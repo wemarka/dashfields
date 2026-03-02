@@ -8,6 +8,8 @@ import { registerMetaOAuthRoutes } from "../metaOAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { startCron } from "../cron";
+import { registerPlatformOAuthRoutes } from "../platformOAuth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,6 +40,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Meta OAuth routes
   registerMetaOAuthRoutes(app);
+  // Platform OAuth routes (TikTok, LinkedIn, YouTube, Twitter)
+  registerPlatformOAuthRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -62,6 +66,8 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // Start cron scheduler for reports and budget alerts
+    startCron();
   });
 }
 

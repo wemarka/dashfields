@@ -21,6 +21,9 @@ import { schedulerRouter }    from "./routers/scheduler";
 import { platformsRouter }    from "./routers/platforms";
 import { exportRouter }       from "./routers/export";
 import { reportsRouter }      from "./routers/reports";
+import { audienceRouter }     from "./routers/audience";
+import { budgetRouter }       from "./routers/budget";
+import { cronRouter }         from "./routers/cron";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -47,6 +50,9 @@ export const appRouter = router({
   platforms:     platformsRouter,
   export:        exportRouter,
   reports:       reportsRouter,
+  audience:      audienceRouter,
+  budget:        budgetRouter,
+  cron:          cronRouter,
 });
 
 export type AppRouter = typeof appRouter;

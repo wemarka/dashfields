@@ -26,7 +26,7 @@ interface ConnectModalProps {
 
 // ─── Connect Modal ────────────────────────────────────────────────────────────
 // Platforms that support real OAuth flow
-const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
+const OAUTH_PLATFORMS = new Set(["facebook", "instagram", "tiktok", "linkedin", "youtube", "twitter"]);
 
 function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
   const platform = getPlatform(platformId);
@@ -48,7 +48,13 @@ function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
   const handleOAuthConnect = () => {
     const origin = window.location.origin;
     const returnPath = "/connections";
-    window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    // Meta platforms use the meta OAuth route
+    if (platformId === "facebook" || platformId === "instagram") {
+      window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    } else {
+      // TikTok, LinkedIn, YouTube, Twitter use the platform OAuth route
+      window.location.href = `/api/oauth/${platformId}/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    }
   };
 
   const handleConnect = () => {

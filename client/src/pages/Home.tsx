@@ -18,6 +18,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
+import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -161,6 +162,9 @@ export default function Dashboard() {
             isConnected={isMetaConnected}
           />
         )}
+
+        {/* ── Budget Tracker ─────────────────────────────────────────────────── */}
+        <BudgetTracker />
 
       </div>
     </DashboardLayout>

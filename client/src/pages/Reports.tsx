@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   FileText, Plus, Download, Trash2, Calendar, RefreshCw,
-  Clock, CheckCircle2, AlertCircle, ChevronDown, X,
+  Clock, CheckCircle2, AlertCircle, ChevronDown, X, Zap,
 } from "lucide-react";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -326,6 +326,15 @@ export default function Reports() {
     onError: (err) => toast.error("Export failed: " + err.message),
   });
 
+  const { data: cronStatus } = trpc.cron.status.useQuery(undefined, { refetchInterval: 30000 });
+  const runCronMutation = trpc.cron.runNow.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Cron ran: ${data.reportsSent} report(s) sent, ${data.budgetAlertsChecked} budget checks`);
+      utils.reports.list.invalidate();
+    },
+    onError: (err) => toast.error("Cron failed: " + err.message),
+  });
+
   const sendDueMutation = trpc.reports.sendDue.useMutation({
     onSuccess: (data) => {
       if (data.sent.length > 0) {
@@ -384,6 +393,38 @@ export default function Reports() {
             </button>
           </div>
         </div>
+
+        {/* Cron Status Banner */}
+        {cronStatus && (
+          <div className="mb-5 flex items-center justify-between bg-card border border-border rounded-2xl px-5 py-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-2 h-2 rounded-full ${cronStatus.running ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40"}`} />
+              <div>
+                <p className="text-xs font-medium text-foreground">
+                  Auto-Scheduler {cronStatus.running ? "Active" : "Inactive"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {cronStatus.lastRunAt
+                    ? `Last run: ${new Date(cronStatus.lastRunAt).toLocaleString()}`
+                    : "Not run yet"}
+                  {" · "}{cronStatus.runCount} run{cronStatus.runCount !== 1 ? "s" : ""} total
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => runCronMutation.mutate()}
+              disabled={runCronMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+            >
+              {runCronMutation.isPending ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Zap className="w-3.5 h-3.5" />
+              )}
+              Run Now
+            </button>
+          </div>
+        )}
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4 mb-6">

@@ -165,3 +165,40 @@
 - [x] 116/116 tests passing across 14 test files
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+## 🔄 Phase 35-39 — Audience Analytics + Budget Tracker + Cron + TikTok/LinkedIn
+
+### Phase 35 — Audience Analytics Page
+- [x] server/routers/audience.ts — demographics data (age, gender, location, interests)
+- [x] Audience page (/audience) with 4 chart sections
+- [x] AgeGenderChart component (stacked bar chart)
+- [x] LocationChart component (top countries/cities bar chart)
+- [x] InterestsChart component (horizontal bar chart)
+- [x] DeviceBreakdown component (pie chart: mobile/desktop/tablet)
+- [x] Platform filter tabs in Audience page
+- [x] App.tsx: /audience route + sidebar link
+
+### Phase 36 — Budget Tracker Widget
+- [x] BudgetTracker component on Dashboard
+- [x] Daily/Monthly spend vs budget progress bars
+- [x] 80% threshold alert badge
+- [x] Budget settings in Settings page
+- [x] server/routers/budget.ts — getBudgetStatus + setBudget procedures
+
+### Phase 37 — Automated Scheduled Reports Cron
+- [x] server/cron.ts — cron job runner (daily/weekly/monthly)
+- [x] Auto-run scheduled reports via notifyOwner
+- [x] Cron status endpoint (/api/cron/status)
+- [x] Last run timestamp in Reports page
+
+### Phase 38 — TikTok & LinkedIn OAuth UI
+- [x] TikTok OAuth flow UI in Connections Hub
+- [x] LinkedIn OAuth flow UI in Connections Hub
+- [x] Real OAuth URL builders for TikTok + LinkedIn
+- [x] Token storage in connections table
+
+### Phase 39 — Tests + Checkpoint
+- [x] server/audience.test.ts — 10+ tests
+- [x] server/budget.test.ts — 8+ tests
+- [x] 149/149 tests passing
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver
