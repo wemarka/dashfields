@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE posts ADD COLUMN IF NOT EXISTS post_type VARCHAR(32) DEFAULT 'text'; ALTER TABLE posts ADD COLUMN IF NOT EXISTS likes BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS comments BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS shares BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS reach BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS impressions BIGINT DEFAULT 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute ALTER TABLE posts ADD COLUMN IF NOT EXISTS post_type VARCHAR(32) DEFAULT 'text'; ALTER TABLE posts ADD COLUMN IF NOT EXISTS likes BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS comments BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS shares BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS reach BIGINT DEFAULT 0; ALTER TABLE posts ADD COLUMN IF NOT EXISTS impressions BIGINT DEFAULT 0;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 4199
+}

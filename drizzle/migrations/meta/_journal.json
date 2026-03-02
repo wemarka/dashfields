@@ -22,6 +22,13 @@
       "when": 1772487875016,
       "tag": "0002_burly_outlaw_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1772494058417,
+      "tag": "0003_parched_magus",
+      "breakpoints": true
     }
   ]
 }

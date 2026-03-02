@@ -91,6 +91,8 @@ export const campaignMetrics = pgTable("campaign_metrics", {
 });
 
 // ─── Scheduled Posts ──────────────────────────────────────────────────────────
+export const postTypeEnum = pgEnum("post_type", ["image", "video", "text", "carousel", "story", "reel", "link"]);
+
 export const posts = pgTable("posts", {
   id:               serial("id").primaryKey(),
   userId:           integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -100,8 +102,14 @@ export const posts = pgTable("posts", {
   platforms:        jsonb("platforms").notNull(),        // string[]
   socialAccountIds: jsonb("social_account_ids"),         // number[]
   status:           postStatusEnum("status").default("draft").notNull(),
+  postType:         postTypeEnum("post_type").default("text"),
   scheduledAt:      timestamp("scheduled_at"),
   publishedAt:      timestamp("published_at"),
+  likes:            bigint("likes", { mode: "number" }).default(0),
+  comments:         bigint("comments", { mode: "number" }).default(0),
+  shares:           bigint("shares", { mode: "number" }).default(0),
+  reach:            bigint("reach", { mode: "number" }).default(0),
+  impressions:      bigint("impressions", { mode: "number" }).default(0),
   metadata:         jsonb("metadata"),
   createdAt:        timestamp("created_at").defaultNow().notNull(),
   updatedAt:        timestamp("updated_at").defaultNow().notNull(),

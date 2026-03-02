@@ -205,6 +205,7 @@
 
 ## 🐛 Bug Fixes
 - [x] Fix "column posts.platform does not exist" error on /audience page
+- [x] Fix "column posts.post_type does not exist" error on /audience page — added post_type, likes, comments, shares, reach, impressions columns via Supabase migration
 
 ## 🔄 Phase 40-44 — Post Analytics + Period Comparison + AI Content + Activity Feed
 
