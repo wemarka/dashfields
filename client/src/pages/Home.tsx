@@ -17,6 +17,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState } from "react";
+import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -99,27 +100,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ── Connect banner (no accounts) ───────────────────────────────────── */}
-        {!hasConnections && (
-          <div className="glass rounded-2xl p-5 flex items-center justify-between gap-4 border border-primary/20">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Link2 className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Connect your social media accounts</p>
-                <p className="text-xs text-muted-foreground">
-                  Link Facebook, Instagram, TikTok, LinkedIn, YouTube and more to see unified analytics
-                </p>
-              </div>
-            </div>
-            <Link href="/connections">
-              <button className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap">
-                Connect Now
-              </button>
-            </Link>
-          </div>
-        )}
+        {/* ── Onboarding (auto-hides when all steps done) ─────────────────── */}
+        <SmartOnboardingBanner />
 
         {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">

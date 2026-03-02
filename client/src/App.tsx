@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import MetaConnect from "./pages/MetaConnect";
 import Connections from "./pages/Connections";
 import Alerts from "./pages/Alerts";
+import Reports from "./pages/Reports";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       {/* Keep /meta-connect for backward compatibility */}
       <Route path="/meta-connect" component={MetaConnect} />
       <Route path="/alerts"       component={Alerts} />
+      <Route path="/reports"      component={Reports} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -146,3 +146,22 @@
 - [x] 92/92 tests passing across 12 test files
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+
+## ✅ Phase 30-34 — Meta OAuth + Reports + Compare + Polish (Complete)
+- [x] server/metaOAuth.ts — Meta OAuth server routes (/api/meta/oauth/start, /callback)
+- [x] Connections Hub: OAuth button for Facebook/Instagram + step-by-step modal
+- [x] drizzle/schema.ts: reports table + reportScheduleEnum
+- [x] Supabase migration applied via MCP
+- [x] server/routers/reports.ts — CRUD for scheduled reports + notifyOwner delivery
+- [x] Reports page (/reports) in sidebar with create/edit/delete/run now
+- [x] App.tsx: /reports route added
+- [x] CampaignCompareDrawer: side-by-side campaign comparison with bar charts
+- [x] Campaigns page: "Compare" button in header
+- [x] Settings page: full redesign with real data binding (notifications, connections, appearance)
+- [x] OnboardingBanner: smart 3-step guide auto-hides when all steps done
+- [x] Home.tsx: SmartOnboardingBanner replaces simple connect banner
+- [x] server/reports.test.ts — 14 tests (schedule, next-run, CSV, title)
+- [x] server/metaOAuth.test.ts — 10 tests (URL builder, state encode/decode, code validation)
+- [x] 116/116 tests passing across 14 test files
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver

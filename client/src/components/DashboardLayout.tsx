@@ -6,7 +6,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import {
   BarChart3, Bell, Calendar, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
-  TrendingUp, Link2, Globe2,
+  TrendingUp, Link2, Globe2, FileText,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -19,6 +19,7 @@ const navItems = [
   { icon: TrendingUp,      label: "Insights",   path: "/insights" },
   { icon: Sparkles,        label: "AI Tools",   path: "/ai-tools" },
   { icon: Bell,            label: "Alerts",     path: "/alerts" },
+  { icon: FileText,        label: "Reports",    path: "/reports" },
 ];
 
 const bottomItems = [

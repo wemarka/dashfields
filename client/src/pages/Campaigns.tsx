@@ -11,7 +11,8 @@ import { LocalCampaignTable } from "@/components/campaigns/LocalCampaignTable";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
-import { Plus, RefreshCw, LayoutGrid, Link2 } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare } from "lucide-react";
+import { CampaignCompareDrawer } from "@/components/campaigns/CampaignCompareDrawer";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -27,6 +28,7 @@ export default function Campaigns() {
   const [selectedCampaign, setSelectedCampaign] = useState<{
     id: string; name: string; status: string; objective?: string; dailyBudget?: number | null
   } | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -109,6 +111,13 @@ export default function Campaigns() {
                 Refresh
               </button>
             )}
+            <button
+              onClick={() => setShowCompare(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              <GitCompare className="w-4 h-4" />
+              Compare
+            </button>
             <button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
@@ -248,6 +257,9 @@ export default function Campaigns() {
         open={!!selectedCampaign}
         onClose={() => setSelectedCampaign(null)}
       />
+      {showCompare && (
+        <CampaignCompareDrawer onClose={() => setShowCompare(false)} />
+      )}
     </DashboardLayout>
   );
 }

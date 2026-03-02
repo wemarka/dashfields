@@ -25,12 +25,16 @@ interface ConnectModalProps {
 }
 
 // ─── Connect Modal ────────────────────────────────────────────────────────────
+// Platforms that support real OAuth flow
+const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
+
 function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
   const platform = getPlatform(platformId);
   const [step, setStep] = useState<"info" | "token" | "account">("info");
   const [accessToken, setAccessToken] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accountName, setAccountName] = useState("");
+  const supportsOAuth = OAUTH_PLATFORMS.has(platformId);
 
   const connectMutation = trpc.social.connect.useMutation({
     onSuccess: () => {
@@ -40,6 +44,12 @@ function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
     },
     onError: (err) => toast.error("Connection failed: " + err.message),
   });
+
+  const handleOAuthConnect = () => {
+    const origin = window.location.origin;
+    const returnPath = "/connections";
+    window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+  };
 
   const handleConnect = () => {
     if (!accountId.trim()) {
@@ -86,18 +96,49 @@ function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
                   ))}
                 </div>
               </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-                <p className="text-xs text-amber-800">
-                  <strong>How to get your token:</strong> {platform.tokenHint}
-                </p>
-              </div>
-              <button
-                onClick={() => setStep("token")}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                Continue
-                <ChevronRight className="w-4 h-4" />
-              </button>
+
+              {supportsOAuth ? (
+                <>
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+                    <p className="text-xs text-blue-800">
+                      <strong>Secure OAuth:</strong> You'll be redirected to {platform.name} to authorize access. No token copying required.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOAuthConnect}
+                    className={"w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-medium transition-colors " + platform.color}
+                  >
+                    <PlatformIcon platform={platformId} className="w-4 h-4" />
+                    Continue with {platform.name}
+                  </button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+                    <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or enter token manually</span></div>
+                  </div>
+                  <button
+                    onClick={() => setStep("token")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Enter Access Token Manually
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-xs text-amber-800">
+                      <strong>How to get your token:</strong> {platform.tokenHint}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setStep("token")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Continue
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
             </>
           )}
 

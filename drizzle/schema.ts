@@ -144,6 +144,23 @@ export const alertRules = pgTable("alert_rules", {
   updatedAt:    timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── Scheduled Reports ──────────────────────────────────────────────────────
+export const reportScheduleEnum = pgEnum("report_schedule", ["none", "weekly", "monthly"]);
+export const reportFormatEnum   = pgEnum("report_format",   ["csv", "html"]);
+
+export const scheduledReports = pgTable("scheduled_reports", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name:         varchar("name", { length: 256 }).notNull(),
+  platforms:    text("platforms").array().notNull().default([]),  // [] = all
+  datePreset:   varchar("date_preset", { length: 32 }).default("last_30d").notNull(),
+  format:       reportFormatEnum("format").default("csv").notNull(),
+  schedule:     reportScheduleEnum("schedule").default("none").notNull(),
+  lastSentAt:   timestamp("last_sent_at"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type User           = typeof users.$inferSelect;
 export type InsertUser     = typeof users.$inferInsert;
@@ -158,3 +175,5 @@ export type UserSettings   = typeof userSettings.$inferSelect;
 export type Notification   = typeof notifications.$inferSelect;
 export type AlertRule      = typeof alertRules.$inferSelect;
 export type InsertAlertRule = typeof alertRules.$inferInsert;
+export type ScheduledReport = typeof scheduledReports.$inferSelect;
+export type InsertScheduledReport = typeof scheduledReports.$inferInsert;
