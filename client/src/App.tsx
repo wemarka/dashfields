@@ -12,6 +12,7 @@ import Insights from "./pages/Insights";
 import AITools from "./pages/AITools";
 import Settings from "./pages/Settings";
 import MetaConnect from "./pages/MetaConnect";
+import Alerts from "./pages/Alerts";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/ai-tools"    component={AITools} />
       <Route path="/settings"    component={Settings} />
       <Route path="/meta-connect" component={MetaConnect} />
+      <Route path="/alerts"        component={Alerts} />
       <Route path="/404"         component={NotFound} />
       <Route component={NotFound} />
     </Switch>

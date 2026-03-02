@@ -2,8 +2,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
-  BarChart3, Calendar, ChevronLeft, ChevronRight,
+  BarChart3, Bell, Calendar, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles, TrendingUp, Facebook,
 } from "lucide-react";
 import { useState } from "react";
@@ -16,6 +17,7 @@ const navItems = [
   { icon: Calendar,        label: "Publishing", path: "/publishing" },
   { icon: TrendingUp,      label: "Insights",   path: "/insights" },
   { icon: Sparkles,        label: "AI Tools",   path: "/ai-tools" },
+  { icon: Bell,            label: "Alerts",     path: "/alerts" },
 ];
 
 const bottomItems = [
@@ -163,8 +165,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto min-w-0">
-        {children}
+      <main className="flex-1 overflow-y-auto min-w-0 flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-end px-6 py-3 border-b border-white/8 shrink-0">
+          <NotificationBell />
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

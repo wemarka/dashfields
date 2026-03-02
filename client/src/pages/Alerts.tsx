@@ -1,0 +1,275 @@
+/**
+ * Alerts.tsx
+ * Performance Alerts page — create threshold rules and view triggered notifications.
+ */
+import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from "react";
+import {
+  Bell, Plus, Trash2, AlertTriangle, CheckCircle2,
+  Info, XCircle, Loader2, BellRing
+} from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+type Metric   = "ctr" | "cpc" | "cpm" | "spend" | "impressions" | "clicks" | "roas";
+type Operator = "lt" | "gt" | "lte" | "gte";
+
+const METRIC_LABELS: Record<Metric, string> = {
+  ctr:         "CTR (%)",
+  cpc:         "CPC ($)",
+  cpm:         "CPM ($)",
+  spend:       "Spend ($)",
+  impressions: "Impressions",
+  clicks:      "Clicks",
+  roas:        "ROAS",
+};
+
+const OPERATOR_LABELS: Record<Operator, string> = {
+  lt:  "< Less than",
+  gt:  "> Greater than",
+  lte: "≤ Less than or equal",
+  gte: "≥ Greater than or equal",
+};
+
+const NOTIFICATION_ICONS = {
+  info:    <Info className="h-4 w-4 text-blue-400" />,
+  warning: <AlertTriangle className="h-4 w-4 text-amber-400" />,
+  error:   <XCircle className="h-4 w-4 text-red-400" />,
+  success: <CheckCircle2 className="h-4 w-4 text-emerald-400" />,
+};
+
+// ─── Create Alert Form ────────────────────────────────────────────────────────
+function CreateAlertForm({ onCreated }: { onCreated: () => void }) {
+  const [metric, setMetric]       = useState<Metric>("ctr");
+  const [operator, setOperator]   = useState<Operator>("lt");
+  const [threshold, setThreshold] = useState("");
+
+  const create = trpc.alerts.create.useMutation({
+    onSuccess: () => {
+      toast.success("Alert rule created");
+      setThreshold("");
+      onCreated();
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!threshold) return;
+    create.mutate({ metric, operator, threshold: parseFloat(threshold) });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="glass rounded-2xl p-5 space-y-4">
+      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+        <Plus className="h-4 w-4" />
+        Create Alert Rule
+      </h3>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Metric */}
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Metric</label>
+          <select
+            value={metric}
+            onChange={e => setMetric(e.target.value as Metric)}
+            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+          >
+            {Object.entries(METRIC_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Operator */}
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Condition</label>
+          <select
+            value={operator}
+            onChange={e => setOperator(e.target.value as Operator)}
+            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+          >
+            {Object.entries(OPERATOR_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Threshold */}
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Threshold Value</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={threshold}
+            onChange={e => setThreshold(e.target.value)}
+            placeholder="e.g. 1.5"
+            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+            required
+          />
+        </div>
+
+        {/* Submit */}
+        <div className="flex items-end">
+          <button
+            type="submit"
+            disabled={create.isPending}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          >
+            {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Create Alert
+          </button>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Alert will trigger when <strong>{METRIC_LABELS[metric]}</strong> is{" "}
+        <strong>{OPERATOR_LABELS[operator].split(" ").slice(1).join(" ")}</strong>{" "}
+        {threshold && <strong>{threshold}</strong>}
+      </p>
+    </form>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+export default function Alerts() {
+  const utils = trpc.useUtils();
+
+  const { data: rules = [], isLoading: rulesLoading } = trpc.alerts.list.useQuery();
+  const { data: notifications = [], isLoading: notifLoading } = trpc.notifications.list.useQuery();
+
+  const deleteRule = trpc.alerts.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Alert rule deleted");
+      utils.alerts.list.invalidate();
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  const markRead = trpc.notifications.markRead.useMutation({
+    onSuccess: () => utils.notifications.list.invalidate(),
+  });
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Performance Alerts</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Set thresholds to get notified when campaign metrics cross limits.
+            </p>
+          </div>
+          {unreadCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <BellRing className="h-4 w-4 text-amber-500" />
+              <span className="text-xs font-medium text-amber-600">{unreadCount} unread</span>
+            </div>
+          )}
+        </div>
+
+        {/* Create Form */}
+        <CreateAlertForm onCreated={() => utils.alerts.list.invalidate()} />
+
+        {/* Alert Rules */}
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/10 flex items-center gap-2">
+            <Bell className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Active Alert Rules</h2>
+            <span className="ml-auto text-xs text-muted-foreground">{rules.length} rules</span>
+          </div>
+          {rulesLoading ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading rules...</span>
+            </div>
+          ) : rules.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground">
+              <Bell className="h-8 w-8 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No alert rules yet. Create one above.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {rules.map(rule => (
+                <div key={rule.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/3 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{rule.metric}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {METRIC_LABELS[rule.metric as Metric] ?? rule.metric}{" "}
+                      {OPERATOR_LABELS[rule.operator as Operator]?.split(" ")[0]}{" "}
+                      <strong>{rule.threshold}</strong>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => deleteRule.mutate({ id: rule.id })}
+                    disabled={deleteRule.isPending}
+                    className="ml-4 p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Notification History */}
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/10 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Notification History</h2>
+            {unreadCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          {notifLoading ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading notifications...</span>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground">
+              <CheckCircle2 className="h-8 w-8 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No notifications yet. Alerts will appear here when triggered.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {notifications.map(n => (
+                <div
+                  key={n.id}
+                  className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-white/3"}`}
+                >
+                  <div className="mt-0.5 shrink-0">
+                    {NOTIFICATION_ICONS[n.type as keyof typeof NOTIFICATION_ICONS] ?? NOTIFICATION_ICONS.info}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{n.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">
+                      {new Date(n.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  {!n.is_read && (
+                    <button
+                      onClick={() => markRead.mutate({ notificationId: n.id })}
+                      className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Mark read
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

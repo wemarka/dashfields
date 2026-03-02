@@ -1,122 +1,107 @@
 /**
- * Meta Ads tRPC Router
- * Provides procedures to connect Meta ad accounts and fetch real campaign data.
+ * server/routers/meta.ts
+ * tRPC router for Meta Ads integration.
+ * Connects Meta ad accounts and fetches real campaign data via Meta Graph API.
+ * Uses Supabase client for data persistence.
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
-import { socialAccounts } from "../../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { getSupabase } from "../supabase";
 import {
+  MetaInsight,
   getAdAccounts,
   getMetaCampaigns,
   getAccountInsights,
   getCampaignInsights,
+  getCampaignDailyInsights,
 } from "../meta";
 
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
 async function getMetaToken(userId: number): Promise<{ token: string; adAccountId: string } | null> {
-  const db = await getDb();
-  if (!db) return null;
-  const accounts = await db
-    .select()
-    .from(socialAccounts)
-    .where(
-      and(
-        eq(socialAccounts.userId, userId),
-        eq(socialAccounts.platform, "facebook"),
-        eq(socialAccounts.accountType, "ad_account"),
-        eq(socialAccounts.isActive, true)
-      )
-    )
-    .limit(1);
+  const sb = getSupabase();
+  const { data } = await sb
+    .from("social_accounts")
+    .select("access_token, platform_account_id")
+    .eq("user_id", userId)
+    .eq("platform", "facebook")
+    .eq("is_active", true)
+    .maybeSingle();
 
-  if (accounts.length === 0) return null;
-  const acc = accounts[0];
-  if (!acc.accessToken) return null;
-  return { token: acc.accessToken, adAccountId: acc.platformAccountId };
+  if (!data?.access_token || !data?.platform_account_id) return null;
+  return { token: data.access_token, adAccountId: data.platform_account_id };
 }
 
 // ─── Meta Router ─────────────────────────────────────────────────────────────
 export const metaRouter = router({
   /** Check if user has a connected Meta ad account */
   connectionStatus: protectedProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db) return { connected: false, accounts: [] };
-    const accounts = await db
-      .select({
-        id: socialAccounts.id,
-        name: socialAccounts.name,
-        platformAccountId: socialAccounts.platformAccountId,
-        isActive: socialAccounts.isActive,
-        updatedAt: socialAccounts.updatedAt,
-      })
-      .from(socialAccounts)
-      .where(
-        and(
-          eq(socialAccounts.userId, ctx.user.id),
-          eq(socialAccounts.platform, "facebook"),
-          eq(socialAccounts.accountType, "ad_account")
-        )
-      );
+    const sb = getSupabase();
+    const { data } = await sb
+      .from("social_accounts")
+      .select("id, name, platform_account_id, is_active, updated_at")
+      .eq("user_id", ctx.user.id)
+      .eq("platform", "facebook");
+
+    const accounts = (data ?? []) as any[];
     return {
-      connected: accounts.length > 0 && accounts[0].isActive,
-      accounts,
+      connected: accounts.length > 0 && !!accounts[0]?.is_active,
+      accounts: accounts.map(a => ({
+        id:                a.id,
+        name:              a.name,
+        platformAccountId: a.platform_account_id,
+        isActive:          a.is_active,
+        updatedAt:         a.updated_at,
+      })),
     };
   }),
 
   /** Connect a Meta ad account by saving access token + account selection */
   connect: protectedProcedure
-    .input(
-      z.object({
-        accessToken: z.string().min(1),
-        adAccountId: z.string().min(1),
-        accountName: z.string().optional(),
-      })
-    )
+    .input(z.object({
+      accessToken:  z.string().min(1),
+      adAccountId:  z.string().min(1),
+      accountName:  z.string().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
-      // Verify token works by fetching ad accounts
+      const sb = getSupabase();
       const adAccounts = await getAdAccounts(input.accessToken);
       const matched = adAccounts.find(
-        (a) => a.id === input.adAccountId || a.id === `act_${input.adAccountId}`
+        a => a.id === input.adAccountId || a.id === `act_${input.adAccountId}`
       );
       const accountName = matched?.name ?? input.accountName ?? input.adAccountId;
 
-      // Upsert social account record
-      const existing = await db
-        .select({ id: socialAccounts.id })
-        .from(socialAccounts)
-        .where(
-          and(
-            eq(socialAccounts.userId, ctx.user.id),
-            eq(socialAccounts.platform, "facebook"),
-            eq(socialAccounts.accountType, "ad_account"),
-            eq(socialAccounts.platformAccountId, input.adAccountId)
-          )
-        )
-        .limit(1);
+      // Check if already connected
+      const { data: existing } = await sb
+        .from("social_accounts")
+        .select("id")
+        .eq("user_id", ctx.user.id)
+        .eq("platform", "facebook")
+        .maybeSingle();
 
-      if (existing.length > 0) {
-        await db
-          .update(socialAccounts)
-          .set({
-            accessToken: input.accessToken,
-            name: accountName,
-            isActive: true,
-          })
-          .where(eq(socialAccounts.id, existing[0].id));
+      if (existing) {
+        await sb
+          .from("social_accounts")
+          .update({
+            access_token:          input.accessToken,
+            platform_account_id:   input.adAccountId,
+            name:                  accountName,
+            username:              accountName,
+            is_active:             true,
+            updated_at:            new Date().toISOString(),
+          } as any)
+          .eq("id", (existing as any).id);
       } else {
-        await db.insert(socialAccounts).values({
-          userId: ctx.user.id,
-          platform: "facebook" as const,
-          accountType: "ad_account" as const,
-          platformAccountId: input.adAccountId,
-          name: accountName,
-          accessToken: input.accessToken,
-          isActive: true,
-        });
+        await sb
+          .from("social_accounts")
+          .insert({
+            user_id:              ctx.user.id,
+            platform:             "facebook",
+            access_token:         input.accessToken,
+            platform_account_id:  input.adAccountId,
+            name:                 accountName,
+            username:             accountName,
+            is_active:            true,
+          } as any);
       }
       return { success: true, accountName };
     }),
@@ -125,17 +110,12 @@ export const metaRouter = router({
   disconnect: protectedProcedure
     .input(z.object({ socialAccountId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
-      await db
-        .update(socialAccounts)
-        .set({ isActive: false })
-        .where(
-          and(
-            eq(socialAccounts.id, input.socialAccountId),
-            eq(socialAccounts.userId, ctx.user.id)
-          )
-        );
+      const sb = getSupabase();
+      await sb
+        .from("social_accounts")
+        .update({ is_active: false, updated_at: new Date().toISOString() } as any)
+        .eq("id", input.socialAccountId)
+        .eq("user_id", ctx.user.id);
       return { success: true };
     }),
 
@@ -144,87 +124,145 @@ export const metaRouter = router({
     .input(z.object({ accessToken: z.string().min(1) }))
     .query(async ({ input }) => {
       const accounts = await getAdAccounts(input.accessToken);
-      return accounts.map((a) => ({
-        id: a.id,
-        name: a.name,
+      return accounts.map(a => ({
+        id:       a.id,
+        name:     a.name,
         currency: a.currency,
-        status: a.account_status === 1 ? "ACTIVE" : "INACTIVE",
+        status:   a.account_status === 1 ? "ACTIVE" : "INACTIVE",
       }));
     }),
 
   /** Get account-level KPI summary */
   accountInsights: protectedProcedure
-    .input(
-      z.object({
-        datePreset: z
-          .enum([
-            "today", "yesterday", "last_7d", "last_14d", "last_30d",
-            "last_90d", "this_month", "last_month",
-          ])
-          .default("last_30d"),
-      })
-    )
+    .input(z.object({
+      datePreset: z.enum([
+        "today", "yesterday", "last_7d", "last_14d", "last_30d",
+        "last_90d", "this_month", "last_month",
+      ]).default("last_30d"),
+    }))
     .query(async ({ ctx, input }) => {
       const conn = await getMetaToken(ctx.user.id);
       if (!conn) return null;
       const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
       if (insights.length === 0) return null;
       const d = insights[0];
-      // Extract key actions
-      const actions = d.actions ?? [];
+      const actions = (d.actions ?? []) as { action_type: string; value: string }[];
       const getAction = (type: string) =>
-        Number(actions.find((a) => a.action_type === type)?.value ?? 0);
-      const leads = getAction("lead") + getAction("onsite_conversion.lead");
-      const calls = getAction("click_to_call_call_confirm");
-      const messages = getAction("onsite_conversion.messaging_conversation_started_7d");
+        Number(actions.find(a => a.action_type === type)?.value ?? 0);
       return {
         impressions: Number(d.impressions ?? 0),
-        reach: Number(d.reach ?? 0),
-        clicks: Number(d.clicks ?? 0),
-        spend: Number(d.spend ?? 0),
-        ctr: Number(d.ctr ?? 0),
-        cpc: Number(d.cpc ?? 0),
-        cpm: Number(d.cpm ?? 0),
-        frequency: Number(d.frequency ?? 0),
-        leads,
-        calls,
-        messages,
-        datePreset: input.datePreset,
+        reach:       Number(d.reach ?? 0),
+        clicks:      Number(d.clicks ?? 0),
+        spend:       Number(d.spend ?? 0),
+        ctr:         Number(d.ctr ?? 0),
+        cpc:         Number(d.cpc ?? 0),
+        cpm:         Number(d.cpm ?? 0),
+        frequency:   Number(d.frequency ?? 0),
+        leads:       getAction("lead") + getAction("onsite_conversion.lead"),
+        calls:       getAction("click_to_call_call_confirm"),
+        messages:    getAction("onsite_conversion.messaging_conversation_started_7d"),
+        datePreset:  input.datePreset,
       };
+    }),
+
+  /** Compare current period vs previous period */
+  compareInsights: protectedProcedure
+    .input(z.object({
+      datePreset: z.enum([
+        "today", "yesterday", "last_7d", "last_14d", "last_30d",
+        "last_90d", "this_month", "last_month",
+      ]).default("last_30d"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return null;
+
+      const prevPresetMap: Record<string, string> = {
+        today:      "yesterday",
+        yesterday:  "last_7d",
+        last_7d:    "last_14d",
+        last_14d:   "last_30d",
+        last_30d:   "last_90d",
+        last_90d:   "last_month",
+        this_month: "last_month",
+        last_month: "last_month",
+      };
+      const prevPreset = prevPresetMap[input.datePreset] ?? "last_30d";
+
+      const [current, previous] = await Promise.all([
+        getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
+        getAccountInsights(conn.adAccountId, conn.token, prevPreset),
+      ]);
+
+      const parse = (insights: MetaInsight[]) => {
+        if (!insights[0]) return null;
+        const d = insights[0];
+        return {
+          impressions: Number(d.impressions ?? 0),
+          reach:       Number(d.reach ?? 0),
+          clicks:      Number(d.clicks ?? 0),
+          spend:       Number(d.spend ?? 0),
+          ctr:         Number(d.ctr ?? 0),
+          cpc:         Number(d.cpc ?? 0),
+          cpm:         Number(d.cpm ?? 0),
+        };
+      };
+
+      return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
     }),
 
   /** Get campaign-level insights */
   campaignInsights: protectedProcedure
-    .input(
-      z.object({
-        datePreset: z
-          .enum([
-            "today", "yesterday", "last_7d", "last_14d", "last_30d",
-            "last_90d", "this_month", "last_month",
-          ])
-          .default("last_30d"),
-        limit: z.number().min(1).max(50).default(20),
-      })
-    )
+    .input(z.object({
+      datePreset: z.enum([
+        "today", "yesterday", "last_7d", "last_14d", "last_30d",
+        "last_90d", "this_month", "last_month",
+      ]).default("last_30d"),
+      limit: z.number().min(1).max(50).default(20),
+    }))
     .query(async ({ ctx, input }) => {
       const conn = await getMetaToken(ctx.user.id);
       if (!conn) return [];
       const insights = await getCampaignInsights(
-        conn.adAccountId,
-        conn.token,
-        input.datePreset,
-        input.limit
+        conn.adAccountId, conn.token, input.datePreset, input.limit
       );
-      return insights.map((d) => ({
-        campaignId: d.campaign_id ?? "",
+      return insights.map(d => ({
+        campaignId:   d.campaign_id ?? "",
         campaignName: d.campaign_name ?? "Unknown",
+        impressions:  Number(d.impressions ?? 0),
+        reach:        Number(d.reach ?? 0),
+        clicks:       Number(d.clicks ?? 0),
+        spend:        Number(d.spend ?? 0),
+        ctr:          Number(d.ctr ?? 0),
+        cpc:          Number(d.cpc ?? 0),
+        cpm:          Number(d.cpm ?? 0),
+      }));
+    }),
+
+  /** Get daily breakdown for a specific campaign */
+  campaignDailyInsights: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      datePreset: z.enum([
+        "today", "yesterday", "last_7d", "last_14d", "last_30d",
+        "last_90d", "this_month", "last_month",
+      ]).default("last_30d"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return [];
+      const daily = await getCampaignDailyInsights(
+        input.campaignId, conn.token, input.datePreset
+      );
+      return daily.map(d => ({
+        date:        d.date_start ?? "",
         impressions: Number(d.impressions ?? 0),
-        reach: Number(d.reach ?? 0),
-        clicks: Number(d.clicks ?? 0),
-        spend: Number(d.spend ?? 0),
-        ctr: Number(d.ctr ?? 0),
-        cpc: Number(d.cpc ?? 0),
-        cpm: Number(d.cpm ?? 0),
+        clicks:      Number(d.clicks ?? 0),
+        spend:       Number(d.spend ?? 0),
+        ctr:         Number(d.ctr ?? 0),
+        cpc:         Number(d.cpc ?? 0),
+        cpm:         Number(d.cpm ?? 0),
+        reach:       Number(d.reach ?? 0),
       }));
     }),
 
@@ -235,15 +273,15 @@ export const metaRouter = router({
       const conn = await getMetaToken(ctx.user.id);
       if (!conn) return [];
       const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
-      return campaigns.map((c) => ({
-        id: c.id,
-        name: c.name,
-        status: c.effective_status ?? c.status,
-        objective: c.objective,
-        dailyBudget: c.daily_budget ? Number(c.daily_budget) / 100 : null,
+      return campaigns.map(c => ({
+        id:             c.id,
+        name:           c.name,
+        status:         c.effective_status ?? c.status,
+        objective:      c.objective,
+        dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
         lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
-        startTime: c.start_time,
-        stopTime: c.stop_time,
+        startTime:      c.start_time,
+        stopTime:       c.stop_time,
       }));
     }),
 });

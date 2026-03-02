@@ -4,7 +4,7 @@ import {
   CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend
 } from "recharts";
 import {
-  Loader2, Facebook, Link2, TrendingUp, Eye, MousePointerClick,
+  Loader2, Facebook, Link2, TrendingUp, TrendingDown, Minus, Eye, MousePointerClick,
   DollarSign, Users, MessageCircle, Phone, RefreshCw
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -40,6 +40,21 @@ const TOOLTIP_STYLE = {
   fontSize: "12px",
 };
 
+// ─── Period Comparison Card ───────────────────────────────────────────────────
+function PeriodChangeChip({ current, previous }: { current: number; previous: number | null | undefined }) {
+  if (previous == null || previous === 0) return null;
+  const pct = ((current - previous) / previous) * 100;
+  const up = pct > 0;
+  return (
+    <span className={`flex items-center gap-0.5 text-xs font-medium ${
+      up ? "text-emerald-500" : "text-red-500"
+    }`}>
+      {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+      {Math.abs(pct).toFixed(1)}%
+    </span>
+  );
+}
+
 export default function Analytics() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
 
@@ -54,6 +69,13 @@ export default function Analytics() {
     { datePreset },
     { enabled: isConnected }
   );
+
+  // Period comparison
+  const { data: compare } = trpc.meta.compareInsights.useQuery(
+    { datePreset },
+    { enabled: isConnected }
+  );
+  const prevData = compare?.previous;
 
   const {
     data: campaignInsights = [],
@@ -157,26 +179,42 @@ export default function Analytics() {
         {/* Analytics content */}
         {isConnected && !isLoading && (
           <>
+            {/* Period comparison label */}
+            {compare && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                  {DATE_PRESETS.find(p => p.value === datePreset)?.label}
+                </span>
+                <span>vs</span>
+                <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">
+                  {compare.prevPreset}
+                </span>
+              </div>
+            )}
+
             {/* KPI Summary */}
             {insights && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: "Total Spend",  value: fmtMoney(insights.spend),            icon: DollarSign,        color: "bg-blue-50 text-blue-600" },
-                  { label: "Impressions",  value: fmtNum(insights.impressions),         icon: Eye,               color: "bg-purple-50 text-purple-600" },
-                  { label: "Clicks (all)", value: fmtNum(insights.clicks),              icon: MousePointerClick, color: "bg-amber-50 text-amber-600" },
-                  { label: "Reach",        value: fmtNum(insights.reach),               icon: Users,             color: "bg-emerald-50 text-emerald-600" },
-                  { label: "CTR",          value: insights.ctr.toFixed(2) + "%",        icon: TrendingUp,        color: "bg-rose-50 text-rose-600" },
-                  { label: "CPC",          value: fmtMoney(insights.cpc),               icon: DollarSign,        color: "bg-cyan-50 text-cyan-600" },
-                  { label: "CPM",          value: fmtMoney(insights.cpm),               icon: Eye,               color: "bg-indigo-50 text-indigo-600" },
-                  { label: "Frequency",    value: insights.frequency.toFixed(2) + "x",  icon: Users,             color: "bg-orange-50 text-orange-600" },
+                  { label: "Total Spend",  value: fmtMoney(insights.spend),            icon: DollarSign,        color: "bg-blue-50 text-blue-600",   prev: prevData?.spend },
+                  { label: "Impressions",  value: fmtNum(insights.impressions),         icon: Eye,               color: "bg-purple-50 text-purple-600", prev: prevData?.impressions },
+                  { label: "Clicks (all)", value: fmtNum(insights.clicks),              icon: MousePointerClick, color: "bg-amber-50 text-amber-600",  prev: prevData?.clicks },
+                  { label: "Reach",        value: fmtNum(insights.reach),               icon: Users,             color: "bg-emerald-50 text-emerald-600", prev: prevData?.reach },
+                  { label: "CTR",          value: insights.ctr.toFixed(2) + "%",        icon: TrendingUp,        color: "bg-rose-50 text-rose-600",    prev: prevData?.ctr },
+                  { label: "CPC",          value: fmtMoney(insights.cpc),               icon: DollarSign,        color: "bg-cyan-50 text-cyan-600",    prev: prevData?.cpc },
+                  { label: "CPM",          value: fmtMoney(insights.cpm),               icon: Eye,               color: "bg-indigo-50 text-indigo-600", prev: prevData?.cpm },
+                  { label: "Frequency",    value: insights.frequency.toFixed(2) + "x",  icon: Users,             color: "bg-orange-50 text-orange-600", prev: null },
                 ].map((kpi) => (
                   <div key={kpi.label} className="glass rounded-2xl p-4 flex items-center gap-3">
                     <div className={"w-9 h-9 rounded-xl flex items-center justify-center shrink-0 " + kpi.color}>
                       <kpi.icon className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted-foreground">{kpi.label}</p>
-                      <p className="text-lg font-semibold tracking-tight">{kpi.value}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-lg font-semibold tracking-tight">{kpi.value}</p>
+                        <PeriodChangeChip current={Number(kpi.value.replace(/[^0-9.]/g, ""))} previous={kpi.prev ?? null} />
+                      </div>
                     </div>
                   </div>
                 ))}

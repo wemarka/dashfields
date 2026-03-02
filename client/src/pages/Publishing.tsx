@@ -35,7 +35,7 @@ export default function Publishing() {
 
   const postsByDay: Record<number, typeof posts> = {};
   posts.forEach((p) => {
-    const d = p.scheduledAt ? new Date(p.scheduledAt) : null;
+    const d = p.scheduled_at ? new Date(p.scheduled_at) : null;
     if (d && d.getMonth() === calMonth.getMonth() && d.getFullYear() === calMonth.getFullYear()) {
       const day = d.getDate();
       postsByDay[day] = [...(postsByDay[day] ?? []), p];
@@ -120,10 +120,10 @@ export default function Publishing() {
                                 );
                               })}
                             </div>
-                            {post.scheduledAt && (
+                            {post.scheduled_at && (
                               <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
-                                {new Date(post.scheduledAt).toLocaleString()}
+                                {new Date(post.scheduled_at).toLocaleString()}
                               </span>
                             )}
                             <span className={"text-xs px-2 py-0.5 rounded-full capitalize font-medium " + (
