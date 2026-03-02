@@ -1,6 +1,6 @@
 /**
- * Home.tsx — Dashboard page
- * Composed from small, focused components in client/src/components/dashboard/
+ * Home.tsx — Unified Multi-Platform Dashboard
+ * Shows aggregated KPIs from ALL connected social platforms.
  */
 import DashboardLayout from "@/components/DashboardLayout";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -8,9 +8,11 @@ import { SpendChart } from "@/components/dashboard/SpendChart";
 import { PerformanceStats } from "@/components/dashboard/PerformanceStats";
 import { ActiveCampaignsTable } from "@/components/dashboard/ActiveCampaignsTable";
 import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
+import { PlatformBreakdownCard } from "@/components/dashboard/PlatformBreakdownCard";
+import { PlatformIcon } from "@/components/PlatformIcon";
 import {
   DollarSign, Eye, MousePointerClick,
-  Users, TrendingUp, MessageCircle, Link2,
+  Users, TrendingUp, Heart, Link2, Zap,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
@@ -33,37 +35,38 @@ function fmtPct(n: number): string {
 export default function Dashboard() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
 
+  // Multi-platform summary
+  const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({ datePreset });
+  const { data: allInsights = [], isLoading: insightsLoading } = trpc.platforms.allInsights.useQuery({ datePreset });
+
+  // Connected accounts count
+  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const hasConnections = accounts.length > 0;
+
+  // Meta-specific data for campaigns table (still useful when Meta is connected)
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
-  const isConnected = metaStatus?.connected ?? false;
-
-  const { data: insights, isLoading: insightsLoading } = trpc.meta.accountInsights.useQuery(
-    { datePreset },
-    { enabled: isConnected }
-  );
-
+  const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } = trpc.meta.campaignInsights.useQuery(
     { datePreset, limit: 10 },
-    { enabled: isConnected }
+    { enabled: isMetaConnected }
   );
 
-  // KPI cards config
-  const kpiCards = insights
+  // KPI cards from unified summary
+  const kpiCards = summary && hasConnections
     ? [
-        { label: "Total Spend",  value: fmtMoney(insights.spend),       icon: DollarSign,        iconColor: "text-blue-600" },
-        { label: "Impressions",  value: fmtNum(insights.impressions),    icon: Eye,               iconColor: "text-purple-600" },
-        { label: "Clicks (all)", value: fmtNum(insights.clicks),         icon: MousePointerClick, iconColor: "text-amber-600" },
-        { label: "Reach",        value: fmtNum(insights.reach),          icon: Users,             iconColor: "text-emerald-600" },
-        { label: "Leads",        value: fmtNum(insights.leads),          icon: TrendingUp,        iconColor: "text-rose-600" },
-        { label: "Messages",     value: fmtNum(insights.messages),       icon: MessageCircle,     iconColor: "text-cyan-600" },
+        { label: "Total Spend",    value: fmtMoney(summary.totalSpend),       icon: DollarSign,        iconColor: "text-blue-600" },
+        { label: "Impressions",    value: fmtNum(summary.totalImpressions),    icon: Eye,               iconColor: "text-purple-600" },
+        { label: "Clicks",         value: fmtNum(summary.totalClicks),         icon: MousePointerClick, iconColor: "text-amber-600" },
+        { label: "Reach",          value: fmtNum(summary.totalReach),          icon: Users,             iconColor: "text-emerald-600" },
+        { label: "Engagements",    value: fmtNum(summary.totalEngagements),    icon: Heart,             iconColor: "text-rose-600" },
+        { label: "Platforms",      value: String(summary.connectedPlatforms),  icon: Zap,               iconColor: "text-cyan-600" },
       ]
     : null;
 
-  const perfStats = insights
+  const perfStats = summary && hasConnections
     ? [
-        { label: "CTR",       value: fmtPct(insights.ctr),               bar: Math.min(insights.ctr * 20, 100) },
-        { label: "CPC",       value: fmtMoney(insights.cpc),             bar: Math.min(insights.cpc * 50, 100) },
-        { label: "CPM",       value: fmtMoney(insights.cpm),             bar: Math.min(insights.cpm * 10, 100) },
-        { label: "Frequency", value: insights.frequency.toFixed(2) + "x", bar: Math.min(insights.frequency * 10, 100) },
+        { label: "Avg CTR",  value: fmtPct(summary.avgCtr),   bar: Math.min(summary.avgCtr * 20, 100) },
+        { label: "Avg CPC",  value: fmtMoney(summary.avgCpc), bar: Math.min(summary.avgCpc * 50, 100) },
       ]
     : null;
 
@@ -76,28 +79,42 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {isConnected ? "Live Meta Ads performance" : "Overview of your ad performance"}
+              {hasConnections
+                ? `Unified performance across ${summary?.connectedPlatforms ?? accounts.length} platform${(summary?.connectedPlatforms ?? accounts.length) !== 1 ? "s" : ""}`
+                : "Connect your social media accounts to get started"}
             </p>
           </div>
-          {isConnected && (
-            <DatePresetSelector value={datePreset} onChange={setDatePreset} />
+          {hasConnections && (
+            <div className="flex items-center gap-3">
+              {/* Connected platform icons */}
+              <div className="flex items-center gap-1">
+                {Array.from(new Set(accounts.map((a) => a.platform))).map((pid) => (
+                  <div key={pid} className="w-7 h-7 rounded-full bg-muted flex items-center justify-center" title={pid}>
+                    <PlatformIcon platform={pid} className="w-3.5 h-3.5 text-foreground/60" />
+                  </div>
+                ))}
+              </div>
+              <DatePresetSelector value={datePreset} onChange={setDatePreset} />
+            </div>
           )}
         </div>
 
-        {/* ── Connect banner ─────────────────────────────────────────────────── */}
-        {!isConnected && (
-          <div className="glass rounded-2xl p-5 flex items-center justify-between gap-4 border border-blue-200/50">
+        {/* ── Connect banner (no accounts) ───────────────────────────────────── */}
+        {!hasConnections && (
+          <div className="glass rounded-2xl p-5 flex items-center justify-between gap-4 border border-primary/20">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                <Link2 className="w-4 h-4 text-blue-600" />
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Link2 className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Connect Meta Ads</p>
-                <p className="text-xs text-muted-foreground">Link your Meta Ads account to see real campaign data</p>
+                <p className="text-sm font-semibold">Connect your social media accounts</p>
+                <p className="text-xs text-muted-foreground">
+                  Link Facebook, Instagram, TikTok, LinkedIn, YouTube and more to see unified analytics
+                </p>
               </div>
             </div>
-            <Link href="/meta-connect">
-              <button className="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">
+            <Link href="/connections">
+              <button className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap">
                 Connect Now
               </button>
             </Link>
@@ -106,7 +123,7 @@ export default function Dashboard() {
 
         {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-          {insightsLoading
+          {summaryLoading
             ? Array.from({ length: 6 }).map((_, i) => (
                 <KpiCard key={i} label="" value="" icon={DollarSign} loading />
               ))
@@ -117,10 +134,10 @@ export default function Dashboard() {
               : [
                   { label: "Total Spend",  icon: DollarSign },
                   { label: "Impressions",  icon: Eye },
-                  { label: "Clicks (all)", icon: MousePointerClick },
+                  { label: "Clicks",       icon: MousePointerClick },
                   { label: "Reach",        icon: Users },
-                  { label: "Leads",        icon: TrendingUp },
-                  { label: "Messages",     icon: MessageCircle },
+                  { label: "Engagements",  icon: TrendingUp },
+                  { label: "Platforms",    icon: Zap },
                 ].map((kpi) => (
                   <div key={kpi.label} className="glass rounded-2xl p-4 space-y-3 opacity-50">
                     <div className="flex items-center justify-between">
@@ -135,22 +152,33 @@ export default function Dashboard() {
           }
         </div>
 
-        {/* ── Charts row ─────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* ── Platform breakdown + Performance ───────────────────────────────── */}
+        {hasConnections && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <PlatformBreakdownCard insights={allInsights} loading={insightsLoading} />
+            </div>
+            <PerformanceStats stats={perfStats} />
+          </div>
+        )}
+
+        {/* ── Spend chart (Meta campaigns) ───────────────────────────────────── */}
+        {isMetaConnected && (
           <SpendChart
             campaigns={metaCampaigns}
             loading={campaignsLoading}
-            isConnected={isConnected}
+            isConnected={isMetaConnected}
           />
-          <PerformanceStats stats={perfStats} />
-        </div>
+        )}
 
-        {/* ── Campaigns table ────────────────────────────────────────────────── */}
-        <ActiveCampaignsTable
-          campaigns={metaCampaigns}
-          loading={campaignsLoading}
-          isConnected={isConnected}
-        />
+        {/* ── Active Campaigns table ─────────────────────────────────────────── */}
+        {isMetaConnected && (
+          <ActiveCampaignsTable
+            campaigns={metaCampaigns}
+            loading={campaignsLoading}
+            isConnected={isMetaConnected}
+          />
+        )}
 
       </div>
     </DashboardLayout>

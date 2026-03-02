@@ -1,12 +1,14 @@
 /**
  * Alerts.tsx
- * Performance Alerts page — create threshold rules and view triggered notifications.
+ * Multi-Platform Performance Alerts — create threshold rules across all platforms.
  */
 import DashboardLayout from "@/components/DashboardLayout";
+import { PlatformIcon } from "@/components/PlatformIcon";
+import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
 import {
   Bell, Plus, Trash2, AlertTriangle, CheckCircle2,
-  Info, XCircle, Loader2, BellRing, Play, Clock
+  Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -40,10 +42,17 @@ const NOTIFICATION_ICONS = {
 };
 
 // ─── Create Alert Form ────────────────────────────────────────────────────────
-function CreateAlertForm({ onCreated }: { onCreated: () => void }) {
+function CreateAlertForm({
+  onCreated,
+  connectedPlatforms,
+}: {
+  onCreated: () => void;
+  connectedPlatforms: string[];
+}) {
   const [metric, setMetric]       = useState<Metric>("ctr");
   const [operator, setOperator]   = useState<Operator>("lt");
   const [threshold, setThreshold] = useState("");
+  const [platform, setPlatform]   = useState<string>("all");
 
   const create = trpc.alerts.create.useMutation({
     onSuccess: () => {
@@ -66,6 +75,45 @@ function CreateAlertForm({ onCreated }: { onCreated: () => void }) {
         <Plus className="h-4 w-4" />
         Create Alert Rule
       </h3>
+
+      {/* Platform selector */}
+      <div>
+        <label className="block text-xs text-muted-foreground mb-2">Platform</label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setPlatform("all")}
+            className={
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all " +
+              (platform === "all"
+                ? "bg-foreground text-background border-foreground"
+                : "bg-muted text-muted-foreground border-transparent hover:border-border")
+            }
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            All Platforms
+          </button>
+          {connectedPlatforms.map((pid) => {
+            const p = getPlatform(pid);
+            return (
+              <button
+                key={pid}
+                type="button"
+                onClick={() => setPlatform(pid)}
+                className={
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all " +
+                  (platform === pid
+                    ? p.bgLight + " " + p.textColor + " " + p.borderColor
+                    : "bg-muted text-muted-foreground border-transparent hover:border-border")
+                }
+              >
+                <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
+                {p.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Metric */}
@@ -125,7 +173,9 @@ function CreateAlertForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Alert will trigger when <strong>{METRIC_LABELS[metric]}</strong> is{" "}
+        Alert will trigger on{" "}
+        <strong>{platform === "all" ? "all platforms" : getPlatform(platform).name}</strong>{" "}
+        when <strong>{METRIC_LABELS[metric]}</strong> is{" "}
         <strong>{OPERATOR_LABELS[operator].split(" ").slice(1).join(" ")}</strong>{" "}
         {threshold && <strong>{threshold}</strong>}
       </p>
@@ -136,9 +186,17 @@ function CreateAlertForm({ onCreated }: { onCreated: () => void }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Alerts() {
   const utils = trpc.useUtils();
+  const [filterPlatform, setFilterPlatform] = useState<string>("all");
 
   const { data: rules = [], isLoading: rulesLoading } = trpc.alerts.list.useQuery();
   const { data: notifications = [], isLoading: notifLoading } = trpc.notifications.list.useQuery();
+  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
+
+  const connectedPlatforms = Array.from(new Set([
+    ...(metaStatus?.connected ? ["facebook"] : []),
+    ...accounts.map((a) => a.platform),
+  ]));
 
   const deleteRule = trpc.alerts.delete.useMutation({
     onSuccess: () => {
@@ -153,7 +211,6 @@ export default function Alerts() {
   });
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
-
   const { data: lastCheckedData } = trpc.scheduler.getLastChecked.useQuery();
 
   const runCheck = trpc.scheduler.runAlertCheck.useMutation({
@@ -168,18 +225,24 @@ export default function Alerts() {
     onError: e => toast.error(e.message),
   });
 
+  // Filter notifications by platform
+  const filteredNotifications = filterPlatform === "all"
+    ? notifications
+    : notifications.filter((n) => n.message?.toLowerCase().includes(filterPlatform));
+
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
+
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Performance Alerts</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Set thresholds to get notified when campaign metrics cross limits.
+              Set thresholds across all platforms — get notified when metrics cross limits.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {lastCheckedData?.lastChecked && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" />
@@ -204,7 +267,10 @@ export default function Alerts() {
         </div>
 
         {/* Create Form */}
-        <CreateAlertForm onCreated={() => utils.alerts.list.invalidate()} />
+        <CreateAlertForm
+          onCreated={() => utils.alerts.list.invalidate()}
+          connectedPlatforms={connectedPlatforms}
+        />
 
         {/* Alert Rules */}
         <div className="glass rounded-2xl overflow-hidden">
@@ -228,12 +294,21 @@ export default function Alerts() {
               {rules.map(rule => (
                 <div key={rule.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/3 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{rule.metric}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {METRIC_LABELS[rule.metric as Metric] ?? rule.metric}{" "}
-                      {OPERATOR_LABELS[rule.operator as Operator]?.split(" ")[0]}{" "}
-                      <strong>{rule.threshold}</strong>
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        {METRIC_LABELS[rule.metric as Metric] ?? rule.metric}
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {OPERATOR_LABELS[rule.operator as Operator]?.split(" ")[0]}{" "}
+                        <strong className="text-foreground">{rule.threshold}</strong>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <LayoutGrid className="w-3 h-3" />
+                        All Platforms
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={() => deleteRule.mutate({ id: rule.id })}
@@ -250,28 +325,59 @@ export default function Alerts() {
 
         {/* Notification History */}
         <div className="glass rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/10 flex items-center gap-2">
+          <div className="px-5 py-4 border-b border-white/10 flex items-center gap-2 flex-wrap">
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold text-foreground">Notification History</h2>
             {unreadCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">
                 {unreadCount}
               </span>
             )}
+            {/* Platform filter */}
+            <div className="ml-auto flex items-center gap-1 overflow-x-auto">
+              <button
+                onClick={() => setFilterPlatform("all")}
+                className={
+                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all " +
+                  (filterPlatform === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted")
+                }
+              >
+                <LayoutGrid className="w-3 h-3" />
+                All
+              </button>
+              {connectedPlatforms.map((pid) => {
+                const p = getPlatform(pid);
+                return (
+                  <button
+                    key={pid}
+                    onClick={() => setFilterPlatform(pid)}
+                    className={
+                      "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all " +
+                      (filterPlatform === pid
+                        ? p.bgLight + " " + p.textColor
+                        : "text-muted-foreground hover:bg-muted")
+                    }
+                  >
+                    <PlatformIcon platform={pid} className="w-3 h-3" />
+                    {p.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           {notifLoading ? (
             <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Loading notifications...</span>
             </div>
-          ) : notifications.length === 0 ? (
+          ) : filteredNotifications.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
               <CheckCircle2 className="h-8 w-8 mx-auto mb-3 opacity-30" />
               <p className="text-sm">No notifications yet. Alerts will appear here when triggered.</p>
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {notifications.map(n => (
+              {filteredNotifications.map(n => (
                 <div
                   key={n.id}
                   className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-white/3"}`}

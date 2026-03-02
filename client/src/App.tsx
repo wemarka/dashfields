@@ -12,21 +12,24 @@ import Insights from "./pages/Insights";
 import AITools from "./pages/AITools";
 import Settings from "./pages/Settings";
 import MetaConnect from "./pages/MetaConnect";
+import Connections from "./pages/Connections";
 import Alerts from "./pages/Alerts";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/"            component={Home} />
-      <Route path="/campaigns"   component={Campaigns} />
-      <Route path="/analytics"   component={Analytics} />
-      <Route path="/publishing"  component={Publishing} />
-      <Route path="/insights"    component={Insights} />
-      <Route path="/ai-tools"    component={AITools} />
-      <Route path="/settings"    component={Settings} />
+      <Route path="/"             component={Home} />
+      <Route path="/campaigns"    component={Campaigns} />
+      <Route path="/analytics"    component={Analytics} />
+      <Route path="/publishing"   component={Publishing} />
+      <Route path="/insights"     component={Insights} />
+      <Route path="/ai-tools"     component={AITools} />
+      <Route path="/settings"     component={Settings} />
+      <Route path="/connections"  component={Connections} />
+      {/* Keep /meta-connect for backward compatibility */}
       <Route path="/meta-connect" component={MetaConnect} />
-      <Route path="/alerts"        component={Alerts} />
-      <Route path="/404"         component={NotFound} />
+      <Route path="/alerts"       component={Alerts} />
+      <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
