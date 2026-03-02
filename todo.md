@@ -202,3 +202,45 @@
 - [x] 149/149 tests passing
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+
+## 🔄 Phase 40-44 — Post Analytics + Period Comparison + AI Content + Activity Feed
+
+### Phase 40 — Post Analytics Page
+- [x] server/routers/postAnalytics.ts — top posts, engagement by hour/day, best times
+- [x] Post Analytics page (/post-analytics) with 4 sections
+- [x] TopPostsTable component (sorted by engagement)
+- [x] EngagementHeatmap component (day x hour grid)
+- [x] BestTimesChart component (bar chart by hour)
+- [x] PostTypeBreakdown component (image/video/text pie)
+- [x] App.tsx: /post-analytics route + sidebar link
+
+### Phase 41 — Period Comparison Dashboard
+- [x] PeriodComparison page (/compare) with current vs previous month
+- [x] server/routers/periodComparison.ts — fetch two periods in parallel
+- [x] ComparisonKpiCard component (shows delta %, trend arrow)
+- [x] ComparisonChart component (two lines on same chart)
+- [x] Platform filter in comparison page
+- [x] App.tsx: /compare route + sidebar link
+
+### Phase 42 — AI Content Suggestions
+- [x] server/routers/aiContent.ts — LLM-powered post ideas generator
+- [x] AI Content page (/ai-content) with platform + tone selectors
+- [x] ContentIdeaCard component (copy to clipboard, save to drafts)
+- [x] Hashtag suggestions per platform
+- [x] Caption length optimizer
+- [x] Save generated content to posts table in Supabase
+
+### Phase 43 — Activity Feed + Settings API Keys
+- [ ] ActivityFeed component — real-time Supabase Realtime events
+- [ ] Add ActivityFeed to Dashboard sidebar/widget
+- [x] Settings: API Keys tab (add/remove platform API keys)
+- [x] server/routers/apiKeys.ts — store encrypted keys in Supabase
+- [x] Show connected API key status per platform in Connections Hub
+
+### Phase 44 — Tests + Checkpoint
+- [x] server/postAnalytics.test.ts — 10+ tests
+- [x] server/periodComparison.test.ts — 8+ tests
+- [x] server/aiContent.test.ts — 8+ tests
+- [x] 175+ tests passing
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver

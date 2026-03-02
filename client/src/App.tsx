@@ -16,6 +16,9 @@ import Connections from "./pages/Connections";
 import Alerts from "./pages/Alerts";
 import Reports from "@/pages/Reports";
 import Audience from "@/pages/Audience";
+import PostAnalytics from "@/pages/PostAnalytics";
+import PeriodComparison from "@/pages/PeriodComparison";
+import AIContent from "@/pages/AIContent";
 
 function Router() {
   return (
@@ -33,6 +36,9 @@ function Router() {
       <Route path="/alerts"       component={Alerts} />
       <Route path="/reports"      component={Reports} />
       <Route path="/audience"     component={Audience} />
+      <Route path="/post-analytics" component={PostAnalytics} />
+      <Route path="/compare"        component={PeriodComparison} />
+      <Route path="/ai-content"     component={AIContent} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>
