@@ -127,4 +127,22 @@
 - [x] server/connections.test.ts — 11 tests (connection status + feature matrix)
 - [x] 68/68 tests passing across 10 test files
 - [x] 0 TypeScript errors
-- [ ] Checkpoint and deliver
+- [x] Checkpoint and deliver
+
+## ✅ Phase 25-29 — Enhanced Features (Complete)
+- [x] Connections Hub: PlatformCardSkeleton loading state (6 skeleton cards)
+- [x] Connections Hub: ConnectModal with step-by-step OAuth/token flow per platform
+- [x] Insights page: cross-platform ROI comparison (BarChart + RadarChart)
+- [x] Insights page: best platform card, cost efficiency table, AI recommendations
+- [x] Insights page: DashboardKpiSkeleton + ChartSkeleton loading states
+- [x] Export Reports: server/routers/export.ts (CSV + HTML report generation)
+- [x] Export Reports: ExportReportModal component with platform/format/date filters
+- [x] Export button in Analytics page header
+- [x] MetaCampaignTable: CampaignRowSkeleton (5 skeleton rows) instead of spinner
+- [x] shared/platforms.ts: connectionType added per platform
+- [x] snapchat + pinterest added to platformEnum in schema
+- [x] server/export.test.ts — 13 tests (CSV builder + HTML report)
+- [x] server/insights.test.ts — 11 tests (ROI ranking + efficiency + radar)
+- [x] 92/92 tests passing across 12 test files
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver

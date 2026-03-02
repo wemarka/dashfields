@@ -2,7 +2,8 @@
  * MetaCampaignTable.tsx
  * Table for displaying Meta Ads campaigns with insights.
  */
-import { Loader2, Link2, Facebook } from "lucide-react";
+import { Link2, Facebook } from "lucide-react";
+import { CampaignRowSkeleton } from "@/components/ui/skeleton-cards";
 import { Link } from "wouter";
 
 const statusDot: Record<string, string> = {
@@ -77,9 +78,23 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
 
   if (loading) {
     return (
-      <div className="glass rounded-2xl flex items-center justify-center py-16 gap-2 text-muted-foreground">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm">Loading Meta campaigns...</span>
+      <div className="glass rounded-2xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-foreground/5">
+                {["Campaign", "Status", "Objective", "Budget", "Spend", "Impressions", "Clicks", "CTR"].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <CampaignRowSkeleton key={i} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

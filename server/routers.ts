@@ -19,6 +19,7 @@ import { alertsRouter }       from "./routers/alerts";
 import { metaRouter }         from "./routers/meta";
 import { schedulerRouter }    from "./routers/scheduler";
 import { platformsRouter }    from "./routers/platforms";
+import { exportRouter }       from "./routers/export";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -43,6 +44,7 @@ export const appRouter = router({
   meta:          metaRouter,
   scheduler:     schedulerRouter,
   platforms:     platformsRouter,
+  export:        exportRouter,
 });
 
 export type AppRouter = typeof appRouter;

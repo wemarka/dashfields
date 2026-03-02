@@ -14,7 +14,7 @@ import {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const roleEnum       = pgEnum("role",         ["user", "admin"]);
-export const platformEnum   = pgEnum("platform",     ["facebook", "instagram", "linkedin", "twitter", "youtube", "tiktok", "google"]);
+export const platformEnum   = pgEnum("platform",     ["facebook", "instagram", "linkedin", "twitter", "youtube", "tiktok", "google", "snapchat", "pinterest"]);
 export const accountTypeEnum = pgEnum("account_type", ["profile", "page", "ad_account", "business"]);
 export const campaignStatusEnum = pgEnum("campaign_status", ["active", "paused", "ended", "draft", "scheduled"]);
 export const budgetTypeEnum = pgEnum("budget_type",  ["daily", "lifetime"]);

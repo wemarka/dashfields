@@ -10,7 +10,8 @@ import { ImpressionsClicksChart } from "@/components/analytics/ImpressionsClicks
 import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
-import { Loader2, Link2, RefreshCw, BarChart3 } from "lucide-react";
+import { Loader2, Link2, RefreshCw, BarChart3, Download } from "lucide-react";
+import { ExportReportModal } from "@/components/ExportReportModal";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -32,6 +33,7 @@ function fmtMoney(n: number): string {
 export default function Analytics() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [activePlatform, setActivePlatform] = useState<string>("all");
+  const [showExport, setShowExport] = useState(false);
 
   // Multi-platform data
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =
@@ -132,6 +134,13 @@ export default function Analytics() {
                 Refresh
               </button>
               <DatePresetSelector value={datePreset} onChange={setDatePreset} />
+              <button
+                onClick={() => setShowExport(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export
+              </button>
             </div>
           )}
         </div>
@@ -302,6 +311,9 @@ export default function Analytics() {
         )}
 
       </div>
+
+      {/* Export Modal */}
+      {showExport && <ExportReportModal onClose={() => setShowExport(false)} />}
     </DashboardLayout>
   );
 }

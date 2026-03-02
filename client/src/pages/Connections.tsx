@@ -15,6 +15,7 @@ import {
   CheckCircle2, Loader2, Link2, Unlink,
   ChevronRight, X, Zap, Globe
 } from "lucide-react";
+import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ConnectModalProps {
@@ -355,9 +356,10 @@ export default function Connections() {
 
         {/* ── Platform grid ──────────────────────────────────────────────── */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm">Loading connections...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <PlatformCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
