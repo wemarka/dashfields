@@ -355,7 +355,7 @@ export default function Connections() {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Connections</h1>
+            <h1 className="page-header">Connections</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Connect all your social media accounts to manage them from one place.
             </p>
@@ -363,11 +363,11 @@ export default function Connections() {
           {totalConnected > 0 && (
             <div className="flex items-center gap-4 text-right">
               <div>
-                <p className="text-2xl font-bold text-foreground">{connectedPlatforms}</p>
+                <p className="page-header">{connectedPlatforms}</p>
                 <p className="text-xs text-muted-foreground">Platforms</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{totalConnected}</p>
+                <p className="page-header">{totalConnected}</p>
                 <p className="text-xs text-muted-foreground">Accounts</p>
               </div>
             </div>

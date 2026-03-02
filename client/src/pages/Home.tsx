@@ -82,8 +82,8 @@ export default function Dashboard() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="page-header">Dashboard</h1>
+            <p className="page-subtitle">
               {hasConnections
                 ? `Unified performance across ${summary?.connectedPlatforms ?? accounts.length} platform${(summary?.connectedPlatforms ?? accounts.length) !== 1 ? "s" : ""}`
                 : "Connect your social media accounts to get started"}

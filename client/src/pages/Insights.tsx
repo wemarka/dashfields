@@ -201,7 +201,7 @@ export default function Insights() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Insights</h1>
+            <h1 className="page-header">Insights</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Cross-platform performance comparison and AI recommendations
             </p>

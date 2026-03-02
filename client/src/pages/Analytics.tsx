@@ -117,7 +117,7 @@ export default function Analytics() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>
+            <h1 className="page-header">Analytics</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               {hasConnections
                 ? `Performance across ${connectedPlatforms.length} connected platform${connectedPlatforms.length !== 1 ? "s" : ""}`

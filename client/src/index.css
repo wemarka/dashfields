@@ -40,11 +40,13 @@
   --color-sidebar-primary: oklch(0.22 0.012 264);
   --color-sidebar-primary-foreground: oklch(0.98 0 0);
   --color-sidebar-ring: oklch(0.22 0.012 264 / 0.15);
-  --color-chart-1: oklch(0.35 0.012 264);
-  --color-chart-2: oklch(0.50 0.010 264);
-  --color-chart-3: oklch(0.62 0.008 264);
-  --color-chart-4: oklch(0.72 0.006 264);
-  --color-chart-5: oklch(0.82 0.004 264);
+  --color-chart-1: oklch(0.52 0.18 264);
+  --color-chart-2: oklch(0.62 0.16 220);
+  --color-chart-3: oklch(0.70 0.14 160);
+  --color-chart-4: oklch(0.72 0.16 30);
+  --color-chart-5: oklch(0.68 0.18 300);
+  --color-brand: oklch(0.52 0.18 264);
+  --color-brand-foreground: oklch(0.98 0 0);
 }
 
 .dark {
@@ -74,11 +76,13 @@
   --color-sidebar-accent-foreground: oklch(0.90 0.004 264);
   --color-sidebar-primary: oklch(0.92 0.004 264);
   --color-sidebar-primary-foreground: oklch(0.12 0.008 264);
-  --color-chart-1: oklch(0.82 0.008 264);
-  --color-chart-2: oklch(0.70 0.008 264);
-  --color-chart-3: oklch(0.58 0.008 264);
-  --color-chart-4: oklch(0.46 0.008 264);
-  --color-chart-5: oklch(0.34 0.008 264);
+  --color-chart-1: oklch(0.65 0.18 264);
+  --color-chart-2: oklch(0.70 0.16 220);
+  --color-chart-3: oklch(0.72 0.14 160);
+  --color-chart-4: oklch(0.75 0.16 30);
+  --color-chart-5: oklch(0.72 0.18 300);
+  --color-brand: oklch(0.65 0.18 264);
+  --color-brand-foreground: oklch(0.10 0 0);
 }
 
 @layer base {
@@ -115,8 +119,21 @@
   .delay-400 { animation-delay: 400ms; }
   .delay-500 { animation-delay: 500ms; }
   .shimmer { background: linear-gradient(90deg, transparent 0%, oklch(0.90 0.004 264 / 0.6) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 1.8s ease-in-out infinite; }
-  .gradient-text { background: linear-gradient(135deg, oklch(0.18 0.012 264) 0%, oklch(0.45 0.010 264) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .dark .gradient-text { background: linear-gradient(135deg, oklch(0.96 0.004 264) 0%, oklch(0.72 0.008 264) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gradient-text { background: linear-gradient(135deg, oklch(0.35 0.18 264) 0%, oklch(0.55 0.16 220) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dark .gradient-text { background: linear-gradient(135deg, oklch(0.85 0.12 264) 0%, oklch(0.75 0.14 220) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .page-header { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; }
+  .page-subtitle { font-size: 0.8125rem; color: var(--color-muted-foreground); margin-top: 0.125rem; }
+  .stat-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .stat-label { font-size: 0.75rem; color: var(--color-muted-foreground); margin-top: 0.25rem; }
+  .section-title { font-size: 0.875rem; font-weight: 600; letter-spacing: -0.01em; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center; gap: 0.75rem; }
+  .empty-state-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; background: oklch(0.92 0.006 264 / 0.6); display: flex; align-items: center; justify-content: center; }
+  .dark .empty-state-icon { background: oklch(0.22 0.008 264 / 0.6); }
+  .card-hover { transition: box-shadow 0.2s, transform 0.2s; }
+  .card-hover:hover { box-shadow: 0 8px 24px oklch(0.12 0.01 264 / 0.12); transform: translateY(-1px); }
+  .dark .card-hover:hover { box-shadow: 0 8px 24px oklch(0 0 0 / 0.3); }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
   .container { width: 100%; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
   .flex { min-height: 0; min-width: 0; }
   .app-bg { background: radial-gradient(ellipse 80% 60% at 15% 0%, oklch(0.88 0.010 264 / 0.7) 0%, transparent 55%), radial-gradient(ellipse 100% 100% at 50% 50%, oklch(0.95 0.005 264) 0%, oklch(0.91 0.007 250) 100%); min-height: 100dvh; }

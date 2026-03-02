@@ -69,7 +69,7 @@ export default function AITools() {
     <DashboardLayout>
       <div className="p-6 space-y-5 animate-fade-in">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">AI Tools</h1>
+          <h1 className="page-header">AI Tools</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Supercharge your campaigns with AI assistance</p>
         </div>
 

@@ -237,7 +237,7 @@ export default function Alerts() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Performance Alerts</h1>
+            <h1 className="page-header">Performance Alerts</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Set thresholds across all platforms — get notified when metrics cross limits.
             </p>
