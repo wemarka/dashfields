@@ -73,3 +73,15 @@
 ## Testing
 - [ ] Vitest tests for campaign procedures
 - [ ] Vitest tests for AI procedure
+
+## Phase 2 — Full Functionality (In Progress)
+- [x] DB migration: pnpm db:push
+- [x] Campaign creation wizard (multi-step modal)
+- [x] Post composer modal with media + scheduling
+- [x] Wire Campaigns page to real tRPC data
+- [x] Wire Publishing page to real tRPC data
+- [x] AI Tools connected to real LLM router
+- [x] Toast feedback on mutations (Sonner)
+- [x] Empty states with CTA buttons
+- [x] Loading skeletons (Loader2 spinners)
+- [ ] Notification bell in header (future)

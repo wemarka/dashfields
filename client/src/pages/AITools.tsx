@@ -1,6 +1,9 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useState } from "react";
-import { Sparkles, Send, Copy, RefreshCw, Wand2, Target, FileText, Image } from "lucide-react";
+import { Sparkles, Send, Copy, RefreshCw, Wand2, Target, FileText, Image, Check } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+
 const tools = [
   { id: "copy",     icon: FileText, label: "Ad Copywriter",       desc: "Generate compelling ad headlines and descriptions" },
   { id: "audience", icon: Target,   label: "Audience Builder",    desc: "Define and refine your target audience" },
@@ -8,29 +11,59 @@ const tools = [
   { id: "strategy", icon: Wand2,    label: "Campaign Strategist", desc: "Get AI-powered campaign strategy recommendations" },
 ];
 
-const examples = [
-  "Write 5 Facebook ad headlines for a summer clothing sale targeting women 25-45",
-  "Create a retargeting ad for cart abandoners with a 10% discount offer",
-  "Generate a campaign strategy for launching a new fitness app",
-  "Write Instagram ad copy for a luxury watch brand",
-];
+const examplesByTool: Record<string, string[]> = {
+  copy: [
+    "Write 5 Facebook ad headlines for a summer clothing sale targeting women 25-45",
+    "Create a retargeting ad for cart abandoners with a 10% discount offer",
+    "Write Instagram ad copy for a luxury watch brand",
+  ],
+  audience: [
+    "Define the ideal audience for a fitness app targeting busy professionals",
+    "Create an audience segment for a B2B SaaS product targeting marketing managers",
+    "Build a lookalike audience profile for an e-commerce fashion brand",
+  ],
+  creative: [
+    "Create a creative brief for a product launch campaign for a new smartphone",
+    "Write a brief for a brand awareness video ad for a sustainable clothing brand",
+    "Design brief for a carousel ad showcasing 5 product features",
+  ],
+  strategy: [
+    "Generate a campaign strategy for launching a new fitness app with $5,000 budget",
+    "Create a 3-month Meta Ads strategy for an e-commerce store targeting ROAS of 4x",
+    "Develop a retargeting strategy for a SaaS product with 30-day trial",
+  ],
+};
 
 export default function AITools() {
-  const [activeTool, setActiveTool] = useState("copy");
+  const [activeTool, setActiveTool] = useState<"copy" | "audience" | "creative" | "strategy">("copy");
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const handleGenerate = async () => {
+  const generateMutation = trpc.ai.generate.useMutation({
+    onSuccess: (data) => {
+      const content = typeof data.content === "string" ? data.content : "";
+      setResult(content);
+    },
+    onError: (err) => {
+      toast.error("Generation failed: " + err.message);
+    },
+  });
+
+  const handleGenerate = () => {
     if (!prompt.trim()) return;
-    setLoading(true);
     setResult("");
-    // Placeholder: AI generation will be wired to backend
-    setTimeout(() => {
-      setResult("[AI generation coming soon — connect to the AI router in server/routers.ts]");
-      setLoading(false);
-    }, 1200);
+    generateMutation.mutate({ prompt, tool: activeTool });
   };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const examples = examplesByTool[activeTool] ?? [];
 
   return (
     <DashboardLayout>
@@ -45,7 +78,11 @@ export default function AITools() {
           {tools.map((tool) => (
             <button
               key={tool.id}
-              onClick={() => setActiveTool(tool.id)}
+              onClick={() => {
+                setActiveTool(tool.id as typeof activeTool);
+                setPrompt("");
+                setResult("");
+              }}
               className={"glass rounded-2xl p-4 text-left transition-all " + (activeTool === tool.id ? "ring-2 ring-foreground/20 bg-foreground/5" : "hover:bg-foreground/3")}
             >
               <div className="w-8 h-8 rounded-xl bg-foreground/5 flex items-center justify-center mb-3">
@@ -88,11 +125,13 @@ export default function AITools() {
             </div>
             <button
               onClick={handleGenerate}
-              disabled={loading || !prompt.trim()}
+              disabled={generateMutation.isPending || !prompt.trim()}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              {loading ? "Generating..." : "Generate"}
+              {generateMutation.isPending
+                ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</>
+                : <><Send className="w-4 h-4" />Generate</>
+              }
             </button>
           </div>
 
@@ -105,16 +144,16 @@ export default function AITools() {
               </div>
               {result && (
                 <button
-                  onClick={() => navigator.clipboard.writeText(result)}
+                  onClick={handleCopy}
                   className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Copy className="w-3.5 h-3.5" />
-                  Copy
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? "Copied!" : "Copy"}
                 </button>
               )}
             </div>
-            <div className="min-h-[200px] bg-foreground/3 rounded-xl p-3">
-              {loading ? (
+            <div className="min-h-[200px] bg-foreground/3 rounded-xl p-3 overflow-y-auto max-h-[400px]">
+              {generateMutation.isPending ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   Generating your content...
