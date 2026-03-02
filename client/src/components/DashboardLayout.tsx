@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
-  BarChart3, Bell, Calendar, ChevronLeft, ChevronRight,
+  BarChart3, Bell, Calendar, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, GitCompare, Wand2,
 } from "lucide-react";
@@ -24,6 +24,7 @@ const navItems = [
   { icon: BarChart3,         label: "Post Analytics", path: "/post-analytics" },
   { icon: GitCompare,        label: "Compare",      path: "/compare" },
   { icon: Wand2,             label: "AI Content",   path: "/ai-content" },
+  { icon: CalendarDays,      label: "Calendar",     path: "/calendar" },
 ];
 
 const bottomItems = [

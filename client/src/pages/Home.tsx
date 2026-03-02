@@ -19,6 +19,8 @@ import { Link } from "wouter";
 import { useState } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -36,6 +38,7 @@ function fmtPct(n: number): string {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
+  const { user } = useAuth();
 
   // Multi-platform summary
   const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({ datePreset });
@@ -163,8 +166,27 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ── Budget Tracker ─────────────────────────────────────────────────── */}
-        <BudgetTracker />
+        {/* ── Budget Tracker + Activity Feed ──────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <BudgetTracker />
+          </div>
+          {/* Activity Feed */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Activity Feed</h3>
+              <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
+            </div>
+            {user ? (
+              <ActivityFeed userId={user.id} maxItems={8} />
+            ) : (
+              <div className="text-xs text-muted-foreground text-center py-4">Loading...</div>
+            )}
+          </div>
+        </div>
 
       </div>
     </DashboardLayout>

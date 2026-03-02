@@ -248,3 +248,26 @@
 - [x] 175+ tests passing
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+
+## 🔄 Phase 45-48 — Activity Feed + Content Calendar + Demo Data
+
+### Phase 45 — Activity Feed
+- [x] Activity Feed widget in Dashboard (Supabase Realtime)
+- [x] ActivityFeed component with real-time updates
+- [x] Server router for activity events (via Supabase Realtime on client)
+
+### Phase 46 — Content Calendar
+- [x] Content Calendar page (monthly/weekly view)
+- [x] Drag-and-drop post scheduling (click-to-create + reschedule modal)
+- [x] Calendar router (CRUD for scheduled posts) — extended posts router
+- [x] Add Calendar to sidebar navigation
+
+### Phase 47 — Demo Data + Bug Fixes
+- [x] Seed demo posts with analytics data (10 posts)
+- [x] Fix periodComparison router missing module error (was stale log)
+- [x] Fix any remaining Supabase column errors
+
+### Phase 48 — Tests + Checkpoint
+- [x] Write tests for new features (213/213)
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver

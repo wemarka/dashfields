@@ -19,6 +19,7 @@ import Audience from "@/pages/Audience";
 import PostAnalytics from "@/pages/PostAnalytics";
 import PeriodComparison from "@/pages/PeriodComparison";
 import AIContent from "@/pages/AIContent";
+import ContentCalendar from "@/pages/ContentCalendar";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/post-analytics" component={PostAnalytics} />
       <Route path="/compare"        component={PeriodComparison} />
       <Route path="/ai-content"     component={AIContent} />
+      <Route path="/calendar"        component={ContentCalendar} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>
