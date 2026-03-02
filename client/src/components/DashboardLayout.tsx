@@ -1,264 +1,170 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
-import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { trpc } from "@/lib/trpc";
+import {
+  BarChart3, Calendar, ChevronLeft, ChevronRight,
+  LayoutDashboard, LogOut, Megaphone, Settings, Sparkles, TrendingUp,
+} from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
-import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+const navItems = [
+  { icon: LayoutDashboard, label: "Dashboard",  path: "/" },
+  { icon: Megaphone,       label: "Campaigns",  path: "/campaigns" },
+  { icon: BarChart3,       label: "Analytics",  path: "/analytics" },
+  { icon: Calendar,        label: "Publishing", path: "/publishing" },
+  { icon: TrendingUp,      label: "Insights",   path: "/insights" },
+  { icon: Sparkles,        label: "AI Tools",   path: "/ai-tools" },
 ];
 
-const SIDEBAR_WIDTH_KEY = "sidebar-width";
-const DEFAULT_WIDTH = 280;
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 480;
+const bottomItems = [
+  { icon: Settings, label: "Settings", path: "/settings" },
+];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
-  });
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [location, setLocation] = useLocation();
   const { loading, user } = useAuth();
-
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
-  }, [sidebarWidth]);
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => window.location.reload(),
+  });
 
   if (loading) {
-    return <DashboardLayoutSkeleton />
+    return (
+      <div className="app-bg flex h-screen items-center justify-center">
+        <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-2 border-foreground/20 border-t-foreground/80 animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading Dashfields...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to continue
-            </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
-            </p>
+      <div className="app-bg flex h-screen items-center justify-center">
+        <div className="glass-strong rounded-3xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 animate-blur-in">
+          <div className="w-16 h-16 rounded-2xl bg-foreground/5 flex items-center justify-center">
+            <BarChart3 className="w-8 h-8 text-foreground/70" />
           </div>
-          <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold tracking-tight mb-2">Dashfields</h1>
+            <p className="text-sm text-muted-foreground">Sign in to manage your campaigns</p>
+          </div>
+          <a
+            href={getLoginUrl()}
+            className="w-full py-3 px-6 rounded-xl bg-foreground text-background text-sm font-medium text-center hover:bg-foreground/90 transition-colors"
           >
-            Sign in
-          </Button>
+            Sign In
+          </a>
         </div>
       </div>
     );
   }
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": `${sidebarWidth}px`,
-        } as CSSProperties
-      }
-    >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
-        {children}
-      </DashboardLayoutContent>
-    </SidebarProvider>
-  );
-}
-
-type DashboardLayoutContentProps = {
-  children: React.ReactNode;
-  setSidebarWidth: (width: number) => void;
-};
-
-function DashboardLayoutContent({
-  children,
-  setSidebarWidth,
-}: DashboardLayoutContentProps) {
-  const { user, logout } = useAuth();
-  const [location, setLocation] = useLocation();
-  const { state, toggleSidebar } = useSidebar();
-  const isCollapsed = state === "collapsed";
-  const [isResizing, setIsResizing] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (isCollapsed) {
-      setIsResizing(false);
-    }
-  }, [isCollapsed]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-
-      const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
-      const newWidth = e.clientX - sidebarLeft;
-      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
-        setSidebarWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-  }, [isResizing, setSidebarWidth]);
-
-  return (
-    <>
-      <div className="relative" ref={sidebarRef}>
-        <Sidebar
-          collapsible="icon"
-          className="border-r-0"
-          disableTransition={isResizing}
-        >
-          <SidebarHeader className="h-16 justify-center">
-            <div className="flex items-center gap-3 px-2 transition-all w-full">
-              <button
-                onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-                aria-label="Toggle navigation"
-              >
-                <PanelLeft className="h-4 w-4 text-muted-foreground" />
-              </button>
-              {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
-                  </span>
-                </div>
-              ) : null}
-            </div>
-          </SidebarHeader>
-
-          <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
-                const isActive = location === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarContent>
-
-          <SidebarFooter className="p-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <Avatar className="h-9 w-9 border shrink-0">
-                    <AvatarFallback className="text-xs font-medium">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                    <p className="text-sm font-medium truncate leading-none">
-                      {user?.name || "-"}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate mt-1.5">
-                      {user?.email || "-"}
-                    </p>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={logout}
-                  className="cursor-pointer text-destructive focus:text-destructive"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarFooter>
-        </Sidebar>
-        <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
-          onMouseDown={() => {
-            if (isCollapsed) return;
-            setIsResizing(true);
-          }}
-          style={{ zIndex: 50 }}
-        />
-      </div>
-
-      <SidebarInset>
-        {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "Menu"}
-                  </span>
-                </div>
-              </div>
-            </div>
+    <div className="app-bg flex h-screen overflow-hidden">
+      {/* Sidebar */}
+      <aside
+        className="glass-strong flex flex-col shrink-0 transition-all duration-300 ease-out m-3 rounded-2xl overflow-hidden relative"
+        style={{ width: collapsed ? 64 : 220 }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-4 h-16 border-b border-white/10">
+          <div className="w-8 h-8 rounded-xl bg-foreground/8 flex items-center justify-center shrink-0">
+            <BarChart3 className="w-4 h-4 text-foreground/70" />
           </div>
-        )}
-        <main className="flex-1 p-4">{children}</main>
-      </SidebarInset>
-    </>
+          {!collapsed && (
+            <span className="font-semibold text-sm tracking-tight truncate">Dashfields</span>
+          )}
+        </div>
+
+        {/* Nav Items */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+            return (
+              <button
+                key={item.path}
+                onClick={() => setLocation(item.path)}
+                title={collapsed ? item.label : undefined}
+                className={[
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                  "transition-all duration-200 text-left",
+                  isActive
+                    ? "bg-foreground/10 text-foreground shadow-sm"
+                    : "text-foreground/60 hover:text-foreground hover:bg-foreground/5",
+                ].join(" ")}
+              >
+                <item.icon className={"w-4 h-4 shrink-0 " + (isActive ? "text-foreground" : "text-foreground/50")} />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Bottom */}
+        <div className="px-2 pb-2 space-y-0.5 border-t border-white/10 pt-2">
+          {bottomItems.map((item) => {
+            const isActive = location === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => setLocation(item.path)}
+                title={collapsed ? item.label : undefined}
+                className={[
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                  "transition-all duration-200 text-left",
+                  isActive
+                    ? "bg-foreground/10 text-foreground"
+                    : "text-foreground/60 hover:text-foreground hover:bg-foreground/5",
+                ].join(" ")}
+              >
+                <item.icon className="w-4 h-4 shrink-0 text-foreground/50" />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            );
+          })}
+
+          {/* User */}
+          <div className={"flex items-center gap-3 px-3 py-2.5 rounded-xl " + (collapsed ? "justify-center" : "")}>
+            <Avatar className="w-7 h-7 shrink-0">
+              <AvatarFallback className="text-xs bg-foreground/10 text-foreground/70">
+                {user?.name?.charAt(0).toUpperCase() ?? "U"}
+              </AvatarFallback>
+            </Avatar>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{user?.name ?? "User"}</p>
+                <button
+                  onClick={() => logoutMutation.mutate()}
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+                >
+                  <LogOut className="w-3 h-3" />
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full glass-strong flex items-center justify-center hover:bg-foreground/10 transition-colors z-10 shadow-sm border border-white/20"
+        >
+          {collapsed
+            ? <ChevronRight className="w-3 h-3 text-foreground/60" />
+            : <ChevronLeft className="w-3 h-3 text-foreground/60" />
+          }
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto min-w-0">
+        {children}
+      </main>
+    </div>
   );
 }

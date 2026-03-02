@@ -1,7 +1,15 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  users,
+  campaigns,
+  campaignMetrics,
+  posts,
+  socialAccounts,
+  userSettings,
+  notifications,
+} from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -18,75 +26,160 @@ export async function getDb() {
   return _db;
 }
 
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
-}
-
+// ─── Users ───────────────────────────────────────────────────────────────────
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
+  if (!db) return null;
+  const rows = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  return rows[0] ?? null;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function upsertUser(user: InsertUser): Promise<void> {
+  if (!user.openId) throw new Error("User openId is required for upsert");
+  const db = await getDb();
+  if (!db) { console.warn("[Database] Cannot upsert user: database not available"); return; }
+
+  const values: InsertUser = { openId: user.openId };
+  const updateSet: Record<string, unknown> = {};
+  const textFields = ["name", "email", "loginMethod"] as const;
+  for (const field of textFields) {
+    if (user[field] !== undefined && user[field] !== null) {
+      (values as Record<string, unknown>)[field] = user[field];
+      updateSet[field] = user[field];
+    }
+  }
+  if (user.lastSignedIn) {
+    values.lastSignedIn = user.lastSignedIn;
+    updateSet.lastSignedIn = user.lastSignedIn;
+  }
+  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+}
+
+// ─── Social Accounts ─────────────────────────────────────────────────────────
+export async function getUserSocialAccounts(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialAccounts).where(eq(socialAccounts.userId, userId));
+}
+
+// ─── Campaigns ───────────────────────────────────────────────────────────────
+export async function getUserCampaigns(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaigns).where(eq(campaigns.userId, userId)).orderBy(desc(campaigns.createdAt));
+}
+
+export async function getCampaignById(campaignId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(campaigns)
+    .where(and(eq(campaigns.id, campaignId), eq(campaigns.userId, userId)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function createCampaign(data: {
+  userId: number;
+  name: string;
+  platform: "facebook" | "instagram" | "linkedin" | "twitter" | "youtube" | "tiktok" | "google";
+  budget?: number;
+  objective?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(campaigns).values({
+    userId: data.userId,
+    name: data.name,
+    platform: data.platform,
+    budget: data.budget?.toString(),
+    objective: data.objective,
+    status: "draft",
+  });
+}
+
+export async function updateCampaignStatus(
+  campaignId: number,
+  userId: number,
+  status: "active" | "paused" | "ended" | "draft" | "scheduled"
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(campaigns)
+    .set({ status, updatedAt: new Date() })
+    .where(and(eq(campaigns.id, campaignId), eq(campaigns.userId, userId)));
+}
+
+// ─── Campaign Metrics ─────────────────────────────────────────────────────────
+export async function getCampaignMetrics(campaignId: number, days = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  return db.select().from(campaignMetrics)
+    .where(and(eq(campaignMetrics.campaignId, campaignId), gte(campaignMetrics.date, since)))
+    .orderBy(campaignMetrics.date);
+}
+
+// ─── Posts ────────────────────────────────────────────────────────────────────
+export async function getUserPosts(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(posts).where(eq(posts.userId, userId)).orderBy(desc(posts.createdAt));
+}
+
+export async function createPost(data: {
+  userId: number;
+  content: string;
+  title?: string;
+  platforms: string[];
+  scheduledAt?: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(posts).values({
+    userId: data.userId,
+    content: data.content,
+    title: data.title,
+    platforms: data.platforms,
+    status: data.scheduledAt ? "scheduled" : "draft",
+    scheduledAt: data.scheduledAt,
+  });
+}
+
+// ─── User Settings ────────────────────────────────────────────────────────────
+export async function getUserSettings(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function upsertUserSettings(userId: number, data: Partial<{
+  defaultTimezone: string;
+  notificationsEnabled: boolean;
+}>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getUserSettings(userId);
+  if (existing) {
+    return db.update(userSettings).set({ ...data, updatedAt: new Date() }).where(eq(userSettings.userId, userId));
+  }
+  return db.insert(userSettings).values({ userId, ...data });
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+export async function getUserNotifications(userId: number, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(notifications)
+    .where(eq(notifications.userId, userId))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+}
+
+export async function markNotificationRead(notificationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(notifications)
+    .set({ isRead: true })
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+}
