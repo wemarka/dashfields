@@ -85,7 +85,7 @@ function EngagementHeatmap({ data }: { data: { day: number; hour: number; value:
 // ─── Top Posts Table ───────────────────────────────────────────────────────────
 function TopPostsTable({ posts, sortBy, onSortChange }: {
   posts: {
-    id: number; platform: string; content: string; post_type: string;
+    id: number; platforms: string[]; content: string; post_type: string;
     published_at: string | null; likes: number; comments: number; shares: number;
     reach: number; engagement: number; engagementRate: number;
   }[];
@@ -137,7 +137,7 @@ function TopPostsTable({ posts, sortBy, onSortChange }: {
               <tr key={post.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                 <td className="py-3 px-3 max-w-xs">
                   <div className="flex items-center gap-2">
-                    <PlatformIcon platform={post.platform} className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    <PlatformIcon platform={(Array.isArray(post.platforms) ? post.platforms[0] : "facebook") ?? "facebook"} className="w-4 h-4 shrink-0 text-muted-foreground" />
                     <span className="text-xs text-foreground line-clamp-2">{post.content || "—"}</span>
                   </div>
                 </td>

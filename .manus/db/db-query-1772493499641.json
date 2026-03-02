@@ -1,0 +1,49 @@
+{
+  "query": "SELECT column_name FROM information_schema.columns WHERE table_name = 'posts' ORDER BY ordinal_position;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute SELECT column_name FROM information_schema.columns WHERE table_name = 'posts' ORDER BY ordinal_position;",
+  "rows": [
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "userId"
+    },
+    {
+      "column_name": "title"
+    },
+    {
+      "column_name": "content"
+    },
+    {
+      "column_name": "mediaUrls"
+    },
+    {
+      "column_name": "platforms"
+    },
+    {
+      "column_name": "socialAccountIds"
+    },
+    {
+      "column_name": "status"
+    },
+    {
+      "column_name": "scheduledAt"
+    },
+    {
+      "column_name": "publishedAt"
+    },
+    {
+      "column_name": "metadata"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "updatedAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "column_name\nid\nuserId\ntitle\ncontent\nmediaUrls\nplatforms\nsocialAccountIds\nstatus\nscheduledAt\npublishedAt\nmetadata\ncreatedAt\nupdatedAt\n",
+  "stderr": "",
+  "execution_time_ms": 1565
+}

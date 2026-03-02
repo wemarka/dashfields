@@ -350,7 +350,7 @@ export default function AIContent() {
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {drafts.map((draft) => (
                     <div key={draft.id} className="flex items-start gap-2 p-2 rounded-xl bg-muted/50">
-                      <PlatformIcon platform={draft.platform} className="w-3.5 h-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                      <PlatformIcon platform={(Array.isArray(draft.platforms) ? draft.platforms[0] : draft.platforms) ?? "facebook"} className="w-3.5 h-3.5 mt-0.5 shrink-0 text-muted-foreground" />
                       <p className="text-xs text-foreground line-clamp-2 flex-1">{draft.content}</p>
                     </div>
                   ))}

@@ -10,7 +10,7 @@ import { getSupabase } from "../supabase";
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface PostRow {
   id: number;
-  platform: string;
+  platforms: string[];   // JSON array column in DB
   content: string;
   post_type: string;
   published_at: string | null;
@@ -70,12 +70,12 @@ export const postAnalyticsRouter = router({
 
       let query = sb
         .from("posts")
-        .select("id, platform, content, post_type, published_at, likes, comments, shares, reach, impressions")
+        .select("id, platforms, content, post_type, published_at, likes, comments, shares, reach, impressions")
         .eq("user_id", ctx.user.id)
         .gte("published_at", since)
         .not("published_at", "is", null);
 
-      if (input.platform) query = query.eq("platform", input.platform);
+      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
 
       const { data, error } = await query.limit(100);
       if (error) throw new Error(error.message);
@@ -119,7 +119,7 @@ export const postAnalyticsRouter = router({
         .gte("published_at", since)
         .not("published_at", "is", null);
 
-      if (input.platform) query = query.eq("platform", input.platform);
+      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
 
       const { data } = await query;
 
@@ -180,7 +180,7 @@ export const postAnalyticsRouter = router({
         .eq("user_id", ctx.user.id)
         .gte("published_at", since);
 
-      if (input.platform) query = query.eq("platform", input.platform);
+      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
 
       const { data } = await query;
 
@@ -230,7 +230,7 @@ export const postAnalyticsRouter = router({
         .eq("user_id", ctx.user.id)
         .gte("published_at", since);
 
-      if (input.platform) query = query.eq("platform", input.platform);
+      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
 
       const { data } = await query;
       const posts = data ?? [];

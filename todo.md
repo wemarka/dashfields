@@ -203,6 +203,9 @@
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
 
+## 🐛 Bug Fixes
+- [x] Fix "column posts.platform does not exist" error on /audience page
+
 ## 🔄 Phase 40-44 — Post Analytics + Period Comparison + AI Content + Activity Feed
 
 ### Phase 40 — Post Analytics Page

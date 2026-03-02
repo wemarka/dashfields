@@ -252,7 +252,7 @@ Return a JSON object with this exact structure:
     const sb = getSupabase();
     const { data, error } = await sb
       .from("posts")
-      .select("id, platform, content, status, created_at")
+      .select("id, platforms, content, status, created_at")
       .eq("user_id", ctx.user.id)
       .eq("status", "draft")
       .order("created_at", { ascending: false })
