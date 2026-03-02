@@ -72,3 +72,41 @@
 - [x] 23/23 tests passing across 5 test files
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+
+## ✅ Phase 11 — Supabase Realtime Notifications
+- [x] Add Supabase Realtime channel subscription in NotificationBell
+- [x] Replace polling (30s interval) with live push updates
+- [x] Show toast when new notification arrives in real-time
+- [x] Add unread count animation on badge update
+- [x] client/src/lib/supabase.ts — frontend Supabase client
+- [x] client/src/hooks/useRealtimeNotifications.ts — Realtime hook
+- [x] VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY set via MCP auto-extraction
+
+## ✅ Phase 12 — Analytics Component Refactor
+- [x] Create client/src/components/analytics/ directory
+- [x] AnalyticsKpiCards component (8 KPI cards with period comparison)
+- [x] SpendByCampaignChart component (bar chart)
+- [x] CtrCpcChart component (CTR bar + spend pie side by side)
+- [x] ImpressionsClicksChart component (grouped bar chart)
+- [x] Analytics.tsx refactored to use analytics components
+
+## ✅ Phase 13 — Automated Alert Scheduler
+- [x] server/routers/scheduler.ts — runAlertCheck + getLastChecked procedures
+- [x] Wire to notifyOwner when thresholds breached
+- [x] Add "Last checked" timestamp + "Run Check" button to Alerts page
+- [x] Registered schedulerRouter in routers.ts
+
+## ✅ Phase 14 — Publishing Page Refactor
+- [x] Create client/src/components/publishing/ directory
+- [x] PostCard component (individual post card with platform icons + status badge)
+- [x] PostList component (list view with empty state)
+- [x] PostCalendarView component (monthly calendar grid)
+- [x] Publishing.tsx refactored to use publishing components
+
+## ✅ Phase 15 — Final Tests & Delivery
+- [x] scheduler.test.ts (8 tests: evaluateRule + datePreset validation)
+- [x] publishing.test.ts (9 tests: status style + calendar + groupByDay)
+- [x] supabase-frontend.test.ts (3 tests: env vars + REST reachability)
+- [x] 43/43 tests passing across 8 test files
+- [x] 0 TypeScript errors
+- [ ] Checkpoint and deliver

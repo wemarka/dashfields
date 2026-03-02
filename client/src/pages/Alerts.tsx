@@ -6,7 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useState } from "react";
 import {
   Bell, Plus, Trash2, AlertTriangle, CheckCircle2,
-  Info, XCircle, Loader2, BellRing
+  Info, XCircle, Loader2, BellRing, Play, Clock
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -154,6 +154,20 @@ export default function Alerts() {
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
+  const { data: lastCheckedData } = trpc.scheduler.getLastChecked.useQuery();
+
+  const runCheck = trpc.scheduler.runAlertCheck.useMutation({
+    onSuccess: (result) => {
+      if (result.skipped) {
+        toast.info(`Check skipped: ${result.reason}`);
+      } else {
+        toast.success(`Alert check complete — ${result.triggered} alert(s) triggered`);
+        utils.notifications.list.invalidate();
+      }
+    },
+    onError: e => toast.error(e.message),
+  });
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6">
@@ -165,12 +179,28 @@ export default function Alerts() {
               Set thresholds to get notified when campaign metrics cross limits.
             </p>
           </div>
-          {unreadCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
-              <BellRing className="h-4 w-4 text-amber-500" />
-              <span className="text-xs font-medium text-amber-600">{unreadCount} unread</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {lastCheckedData?.lastChecked && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                <span>Last checked: {new Date(lastCheckedData.lastChecked).toLocaleString()}</span>
+              </div>
+            )}
+            <button
+              onClick={() => runCheck.mutate({ datePreset: "today" })}
+              disabled={runCheck.isPending}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {runCheck.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+              Run Check
+            </button>
+            {unreadCount > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <BellRing className="h-4 w-4 text-amber-500" />
+                <span className="text-xs font-medium text-amber-600">{unreadCount} unread</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Create Form */}

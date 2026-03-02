@@ -17,6 +17,7 @@ import { notificationsRouter } from "./routers/notifications";
 import { aiRouter }           from "./routers/ai";
 import { alertsRouter }       from "./routers/alerts";
 import { metaRouter }         from "./routers/meta";
+import { schedulerRouter }    from "./routers/scheduler";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -39,6 +40,7 @@ export const appRouter = router({
   ai:            aiRouter,
   alerts:        alertsRouter,
   meta:          metaRouter,
+  scheduler:     schedulerRouter,
 });
 
 export type AppRouter = typeof appRouter;
