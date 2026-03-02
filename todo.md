@@ -85,3 +85,17 @@
 - [x] Empty states with CTA buttons
 - [x] Loading skeletons (Loader2 spinners)
 - [ ] Notification bell in header (future)
+
+## Phase 3 — Meta Ads Real Integration
+
+- [x] Verify Meta Ads MCP connection (3 ad accounts found)
+- [x] Build server/meta.ts — Meta Graph API helper
+- [x] Build server/routers/meta.ts — tRPC router with 7 procedures
+- [x] Register metaRouter in appRouter
+- [x] Build MetaConnect.tsx — 3-step connection flow
+- [x] Update Dashboard with real Meta KPIs + date preset selector
+- [x] Update Campaigns page with Meta/Local tabs + real Meta campaign data
+- [x] Update Analytics page with real Meta insights + 4 charts
+- [x] Add Meta Ads link in sidebar navigation
+- [x] Add /meta-connect route in App.tsx
+- [x] 0 TypeScript errors, 5 tests passing

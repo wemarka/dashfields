@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import {
   BarChart3, Calendar, ChevronLeft, ChevronRight,
-  LayoutDashboard, LogOut, Megaphone, Settings, Sparkles, TrendingUp,
+  LayoutDashboard, LogOut, Megaphone, Settings, Sparkles, TrendingUp, Facebook,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -19,7 +19,8 @@ const navItems = [
 ];
 
 const bottomItems = [
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Facebook, label: "Meta Ads",  path: "/meta-connect" },
+  { icon: Settings, label: "Settings",  path: "/settings" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

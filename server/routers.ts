@@ -5,6 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import * as db from "./db";
+import { metaRouter } from "./routers/meta";
 
 // ─── Campaigns Router ─────────────────────────────────────────────────────────
 const campaignsRouter = router({
@@ -137,6 +138,7 @@ export const appRouter = router({
   settings: settingsRouter,
   notifications: notificationsRouter,
   ai: aiRouter,
+  meta: metaRouter,
 });
 
 export type AppRouter = typeof appRouter;
