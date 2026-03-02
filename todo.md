@@ -235,8 +235,8 @@
 - [x] Save generated content to posts table in Supabase
 
 ### Phase 43 — Activity Feed + Settings API Keys
-- [ ] ActivityFeed component — real-time Supabase Realtime events
-- [ ] Add ActivityFeed to Dashboard sidebar/widget
+- [x] ActivityFeed component — real-time Supabase Realtime events
+- [x] Add ActivityFeed to Dashboard sidebar/widget
 - [x] Settings: API Keys tab (add/remove platform API keys)
 - [x] server/routers/apiKeys.ts — store encrypted keys in Supabase
 - [x] Show connected API key status per platform in Connections Hub
@@ -294,3 +294,24 @@
 - [x] TypeScript check (0 errors)
 - [x] Tests passing (213/213)
 - [x] Checkpoint and deliver
+
+## 🔄 Phase 53-56 — Feature Completion Round 3
+
+### Phase 53 — Analytics Merge + Dark Mode
+- [ ] Merge Insights page content into Analytics as a Tab
+- [ ] Add Dark Mode toggle button in Topbar
+- [ ] Update sidebar to remove standalone Insights entry (now under Analytics)
+
+### Phase 54 — Dashboard Quick Actions + Publishing
+- [ ] Add Quick Actions bar in Dashboard (New Post, New Campaign, View Reports)
+- [ ] Improve Publishing page with better layout and scheduling UI
+
+### Phase 55 — Campaigns + Connections Polish
+- [ ] Add filters (status, platform, date) to Campaigns page
+- [ ] Add status badges and better empty states to Campaigns
+- [ ] Improve Connections page with platform health indicators
+
+### Phase 56 — Tests + Checkpoint
+- [ ] TypeScript check (0 errors)
+- [ ] Tests passing
+- [ ] Checkpoint and deliver

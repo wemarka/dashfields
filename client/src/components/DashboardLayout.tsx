@@ -34,7 +34,6 @@ const navGroups = [
       { icon: Users,       label: "Audience",        path: "/audience" },
       { icon: PieChart,    label: "Post Analytics",  path: "/post-analytics" },
       { icon: GitCompare,  label: "Compare",         path: "/compare" },
-      { icon: TrendingUp,  label: "Insights",        path: "/insights" },
     ],
   },
   {
@@ -42,7 +41,6 @@ const navGroups = [
     items: [
       { icon: CalendarDays, label: "Calendar",    path: "/calendar" },
       { icon: Sparkles,     label: "AI Studio",   path: "/ai-content" },
-      { icon: Zap,          label: "AI Tools",    path: "/ai-tools" },
     ],
   },
   {

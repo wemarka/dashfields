@@ -13,6 +13,7 @@ import { PlatformIcon } from "@/components/PlatformIcon";
 import {
   DollarSign, Eye, MousePointerClick,
   Users, TrendingUp, Heart, Link2, Zap,
+  Plus, BarChart3, FileText, CalendarDays,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
@@ -103,6 +104,32 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* ── Quick Actions ──────────────────────────────────────────────── */}
+        {hasConnections && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/calendar">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+                <Plus className="w-3.5 h-3.5" />New Post
+              </button>
+            </Link>
+            <Link href="/campaigns">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-xs font-medium hover:bg-foreground/5 transition-colors">
+                <Zap className="w-3.5 h-3.5" />New Campaign
+              </button>
+            </Link>
+            <Link href="/analytics">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-xs font-medium hover:bg-foreground/5 transition-colors">
+                <BarChart3 className="w-3.5 h-3.5" />Analytics
+              </button>
+            </Link>
+            <Link href="/reports">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-xs font-medium hover:bg-foreground/5 transition-colors">
+                <FileText className="w-3.5 h-3.5" />Reports
+              </button>
+            </Link>
+          </div>
+        )}
 
         {/* ── Onboarding (auto-hides when all steps done) ─────────────────── */}
         <SmartOnboardingBanner />
