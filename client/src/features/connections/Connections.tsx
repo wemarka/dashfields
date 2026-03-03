@@ -238,7 +238,25 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
     const origin      = window.location.origin;
     const returnPath  = "/connections";
     const initPath    = platform.oauthInitPath ?? `/api/oauth/${platformId}/init`;
-    window.location.href = `${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    const oauthUrl    = `${origin}${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+
+    // Open in a new tab/window to avoid iframe restrictions (Facebook blocks login in iframes)
+    const popup = window.open(oauthUrl, `oauth_${platformId}`, "width=600,height=700,scrollbars=yes,resizable=yes");
+
+    // If popup was blocked, fall back to full-page redirect
+    if (!popup || popup.closed || typeof popup.closed === "undefined") {
+      window.location.href = oauthUrl;
+      return;
+    }
+
+    // Poll for popup close and refresh accounts list
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        // Refresh accounts list after OAuth completes
+        window.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: platformId } }));
+      }
+    }, 500);
   };
 
   const handleConnect = () => {
@@ -432,9 +450,42 @@ export default function Connections() {
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
 
+  // Listen for oauth-complete event (fired when popup closes after OAuth)
+  useEffect(() => {
+    const handleOAuthComplete = (e: Event) => {
+      utils.social.list.invalidate();
+      const detail = (e as CustomEvent).detail;
+      if (detail?.success) {
+        toast.success("✅ Account connected successfully!");
+      }
+    };
+    window.addEventListener("oauth-complete", handleOAuthComplete);
+    return () => window.removeEventListener("oauth-complete", handleOAuthComplete);
+  }, [utils]);
+
+  // Listen for postMessage from OAuth popup
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === "oauth-complete") {
+        utils.social.list.invalidate();
+        if (e.data.success) {
+          const summary = e.data.summary ? decodeURIComponent(e.data.summary) : null;
+          toast.success(summary ? `✅ Connected: ${summary}` : "✅ Account connected successfully!");
+        } else if (e.data.error) {
+          toast.error(`Connection failed: ${e.data.error}`);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [utils]);
+
   // Handle OAuth callback results
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Detect if we're running inside a popup window
+    const isPopup = window.opener && window.opener !== window;
 
     // Meta OAuth
     const metaConnected = params.get("meta_connected");
@@ -445,6 +496,17 @@ export default function Connections() {
       const msg = summary
         ? `✅ Connected: ${decodeURIComponent(summary)}`
         : "✅ Meta accounts connected successfully!";
+
+      if (isPopup) {
+        // Notify parent window and close popup
+        try {
+          window.opener.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: "meta", success: true } }));
+          window.opener.postMessage({ type: "oauth-complete", platform: "meta", success: true, summary }, "*");
+        } catch { /* cross-origin safety */ }
+        window.close();
+        return;
+      }
+
       toast.success(msg);
       utils.social.list.invalidate();
       window.history.replaceState({}, "", window.location.pathname);
@@ -454,6 +516,15 @@ export default function Connections() {
       const errMsg = metaError === "no_app_id"
         ? "Meta App ID not configured. Please add META_APP_ID in Settings → Secrets."
         : `Meta connection failed: ${decodeURIComponent(metaError)}`;
+
+      if (isPopup) {
+        try {
+          window.opener.postMessage({ type: "oauth-complete", platform: "meta", success: false, error: metaError }, "*");
+        } catch { /* cross-origin safety */ }
+        window.close();
+        return;
+      }
+
       toast.error(errMsg);
       window.history.replaceState({}, "", window.location.pathname);
       return;
@@ -468,10 +539,27 @@ export default function Connections() {
     if (oauthSuccess && platform) {
       const platformName = getPlatform(platform).name;
       const displayName  = name ? ` (${decodeURIComponent(name)})` : "";
+
+      if (isPopup) {
+        try {
+          window.opener.postMessage({ type: "oauth-complete", platform, success: true, name }, "*");
+        } catch { /* cross-origin safety */ }
+        window.close();
+        return;
+      }
+
       toast.success(`✅ ${platformName}${displayName} connected successfully!`);
       utils.social.list.invalidate();
       window.history.replaceState({}, "", window.location.pathname);
     } else if (oauthError && platform) {
+      if (isPopup) {
+        try {
+          window.opener.postMessage({ type: "oauth-complete", platform, success: false, error: oauthError }, "*");
+        } catch { /* cross-origin safety */ }
+        window.close();
+        return;
+      }
+
       const platformCfg  = getPlatform(platform);
       const platformName = platformCfg.name;
       if (oauthError === "not_configured") {

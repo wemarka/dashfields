@@ -1148,3 +1148,10 @@
 - [x] تشغيل tsc --noEmit: 0 TS2307 errors ✅
 - [x] تشغيل الاختبارات: 292/292 passing ✅
 - [x] Dev server: لا توجد أخطاء Vite بعد restart ✅
+
+## Meta OAuth Fix
+- [x] إصلاح Facebook iframe block: فتح OAuth في نافذة مستقلة (window.open) بدلاً من redirect مباشر
+- [x] إضافة postMessage listener لتحديث القائمة بعد إغلاق popup
+- [x] إضافة popup handling لجميع OAuth callbacks (success + error)
+- [ ] التحقق من Redirect URI في Meta App Dashboard (يتطلب تدخل المستخدم)
+- [ ] اختبار OAuth Flow الكامل بعد الإصلاح (يتطلب حساب Facebook حقيقي)
