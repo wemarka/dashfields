@@ -81,10 +81,10 @@ export function ActiveCampaignsTable({ campaigns, loading, isConnected }: Active
               {isConnected ? "No campaign data for this period." : "Connect Meta Ads to see real campaigns."}
             </p>
             {!isConnected && (
-              <Link href="/meta-connect">
+              <Link href="/connections">
                 <button className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors">
                   <Link2 className="w-3.5 h-3.5" />
-                  Connect Meta Ads
+                  Connect Accounts
                 </button>
               </Link>
             )}

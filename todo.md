@@ -1113,3 +1113,11 @@
 - [x] تلوين الشعار بلون Brand رسمي
 - [x] Dark Mode: شعار أبيض تلقائياً عند تفعيل Dark Mode
 - [x] تحسين Splash Screen بحجم أكبر وتصميم أفضل
+
+## App Cleanup (Real Data Only)
+- [x] حذف جميع Connections السابقة من قاعدة البيانات
+- [x] تحديد وحذف جميع ملفات Demo/Mock و migration scripts القديمة
+- [x] إزالة Math.random() من AudienceOverlap.tsx
+- [x] تحويل /meta-connect إلى redirect لـ /connections
+- [x] تحديث ActiveCampaignsTable: رابط Connect يوجه إلى /connections
+- [x] التأكد أن جميع الصفحات تعرض بيانات حقيقية فقط (صفر أو empty state عند عدم وجود بيانات)

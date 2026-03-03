@@ -1,0 +1,8 @@
+{
+  "query": "\n-- حذف جميع social_accounts\nDELETE FROM social_accounts;\n\n-- حذف جميع campaign_metrics\nDELETE FROM campaign_metrics;\n\n-- حذف جميع campaigns\nDELETE FROM campaigns;\n\n-- حذف جميع posts\nDELETE FROM posts;\n\n-- حذف جميع alert_rules\nDELETE FROM alert_rules;\n\n-- حذف جميع notifications\nDELETE FROM notifications;\n\n-- حذف جميع ab_tests\nDELETE FROM ab_tests;\n\n-- التحقق من النتائج\nSELECT \n  (SELECT COUNT(*) FROM social_accounts) as social_accounts,\n  (SELECT COUNT(*) FROM campaigns) as campaigns,\n  (SELECT COUNT(*) FROM campaign_metrics) as campaign_metrics,\n  (SELECT COUNT(*) FROM posts) as posts;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \n-- حذف جميع social_accounts\nDELETE FROM social_accounts;\n\n-- حذف جميع campaign_metrics\nDELETE FROM campaign_metrics;\n\n-- حذف جميع campaigns\nDELETE FROM campaigns;\n\n-- حذف جميع posts\nDELETE FROM posts;\n\n-- حذف جميع alert_rules\nDELETE FROM alert_rules;\n\n-- حذف جميع notifications\nDELETE FROM notifications;\n\n-- حذف جميع ab_tests\nDELETE FROM ab_tests;\n\n-- التحقق من النتائج\nSELECT \n  (SELECT COUNT(*) FROM social_accounts) as social_accounts,\n  (SELECT COUNT(*) FROM campaigns) as campaigns,\n  (SELECT COUNT(*) FROM campaign_metrics) as campaign_metrics,\n  (SELECT COUNT(*) FROM posts) as posts;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 15: Table 'kxbj95igqtqdrviqhur8ny.alert_rules' doesn't exist"
+  ]
+}

@@ -23,7 +23,6 @@ import SplashScreen from "./components/SplashScreen";
 const Campaigns         = lazy(() => import("./pages/Campaigns"));
 const Analytics         = lazy(() => import("./pages/Analytics"));
 const Settings          = lazy(() => import("./pages/Settings"));
-const MetaConnect       = lazy(() => import("./pages/MetaConnect"));
 const Connections       = lazy(() => import("./pages/Connections"));
 const Alerts            = lazy(() => import("./pages/Alerts"));
 const Reports           = lazy(() => import("./pages/Reports"));
@@ -85,7 +84,7 @@ function Router() {
         <Route path="/workspace-settings"   component={WorkspaceSettings} />
         <Route path="/invite/:token"          component={AcceptInvite} />
         {/* ── Legacy / backward-compat routes ────────────────────────────── */}
-        <Route path="/meta-connect"         component={MetaConnect} />
+        <Route path="/meta-connect"         component={() => <Redirect to="/connections" />} />
         <Route path="/insights"             component={Insights} />
         <Route path="/publishing"           component={Publishing} />
         <Route path="/ai-tools"             component={() => <Redirect to="/ai-content" />} />

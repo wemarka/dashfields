@@ -172,7 +172,7 @@ export default function AudienceOverlap() {
       for (let j = i + 1; j < platforms.length; j++) {
         const a = platforms[i];
         const b = platforms[j];
-        const score = overlapMatrix[a]?.[b] ?? overlapMatrix[b]?.[a] ?? Math.floor(Math.random() * 40 + 20);
+        const score = overlapMatrix[a]?.[b] ?? overlapMatrix[b]?.[a] ?? 30;
         const sizeA = audienceSizes[a] ?? 500000;
         const sizeB = audienceSizes[b] ?? 500000;
         const shared = Math.floor(Math.min(sizeA, sizeB) * (score / 100));
@@ -197,7 +197,7 @@ export default function AudienceOverlap() {
     return metrics.map((metric, i) => {
       const entry: Record<string, string | number> = { metric };
       connectedPlatforms.slice(0, 4).forEach(p => {
-        entry[PLATFORM_LABELS[p] ?? p] = platformProfiles[p]?.[i] ?? Math.floor(Math.random() * 60 + 20);
+        entry[PLATFORM_LABELS[p] ?? p] = platformProfiles[p]?.[i] ?? 50;
       });
       return entry;
     });
@@ -211,7 +211,7 @@ export default function AudienceOverlap() {
     };
     return connectedPlatforms.map(p => ({
       platform: PLATFORM_LABELS[p] ?? p,
-      reach: audienceSizes[p] ?? Math.floor(Math.random() * 1000 + 200),
+      reach: audienceSizes[p] ?? 500,
       color: PLATFORM_COLORS[p] ?? "#6366f1",
     }));
   }, [connectedPlatforms]);
