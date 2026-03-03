@@ -22,6 +22,7 @@ import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
 import { SpendForecastWidget } from "@/components/dashboard/SpendForecastWidget";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
@@ -545,6 +546,10 @@ export default function Dashboard() {
         )}
 
       </div>
+
+      {/* Onboarding Modal — shown automatically on first login */}
+      <OnboardingModal />
+
     </DashboardLayout>
   );
 }

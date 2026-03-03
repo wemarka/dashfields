@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Search, Megaphone, FileText, BarChart3, Settings, CalendarDays,
@@ -184,6 +184,7 @@ export function GlobalSearch() {
         <DialogContent className="p-0 max-w-xl overflow-hidden gap-0 top-[20%] translate-y-0 [&>button]:hidden">
           {/* Hidden title for screen reader accessibility */}
           <DialogTitle className="sr-only">Global Search</DialogTitle>
+          <DialogDescription className="sr-only">Search across campaigns, reports, alerts, and more</DialogDescription>
           {/* Search Input */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             <Search className="w-4 h-4 text-muted-foreground shrink-0" />

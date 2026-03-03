@@ -23,6 +23,7 @@ import {
   Facebook, Instagram, Linkedin, Twitter, Youtube,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 import { useLocation } from "wouter";
 
 // ─── Dark Mode Hook ───────────────────────────────────────────────────────────
@@ -75,25 +76,7 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
   return <Icon className={`${className} ${color}`} />;
 }
 
-// ─── Active Account (localStorage-backed) ────────────────────────────────────
-function useActiveAccount(accounts: SocialAccount[]) {
-  const [activeId, setActiveId] = useState<number | null>(() => {
-    const saved = localStorage.getItem("dashfields-active-account");
-    return saved ? parseInt(saved, 10) : null;
-  });
-  useEffect(() => {
-    if (accounts.length > 0 && activeId === null) {
-      setActiveId(accounts[0].id);
-      localStorage.setItem("dashfields-active-account", String(accounts[0].id));
-    }
-  }, [accounts, activeId]);
-  const setActive = (id: number) => {
-    setActiveId(id);
-    localStorage.setItem("dashfields-active-account", String(id));
-  };
-  const active = accounts.find(a => a.id === activeId) ?? accounts[0] ?? null;
-  return { active, setActive };
-}
+// useActiveAccount is now provided by ActiveAccountContext
 
 // ─── Nav Structure (lean — 5 groups, ~13 items) ───────────────────────────────
 const navGroups: NavGroup[] = [
@@ -301,9 +284,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     onSuccess: () => window.location.reload(),
   });
 
-  const { data: rawAccounts = [] } = trpc.social.list.useQuery();
-  const accounts = rawAccounts as SocialAccount[];
-  const { active: activeAccount, setActive: setActiveAccount } = useActiveAccount(accounts);
+  const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
 
   const handleLangToggle = () => {
     changeLanguage(i18n.language === "ar" ? "en" : "ar");

@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ActiveAccountProvider } from "./contexts/ActiveAccountContext";
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {
@@ -93,10 +94,12 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <ActiveAccountProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ActiveAccountProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
