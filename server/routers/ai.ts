@@ -123,6 +123,55 @@ Return ONLY the hashtags as a space-separated list, each starting with #. No exp
       return { hashtags };
     }),
 
+  /** Analyze audience data and provide AI insights */
+  analyzeAudience: protectedProcedure
+    .input(z.object({
+      platforms:     z.array(z.string()).default([]),
+      totalPosts:    z.number().default(0),
+      totalReach:    z.number().default(0),
+      avgEngagement: z.number().default(0),
+      topPlatform:   z.string().default(""),
+      language:      z.enum(["en", "ar"]).default("en"),
+    }))
+    .mutation(async ({ input }) => {
+      const langInstruction = input.language === "ar"
+        ? "Respond in Arabic (العربية)."
+        : "Respond in English.";
+
+      const dataContext = `
+Connected Platforms: ${input.platforms.join(", ") || "None"}
+Total Posts Published: ${input.totalPosts}
+Total Reach: ${input.totalReach.toLocaleString()}
+Average Engagement Rate: ${input.avgEngagement.toFixed(2)}%
+Top Performing Platform: ${input.topPlatform || "N/A"}
+`;
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert social media analyst. Analyze the provided audience data and give actionable insights.
+${langInstruction}
+Structure your response with these sections:
+1. **Audience Overview** — brief summary
+2. **Key Strengths** — what's working well
+3. **Growth Opportunities** — 3 specific recommendations
+4. **Best Posting Times** — suggest optimal times based on platform
+5. **Content Mix** — recommended content type ratio
+Keep it concise and practical.`,
+          },
+          {
+            role: "user",
+            content: `Analyze this social media audience data:${dataContext}`,
+          },
+        ],
+      });
+      const rawAnalysis = response?.choices?.[0]?.message?.content;
+      const analysis = (typeof rawAnalysis === "string" ? rawAnalysis.trim() : null)
+        ?? "Unable to generate analysis. Please try again.";
+      return { analysis };
+    }),
+
   /** Improve existing post content */
   improveContent: protectedProcedure
     .input(z.object({

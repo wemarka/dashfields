@@ -689,3 +689,25 @@
 - [x] Fix: toast shows clear message with "View Docs" button when credentials missing
 - [x] Verified: all platforms (twitter, tiktok, linkedin, youtube) return 302 redirect correctly
 - [x] 247/247 tests passing, 0 TypeScript errors
+
+## Phase 105-108 — Health Check + Notifications + Campaign Clone
+
+### Phase 105 — Connection Health Check + Meta Ad Account Selector
+- [x] server/routers/social.ts: healthCheck mutation (validates all tokens)
+- [x] server/routers/social.ts: setActiveAdAccount procedure
+- [x] Connections.tsx: Health Check button in header with toast result
+
+### Phase 106 — Token Auto-Refresh + Campaign Clone
+- [x] server/cron.ts: auto-refresh tokens expiring in 7 days
+- [x] server/routers/campaigns.ts: clone + delete procedures
+- [x] LocalCampaignTable.tsx: Clone + Delete buttons with confirmation
+
+### Phase 107 — Audience Insights AI
+- [x] server/routers/ai.ts: analyzeAudience procedure
+- [x] Audience.tsx: AI Analysis panel with insights + best posting times
+
+### Phase 108 — Tests + Checkpoint
+- [x] TypeScript check (0 errors)
+- [x] Vite: no errors
+- [x] 247/247 tests passing
+- [x] Save checkpoint and deliver

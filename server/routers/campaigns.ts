@@ -102,4 +102,41 @@ export const campaignsRouter = router({
     .query(async ({ input }) => {
       return getCampaignMetrics(input.campaignId, input.days);
     }),
+
+  /** Clone an existing campaign with a new name */
+  clone: protectedProcedure
+    .input(z.object({
+      campaignId: z.number(),
+      newName:    z.string().min(1).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const original = await getCampaignById(input.campaignId, ctx.user.id);
+      if (!original) throw new Error("Campaign not found");
+      const clonedName = input.newName ?? `${original.name} (Copy)`;
+      return createCampaign({
+        userId:    ctx.user.id,
+        name:      clonedName,
+        platform:  original.platform,
+        status:    "draft",
+        objective: original.objective,
+        budget:    original.budget,
+        budgetType: original.budget_type ?? undefined,
+        startDate: original.start_date,
+        endDate:   original.end_date,
+        metadata:  original.metadata,
+      });
+    }),
+
+  /** Delete a campaign */
+  delete: protectedProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await sb
+        .from("campaigns")
+        .delete()
+        .eq("id", input.campaignId)
+        .eq("user_id", ctx.user.id);
+      return { success: true };
+    }),
 });

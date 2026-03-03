@@ -163,7 +163,7 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="p-6 space-y-6 animate-fade-in">
 
-        {/* ── Header ─────────────────────────────────────────────────────────── */}
+        {/* - Header - */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="page-header">{t("sidebar.dashboard")}</h1>
@@ -224,10 +224,10 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ── Empty State ────────────────────────────────────────────────────── */}
+        {/* - Empty State - */}
         {!summaryLoading && !hasConnections && <EmptyDashboard />}
 
-        {/* ── Quick Actions ──────────────────────────────────────────────────── */}
+        {/* - Quick Actions - */}
         {hasConnections && (
           <div className="flex items-center gap-2 flex-wrap">
             <Link href="/calendar">
@@ -253,10 +253,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Onboarding ─────────────────────────────────────────────────────── */}
+        {/* - Onboarding - */}
         {hasConnections && <SmartOnboardingBanner />}
 
-        {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
+        {/* - KPI Cards - */}
         {(hasConnections || summaryLoading) && widgets.kpiCards && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             {summaryLoading
@@ -270,7 +270,7 @@ export default function Dashboard() {
                 : null
             }
           </div>
-        )}        {/* ── Platform breakdown + Performance ─────────────────────────────────── */}
+        )}        {/* - Platform breakdown + Performance - */}
         {hasConnections && widgets.platformBreak && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
@@ -280,7 +280,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Spend chart (Meta campaigns) ─────────────────────────────────── */}
+        {/* - Spend chart (Meta campaigns) - */}
         {isMetaConnected && widgets.spendChart && (
           <SpendChart
             campaigns={metaCampaigns}
@@ -289,7 +289,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ── Active Campaigns table ─────────────────────────────────────────────── */}
+        {/* - Active Campaigns table - */}
         {isMetaConnected && widgets.campaigns && (
           <ActiveCampaignsTable
             campaigns={metaCampaigns}
@@ -298,7 +298,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ── Budget Tracker + Activity Feed ────────────────────────────────── */}
+        {/* - Budget Tracker + Activity Feed - */}
         {hasConnections && (widgets.budget || widgets.activity) && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">

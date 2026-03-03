@@ -141,7 +141,66 @@ export async function runCronJob(): Promise<{
     console.error("[Cron] Error fetching reports:", msg);
   }
 
-  // ── 2. Auto-publish scheduled posts that are due ────────────────────────────
+ // -- 1b. Token Auto-Refresh (7 days before expiry) --
+  try {
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400000).toISOString();
+    const { data: expiringAccounts } = await sb
+      .from("social_accounts")
+      .select("id, user_id, platform, refresh_token, name")
+      .eq("is_active", true)
+      .not("refresh_token", "is", null)
+      .lt("token_expires_at", sevenDaysFromNow);
+
+    for (const acc of (expiringAccounts ?? []) as Record<string, unknown>[]) {
+      try {
+        // Attempt token refresh based on platform
+        let newToken: string | null = null;
+        let newExpiry: string | null = null;
+
+        if (acc.platform === "facebook" || acc.platform === "instagram") {
+          // Meta long-lived token refresh
+          const appId     = process.env.META_APP_ID ?? "";
+          const appSecret = process.env.META_APP_SECRET ?? "";
+          if (appId && appSecret && acc.refresh_token) {
+            const res = await fetch(
+              `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${acc.refresh_token}`
+            );
+            const json = await res.json() as Record<string, unknown>;
+            if (json.access_token) {
+              newToken  = json.access_token as string;
+              const expiresIn = Number(json.expires_in ?? 5184000);
+              newExpiry = new Date(now.getTime() + expiresIn * 1000).toISOString();
+            }
+          }
+        }
+
+        if (newToken) {
+          await sb.from("social_accounts").update({
+            access_token:     newToken,
+            token_expires_at: newExpiry,
+            updated_at:       now.toISOString(),
+          } as Record<string, unknown>).eq("id", acc.id as number);
+
+          // Notify user
+          await sb.from("notifications").insert({
+            user_id:    acc.user_id,
+            title:      `Token Refreshed: ${String(acc.platform).charAt(0).toUpperCase() + String(acc.platform).slice(1)}`,
+            message:    `Your ${acc.platform} connection token has been automatically renewed.`,
+            type:       "success",
+            platform:   acc.platform,
+            read:       false,
+          } as Record<string, unknown>);
+          console.log(`[Cron] Refreshed token for ${acc.platform} account ${acc.id}`);
+        }
+      } catch (err) {
+        errors.push(`Token refresh ${acc.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+  } catch (err) {
+    errors.push(`Token refresh: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // -- 2. Auto-publish scheduled posts that are due --───────────────────────────
   let postsAutoPublished = 0;
   try {
     const { data: duePosts } = await sb

@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import {
   Loader2, Link2, Unlink, Globe, RefreshCw, Zap,
   CheckCircle2, X, Shield, ExternalLink, Clock,
-  AlertTriangle, Key, Info,
+  AlertTriangle, Key, Info, Activity,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
@@ -492,6 +492,20 @@ export default function Connections() {
     }
   }, []);
 
+  const healthCheck = trpc.social.healthCheck.useMutation({
+    onSuccess: (res) => {
+      utils.social.list.invalidate();
+      const ok  = res.filter((r) => r.valid).length;
+      const bad = res.filter((r) => !r.valid).length;
+      if (bad > 0) {
+        toast.warning(`Health check: ${ok} OK, ${bad} need re-authentication`);
+      } else {
+        toast.success(`All ${ok} connection${ok !== 1 ? "s" : ""} are healthy!`);
+      }
+    },
+    onError: () => toast.error(t("common.error")),
+  });
+
   const disconnectMutation = trpc.social.disconnect.useMutation({
     onSuccess: () => {
       toast.success("Account disconnected");
@@ -529,7 +543,7 @@ export default function Connections() {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto p-6 space-y-6 animate-fade-in">
 
-        {/* ── Header ──────────────────────────────────────────────────────── */}
+        {/* - Header - */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="page-header">{t("connections.title")}</h1>
@@ -538,7 +552,19 @@ export default function Connections() {
             </p>
           </div>
           {totalConnected > 0 && (
-            <div className="flex items-center gap-6 shrink-0">
+            <div className="flex items-center gap-4 shrink-0">
+              <button
+                onClick={() => healthCheck.mutate()}
+                disabled={healthCheck.isPending}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-background hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+              >
+                {healthCheck.isPending
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <Activity className="w-3.5 h-3.5" />
+                }
+                {t("connections.healthCheck", "Health Check")}
+              </button>
+              <div className="flex items-center gap-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">{connectedPlatforms}</p>
                 <p className="text-xs text-muted-foreground">Platforms</p>
@@ -553,11 +579,12 @@ export default function Connections() {
                   <p className="text-xs text-muted-foreground">Expired</p>
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* ── Info banner ─────────────────────────────────────────────────── */}
+        {/* - Info banner - */}
         <div className="rounded-2xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex items-start gap-3">
           <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
           <div>
@@ -571,7 +598,7 @@ export default function Connections() {
           </div>
         </div>
 
-        {/* ── Expired tokens warning ──────────────────────────────────────── */}
+        {/* - Expired tokens warning - */}
         {expiredCount > 0 && (
           <div className="rounded-2xl border border-red-200/60 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
             <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
@@ -586,7 +613,7 @@ export default function Connections() {
           </div>
         )}
 
-        {/* ── Empty state ──────────────────────────────────────────────────── */}
+        {/* - Empty state - */}
         {totalConnected === 0 && !isLoading && (
           <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
@@ -599,7 +626,7 @@ export default function Connections() {
           </div>
         )}
 
-        {/* ── Connected platforms summary chips ──────────────────────────── */}
+        {/* - Connected platforms summary chips - */}
         {totalConnected > 0 && (
           <div className="flex flex-wrap gap-2">
             {Object.keys(accountsByPlatform).map((pid) => {
@@ -615,7 +642,7 @@ export default function Connections() {
           </div>
         )}
 
-        {/* ── Platform grid ────────────────────────────────────────────────── */}
+        {/* - Platform grid - */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
