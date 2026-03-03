@@ -365,7 +365,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <div className="w-10 h-10 rounded-full border-2 border-brand/20 border-t-brand animate-spin" />
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
+            alt="Dashfields"
+            className="w-10 h-10 object-contain dark:invert animate-pulse"
+          />
           <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
@@ -377,11 +381,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass-strong rounded-3xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 animate-blur-in">
-          <div className="w-16 h-16 rounded-2xl bg-brand-subtle flex items-center justify-center">
-            <Globe2 className="w-8 h-8 text-brand" />
+          <div className="flex flex-col items-center gap-3">
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
+              alt="Dashfields"
+              className="w-16 h-16 object-contain dark:invert"
+            />
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_LOGO_FULL_SVG_e5842d1d.svg"
+              alt="Dashfields"
+              className="h-8 w-auto object-contain dark:invert"
+            />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight mb-1 gradient-text">Dashfields</h1>
             <p className="text-[10px] text-muted-foreground/60 tracking-widest uppercase mb-2">{t("auth.tagline")}</p>
             <p className="text-sm text-muted-foreground">{t("auth.subtitle")}</p>
           </div>
@@ -408,15 +420,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className={`flex items-center gap-3 px-4 h-14 border-b border-white/8 shrink-0 ${collapsed ? "justify-center" : ""}`}>
           <div
-            className="w-8 h-8 rounded-xl bg-brand/10 flex items-center justify-center shrink-0 cursor-pointer"
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
             onClick={() => setLocation("/")}
           >
-            <Globe2 className="w-4 h-4 text-brand icon-pop" />
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
+              alt="Dashfields"
+              className="w-8 h-8 object-contain dark:invert"
+            />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <span className="font-bold text-sm tracking-tight truncate block leading-tight gradient-text">Dashfields</span>
-              <span className="text-[9px] text-muted-foreground/45 tracking-widest uppercase">Social Hub</span>
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_LOGO_FULL_SVG_e5842d1d.svg"
+                alt="Dashfields"
+                className="h-5 w-auto object-contain dark:invert"
+              />
             </div>
           )}
         </div>
