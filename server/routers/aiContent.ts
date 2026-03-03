@@ -234,7 +234,7 @@ Return a JSON object with this exact structure:
         .from("posts")
         .insert({
           user_id:    ctx.user.id,
-          platform:   input.platform,
+          platforms:  JSON.stringify([input.platform]),
           content:    fullContent,
           status:     "draft",
           post_type:  "text",

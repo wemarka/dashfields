@@ -7,7 +7,7 @@ import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
-  PieChart, GitCompare, Zap, Sun, Moon,
+  PieChart, GitCompare, Zap, Sun, Moon, User,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -74,8 +74,9 @@ const navGroups = [
 ];
 
 const bottomItems = [
-  { icon: Link2,    label: "Connections", path: "/connections" },
-  { icon: Settings, label: "Settings",    path: "/settings" },
+  { icon: Link2,    label: "Connections",   path: "/connections" },
+  { icon: Settings, label: "Settings",      path: "/settings" },
+  { icon: User,     label: "Profile",       path: "/profile" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
