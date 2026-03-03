@@ -31,7 +31,7 @@ const OAUTH_CONFIGS: Record<string, OAuthConfig> = {
   },
   twitter: {
     authUrl: "https://twitter.com/i/oauth2/authorize",
-    scope: "tweet.read users.read offline.access",
+    scope: "tweet.read tweet.write users.read offline.access",
     tokenUrl: "https://api.twitter.com/2/oauth2/token",
   },
 };

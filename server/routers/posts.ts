@@ -7,6 +7,7 @@ import { router, protectedProcedure } from "../_core/trpc";
 import { getUserPosts, createPost, updatePostStatus, deletePost } from "../db/posts";
 import { getSupabase } from "../supabase";
 import { publishToInstagram, publishInstagramReel } from "../meta";
+import { postTweet } from "../twitter";
 
 // ─── Meta Graph API post publisher ───────────────────────────────────────────
 async function publishToFacebook(
@@ -99,11 +100,11 @@ export const postsRouter = router({
       return { success: true };
     }),
 
-  /** Publish post immediately to Facebook or Instagram */
+  /** Publish post immediately to Facebook, Instagram, or Twitter/X */
   publishNow: protectedProcedure
     .input(z.object({
       postId:   z.number(),
-      platform: z.enum(["facebook", "instagram"]).default("facebook"),
+      platform: z.enum(["facebook", "instagram", "twitter"]).default("facebook"),
       imageUrl: z.string().optional(),
       videoUrl: z.string().optional(),
       isReel:   z.boolean().optional().default(false),
@@ -122,7 +123,26 @@ export const postsRouter = router({
       const content = (post as Record<string, unknown>).content as string;
       let resultId: string;
 
-      if (input.platform === "instagram") {
+      if (input.platform === "twitter") {
+        // Get Twitter connection token
+        const { data: twitterConn } = await sb
+          .from("connections")
+          .select("access_token")
+          .eq("user_id", ctx.user.id)
+          .eq("platform", "twitter")
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (!twitterConn?.access_token) {
+          throw new Error("Twitter/X not connected. Please connect your Twitter account in Connections.");
+        }
+
+        // Twitter has a 280 character limit
+        const tweetText = content.length > 280 ? content.slice(0, 277) + "..." : content;
+        const result = await postTweet(twitterConn.access_token, tweetText);
+        resultId = result.id;
+
+      } else if (input.platform === "instagram") {
         // Get Instagram account
         const { data: igAccount } = await sb
           .from("social_accounts")

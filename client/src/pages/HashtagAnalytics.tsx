@@ -8,10 +8,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown } from "lucide-react";
+import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown, Sparkles, Loader2, Copy, Download } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PLATFORMS } from "@shared/platforms";
 import DashboardLayout from "@/components/DashboardLayout";
+import { toast } from "sonner";
 
 const SORT_OPTIONS = [
   { value: "avgEngagement", label: "Avg Engagement" },
@@ -55,6 +56,32 @@ export default function HashtagAnalytics() {
   const [sortBy, setSortBy] = useState<"avgEngagement" | "count" | "totalReach">("avgEngagement");
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiHashtags, setAiHashtags] = useState<string[]>([]);
+  const [showAiBox, setShowAiBox] = useState(false);
+
+  const generateHashtags = trpc.ai.generateHashtags.useMutation({
+    onSuccess: (data) => {
+      setAiHashtags(data.hashtags);
+      toast.success(`${data.hashtags.length} hashtags generated!`);
+    },
+    onError: (err) => toast.error("AI error: " + err.message),
+  });
+
+  const copyAll = () => {
+    navigator.clipboard.writeText(aiHashtags.join(" "));
+    toast.success("Hashtags copied to clipboard!");
+  };
+
+  const downloadHashtags = () => {
+    const blob = new Blob([aiHashtags.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "hashtags.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const { data, isLoading } = trpc.hashtags.topHashtags.useQuery({
     platform: platform === "all" ? undefined : platform,
@@ -92,11 +119,74 @@ export default function HashtagAnalytics() {
             Track which hashtags drive the most engagement across your posts
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{data?.totalHashtags ?? 0}</span> unique hashtags
-          from <span className="font-semibold text-foreground">{data?.totalPosts ?? 0}</span> posts
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">{data?.totalHashtags ?? 0}</span> unique hashtags
+            from <span className="font-semibold text-foreground">{data?.totalPosts ?? 0}</span> posts
+          </div>
+          <button
+            onClick={() => setShowAiBox((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-600 hover:bg-violet-500/20 transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            AI Suggest Hashtags
+          </button>
         </div>
       </div>
+
+      {/* AI Hashtag Generator */}
+      {showAiBox && (
+        <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-violet-700 flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Hashtag Generator</p>
+            <button onClick={() => setShowAiBox(false)} className="text-xs text-muted-foreground hover:text-foreground">Close ×</button>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={aiTopic}
+              onChange={(e) => setAiTopic(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
+              placeholder="Describe your content (e.g. summer fashion, tech startup, food photography)"
+              className="flex-1 px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+            />
+            <button
+              onClick={() => aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
+              disabled={generateHashtags.isPending || !aiTopic.trim()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+            >
+              {generateHashtags.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Generate
+            </button>
+          </div>
+          {aiHashtags.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {aiHashtags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      navigator.clipboard.writeText(tag);
+                      toast.success(`${tag} copied!`);
+                    }}
+                    className="px-2.5 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-medium hover:bg-violet-200 transition-colors border border-violet-200"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={copyAll} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-foreground hover:bg-muted/80 transition-colors">
+                  <Copy className="w-3.5 h-3.5" /> Copy All
+                </button>
+                <button onClick={downloadHashtags} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-foreground hover:bg-muted/80 transition-colors">
+                  <Download className="w-3.5 h-3.5" /> Download .txt
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">

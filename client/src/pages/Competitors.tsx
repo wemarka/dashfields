@@ -13,8 +13,10 @@ import {
 } from "recharts";
 import {
   TrendingUp, TrendingDown, Minus, Award, AlertTriangle,
-  BarChart2, Target, Zap, ChevronDown, RefreshCw,
+  BarChart2, Target, Zap, ChevronDown, RefreshCw, Sparkles, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useState as useLocalState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "last_7d" | "last_30d" | "this_month" | "last_month";
@@ -155,6 +157,17 @@ function PlatformCard({
 export default function Competitors() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [aiStrategy, setAiStrategy] = useLocalState<string | null>(null);
+  const [showStrategy, setShowStrategy] = useLocalState(false);
+
+  const generateStrategy = trpc.ai.generate.useMutation({
+    onSuccess: (data) => {
+      const text = typeof data.content === "string" ? data.content : "Strategy generated.";
+      setAiStrategy(text);
+      setShowStrategy(true);
+    },
+    onError: (err) => toast.error("AI error: " + err.message),
+  });
 
   const { data: comparison, isLoading } = trpc.competitors.benchmarkComparison.useQuery({ datePreset });
   const { data: trendData, isLoading: trendLoading } = trpc.competitors.platformTrend.useQuery(
@@ -200,7 +213,7 @@ export default function Competitors() {
               Compare your performance against industry benchmarks
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {DATE_PRESETS.map((d) => (
               <button
                 key={d.value}
@@ -214,8 +227,35 @@ export default function Competitors() {
                 {d.label}
               </button>
             ))}
+            <button
+              onClick={() => {
+                const summaryText = summary
+                  ? `Platforms: ${summary.totalPlatforms}, Outperforming: ${summary.outperforming}, Underperforming: ${summary.underperforming}, Avg Score: ${summary.avgScore}%`
+                  : "No data yet";
+                generateStrategy.mutate({
+                  tool: "strategy",
+                  prompt: `Based on these benchmark comparison results: ${summaryText}. Provide 3-5 actionable recommendations to improve ad performance.`,
+                });
+              }}
+              disabled={generateStrategy.isPending || !summary}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-600 hover:bg-violet-500/20 transition-colors disabled:opacity-50"
+            >
+              {generateStrategy.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              AI Strategy
+            </button>
           </div>
         </div>
+
+        {/* AI Strategy Panel */}
+        {showStrategy && aiStrategy && (
+          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 mb-2">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-violet-700 flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Strategy Recommendations</p>
+              <button onClick={() => setShowStrategy(false)} className="text-xs text-muted-foreground hover:text-foreground">Close ×</button>
+            </div>
+            <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{aiStrategy}</div>
+          </div>
+        )}
 
         {/* Summary KPIs */}
         {summary && (

@@ -571,3 +571,31 @@
 - [x] TypeScript check (0 errors)
 - [x] 247/247 tests passing
 - [x] Save checkpoint and deliver
+
+## Phase 94-98 — Twitter/X + AI Caption + Hashtags + Dashboard Widgets
+
+### Phase 94 — Twitter/X OAuth + Publishing
+- [x] server/twitter.ts: Twitter API v2 helper (post tweet, media upload)
+- [x] server/platformOAuth.ts: Twitter OAuth scope updated (tweet.write)
+- [x] server/routers/posts.ts: publishNow supports Twitter/X
+- [x] ContentCalendar.tsx: Publish Now button for Twitter/X
+
+### Phase 95 — AI Caption Generator in Post Composer
+- [x] server/routers/ai.ts: generateCaption, generateHashtags, improveContent
+- [x] PostComposerModal.tsx: AI Caption Generator with topic input
+- [x] PostComposerModal.tsx: AI Hashtag Suggestions
+- [x] PostComposerModal.tsx: Improve Content button
+
+### Phase 96 — Hashtags + Competitors Enhancements
+- [x] HashtagAnalytics.tsx: AI Suggest Hashtags panel (copy + download .txt)
+- [x] Competitors.tsx: AI Strategy Recommendations button + panel
+
+### Phase 97 — Dashboard Widgets Customization
+- [x] Home.tsx: Widget visibility toggle menu (show/hide 6 widgets)
+- [x] Home.tsx: Persist widget preferences in localStorage
+- [x] Home.tsx: Reset to Default button
+
+### Phase 98 — Tests + Checkpoint
+- [x] TypeScript check (0 errors)
+- [x] 247/247 tests passing
+- [x] Save checkpoint and deliver

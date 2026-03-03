@@ -24,6 +24,27 @@ import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { Settings2 } from "lucide-react";
+
+// Widget visibility stored in localStorage
+const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
+const DEFAULT_WIDGETS = {
+  kpiCards:      true,
+  platformBreak: true,
+  spendChart:    true,
+  campaigns:     true,
+  budget:        true,
+  activity:      true,
+};
+type WidgetKey = keyof typeof DEFAULT_WIDGETS;
+
+function loadWidgets(): typeof DEFAULT_WIDGETS {
+  try {
+    const stored = localStorage.getItem(WIDGET_STORAGE_KEY);
+    if (stored) return { ...DEFAULT_WIDGETS, ...JSON.parse(stored) };
+  } catch {}
+  return { ...DEFAULT_WIDGETS };
+}
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -81,8 +102,27 @@ function EmptyDashboard() {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
+  const [widgets, setWidgets] = useState<typeof DEFAULT_WIDGETS>(loadWidgets);
+  const [showWidgetMenu, setShowWidgetMenu] = useState(false);
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
+
+  const toggleWidget = (key: WidgetKey) => {
+    setWidgets((prev) => {
+      const updated = { ...prev, [key]: !prev[key] };
+      localStorage.setItem(WIDGET_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const WIDGET_LABELS: Record<WidgetKey, string> = {
+    kpiCards:      "KPI Cards",
+    platformBreak: "Platform Breakdown",
+    spendChart:    "Spend Chart",
+    campaigns:     "Active Campaigns",
+    budget:        "Budget Tracker",
+    activity:      "Activity Feed",
+  };
 
   // Multi-platform summary
   const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({ datePreset });
@@ -143,6 +183,43 @@ export default function Dashboard() {
                 ))}
               </div>
               <DatePresetSelector value={datePreset} onChange={setDatePreset} />
+              {/* Widget Customizer */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowWidgetMenu((v) => !v)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-foreground hover:bg-muted/80 transition-colors"
+                >
+                  <Settings2 className="w-3.5 h-3.5" />
+                  Widgets
+                </button>
+                {showWidgetMenu && (
+                  <div className="absolute right-0 top-full mt-2 z-50 bg-card border border-border rounded-2xl shadow-xl p-3 w-52 space-y-1">
+                    <p className="text-xs font-semibold text-foreground px-1 mb-2">Show / Hide Widgets</p>
+                    {(Object.keys(DEFAULT_WIDGETS) as WidgetKey[]).map((key) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleWidget(key)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="text-xs text-foreground">{WIDGET_LABELS[key]}</span>
+                        <span className={`w-4 h-4 rounded-full border-2 transition-colors ${widgets[key] ? "bg-primary border-primary" : "border-border"}`} />
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => {
+                        const all = { ...DEFAULT_WIDGETS };
+                        Object.keys(all).forEach((k) => (all[k as WidgetKey] = true));
+                        setWidgets(all);
+                        localStorage.setItem(WIDGET_STORAGE_KEY, JSON.stringify(all));
+                        setShowWidgetMenu(false);
+                      }}
+                      className="w-full text-xs text-primary font-medium px-2 py-1.5 rounded-lg hover:bg-primary/10 transition-colors mt-1"
+                    >
+                      Reset to Default
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -180,7 +257,7 @@ export default function Dashboard() {
         {hasConnections && <SmartOnboardingBanner />}
 
         {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
-        {(hasConnections || summaryLoading) && (
+        {(hasConnections || summaryLoading) && widgets.kpiCards && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             {summaryLoading
               ? Array.from({ length: 6 }).map((_, i) => (
@@ -193,10 +270,8 @@ export default function Dashboard() {
                 : null
             }
           </div>
-        )}
-
-        {/* ── Platform breakdown + Performance ───────────────────────────────── */}
-        {hasConnections && (
+        )}        {/* ── Platform breakdown + Performance ─────────────────────────────────── */}
+        {hasConnections && widgets.platformBreak && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
               <PlatformBreakdownCard insights={allInsights} loading={insightsLoading} />
@@ -205,8 +280,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── Spend chart (Meta campaigns) ───────────────────────────────────── */}
-        {isMetaConnected && (
+        {/* ── Spend chart (Meta campaigns) ─────────────────────────────────── */}
+        {isMetaConnected && widgets.spendChart && (
           <SpendChart
             campaigns={metaCampaigns}
             loading={campaignsLoading}
@@ -214,8 +289,8 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ── Active Campaigns table ─────────────────────────────────────────── */}
-        {isMetaConnected && (
+        {/* ── Active Campaigns table ─────────────────────────────────────────────── */}
+        {isMetaConnected && widgets.campaigns && (
           <ActiveCampaignsTable
             campaigns={metaCampaigns}
             loading={campaignsLoading}
@@ -223,8 +298,8 @@ export default function Dashboard() {
           />
         )}
 
-        {/* ── Budget Tracker + Activity Feed ──────────────────────────────── */}
-        {hasConnections && (
+        {/* ── Budget Tracker + Activity Feed ────────────────────────────────── */}
+        {hasConnections && (widgets.budget || widgets.activity) && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
               <BudgetTracker />
