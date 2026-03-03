@@ -1,9 +1,9 @@
 // Publishing.tsx — Content Publishing page
 // Composed from components in client/src/components/publishing/
 import DashboardLayout from "@/components/DashboardLayout";
-import PostComposerModal from "@/components/PostComposerModal";
-import { PostList } from "@/components/publishing/PostList";
-import { PostCalendarView } from "@/components/publishing/PostCalendarView";
+import PostComposerModal from "@/features/publishing/components/PostComposerModal";
+import { PostList } from "@/features/publishing/components/PostList";
+import { PostCalendarView } from "@/features/publishing/components/PostCalendarView";
 import { useState } from "react";
 import { Plus, Calendar, List } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";

@@ -1,18 +1,18 @@
 // Campaigns.tsx — Multi-Platform Campaigns Management
 // Supports Meta Ads + local campaigns across all platforms.
 import DashboardLayout from "@/components/DashboardLayout";
-import CreateCampaignModal from "@/components/CreateCampaignModal";
-import { MetaCampaignCreateModal } from "@/components/campaigns/MetaCampaignCreateModal";
-import { CampaignBuilder } from "@/components/campaigns/CampaignBuilder";
-import { CampaignDetailDrawer } from "@/components/CampaignDetailDrawer";
-import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
-import { MetaCampaignTable } from "@/components/campaigns/MetaCampaignTable";
-import { LocalCampaignTable } from "@/components/campaigns/LocalCampaignTable";
+import CreateCampaignModal from "@/features/campaigns/components/CreateCampaignModal";
+import { MetaCampaignCreateModal } from "@/features/campaigns/components/MetaCampaignCreateModal";
+import { CampaignBuilder } from "@/features/campaigns/components/CampaignBuilder";
+import { CampaignDetailDrawer } from "@/features/campaigns/components/CampaignDetailDrawer";
+import { CampaignFilters } from "@/features/campaigns/components/CampaignFilters";
+import { MetaCampaignTable } from "@/features/campaigns/components/MetaCampaignTable";
+import { LocalCampaignTable } from "@/features/campaigns/components/LocalCampaignTable";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { useState, useMemo } from "react";
 import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare, TrendingUp, Eye, MousePointer2, DollarSign } from "lucide-react";
-import { CampaignCompareDrawer } from "@/components/campaigns/CampaignCompareDrawer";
+import { CampaignCompareDrawer } from "@/features/campaigns/components/CampaignCompareDrawer";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";

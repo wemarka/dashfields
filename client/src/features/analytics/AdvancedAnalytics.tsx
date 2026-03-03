@@ -2,7 +2,7 @@
 // Professional-grade analytics for media buyers and performance marketers.
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
+import { DatePresetSelector, type DatePreset } from "@/features/dashboard/components/DatePresetSelector";
 import { trpc } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";

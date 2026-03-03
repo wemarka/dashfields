@@ -15,34 +15,34 @@ function Redirect({ to }: { to: string }) {
 }
 
 // ─── Eager-loaded (critical path) ────────────────────────────────────────────
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
+import Home from "./features/dashboard/Home";
+import NotFound from "./features/shared/NotFound";
 import SplashScreen from "./components/SplashScreen";
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
-const Campaigns         = lazy(() => import("./pages/Campaigns"));
-const Analytics         = lazy(() => import("./pages/Analytics"));
-const Settings          = lazy(() => import("./pages/Settings"));
-const Connections       = lazy(() => import("./pages/Connections"));
-const Alerts            = lazy(() => import("./pages/Alerts"));
-const Reports           = lazy(() => import("./pages/Reports"));
-const Audience          = lazy(() => import("./pages/Audience"));
-const PostAnalytics     = lazy(() => import("./pages/PostAnalytics"));
-const PeriodComparison  = lazy(() => import("./pages/PeriodComparison"));
-const AIContent         = lazy(() => import("./pages/AIContent"));
-const ContentCalendar   = lazy(() => import("./pages/ContentCalendar"));
-const Notifications     = lazy(() => import("./pages/Notifications"));
-const Profile           = lazy(() => import("./pages/Profile"));
-const HashtagAnalytics  = lazy(() => import("./pages/HashtagAnalytics"));
-const Competitors       = lazy(() => import("./pages/Competitors"));
-const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
-const ABTesting         = lazy(() => import("./pages/ABTesting"));
-const AudienceOverlap   = lazy(() => import("./pages/AudienceOverlap"));
-const CustomDashboards  = lazy(() => import("./pages/CustomDashboards"));
-const Insights          = lazy(() => import("./pages/Insights"));
-const Publishing        = lazy(() => import("./pages/Publishing"));
-const WorkspaceSettings = lazy(() => import("./pages/WorkspaceSettings"));
-const AcceptInvite      = lazy(() => import("./pages/AcceptInvite"));
+const Campaigns         = lazy(() => import("./features/campaigns/Campaigns"));
+const Analytics         = lazy(() => import("./features/analytics/Analytics"));
+const Settings          = lazy(() => import("./features/settings/Settings"));
+const Connections       = lazy(() => import("./features/connections/Connections"));
+const Alerts            = lazy(() => import("./features/alerts/Alerts"));
+const Reports           = lazy(() => import("./features/reports/Reports"));
+const Audience          = lazy(() => import("./features/audience/Audience"));
+const PostAnalytics     = lazy(() => import("./features/post-analytics/PostAnalytics"));
+const PeriodComparison  = lazy(() => import("./features/analytics/PeriodComparison"));
+const AIContent         = lazy(() => import("./features/ai/AIContent"));
+const ContentCalendar   = lazy(() => import("./features/publishing/ContentCalendar"));
+const Notifications     = lazy(() => import("./features/notifications/Notifications"));
+const Profile           = lazy(() => import("./features/settings/Profile"));
+const HashtagAnalytics  = lazy(() => import("./features/insights/HashtagAnalytics"));
+const Competitors       = lazy(() => import("./features/competitors/Competitors"));
+const AdvancedAnalytics = lazy(() => import("./features/analytics/AdvancedAnalytics"));
+const ABTesting         = lazy(() => import("./features/ab-testing/ABTesting"));
+const AudienceOverlap   = lazy(() => import("./features/audience/AudienceOverlap"));
+const CustomDashboards  = lazy(() => import("./features/custom-dashboards/CustomDashboards"));
+const Insights          = lazy(() => import("./features/insights/Insights"));
+const Publishing        = lazy(() => import("./features/publishing/Publishing"));
+const WorkspaceSettings = lazy(() => import("./features/settings/WorkspaceSettings"));
+const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite"));
 
 // ─── Page loading fallback ────────────────────────────────────────────────────
 function PageLoader() {

@@ -1,11 +1,11 @@
 // Analytics.tsx — Multi-Platform Analytics
 // Shows unified analytics with per-platform filter tabs.
 import DashboardLayout from "@/components/DashboardLayout";
-import { AnalyticsKpiCards } from "@/components/analytics/AnalyticsKpiCards";
-import { SpendByCampaignChart } from "@/components/analytics/SpendByCampaignChart";
-import { CtrCpcChart } from "@/components/analytics/CtrCpcChart";
-import { ImpressionsClicksChart } from "@/components/analytics/ImpressionsClicksChart";
-import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
+import { AnalyticsKpiCards } from "@/features/analytics/components/AnalyticsKpiCards";
+import { SpendByCampaignChart } from "@/features/analytics/components/SpendByCampaignChart";
+import { CtrCpcChart } from "@/features/analytics/components/CtrCpcChart";
+import { ImpressionsClicksChart } from "@/features/analytics/components/ImpressionsClicksChart";
+import { DatePresetSelector, type DatePreset } from "@/features/dashboard/components/DatePresetSelector";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import {
@@ -13,7 +13,7 @@ import {
   TrendingUp, TrendingDown, Lightbulb, Trophy, Target,
   DollarSign, Eye, MousePointer, Users, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
-import { ExportReportModal } from "@/components/ExportReportModal";
+import { ExportReportModal } from "@/features/reports/ExportReportModal";
 import { trpc } from "@/core/lib/trpc";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";

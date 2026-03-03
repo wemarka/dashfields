@@ -1,12 +1,12 @@
 // Home.tsx — Unified Multi-Platform Dashboard
 // Shows aggregated KPIs from ALL connected social platforms.
 import DashboardLayout from "@/components/DashboardLayout";
-import { KpiCard } from "@/components/dashboard/KpiCard";
-import { SpendChart } from "@/components/dashboard/SpendChart";
-import { PerformanceStats } from "@/components/dashboard/PerformanceStats";
-import { ActiveCampaignsTable } from "@/components/dashboard/ActiveCampaignsTable";
-import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
-import { PlatformBreakdownCard } from "@/components/dashboard/PlatformBreakdownCard";
+import { KpiCard } from "@/features/dashboard/components/KpiCard";
+import { SpendChart } from "@/features/dashboard/components/SpendChart";
+import { PerformanceStats } from "@/features/dashboard/components/PerformanceStats";
+import { ActiveCampaignsTable } from "@/features/dashboard/components/ActiveCampaignsTable";
+import { DatePresetSelector, type DatePreset } from "@/features/dashboard/components/DatePresetSelector";
+import { PlatformBreakdownCard } from "@/features/dashboard/components/PlatformBreakdownCard";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import {
   DollarSign, Eye, MousePointerClick,
@@ -21,9 +21,9 @@ import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { OnboardingModal } from "@/components/OnboardingModal";
-import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
-import { SpendForecastWidget } from "@/components/dashboard/SpendForecastWidget";
-import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import { BudgetTracker } from "@/features/dashboard/components/BudgetTracker";
+import { SpendForecastWidget } from "@/features/dashboard/components/SpendForecastWidget";
+import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { Settings2 } from "lucide-react";
