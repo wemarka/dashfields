@@ -11,7 +11,7 @@ import {
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
   PieChart, GitCompare, Zap, Sun, Moon, User, Hash, Swords,
-  Languages, FlaskConical,
+  Languages, FlaskConical, Send, LineChart, BellDot,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -89,6 +89,14 @@ const navGroups: NavGroup[] = [
     labelKey: "nav.groups.reports",
     items: [
       { icon: FileText,    labelKey: "nav.reports",      path: "/reports",       iconAnimation: "icon-bounce" },
+      { icon: Send,        labelKey: "nav.publishing",   path: "/publishing",    iconAnimation: "icon-pop" },
+    ],
+  },
+  {
+    labelKey: "nav.groups.insights",
+    items: [
+      { icon: LineChart,   labelKey: "nav.insights",     path: "/insights",      iconAnimation: "icon-pop" },
+      { icon: BellDot,     labelKey: "nav.notifications",path: "/notifications", iconAnimation: "icon-bounce" },
     ],
   },
 ];

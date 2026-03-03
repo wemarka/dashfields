@@ -32,8 +32,11 @@
       "advertising": "Advertising",
       "analytics": "Analytics",
       "content": "Content",
-      "reports": "Reports"
-    }
+      "reports": "Reports",
+      "insights": "Insights & Alerts"
+    },
+    "publishing": "Publishing",
+    "insights": "Insights"
   },
   "topbar": {
     "platformsConnected": "{{count}} platform connected",

@@ -32,8 +32,11 @@
       "advertising": "الإعلانات",
       "analytics": "التحليلات",
       "content": "المحتوى",
-      "reports": "التقارير"
-    }
+      "reports": "التقارير",
+      "insights": "الرؤى والتنبيهات"
+    },
+    "publishing": "النشر",
+    "insights": "الرؤى"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصة مرتبطة",
