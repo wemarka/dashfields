@@ -3,13 +3,13 @@
 // using Venn-like diagrams, overlap scores, and AI-powered recommendations.
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { trpc } from "@/lib/trpc";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { trpc } from "@/core/lib/trpc";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/core/components/ui/card";
+import { Badge } from "@/core/components/ui/badge";
+import { Button } from "@/core/components/ui/button";
+import { Progress } from "@/core/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/core/components/ui/tabs";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,

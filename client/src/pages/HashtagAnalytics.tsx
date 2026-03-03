@@ -7,7 +7,7 @@ import {
   PieChart, Pie, Cell, Legend,
 } from "recharts";
 import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown, Sparkles, Loader2, Copy, Download } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { PLATFORMS } from "@shared/platforms";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "sonner";

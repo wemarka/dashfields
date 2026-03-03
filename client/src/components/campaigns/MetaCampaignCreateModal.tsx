@@ -2,7 +2,7 @@
 // Modal for creating a real Meta Ads campaign via Graph API.
 import { useState } from "react";
 import { X, Rocket, DollarSign, Target, Calendar, ChevronRight, Loader2, ExternalLink } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 

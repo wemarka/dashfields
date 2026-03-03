@@ -1,7 +1,7 @@
 // Notifications.tsx
 // Advanced Notifications Center — smart alerts, category filtering, bulk actions, and preferences.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { formatDistanceToNow } from "date-fns";

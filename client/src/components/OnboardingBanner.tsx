@@ -2,7 +2,7 @@
 // Guides new users through the setup steps.
 import { Link } from "wouter";
 import { Zap, Link2, BarChart2, Bell, ChevronRight, CheckCircle2 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 
 const steps = [
   {

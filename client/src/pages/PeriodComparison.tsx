@@ -1,7 +1,7 @@
 // PeriodComparison.tsx
 // Compare current period vs previous period side-by-side with KPI cards and dual-line charts.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";

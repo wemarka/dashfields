@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useState } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import {
   Facebook, Link2, CheckCircle2, AlertCircle, Loader2,

@@ -2,9 +2,9 @@
 // Table for displaying Meta Ads campaigns with insights.
 // Supports status toggle and direct link to Meta Ads Manager.
 import { Link2, Facebook, ExternalLink, Play, Pause, Loader2 } from "lucide-react";
-import { CampaignRowSkeleton } from "@/components/ui/skeleton-cards";
+import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
 import { Link } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

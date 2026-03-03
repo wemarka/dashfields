@@ -1,7 +1,7 @@
 // PostAnalytics.tsx
 // Detailed post-level analytics: top posts, engagement heatmap, best times, post type breakdown.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";

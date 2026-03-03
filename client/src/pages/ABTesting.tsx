@@ -1,18 +1,18 @@
 // ABTesting.tsx — A/B Testing Dashboard
 // Create, manage, and analyze split tests across ad campaigns.
 import DashboardLayout from "@/components/DashboardLayout";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/core/components/ui/button";
+import { Badge } from "@/core/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/core/components/ui/dialog";
+import { Input } from "@/core/components/ui/input";
+import { Textarea } from "@/core/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
+import { Label } from "@/core/components/ui/label";
+import { Progress } from "@/core/components/ui/progress";
+import { Separator } from "@/core/components/ui/separator";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Play, Pause, Trophy, FlaskConical,

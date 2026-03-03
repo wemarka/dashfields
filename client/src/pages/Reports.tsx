@@ -1,8 +1,8 @@
 // Reports.tsx
 // Standalone Reports page — create, manage, and download scheduled reports.
 import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {

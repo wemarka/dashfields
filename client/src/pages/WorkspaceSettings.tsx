@@ -4,8 +4,8 @@
 //  2. Team — members list, roles, add member
 //  3. Brand Profile — AI brand identity settings
 import { useState } from "react";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { trpc } from "@/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { trpc } from "@/core/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "sonner";
 import {

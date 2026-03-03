@@ -2,7 +2,7 @@
 // Side-by-side campaign comparison drawer.
 // Shows KPI comparison table + grouped bar chart + winner badges.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { X, Trophy, TrendingUp, TrendingDown, Minus, ChevronDown } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,

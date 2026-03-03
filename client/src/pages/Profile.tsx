@@ -1,20 +1,20 @@
 // Profile page — user info + settings from Supabase via tRPC
 import { useState, useEffect, useRef } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/core/components/ui/card";
+import { Button } from "@/core/components/ui/button";
+import { Input } from "@/core/components/ui/input";
+import { Label } from "@/core/components/ui/label";
+import { Switch } from "@/core/components/ui/switch";
+import { Badge } from "@/core/components/ui/badge";
+import { Separator } from "@/core/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import { User, Mail, Globe, Bell, Shield, Calendar, Clock, Save, Loader2, Camera, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
-import i18n from "@/i18n";
+import i18n from "@/core/i18n";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Los_Angeles", "America/Chicago",

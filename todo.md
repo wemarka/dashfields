@@ -1128,3 +1128,14 @@
 - [x] نقل جميع .test.ts إلى server/__tests__/
 - [x] تحديث جميع import paths في routers/ و _core/ و cron.ts
 - [x] تشغيل الاختبارات: 292/292 passing ✅
+
+## Refactoring Phase 2 — Frontend Core
+- [x] إنشاء client/src/core/ مع مجلداتها الفرعية
+- [x] نقل components/ui/ → core/components/ui/
+- [x] نقل contexts/ → core/contexts/
+- [x] نقل hooks/ → core/hooks/
+- [x] نقل lib/ → core/lib/
+- [x] نقل i18n/ → core/i18n/
+- [x] تحديث جميع import paths بـ sed -i (80+ ملف)
+- [x] تشغيل tsc --noEmit: 0 TS2307 errors ✅
+- [x] تشغيل الاختبارات: 292/292 passing ✅

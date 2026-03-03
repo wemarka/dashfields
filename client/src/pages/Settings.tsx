@@ -1,7 +1,7 @@
 // Settings.tsx — Improved settings page with real data binding.
 import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Shield, Bell, Palette, Link2, ChevronRight, Check,
@@ -10,10 +10,10 @@ import { Shield, Bell, Palette, Link2, ChevronRight, Check,
 } from "lucide-react";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/core/contexts/ThemeContext";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
-import { changeLanguage } from "@/i18n";
+import { changeLanguage } from "@/core/i18n";
 
 type Section = "account" | "connections" | "notifications" | "appearance" | "apikeys";
 

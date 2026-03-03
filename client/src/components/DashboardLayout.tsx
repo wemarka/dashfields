@@ -5,14 +5,14 @@
 //  • Account Switcher at Sidebar bottom (per-platform, multi-account)
 import { useAuth } from "@/_core/hooks/useAuth";
 import { DashfieldsIcon, DashfieldsLogoFull } from "@/components/DashfieldsLogo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { getLoginUrl } from "@/const";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { NotificationBell } from "@/components/NotificationBell";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
-import { changeLanguage } from "@/i18n";
+import { changeLanguage } from "@/core/i18n";
 import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
@@ -22,8 +22,8 @@ import {
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
 
 // ─── Dark Mode Hook ───────────────────────────────────────────────────────────
@@ -126,7 +126,7 @@ const navGroups: NavGroup[] = [
 ];
 
 // ─── Workspace Switcher Modal ───────────────────────────────────────────────
-import type { WorkspaceItem } from "@/contexts/WorkspaceContext";
+import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
 function WorkspaceSwitcherModal({
   workspaces, active, onSelect, onClose,
 }: {

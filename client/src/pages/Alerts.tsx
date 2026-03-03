@@ -9,8 +9,8 @@ import {
   Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid, SlidersHorizontal,
   FlaskConical, Download, History
 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 

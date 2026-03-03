@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, ChevronRight, ChevronLeft, Check, Facebook, Instagram, Youtube, Twitter, Linkedin } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 
 interface Props {

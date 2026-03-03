@@ -3,9 +3,9 @@
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import {
   FunnelChart, Funnel, Tooltip, ResponsiveContainer, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,

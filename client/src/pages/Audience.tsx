@@ -3,10 +3,10 @@
 // Demographics (age/gender/location/devices) require direct platform API — shown as "not available" with CTA.
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { trpc } from "@/core/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { Button } from "@/core/components/ui/button";
+import { Badge } from "@/core/components/ui/badge";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -19,7 +19,7 @@ import { PLATFORMS } from "@shared/platforms";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import i18n from "@/i18n";
+import i18n from "@/core/i18n";
 import { Streamdown } from "streamdown";
 
 const PLATFORM_OPTIONS = [

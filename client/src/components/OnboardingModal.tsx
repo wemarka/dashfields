@@ -2,14 +2,14 @@
 // Shown automatically to new users on first login.
 // Multi-step: Welcome → Connect Platform → Set Alert → Done
 import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import {
   Dialog, DialogContent, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+} from "@/core/components/ui/dialog";
+import { Button } from "@/core/components/ui/button";
+import { Progress } from "@/core/components/ui/progress";
 import {
   Sparkles, Link2, Bell, BarChart3, CheckCircle2,
   ArrowRight, ChevronRight, X, Zap,

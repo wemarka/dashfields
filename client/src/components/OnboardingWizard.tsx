@@ -2,7 +2,7 @@
 // Shows a multi-step wizard to help users connect their first platform,
 // configure budget alerts, and create their first report.
 import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import {

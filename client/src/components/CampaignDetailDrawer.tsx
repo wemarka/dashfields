@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet";
+} from "@/core/components/ui/sheet";
 import {
   LineChart,
   Line,
@@ -19,10 +19,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/core/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/core/components/ui/tabs";
 import { Loader2, TrendingUp, MousePointerClick, DollarSign, Eye } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MetaCampaign {

@@ -1,11 +1,11 @@
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/core/components/ui/sonner";
+import { TooltipProvider } from "@/core/components/ui/tooltip";
 import { lazy, Suspense, useEffect, useState, useCallback } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import { ActiveAccountProvider } from "./contexts/ActiveAccountContext";
-import { WorkspaceProvider } from "./contexts/WorkspaceContext";
+import { ThemeProvider } from "./core/contexts/ThemeContext";
+import { ActiveAccountProvider } from "./core/contexts/ActiveAccountContext";
+import { WorkspaceProvider } from "./core/contexts/WorkspaceContext";
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {

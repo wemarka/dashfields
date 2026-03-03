@@ -2,7 +2,7 @@
 // Monthly/weekly content calendar for scheduling posts.
 // Supports drag-and-drop rescheduling, status color-coding, and quick post creation.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -11,7 +11,7 @@ import {
   ChevronLeft, ChevronRight, Plus, Calendar, List,
   Clock, CheckCircle2, AlertCircle, Edit3, Trash2, X, Send, Loader2,
 } from "lucide-react";
-import { trpc as trpcClient } from "@/lib/trpc";
+import { trpc as trpcClient } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────

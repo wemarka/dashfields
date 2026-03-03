@@ -5,7 +5,7 @@ import {
   X, Calendar, Clock, Send, Loader2, Sparkles, Hash, Wand2,
   ChevronDown, ChevronUp, Image, Upload, Trash2, AlertCircle,
 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS as ALL_PLATFORMS } from "@shared/platforms";

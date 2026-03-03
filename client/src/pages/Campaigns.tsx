@@ -13,12 +13,12 @@ import { getPlatform } from "@shared/platforms";
 import { useState, useMemo } from "react";
 import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare, TrendingUp, Eye, MousePointer2, DollarSign } from "lucide-react";
 import { CampaignCompareDrawer } from "@/components/campaigns/CampaignCompareDrawer";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 
 type Tab = "all" | "meta" | "local";
 

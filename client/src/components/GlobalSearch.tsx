@@ -3,9 +3,9 @@
 // Searches campaigns, pages, reports, and settings in real time.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { trpc } from "@/core/lib/trpc";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/core/components/ui/dialog";
+import { Badge } from "@/core/components/ui/badge";
 import {
   Search, Megaphone, FileText, BarChart3, Settings, CalendarDays,
   Sparkles, Users, Hash, Swords, FlaskConical, Link2, Bell,

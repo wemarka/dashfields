@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useState } from "react";
 import { Sparkles, Send, Copy, RefreshCw, Wand2, Target, FileText, Image, Check } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 
 const tools = [

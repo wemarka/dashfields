@@ -3,12 +3,12 @@
 // Route: /invite/:token
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/core/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { Badge } from "@/core/components/ui/badge";
 import { Loader2, Building2, CheckCircle2, XCircle, Users } from "lucide-react";
 import { toast } from "sonner";
 

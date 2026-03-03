@@ -5,7 +5,7 @@
 // Step 3 — Ad Creative (headline, body, image, CTA)
 // Step 4 — Review & Launch
 import { useState, useRef } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import {

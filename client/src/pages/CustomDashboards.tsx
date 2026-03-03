@@ -1,7 +1,7 @@
 // CustomDashboards.tsx
 // Allows users to build personalized dashboards with drag-and-drop widgets.
 import { useState, useCallback } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {

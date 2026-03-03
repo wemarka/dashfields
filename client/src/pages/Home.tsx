@@ -15,7 +15,7 @@ import {
   Rocket, ArrowRight, Trophy, CheckCircle2, AlertCircle,
   Clock, Wifi, WifiOff,
 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
@@ -27,7 +27,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { Settings2 } from "lucide-react";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";

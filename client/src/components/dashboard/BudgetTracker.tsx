@@ -1,8 +1,8 @@
 // BudgetTracker — shows daily/monthly spend vs budget per platform
 // Shows alert badge when spend >= 80% of budget
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { trpc } from "@/core/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { Badge } from "@/core/components/ui/badge";
 import { AlertTriangle, DollarSign, TrendingUp } from "lucide-react";
 
 function SpendBar({ percent, label }: { percent: number; label: string }) {

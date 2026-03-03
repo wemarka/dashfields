@@ -5,8 +5,8 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
@@ -16,7 +16,7 @@ import {
   CheckCircle2, X, Shield, ExternalLink, Clock,
   AlertTriangle, Key, Info, Activity,
 } from "lucide-react";
-import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
+import { PlatformCardSkeleton } from "@/core/components/ui/skeleton-cards";
 
 // ─── Manual Token Modal ────────────────────────────────────────────────────────
 interface ManualConnectModalProps {

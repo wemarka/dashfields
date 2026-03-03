@@ -14,11 +14,11 @@ import {
   DollarSign, Eye, MousePointer, Users, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { ExportReportModal } from "@/components/ExportReportModal";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,

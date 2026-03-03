@@ -2,7 +2,7 @@
 // Advanced AI Content Studio — generate ideas, analyze sentiment,
 // find best posting times, and plan a full content calendar.
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";

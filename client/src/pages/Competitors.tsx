@@ -1,7 +1,7 @@
 // Competitors.tsx
 // Competitor Analysis page — compare your performance vs industry benchmarks.
 import { useState } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import {

@@ -3,9 +3,9 @@
 // Uses Supabase Realtime for live push updates — no polling needed.
 import { useState, useRef, useEffect } from "react";
 import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, X, Check } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
+import { useRealtimeNotifications } from "@/core/hooks/useRealtimeNotifications";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 

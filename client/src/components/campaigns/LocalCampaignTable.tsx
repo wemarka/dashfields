@@ -5,17 +5,17 @@ import { useState } from "react";
 import { Loader2, Plus, Play, Pause, ArrowUpRight, Copy, Trash2, MoreHorizontal } from "lucide-react";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/core/components/ui/dropdown-menu";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/core/components/ui/alert-dialog";
 
 const statusDot: Record<string, string> = {
   active: "bg-emerald-500", paused: "bg-amber-500",

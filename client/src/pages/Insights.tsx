@@ -4,9 +4,9 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/core/lib/trpc";
 import { useState, useMemo } from "react";
-import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -17,7 +17,7 @@ import {
   Trophy, Target, Zap, DollarSign, Eye, MousePointer, Users,
   BarChart2, RefreshCw, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
-import { DashboardKpiSkeleton, ChartSkeleton } from "@/components/ui/skeleton-cards";
+import { DashboardKpiSkeleton, ChartSkeleton } from "@/core/components/ui/skeleton-cards";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_30d" | "this_month" | "last_month";
