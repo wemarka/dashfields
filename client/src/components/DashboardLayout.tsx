@@ -4,6 +4,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { NotificationBell } from "@/components/NotificationBell";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
 import { changeLanguage } from "@/i18n";
 import {
@@ -11,7 +12,8 @@ import {
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
   PieChart, GitCompare, Zap, Sun, Moon, User, Hash, Swords,
-  Languages, FlaskConical, Send, LineChart, BellDot, SplitSquareHorizontal,
+  Languages, FlaskConical, Send, LineChart, BellDot, SplitSquareHorizontal, Layers2,
+  LayoutGrid,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -77,6 +79,8 @@ const navGroups: NavGroup[] = [
       { icon: Swords,        labelKey: "nav.competitors",       path: "/competitors",        iconAnimation: "icon-shake" },
       { icon: FlaskConical,  labelKey: "nav.advancedAnalytics", path: "/advanced-analytics", iconAnimation: "icon-pop" },
       { icon: SplitSquareHorizontal, labelKey: "nav.abTesting", path: "/ab-testing", iconAnimation: "icon-spin" },
+      { icon: Layers2,    labelKey: "nav.audienceOverlap",  path: "/audience-overlap",  iconAnimation: "icon-pop" },
+      { icon: LayoutGrid, labelKey: "nav.customDashboards", path: "/custom-dashboards", iconAnimation: "icon-bounce" },
     ],
   },
   {
@@ -323,8 +327,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         {/* Top bar */}
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: connection status */}
-          <div className="flex items-center gap-2">
+          {/* Left: connection status + search */}
+          <div className="flex items-center gap-3">
+            <GlobalSearch />
             {connectedCount > 0 ? (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />

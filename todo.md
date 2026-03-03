@@ -522,7 +522,7 @@
 - [ ] Settings: data export (download all your data as JSON)
 
 ### Phase 88 — Tests + Checkpoint
-- [ ] TypeScript check (0 errors)
+- [x] TypeScript check (0 errors)
 - [ ] All tests passing
 - [ ] Save checkpoint and deliver
 
@@ -636,7 +636,7 @@
 - [ ] Connections page: last synced timestamp
 
 ### Phase 104 — Tests + Checkpoint
-- [ ] TypeScript check (0 errors)
+- [x] TypeScript check (0 errors)
 - [ ] All tests passing
 - [ ] Save checkpoint and deliver
 
@@ -838,7 +838,7 @@
 
 ## Phase 127 — اختبارات شاملة وcheckpoint
 
-- [ ] TypeScript check (0 errors)
+- [x] TypeScript check (0 errors)
 - [ ] All tests passing
 - [ ] Final UI polish
 - [ ] Save checkpoint
@@ -878,3 +878,15 @@
 - [x] White-Label PDF Reports مع branding panel في Reports.tsx
 - [x] 247/247 اختبار ناجح
 - [x] 0 أخطاء TypeScript
+
+## Phase 134-138 — Custom Dashboards + Advanced Notifications + Polish (جلسة 2026-03-03)
+- [x] جدول custom_dashboards في Supabase (تم التحقق عبر Supabase client)
+- [x] server/routers/customDashboards.ts — router كامل (list, get, create, update, delete, duplicate)
+- [x] client/src/pages/CustomDashboards.tsx — صفحة Widget Builder كاملة
+- [x] إضافة Custom Dashboards في sidebar وApp.tsx وi18n (en + ar)
+- [x] Advanced Notifications page مع bulk actions وcategory filters
+- [x] Performance Optimization — lazy loading للصفحات الثقيلة
+- [ ] تحسين Home Dashboard — ربط KPI cards بالبيانات الحقيقية
+- [x] اختبارات vitest للـ customDashboards router
+- [x] TypeScript check (0 errors)
+- [ ] Save checkpoint

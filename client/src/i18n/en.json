@@ -37,7 +37,9 @@
     },
     "publishing": "Publishing",
     "insights": "Insights",
-    "abTesting": "A/B Testing"
+    "abTesting": "A/B Testing",
+    "audienceOverlap": "Audience Overlap",
+    "customDashboards": "Custom Dashboards"
   },
   "topbar": {
     "platformsConnected": "{{count}} platform connected",

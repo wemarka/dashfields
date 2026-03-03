@@ -50,6 +50,16 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [format,     setFormat]     = useState<ReportFormat>("csv");
   const [schedule,   setSchedule]   = useState<Schedule>("none");
+  const [emailInput, setEmailInput] = useState("");
+  const [emailList,  setEmailList]  = useState<string[]>([]);
+
+  const addEmail = () => {
+    const e = emailInput.trim().toLowerCase();
+    if (e && /^[^@]+@[^@]+\.[^@]+$/.test(e) && !emailList.includes(e)) {
+      setEmailList(prev => [...prev, e]);
+      setEmailInput("");
+    }
+  };
 
   const createMutation = trpc.reports.create.useMutation({
     onSuccess: () => {
@@ -190,6 +200,43 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
             </div>
           </div>
 
+          {/* Email Recipients */}
+          {schedule !== "none" && (
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-2">
+                Email Recipients <span className="text-muted-foreground">(optional — get report by email)</span>
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addEmail()}
+                  placeholder="name@company.com"
+                  className="flex-1 px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <button
+                  onClick={addEmail}
+                  className="px-3 py-2 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+              {emailList.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {emailList.map(email => (
+                    <span key={email} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium">
+                      {email}
+                      <button onClick={() => setEmailList(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2 pt-2">
             <button
@@ -199,7 +246,7 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
               Cancel
             </button>
             <button
-              onClick={() => createMutation.mutate({ name, platforms, datePreset, format: format === "pdf" ? "html" : format as "csv" | "html", schedule })}
+              onClick={() => createMutation.mutate({ name, platforms, datePreset, format: format === "pdf" ? "html" : format as "csv" | "html", schedule, emailRecipients: emailList })}
               disabled={createMutation.isPending || !name.trim()}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >

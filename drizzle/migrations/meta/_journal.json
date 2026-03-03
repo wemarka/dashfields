@@ -57,6 +57,20 @@
       "when": 1772554944916,
       "tag": "0007_normal_nightcrawler",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1772557187992,
+      "tag": "0008_parched_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772559292670,
+      "tag": "0009_open_wrecker",
+      "breakpoints": true
     }
   ]
 }

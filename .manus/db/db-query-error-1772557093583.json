@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE scheduled_reports ADD COLUMN IF NOT EXISTS email_recipients TEXT DEFAULT '[]';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute ALTER TABLE scheduled_reports ADD COLUMN IF NOT EXISTS email_recipients TEXT DEFAULT '[]';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'kxbj95igqtqdrviqhur8ny.scheduled_reports' doesn't exist"
+  ]
+}

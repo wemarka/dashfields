@@ -1,61 +1,84 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
+import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+
+// ─── Eager-loaded (critical path) ────────────────────────────────────────────
 import Home from "./pages/Home";
-import Campaigns from "./pages/Campaigns";
-import Analytics from "./pages/Analytics";
-import Publishing from "./pages/Publishing";
-import Insights from "./pages/Insights";
-import AITools from "./pages/AITools";
-import Settings from "./pages/Settings";
-import MetaConnect from "./pages/MetaConnect";
-import Connections from "./pages/Connections";
-import Alerts from "./pages/Alerts";
-import Reports from "@/pages/Reports";
-import Audience from "@/pages/Audience";
-import PostAnalytics from "@/pages/PostAnalytics";
-import PeriodComparison from "@/pages/PeriodComparison";
-import AIContent from "@/pages/AIContent";
-import ContentCalendar from "@/pages/ContentCalendar";
-import Notifications from "@/pages/Notifications";
-import Profile from "@/pages/Profile";
-import HashtagAnalytics from "@/pages/HashtagAnalytics";
-import Competitors from "@/pages/Competitors";
-import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
-import ABTesting from "@/pages/ABTesting";
+import NotFound from "./pages/NotFound";
+
+// ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
+const Campaigns         = lazy(() => import("./pages/Campaigns"));
+const Analytics         = lazy(() => import("./pages/Analytics"));
+const Publishing        = lazy(() => import("./pages/Publishing"));
+const Insights          = lazy(() => import("./pages/Insights"));
+const AITools           = lazy(() => import("./pages/AITools"));
+const Settings          = lazy(() => import("./pages/Settings"));
+const MetaConnect       = lazy(() => import("./pages/MetaConnect"));
+const Connections       = lazy(() => import("./pages/Connections"));
+const Alerts            = lazy(() => import("./pages/Alerts"));
+const Reports           = lazy(() => import("./pages/Reports"));
+const Audience          = lazy(() => import("./pages/Audience"));
+const PostAnalytics     = lazy(() => import("./pages/PostAnalytics"));
+const PeriodComparison  = lazy(() => import("./pages/PeriodComparison"));
+const AIContent         = lazy(() => import("./pages/AIContent"));
+const ContentCalendar   = lazy(() => import("./pages/ContentCalendar"));
+const Notifications     = lazy(() => import("./pages/Notifications"));
+const Profile           = lazy(() => import("./pages/Profile"));
+const HashtagAnalytics  = lazy(() => import("./pages/HashtagAnalytics"));
+const Competitors       = lazy(() => import("./pages/Competitors"));
+const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
+const ABTesting         = lazy(() => import("./pages/ABTesting"));
+const AudienceOverlap   = lazy(() => import("./pages/AudienceOverlap"));
+const CustomDashboards  = lazy(() => import("./pages/CustomDashboards"));
+
+// ─── Page loading fallback ────────────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm text-muted-foreground">Loading...</span>
+      </div>
+    </div>
+  );
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/"             component={Home} />
-      <Route path="/campaigns"    component={Campaigns} />
-      <Route path="/analytics"    component={Analytics} />
-      <Route path="/publishing"   component={Publishing} />
-      <Route path="/insights"     component={Insights} />
-      <Route path="/ai-tools"     component={AITools} />
-      <Route path="/settings"     component={Settings} />
-      <Route path="/connections"  component={Connections} />
-      {/* Keep /meta-connect for backward compatibility */}
-      <Route path="/meta-connect" component={MetaConnect} />
-      <Route path="/alerts"       component={Alerts} />
-      <Route path="/reports"      component={Reports} />
-      <Route path="/audience"     component={Audience} />
-      <Route path="/post-analytics" component={PostAnalytics} />
-      <Route path="/compare"        component={PeriodComparison} />
-      <Route path="/ai-content"     component={AIContent} />
-      <Route path="/calendar"        component={ContentCalendar} />
-      <Route path="/notifications"   component={Notifications} />
-      <Route path="/profile"         component={Profile} />
-      <Route path="/hashtags"         component={HashtagAnalytics} />
-      <Route path="/competitors"       component={Competitors} />
-      <Route path="/advanced-analytics" component={AdvancedAnalytics} />
-      <Route path="/ab-testing"          component={ABTesting} />
-      <Route path="/404"          component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/"                     component={Home} />
+        <Route path="/campaigns"            component={Campaigns} />
+        <Route path="/analytics"            component={Analytics} />
+        <Route path="/publishing"           component={Publishing} />
+        <Route path="/insights"             component={Insights} />
+        <Route path="/ai-tools"             component={AITools} />
+        <Route path="/settings"             component={Settings} />
+        <Route path="/connections"          component={Connections} />
+        {/* Keep /meta-connect for backward compatibility */}
+        <Route path="/meta-connect"         component={MetaConnect} />
+        <Route path="/alerts"               component={Alerts} />
+        <Route path="/reports"              component={Reports} />
+        <Route path="/audience"             component={Audience} />
+        <Route path="/post-analytics"       component={PostAnalytics} />
+        <Route path="/compare"              component={PeriodComparison} />
+        <Route path="/ai-content"           component={AIContent} />
+        <Route path="/calendar"             component={ContentCalendar} />
+        <Route path="/notifications"        component={Notifications} />
+        <Route path="/profile"              component={Profile} />
+        <Route path="/hashtags"             component={HashtagAnalytics} />
+        <Route path="/competitors"          component={Competitors} />
+        <Route path="/advanced-analytics"   component={AdvancedAnalytics} />
+        <Route path="/ab-testing"           component={ABTesting} />
+        <Route path="/audience-overlap"     component={AudienceOverlap} />
+        <Route path="/custom-dashboards"    component={CustomDashboards} />
+        <Route path="/404"                  component={NotFound} />
+        <Route                              component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

@@ -404,6 +404,35 @@ export const metaRouter = router({
       } catch { return { models: [], totalRoas: 0 }; }
     }),
 
+  /** Spend forecast: project monthly spend based on current daily burn rate */
+  spendForecast: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_7d") }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return null;
+      try {
+        const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+        if (!insights || !insights.length) return null;
+        const totalSpend = Number((insights as any)[0]?.spend ?? 0);
+        const now = new Date();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const dayOfMonth = now.getDate();
+        const daysRemaining = daysInMonth - dayOfMonth;
+        const presetDays = input.datePreset === "last_7d" ? 7 : input.datePreset === "last_14d" ? 14 : 30;
+        const dailyBurnRate = totalSpend / presetDays;
+        const monthToDateSpend = dailyBurnRate * dayOfMonth;
+        const projectedMonthlySpend = monthToDateSpend + (dailyBurnRate * daysRemaining);
+        return {
+          dailyBurnRate: parseFloat(dailyBurnRate.toFixed(2)),
+          monthToDateSpend: parseFloat(monthToDateSpend.toFixed(2)),
+          projectedMonthlySpend: parseFloat(projectedMonthlySpend.toFixed(2)),
+          daysRemaining,
+          dayOfMonth,
+          daysInMonth,
+        };
+      } catch { return null; }
+    }),
+
   /** Get top performing campaign by spend */
   topCampaign: protectedProcedure
     .input(z.object({

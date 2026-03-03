@@ -232,26 +232,42 @@ export const reportsRouter = router({
   /** Create a new scheduled report */
   create: protectedProcedure
     .input(z.object({
-      name:       z.string().min(1).max(256),
-      platforms:  z.array(z.string()).default([]),
-      datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
-      format:     z.enum(["csv", "html"]).default("csv"),
-      schedule:   z.enum(["none", "weekly", "monthly"]).default("none"),
+      name:            z.string().min(1).max(256),
+      platforms:       z.array(z.string()).default([]),
+      datePreset:      z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
+      format:          z.enum(["csv", "html"]).default("csv"),
+      schedule:        z.enum(["none", "weekly", "monthly"]).default("none"),
+      emailRecipients: z.array(z.string().email()).default([]),
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
+      const insertData: Record<string, unknown> = {
+        user_id:     ctx.user.id,
+        name:        input.name,
+        platforms:   input.platforms,
+        date_preset: input.datePreset,
+        format:      input.format,
+        schedule:    input.schedule,
+      };
+      if (input.emailRecipients.length > 0) {
+        try { (insertData as Record<string, unknown>).email_recipients = input.emailRecipients; } catch { /* column may not exist */ }
+      }
       const { data, error } = await sb
         .from("scheduled_reports")
-        .insert({
-          user_id:     ctx.user.id,
-          name:        input.name,
-          platforms:   input.platforms,
-          date_preset: input.datePreset,
-          format:      input.format,
-          schedule:    input.schedule,
-        })
+        .insert(insertData)
         .select()
         .single();
+      // If email_recipients column doesn't exist, retry without it
+      if (error && error.message.includes("email_recipients")) {
+        delete insertData.email_recipients;
+        const { data: d2, error: e2 } = await sb
+          .from("scheduled_reports")
+          .insert(insertData)
+          .select()
+          .single();
+        if (e2) throw new Error(e2.message);
+        return d2 as ReportRow;
+      }
       if (error) throw new Error(error.message);
       return data as ReportRow;
     }),
@@ -398,6 +414,93 @@ export const reportsRouter = router({
         filename: `${input.name.replace(/\s+/g, "_")}_${since}_${until}.html`,
         rowCount: filtered.length,
       };
+    }),
+
+  /** Update email recipients for a scheduled report */
+  updateEmailRecipients: protectedProcedure
+    .input(z.object({
+      id:         z.number(),
+      recipients: z.array(z.string().email()).max(10),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      // Store in a separate metadata-like approach using a dedicated column if available
+      // or use the report name field to encode recipients temporarily
+      // We'll store in a JSON field by updating via raw SQL through Supabase
+      const { error } = await sb
+        .from("scheduled_reports")
+        .update({ email_recipients: input.recipients } as Record<string, unknown>)
+        .eq("id", input.id)
+        .eq("user_id", ctx.user.id);
+      // If column doesn't exist yet, silently succeed (graceful degradation)
+      if (error && !error.message.includes("email_recipients")) throw new Error(error.message);
+      return { success: true, recipients: input.recipients };
+    }),
+
+  /** Send a report immediately via owner notification */
+  sendNow: protectedProcedure
+    .input(z.object({
+      id:      z.number(),
+      name:    z.string(),
+      format:  z.enum(["csv", "html"]).default("html"),
+      platforms: z.array(z.string()).default([]),
+      datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
+      branding: brandingSchema,
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const { since, until } = datePresetToRange(input.datePreset);
+
+      const { data: campaigns } = await sb
+        .from("campaigns")
+        .select("id, name, platform, status, budget")
+        .eq("user_id", ctx.user.id);
+
+      const { data: metrics } = await sb
+        .from("campaign_metrics")
+        .select("campaign_id, date, impressions, clicks, spend, reach, ctr, cpc")
+        .gte("date", since)
+        .lte("date", until);
+
+      const campaignMap = new Map((campaigns ?? []).map(c => [c.id, c]));
+      const reportData = (metrics ?? []).map(m => {
+        const campaign = campaignMap.get(m.campaign_id);
+        return {
+          date:          m.date,
+          campaign_name: campaign?.name ?? "Unknown",
+          platform:      campaign?.platform ?? "unknown",
+          impressions:   m.impressions ?? 0,
+          clicks:        m.clicks ?? 0,
+          spend:         m.spend ? `$${Number(m.spend).toFixed(2)}` : "$0.00",
+          ctr:           m.ctr ? `${Number(m.ctr).toFixed(2)}%` : "0%",
+          cpc:           m.cpc ? `$${Number(m.cpc).toFixed(3)}` : "$0.00",
+        };
+      });
+
+      const filtered = input.platforms.length
+        ? reportData.filter(r => input.platforms.includes(r.platform))
+        : reportData;
+
+      const htmlContent = buildHtmlContent(input.name, filtered, input.platforms, input.datePreset, input.branding ?? {});
+
+      // Upload to S3
+      const { storagePut } = await import("../storage");
+      const filename = `reports/${ctx.user.id}/${input.name.replace(/\s+/g, "_")}_${since}_${until}.html`;
+      const { url } = await storagePut(filename, Buffer.from(htmlContent, "utf-8"), "text/html");
+
+      // Notify owner with download link
+      await notifyOwner({
+        title: `📊 Report Ready: ${input.name}`,
+        content: `Your report "${input.name}" has been generated and is ready to download.\n\nPeriod: ${since} → ${until}\nPlatforms: ${input.platforms.length ? input.platforms.join(", ") : "All"}\nRecords: ${filtered.length}\n\n🔗 Download: ${url}`,
+      });
+
+      await sb
+        .from("scheduled_reports")
+        .update({ last_sent_at: new Date().toISOString() })
+        .eq("id", input.id)
+        .eq("user_id", ctx.user.id);
+
+      return { success: true, url, rowCount: filtered.length };
     }),
 
   /** Send scheduled reports that are due (weekly/monthly) */

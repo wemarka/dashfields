@@ -37,7 +37,9 @@
     },
     "publishing": "النشر",
     "insights": "الرؤى",
-    "abTesting": "اختبار A/B"
+    "abTesting": "اختبار A/B",
+    "audienceOverlap": "تداخل الجماهير",
+    "customDashboards": "لوحات مخصصة"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصة مرتبطة",

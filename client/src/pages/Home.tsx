@@ -23,6 +23,7 @@ import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
+import { SpendForecastWidget } from "@/components/dashboard/SpendForecastWidget";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -513,6 +514,11 @@ export default function Dashboard() {
               <TopCampaignWidget datePreset={datePreset} isConnected={isMetaConnected} />
             )}
           </div>
+        )}
+
+        {/* - Spend Forecast - */}
+        {isMetaConnected && (
+          <SpendForecastWidget />
         )}
 
         {/* - Budget Tracker + Activity Feed - */}

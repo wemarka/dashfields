@@ -191,6 +191,20 @@ export const abTests = pgTable("ab_tests", {
 export type AbTest = typeof abTests.$inferSelect;
 export type InsertAbTest = typeof abTests.$inferInsert;
 
+// ─── Custom Dashboards ──────────────────────────────────────────────────────
+export const customDashboards = pgTable("custom_dashboards", {
+  id:          serial("id").primaryKey(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name:        varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  widgets:     jsonb("widgets").notNull().default([]),
+  isDefault:   boolean("is_default").notNull().default(false),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+export type CustomDashboard       = typeof customDashboards.$inferSelect;
+export type InsertCustomDashboard = typeof customDashboards.$inferInsert;
+
 // ─── API Keys ─────────────────────────────────────────────────────────────────
 export const apiKeys = pgTable("api_keys", {
   id:         serial("id").primaryKey(),

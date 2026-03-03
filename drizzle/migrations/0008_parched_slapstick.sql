@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_reports" ADD COLUMN "email_recipients" text[] DEFAULT '{}';
