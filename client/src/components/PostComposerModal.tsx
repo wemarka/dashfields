@@ -1,9 +1,12 @@
 /**
  * PostComposerModal.tsx — Multi-platform post composer
- * Supports all connected social media platforms + AI caption generation.
+ * Supports all connected social media platforms + AI caption generation + image upload.
  */
-import { useState } from "react";
-import { X, Calendar, Clock, Send, Loader2, Sparkles, Hash, Wand2, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import {
+  X, Calendar, Clock, Send, Loader2, Sparkles, Hash, Wand2,
+  ChevronDown, ChevronUp, Image, Upload, Trash2, AlertCircle,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -21,7 +24,20 @@ const SUPPORTED_PLATFORMS = ALL_PLATFORMS.filter((p) =>
   p.features.includes("posts")
 );
 
-const MAX_CHARS = 2200;
+// Platform-specific character limits
+const CHAR_LIMITS: Record<string, number> = {
+  facebook:  63206,
+  instagram: 2200,
+  twitter:   280,
+  linkedin:  3000,
+  tiktok:    2200,
+  youtube:   5000,
+};
+
+function getEffectiveLimit(platforms: string[]): number {
+  if (platforms.length === 0) return 2200;
+  return Math.min(...platforms.map((p) => CHAR_LIMITS[p] ?? 2200));
+}
 
 export default function PostComposerModal({ open, onClose, onCreated }: Props) {
   const { i18n } = useTranslation();
@@ -32,6 +48,13 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
   const [scheduleDate, setScheduleDate]     = useState("");
   const [scheduleTime, setScheduleTime]     = useState("10:00");
 
+  // Image upload state
+  const [imageFile, setImageFile]           = useState<File | null>(null);
+  const [imagePreview, setImagePreview]     = useState<string | null>(null);
+  const [imageUrl, setImageUrl]             = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // AI state
   const [aiTopic, setAiTopic]               = useState("");
   const [aiTone, setAiTone]                 = useState<"professional" | "casual" | "humorous" | "inspirational">("casual");
@@ -41,6 +64,18 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
   // Get connected accounts to highlight available platforms
   const { data: accounts = [] } = trpc.social.list.useQuery();
   const connectedPlatformIds = new Set(accounts.map((a) => a.platform));
+
+  const uploadImageMutation = trpc.posts.uploadImage.useMutation({
+    onSuccess: (data) => {
+      setImageUrl(data.url);
+      setIsUploadingImage(false);
+      toast.success("Image uploaded successfully!");
+    },
+    onError: (err) => {
+      setIsUploadingImage(false);
+      toast.error("Image upload failed: " + err.message);
+    },
+  });
 
   const createMutation = trpc.posts.create.useMutation({
     onSuccess: () => {
@@ -88,6 +123,9 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
     setAiTopic("");
     setSuggestedHashtags([]);
     setShowAiPanel(false);
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl(null);
     onClose();
   };
 
@@ -95,6 +133,50 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
     setSelectedPlatforms((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
+  };
+
+  const handleImageSelect = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be under 10MB");
+      return;
+    }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setImagePreview(dataUrl);
+      // Auto-upload
+      setIsUploadingImage(true);
+      const base64 = dataUrl.split(",")[1];
+      uploadImageMutation.mutate({
+        base64,
+        mimeType: file.type,
+        filename: file.name,
+      });
+    };
+    reader.readAsDataURL(file);
+  }, [uploadImageMutation]);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageSelect(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageSelect(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = () => {
@@ -110,6 +192,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
       content: content.trim(),
       platforms: selectedPlatforms,
       scheduledAt,
+      imageUrl: imageUrl ?? undefined,
     });
   };
 
@@ -146,8 +229,14 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
   if (!open) return null;
 
-  const remaining = MAX_CHARS - content.length;
+  const maxChars = getEffectiveLimit(selectedPlatforms);
+  const remaining = maxChars - content.length;
   const isAiLoading = generateCaption.isPending || generateHashtags.isPending || improveContent.isPending;
+  const isOverLimit = remaining < 0;
+
+  // Platform-specific warnings
+  const twitterSelected = selectedPlatforms.includes("twitter");
+  const showTwitterWarning = twitterSelected && content.length > 280;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -178,14 +267,82 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
           <div className="relative">
             <textarea
               value={content}
-              onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
+              onChange={(e) => setContent(e.target.value.slice(0, maxChars + 50))}
               placeholder="What do you want to share?"
               rows={5}
-              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className={
+                "w-full px-3 py-2 rounded-xl bg-muted border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 resize-none transition-colors " +
+                (isOverLimit
+                  ? "border-red-400 focus:ring-red-400/30"
+                  : "border-border focus:ring-primary/30")
+              }
             />
-            <span className={"absolute bottom-2 right-3 text-xs " + (remaining < 100 ? "text-amber-500" : "text-muted-foreground")}>
+            <span className={
+              "absolute bottom-2 right-3 text-xs font-medium " +
+              (isOverLimit ? "text-red-500" : remaining < 50 ? "text-amber-500" : "text-muted-foreground")
+            }>
               {remaining}
             </span>
+          </div>
+
+          {/* Twitter warning */}
+          {showTwitterWarning && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              Twitter/X has a 280 character limit. Your post will be truncated for Twitter.
+            </div>
+          )}
+
+          {/* Image Upload */}
+          <div>
+            <p className="text-xs font-medium text-foreground mb-2">
+              <Image className="w-3.5 h-3.5 inline mr-1" />
+              Add Image (optional)
+            </p>
+            {imagePreview ? (
+              <div className="relative rounded-xl overflow-hidden border border-border">
+                <img src={imagePreview} alt="Preview" className="w-full max-h-48 object-cover" />
+                {isUploadingImage && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="flex items-center gap-2 text-white text-xs">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading...
+                    </div>
+                  </div>
+                )}
+                {imageUrl && !isUploadingImage && (
+                  <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    Uploaded ✓
+                  </div>
+                )}
+                <button
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-border rounded-xl p-4 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+              >
+                <Upload className="w-6 h-6 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground text-center">
+                  Click or drag & drop an image<br />
+                  <span className="text-[10px]">PNG, JPG, GIF up to 10MB</span>
+                </p>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
           </div>
 
           {/* AI Quick Actions */}
@@ -283,10 +440,12 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
               {SUPPORTED_PLATFORMS.map((p) => {
                 const isSelected = selectedPlatforms.includes(p.id);
                 const isConnected = connectedPlatformIds.has(p.id);
+                const limit = CHAR_LIMITS[p.id] ?? 2200;
                 return (
                   <button
                     key={p.id}
                     onClick={() => togglePlatform(p.id)}
+                    title={`${p.name} — ${limit.toLocaleString()} char limit`}
                     className={
                       "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all " +
                       (isSelected
@@ -305,6 +464,11 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
             </div>
             {selectedPlatforms.length === 0 && (
               <p className="text-xs text-red-500 mt-1">Select at least one platform</p>
+            )}
+            {selectedPlatforms.length > 0 && (
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Character limit: {maxChars.toLocaleString()} (based on most restrictive platform)
+              </p>
             )}
           </div>
 
@@ -373,17 +537,29 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={createMutation.isPending || !content.trim() || selectedPlatforms.length === 0}
+            disabled={
+              createMutation.isPending ||
+              isUploadingImage ||
+              !content.trim() ||
+              selectedPlatforms.length === 0 ||
+              isOverLimit
+            }
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {createMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isUploadingImage ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : scheduleMode === "schedule" ? (
               <Calendar className="w-4 h-4" />
             ) : (
               <Send className="w-4 h-4" />
             )}
-            {scheduleMode === "schedule" ? "Schedule Post" : "Save Draft"}
+            {isUploadingImage
+              ? "Uploading image..."
+              : scheduleMode === "schedule"
+              ? "Schedule Post"
+              : "Save Draft"}
           </button>
         </div>
       </div>

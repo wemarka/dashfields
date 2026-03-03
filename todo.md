@@ -716,3 +716,70 @@
 - [x] Fix duplicate key error in PlatformBreakdownCard.tsx (key={ins.platform} → key={platform-name-idx})
 - [x] Fix duplicate key error in Analytics.tsx (key={ins.platform+ins.accountName} → key={platform-name-idx})
 - [x] Fix duplicate key error in Insights.tsx (key={ins.platform} → key={platform-idx})
+
+## Phase 109-120 — World-Class Professional Completion
+
+### Phase 109 — Multi-Platform Publishing (LinkedIn + TikTok + YouTube)
+- [ ] server/linkedin.ts — LinkedIn API helper (share post, upload media)
+- [ ] server/tiktok.ts — TikTok API helper (create video post)
+- [ ] server/youtube.ts — YouTube Data API helper (upload video, community post)
+- [ ] server/routers/posts.ts: publishNow supports linkedin, tiktok, youtube
+- [ ] ContentCalendar.tsx: Publish Now for all 6 platforms
+- [x] PostComposerModal: platform-specific character limits + previews + image upload
+
+### Phase 110 — Advanced AI Studio
+- [ ] server/routers/ai.ts: sentimentAnalysis procedure
+- [ ] server/routers/ai.ts: bestTimeToPost procedure
+- [ ] server/routers/ai.ts: contentCalendarPlan procedure
+- [ ] AIContent.tsx: Sentiment Analysis tab
+- [ ] AIContent.tsx: Best Time to Post AI recommendations
+- [ ] AIContent.tsx: AI Content Calendar Planner
+
+### Phase 111 — Competitor Intelligence Upgrade
+- [ ] Competitors.tsx: Add competitor URL/handle input form
+- [ ] Competitors.tsx: AI-powered SWOT analysis
+- [ ] Competitors.tsx: Benchmark comparison radar chart
+- [ ] server/routers/competitors.ts: trackCompetitor + getSwot procedures
+
+### Phase 112 — White-Label PDF Reports
+- [ ] server/routers/reports.ts: generateWhitelabelPdf (logo + brand colors)
+- [ ] Reports page: Brand customization section (logo upload, color picker)
+- [ ] Reports page: PDF preview before download
+- [ ] Reports page: Email delivery option
+
+### Phase 113 — Advanced Analytics (Funnel + Attribution)
+- [x] AdvancedAnalytics page: Conversion Funnel chart (Impressions → Clicks → Conversions)
+- [x] AdvancedAnalytics page: Attribution model selector (Last Click, First Click, Linear, Time Decay)
+- [x] AdvancedAnalytics page: ROI calculator widget with ROAS, LTV:CAC, Break-even
+- [x] server/routers/meta.ts: funnelData + attributionData procedures
+
+### Phase 114 — Real-Time Dashboard Enhancements
+- [x] Home.tsx: Live spend ticker (animated counter with ease-out cubic)
+- [x] Home.tsx: Top Campaign widget (highest spend campaign with metrics)
+- [x] Home.tsx: Platform health status indicators (active/inactive per platform)
+- [x] server/routers/meta.ts: topCampaign procedure
+
+### Phase 115 — Mobile Responsiveness Polish
+- [ ] DashboardLayout: bottom navigation bar for mobile
+- [ ] All pages: mobile-first responsive fixes
+- [ ] PostComposerModal: mobile-optimized layout
+- [ ] Charts: responsive sizing for small screens
+
+### Phase 116 — Onboarding Wizard
+- [ ] Multi-step onboarding modal for new users
+- [ ] Step 1: Connect first platform
+- [ ] Step 2: Set budget goals
+- [ ] Step 3: Create first campaign or post
+- [ ] Progress saved in user_settings
+
+### Phase 117 — Settings Overhaul
+- [ ] Settings: Timezone selector (affects all date displays)
+- [ ] Settings: Currency selector (USD, EUR, SAR, AED, EGP)
+- [ ] Settings: Data export (download all data as JSON/CSV)
+- [ ] Settings: Account deletion with confirmation
+
+### Phase 118-120 — Tests + Polish + Checkpoint
+- [x] TypeScript check (0 errors)
+- [x] All tests passing (247/247)
+- [ ] Final UI polish pass
+- [x] Save checkpoint and deliver

@@ -1,6 +1,7 @@
 /**
  * server/routers/posts.ts
  * tRPC router for scheduled posts management.
+ * Supports: Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube
  */
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
@@ -8,6 +9,21 @@ import { getUserPosts, createPost, updatePostStatus, deletePost } from "../db/po
 import { getSupabase } from "../supabase";
 import { publishToInstagram, publishInstagramReel } from "../meta";
 import { postTweet } from "../twitter";
+import { postLinkedInShare, getLinkedInUser } from "../linkedin";
+import { createTikTokPost } from "../tiktok";
+import { storagePut } from "../storage";
+
+// ─── Platform character limits ────────────────────────────────────────────────
+export const PLATFORM_CHAR_LIMITS: Record<string, number> = {
+  facebook:  63206,
+  instagram: 2200,
+  twitter:   280,
+  linkedin:  3000,
+  tiktok:    2200,
+  youtube:   5000,
+  snapchat:  250,
+  pinterest: 500,
+};
 
 // ─── Meta Graph API post publisher ───────────────────────────────────────────
 async function publishToFacebook(
@@ -62,6 +78,24 @@ export const postsRouter = router({
       return (data ?? []) as import("../db/posts").PostRow[];
     }),
 
+  /** Upload a post image to S3 and return the URL */
+  uploadImage: protectedProcedure
+    .input(z.object({
+      base64:   z.string(),
+      mimeType: z.string().default("image/jpeg"),
+      filename: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const buffer = Buffer.from(input.base64, "base64");
+      if (buffer.length > 10 * 1024 * 1024) {
+        throw new Error("Image must be under 10MB");
+      }
+      const ext = input.mimeType.split("/")[1] ?? "jpg";
+      const key = `posts/${ctx.user.id}/img_${Date.now()}.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url };
+    }),
+
   create: protectedProcedure
     .input(z.object({
       content:     z.string().min(1),
@@ -69,6 +103,7 @@ export const postsRouter = router({
       platforms:   z.array(z.string()).min(1),
       scheduledAt: z.union([z.date(), z.string()]).optional(),
       status:      z.enum(["draft", "scheduled", "published", "failed"]).optional(),
+      imageUrl:    z.string().url().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const scheduledAt = input.scheduledAt
@@ -80,6 +115,7 @@ export const postsRouter = router({
         title: input.title ?? null,
         platforms: input.platforms,
         scheduledAt,
+        mediaUrls: input.imageUrl ? [input.imageUrl] : null,
         status: input.status ?? (scheduledAt ? "scheduled" : "draft"),
       });
     }),
@@ -100,11 +136,15 @@ export const postsRouter = router({
       return { success: true };
     }),
 
-  /** Publish post immediately to Facebook, Instagram, or Twitter/X */
+  /** Get platform character limits */
+  getCharLimits: protectedProcedure
+    .query(() => PLATFORM_CHAR_LIMITS),
+
+  /** Publish post immediately to any connected platform */
   publishNow: protectedProcedure
     .input(z.object({
       postId:   z.number(),
-      platform: z.enum(["facebook", "instagram", "twitter"]).default("facebook"),
+      platform: z.enum(["facebook", "instagram", "twitter", "linkedin", "tiktok", "youtube"]).default("facebook"),
       imageUrl: z.string().optional(),
       videoUrl: z.string().optional(),
       isReel:   z.boolean().optional().default(false),
@@ -123,79 +163,160 @@ export const postsRouter = router({
       const content = (post as Record<string, unknown>).content as string;
       let resultId: string;
 
-      if (input.platform === "twitter") {
-        // Get Twitter connection token
-        const { data: twitterConn } = await sb
-          .from("connections")
-          .select("access_token")
-          .eq("user_id", ctx.user.id)
-          .eq("platform", "twitter")
-          .eq("status", "active")
-          .maybeSingle();
+      switch (input.platform) {
+        case "twitter": {
+          const { data: conn } = await sb
+            .from("connections")
+            .select("access_token")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "twitter")
+            .eq("status", "active")
+            .maybeSingle();
 
-        if (!twitterConn?.access_token) {
-          throw new Error("Twitter/X not connected. Please connect your Twitter account in Connections.");
+          if (!conn?.access_token) {
+            throw new Error("Twitter/X not connected. Please connect in Connections.");
+          }
+          const tweetText = content.length > 280 ? content.slice(0, 277) + "..." : content;
+          const result = await postTweet(conn.access_token, tweetText);
+          resultId = result.id;
+          break;
         }
 
-        // Twitter has a 280 character limit
-        const tweetText = content.length > 280 ? content.slice(0, 277) + "..." : content;
-        const result = await postTweet(twitterConn.access_token, tweetText);
-        resultId = result.id;
+        case "linkedin": {
+          const { data: conn } = await sb
+            .from("connections")
+            .select("access_token, account_name, platform_user_id")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "linkedin")
+            .eq("status", "active")
+            .maybeSingle();
 
-      } else if (input.platform === "instagram") {
-        // Get Instagram account
-        const { data: igAccount } = await sb
-          .from("social_accounts")
-          .select("access_token, platform_account_id")
-          .eq("user_id", ctx.user.id)
-          .eq("platform", "instagram")
-          .eq("is_active", true)
-          .maybeSingle();
+          if (!conn?.access_token) {
+            throw new Error("LinkedIn not connected. Please connect in Connections.");
+          }
 
-        if (!igAccount?.access_token || !igAccount?.platform_account_id) {
-          throw new Error("Instagram not connected. Please connect your Instagram account first.");
-        }
+          // Get user URN for posting
+          let authorUrn = conn.platform_user_id
+            ? `urn:li:person:${conn.platform_user_id}`
+            : "";
 
-        if (input.isReel && input.videoUrl) {
-          const result = await publishInstagramReel(
-            igAccount.platform_account_id,
-            igAccount.access_token,
-            content,
-            input.videoUrl
+          if (!authorUrn) {
+            const liUser = await getLinkedInUser(conn.access_token);
+            authorUrn = liUser.urn;
+          }
+
+          const linkedInText = content.length > 3000 ? content.slice(0, 2997) + "..." : content;
+          const result = await postLinkedInShare(
+            conn.access_token,
+            authorUrn,
+            linkedInText,
+            input.imageUrl
           );
           resultId = result.id;
-        } else if (input.imageUrl) {
-          const result = await publishToInstagram(
-            igAccount.platform_account_id,
-            igAccount.access_token,
+          break;
+        }
+
+        case "tiktok": {
+          const { data: conn } = await sb
+            .from("connections")
+            .select("access_token")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "tiktok")
+            .eq("status", "active")
+            .maybeSingle();
+
+          if (!conn?.access_token) {
+            throw new Error("TikTok not connected. Please connect in Connections.");
+          }
+
+          if (!input.videoUrl) {
+            throw new Error("TikTok requires a video URL. Please upload a video first.");
+          }
+
+          const result = await createTikTokPost(conn.access_token, content, input.videoUrl);
+          resultId = result.publishId;
+          break;
+        }
+
+        case "youtube": {
+          // YouTube community post (text) or video upload
+          const { data: conn } = await sb
+            .from("connections")
+            .select("access_token")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "youtube")
+            .eq("status", "active")
+            .maybeSingle();
+
+          if (!conn?.access_token) {
+            throw new Error("YouTube not connected. Please connect in Connections.");
+          }
+
+          // For now, post as community post (text)
+          const { postYouTubeCommunityPost } = await import("../youtube");
+          const result = await postYouTubeCommunityPost(conn.access_token, content);
+          resultId = result.postId;
+          break;
+        }
+
+        case "instagram": {
+          const { data: igAccount } = await sb
+            .from("social_accounts")
+            .select("access_token, platform_account_id")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "instagram")
+            .eq("is_active", true)
+            .maybeSingle();
+
+          if (!igAccount?.access_token || !igAccount?.platform_account_id) {
+            throw new Error("Instagram not connected. Please connect your Instagram account first.");
+          }
+
+          if (input.isReel && input.videoUrl) {
+            const result = await publishInstagramReel(
+              igAccount.platform_account_id,
+              igAccount.access_token,
+              content,
+              input.videoUrl
+            );
+            resultId = result.id;
+          } else if (input.imageUrl) {
+            const result = await publishToInstagram(
+              igAccount.platform_account_id,
+              igAccount.access_token,
+              content,
+              input.imageUrl
+            );
+            resultId = result.id;
+          } else {
+            throw new Error("Instagram requires an image or video URL.");
+          }
+          break;
+        }
+
+        default: {
+          // Facebook
+          const { data: fbAccount } = await sb
+            .from("social_accounts")
+            .select("access_token, platform_account_id")
+            .eq("user_id", ctx.user.id)
+            .eq("platform", "facebook")
+            .eq("is_active", true)
+            .maybeSingle();
+
+          if (!fbAccount?.access_token || !fbAccount?.platform_account_id) {
+            throw new Error("Meta not connected. Please connect your Facebook account first.");
+          }
+
+          const result = await publishToFacebook(
+            fbAccount.platform_account_id,
+            fbAccount.access_token,
             content,
             input.imageUrl
           );
           resultId = result.id;
-        } else {
-          throw new Error("Instagram requires an image or video URL.");
+          break;
         }
-      } else {
-        // Facebook
-        const { data: fbAccount } = await sb
-          .from("social_accounts")
-          .select("access_token, platform_account_id")
-          .eq("user_id", ctx.user.id)
-          .eq("platform", "facebook")
-          .eq("is_active", true)
-          .maybeSingle();
-
-        if (!fbAccount?.access_token || !fbAccount?.platform_account_id) {
-          throw new Error("Meta not connected. Please connect your Facebook account first.");
-        }
-
-        const result = await publishToFacebook(
-          fbAccount.platform_account_id,
-          fbAccount.access_token,
-          content,
-          input.imageUrl
-        );
-        resultId = result.id;
       }
 
       // Mark as published
@@ -218,7 +339,6 @@ export const postsRouter = router({
       const sb = getSupabase();
       const now = new Date().toISOString();
 
-      // Fetch all scheduled posts that are due
       const { data: duePosts, error } = await sb
         .from("posts")
         .select("*")
@@ -261,6 +381,31 @@ export const postsRouter = router({
                   post.image_url as string
                 );
               }
+            } else if (platform === "twitter") {
+              const { data: conn } = await sb
+                .from("connections")
+                .select("access_token")
+                .eq("user_id", ctx.user.id)
+                .eq("platform", "twitter")
+                .eq("status", "active")
+                .maybeSingle();
+              if (!conn?.access_token) continue;
+              const text = (post.content as string).slice(0, 280);
+              await postTweet(conn.access_token, text);
+            } else if (platform === "linkedin") {
+              const { data: conn } = await sb
+                .from("connections")
+                .select("access_token, platform_user_id")
+                .eq("user_id", ctx.user.id)
+                .eq("platform", "linkedin")
+                .eq("status", "active")
+                .maybeSingle();
+              if (!conn?.access_token || !conn?.platform_user_id) continue;
+              await postLinkedInShare(
+                conn.access_token,
+                `urn:li:person:${conn.platform_user_id}`,
+                (post.content as string).slice(0, 3000)
+              );
             }
           }
 

@@ -1,10 +1,10 @@
 /**
  * server/routers/ai.ts
- * tRPC router for AI-powered content generation.
+ * tRPC router for AI-powered content generation and analysis.
  */
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
-import { invokeLLM } from "../_core/llm";
+import { invokeLLM, type ResponseFormat } from "../_core/llm";
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   copy: `You are an expert Meta Ads copywriter. Generate compelling, conversion-focused ad copy.
@@ -115,7 +115,6 @@ Return ONLY the hashtags as a space-separated list, each starting with #. No exp
       });
       const rawContent = response?.choices?.[0]?.message?.content;
       const raw = typeof rawContent === "string" ? rawContent.trim() : "";
-      // Parse hashtags from response
       const hashtags = raw
         .split(/\s+/)
         .filter((h: string) => h.startsWith("#"))
@@ -202,5 +201,308 @@ Platform: ${input.platform}. Return ONLY the improved text, no explanation.`,
       const improved = (typeof rawImproved === "string" ? rawImproved.trim() : null)
         ?? input.content;
       return { improved };
+    }),
+
+  /** Analyze sentiment of post content or comments */
+  sentimentAnalysis: protectedProcedure
+    .input(z.object({
+      text:     z.string().min(1).max(5000),
+      language: z.enum(["en", "ar"]).default("en"),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a sentiment analysis expert. Analyze the sentiment of the provided text.
+Return a JSON object with:
+{
+  "sentiment": "positive" | "negative" | "neutral" | "mixed",
+  "score": number between -1 (very negative) and 1 (very positive),
+  "confidence": number between 0 and 1,
+  "emotions": ["joy", "trust", "anticipation", "surprise", "fear", "sadness", "disgust", "anger"] (list detected emotions),
+  "summary": "one sentence summary of the sentiment",
+  "suggestions": ["actionable suggestion 1", "actionable suggestion 2"]
+}
+Return ONLY valid JSON, no markdown.`,
+          },
+          { role: "user", content: input.text },
+        ],
+        response_format: { type: "json_object" } as ResponseFormat,
+      });
+
+      const rawContent = response?.choices?.[0]?.message?.content;
+      try {
+        const parsed = JSON.parse(typeof rawContent === "string" ? rawContent : "{}") as {
+          sentiment?: string;
+          score?: number;
+          confidence?: number;
+          emotions?: string[];
+          summary?: string;
+          suggestions?: string[];
+        };
+        return {
+          sentiment: parsed.sentiment ?? "neutral",
+          score: parsed.score ?? 0,
+          confidence: parsed.confidence ?? 0.5,
+          emotions: parsed.emotions ?? [],
+          summary: parsed.summary ?? "",
+          suggestions: parsed.suggestions ?? [],
+        };
+      } catch {
+        return {
+          sentiment: "neutral",
+          score: 0,
+          confidence: 0.5,
+          emotions: [],
+          summary: "Unable to analyze sentiment.",
+          suggestions: [],
+        };
+      }
+    }),
+
+  /** AI-powered best time to post recommendations */
+  bestTimeToPost: protectedProcedure
+    .input(z.object({
+      platforms:    z.array(z.string()).min(1),
+      industry:     z.string().default("general"),
+      targetRegion: z.string().default("global"),
+      language:     z.enum(["en", "ar"]).default("en"),
+    }))
+    .mutation(async ({ input }) => {
+      const langInstruction = input.language === "ar"
+        ? "Respond in Arabic (العربية)."
+        : "Respond in English.";
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a social media scheduling expert with deep knowledge of platform algorithms and user behavior patterns.
+${langInstruction}
+Return a JSON object with best posting times for each platform:
+{
+  "recommendations": [
+    {
+      "platform": "facebook",
+      "bestDays": ["Monday", "Wednesday", "Friday"],
+      "bestTimes": ["9:00 AM", "1:00 PM", "7:00 PM"],
+      "timezone": "local",
+      "reasoning": "brief explanation",
+      "engagementBoost": "+25%"
+    }
+  ],
+  "generalTips": ["tip 1", "tip 2", "tip 3"],
+  "peakDays": ["Wednesday", "Thursday"]
+}
+Return ONLY valid JSON.`,
+          },
+          {
+            role: "user",
+            content: `Provide best posting times for: ${input.platforms.join(", ")}
+Industry: ${input.industry}
+Target Region: ${input.targetRegion}`,
+          },
+        ],
+        response_format: { type: "json_object" } as ResponseFormat,
+      });
+
+      const rawContent = response?.choices?.[0]?.message?.content;
+      try {
+        const parsed = JSON.parse(typeof rawContent === "string" ? rawContent : "{}") as {
+          recommendations?: Array<{
+            platform: string;
+            bestDays: string[];
+            bestTimes: string[];
+            timezone: string;
+            reasoning: string;
+            engagementBoost: string;
+          }>;
+          generalTips?: string[];
+          peakDays?: string[];
+        };
+        return {
+          recommendations: parsed.recommendations ?? [],
+          generalTips: parsed.generalTips ?? [],
+          peakDays: parsed.peakDays ?? [],
+        };
+      } catch {
+        return { recommendations: [], generalTips: [], peakDays: [] };
+      }
+    }),
+
+  /** AI-powered content calendar planner */
+  contentCalendarPlan: protectedProcedure
+    .input(z.object({
+      brand:       z.string().min(1).max(200),
+      industry:    z.string().min(1).max(100),
+      platforms:   z.array(z.string()).min(1),
+      goals:       z.array(z.string()).default(["engagement", "brand awareness"]),
+      weekCount:   z.number().int().min(1).max(4).default(1),
+      language:    z.enum(["en", "ar"]).default("en"),
+    }))
+    .mutation(async ({ input }) => {
+      const langInstruction = input.language === "ar"
+        ? "Write all content ideas in Arabic (العربية)."
+        : "Write all content ideas in English.";
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional social media content strategist.
+${langInstruction}
+Create a detailed content calendar plan. Return a JSON object:
+{
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "theme": "Week theme",
+      "posts": [
+        {
+          "day": "Monday",
+          "platform": "instagram",
+          "type": "image" | "video" | "story" | "reel" | "carousel" | "text",
+          "topic": "Post topic",
+          "caption": "Sample caption",
+          "hashtags": ["#tag1", "#tag2"],
+          "bestTime": "10:00 AM",
+          "goal": "engagement"
+        }
+      ]
+    }
+  ],
+  "contentMix": { "educational": 30, "promotional": 20, "entertaining": 30, "inspirational": 20 },
+  "keyMessages": ["message 1", "message 2"],
+  "campaignIdeas": ["idea 1", "idea 2"]
+}
+Return ONLY valid JSON.`,
+          },
+          {
+            role: "user",
+            content: `Create a ${input.weekCount}-week content calendar for:
+Brand: ${input.brand}
+Industry: ${input.industry}
+Platforms: ${input.platforms.join(", ")}
+Goals: ${input.goals.join(", ")}`,
+          },
+        ],
+        response_format: { type: "json_object" } as ResponseFormat,
+      });
+
+      const rawContent = response?.choices?.[0]?.message?.content;
+      try {
+        const parsed = JSON.parse(typeof rawContent === "string" ? rawContent : "{}") as {
+          weeks?: Array<{
+            weekNumber: number;
+            theme: string;
+            posts: Array<{
+              day: string;
+              platform: string;
+              type: string;
+              topic: string;
+              caption: string;
+              hashtags: string[];
+              bestTime: string;
+              goal: string;
+            }>;
+          }>;
+          contentMix?: Record<string, number>;
+          keyMessages?: string[];
+          campaignIdeas?: string[];
+        };
+        return {
+          weeks: parsed.weeks ?? [],
+          contentMix: parsed.contentMix ?? {},
+          keyMessages: parsed.keyMessages ?? [],
+          campaignIdeas: parsed.campaignIdeas ?? [],
+        };
+      } catch {
+        return { weeks: [], contentMix: {}, keyMessages: [], campaignIdeas: [] };
+      }
+    }),
+
+  /** AI SWOT analysis for competitor comparison */
+  competitorSwot: protectedProcedure
+    .input(z.object({
+      yourBrand:       z.string().min(1),
+      competitorName:  z.string().min(1),
+      industry:        z.string().default("digital marketing"),
+      yourMetrics:     z.object({
+        ctr: z.number().default(0),
+        cpc: z.number().default(0),
+        roas: z.number().default(0),
+        engagementRate: z.number().default(0),
+      }),
+      industryAvgMetrics: z.object({
+        ctr: z.number().default(0),
+        cpc: z.number().default(0),
+        roas: z.number().default(0),
+        engagementRate: z.number().default(0),
+      }),
+      language: z.enum(["en", "ar"]).default("en"),
+    }))
+    .mutation(async ({ input }) => {
+      const langInstruction = input.language === "ar"
+        ? "Respond in Arabic (العربية)."
+        : "Respond in English.";
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a competitive intelligence analyst specializing in digital marketing.
+${langInstruction}
+Return a JSON object with SWOT analysis:
+{
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "weaknesses": ["weakness 1", "weakness 2"],
+  "opportunities": ["opportunity 1", "opportunity 2", "opportunity 3"],
+  "threats": ["threat 1", "threat 2"],
+  "recommendations": ["action 1", "action 2", "action 3"],
+  "competitiveScore": number between 0-100 (your competitive position),
+  "summary": "2-3 sentence executive summary"
+}
+Return ONLY valid JSON.`,
+          },
+          {
+            role: "user",
+            content: `Perform SWOT analysis:
+Your Brand: ${input.yourBrand}
+Competitor: ${input.competitorName}
+Industry: ${input.industry}
+Your Performance: CTR ${input.yourMetrics.ctr}%, CPC $${input.yourMetrics.cpc}, ROAS ${input.yourMetrics.roas}x, Engagement ${input.yourMetrics.engagementRate}%
+Industry Average: CTR ${input.industryAvgMetrics.ctr}%, CPC $${input.industryAvgMetrics.cpc}, ROAS ${input.industryAvgMetrics.roas}x, Engagement ${input.industryAvgMetrics.engagementRate}%`,
+          },
+        ],
+        response_format: { type: "json_object" } as ResponseFormat,
+      });
+
+      const rawContent = response?.choices?.[0]?.message?.content;
+      try {
+        const parsed = JSON.parse(typeof rawContent === "string" ? rawContent : "{}") as {
+          strengths?: string[];
+          weaknesses?: string[];
+          opportunities?: string[];
+          threats?: string[];
+          recommendations?: string[];
+          competitiveScore?: number;
+          summary?: string;
+        };
+        return {
+          strengths: parsed.strengths ?? [],
+          weaknesses: parsed.weaknesses ?? [],
+          opportunities: parsed.opportunities ?? [],
+          threats: parsed.threats ?? [],
+          recommendations: parsed.recommendations ?? [],
+          competitiveScore: parsed.competitiveScore ?? 50,
+          summary: parsed.summary ?? "",
+        };
+      } catch {
+        return {
+          strengths: [], weaknesses: [], opportunities: [], threats: [],
+          recommendations: [], competitiveScore: 50, summary: "",
+        };
+      }
     }),
 });

@@ -16,6 +16,7 @@ export const settingsRouter = router({
   update: protectedProcedure
     .input(z.object({
       timezone:             z.string().optional(),
+      currency:             z.string().optional(),
       language:             z.string().optional(),
       emailNotifications:   z.boolean().optional(),
       pushNotifications:    z.boolean().optional(),
@@ -27,6 +28,30 @@ export const settingsRouter = router({
     .mutation(async ({ ctx, input }) => {
       return upsertUserSettings(ctx.user.id, input);
     }),
+
+  /** Export all user data as JSON */
+  exportData: protectedProcedure.mutation(async ({ ctx }) => {
+    const sb = getSupabase();
+    const userId = ctx.user.id;
+
+    const [accounts, campaigns, posts, alerts, reports] = await Promise.all([
+      sb.from("social_accounts").select("id, platform, name, username, account_type, is_active, created_at").eq("user_id", userId),
+      sb.from("campaigns").select("id, name, platform, status, budget, budget_type, start_date, end_date, created_at").eq("user_id", userId),
+      sb.from("posts").select("id, title, content, platforms, status, scheduled_at, published_at, created_at").eq("user_id", userId),
+      sb.from("alert_rules").select("id, name, metric, operator, threshold, is_active, created_at").eq("user_id", userId),
+      sb.from("scheduled_reports").select("id, name, platforms, schedule, format, created_at").eq("user_id", userId),
+    ]);
+
+    return {
+      exportedAt: new Date().toISOString(),
+      user: { id: userId, name: ctx.user.name, email: ctx.user.email },
+      socialAccounts: accounts.data ?? [],
+      campaigns: campaigns.data ?? [],
+      posts: posts.data ?? [],
+      alertRules: alerts.data ?? [],
+      scheduledReports: reports.data ?? [],
+    };
+  }),
 
   /** Update user display name */
   updateProfile: protectedProcedure

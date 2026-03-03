@@ -36,6 +36,13 @@
       "when": 1772543523155,
       "tag": "0004_chubby_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772547638215,
+      "tag": "0005_faithful_sebastian_shaw",
+      "breakpoints": true
     }
   ]
 }

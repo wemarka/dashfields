@@ -14,12 +14,14 @@ import {
   DollarSign, Eye, MousePointerClick,
   Users, TrendingUp, Heart, Link2, Zap,
   Plus, BarChart3, FileText, CalendarDays,
-  Rocket, ArrowRight,
+  Rocket, ArrowRight, Trophy, CheckCircle2, AlertCircle,
+  Clock, Wifi, WifiOff,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { BudgetTracker } from "@/components/dashboard/BudgetTracker";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -35,6 +37,7 @@ const DEFAULT_WIDGETS = {
   campaigns:     true,
   budget:        true,
   activity:      true,
+  topCampaign:   true,
 };
 type WidgetKey = keyof typeof DEFAULT_WIDGETS;
 
@@ -57,6 +60,138 @@ function fmtMoney(n: number): string {
 }
 function fmtPct(n: number): string {
   return n.toFixed(2) + "%";
+}
+
+// ─── Live Spend Ticker ────────────────────────────────────────────────────────
+function LiveSpendTicker({ spend }: { spend: number }) {
+  const [displayed, setDisplayed] = useState(0);
+  const animRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (spend === 0) { setDisplayed(0); return; }
+    const start = displayed;
+    const end = spend;
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function animate(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayed(start + (end - start) * eased);
+      if (progress < 1) animRef.current = requestAnimationFrame(animate);
+    }
+    animRef.current = requestAnimationFrame(animate);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spend]);
+
+  return (
+    <span className="font-black text-2xl tabular-nums text-foreground">
+      ${displayed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+    </span>
+  );
+}
+
+// ─── Platform Health Indicator ────────────────────────────────────────────────
+interface PlatformHealthProps {
+  platform: string;
+  isActive: boolean;
+  lastSeen?: string | null;
+}
+function PlatformHealthBadge({ platform, isActive, lastSeen }: PlatformHealthProps) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/60 border border-border/50">
+      <div className="relative">
+        <PlatformIcon platform={platform} className="w-4 h-4 text-foreground/70" />
+        <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${isActive ? "bg-emerald-500" : "bg-red-400"}`} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-foreground capitalize truncate">{platform}</p>
+        {lastSeen && (
+          <p className="text-[10px] text-muted-foreground truncate">
+            {isActive ? "Active" : `Last: ${new Date(lastSeen).toLocaleDateString()}`}
+          </p>
+        )}
+      </div>
+      {isActive ? (
+        <Wifi className="w-3 h-3 text-emerald-500 shrink-0" />
+      ) : (
+        <WifiOff className="w-3 h-3 text-red-400 shrink-0" />
+      )}
+    </div>
+  );
+}
+
+// ─── Top Campaign Widget ──────────────────────────────────────────────────────
+interface TopCampaignWidgetProps {
+  datePreset: DatePreset;
+  isConnected: boolean;
+}
+function TopCampaignWidget({ datePreset, isConnected }: TopCampaignWidgetProps) {
+  const { data: top, isLoading } = trpc.meta.topCampaign.useQuery(
+    { datePreset },
+    { enabled: isConnected }
+  );
+
+  if (!isConnected) return null;
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-5 flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
+          <Trophy className="w-4 h-4 text-amber-500" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">Top Campaign</h3>
+          <p className="text-xs text-muted-foreground">Highest spend this period</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2 animate-pulse">
+          <div className="h-4 bg-muted rounded w-3/4" />
+          <div className="h-3 bg-muted rounded w-1/2" />
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {[0,1,2].map(i => <div key={i} className="h-12 bg-muted rounded-xl" />)}
+          </div>
+        </div>
+      ) : top ? (
+        <>
+          <div>
+            <p className="text-sm font-semibold text-foreground truncate" title={top.name}>{top.name}</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Active</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "Spend",       value: fmtMoney(top.spend),       color: "text-blue-600" },
+              { label: "Impressions", value: fmtNum(top.impressions),   color: "text-purple-600" },
+              { label: "CTR",         value: fmtPct(top.ctr),           color: "text-amber-600" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="rounded-xl bg-muted/60 p-2.5 text-center">
+                <p className={`text-sm font-bold ${color}`}>{value}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
+              </div>
+            ))}
+          </div>
+          <Link href="/campaigns">
+            <button className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors">
+              View All Campaigns <ArrowRight className="w-3 h-3" />
+            </button>
+          </Link>
+        </>
+      ) : (
+        <div className="flex flex-col items-center py-4 text-center">
+          <AlertCircle className="w-8 h-8 text-muted-foreground/40 mb-2" />
+          <p className="text-xs text-muted-foreground">No campaign data for this period</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
@@ -105,7 +240,7 @@ export default function Dashboard() {
   const [widgets, setWidgets] = useState<typeof DEFAULT_WIDGETS>(loadWidgets);
   const [showWidgetMenu, setShowWidgetMenu] = useState(false);
   const { user } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const toggleWidget = (key: WidgetKey) => {
     setWidgets((prev) => {
@@ -122,6 +257,7 @@ export default function Dashboard() {
     campaigns:     "Active Campaigns",
     budget:        "Budget Tracker",
     activity:      "Activity Feed",
+    topCampaign:   "Top Campaign",
   };
 
   // Multi-platform summary
@@ -158,6 +294,13 @@ export default function Dashboard() {
         { label: t("dashboard.avgCpc"),  value: fmtMoney(summary.avgCpc), bar: Math.min(summary.avgCpc * 50, 100) },
       ]
     : null;
+
+  // Platform health from accounts
+  const platformHealth = accounts.map(acc => ({
+    platform:  acc.platform,
+    isActive:  acc.is_active ?? true,
+    lastSeen:  acc.updated_at ?? null,
+  }));
 
   return (
     <DashboardLayout>
@@ -253,8 +396,71 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* - Onboarding - */}
+        {/* - Onboarding Wizard (first-run) - */}
+        {!hasConnections && <OnboardingWizard />}
+
+        {/* - Onboarding Banner (post-connect) - */}
         {hasConnections && <SmartOnboardingBanner />}
+
+        {/* - Live Spend Ticker + Platform Health - */}
+        {hasConnections && summary && summary.totalSpend > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Live Spend Ticker */}
+            <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/5 border border-blue-500/20 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/15 flex items-center justify-center shrink-0">
+                <DollarSign className="w-6 h-6 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-medium text-muted-foreground">Total Ad Spend</span>
+                  <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live
+                  </span>
+                </div>
+                <LiveSpendTicker spend={summary.totalSpend} />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {datePreset.replace("last_", "Last ").replace("d", " days")} · {summary.connectedPlatforms} platform{summary.connectedPlatforms !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-xs text-muted-foreground">CTR</p>
+                <p className="text-lg font-bold text-foreground">{fmtPct(summary.avgCtr)}</p>
+                <div className="flex items-center gap-1 justify-end mt-1">
+                  <TrendingUp className="w-3 h-3 text-emerald-500" />
+                  <span className="text-[10px] text-emerald-500 font-medium">Tracking</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Platform Health Status */}
+            <div className="bg-card border border-border rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-foreground">Platform Health</h3>
+                <span className="text-[10px] text-muted-foreground">
+                  {platformHealth.filter(p => p.isActive).length}/{platformHealth.length} active
+                </span>
+              </div>
+              {platformHealth.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {platformHealth.map((ph, idx) => (
+                    <PlatformHealthBadge
+                      key={`${ph.platform}-${idx}`}
+                      platform={ph.platform}
+                      isActive={ph.isActive}
+                      lastSeen={ph.lastSeen}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground py-4 justify-center">
+                  <Clock className="w-4 h-4" />
+                  No platforms connected
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* - KPI Cards - */}
         {(hasConnections || summaryLoading) && widgets.kpiCards && (
@@ -270,7 +476,9 @@ export default function Dashboard() {
                 : null
             }
           </div>
-        )}        {/* - Platform breakdown + Performance - */}
+        )}
+
+        {/* - Platform breakdown + Performance - */}
         {hasConnections && widgets.platformBreak && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
@@ -289,13 +497,22 @@ export default function Dashboard() {
           />
         )}
 
-        {/* - Active Campaigns table - */}
-        {isMetaConnected && widgets.campaigns && (
-          <ActiveCampaignsTable
-            campaigns={metaCampaigns}
-            loading={campaignsLoading}
-            isConnected={isMetaConnected}
-          />
+        {/* - Active Campaigns table + Top Campaign widget - */}
+        {isMetaConnected && (widgets.campaigns || widgets.topCampaign) && (
+          <div className={`grid gap-4 ${widgets.campaigns && widgets.topCampaign ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}>
+            {widgets.campaigns && (
+              <div className={widgets.topCampaign ? "lg:col-span-2" : ""}>
+                <ActiveCampaignsTable
+                  campaigns={metaCampaigns}
+                  loading={campaignsLoading}
+                  isConnected={isMetaConnected}
+                />
+              </div>
+            )}
+            {widgets.topCampaign && (
+              <TopCampaignWidget datePreset={datePreset} isConnected={isMetaConnected} />
+            )}
+          </div>
         )}
 
         {/* - Budget Tracker + Activity Feed - */}

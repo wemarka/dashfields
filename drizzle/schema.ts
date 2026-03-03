@@ -170,6 +170,18 @@ export const scheduledReports = pgTable("scheduled_reports", {
   updatedAt:    timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── API Keys ────────────────────────────────────────────────────────────────
+export const apiKeys = pgTable("api_keys", {
+  id:         serial("id").primaryKey(),
+  userId:     integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform:   varchar("platform", { length: 64 }).notNull(),
+  keyName:    varchar("key_name", { length: 128 }).notNull().default("Default"),
+  apiKey:     text("api_key").notNull(),
+  isActive:   boolean("is_active").notNull().default(true),
+  createdAt:  timestamp("created_at").defaultNow().notNull(),
+  updatedAt:  timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type User           = typeof users.$inferSelect;
 export type InsertUser     = typeof users.$inferInsert;

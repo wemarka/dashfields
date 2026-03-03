@@ -6,9 +6,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import {
-  Shield, Bell, Palette, Link2, ChevronRight, Check,
+import { Shield, Bell, Palette, Link2, ChevronRight, Check,
   Sun, Moon, Monitor, Globe, Save, ExternalLink, Key, Plus, Trash2, Eye, EyeOff, ToggleLeft, ToggleRight,
+  Download, Clock, Type, Loader2,
 } from "lucide-react";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -18,6 +18,13 @@ import { useTranslation } from "react-i18next";
 import { changeLanguage } from "@/i18n";
 
 type Section = "account" | "connections" | "notifications" | "appearance" | "apikeys";
+
+const TIMEZONES = [
+  "UTC", "America/New_York", "America/Los_Angeles", "America/Chicago",
+  "Europe/London", "Europe/Paris", "Europe/Berlin", "Asia/Dubai",
+  "Asia/Riyadh", "Asia/Amman", "Asia/Beirut", "Asia/Cairo",
+  "Asia/Tokyo", "Asia/Singapore", "Australia/Sydney",
+];
 
 const sections: { id: Section; icon: typeof Shield; labelKey: string }[] = [
   { id: "account",       icon: Shield,  labelKey: "settings.account" },
@@ -212,6 +219,67 @@ export default function Settings() {
     onError:   (e) => toast.error("Failed: " + e.message),
   });
 
+  // ── Account fields ─────────────────────────────────────────────────────────
+  const [displayName, setDisplayName] = useState("");
+  const [timezone, setTimezone] = useState("UTC");
+  const [isSavingAccount, setIsSavingAccount] = useState(false);
+
+  const updateProfileMutation = trpc.settings.updateProfile.useMutation({
+    onSuccess: () => { toast.success("Profile updated"); setIsSavingAccount(false); },
+    onError: (e) => { toast.error(e.message); setIsSavingAccount(false); },
+  });
+
+  useEffect(() => {
+    if (user?.name) setDisplayName(user.name);
+  }, [user]);
+
+  useEffect(() => {
+    if (settings?.timezone) setTimezone(settings.timezone);
+  }, [settings]);
+
+  const handleSaveAccount = () => {
+    setIsSavingAccount(true);
+    // Save name
+    if (displayName.trim() && displayName.trim() !== user?.name) {
+      updateProfileMutation.mutate({ name: displayName.trim() });
+    }
+    // Save timezone
+    updateMutation.mutate({ timezone });
+    if (!displayName.trim() || displayName.trim() === user?.name) {
+      setIsSavingAccount(false);
+    }
+  };
+
+  // ── Data Export ────────────────────────────────────────────────────────────
+  const exportDataMutation = trpc.settings.exportData?.useMutation?.({
+    onSuccess: (data: any) => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dashfields-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Data exported successfully");
+    },
+    onError: (e: any) => toast.error("Export failed: " + e.message),
+  });
+
+  // ── Font size ──────────────────────────────────────────────────────────────
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
+  const fontSizeOptions = [
+    { value: "sm", label: "Small",   size: "text-xs" },
+    { value: "md", label: "Default", size: "text-sm" },
+    { value: "lg", label: "Large",   size: "text-base" },
+  ] as const;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (fontSize === "sm") root.style.fontSize = "14px";
+    else if (fontSize === "lg") root.style.fontSize = "17px";
+    else root.style.fontSize = "16px";
+  }, [fontSize]);
+
   // ── Notification toggles (local state synced with settings) ───────────────
   const [emailNotif,  setEmailNotif]  = useState(true);
   const [pushNotif,   setPushNotif]   = useState(true);
@@ -307,7 +375,8 @@ export default function Settings() {
                   <div>
                     <label className="text-xs text-muted-foreground mb-1.5 block">{t("profile.name")}</label>
                     <input
-                      defaultValue={user?.name ?? ""}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
@@ -319,14 +388,51 @@ export default function Settings() {
                       className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground outline-none cursor-not-allowed"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Timezone
+                    </label>
+                    <select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      {TIMEZONES.map((tz) => (
+                        <option key={tz} value={tz}>{tz}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-end">
+                    <p className="text-xs text-muted-foreground pb-2">
+                      Current time: {new Date().toLocaleTimeString(undefined, { timeZone: timezone })}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3 pt-1">
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                    <Save className="w-3.5 h-3.5" />
+                  <button
+                    onClick={handleSaveAccount}
+                    disabled={isSavingAccount || updateMutation.isPending}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    {isSavingAccount ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     {t("profile.saveChanges")}
                   </button>
-                  <p className="text-xs text-muted-foreground">Changes to name only; email is managed by Manus OAuth</p>
+                  <p className="text-xs text-muted-foreground">Email is managed by Manus OAuth</p>
+                </div>
+
+                {/* Data Export */}
+                <div className="pt-4 border-t border-border">
+                  <h3 className="text-xs font-semibold text-foreground mb-1">Data Export</h3>
+                  <p className="text-xs text-muted-foreground mb-3">Download all your account data as a JSON file</p>
+                  <button
+                    onClick={() => exportDataMutation?.mutate?.()}
+                    disabled={exportDataMutation?.isPending}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
+                  >
+                    {exportDataMutation?.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                    Export My Data
+                  </button>
                 </div>
               </div>
             )}
@@ -470,20 +576,23 @@ export default function Settings() {
                   <LanguageSelector />
                 </div>
 
-                {/* Density */}
+                {/* Font Size */}
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-3">Interface Density</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1">
+                    <Type className="w-3 h-3" /> Font Size
+                  </p>
                   <div className="flex gap-2">
-                    {["Compact", "Default", "Comfortable"].map((d) => (
+                    {fontSizeOptions.map((f) => (
                       <button
-                        key={d}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
-                          d === "Default"
+                        key={f.value}
+                        onClick={() => setFontSize(f.value)}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium border transition-all ${f.size} ${
+                          fontSize === f.value
                             ? "border-primary bg-primary/10 text-primary"
                             : "border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
-                        {d}
+                        Aa — {f.label}
                       </button>
                     ))}
                   </div>

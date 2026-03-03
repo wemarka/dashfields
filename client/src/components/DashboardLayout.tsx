@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -10,7 +11,7 @@ import {
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
   PieChart, GitCompare, Zap, Sun, Moon, User, Hash, Swords,
-  Languages,
+  Languages, FlaskConical,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -73,7 +74,8 @@ const navGroups: NavGroup[] = [
       { icon: PieChart,    labelKey: "nav.postAnalytics",   path: "/post-analytics", iconAnimation: "icon-pop" },
       { icon: GitCompare,  labelKey: "nav.compare",         path: "/compare",       iconAnimation: "icon-spin" },
       { icon: Hash,        labelKey: "nav.hashtags",         path: "/hashtags",      iconAnimation: "icon-bounce" },
-      { icon: Swords,      labelKey: "nav.competitors",      path: "/competitors",   iconAnimation: "icon-shake" },
+      { icon: Swords,        labelKey: "nav.competitors",       path: "/competitors",        iconAnimation: "icon-shake" },
+      { icon: FlaskConical,  labelKey: "nav.advancedAnalytics", path: "/advanced-analytics", iconAnimation: "icon-pop" },
     ],
   },
   {
@@ -159,7 +161,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className={`app-bg flex h-screen overflow-hidden ${isRTL ? "flex-row-reverse" : ""}`}>
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside
-        className="glass-strong flex flex-col shrink-0 transition-all duration-300 ease-out m-3 rounded-2xl overflow-hidden relative"
+        className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out m-3 rounded-2xl overflow-hidden relative"
         style={{ width: collapsed ? 64 : 228 }}
       >
         {/* Logo */}
@@ -358,10 +360,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Page content */}
-        <div className="flex-1 overflow-y-auto animate-fade-in">
+        <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">
           {children}
         </div>
       </main>
+
+      {/* ── Mobile Bottom Nav ───────────────────────────────────────────────── */}
+      <MobileBottomNav />
     </div>
   );
 }

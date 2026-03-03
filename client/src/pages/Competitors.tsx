@@ -14,9 +14,11 @@ import {
 import {
   TrendingUp, TrendingDown, Minus, Award, AlertTriangle,
   BarChart2, Target, Zap, ChevronDown, RefreshCw, Sparkles, Loader2,
+  Shield, ShieldAlert, Lightbulb, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState as useLocalState } from "react";
+import { Streamdown } from "streamdown";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "last_7d" | "last_30d" | "this_month" | "last_month";
@@ -159,6 +161,17 @@ export default function Competitors() {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [aiStrategy, setAiStrategy] = useLocalState<string | null>(null);
   const [showStrategy, setShowStrategy] = useLocalState(false);
+  const [swotData, setSwotData] = useLocalState<{
+    strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[];
+    recommendations: string[]; competitiveScore: number; summary: string;
+  } | null>(null);
+  const [showSwot, setShowSwot] = useLocalState(false);
+  const [swotCompetitor, setSwotCompetitor] = useLocalState("Industry Average");
+
+  const generateSwot = trpc.ai.competitorSwot.useMutation({
+    onSuccess: (data) => { setSwotData(data); setShowSwot(true); },
+    onError: (err) => toast.error("SWOT failed: " + err.message),
+  });
 
   const generateStrategy = trpc.ai.generate.useMutation({
     onSuccess: (data) => {
@@ -214,6 +227,39 @@ export default function Competitors() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {/* SWOT Competitor Input */}
+            <input
+              type="text" value={swotCompetitor} onChange={(e) => setSwotCompetitor(e.target.value)}
+              placeholder="Competitor name..."
+              className="px-3 py-1.5 rounded-xl text-xs border border-border bg-muted text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 w-36"
+            />
+            <button
+              onClick={() => {
+                const myPlatform = platforms.find(p => p.hasData);
+                generateSwot.mutate({
+                  yourBrand: "Your Brand",
+                  competitorName: swotCompetitor || "Industry Average",
+                  industry: "digital marketing",
+                  yourMetrics: {
+                    ctr: myPlatform?.metrics.ctr ?? 0,
+                    cpc: myPlatform?.metrics.cpc ?? 0,
+                    roas: myPlatform?.metrics.roas ?? 0,
+                    engagementRate: 0,
+                  },
+                  industryAvgMetrics: {
+                    ctr: myPlatform?.benchmark.ctr ?? 2.0,
+                    cpc: myPlatform?.benchmark.cpc ?? 1.5,
+                    roas: myPlatform?.benchmark.roas ?? 3.0,
+                    engagementRate: 3.5,
+                  },
+                });
+              }}
+              disabled={generateSwot.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+            >
+              {generateSwot.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Shield className="w-3.5 h-3.5" />}
+              SWOT
+            </button>
             {DATE_PRESETS.map((d) => (
               <button
                 key={d.value}
@@ -246,8 +292,59 @@ export default function Competitors() {
           </div>
         </div>
 
-        {/* AI Strategy Panel */}
-        {showStrategy && aiStrategy && (
+            {/* SWOT Analysis Panel */}
+            {showSwot && swotData && (
+              <div className="rounded-2xl border border-border bg-card p-5 mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> SWOT Analysis vs {swotCompetitor}</p>
+                  <button onClick={() => setShowSwot(false)} className="text-xs text-muted-foreground hover:text-foreground">Close ×</button>
+                </div>
+                {/* Competitive Score */}
+                <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#10b981' : swotData.competitiveScore >= 40 ? '#f59e0b' : '#ef4444'} ${swotData.competitiveScore}%, #e5e7eb ${swotData.competitiveScore}%)` }}>
+                    <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+                      <span className="text-xs font-bold">{swotData.competitiveScore}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-foreground">{swotData.summary}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {[
+                    { title: "Strengths",     items: swotData.strengths,     color: "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-800", titleColor: "text-emerald-700 dark:text-emerald-400", icon: "💪" },
+                    { title: "Weaknesses",    items: swotData.weaknesses,    color: "border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800",             titleColor: "text-red-700 dark:text-red-400",     icon: "⚠️" },
+                    { title: "Opportunities", items: swotData.opportunities, color: "border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800",         titleColor: "text-blue-700 dark:text-blue-400",   icon: "🚀" },
+                    { title: "Threats",       items: swotData.threats,       color: "border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800",     titleColor: "text-amber-700 dark:text-amber-400", icon: "🔴" },
+                  ].map((q) => (
+                    <div key={q.title} className={`border rounded-xl p-3 ${q.color}`}>
+                      <p className={`text-xs font-bold mb-2 ${q.titleColor}`}>{q.icon} {q.title}</p>
+                      <ul className="space-y-1">
+                        {q.items.map((item, i) => (
+                          <li key={i} className="flex items-start gap-1.5 text-xs text-foreground">
+                            <ChevronRight className="w-3 h-3 mt-0.5 shrink-0 text-muted-foreground" />{item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                {swotData.recommendations.length > 0 && (
+                  <div className="border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 rounded-xl p-3">
+                    <p className="text-xs font-bold text-violet-700 dark:text-violet-400 mb-2">💡 Strategic Recommendations</p>
+                    <ul className="space-y-1">
+                      {swotData.recommendations.map((r, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-xs text-foreground">
+                          <span className="text-violet-500 font-bold shrink-0">{i + 1}.</span>{r}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* AI Strategy Panel */}
+            {showStrategy && aiStrategy && (
           <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 mb-2">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-violet-700 flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Strategy Recommendations</p>

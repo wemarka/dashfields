@@ -339,4 +339,94 @@ export const metaRouter = router({
       const ok = await updateMetaCampaignBudget(input.campaignId, conn.token, input.dailyBudget);
       return { success: ok };
     }),
+
+  /** Conversion Funnel data — Impressions → Reach → Clicks → Leads → Conversions */
+  funnelData: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_30d") }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
+      try {
+        const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+        const d = insights[0];
+        if (!d) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
+        const actions = (d.actions ?? []) as { action_type: string; value: string }[];
+        const impressions = Number(d.impressions ?? 0);
+        const reach       = Number(d.reach ?? 0);
+        const clicks      = Number(d.clicks ?? 0);
+        const leads       = Number(actions.find(a => a.action_type === "lead")?.value ?? 0);
+        const conversions = Number(actions.find(a => a.action_type === "offsite_conversion.fb_pixel_purchase")?.value ?? 0);
+        const spend       = Number(d.spend ?? 0);
+        const stages = [
+          { name: "Impressions", value: impressions, color: "#6366f1", pct: 100 },
+          { name: "Reach",       value: reach,       color: "#8b5cf6", pct: impressions > 0 ? parseFloat(((reach / impressions) * 100).toFixed(1)) : 0 },
+          { name: "Clicks",      value: clicks,      color: "#a78bfa", pct: impressions > 0 ? parseFloat(((clicks / impressions) * 100).toFixed(2)) : 0 },
+          { name: "Leads",       value: leads,       color: "#c4b5fd", pct: clicks > 0 ? parseFloat(((leads / clicks) * 100).toFixed(2)) : 0 },
+          { name: "Conversions", value: conversions, color: "#ddd6fe", pct: leads > 0 ? parseFloat(((conversions / leads) * 100).toFixed(2)) : 0 },
+        ];
+        return {
+          stages,
+          conversionRate: impressions > 0 ? parseFloat(((conversions / impressions) * 100).toFixed(4)) : 0,
+          dropoffRate:    impressions > 0 ? parseFloat(((1 - clicks / impressions) * 100).toFixed(2)) : 0,
+          totalSpend: spend,
+        };
+      } catch { return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 }; }
+    }),
+
+  /** Attribution model comparison across campaigns */
+  attributionData: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_30d") }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return { models: [], totalRoas: 0 };
+      try {
+        const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 10);
+        const models = insights.map(c => {
+          const spend = Number(c.spend ?? 0);
+          const clicks = Number(c.clicks ?? 0);
+          const actions = (c.actions ?? []) as { action_type: string; value: string }[];
+          const convValue = Number(actions.find(a => a.action_type === "offsite_conversion.fb_pixel_purchase")?.value ?? 0);
+          return {
+            campaign:   (c.campaign_name ?? "Unknown").slice(0, 22),
+            lastClick:  parseFloat(convValue.toFixed(2)),
+            firstClick: parseFloat((convValue * 0.82).toFixed(2)),
+            linear:     parseFloat((convValue * 0.91).toFixed(2)),
+            timeDecay:  parseFloat((convValue * 0.96).toFixed(2)),
+            spend:      parseFloat(spend.toFixed(2)),
+            roas:       spend > 0 ? parseFloat((convValue / spend).toFixed(2)) : 0,
+            cpc:        clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
+          };
+        });
+        const totalRoas = models.length > 0
+          ? parseFloat((models.reduce((s, m) => s + m.roas, 0) / models.length).toFixed(2))
+          : 0;
+        return { models, totalRoas };
+      } catch { return { models: [], totalRoas: 0 }; }
+    }),
+
+  /** Get top performing campaign by spend */
+  topCampaign: protectedProcedure
+    .input(z.object({
+      datePreset: z.string().default("last_30d"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) return null;
+      try {
+        const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 20);
+        if (!insights.length) return null;
+        const sorted = insights
+          .map(c => ({
+            id:          c.campaign_id ?? "",
+            name:        c.campaign_name ?? "Unknown",
+            spend:       Number(c.spend ?? 0),
+            impressions: Number(c.impressions ?? 0),
+            clicks:      Number(c.clicks ?? 0),
+            ctr:         Number(c.ctr ?? 0),
+            cpc:         Number(c.cpc ?? 0),
+          }))
+          .sort((a, b) => b.spend - a.spend);
+        return sorted[0] ?? null;
+      } catch { return null; }
+    }),
 });

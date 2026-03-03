@@ -1,0 +1,8 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS public.api_keys (\n  id          SERIAL PRIMARY KEY,\n  user_id     INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,\n  platform    VARCHAR(64) NOT NULL,\n  key_name    VARCHAR(128) NOT NULL DEFAULT 'Default',\n  api_key     TEXT NOT NULL,\n  is_active   BOOLEAN NOT NULL DEFAULT TRUE,\n  created_at  TIMESTAMP NOT NULL DEFAULT NOW(),\n  updated_at  TIMESTAMP NOT NULL DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS api_keys_user_id_idx ON public.api_keys(user_id);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \nCREATE TABLE IF NOT EXISTS public.api_keys (\n  id          SERIAL PRIMARY KEY,\n  user_id     INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,\n  platform    VARCHAR(64) NOT NULL,\n  key_name    VARCHAR(128) NOT NULL DEFAULT 'Default',\n  api_key     TEXT NOT NULL,\n  is_active   BOOLEAN NOT NULL DEFAULT TRUE,\n  created_at  TIMESTAMP NOT NULL DEFAULT NOW(),\n  updated_at  TIMESTAMP NOT NULL DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS api_keys_user_id_idx ON public.api_keys(user_id);\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1142 (42000) at line 2: CREATE command denied to user '2qNhRDYaxzneXfG.9d70d45e7b6d'@'%' for table 'api_keys'"
+  ]
+}

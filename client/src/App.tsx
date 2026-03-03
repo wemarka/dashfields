@@ -24,6 +24,7 @@ import Notifications from "@/pages/Notifications";
 import Profile from "@/pages/Profile";
 import HashtagAnalytics from "@/pages/HashtagAnalytics";
 import Competitors from "@/pages/Competitors";
+import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
 
 function Router() {
   return (
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/profile"         component={Profile} />
       <Route path="/hashtags"         component={HashtagAnalytics} />
       <Route path="/competitors"       component={Competitors} />
+      <Route path="/advanced-analytics" component={AdvancedAnalytics} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>
