@@ -156,7 +156,8 @@
     "totalSpend": "إجمالي الإنفاق",
     "activeCampaigns": "الحملات النشطة",
     "avgCtr": "متوسط نسبة النقر",
-    "totalImpressions": "إجمالي مرات الظهور"
+    "totalImpressions": "إجمالي مرات الظهور",
+    "statusLabel": "الحالة"
   },
   "analytics": {
     "title": "نظرة عامة على التحليلات",

@@ -131,7 +131,7 @@ export function LocalCampaignTable({ campaigns, loading, onStatusChange, onCreat
                 {[
                   t("campaigns.campaign", "Campaign"),
                   t("campaigns.platform", "Platform"),
-                  t("campaigns.status", "Status"),
+                  t("campaigns.statusLabel", "Status"),
                   t("campaigns.budget", "Budget"),
                   t("campaigns.impressions", "Impressions"),
                   t("campaigns.clicks", "Clicks"),

@@ -156,7 +156,8 @@
     "totalSpend": "Total Spend",
     "activeCampaigns": "Active Campaigns",
     "avgCtr": "Avg CTR",
-    "totalImpressions": "Total Impressions"
+    "totalImpressions": "Total Impressions",
+    "statusLabel": "Status"
   },
   "analytics": {
     "title": "Analytics Overview",
