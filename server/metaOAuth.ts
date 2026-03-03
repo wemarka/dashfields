@@ -1,7 +1,8 @@
 /**
  * metaOAuth.ts
- * Handles Meta (Facebook) OAuth 2.0 flow for connecting ad accounts.
+ * Handles Meta (Facebook + Instagram) OAuth 2.0 flow.
  * Registers /api/oauth/meta/init and /api/oauth/meta/callback routes.
+ * After connect: saves ad accounts (facebook) + Instagram business accounts.
  */
 import type { Express, Request, Response } from "express";
 import { getSupabase } from "./supabase";
@@ -19,7 +20,7 @@ function getMetaAppSecret() { return process.env.META_APP_SECRET ?? ""; }
 async function exchangeForLongLivedToken(shortToken: string): Promise<string> {
   const appId     = getMetaAppId();
   const appSecret = getMetaAppSecret();
-  if (!appId || !appSecret) return shortToken; // fallback: use as-is
+  if (!appId || !appSecret) return shortToken;
 
   const url = new URL(`${META_GRAPH_BASE}/oauth/access_token`);
   url.searchParams.set("grant_type",        "fb_exchange_token");
@@ -54,6 +55,28 @@ async function getMetaUserInfo(accessToken: string) {
   return json as { id: string; name: string; picture?: { data?: { url?: string } } };
 }
 
+/** Fetch Facebook Pages with Instagram business accounts */
+async function getFacebookPages(accessToken: string) {
+  const url = new URL(`${META_GRAPH_BASE}/me/accounts`);
+  url.searchParams.set("access_token", accessToken);
+  url.searchParams.set("fields", "id,name,access_token,instagram_business_account{id,name,username,profile_picture_url,followers_count}");
+  const res  = await fetch(url.toString());
+  const json = await res.json() as any;
+  if (json.error) return [];
+  return (json.data ?? []) as Array<{
+    id: string;
+    name: string;
+    access_token: string;
+    instagram_business_account?: {
+      id: string;
+      name?: string;
+      username?: string;
+      profile_picture_url?: string;
+      followers_count?: number;
+    };
+  }>;
+}
+
 /** Extract user ID from session cookie */
 async function getUserIdFromCookie(req: Request): Promise<number | null> {
   try {
@@ -72,6 +95,59 @@ async function getUserIdFromCookie(req: Request): Promise<number | null> {
   }
 }
 
+/** Upsert a social account in Supabase */
+async function upsertAccount(params: {
+  userId: number;
+  platform: string;
+  platformAccountId: string;
+  name: string;
+  username?: string | null;
+  accessToken: string;
+  profilePicture?: string | null;
+  metadata?: Record<string, unknown>;
+}) {
+  const sb = getSupabase();
+  const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // 60 days
+
+  const { data: existing } = await sb
+    .from("social_accounts")
+    .select("id")
+    .eq("user_id", params.userId)
+    .eq("platform", params.platform)
+    .eq("platform_account_id", params.platformAccountId)
+    .maybeSingle();
+
+  if (existing) {
+    await sb
+      .from("social_accounts")
+      .update({
+        access_token:     params.accessToken,
+        is_active:        true,
+        token_expires_at: expiresAt,
+        updated_at:       new Date().toISOString(),
+        profile_picture:  params.profilePicture ?? null,
+        name:             params.name,
+        username:         params.username ?? null,
+        metadata:         params.metadata ?? {},
+      })
+      .eq("id", existing.id);
+  } else {
+    await sb.from("social_accounts").insert({
+      user_id:             params.userId,
+      platform:            params.platform,
+      account_type:        params.platform === "facebook" ? "ad_account" : "business",
+      platform_account_id: params.platformAccountId,
+      name:                params.name,
+      username:            params.username ?? null,
+      access_token:        params.accessToken,
+      is_active:           true,
+      token_expires_at:    expiresAt,
+      profile_picture:     params.profilePicture ?? null,
+      metadata:            params.metadata ?? {},
+    });
+  }
+}
+
 export function registerMetaOAuthRoutes(app: Express) {
   /**
    * GET /api/oauth/meta/init
@@ -84,7 +160,6 @@ export function registerMetaOAuthRoutes(app: Express) {
     const returnPath = String(req.query.returnPath ?? "/connections");
 
     if (!appId) {
-      // No Meta App ID configured — redirect back with error
       res.redirect(302, `${origin}${returnPath}?meta_error=no_app_id`);
       return;
     }
@@ -96,7 +171,17 @@ export function registerMetaOAuthRoutes(app: Express) {
     authUrl.searchParams.set("client_id",     appId);
     authUrl.searchParams.set("redirect_uri",  redirectUri);
     authUrl.searchParams.set("state",         state);
-    authUrl.searchParams.set("scope",         "ads_read,ads_management,business_management,pages_read_engagement");
+    // Scopes: ads + pages + instagram
+    authUrl.searchParams.set("scope", [
+      "ads_read",
+      "ads_management",
+      "business_management",
+      "pages_read_engagement",
+      "pages_show_list",
+      "instagram_basic",
+      "instagram_content_publish",
+      "instagram_manage_insights",
+    ].join(","));
     authUrl.searchParams.set("response_type", "code");
 
     res.redirect(302, authUrl.toString());
@@ -104,7 +189,7 @@ export function registerMetaOAuthRoutes(app: Express) {
 
   /**
    * GET /api/oauth/meta/callback
-   * Handles Meta OAuth callback. Exchanges code for token, saves to DB.
+   * Handles Meta OAuth callback. Exchanges code for token, saves FB + IG accounts.
    */
   app.get("/api/oauth/meta/callback", async (req: Request, res: Response) => {
     const code  = String(req.query.code  ?? "");
@@ -145,13 +230,14 @@ export function registerMetaOAuthRoutes(app: Express) {
 
       const shortToken = String(tokenJson.access_token);
 
-      // Exchange for long-lived token
+      // Exchange for long-lived token (60 days)
       const longToken = await exchangeForLongLivedToken(shortToken);
 
-      // Get Meta user info + ad accounts
-      const [metaUser, adAccounts] = await Promise.all([
+      // Get Meta user info + ad accounts + pages
+      const [metaUser, adAccounts, pages] = await Promise.all([
         getMetaUserInfo(longToken),
-        getAdAccounts(longToken),
+        getAdAccounts(longToken).catch(() => []),
+        getFacebookPages(longToken).catch(() => []),
       ]);
 
       // Get our app user from session
@@ -161,50 +247,56 @@ export function registerMetaOAuthRoutes(app: Express) {
         return;
       }
 
-      // Save each ad account to social_accounts
+      let fbCount = 0;
+      let igCount = 0;
+
+      // Save Facebook ad accounts
       for (const account of adAccounts) {
         const accountId = account.id.replace("act_", "");
-        const sb = getSupabase();
-      // Check if already exists
-        const { data: existing } = await sb
-          .from("social_accounts")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("platform", "facebook")
-          .eq("platform_account_id", accountId)
-          .maybeSingle();
+        await upsertAccount({
+          userId,
+          platform: "facebook",
+          platformAccountId: accountId,
+          name: account.name,
+          username: metaUser.name,
+          accessToken: longToken,
+          profilePicture: metaUser.picture?.data?.url ?? null,
+          metadata: { currency: account.currency, metaUserId: metaUser.id },
+        });
+        fbCount++;
+      }
 
-        if (existing) {
-          // Update token
-          await sb
-            .from("social_accounts")
-            .update({
-              access_token:     longToken,
-              is_active:        true,
-              token_expires_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days
-              updated_at:       new Date().toISOString(),
-              profile_picture:  metaUser.picture?.data?.url ?? null,
-            })
-            .eq("id", existing.id);
-        } else {
-          // Insert new
-          await sb.from("social_accounts").insert({
-            user_id:            userId,
-            platform:           "facebook",
-            account_type:       "ad_account",
-            platform_account_id: accountId,
-            name:               account.name,
-            username:           metaUser.name,
-            access_token:       longToken,
-            is_active:          true,
-            token_expires_at:   new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
-            profile_picture:    metaUser.picture?.data?.url ?? null,
-            metadata:           { currency: account.currency, metaUserId: metaUser.id },
+      // Save Instagram business accounts (from pages)
+      for (const page of pages) {
+        if (page.instagram_business_account) {
+          const ig = page.instagram_business_account;
+          // Use page access token for Instagram (more reliable)
+          const igToken = page.access_token || longToken;
+          await upsertAccount({
+            userId,
+            platform: "instagram",
+            platformAccountId: ig.id,
+            name: ig.name ?? page.name,
+            username: ig.username ?? null,
+            accessToken: igToken,
+            profilePicture: ig.profile_picture_url ?? null,
+            metadata: {
+              facebookPageId: page.id,
+              facebookPageName: page.name,
+              followersCount: ig.followers_count ?? 0,
+              metaUserId: metaUser.id,
+            },
           });
+          igCount++;
         }
       }
 
-      res.redirect(302, `${origin}${returnPath}?meta_connected=1&accounts=${adAccounts.length}`);
+      const summary = [
+        fbCount > 0 ? `${fbCount} Facebook` : "",
+        igCount > 0 ? `${igCount} Instagram` : "",
+      ].filter(Boolean).join(", ");
+
+      res.redirect(302, `${origin}${returnPath}?meta_connected=1&accounts=${fbCount + igCount}&summary=${encodeURIComponent(summary)}`);
     } catch (err: any) {
       console.error("[Meta OAuth] Callback error:", err);
       res.redirect(302, `${origin}${returnPath}?meta_error=${encodeURIComponent(err.message ?? "unknown")}`);

@@ -599,3 +599,86 @@
 - [x] TypeScript check (0 errors)
 - [x] 247/247 tests passing
 - [x] Save checkpoint and deliver
+
+## Phase 99-104 — Connections 100% Complete
+
+### Phase 99 — Audit All Connections
+- [ ] Review server/platformOAuth.ts for all 8 platforms
+- [ ] Review server/metaOAuth.ts for Facebook/Instagram
+- [ ] Review Connections.tsx UI state
+- [ ] Identify gaps: missing OAuth flows, broken callbacks, missing token refresh
+
+### Phase 100 — Meta (Facebook + Instagram) OAuth Polish
+- [ ] Verify /api/meta/oauth/start and /callback work end-to-end
+- [ ] Store page_id, page_name, instagram_business_account_id after connect
+- [ ] Show real account name + page name in Connections card
+- [ ] Add token expiry check + re-auth prompt
+- [ ] Disconnect clears tokens properly
+
+### Phase 101 — Twitter/X OAuth 2.0 Complete
+- [ ] /api/oauth/twitter/start → Twitter OAuth 2.0 PKCE flow
+- [ ] /api/oauth/twitter/callback → exchange code for access_token
+- [ ] Store twitter username + user_id after connect
+- [ ] Show @username in Connections card
+
+### Phase 102 — TikTok + LinkedIn + YouTube OAuth
+- [ ] TikTok: /api/oauth/tiktok/start + /callback (OAuth 2.0)
+- [ ] LinkedIn: /api/oauth/linkedin/start + /callback
+- [ ] YouTube: /api/oauth/youtube/start + /callback (Google OAuth)
+- [ ] Store display name/handle for each platform
+
+### Phase 103 — Snapchat + Pinterest + Connections UI
+- [ ] Snapchat: token-based connect (API key input)
+- [ ] Pinterest: token-based connect (API key input)
+- [ ] Connections page: show real account info per platform
+- [ ] Connections page: Sync Now button per platform
+- [ ] Connections page: token expiry badge (Expired/Active)
+- [ ] Connections page: last synced timestamp
+
+### Phase 104 — Tests + Checkpoint
+- [ ] TypeScript check (0 errors)
+- [ ] All tests passing
+- [ ] Save checkpoint and deliver
+
+## Phase 99-104 — Connections 100% Complete
+
+### Phase 99 — Meta OAuth Overhaul
+- [x] metaOAuth.ts: Exchange short-lived token for long-lived (60 days)
+- [x] metaOAuth.ts: Fetch Facebook ad accounts + Pages
+- [x] metaOAuth.ts: Fetch Instagram business accounts from Pages
+- [x] metaOAuth.ts: Save profile picture, username, followers count
+- [x] metaOAuth.ts: Friendly error page when META_APP_ID missing
+- [x] Callback: save both Facebook + Instagram in one OAuth flow
+
+### Phase 100 — Twitter/X OAuth 2.0 (PKCE)
+- [x] platformOAuth.ts: Twitter PKCE flow (code_verifier + code_challenge)
+- [x] platformOAuth.ts: HTTP Basic Auth for token exchange
+- [x] platformOAuth.ts: Fetch Twitter user info (name, username, profile_image_url)
+- [x] State store with in-memory TTL cleanup
+
+### Phase 101 — TikTok OAuth
+- [x] platformOAuth.ts: TikTok OAuth 2.0 flow
+- [x] platformOAuth.ts: Fetch TikTok user info (display_name, avatar_url)
+- [x] Friendly "not configured" HTML page when CLIENT_ID missing
+
+### Phase 102 — LinkedIn + YouTube OAuth
+- [x] platformOAuth.ts: LinkedIn OAuth 2.0 with Basic Auth
+- [x] platformOAuth.ts: YouTube (Google) OAuth with offline access
+- [x] Fetch LinkedIn name + YouTube channel info
+
+### Phase 103 — Snapchat + Pinterest (API Key)
+- [x] shared/platforms.ts: Changed connectionType from "coming_soon" to "api_key"
+- [x] ManualConnectModal: token hint + docs URL link
+- [x] Full manual token connect form with validation
+
+### Phase 104 — Connections UI Overhaul
+- [x] PlatformCard: OAuth 2.0 badge, profile picture, username display
+- [x] PlatformCard: Token expiry badge (Active / Expires in Xd / Expired)
+- [x] PlatformCard: "Refresh" button to reconnect expired tokens
+- [x] PlatformCard: "Add another account" link
+- [x] Connected accounts list with disconnect per account
+- [x] Summary chips showing connected platforms
+- [x] Expired tokens warning banner
+- [x] OAuth callback handler (meta_connected, oauth_success, oauth_error)
+- [x] Info banner explaining OAuth 2.0 security
+- [x] 247/247 tests passing, 0 TypeScript errors

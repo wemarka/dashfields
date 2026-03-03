@@ -1,7 +1,8 @@
 /**
  * Connections.tsx
  * Multi-platform social media connections hub.
- * OAuth-first: clicking Connect on supported platforms goes directly to OAuth.
+ * OAuth-first for all platforms that support it.
+ * Manual token input for api_key platforms (Snapchat, Pinterest).
  */
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -9,19 +10,16 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
+import type { PlatformId } from "@shared/platforms";
 import { useTranslation } from "react-i18next";
 import {
   Loader2, Link2, Unlink, Globe, RefreshCw, Zap,
-  CheckCircle2, AlertCircle, X, ChevronRight, Shield,
+  CheckCircle2, X, Shield, ExternalLink, Clock,
+  AlertTriangle, Key, Info,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
-type PlatformId = "facebook" | "instagram" | "tiktok" | "twitter" | "linkedin" | "youtube" | "google" | "snapchat" | "pinterest";
-
-// Platforms that support direct OAuth (no token needed)
-const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
-
-// ─── Manual Token Modal (for non-OAuth platforms) ─────────────────────────────
+// ─── Manual Token Modal ────────────────────────────────────────────────────────
 interface ManualConnectModalProps {
   platformId: PlatformId;
   onClose: () => void;
@@ -31,13 +29,13 @@ interface ManualConnectModalProps {
 function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectModalProps) {
   const { t } = useTranslation();
   const platform = getPlatform(platformId);
-  const [accountId, setAccountId] = useState("");
+  const [accountId, setAccountId]   = useState("");
   const [accountName, setAccountName] = useState("");
   const [accessToken, setAccessToken] = useState("");
 
   const connectMutation = trpc.social.connect.useMutation({
     onSuccess: () => {
-      toast.success(`${platform.name} connected!`);
+      toast.success(`${platform.name} connected successfully!`);
       onConnected();
       onClose();
     },
@@ -52,7 +50,7 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
     connectMutation.mutate({
       platform: platformId as "facebook" | "instagram" | "linkedin" | "twitter" | "youtube" | "tiktok" | "google",
       platformAccountId: accountId.trim(),
-      name: accountName.trim() || platform.name + " Account",
+      name: accountName.trim() || `${platform.name} Account`,
       accessToken: accessToken.trim() || undefined,
     });
   };
@@ -78,10 +76,23 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
 
         <div className="p-5 space-y-4">
           {/* Token hint */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/40 p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-300">
-              <strong>How to get your token:</strong> {platform.tokenHint}
-            </p>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/40 p-3 flex gap-2">
+            <Key className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-1">How to get your token</p>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80">{platform.tokenHint}</p>
+              {platform.docsUrl && (
+                <a
+                  href={platform.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-300 hover:underline mt-1.5 font-medium"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  View documentation
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Supported features */}
@@ -121,14 +132,14 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
           </div>
           <div>
             <label className="block text-xs font-medium text-foreground mb-1.5">
-              Access Token <span className="text-muted-foreground">(optional)</span>
+              Access Token <span className="text-red-500">*</span>
             </label>
             <textarea
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value)}
-              placeholder={platform.tokenHint}
+              placeholder="Paste your access token here..."
               rows={3}
-              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono"
             />
           </div>
 
@@ -141,7 +152,7 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
             </button>
             <button
               onClick={handleConnect}
-              disabled={connectMutation.isPending || !accountId.trim()}
+              disabled={connectMutation.isPending || !accountId.trim() || !accessToken.trim()}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {connectMutation.isPending ? (
@@ -149,7 +160,7 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
               ) : (
                 <Link2 className="w-4 h-4" />
               )}
-              {t("connections.connect")}
+              Connect
             </button>
           </div>
         </div>
@@ -158,7 +169,39 @@ function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectM
   );
 }
 
-// ─── Platform Card ────────────────────────────────────────────────────────────
+// ─── Token Expiry Badge ────────────────────────────────────────────────────────
+function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
+  if (!expiresAt) return null;
+  const expiry  = new Date(expiresAt);
+  const now     = new Date();
+  const diffMs  = expiry.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMs < 0) {
+    return (
+      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-800/50 font-medium">
+        <AlertTriangle className="w-2.5 h-2.5" />
+        Expired
+      </span>
+    );
+  }
+  if (diffDays <= 7) {
+    return (
+      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50 font-medium">
+        <Clock className="w-2.5 h-2.5" />
+        Expires in {diffDays}d
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/50 font-medium">
+      <CheckCircle2 className="w-2.5 h-2.5" />
+      Active
+    </span>
+  );
+}
+
+// ─── Platform Card ─────────────────────────────────────────────────────────────
 interface ConnectedAccount {
   id: number;
   platform: string;
@@ -166,6 +209,8 @@ interface ConnectedAccount {
   username?: string | null;
   platformAccountId: string;
   isActive: boolean;
+  profilePicture?: string | null;
+  tokenExpiresAt?: string | null;
   updatedAt?: string | null;
 }
 
@@ -178,11 +223,11 @@ interface PlatformCardProps {
 }
 
 function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, isDisconnecting }: PlatformCardProps) {
-  const { t, i18n } = useTranslation();
-  const platform = getPlatform(platformId);
+  const { i18n } = useTranslation();
+  const platform    = getPlatform(platformId);
   const isConnected = connectedAccounts.length > 0;
-  const isOAuth = OAUTH_PLATFORMS.has(platformId);
-  const locale = i18n.language === "ar" ? "ar-SA" : "en-US";
+  const isOAuth     = platform.connectionType === "oauth";
+  const locale      = i18n.language === "ar" ? "ar-SA" : "en-US";
 
   const lastSync = connectedAccounts[0]?.updatedAt
     ? new Date(connectedAccounts[0].updatedAt).toLocaleString(locale, {
@@ -190,36 +235,70 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
       })
     : null;
 
+  const handleOAuthConnect = () => {
+    const origin      = window.location.origin;
+    const returnPath  = "/connections";
+    const initPath    = platform.oauthInitPath ?? `/api/oauth/${platformId}/init`;
+    window.location.href = `${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+  };
+
   const handleConnect = () => {
     if (isOAuth) {
-      // Direct OAuth — no modal needed
-      const origin = window.location.origin;
-      const returnPath = "/connections";
-      window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+      handleOAuthConnect();
     } else {
       onConnect();
     }
   };
 
+  // Check if any account is expired
+  const hasExpired = connectedAccounts.some((a) => {
+    if (!a.tokenExpiresAt) return false;
+    return new Date(a.tokenExpiresAt) < new Date();
+  });
+
   return (
     <div className={[
       "rounded-2xl border transition-all duration-300 overflow-hidden group",
       isConnected
-        ? "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm hover:shadow-md"
+        ? hasExpired
+          ? "border-red-200/60 dark:border-red-800/40 bg-card shadow-sm"
+          : "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm hover:shadow-md"
         : "border-border/40 bg-card/50 hover:bg-card hover:border-border hover:shadow-sm",
     ].join(" ")}>
       {/* Status stripe */}
       {isConnected && (
-        <div className="h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400" />
+        <div className={[
+          "h-0.5 bg-gradient-to-r",
+          hasExpired
+            ? "from-red-400 via-red-500 to-orange-400"
+            : "from-emerald-400 via-emerald-500 to-teal-400",
+        ].join(" ")} />
       )}
 
       {/* Platform header */}
       <div className="flex items-center gap-3 p-4">
-        <div className={"relative w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 " + platform.bgLight}>
-          <PlatformIcon platform={platformId} className={"w-5 h-5 " + platform.textColor} />
+        {/* Avatar / Icon */}
+        <div className="relative shrink-0">
+          {isConnected && connectedAccounts[0]?.profilePicture ? (
+            <img
+              src={connectedAccounts[0].profilePicture}
+              alt={connectedAccounts[0].name ?? platform.name}
+              className="w-11 h-11 rounded-xl object-cover"
+            />
+          ) : (
+            <div className={"w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105 " + platform.bgLight}>
+              <PlatformIcon platform={platformId} className={"w-5 h-5 " + platform.textColor} />
+            </div>
+          )}
           {isConnected && (
-            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center">
-              <CheckCircle2 className="w-2 h-2 text-white" />
+            <span className={[
+              "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card flex items-center justify-center",
+              hasExpired ? "bg-red-500" : "bg-emerald-500",
+            ].join(" ")}>
+              {hasExpired
+                ? <AlertTriangle className="w-2 h-2 text-white" />
+                : <CheckCircle2 className="w-2 h-2 text-white" />
+              }
             </span>
           )}
         </div>
@@ -228,26 +307,41 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-foreground">{platform.name}</h3>
             {isConnected ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50">
-                {t("connections.connected")}
-              </span>
+              hasExpired ? (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold border border-red-200/50 dark:border-red-800/50">
+                  Token Expired
+                </span>
+              ) : (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50">
+                  Connected
+                </span>
+              )
             ) : (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                {t("connections.noConnections").includes("No") ? "Not connected" : "غير مرتبط"}
+                Not connected
               </span>
             )}
             {isOAuth && !isConnected && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium border border-blue-200/50 dark:border-blue-800/50 flex items-center gap-1">
                 <Shield className="w-2.5 h-2.5" />
-                OAuth
+                OAuth 2.0
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {isConnected && lastSync
-              ? `${t("connections.lastSync")}: ${lastSync}`
-              : platform.description}
-          </p>
+
+          {/* Account name / username */}
+          {isConnected && connectedAccounts[0] ? (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
+              {connectedAccounts[0].username
+                ? `@${connectedAccounts[0].username}`
+                : connectedAccounts[0].name ?? "Connected"}
+              {lastSync && (
+                <span className="opacity-60"> · {lastSync}</span>
+              )}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{platform.description}</p>
+          )}
         </div>
 
         {/* Action button */}
@@ -255,17 +349,18 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
           <button
             onClick={handleConnect}
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+            title="Reconnect to refresh token"
           >
             <RefreshCw className="w-3 h-3" />
-            {t("connections.reconnect")}
+            Refresh
           </button>
         ) : (
           <button
             onClick={handleConnect}
-            className={"shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95 " + (isOAuth ? platform.color + " text-white shadow-sm" : "bg-primary text-primary-foreground hover:bg-primary/90")}
+            className={"shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95 " + (isOAuth ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : "border border-border text-foreground hover:bg-muted")}
           >
-            <Link2 className="w-3.5 h-3.5" />
-            {t("connections.connect")}
+            {isOAuth ? <Shield className="w-3.5 h-3.5" /> : <Key className="w-3.5 h-3.5" />}
+            {isOAuth ? "Connect" : "Add Token"}
           </button>
         )}
       </div>
@@ -284,35 +379,43 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
         <div className="border-t border-border/50 divide-y divide-border/30">
           {connectedAccounts.map((acc) => (
             <div key={acc.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors">
-              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
-                <PlatformIcon platform={platformId} className={"w-3.5 h-3.5 " + platform.textColor} />
-              </div>
+              {acc.profilePicture ? (
+                <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-7 h-7 rounded-full object-cover shrink-0" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <PlatformIcon platform={platformId} className={"w-3.5 h-3.5 " + platform.textColor} />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-foreground truncate">
                   {acc.name ?? acc.username ?? "Account"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">ID: {acc.platformAccountId}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {acc.username ? `@${acc.username}` : `ID: ${acc.platformAccountId}`}
+                </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={"w-1.5 h-1.5 rounded-full " + (acc.isActive ? "bg-emerald-500" : "bg-slate-400")} />
+              <div className="flex items-center gap-2 shrink-0">
+                <TokenExpiryBadge expiresAt={acc.tokenExpiresAt} />
                 <button
                   onClick={() => onDisconnect(acc.id)}
                   disabled={isDisconnecting}
                   className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                  title={t("connections.disconnect")}
+                  title="Disconnect"
                 >
                   <Unlink className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           ))}
+
+          {/* Add another account */}
           <div className="px-4 py-2">
             <button
               onClick={handleConnect}
               className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors"
             >
               <Link2 className="w-3 h-3" />
-              {t("common.connect")}
+              Add another account
             </button>
           </div>
         </div>
@@ -321,7 +424,7 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Connections() {
   const utils = trpc.useUtils();
   const { t } = useTranslation();
@@ -329,22 +432,51 @@ export default function Connections() {
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery();
 
-  // Handle OAuth callback result
+  // Handle OAuth callback results
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Meta OAuth
     const metaConnected = params.get("meta_connected");
-    const metaError = params.get("meta_error");
-    const accountCount = params.get("accounts");
+    const metaError     = params.get("meta_error");
+    const summary       = params.get("summary");
 
     if (metaConnected) {
-      toast.success(`✅ ${t("connections.connectionSuccess", { platform: "Facebook" })} ${accountCount ? `${accountCount} ad account(s) linked.` : ""}`);
+      const msg = summary
+        ? `✅ Connected: ${decodeURIComponent(summary)}`
+        : "✅ Meta accounts connected successfully!";
+      toast.success(msg);
       utils.social.list.invalidate();
       window.history.replaceState({}, "", window.location.pathname);
-    } else if (metaError) {
-      const msg = metaError === "no_app_id"
-        ? "Meta App ID not configured."
-        : `${t("connections.connectionError", { platform: "Facebook" })}: ${decodeURIComponent(metaError)}`;
-      toast.error(msg);
+      return;
+    }
+    if (metaError) {
+      const errMsg = metaError === "no_app_id"
+        ? "Meta App ID not configured. Please add META_APP_ID in Settings → Secrets."
+        : `Meta connection failed: ${decodeURIComponent(metaError)}`;
+      toast.error(errMsg);
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
+    // Generic OAuth (Twitter, TikTok, LinkedIn, YouTube)
+    const oauthSuccess = params.get("oauth_success");
+    const oauthError   = params.get("oauth_error");
+    const platform     = params.get("platform");
+    const name         = params.get("name");
+
+    if (oauthSuccess && platform) {
+      const platformName = getPlatform(platform).name;
+      const displayName  = name ? ` (${decodeURIComponent(name)})` : "";
+      toast.success(`✅ ${platformName}${displayName} connected successfully!`);
+      utils.social.list.invalidate();
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (oauthError && platform) {
+      const platformName = getPlatform(platform).name;
+      const errMsg = oauthError === "not_configured"
+        ? `${platformName} OAuth credentials not configured. Add ${platform.toUpperCase()}_CLIENT_ID and ${platform.toUpperCase()}_CLIENT_SECRET in Settings → Secrets.`
+        : `${platformName} connection failed: ${decodeURIComponent(oauthError)}`;
+      toast.error(errMsg, { duration: 8000 });
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
@@ -363,70 +495,100 @@ export default function Connections() {
     const pid = acc.platform;
     if (!accountsByPlatform[pid]) accountsByPlatform[pid] = [];
     accountsByPlatform[pid].push({
-      id: acc.id,
-      platform: acc.platform,
-      name: acc.name ?? acc.username,
-      username: acc.username,
+      id:                acc.id,
+      platform:          acc.platform,
+      name:              acc.name ?? acc.username,
+      username:          acc.username,
       platformAccountId: acc.platform_account_id ?? String(acc.id),
-      isActive: acc.is_active,
-      updatedAt: acc.updated_at,
-    } as ConnectedAccount & { updatedAt?: string | null });
+      isActive:          acc.is_active,
+      profilePicture:    (acc as any).profile_picture ?? null,
+      tokenExpiresAt:    (acc as any).token_expires_at ?? null,
+      updatedAt:         acc.updated_at,
+    });
   });
 
-  const totalConnected = accounts.length;
+  const totalConnected    = accounts.length;
   const connectedPlatforms = Object.keys(accountsByPlatform).length;
+  const expiredCount      = accounts.filter((a) => {
+    const exp = (a as any).token_expires_at;
+    return exp && new Date(exp) < new Date();
+  }).length;
 
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto p-6 space-y-6 animate-fade-in">
 
-        {/* ── Header ─────────────────────────────────────────────────────── */}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="page-header">{t("connections.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {t("connections.subtitle")}
+              Connect your social media accounts to unlock analytics, publishing, and campaign management.
             </p>
           </div>
           {totalConnected > 0 && (
             <div className="flex items-center gap-6 shrink-0">
               <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">{connectedPlatforms}</p>
-                <p className="text-xs text-muted-foreground">{t("analytics.platforms")}</p>
+                <p className="text-xs text-muted-foreground">Platforms</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">{totalConnected}</p>
-                <p className="text-xs text-muted-foreground">{t("connections.noConnections").includes("No") ? "Accounts" : "حسابات"}</p>
+                <p className="text-xs text-muted-foreground">Accounts</p>
               </div>
+              {expiredCount > 0 && (
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-500">{expiredCount}</p>
+                  <p className="text-xs text-muted-foreground">Expired</p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* ── OAuth info banner ──────────────────────────────────────────── */}
+        {/* ── Info banner ─────────────────────────────────────────────────── */}
         <div className="rounded-2xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex items-start gap-3">
-          <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+          <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">{t("connections.secureOAuth")}</p>
+            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">
+              Secure OAuth 2.0 Connections
+            </p>
             <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-0.5">
-              {t("connections.oauthDesc", { platform: "Meta (Facebook & Instagram)" })}
+              Facebook, Instagram, Twitter/X, TikTok, LinkedIn, and YouTube use OAuth 2.0 — no password sharing.
+              Snapchat and Pinterest use API access tokens. Credentials are stored securely and never shared.
             </p>
           </div>
         </div>
 
-        {/* ── Empty state ────────────────────────────────────────────────── */}
+        {/* ── Expired tokens warning ──────────────────────────────────────── */}
+        {expiredCount > 0 && (
+          <div className="rounded-2xl border border-red-200/60 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs font-semibold text-red-800 dark:text-red-300">
+                {expiredCount} account{expiredCount > 1 ? "s" : ""} need re-authentication
+              </p>
+              <p className="text-xs text-red-700/80 dark:text-red-400/80 mt-0.5">
+                Click "Refresh" on the expired accounts below to reconnect and restore access.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Empty state ──────────────────────────────────────────────────── */}
         {totalConnected === 0 && !isLoading && (
           <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
               <Globe className="w-7 h-7 text-muted-foreground/50" />
             </div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">{t("connections.noConnections")}</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-1">No accounts connected yet</h3>
             <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              {t("connections.noConnectionsSub")}
+              Connect your social media accounts below to start tracking analytics and publishing content.
             </p>
           </div>
         )}
 
-        {/* ── Connected platforms summary chips ─────────────────────────── */}
+        {/* ── Connected platforms summary chips ──────────────────────────── */}
         {totalConnected > 0 && (
           <div className="flex flex-wrap gap-2">
             {Object.keys(accountsByPlatform).map((pid) => {
@@ -442,10 +604,10 @@ export default function Connections() {
           </div>
         )}
 
-        {/* ── Platform grid ──────────────────────────────────────────────── */}
+        {/* ── Platform grid ────────────────────────────────────────────────── */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <PlatformCardSkeleton key={i} />
             ))}
           </div>
@@ -456,15 +618,19 @@ export default function Connections() {
               <div>
                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-emerald-500" />
-                  {t("connections.connected")} ({connectedPlatforms})
+                  Connected ({connectedPlatforms})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PLATFORMS.filter((p) => accountsByPlatform[p.id]).map((p) => (
                     <PlatformCard
                       key={p.id}
-                      platformId={p.id as PlatformId}
+                      platformId={p.id}
                       connectedAccounts={accountsByPlatform[p.id] ?? []}
-                      onConnect={() => setManualPlatform(p.id as PlatformId)}
+                      onConnect={() => {
+                        if (p.connectionType !== "oauth") {
+                          setManualPlatform(p.id);
+                        }
+                      }}
                       onDisconnect={(id) => disconnectMutation.mutate({ id })}
                       isDisconnecting={disconnectMutation.isPending}
                     />
@@ -477,17 +643,17 @@ export default function Connections() {
             <div>
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5" />
-                {t("analytics.allPlatforms")}
+                Available Platforms ({PLATFORMS.filter((p) => !accountsByPlatform[p.id]).length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLATFORMS.filter((p) => !accountsByPlatform[p.id]).map((p) => (
                   <PlatformCard
                     key={p.id}
-                    platformId={p.id as PlatformId}
+                    platformId={p.id}
                     connectedAccounts={[]}
                     onConnect={() => {
-                      if (!OAUTH_PLATFORMS.has(p.id)) {
-                        setManualPlatform(p.id as PlatformId);
+                      if (p.connectionType !== "oauth") {
+                        setManualPlatform(p.id);
                       }
                       // OAuth platforms handle redirect inside PlatformCard
                     }}
@@ -501,7 +667,7 @@ export default function Connections() {
         )}
       </div>
 
-      {/* Manual Connect Modal (non-OAuth platforms) */}
+      {/* Manual Connect Modal */}
       {manualPlatform && (
         <ManualConnectModal
           platformId={manualPlatform}

@@ -23,9 +23,13 @@ export interface PlatformConfig {
   bgLight: string;        // Light background for badges
   description: string;
   features: ("ads" | "posts" | "analytics" | "insights")[];
-  connectionType: "oauth" | "api_key" | "coming_soon";
-  connectUrl?: string;    // OAuth URL (future)
+  /** oauth = full OAuth 2.0 flow | api_key = manual token input */
+  connectionType: "oauth" | "api_key";
+  /** OAuth init endpoint (relative) — only for oauth type */
+  oauthInitPath?: string;
   tokenHint: string;      // Hint for manual token input
+  /** Docs URL for getting a token */
+  docsUrl?: string;
 }
 
 export const PLATFORMS: PlatformConfig[] = [
@@ -39,7 +43,9 @@ export const PLATFORMS: PlatformConfig[] = [
     description: "Pages, Groups, and Ads Manager",
     features: ["ads", "posts", "analytics", "insights"],
     connectionType: "oauth",
+    oauthInitPath: "/api/oauth/meta/init",
     tokenHint: "Facebook User Access Token from developers.facebook.com",
+    docsUrl: "https://developers.facebook.com/docs/facebook-login",
   },
   {
     id: "instagram",
@@ -51,7 +57,9 @@ export const PLATFORMS: PlatformConfig[] = [
     description: "Business profiles, Reels, Stories",
     features: ["posts", "analytics", "insights"],
     connectionType: "oauth",
+    oauthInitPath: "/api/oauth/meta/init",   // Same Meta OAuth flow
     tokenHint: "Instagram Graph API token (requires Facebook Business account)",
+    docsUrl: "https://developers.facebook.com/docs/instagram-api",
   },
   {
     id: "tiktok",
@@ -62,8 +70,10 @@ export const PLATFORMS: PlatformConfig[] = [
     bgLight: "bg-[#010101]/10",
     description: "Short-form video content and TikTok Ads",
     features: ["ads", "posts", "analytics"],
-    connectionType: "api_key",
-    tokenHint: "TikTok for Business API access token",
+    connectionType: "oauth",
+    oauthInitPath: "/api/oauth/tiktok/init",
+    tokenHint: "TikTok for Business API access token from developers.tiktok.com",
+    docsUrl: "https://developers.tiktok.com/doc/login-kit-web",
   },
   {
     id: "twitter",
@@ -74,8 +84,10 @@ export const PLATFORMS: PlatformConfig[] = [
     bgLight: "bg-[#000000]/10",
     description: "Tweets, Spaces, and X Ads",
     features: ["ads", "posts", "analytics"],
-    connectionType: "api_key",
-    tokenHint: "X (Twitter) API Bearer Token from developer.twitter.com",
+    connectionType: "oauth",
+    oauthInitPath: "/api/oauth/twitter/init",
+    tokenHint: "X (Twitter) OAuth 2.0 Bearer Token from developer.twitter.com",
+    docsUrl: "https://developer.twitter.com/en/docs/authentication/oauth-2-0",
   },
   {
     id: "linkedin",
@@ -87,7 +99,9 @@ export const PLATFORMS: PlatformConfig[] = [
     description: "Company pages, posts, and LinkedIn Ads",
     features: ["ads", "posts", "analytics", "insights"],
     connectionType: "oauth",
+    oauthInitPath: "/api/oauth/linkedin/init",
     tokenHint: "LinkedIn OAuth 2.0 access token from linkedin.com/developers",
+    docsUrl: "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow",
   },
   {
     id: "youtube",
@@ -99,7 +113,9 @@ export const PLATFORMS: PlatformConfig[] = [
     description: "Channel analytics, videos, and YouTube Ads",
     features: ["ads", "analytics", "insights"],
     connectionType: "oauth",
+    oauthInitPath: "/api/oauth/youtube/init",
     tokenHint: "Google OAuth token with YouTube Data API v3 scope",
+    docsUrl: "https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps",
   },
   {
     id: "snapchat",
@@ -110,8 +126,9 @@ export const PLATFORMS: PlatformConfig[] = [
     bgLight: "bg-[#FFFC00]/10",
     description: "Snap Ads and audience analytics",
     features: ["ads", "analytics"],
-    connectionType: "coming_soon",
-    tokenHint: "Snapchat Marketing API access token",
+    connectionType: "api_key",
+    tokenHint: "Snapchat Marketing API access token from business.snapchat.com",
+    docsUrl: "https://marketingapi.snapchat.com/docs/#authentication",
   },
   {
     id: "pinterest",
@@ -122,8 +139,9 @@ export const PLATFORMS: PlatformConfig[] = [
     bgLight: "bg-[#E60023]/10",
     description: "Pins, boards, and Pinterest Ads",
     features: ["ads", "posts", "analytics"],
-    connectionType: "coming_soon",
+    connectionType: "api_key",
     tokenHint: "Pinterest API v5 access token from developers.pinterest.com",
+    docsUrl: "https://developers.pinterest.com/docs/getting-started/authentication",
   },
 ];
 
@@ -143,7 +161,7 @@ export function getPlatform(id: string): PlatformConfig {
       bgLight: "bg-slate-500/10",
       description: "",
       features: [],
-      connectionType: "coming_soon",
+      connectionType: "api_key" as const,
       tokenHint: "",
     }
   );
