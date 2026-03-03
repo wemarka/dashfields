@@ -472,11 +472,22 @@ export default function Connections() {
       utils.social.list.invalidate();
       window.history.replaceState({}, "", window.location.pathname);
     } else if (oauthError && platform) {
-      const platformName = getPlatform(platform).name;
-      const errMsg = oauthError === "not_configured"
-        ? `${platformName} OAuth credentials not configured. Add ${platform.toUpperCase()}_CLIENT_ID and ${platform.toUpperCase()}_CLIENT_SECRET in Settings → Secrets.`
-        : `${platformName} connection failed: ${decodeURIComponent(oauthError)}`;
-      toast.error(errMsg, { duration: 8000 });
+      const platformCfg  = getPlatform(platform);
+      const platformName = platformCfg.name;
+      if (oauthError === "not_configured") {
+        const keyName = platform.toUpperCase();
+        toast.error(
+          `⚠️ ${platformName} OAuth not configured. Add ${keyName}_CLIENT_ID and ${keyName}_CLIENT_SECRET in Settings → Secrets.`,
+          {
+            duration: 10000,
+            action: platformCfg.docsUrl
+              ? { label: "View Docs", onClick: () => window.open(platformCfg.docsUrl, "_blank") }
+              : undefined,
+          }
+        );
+      } else {
+        toast.error(`${platformName} connection failed: ${decodeURIComponent(oauthError)}`, { duration: 8000 });
+      }
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);

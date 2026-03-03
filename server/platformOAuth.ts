@@ -221,37 +221,10 @@ export function registerPlatformOAuthRoutes(app: Express) {
 
     const clientId = process.env[`${platform.toUpperCase()}_CLIENT_ID`];
     if (!clientId) {
-      // Friendly "not configured" page
-      const name = platform.charAt(0).toUpperCase() + platform.slice(1);
-      return res.status(200).send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${name} OAuth — Not Configured</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           display: flex; align-items: center; justify-content: center;
-           min-height: 100vh; margin: 0; background: #f8fafc; }
-    .card { background: white; border-radius: 16px; padding: 40px; max-width: 480px;
-            box-shadow: 0 4px 24px rgba(0,0,0,.08); text-align: center; }
-    h2 { margin: 0 0 12px; font-size: 20px; color: #0f172a; }
-    p  { color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 8px; }
-    code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
-    a  { display: inline-block; margin-top: 20px; color: #6366f1; font-size: 14px; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>⚙️ ${name} OAuth Not Configured</h2>
-    <p>To enable ${name} OAuth, add the following environment variables in <strong>Settings → Secrets</strong>:</p>
-    <p><code>${platform.toUpperCase()}_CLIENT_ID</code></p>
-    <p><code>${platform.toUpperCase()}_CLIENT_SECRET</code></p>
-    <p style="margin-top:16px">You can also connect manually using an access token from the Connections page.</p>
-    <a href="/connections">← Back to Connections</a>
-  </div>
-</body>
-</html>`);
+      // Redirect back to the app with an error param instead of showing a raw HTML page
+      const origin     = String(req.query.origin ?? "http://localhost:3000");
+      const returnPath = String(req.query.returnPath ?? "/connections");
+      return res.redirect(`${origin}${returnPath}?oauth_error=not_configured&platform=${platform}`);
     }
 
     const origin     = String(req.query.origin ?? "http://localhost:3000");

@@ -682,3 +682,10 @@
 - [x] OAuth callback handler (meta_connected, oauth_success, oauth_error)
 - [x] Info banner explaining OAuth 2.0 security
 - [x] 247/247 tests passing, 0 TypeScript errors
+
+## 🐛 Bug Fix — Connect Button "refused to connect"
+- [x] Diagnose OAuth redirect URL construction issue
+- [x] Fix: platformOAuth.ts now redirects to app with oauth_error=not_configured instead of serving HTML page
+- [x] Fix: toast shows clear message with "View Docs" button when credentials missing
+- [x] Verified: all platforms (twitter, tiktok, linkedin, youtube) return 302 redirect correctly
+- [x] 247/247 tests passing, 0 TypeScript errors
