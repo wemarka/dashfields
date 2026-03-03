@@ -256,10 +256,10 @@ export default function Analytics() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-foreground/5">
-                  {filteredInsights.map((ins) => {
+                  {filteredInsights.map((ins, idx) => {
                     const p = getPlatform(ins.platform);
                     return (
-                      <tr key={ins.platform + ins.accountName} className="hover:bg-foreground/2 transition-colors">
+                      <tr key={`${ins.platform}-${ins.accountName}-${idx}`} className="hover:bg-foreground/2 transition-colors">
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
                             <div className={"w-7 h-7 rounded-lg flex items-center justify-center " + p.bgLight}>

@@ -46,10 +46,10 @@ export function PlatformBreakdownCard({ insights, loading }: PlatformBreakdownCa
         </div>
       ) : (
         <div className="divide-y divide-foreground/5">
-          {insights.map((ins) => {
+          {insights.map((ins, idx) => {
             const p = getPlatform(ins.platform);
             return (
-              <div key={ins.platform} className="flex items-center gap-3 px-5 py-3 hover:bg-foreground/2 transition-colors">
+              <div key={`${ins.platform}-${ins.accountName}-${idx}`} className="flex items-center gap-3 px-5 py-3 hover:bg-foreground/2 transition-colors">
                 {/* Platform icon */}
                 <div className={"w-8 h-8 rounded-lg flex items-center justify-center shrink-0 " + p.bgLight}>
                   <PlatformIcon platform={ins.platform} className={"w-4 h-4 " + p.textColor} />

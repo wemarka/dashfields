@@ -10,6 +10,7 @@ import {
   bigint,
   numeric,
   jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ export const socialAccounts = pgTable("social_accounts", {
   metadata:            jsonb("metadata"),
   createdAt:           timestamp("created_at").defaultNow().notNull(),
   updatedAt:           timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [uniqueIndex("social_accounts_user_platform_account_idx").on(t.userId, t.platform, t.platformAccountId)]);
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
 export const campaigns = pgTable("campaigns", {

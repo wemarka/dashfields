@@ -29,6 +29,13 @@
       "when": 1772494058417,
       "tag": "0003_parched_magus",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772543523155,
+      "tag": "0004_chubby_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

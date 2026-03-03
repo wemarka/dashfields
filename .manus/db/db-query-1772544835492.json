@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, platform, name, username FROM social_accounts ORDER BY platform, id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute SELECT id, platform, name, username FROM social_accounts ORDER BY platform, id;",
+  "rows": [
+    {
+      "id": "1",
+      "platform": "facebook",
+      "name": "wemarka.com",
+      "username": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tplatform\tname\tusername\n1\tfacebook\twemarka.com\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1634
+}

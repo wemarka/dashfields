@@ -367,9 +367,9 @@ export default function Insights() {
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="rgba(0,0,0,0.08)" />
                     <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11 }} />
-                    {insights.map((ins) => (
+                    {insights.map((ins, idx) => (
                       <Radar
-                        key={ins.platform}
+                        key={`${ins.platform}-${idx}`}
                         name={getPlatform(ins.platform).name}
                         dataKey={getPlatform(ins.platform).name}
                         stroke={getPlatformColor(ins.platform)}

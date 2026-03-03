@@ -592,7 +592,7 @@ export default function Connections() {
               Secure OAuth 2.0 Connections
             </p>
             <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-0.5">
-              Facebook, Instagram, Twitter/X, TikTok, LinkedIn, and YouTube use OAuth 2.0 — no password sharing.
+              Facebook, Instagram, Twitter/X, TikTok, LinkedIn, and YouTube use OAuth 2.0 - no password sharing.
               Snapchat and Pinterest use API access tokens. Credentials are stored securely and never shared.
             </p>
           </div>
@@ -661,7 +661,7 @@ export default function Connections() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PLATFORMS.filter((p) => accountsByPlatform[p.id]).map((p) => (
                     <PlatformCard
-                      key={p.id}
+                      key={`connected-${p.id}`}
                       platformId={p.id}
                       connectedAccounts={accountsByPlatform[p.id] ?? []}
                       onConnect={() => {
@@ -686,7 +686,7 @@ export default function Connections() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLATFORMS.filter((p) => !accountsByPlatform[p.id]).map((p) => (
                   <PlatformCard
-                    key={p.id}
+                    key={`available-${p.id}`}
                     platformId={p.id}
                     connectedAccounts={[]}
                     onConnect={() => {

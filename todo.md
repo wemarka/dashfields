@@ -711,3 +711,8 @@
 - [x] Vite: no errors
 - [x] 247/247 tests passing
 - [x] Save checkpoint and deliver
+
+## Bug Fix — Duplicate key "facebook" on / and /connections pages
+- [x] Fix duplicate key error in PlatformBreakdownCard.tsx (key={ins.platform} → key={platform-name-idx})
+- [x] Fix duplicate key error in Analytics.tsx (key={ins.platform+ins.accountName} → key={platform-name-idx})
+- [x] Fix duplicate key error in Insights.tsx (key={ins.platform} → key={platform-idx})
