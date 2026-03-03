@@ -854,3 +854,27 @@
 - [x] جدول ab_tests في قاعدة البيانات
 - [x] 247/247 اختبار ناجح
 - [x] 0 أخطاء TypeScript
+
+## Phase 128-133 — تطوير متقدم (جلسة 2026-03-03 مساءً)
+- [ ] Onboarding Wizard — معالج تهيئة 4 خطوات للمستخدمين الجدد
+- [ ] Mobile Bottom Navigation — شريط تنقل سفلي للهاتف
+- [ ] Competitor SWOT Analysis بالذكاء الاصطناعي
+- [ ] Competitor Benchmark Radar Chart
+- [ ] Data Export (JSON/CSV) في Settings
+- [ ] Account Deletion مع تأكيد في Settings
+- [ ] AI Sentiment Analysis في AI Studio
+- [ ] AI Best Time to Post في AI Studio
+
+## Phase 128-133 — تطوير متقدم (جلسة مارس 2026)
+- [x] SWOT AI Analysis procedure في competitors router (generateSwot)
+- [x] Danger Zone (Account Deletion) في Settings مع تأكيد "DELETE"
+- [x] Data Export موجود ومتصل بـ settings.exportData
+- [x] Mobile Bottom Navigation مدرج في DashboardLayout مع pb-16 md:pb-0
+- [x] AI Sentiment Analysis موجود في AI Studio (SentimentTab)
+- [x] Best Time to Post موجود في AI Studio (TimingTab)
+- [x] AI Content Calendar Planner موجود في AI Studio (CalendarTab)
+- [x] A/B Testing Dashboard كامل (صفحة + router + جدول ab_tests)
+- [x] Campaign Builder 4-step wizard (CampaignBuilder.tsx)
+- [x] White-Label PDF Reports مع branding panel في Reports.tsx
+- [x] 247/247 اختبار ناجح
+- [x] 0 أخطاء TypeScript

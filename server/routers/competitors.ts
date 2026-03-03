@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";
+import { invokeLLM } from "../_core/llm";
 
 // ─── Industry benchmarks (based on 2024 industry averages) ───────────────────
 const INDUSTRY_BENCHMARKS: Record<string, {
@@ -222,4 +223,106 @@ export const competitorsRouter = router({
       ...b,
     }));
   }),
+
+  /**
+   * AI-powered SWOT analysis based on real campaign performance vs benchmarks.
+   */
+  generateSwot: protectedProcedure
+    .input(z.object({
+      platform:   z.string().optional(),
+      datePreset: z.enum(["last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const { since, until } = getDateRange(input.datePreset);
+
+      // Gather real metrics
+      let campaignQuery = sb
+        .from("campaigns")
+        .select("id, platform, name, status, budget")
+        .eq("user_id", ctx.user.id);
+      if (input.platform) campaignQuery = campaignQuery.eq("platform", input.platform);
+      const { data: campaigns } = await campaignQuery;
+
+      const campaignIds = (campaigns ?? []).map((c: { id: number }) => c.id);
+      let metricsData: Array<{ impressions: number; clicks: number; spend: number; conversions: number }> = [];
+
+      if (campaignIds.length > 0) {
+        const { data: metrics } = await sb
+          .from("campaign_metrics")
+          .select("impressions, clicks, spend, conversions")
+          .in("campaign_id", campaignIds)
+          .gte("date", since)
+          .lte("date", until);
+        metricsData = (metrics ?? []) as typeof metricsData;
+      }
+
+      const totalImpressions = metricsData.reduce((s, r) => s + (r.impressions ?? 0), 0);
+      const totalClicks      = metricsData.reduce((s, r) => s + (r.clicks ?? 0), 0);
+      const totalSpend       = metricsData.reduce((s, r) => s + Number(r.spend ?? 0), 0);
+      const totalConversions = metricsData.reduce((s, r) => s + (r.conversions ?? 0), 0);
+      const ctr    = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+      const cpc    = totalClicks > 0 ? totalSpend / totalClicks : 0;
+      const cpm    = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
+      const roas   = totalSpend > 0 ? (totalConversions * 50) / totalSpend : 0;
+
+      const platform = input.platform ?? "all platforms";
+      const bench = INDUSTRY_BENCHMARKS[input.platform ?? ""] ?? { avgCtr: 0.5, avgCpc: 2.0, avgCpm: 10.0, avgConversionRate: 1.0, avgRoas: 3.0 };
+
+      const prompt = `You are a digital marketing strategist. Analyze this advertiser's performance data and generate a concise SWOT analysis.
+
+Platform: ${platform}
+Date range: ${since} to ${until}
+Campaigns: ${(campaigns ?? []).length}
+
+Your Metrics:
+- CTR: ${ctr.toFixed(2)}% (industry avg: ${bench.avgCtr}%)
+- CPC: $${cpc.toFixed(2)} (industry avg: $${bench.avgCpc})
+- CPM: $${cpm.toFixed(2)} (industry avg: $${bench.avgCpm})
+- ROAS: ${roas.toFixed(2)}x (industry avg: ${bench.avgRoas}x)
+- Total Spend: $${totalSpend.toFixed(2)}
+- Total Conversions: ${totalConversions}
+
+Generate a SWOT analysis with exactly 3 bullet points per section. Be specific, data-driven, and actionable. Return JSON with this exact structure:
+{
+  "strengths": ["...", "...", "..."],
+  "weaknesses": ["...", "...", "..."],
+  "opportunities": ["...", "...", "..."],
+  "threats": ["...", "...", "..."]
+}`;
+
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: "You are a digital marketing analyst. Always respond with valid JSON only, no markdown." },
+          { role: "user", content: prompt },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "swot_analysis",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                strengths:     { type: "array", items: { type: "string" } },
+                weaknesses:    { type: "array", items: { type: "string" } },
+                opportunities: { type: "array", items: { type: "string" } },
+                threats:       { type: "array", items: { type: "string" } },
+              },
+              required: ["strengths", "weaknesses", "opportunities", "threats"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+
+      const content = response.choices?.[0]?.message?.content ?? "{}";
+      const swot = JSON.parse(typeof content === "string" ? content : JSON.stringify(content));
+      return {
+        swot,
+        generatedAt: new Date().toISOString(),
+        platform,
+        metrics: { ctr: Math.round(ctr * 100) / 100, cpc: Math.round(cpc * 100) / 100, cpm: Math.round(cpm * 100) / 100, roas: Math.round(roas * 100) / 100, totalSpend: Math.round(totalSpend * 100) / 100, totalConversions },
+      };
+    }),
 });
