@@ -1103,3 +1103,8 @@
 - [x] تطبيق الشعار الكامل في صفحة Login/Landing
 - [x] تطبيق الأيقونة في Loading screen
 - [x] تحديث VITE_APP_LOGO بالأيقونة الرسمية
+
+## Brand Polish Round 2
+- [x] Sidebar: شعار كامل بدون أيقونة منفصلة + حجم أكبر
+- [x] Splash Screen عند التحميل الأولي
+- [x] Open Graph Meta Tags (og:title, og:image, og:description)

@@ -407,17 +407,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{ width: collapsed ? 64 : 228 }}
       >
         {/* Logo */}
-        <div className={`flex items-center gap-3 px-4 h-14 border-b border-white/8 shrink-0 ${collapsed ? "justify-center" : ""}`}>
-          <div
-            className="w-8 h-8 flex items-center justify-center shrink-0 cursor-pointer"
-            onClick={() => setLocation("/")}
-          >
+        <div
+          className={`flex items-center px-4 h-14 border-b border-white/8 shrink-0 cursor-pointer ${collapsed ? "justify-center" : ""}`}
+          onClick={() => setLocation("/")}
+        >
+          {collapsed ? (
             <DashfieldsIcon className="w-8 h-8 text-foreground" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <DashfieldsLogoFull className="h-5 w-auto text-foreground" />
-            </div>
+          ) : (
+            <DashfieldsLogoFull className="h-7 w-auto text-foreground" />
           )}
         </div>
 

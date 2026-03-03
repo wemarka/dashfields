@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState, useCallback } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -17,6 +17,7 @@ function Redirect({ to }: { to: string }) {
 // ─── Eager-loaded (critical path) ────────────────────────────────────────────
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import SplashScreen from "./components/SplashScreen";
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
 const Campaigns         = lazy(() => import("./pages/Campaigns"));
@@ -95,7 +96,19 @@ function Router() {
   );
 }
 
+// Show splash only once per session
+const SPLASH_KEY = "dashfields-splash-shown";
+
 function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem(SPLASH_KEY);
+  });
+
+  const handleSplashDone = useCallback(() => {
+    sessionStorage.setItem(SPLASH_KEY, "1");
+    setShowSplash(false);
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
@@ -103,6 +116,7 @@ function App() {
           <WorkspaceProvider>
             <TooltipProvider>
               <Toaster />
+              {showSplash && <SplashScreen onDone={handleSplashDone} />}
               <Router />
             </TooltipProvider>
           </WorkspaceProvider>
