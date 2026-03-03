@@ -222,6 +222,7 @@ export default function Settings() {
   // ── Account fields ─────────────────────────────────────────────────────────
   const [displayName, setDisplayName] = useState("");
   const [timezone, setTimezone] = useState("UTC");
+  const [currency, setCurrency] = useState("USD");
   const [isSavingAccount, setIsSavingAccount] = useState(false);
 
   const updateProfileMutation = trpc.settings.updateProfile.useMutation({
@@ -235,6 +236,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (settings?.timezone) setTimezone(settings.timezone);
+    if ((settings as any)?.currency) setCurrency((settings as any).currency);
   }, [settings]);
 
   const handleSaveAccount = () => {
@@ -243,8 +245,8 @@ export default function Settings() {
     if (displayName.trim() && displayName.trim() !== user?.name) {
       updateProfileMutation.mutate({ name: displayName.trim() });
     }
-    // Save timezone
-    updateMutation.mutate({ timezone });
+    // Save timezone + currency
+    updateMutation.mutate({ timezone, currency });
     if (!displayName.trim() || displayName.trim() === user?.name) {
       setIsSavingAccount(false);
     }
@@ -402,10 +404,35 @@ export default function Settings() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex items-end">
-                    <p className="text-xs text-muted-foreground pb-2">
-                      Current time: {new Date().toLocaleTimeString(undefined, { timeZone: timezone })}
-                    </p>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-1">
+                      <Globe className="w-3 h-3" /> Currency
+                    </label>
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      {[
+                        { code: "USD", label: "USD — US Dollar" },
+                        { code: "EUR", label: "EUR — Euro" },
+                        { code: "GBP", label: "GBP — British Pound" },
+                        { code: "SAR", label: "SAR — Saudi Riyal" },
+                        { code: "AED", label: "AED — UAE Dirham" },
+                        { code: "EGP", label: "EGP — Egyptian Pound" },
+                        { code: "JOD", label: "JOD — Jordanian Dinar" },
+                        { code: "KWD", label: "KWD — Kuwaiti Dinar" },
+                        { code: "QAR", label: "QAR — Qatari Riyal" },
+                        { code: "BHD", label: "BHD — Bahraini Dinar" },
+                        { code: "TRY", label: "TRY — Turkish Lira" },
+                        { code: "INR", label: "INR — Indian Rupee" },
+                        { code: "JPY", label: "JPY — Japanese Yen" },
+                        { code: "CAD", label: "CAD — Canadian Dollar" },
+                        { code: "AUD", label: "AUD — Australian Dollar" },
+                      ].map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

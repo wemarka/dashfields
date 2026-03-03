@@ -1,0 +1,9 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS ab_tests (\n  id          INT AUTO_INCREMENT PRIMARY KEY,\n  user_id     INT NOT NULL,\n  name        VARCHAR(256) NOT NULL,\n  hypothesis  TEXT,\n  platform    VARCHAR(64) NOT NULL DEFAULT 'facebook',\n  status      ENUM('draft', 'running', 'paused', 'completed') NOT NULL DEFAULT 'draft',\n  start_date  DATETIME,\n  end_date    DATETIME,\n  variants    TEXT NOT NULL,\n  winner      VARCHAR(64),\n  notes       TEXT,\n  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \nCREATE TABLE IF NOT EXISTS ab_tests (\n  id          INT AUTO_INCREMENT PRIMARY KEY,\n  user_id     INT NOT NULL,\n  name        VARCHAR(256) NOT NULL,\n  hypothesis  TEXT,\n  platform    VARCHAR(64) NOT NULL DEFAULT 'facebook',\n  status      ENUM('draft', 'running', 'paused', 'completed') NOT NULL DEFAULT 'draft',\n  start_date  DATETIME,\n  end_date    DATETIME,\n  variants    TEXT NOT NULL,\n  winner      VARCHAR(64),\n  notes       TEXT,\n  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE\n);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1883
+}

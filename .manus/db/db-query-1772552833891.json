@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS default_currency VARCHAR(8) DEFAULT 'USD';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS default_currency VARCHAR(8) DEFAULT 'USD';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3408
+}

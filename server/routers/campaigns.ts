@@ -70,18 +70,26 @@ export const campaignsRouter = router({
 
   create: protectedProcedure
     .input(z.object({
-      name:      z.string().min(1),
-      platform:  z.enum(["facebook", "instagram", "linkedin", "twitter", "youtube", "tiktok", "google"]),
-      budget:    z.number().optional(),
-      objective: z.string().optional(),
+      name:       z.string().min(1),
+      platform:   z.enum(["facebook", "instagram", "linkedin", "twitter", "youtube", "tiktok", "google"]),
+      budget:     z.number().optional(),
+      objective:  z.string().optional(),
+      budgetType: z.enum(["daily", "lifetime"]).optional(),
+      startDate:  z.string().optional(),
+      endDate:    z.string().optional(),
+      metadata:   z.record(z.string(), z.unknown()).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       return createCampaign({
-        userId: ctx.user.id,
-        name: input.name,
-        platform: input.platform,
-        budget: input.budget?.toString() ?? null,
-        objective: input.objective ?? null,
+        userId:     ctx.user.id,
+        name:       input.name,
+        platform:   input.platform,
+        budget:     input.budget?.toString() ?? null,
+        objective:  input.objective ?? null,
+        budgetType: input.budgetType,
+        startDate:  input.startDate ?? undefined,
+        endDate:    input.endDate   ?? undefined,
+        metadata:   input.metadata ?? {},
       });
     }),
 

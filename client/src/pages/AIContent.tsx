@@ -19,7 +19,7 @@ import {
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type Tone = "professional" | "casual" | "funny" | "inspirational" | "educational" | "promotional";
-type StudioTab = "generate" | "sentiment" | "timing" | "calendar";
+type StudioTab = "generate" | "adtools" | "sentiment" | "timing" | "calendar";
 
 interface ContentIdea {
   title: string;
@@ -55,10 +55,165 @@ const SENTIMENT_CONFIG: Record<string, { color: string; bg: string; emoji: strin
 
 const STUDIO_TABS: { id: StudioTab; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "generate",  label: "Content Ideas",    icon: Sparkles,  desc: "Generate AI-powered post ideas" },
+  { id: "adtools",   label: "Ad Tools",         icon: Target,    desc: "AI-powered ad copy & strategy" },
   { id: "sentiment", label: "Sentiment",        icon: SmilePlus, desc: "Analyze content sentiment" },
   { id: "timing",    label: "Best Time",        icon: Clock,     desc: "AI posting time recommendations" },
   { id: "calendar",  label: "Calendar Planner", icon: Calendar,  desc: "Plan your content calendar" },
 ];
+
+const AD_TOOLS: { id: string; icon: React.ElementType; label: string; desc: string; examples: string[] }[] = [
+  {
+    id: "copy", icon: Wand2, label: "Ad Copywriter", desc: "Generate compelling ad headlines and descriptions",
+    examples: [
+      "Write 5 Facebook ad headlines for a summer clothing sale targeting women 25-45",
+      "Create a retargeting ad for cart abandoners with a 10% discount offer",
+      "Write Instagram ad copy for a luxury watch brand",
+    ],
+  },
+  {
+    id: "audience", icon: Target, label: "Audience Builder", desc: "Define and refine your target audience",
+    examples: [
+      "Define the ideal audience for a fitness app targeting busy professionals",
+      "Create an audience segment for a B2B SaaS product targeting marketing managers",
+      "Build a lookalike audience profile for an e-commerce fashion brand",
+    ],
+  },
+  {
+    id: "creative", icon: Lightbulb, label: "Creative Brief", desc: "Create briefs for your design team",
+    examples: [
+      "Create a creative brief for a product launch campaign for a new smartphone",
+      "Write a brief for a brand awareness video ad for a sustainable clothing brand",
+      "Design brief for a carousel ad showcasing 5 product features",
+    ],
+  },
+  {
+    id: "strategy", icon: BarChart3, label: "Campaign Strategist", desc: "Get AI-powered campaign strategy recommendations",
+    examples: [
+      "Create a 3-month social media strategy for a new restaurant opening",
+      "Develop a campaign strategy for a Black Friday sale with $5000 budget",
+      "Plan a brand awareness campaign for a B2B software company",
+    ],
+  },
+];
+
+// ─── Ad Tools Tab ──────────────────────────────────────────────────────────────
+function AdToolsTab() {
+  const [activeTool, setActiveTool] = useState("copy");
+  const [prompt, setPrompt] = useState("");
+  const [result, setResult] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const generateMutation = trpc.ai.generate.useMutation({
+    onSuccess: (data) => setResult(typeof data.content === "string" ? data.content : ""),
+    onError: (err) => toast.error("Generation failed: " + err.message),
+  });
+
+  const currentTool = AD_TOOLS.find(t => t.id === activeTool)!;
+
+  const handleGenerate = () => {
+    if (!prompt.trim()) { toast.error("Please enter a prompt"); return; }
+    const toolMap: Record<string, "copy" | "audience" | "creative" | "strategy" | "hashtags" | "caption"> = {
+      copy: "copy", audience: "audience", creative: "creative", strategy: "strategy",
+    };
+    generateMutation.mutate({ tool: toolMap[activeTool] ?? "copy", prompt });
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Tool Selector */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {AD_TOOLS.map((tool) => (
+          <button
+            key={tool.id}
+            onClick={() => { setActiveTool(tool.id); setPrompt(""); setResult(""); }}
+            className={"bg-card border rounded-2xl p-4 text-left transition-all " + (activeTool === tool.id ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20" : "border-border hover:bg-muted/50")}
+          >
+            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+              <tool.icon className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">{tool.label}</p>
+            <p className="text-xs text-muted-foreground mt-1">{tool.desc}</p>
+          </button>
+        ))}
+      </div>
+      {/* Main Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Input */}
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <currentTool.icon className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">{currentTool.label}</h2>
+          </div>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe what you need..."
+            rows={6}
+            className="w-full resize-none bg-muted/50 rounded-xl p-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+          />
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Quick examples:</p>
+            <div className="space-y-1.5">
+              {currentTool.examples.slice(0, 2).map((ex) => (
+                <button
+                  key={ex}
+                  onClick={() => setPrompt(ex)}
+                  className="w-full text-left text-xs text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-lg px-3 py-2 transition-colors"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={generateMutation.isPending || !prompt.trim()}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {generateMutation.isPending
+              ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</>
+              : <><Zap className="w-4 h-4" />Generate</>
+            }
+          </button>
+        </div>
+        {/* Output */}
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-violet-500" />
+              <h2 className="text-sm font-semibold text-foreground">Result</h2>
+            </div>
+            {result && (
+              <button onClick={handleCopy} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            )}
+          </div>
+          <div className="min-h-[200px] bg-muted/50 rounded-xl p-3 overflow-y-auto max-h-[400px]">
+            {generateMutation.isPending ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Generating your content...
+              </div>
+            ) : result ? (
+              <Streamdown className="text-sm leading-relaxed">{result}</Streamdown>
+            ) : (
+              <p className="text-sm text-muted-foreground">Your generated content will appear here...</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Content Idea Card ─────────────────────────────────────────────────────────
 function ContentIdeaCard({ idea, platform, onSaveDraft }: {
@@ -843,6 +998,11 @@ export default function AIContent() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Ad Tools Tab */}
+        {activeTab === "adtools" && (
+          <AdToolsTab />
         )}
 
         {/* Sentiment Tab */}

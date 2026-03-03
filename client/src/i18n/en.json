@@ -36,7 +36,8 @@
       "insights": "Insights & Alerts"
     },
     "publishing": "Publishing",
-    "insights": "Insights"
+    "insights": "Insights",
+    "abTesting": "A/B Testing"
   },
   "topbar": {
     "platformsConnected": "{{count}} platform connected",

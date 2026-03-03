@@ -5,6 +5,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
 import { MetaCampaignCreateModal } from "@/components/campaigns/MetaCampaignCreateModal";
+import { CampaignBuilder } from "@/components/campaigns/CampaignBuilder";
 import { CampaignDetailDrawer } from "@/components/CampaignDetailDrawer";
 import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
 import { MetaCampaignTable } from "@/components/campaigns/MetaCampaignTable";
@@ -32,6 +33,7 @@ export default function Campaigns() {
   } | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [showMetaCreate, setShowMetaCreate] = useState(false);
+  const [showBuilder, setShowBuilder] = useState(false);
   const { t } = useTranslation();
 
   const utils = trpc.useUtils();
@@ -132,21 +134,20 @@ export default function Campaigns() {
               <GitCompare className="w-4 h-4" />
               {t("campaigns.compare")}
             </button>
-            {isMetaConnected ? (
+            <button
+              onClick={() => setShowBuilder(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              {t("campaigns.newCampaign")}
+            </button>
+            {isMetaConnected && (
               <button
                 onClick={() => setShowMetaCreate(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1877F2] text-white text-sm font-medium hover:bg-[#1877F2]/90 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#1877F2]/30 text-[#1877F2] text-xs font-medium hover:bg-[#1877F2]/5 transition-colors"
               >
-                <Plus className="w-4 h-4" />
-                {t("campaigns.newCampaign")}
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                {t("campaigns.newCampaign")}
+                <PlatformIcon platform="facebook" className="w-3.5 h-3.5" />
+                Meta Ads
               </button>
             )}
           </div>
@@ -318,6 +319,12 @@ export default function Campaigns() {
       />
       {showCompare && (
         <CampaignCompareDrawer onClose={() => setShowCompare(false)} />
+      )}
+      {showBuilder && (
+        <CampaignBuilder
+          onClose={() => setShowBuilder(false)}
+          onCreated={() => { setShowBuilder(false); utils.campaigns.list.invalidate(); }}
+        />
       )}
     </DashboardLayout>
   );

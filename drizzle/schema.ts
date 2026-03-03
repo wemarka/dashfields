@@ -121,6 +121,7 @@ export const userSettings = pgTable("user_settings", {
   id:                    serial("id").primaryKey(),
   userId:                integer("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
   defaultTimezone:       varchar("default_timezone", { length: 64 }).default("UTC"),
+  defaultCurrency:       varchar("default_currency", { length: 8 }).default("USD"),
   notificationsEnabled:  boolean("notifications_enabled").default(true),
   preferences:           jsonb("preferences"),
   createdAt:             timestamp("created_at").defaultNow().notNull(),
@@ -170,7 +171,27 @@ export const scheduledReports = pgTable("scheduled_reports", {
   updatedAt:    timestamp("updated_at").defaultNow().notNull(),
 });
 
-// ─── API Keys ────────────────────────────────────────────────────────────────
+// ─── A/B Tests ─────────────────────────────────────────────────────────────────
+export const abTestStatusEnum = pgEnum("ab_test_status", ["draft", "running", "paused", "completed"]);
+export const abTests = pgTable("ab_tests", {
+  id:          serial("id").primaryKey(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name:        varchar("name", { length: 256 }).notNull(),
+  hypothesis:  text("hypothesis"),
+  platform:    varchar("platform", { length: 64 }).default("facebook").notNull(),
+  status:      abTestStatusEnum("status").default("draft").notNull(),
+  startDate:   timestamp("start_date"),
+  endDate:     timestamp("end_date"),
+  variants:    text("variants").notNull().default("[]"),
+  winner:      varchar("winner", { length: 64 }),
+  notes:       text("notes"),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+export type AbTest = typeof abTests.$inferSelect;
+export type InsertAbTest = typeof abTests.$inferInsert;
+
+// ─── API Keys ─────────────────────────────────────────────────────────────────
 export const apiKeys = pgTable("api_keys", {
   id:         serial("id").primaryKey(),
   userId:     integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

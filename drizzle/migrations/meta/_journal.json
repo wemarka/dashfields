@@ -43,6 +43,20 @@
       "when": 1772547638215,
       "tag": "0005_faithful_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772552815958,
+      "tag": "0006_mixed_flatman",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772554944916,
+      "tag": "0007_normal_nightcrawler",
+      "breakpoints": true
     }
   ]
 }

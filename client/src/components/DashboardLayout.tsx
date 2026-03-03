@@ -11,7 +11,7 @@ import {
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
   PieChart, GitCompare, Zap, Sun, Moon, User, Hash, Swords,
-  Languages, FlaskConical, Send, LineChart, BellDot,
+  Languages, FlaskConical, Send, LineChart, BellDot, SplitSquareHorizontal,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -76,6 +76,7 @@ const navGroups: NavGroup[] = [
       { icon: Hash,        labelKey: "nav.hashtags",         path: "/hashtags",      iconAnimation: "icon-bounce" },
       { icon: Swords,        labelKey: "nav.competitors",       path: "/competitors",        iconAnimation: "icon-shake" },
       { icon: FlaskConical,  labelKey: "nav.advancedAnalytics", path: "/advanced-analytics", iconAnimation: "icon-pop" },
+      { icon: SplitSquareHorizontal, labelKey: "nav.abTesting", path: "/ab-testing", iconAnimation: "icon-spin" },
     ],
   },
   {

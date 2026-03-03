@@ -25,6 +25,7 @@ import Profile from "@/pages/Profile";
 import HashtagAnalytics from "@/pages/HashtagAnalytics";
 import Competitors from "@/pages/Competitors";
 import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
+import ABTesting from "@/pages/ABTesting";
 
 function Router() {
   return (
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/hashtags"         component={HashtagAnalytics} />
       <Route path="/competitors"       component={Competitors} />
       <Route path="/advanced-analytics" component={AdvancedAnalytics} />
+      <Route path="/ab-testing"          component={ABTesting} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>

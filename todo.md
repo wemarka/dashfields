@@ -783,3 +783,74 @@
 - [x] All tests passing (247/247)
 - [ ] Final UI polish pass
 - [x] Save checkpoint and deliver
+
+## Phase 121 — دمج AITools + تحسين Settings
+
+- [ ] دمج AITools (Ad Copywriter, Audience Builder, Creative Brief, Campaign Strategist) كـ tabs في AIContent.tsx
+- [ ] تحويل /ai-tools redirect لـ /ai-content
+- [ ] Settings: Currency Selector (USD, EUR, SAR, AED, EGP, GBP)
+- [ ] Settings: Timezone Selector مع تأثير على عرض التواريخ
+- [ ] Settings: Data Export (JSON/CSV)
+- [ ] حفظ currency وtimezone في user_settings وتطبيقهما globally
+
+## Phase 122 — Multi-Platform OAuth UI
+
+- [ ] Connections.tsx: زر "Connect with OAuth" لـ Twitter/X
+- [ ] Connections.tsx: زر "Connect with OAuth" لـ TikTok
+- [ ] Connections.tsx: زر "Connect with OAuth" لـ LinkedIn
+- [ ] Connections.tsx: زر "Connect with OAuth" لـ YouTube
+- [ ] server/platformOAuth.ts: التحقق من صحة الـ routes وإضافة callback handlers
+- [ ] عرض حالة الاتصال الحقيقية لكل منصة
+
+## Phase 123 — Campaign Builder الكامل
+
+- [ ] server/routers/meta.ts: createAdSet procedure
+- [ ] server/routers/meta.ts: createAd procedure مع image upload
+- [ ] server/routers/meta.ts: getAdSets procedure
+- [ ] server/routers/meta.ts: getAds procedure
+- [ ] CampaignDetailDrawer.tsx: تبويب Ad Sets داخل الحملة
+- [ ] CreateAdSetModal.tsx: نموذج إنشاء Ad Set مع targeting
+- [ ] CreateAdModal.tsx: نموذج إنشاء Ad مع رفع صورة
+- [ ] Audience Targeting: Age, Gender, Location, Interests
+
+## Phase 124 — White-Label PDF Reports
+
+- [ ] server/routers/reports.ts: generateWhitelabelPdf procedure
+- [ ] Reports.tsx: Brand customization section (logo upload, color picker)
+- [ ] Reports.tsx: PDF preview قبل التنزيل
+- [ ] server/routers/reports.ts: sendReportByEmail procedure
+- [ ] Reports.tsx: Email delivery option مع قائمة مستلمين
+
+## Phase 125 — Dashboard Customization + Custom Date Range
+
+- [ ] Custom Date Range Picker component
+- [ ] تطبيق Custom Date Range على Analytics وCampaigns وHome
+- [ ] Dashboard widget visibility toggles (إخفاء/إظهار)
+- [ ] حفظ تفضيلات Dashboard في user_settings
+
+## Phase 126 — A/B Testing + Audience Overlap
+
+- [ ] server/routers/meta.ts: abTestCompare procedure
+- [ ] ABTestingPage.tsx: مقارنة أداء نسختين من الإعلان
+- [ ] Statistical significance calculator
+- [ ] server/routers/audience.ts: audienceOverlap procedure
+- [ ] Audience Overlap visualization في Audience page
+
+## Phase 127 — اختبارات شاملة وcheckpoint
+
+- [ ] TypeScript check (0 errors)
+- [ ] All tests passing
+- [ ] Final UI polish
+- [ ] Save checkpoint
+
+## Phase 121-127 — تطوير شامل (جلسة 2026-03-03)
+- [x] دمج AITools في AI Studio كـ tab جديد "Ad Tools"
+- [x] إضافة Currency selector في Settings
+- [x] Campaign Builder متكامل من 4 خطوات (Campaign → Ad Set → Ad Creative → Review)
+- [x] White-Label PDF Reports مع شعار الشركة والألوان المخصصة
+- [x] server/routers/abTesting.ts — router كامل مع statistical significance
+- [x] client/src/pages/ABTesting.tsx — صفحة A/B Testing Dashboard كاملة
+- [x] إضافة A/B Testing في sidebar وApp.tsx وi18n
+- [x] جدول ab_tests في قاعدة البيانات
+- [x] 247/247 اختبار ناجح
+- [x] 0 أخطاء TypeScript

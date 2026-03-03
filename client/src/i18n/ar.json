@@ -36,7 +36,8 @@
       "insights": "الرؤى والتنبيهات"
     },
     "publishing": "النشر",
-    "insights": "الرؤى"
+    "insights": "الرؤى",
+    "abTesting": "اختبار A/B"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصة مرتبطة",

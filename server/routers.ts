@@ -30,6 +30,7 @@ import { aiContentRouter }    from "./routers/aiContent";
 import { apiKeysRouter }      from "./routers/apiKeys";
 import { hashtagsRouter }     from "./routers/hashtags";
 import { competitorsRouter }  from "./routers/competitors";
+import { abTestingRouter }    from "./routers/abTesting";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -65,6 +66,7 @@ export const appRouter = router({
   apiKeys:       apiKeysRouter,
   hashtags:      hashtagsRouter,
   competitors:   competitorsRouter,
+  abTesting:     abTestingRouter,
 });
 
 export type AppRouter = typeof appRouter;
