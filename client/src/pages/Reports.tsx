@@ -2,16 +2,17 @@
  * Reports.tsx
  * Standalone Reports page — create, manage, and download scheduled reports.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   FileText, Plus, Download, Trash2, Calendar, RefreshCw,
-  Clock, CheckCircle2, AlertCircle, ChevronDown, X, Zap, Printer,
+  Clock, CheckCircle2, AlertCircle, X, Zap, Timer,
 } from "lucide-react";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
+import { useTranslation } from "react-i18next";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type DatePreset   = "last_7d" | "last_14d" | "last_30d" | "last_90d";
@@ -216,7 +217,44 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
   );
 }
 
-// ─── Report Card ───────────────────────────────────────────────────────────────
+//// ─── Next-Run Countdown ───────────────────────────────────────────────────────
+function getNextRunDate(schedule: Schedule, lastSentAt: string | null): Date | null {
+  if (schedule === "none") return null;
+  const base = lastSentAt ? new Date(lastSentAt) : new Date();
+  const next = new Date(base);
+  if (schedule === "weekly")  next.setDate(next.getDate() + 7);
+  if (schedule === "monthly") next.setMonth(next.getMonth() + 1);
+  return next;
+}
+
+function CountdownBadge({ nextRun }: { nextRun: Date }) {
+  const [remaining, setRemaining] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const diff = nextRun.getTime() - Date.now();
+      if (diff <= 0) { setRemaining("Due now"); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      if (d > 0) setRemaining(`${d}d ${h}h`);
+      else if (h > 0) setRemaining(`${h}h ${m}m`);
+      else setRemaining(`${m}m`);
+    }
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, [nextRun]);
+
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+      <Timer className="w-3 h-3" />
+      Next in {remaining}
+    </div>
+  );
+}
+
+// ─── Report Card ─────────────────────────────────────────────────────────
 function ReportCard({ report, onDelete, onDownload }: {
   report: ReportRow;
   onDelete: (id: number) => void;
@@ -268,13 +306,24 @@ function ReportCard({ report, onDelete, onDownload }: {
         </div>
       )}
 
-      {/* Last sent */}
-      {report.last_sent_at && (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4">
-          <Clock className="w-3.5 h-3.5" />
-          Last generated: {new Date(report.last_sent_at).toLocaleDateString()}
-        </div>
-      )}
+      {/* Last sent + countdown */}
+      <div className="flex items-center justify-between mb-4">
+        {report.last_sent_at ? (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="w-3.5 h-3.5" />
+            Last: {new Date(report.last_sent_at).toLocaleDateString()}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="w-3.5 h-3.5" />
+            Never generated
+          </div>
+        )}
+        {report.schedule !== "none" && (() => {
+          const nextRun = getNextRunDate(report.schedule, report.last_sent_at);
+          return nextRun ? <CountdownBadge nextRun={nextRun} /> : null;
+        })()}
+      </div>
 
       {/* Actions */}
       <div className="flex gap-2">
@@ -383,6 +432,7 @@ export default function Reports() {
   };
 
   const scheduledCount = reports.filter(r => r.schedule !== "none").length;
+  const { t } = useTranslation();
 
   return (
     <DashboardLayout>
@@ -390,9 +440,9 @@ export default function Reports() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Reports</h1>
+            <h1 className="text-xl font-bold text-foreground">{t("reports.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Generate and schedule analytics reports for all your platforms
+              {t("reports.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">

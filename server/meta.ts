@@ -129,6 +129,78 @@ export async function getCampaignInsights(
   return data.data ?? [];
 }
 
+/** Create a new campaign in a Meta ad account */
+export async function createMetaCampaign(
+  adAccountId: string,
+  accessToken: string,
+  params: {
+    name: string;
+    objective: string;
+    status: string;
+    dailyBudget?: number; // in cents
+    lifetimeBudget?: number; // in cents
+    startTime?: string;
+    stopTime?: string;
+  }
+): Promise<{ id: string; name: string }> {
+  const url = new URL(`${META_GRAPH_BASE}/${adAccountId}/campaigns`);
+  url.searchParams.set("access_token", accessToken);
+  const body = new URLSearchParams();
+  body.set("name", params.name);
+  body.set("objective", params.objective);
+  body.set("status", params.status);
+  body.set("special_ad_categories", "[]");
+  if (params.dailyBudget) body.set("daily_budget", String(params.dailyBudget));
+  if (params.lifetimeBudget) body.set("lifetime_budget", String(params.lifetimeBudget));
+  if (params.startTime) body.set("start_time", params.startTime);
+  if (params.stopTime) body.set("stop_time", params.stopTime);
+  const res = await fetch(url.toString(), { method: "POST", body });
+  const json = await res.json() as Record<string, unknown>;
+  if (!res.ok || json.error) {
+    const err = json.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Meta API error: ${res.status}`);
+  }
+  return { id: json.id as string, name: params.name };
+}
+
+/** Update campaign status (ACTIVE / PAUSED) */
+export async function updateMetaCampaignStatus(
+  campaignId: string,
+  accessToken: string,
+  status: "ACTIVE" | "PAUSED"
+): Promise<boolean> {
+  const url = new URL(`${META_GRAPH_BASE}/${campaignId}`);
+  url.searchParams.set("access_token", accessToken);
+  const body = new URLSearchParams();
+  body.set("status", status);
+  const res = await fetch(url.toString(), { method: "POST", body });
+  const json = await res.json() as Record<string, unknown>;
+  if (!res.ok || json.error) {
+    const err = json.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Meta API error: ${res.status}`);
+  }
+  return json.success === true;
+}
+
+/** Update campaign daily budget (amount in USD, converted to cents) */
+export async function updateMetaCampaignBudget(
+  campaignId: string,
+  accessToken: string,
+  dailyBudgetUsd: number
+): Promise<boolean> {
+  const url = new URL(`${META_GRAPH_BASE}/${campaignId}`);
+  url.searchParams.set("access_token", accessToken);
+  const body = new URLSearchParams();
+  body.set("daily_budget", String(Math.round(dailyBudgetUsd * 100)));
+  const res = await fetch(url.toString(), { method: "POST", body });
+  const json = await res.json() as Record<string, unknown>;
+  if (!res.ok || json.error) {
+    const err = json.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Meta API error: ${res.status}`);
+  }
+  return json.success === true;
+}
+
 /** Get daily time-series insights for a campaign */
 export async function getCampaignDailyInsights(
   campaignId: string,

@@ -14,6 +14,9 @@ import {
   getAccountInsights,
   getCampaignInsights,
   getCampaignDailyInsights,
+  createMetaCampaign,
+  updateMetaCampaignStatus,
+  updateMetaCampaignBudget,
 } from "../meta";
 
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
@@ -283,5 +286,57 @@ export const metaRouter = router({
         startTime:      c.start_time,
         stopTime:       c.stop_time,
       }));
+    }),
+
+  /** Create a new campaign in Meta Ads */
+  createCampaign: protectedProcedure
+    .input(z.object({
+      name:           z.string().min(1).max(200),
+      objective:      z.enum(["OUTCOME_AWARENESS", "OUTCOME_TRAFFIC", "OUTCOME_ENGAGEMENT", "OUTCOME_LEADS", "OUTCOME_APP_PROMOTION", "OUTCOME_SALES"]),
+      status:         z.enum(["ACTIVE", "PAUSED"]).default("PAUSED"),
+      dailyBudget:    z.number().min(1).optional(),  // USD
+      lifetimeBudget: z.number().min(1).optional(),  // USD
+      startTime:      z.string().optional(),
+      stopTime:       z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) throw new Error("Meta not connected");
+      const result = await createMetaCampaign(conn.adAccountId, conn.token, {
+        name:           input.name,
+        objective:      input.objective,
+        status:         input.status,
+        dailyBudget:    input.dailyBudget    ? Math.round(input.dailyBudget * 100)    : undefined,
+        lifetimeBudget: input.lifetimeBudget ? Math.round(input.lifetimeBudget * 100) : undefined,
+        startTime:      input.startTime,
+        stopTime:       input.stopTime,
+      });
+      return result;
+    }),
+
+  /** Toggle Meta campaign status (ACTIVE ↔ PAUSED) */
+  toggleCampaignStatus: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      status:     z.enum(["ACTIVE", "PAUSED"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) throw new Error("Meta not connected");
+      const ok = await updateMetaCampaignStatus(input.campaignId, conn.token, input.status);
+      return { success: ok };
+    }),
+
+  /** Update Meta campaign daily budget */
+  updateCampaignBudget: protectedProcedure
+    .input(z.object({
+      campaignId:  z.string().min(1),
+      dailyBudget: z.number().min(1),  // USD
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id);
+      if (!conn) throw new Error("Meta not connected");
+      const ok = await updateMetaCampaignBudget(input.campaignId, conn.token, input.dailyBudget);
+      return { success: ok };
     }),
 });

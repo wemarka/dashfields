@@ -4,6 +4,7 @@
  */
 import DashboardLayout from "@/components/DashboardLayout";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
+import { MetaCampaignCreateModal } from "@/components/campaigns/MetaCampaignCreateModal";
 import { CampaignDetailDrawer } from "@/components/CampaignDetailDrawer";
 import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
 import { MetaCampaignTable } from "@/components/campaigns/MetaCampaignTable";
@@ -30,6 +31,7 @@ export default function Campaigns() {
     id: string; name: string; status: string; objective?: string; dailyBudget?: number | null
   } | null>(null);
   const [showCompare, setShowCompare] = useState(false);
+  const [showMetaCreate, setShowMetaCreate] = useState(false);
   const { t } = useTranslation();
 
   const utils = trpc.useUtils();
@@ -130,13 +132,23 @@ export default function Campaigns() {
               <GitCompare className="w-4 h-4" />
               {t("campaigns.compare")}
             </button>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              {t("campaigns.newCampaign")}
-            </button>
+            {isMetaConnected ? (
+              <button
+                onClick={() => setShowMetaCreate(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1877F2] text-white text-sm font-medium hover:bg-[#1877F2]/90 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                {t("campaigns.newCampaign")}
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                {t("campaigns.newCampaign")}
+              </button>
+            )}
           </div>
         </div>
 
@@ -293,6 +305,11 @@ export default function Campaigns() {
         open={showCreate}
         onClose={() => setShowCreate(false)}
         onCreated={() => utils.campaigns.list.invalidate()}
+      />
+      <MetaCampaignCreateModal
+        open={showMetaCreate}
+        onClose={() => setShowMetaCreate(false)}
+        onCreated={() => { utils.meta.campaigns.invalidate(); utils.meta.campaignInsights.invalidate(); }}
       />
       <CampaignDetailDrawer
         campaign={selectedCampaign}

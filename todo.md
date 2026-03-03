@@ -490,3 +490,55 @@
 - [x] TypeScript check (0 errors)
 - [x] 247/247 tests passing
 - [x] Save checkpoint and deliver
+
+## 🔄 Phase 84-88 — Campaigns Meta API + Calendar Publishing + Reports + Alerts + Profile
+
+### Phase 84 — Campaigns: Meta Ads API Integration
+- [ ] Campaign creation form: connect to real Meta Ads API (create campaign via Graph API)
+- [ ] Campaign status toggle: pause/resume via Meta API
+- [ ] Campaign budget edit: update budget via Meta API
+- [ ] Better campaign creation wizard with ad set + budget steps
+- [ ] Show Meta campaign ID and link to Meta Ads Manager
+
+### Phase 85 — Calendar: Real Publishing + Post Composer
+- [ ] Post Composer: publish immediately to Meta (Facebook/Instagram) via Graph API
+- [ ] Post Composer: schedule post (save to DB + cron picks up)
+- [ ] Calendar: show published posts with real engagement data
+- [ ] Calendar: drag-and-drop reschedule updates DB
+- [ ] Post Composer: image upload via S3
+
+### Phase 86 — Reports: Countdown + Alerts: Threshold UI
+- [ ] Reports page: next-run countdown timer (live countdown to next scheduled run)
+- [ ] Reports page: last-run status indicator (success/failed/running)
+- [ ] Alerts page: visual threshold slider instead of text input
+- [ ] Alerts page: alert history log (last 10 triggered alerts)
+- [ ] Alerts page: test alert button (simulate trigger)
+
+### Phase 87 — Profile + Settings Polish
+- [ ] Profile page: edit name with real Supabase update
+- [ ] Profile page: avatar upload via S3
+- [ ] Settings: appearance tab with font size option
+- [ ] Settings: timezone selector (affects date display)
+- [ ] Settings: data export (download all your data as JSON)
+
+### Phase 88 — Tests + Checkpoint
+- [ ] TypeScript check (0 errors)
+- [ ] All tests passing
+- [ ] Save checkpoint and deliver
+
+## Phase 84-88 — Campaigns + Calendar + Reports + Alerts + Profile
+
+- [x] Campaigns: إضافة إجراءات createCampaign وtoggleStatus وupdateBudget في Meta router
+- [x] Campaigns: إنشاء MetaCampaignCreateModal لإنشاء حملات Meta حقيقية
+- [x] Campaigns: تحديث MetaCampaignTable مع toggle status وlink لـ Meta Ads Manager
+- [x] Calendar: إضافة زر Publish Now في PostDetailModal لنشر المنشورات عبر Meta Graph API
+- [x] Calendar: إضافة إجراء publishNow في server/routers/posts.ts
+- [x] Reports: إضافة CountdownBadge لعداد تنازلي للتقرير التالي
+- [x] Reports: تحسين ReportCard مع عرض آخر وقت تشغيل + i18n
+- [x] Alerts: إضافة threshold slider لكل metric مع نطاق ديناميكي
+- [x] Alerts: تحسين CreateAlertForm مع SlidersHorizontal icon + i18n
+- [x] Profile: إضافة i18n كامل + مزامنة اللغة فورياً عند الحفظ
+- [x] i18n: إضافة مفاتيح profile.accountInfo/preferences/notifications في en.json وar.json
+- [x] i18n: إضافة common.saving وcommon.saveChanges في كلا الملفين
+- [x] TypeScript: 0 أخطاء
+- [x] Tests: 247/247 ناجح

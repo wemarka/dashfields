@@ -286,14 +286,20 @@
     "triggered": "مُفعَّل"
   },
   "profile": {
-    "title": "الملف الشخصي",
-    "subtitle": "إدارة معلومات حسابك",
+    "title": "الملف الشخصي والإعدادات",
+    "subtitle": "إدارة معلومات حسابك وتفضيلات الإشعارات.",
     "name": "الاسم",
     "email": "البريد الإلكتروني",
     "joinedOn": "انضم في",
     "editProfile": "تعديل الملف الشخصي",
     "saveChanges": "حفظ التغييرات",
-    "changeAvatar": "تغيير الصورة الشخصية"
+    "changeAvatar": "تغيير الصورة الشخصية",
+    "accountInfo": "معلومات الحساب",
+    "accountInfoDesc": "تفاصيل ملفك الشخصي من Manus OAuth.",
+    "preferences": "التفضيلات",
+    "preferencesDesc": "إعدادات المنطقة الزمنية واللغة.",
+    "notifications": "تفضيلات الإشعارات",
+    "notificationsDesc": "اختر كيفية تلقي الإشعارات."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -346,6 +352,8 @@
   },
   "common": {
     "loading": "جارٍ التحميل...",
+    "saving": "جارٍ الحفظ...",
+    "saveChanges": "حفظ التغييرات",
     "noData": "لا توجد بيانات",
     "error": "حدث خطأ ما",
     "retry": "إعادة المحاولة",

@@ -8,10 +8,11 @@ import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
 import {
   Bell, Plus, Trash2, AlertTriangle, CheckCircle2,
-  Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid
+  Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid, SlidersHorizontal
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Metric   = "ctr" | "cpc" | "cpm" | "spend" | "impressions" | "clicks" | "roas";
@@ -63,6 +64,18 @@ function CreateAlertForm({
     onError: e => toast.error(e.message),
   });
 
+  // Threshold slider ranges per metric
+  const METRIC_RANGES: Record<Metric, { min: number; max: number; step: number; unit: string }> = {
+    ctr:         { min: 0, max: 20,    step: 0.1,  unit: "%" },
+    cpc:         { min: 0, max: 50,    step: 0.01, unit: "$" },
+    cpm:         { min: 0, max: 100,   step: 0.5,  unit: "$" },
+    spend:       { min: 0, max: 10000, step: 10,   unit: "$" },
+    impressions: { min: 0, max: 100000,step: 100,  unit: "" },
+    clicks:      { min: 0, max: 10000, step: 10,   unit: "" },
+    roas:        { min: 0, max: 20,    step: 0.1,  unit: "x" },
+  };
+  const range = METRIC_RANGES[metric];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!threshold) return;
@@ -72,7 +85,7 @@ function CreateAlertForm({
   return (
     <form onSubmit={handleSubmit} className="glass rounded-2xl p-5 space-y-4">
       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-        <Plus className="h-4 w-4" />
+        <SlidersHorizontal className="h-4 w-4" />
         Create Alert Rule
       </h3>
 
@@ -144,23 +157,47 @@ function CreateAlertForm({
           </select>
         </div>
 
-        {/* Threshold */}
-        <div>
-          <label className="block text-xs text-muted-foreground mb-1">Threshold Value</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={threshold}
-            onChange={e => setThreshold(e.target.value)}
-            placeholder="e.g. 1.5"
-            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-            required
-          />
+        {/* Threshold with slider */}
+        <div className="sm:col-span-2">
+          <label className="block text-xs text-muted-foreground mb-1">
+            Threshold Value
+            {threshold && (
+              <span className="ml-2 font-semibold text-primary">
+                {range.unit}{threshold}{range.unit === "%" ? "" : ""}
+              </span>
+            )}
+          </label>
+          <div className="space-y-2">
+            <input
+              type="range"
+              min={range.min}
+              max={range.max}
+              step={range.step}
+              value={threshold || range.min}
+              onChange={e => setThreshold(e.target.value)}
+              className="w-full accent-primary h-2 rounded-full cursor-pointer"
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                step={range.step}
+                min={range.min}
+                max={range.max}
+                value={threshold}
+                onChange={e => setThreshold(e.target.value)}
+                placeholder={`e.g. ${range.max / 4}`}
+                className="flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                required
+              />
+              <span className="text-xs text-muted-foreground shrink-0">
+                Range: {range.min}–{range.max}{range.unit}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Submit */}
-        <div className="flex items-end">
+        <div className="flex items-end sm:col-span-2">
           <button
             type="submit"
             disabled={create.isPending}
@@ -212,6 +249,7 @@ export default function Alerts() {
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const { data: lastCheckedData } = trpc.scheduler.getLastChecked.useQuery();
+  const { t } = useTranslation();
 
   const runCheck = trpc.scheduler.runAlertCheck.useMutation({
     onSuccess: (result) => {
@@ -237,9 +275,9 @@ export default function Alerts() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="page-header">Performance Alerts</h1>
+            <h1 className="page-header">{t("alerts.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Set thresholds across all platforms — get notified when metrics cross limits.
+              {t("alerts.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">

@@ -286,14 +286,20 @@
     "triggered": "Triggered"
   },
   "profile": {
-    "title": "Profile",
-    "subtitle": "Manage your account information",
+    "title": "Profile & Settings",
+    "subtitle": "Manage your account information and notification preferences.",
     "name": "Name",
     "email": "Email",
     "joinedOn": "Joined on",
     "editProfile": "Edit Profile",
     "saveChanges": "Save Changes",
-    "changeAvatar": "Change Avatar"
+    "changeAvatar": "Change Avatar",
+    "accountInfo": "Account Information",
+    "accountInfoDesc": "Your profile details from Manus OAuth.",
+    "preferences": "Preferences",
+    "preferencesDesc": "Timezone and language settings.",
+    "notifications": "Notification Preferences",
+    "notificationsDesc": "Choose how you want to be notified."
   },
   "notifications": {
     "title": "Notifications",
@@ -346,6 +352,8 @@
   },
   "common": {
     "loading": "Loading...",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
     "noData": "No data available",
     "error": "Something went wrong",
     "retry": "Retry",

@@ -12,9 +12,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Globe, Bell, Shield, Calendar, Clock } from "lucide-react";
+import { User, Mail, Globe, Bell, Shield, Calendar, Clock, Save, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Los_Angeles", "America/Chicago",
@@ -26,6 +28,7 @@ const TIMEZONES = [
 export default function Profile() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
+  const { t } = useTranslation();
 
   const { data: settings, isLoading } = trpc.settings.get.useQuery();
 
@@ -76,6 +79,10 @@ export default function Profile() {
       alertThresholdCpc,
       alertThresholdSpend,
     });
+    // Sync language to i18n immediately
+    if (language !== i18n.language) {
+      i18n.changeLanguage(language);
+    }
   };
 
   return (
@@ -83,8 +90,8 @@ export default function Profile() {
       <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="page-header">Profile & Settings</h1>
-        <p className="page-subtitle">Manage your account information and notification preferences.</p>
+        <h1 className="page-header">{t("profile.title")}</h1>
+        <p className="page-subtitle">{t("profile.subtitle")}</p>
       </div>
 
       {/* Account Info */}
@@ -92,9 +99,9 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <User className="h-4 w-4 text-brand" />
-            Account Information
+            {t("profile.accountInfo")}
           </CardTitle>
-          <CardDescription>Your profile details from Manus OAuth.</CardDescription>
+          <CardDescription>{t("profile.accountInfoDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
@@ -137,9 +144,9 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Globe className="h-4 w-4 text-brand" />
-            Preferences
+            {t("profile.preferences")}
           </CardTitle>
-          <CardDescription>Timezone and language settings.</CardDescription>
+          <CardDescription>{t("profile.preferencesDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
@@ -188,9 +195,9 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Bell className="h-4 w-4 text-brand" />
-            Notification Preferences
+            {t("profile.notifications")}
           </CardTitle>
-          <CardDescription>Choose how you want to be notified.</CardDescription>
+          <CardDescription>{t("profile.notificationsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {[
@@ -263,8 +270,12 @@ export default function Profile() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving} className="gap-2 min-w-32">
-          {isSaving ? "Saving..." : "Save Changes"}
+        <Button onClick={handleSave} disabled={isSaving} className="gap-2 min-w-36">
+          {isSaving ? (
+            <><Loader2 className="h-4 w-4 animate-spin" />{t("common.saving")}</>
+          ) : (
+            <><Save className="h-4 w-4" />{t("common.saveChanges")}</>
+          )}
         </Button>
       </div>
       </div>

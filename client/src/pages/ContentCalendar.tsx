@@ -11,8 +11,10 @@ import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";
 import {
   ChevronLeft, ChevronRight, Plus, Calendar, List,
-  Clock, CheckCircle2, AlertCircle, Edit3, Trash2, X,
+  Clock, CheckCircle2, AlertCircle, Edit3, Trash2, X, Send, Loader2,
 } from "lucide-react";
+import { trpc as trpcClient } from "@/lib/trpc";
+import { useTranslation } from "react-i18next";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type ViewMode = "month" | "week" | "list";
@@ -71,17 +73,30 @@ function PostPill({ post, onClick }: { post: CalendarPost; onClick: () => void }
 }
 
 // ─── Post Detail Modal ─────────────────────────────────────────────────────────
-function PostDetailModal({ post, onClose, onDelete, onReschedule }: {
+function PostDetailModal({ post, onClose, onDelete, onReschedule, onPublished }: {
   post: CalendarPost;
   onClose: () => void;
   onDelete: (id: number) => void;
   onReschedule: (id: number, newDate: string) => void;
+  onPublished?: () => void;
 }) {
   const [rescheduleDate, setRescheduleDate] = useState(
     post.scheduledAt ? post.scheduledAt.slice(0, 16) : ""
   );
   const style = STATUS_STYLES[post.status] ?? STATUS_STYLES.draft;
   const StatusIcon = STATUS_ICON[post.status] ?? Edit3;
+  const { t } = useTranslation();
+
+  const publishNowMutation = trpcClient.posts.publishNow.useMutation({
+    onSuccess: (data) => {
+      toast.success("Post published to Facebook!", {
+        description: `Meta Post ID: ${data.metaPostId}`,
+      });
+      onPublished?.();
+      onClose();
+    },
+    onError: (err) => toast.error("Publish failed", { description: err.message }),
+  });
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -152,7 +167,7 @@ function PostDetailModal({ post, onClose, onDelete, onReschedule }: {
         )}
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-border">
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
           <button
             onClick={() => onDelete(post.id)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 transition-colors"
@@ -160,6 +175,20 @@ function PostDetailModal({ post, onClose, onDelete, onReschedule }: {
             <Trash2 className="w-3.5 h-3.5" />
             Delete
           </button>
+          {(post.status === "draft" || post.status === "scheduled") && post.platforms.includes("facebook") && (
+            <button
+              onClick={() => publishNowMutation.mutate({ postId: post.id })}
+              disabled={publishNowMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1877F2] text-white text-xs font-medium hover:bg-[#1877F2]/90 transition-colors disabled:opacity-50"
+            >
+              {publishNowMutation.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5" />
+              )}
+              Publish Now
+            </button>
+          )}
           <button
             onClick={onClose}
             className="flex-1 px-3 py-2 rounded-xl bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
@@ -677,6 +706,7 @@ export default function ContentCalendar() {
           onClose={() => setSelectedPost(null)}
           onDelete={id => deleteMutation.mutate({ id })}
           onReschedule={(id, newDate) => rescheduleMutation.mutate({ id, scheduledAt: newDate })}
+          onPublished={() => { refetch(); utils.posts.list.invalidate(); }}
         />
       )}
       {createDate && (
