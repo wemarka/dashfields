@@ -964,3 +964,28 @@
 - [x] Frontend: صفحة WorkspaceSettings (General + Team + Brand Profile)
 - [x] Auto-create Default Workspace عند تسجيل مستخدم جديد
 - [x] QA: 281/281 اختبار ناجح + 0 أخطاء TypeScript + Checkpoint
+
+## ✅ Phase — Workspace Data Binding + Invitations + Branding
+
+### Phase A — ربط البيانات بـ workspaceId
+- [x] إضافة عمود workspace_id لجداول social_accounts, campaigns, posts, alert_rules, reports في Supabase
+- [x] تحديث DB helpers: getUserCampaigns, getUserPosts, getUserAlertRules, getUserSocialAccounts, reports.list
+- [x] تحديث routers: campaigns.list, campaigns.create, posts.list, posts.create, alerts.list, alerts.create, reports.list, reports.create, social.list
+
+### Phase B — نظام الدعوات
+- [x] جدول workspace_invitations (token, workspace_id, email, role, expires_at, accepted_at, status)
+- [x] Supabase migration لجدول الدعوات
+- [x] server/db/invitations.ts — createInvitation, getInvitationByToken, acceptInvitation, revokeInvitation, getWorkspaceInvitations
+- [x] server/routers/invitations.ts — invite, list, revoke, accept procedures
+- [x] WorkspaceSettings Team tab: "Invite by Link" + قائمة الدعوات المعلقة + زر إلغاء
+- [x] صفحة AcceptInvite.tsx (/invite/:token) — قبول الدعوة
+
+### Phase C — Workspace Branding
+- [x] uploadLogo tRPC procedure — base64 → S3 → logo_url في Supabase
+- [x] Logo Upload UI في WorkspaceSettings General tab (preview + spinner + remove)
+- [x] canAdmin في GeneralTab لإخفاء Logo uploader عن غير المشرفين
+
+### Phase D — اختبارات + Checkpoint
+- [x] server/invitations.test.ts — 11 اختبار (token generation, DB helpers, edge cases, security)
+- [x] 292/292 اختبار ناجح + 0 أخطاء TypeScript
+- [x] Checkpoint نهائي

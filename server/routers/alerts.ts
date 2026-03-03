@@ -14,22 +14,26 @@ import {
 import { notifyOwner } from "../_core/notification";
 
 export const alertsRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    return getUserAlertRules(ctx.user.id);
-  }),
+  list: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      return getUserAlertRules(ctx.user.id, input?.workspaceId);
+    }),
 
   create: protectedProcedure
     .input(z.object({
-      metric:    z.enum(["ctr", "cpc", "cpm", "spend", "impressions", "clicks", "roas"]),
-      operator:  z.enum(["lt", "gt", "lte", "gte"]),
-      threshold: z.number().positive(),
+      metric:      z.enum(["ctr", "cpc", "cpm", "spend", "impressions", "clicks", "roas"]),
+      operator:    z.enum(["lt", "gt", "lte", "gte"]),
+      threshold:   z.number().positive(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       return createAlertRule({
-        userId:    ctx.user.id,
-        metric:    input.metric,
-        operator:  input.operator,
-        threshold: input.threshold.toString(),
+        userId:      ctx.user.id,
+        metric:      input.metric,
+        operator:    input.operator,
+        threshold:   input.threshold.toString(),
+        workspaceId: input.workspaceId,
       });
     }),
 

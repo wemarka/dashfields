@@ -252,13 +252,14 @@ export type AlertRuleRow = {
   updated_at: string;
 };
 
-export async function getUserAlertRules(userId: number): Promise<AlertRuleRow[]> {
+export async function getUserAlertRules(userId: number, workspaceId?: number): Promise<AlertRuleRow[]> {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("alert_rules")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+  if (workspaceId) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as AlertRuleRow[];
 }
@@ -270,18 +271,20 @@ export async function createAlertRule(rule: {
   operator: string;
   threshold: string;
   name?: string;
+  workspaceId?: number | null;
 }): Promise<AlertRuleRow | null> {
   const sb = getSupabase();
   const { data, error } = await sb
     .from("alert_rules")
     .insert({
-      user_id:     rule.userId,
-      campaign_id: rule.campaignId ?? null,
-      metric:      rule.metric,
-      operator:    rule.operator,
-      threshold:   rule.threshold,
-      name:        rule.name ?? null,
-      is_active:   true,
+      user_id:      rule.userId,
+      campaign_id:  rule.campaignId ?? null,
+      metric:       rule.metric,
+      operator:     rule.operator,
+      threshold:    rule.threshold,
+      name:         rule.name ?? null,
+      is_active:    true,
+      workspace_id: rule.workspaceId ?? null,
     } as any)
     .select("*")
     .maybeSingle();

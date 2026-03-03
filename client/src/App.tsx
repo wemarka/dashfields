@@ -42,6 +42,7 @@ const CustomDashboards  = lazy(() => import("./pages/CustomDashboards"));
 const Insights          = lazy(() => import("./pages/Insights"));
 const Publishing        = lazy(() => import("./pages/Publishing"));
 const WorkspaceSettings = lazy(() => import("./pages/WorkspaceSettings"));
+const AcceptInvite      = lazy(() => import("./pages/AcceptInvite"));
 
 // ─── Page loading fallback ────────────────────────────────────────────────────
 function PageLoader() {
@@ -81,6 +82,7 @@ function Router() {
         <Route path="/compare"             component={PeriodComparison} />
         <Route path="/hashtags"             component={HashtagAnalytics} />
         <Route path="/workspace-settings"   component={WorkspaceSettings} />
+        <Route path="/invite/:token"          component={AcceptInvite} />
         {/* ── Legacy / backward-compat routes ────────────────────────────── */}
         <Route path="/meta-connect"         component={MetaConnect} />
         <Route path="/insights"             component={Insights} />

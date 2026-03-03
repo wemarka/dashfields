@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import {
   Building2, Users, Sparkles, Settings, Trash2,
   ChevronDown, Plus, Shield, Eye, UserCheck, Crown,
-  Tag, X, Save, AlertTriangle,
+  Tag, X, Save, AlertTriangle, Link2, Copy, MailPlus,
+  Clock, CheckCircle2, Ban, Upload, ImageIcon,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -48,10 +49,40 @@ const INDUSTRY_OPTIONS = [
 
 // ─── General Tab ──────────────────────────────────────────────────────────────
 function GeneralTab() {
-  const { activeWorkspace, refetch } = useWorkspace();
+  const { activeWorkspace, refetch, canAdmin } = useWorkspace();
   const [name, setName] = useState(activeWorkspace?.name ?? "");
   const [showDanger, setShowDanger] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [logoPreview, setLogoPreview] = useState<string | null>(activeWorkspace?.logo_url ?? null);
+  const [logoUploading, setLogoUploading] = useState(false);
+
+  const uploadLogoMutation = trpc.workspaces.uploadLogo.useMutation({
+    onSuccess: (data) => {
+      setLogoPreview(data.url);
+      toast.success("Logo updated!");
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+    onSettled: () => setLogoUploading(false),
+  });
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeWorkspace) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("Logo must be under 2MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setLogoPreview(dataUrl);
+      setLogoUploading(true);
+      uploadLogoMutation.mutate({
+        workspaceId: activeWorkspace.id,
+        dataUrl,
+        mimeType: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
 
   const updateMutation = trpc.workspaces.update.useMutation({
     onSuccess: () => {
@@ -81,6 +112,49 @@ function GeneralTab() {
 
   return (
     <div className="space-y-6 max-w-lg">
+      {/* Logo Upload */}
+      {canAdmin && (
+        <div className="glass rounded-2xl p-5 space-y-3">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-brand" />
+            Workspace Logo
+          </h3>
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center overflow-hidden border-2 border-border/40">
+              {logoPreview ? (
+                <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <Building2 className="w-7 h-7 text-brand/50" />
+              )}
+              {logoUploading && (
+                <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand/10 text-brand text-xs font-medium cursor-pointer hover:bg-brand/20 transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                {logoUploading ? "Uploading..." : "Upload Logo"}
+                <input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} disabled={logoUploading} />
+              </label>
+              <p className="text-[11px] text-muted-foreground/60">PNG, JPG, SVG • Max 2MB</p>
+            </div>
+            {logoPreview && activeWorkspace?.logo_url && (
+              <button
+                onClick={() => {
+                  setLogoPreview(null);
+                  uploadLogoMutation.mutate({ workspaceId: activeWorkspace.id, dataUrl: "", mimeType: "image/png" });
+                }}
+                className="ml-auto text-xs text-muted-foreground hover:text-destructive transition-colors"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Workspace Info */}
       <div className="glass rounded-2xl p-5 space-y-4">
         <h3 className="text-sm font-semibold">Workspace Information</h3>
@@ -212,6 +286,34 @@ function TeamTab() {
     onError: (e) => toast.error(e.message),
   });
 
+  // ── Invite by link ─────────────────────────────────────────────────────
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "member" | "viewer">("member");
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+
+  const inviteMutation = trpc.invitations.invite.useMutation({
+    onSuccess: (data) => {
+      setInviteLink(data.inviteUrl);
+      setInviteEmail("");
+      utils.invitations.list.invalidate();
+      toast.success(`Invitation link generated for ${data.email}`);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const revokeMutation = trpc.invitations.revoke.useMutation({
+    onSuccess: () => {
+      toast.success("Invitation revoked");
+      utils.invitations.list.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const { data: pendingInvitations } = trpc.invitations.list.useQuery(
+    { workspaceId: activeWorkspace?.id ?? 0 },
+    { enabled: !!activeWorkspace && canAdmin }
+  );
+
   if (!activeWorkspace) return null;
 
   return (
@@ -250,6 +352,92 @@ function TeamTab() {
           <p className="text-[11px] text-muted-foreground/60">
             The user must already have a Dashfields account.
           </p>
+        </div>
+      )}
+
+      {/* Invite by Link */}
+      {canAdmin && (
+        <div className="glass rounded-2xl p-5 space-y-3">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <Link2 className="w-4 h-4 text-brand" />
+            Invite by Link
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Generate a secure invite link and share it with anyone — they don't need an existing account.
+          </p>
+          <div className="flex gap-2">
+            <input
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="recipient@example.com"
+              className="flex-1 px-3 py-2 rounded-xl bg-background border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+            />
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as "admin" | "member" | "viewer")}
+              className="px-3 py-2 rounded-xl bg-background border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+            >
+              <option value="admin">Admin</option>
+              <option value="member">Member</option>
+              <option value="viewer">Viewer</option>
+            </select>
+            <button
+              onClick={() => inviteMutation.mutate({
+                workspaceId: activeWorkspace.id,
+                email: inviteEmail,
+                role: inviteRole,
+                origin: window.location.origin,
+              })}
+              disabled={!inviteEmail || inviteMutation.isPending}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+            >
+              <MailPlus className="w-3.5 h-3.5" />
+              {inviteMutation.isPending ? "Generating..." : "Generate Link"}
+            </button>
+          </div>
+
+          {/* Generated invite link */}
+          {inviteLink && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-brand/5 border border-brand/20">
+              <Link2 className="w-3.5 h-3.5 text-brand shrink-0" />
+              <span className="flex-1 text-xs font-mono text-brand truncate">{inviteLink}</span>
+              <button
+                onClick={() => { navigator.clipboard.writeText(inviteLink); toast.success("Link copied!"); }}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-brand text-brand-foreground text-xs hover:opacity-90 transition-opacity"
+              >
+                <Copy className="w-3 h-3" />
+                Copy
+              </button>
+            </div>
+          )}
+
+          {/* Pending invitations */}
+          {pendingInvitations && pendingInvitations.filter((i: Record<string, unknown>) => i.status === "pending").length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">Pending Invitations</p>
+              {pendingInvitations
+                .filter((i: Record<string, unknown>) => i.status === "pending")
+                .map((inv: Record<string, unknown>) => (
+                  <div key={inv.id as number} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/30">
+                    <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{inv.email as string}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Expires {new Date(inv.expires_at as string).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted capitalize">{inv.role as string}</span>
+                    <button
+                      onClick={() => revokeMutation.mutate({ invitationId: inv.id as number, workspaceId: activeWorkspace.id })}
+                      className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+                      title="Revoke invitation"
+                    >
+                      <Ban className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
 

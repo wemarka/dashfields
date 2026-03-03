@@ -50,13 +50,14 @@ export const postsRouter = router({
   // List posts — optionally filtered by date range
   list: protectedProcedure
     .input(z.object({
-      rangeStart: z.string().optional(),
-      rangeEnd:   z.string().optional(),
-      limit:      z.number().optional().default(100),
+      rangeStart:  z.string().optional(),
+      rangeEnd:    z.string().optional(),
+      limit:       z.number().optional().default(100),
+      workspaceId: z.number().int().positive().optional(),
     }).optional())
     .query(async ({ ctx, input }) => {
       if (!input?.rangeStart && !input?.rangeEnd) {
-        return getUserPosts(ctx.user.id);
+        return getUserPosts(ctx.user.id, input?.workspaceId);
       }
       const sb = getSupabase();
       let query = sb
@@ -65,7 +66,7 @@ export const postsRouter = router({
         .eq("user_id", ctx.user.id)
         .order("scheduled_at", { ascending: true })
         .limit(input?.limit ?? 100);
-
+      if (input?.workspaceId) query = query.eq("workspace_id", input.workspaceId);
       if (input?.rangeStart) {
         query = query.gte("scheduled_at", input.rangeStart);
       }
@@ -104,19 +105,21 @@ export const postsRouter = router({
       scheduledAt: z.union([z.date(), z.string()]).optional(),
       status:      z.enum(["draft", "scheduled", "published", "failed"]).optional(),
       imageUrl:    z.string().url().optional(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const scheduledAt = input.scheduledAt
         ? (typeof input.scheduledAt === "string" ? input.scheduledAt : input.scheduledAt.toISOString())
         : null;
       return createPost({
-        userId: ctx.user.id,
-        content: input.content,
-        title: input.title ?? null,
-        platforms: input.platforms,
+        userId:      ctx.user.id,
+        content:     input.content,
+        title:       input.title ?? null,
+        platforms:   input.platforms,
         scheduledAt,
-        mediaUrls: input.imageUrl ? [input.imageUrl] : null,
-        status: input.status ?? (scheduledAt ? "scheduled" : "draft"),
+        mediaUrls:   input.imageUrl ? [input.imageUrl] : null,
+        status:      input.status ?? (scheduledAt ? "scheduled" : "draft"),
+        workspaceId: input.workspaceId,
       });
     }),
 

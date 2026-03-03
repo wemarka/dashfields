@@ -20,13 +20,14 @@ export type PostRow = {
   updated_at: string;
 };
 
-export async function getUserPosts(userId: number): Promise<PostRow[]> {
+export async function getUserPosts(userId: number, workspaceId?: number): Promise<PostRow[]> {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("posts")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+  if (workspaceId) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as PostRow[];
 }
@@ -53,6 +54,7 @@ export async function createPost(post: {
   status?: string;
   scheduledAt?: string | null;
   metadata?: Record<string, unknown> | null;
+  workspaceId?: number | null;
 }): Promise<PostRow | null> {
   const sb = getSupabase();
   const { data, error } = await sb
@@ -67,6 +69,7 @@ export async function createPost(post: {
       status:             post.status ?? "draft",
       scheduled_at:       post.scheduledAt ?? null,
       metadata:           post.metadata ?? null,
+      workspace_id:       post.workspaceId ?? null,
     } as any)
     .select("*")
     .maybeSingle();

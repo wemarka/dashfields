@@ -39,13 +39,14 @@ export type MetricRow = {
   created_at: string;
 };
 
-export async function getUserCampaigns(userId: number): Promise<CampaignRow[]> {
+export async function getUserCampaigns(userId: number, workspaceId?: number): Promise<CampaignRow[]> {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("campaigns")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+  if (workspaceId) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as CampaignRow[];
 }
@@ -75,6 +76,7 @@ export async function createCampaign(campaign: {
   socialAccountId?: number | null;
   platformCampaignId?: string | null;
   metadata?: Record<string, unknown> | null;
+  workspaceId?: number | null;
 }): Promise<CampaignRow | null> {
   const sb = getSupabase();
   const { data, error } = await sb
@@ -92,6 +94,7 @@ export async function createCampaign(campaign: {
       social_account_id:    campaign.socialAccountId ?? null,
       platform_campaign_id: campaign.platformCampaignId ?? null,
       metadata:             campaign.metadata ?? null,
+      workspace_id:         campaign.workspaceId ?? null,
     } as any)
     .select("*")
     .maybeSingle();

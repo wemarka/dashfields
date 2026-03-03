@@ -26,13 +26,14 @@ export type SocialAccountRow = {
   updated_at: string;
 };
 
-export async function getUserSocialAccounts(userId: number): Promise<SocialAccountRow[]> {
+export async function getUserSocialAccounts(userId: number, workspaceId?: number): Promise<SocialAccountRow[]> {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("social_accounts")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+  if (workspaceId) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as SocialAccountRow[];
 }

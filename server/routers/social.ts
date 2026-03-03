@@ -66,9 +66,11 @@ async function checkYouTubeToken(token: string): Promise<{ valid: boolean; name?
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 export const socialRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) => {
-    return getUserSocialAccounts(ctx.user.id);
-  }),
+  list: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      return getUserSocialAccounts(ctx.user.id, input?.workspaceId);
+    }),
 
   connect: protectedProcedure
     .input(z.object({

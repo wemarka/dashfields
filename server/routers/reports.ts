@@ -218,16 +218,19 @@ const brandingSchema = z.object({
 // ─── Router ────────────────────────────────────────────────────────────────────
 export const reportsRouter = router({
   /** List all scheduled reports for the current user */
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const sb = getSupabase();
-    const { data, error } = await sb
-      .from("scheduled_reports")
-      .select("*")
-      .eq("user_id", ctx.user.id)
-      .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return (data ?? []) as ReportRow[];
-  }),
+  list: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("scheduled_reports")
+        .select("*")
+        .eq("user_id", ctx.user.id);
+      if (input?.workspaceId) query = query.eq("workspace_id", input.workspaceId);
+      const { data, error } = await query.order("created_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as ReportRow[];
+    }),
 
   /** Create a new scheduled report */
   create: protectedProcedure
@@ -238,16 +241,18 @@ export const reportsRouter = router({
       format:          z.enum(["csv", "html"]).default("csv"),
       schedule:        z.enum(["none", "weekly", "monthly"]).default("none"),
       emailRecipients: z.array(z.string().email()).default([]),
+      workspaceId:     z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
       const insertData: Record<string, unknown> = {
-        user_id:     ctx.user.id,
-        name:        input.name,
-        platforms:   input.platforms,
-        date_preset: input.datePreset,
-        format:      input.format,
-        schedule:    input.schedule,
+        user_id:      ctx.user.id,
+        name:         input.name,
+        platforms:    input.platforms,
+        date_preset:  input.datePreset,
+        format:       input.format,
+        schedule:     input.schedule,
+        workspace_id: input.workspaceId ?? null,
       };
       if (input.emailRecipients.length > 0) {
         try { (insertData as Record<string, unknown>).email_recipients = input.emailRecipients; } catch { /* column may not exist */ }

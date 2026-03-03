@@ -20,6 +20,7 @@ import {
   generateSlug,
 } from "../db/workspaces";
 import { getSupabase } from "../supabase";
+import { storagePut } from "../storage";
 
 // ─── Input Schemas ────────────────────────────────────────────────────────────
 const createWorkspaceInput = z.object({
@@ -203,6 +204,28 @@ export const workspacesRouter = router({
       if (updates.examplePosts !== undefined) dbUpdates.example_posts = updates.examplePosts;
 
       return upsertBrandProfile(ctx.workspaceId, dbUpdates as Parameters<typeof upsertBrandProfile>[1]);
+    }),
+
+  /** Upload workspace logo — accepts base64 data URL (admin/owner only) */
+  uploadLogo: workspaceAdminProcedure
+    .input(z.object({
+      workspaceId: z.number().int().positive(),
+      dataUrl:     z.string().min(1), // base64 data URL: "data:image/png;base64,..."
+      mimeType:    z.string().default("image/png"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Decode base64
+      const base64 = input.dataUrl.replace(/^data:[^;]+;base64,/, "");
+      const buffer = Buffer.from(base64, "base64");
+      if (buffer.byteLength > 2 * 1024 * 1024) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Logo must be under 2MB" });
+      }
+      const ext = input.mimeType.split("/")[1] ?? "png";
+      const key = `workspace-logos/${ctx.workspaceId}-${Date.now()}.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      // Save logo_url to workspace
+      await updateWorkspace(ctx.workspaceId, { logoUrl: url });
+      return { url };
     }),
 
   /** Quick add member by user lookup (admin/owner only — for demo/dev) */

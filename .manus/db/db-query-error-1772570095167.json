@@ -1,0 +1,15 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS workspace_invitations (\n  id           BIGSERIAL PRIMARY KEY,\n  workspace_id BIGINT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,\n  invited_by   BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n  email        TEXT NOT NULL,\n  role         TEXT NOT NULL DEFAULT 'member',\n  token        TEXT NOT NULL UNIQUE,\n  status       TEXT NOT NULL DEFAULT 'pending',\n  expires_at   TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),\n  accepted_at  TIMESTAMPTZ,\n  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_workspace_id ON workspace_invitations(workspace_id);\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_token ON workspace_invitations(token);\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_email ON workspace_invitations(email);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \nCREATE TABLE IF NOT EXISTS workspace_invitations (\n  id           BIGSERIAL PRIMARY KEY,\n  workspace_id BIGINT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,\n  invited_by   BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n  email        TEXT NOT NULL,\n  role         TEXT NOT NULL DEFAULT 'member',\n  token        TEXT NOT NULL UNIQUE,\n  status       TEXT NOT NULL DEFAULT 'pending',\n  expires_at   TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),\n  accepted_at  TIMESTAMPTZ,\n  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_workspace_id ON workspace_invitations(workspace_id);\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_token ON workspace_invitations(token);\nCREATE INDEX IF NOT EXISTS idx_workspace_invitations_email ON workspace_invitations(email);\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 2: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 2 column 25 near \"BIGSERIAL PRIMARY KEY,",
+    "  workspace_id BIGINT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,",
+    "  invited_by   BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,",
+    "  email        TEXT NOT NULL,",
+    "  role         TEXT NOT NULL DEFAULT 'member',",
+    "  token        TEXT NOT NULL UNIQUE,",
+    "  status       TEXT NOT NULL DEFAULT 'pending',",
+    "  expires_at   TIMESTAMPTZ NOT NULL"
+  ]
+}
