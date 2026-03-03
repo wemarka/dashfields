@@ -255,4 +255,55 @@ export const postAnalyticsRouter = router({
         avgEngagementRate:    totalReach > 0 ? Math.round((totalEngagement / totalReach) * 10000) / 100 : 0,
       };
     }),
+
+  /** Engagement trend over time — grouped by day for the selected period */
+  engagementTrend: protectedProcedure
+    .input(z.object({
+      platform:   z.string().optional(),
+      datePreset: z.enum(["7d", "30d", "90d"]).default("30d"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const sb   = getSupabase();
+      const days = input.datePreset === "7d" ? 7 : input.datePreset === "30d" ? 30 : 90;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+      let query = sb
+        .from("posts")
+        .select("likes, comments, shares, reach, published_at")
+        .eq("user_id", ctx.user.id)
+        .eq("status", "published")
+        .gte("published_at", since)
+        .not("published_at", "is", null)
+        .order("published_at", { ascending: true });
+
+      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      const { data } = await query;
+      const posts = data ?? [];
+
+      // Group by date
+      const dayMap = new Map<string, { likes: number; comments: number; shares: number; reach: number; count: number }>();
+      for (const p of posts) {
+        const day = (p.published_at || "").split("T")[0];
+        if (!day) continue;
+        if (!dayMap.has(day)) dayMap.set(day, { likes: 0, comments: 0, shares: 0, reach: 0, count: 0 });
+        const d = dayMap.get(day)!;
+        d.likes    += Number(p.likes)    || 0;
+        d.comments += Number(p.comments) || 0;
+        d.shares   += Number(p.shares)   || 0;
+        d.reach    += Number(p.reach)    || 0;
+        d.count++;
+      }
+
+      const trend = Array.from(dayMap.entries()).map(([date, d]) => ({
+        date,
+        likes:      d.likes,
+        comments:   d.comments,
+        shares:     d.shares,
+        reach:      d.reach,
+        engagement: d.likes + d.comments + d.shares,
+        posts:      d.count,
+      }));
+
+      return { trend, totalDays: days };
+    }),
 });

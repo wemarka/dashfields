@@ -22,6 +22,7 @@ import AIContent from "@/pages/AIContent";
 import ContentCalendar from "@/pages/ContentCalendar";
 import Notifications from "@/pages/Notifications";
 import Profile from "@/pages/Profile";
+import HashtagAnalytics from "@/pages/HashtagAnalytics";
 
 function Router() {
   return (
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/calendar"        component={ContentCalendar} />
       <Route path="/notifications"   component={Notifications} />
       <Route path="/profile"         component={Profile} />
+      <Route path="/hashtags"         component={HashtagAnalytics} />
       <Route path="/404"          component={NotFound} />
       <Route component={NotFound} />
     </Switch>

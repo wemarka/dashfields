@@ -339,3 +339,12 @@
 - [ ] TypeScript check (0 errors)
 - [ ] Tests passing
 - [ ] Checkpoint and deliver
+
+## ✅ Phase 69-73 — Hashtag Analytics + Post Trend Chart
+- [x] Hashtag Analytics page (/hashtags) with real data from posts table
+- [x] server/routers/hashtags.ts — top hashtags, trend distribution, co-occurring tags
+- [x] Hashtag seeding script (added hashtags to 10 posts in Supabase)
+- [x] Hashtags added to sidebar under Analytics section
+- [x] Post Analytics — engagementTrend procedure (real data from posts table)
+- [x] Post Analytics — Trend tab with AreaChart (Engagement, Reach, Likes over time)
+- [x] 225/225 tests passing, 0 TypeScript errors

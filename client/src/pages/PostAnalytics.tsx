@@ -10,6 +10,7 @@ import { PLATFORMS } from "@shared/platforms";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
+  AreaChart, Area, CartesianGrid,
 } from "recharts";
 import {
   TrendingUp, Heart, MessageCircle, Share2, Eye, Users,
@@ -179,7 +180,8 @@ export default function PostAnalytics() {
   const [platform,  setPlatform]  = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<DateRange>("last_30d");
   const [sortBy,    setSortBy]    = useState<SortBy>("engagement");
-  const [activeTab, setActiveTab] = useState<"posts" | "heatmap" | "times" | "types">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "heatmap" | "times" | "types" | "trend">("posts");
+  const [trendPreset, setTrendPreset] = useState<"7d" | "30d" | "90d">("30d");
 
   const queryInput = useMemo(() => ({ platform, dateRange }), [platform, dateRange]);
   const topPostsInput = useMemo(() => ({ platform, dateRange, sortBy, limit: 20 }), [platform, dateRange, sortBy]);
@@ -189,6 +191,8 @@ export default function PostAnalytics() {
   const { data: heatmapData } = trpc.postAnalytics.heatmap.useQuery(queryInput);
   const { data: bestTimes }   = trpc.postAnalytics.bestTimes.useQuery(queryInput);
   const { data: typeBreakdown } = trpc.postAnalytics.typeBreakdown.useQuery(queryInput);
+  const trendInput = useMemo(() => ({ platform, datePreset: trendPreset }), [platform, trendPreset]);
+  const { data: trendData } = trpc.postAnalytics.engagementTrend.useQuery(trendInput);
 
   const kpis = [
     { label: "Total Posts",      value: summary?.totalPosts ?? 0,        icon: BarChart2, color: "text-violet-500 bg-violet-500/10", format: "number" },
@@ -204,6 +208,7 @@ export default function PostAnalytics() {
     { key: "heatmap", label: "Heatmap",        icon: Grid3X3 },
     { key: "times",   label: "Best Times",     icon: Clock },
     { key: "types",   label: "Post Types",     icon: Eye },
+    { key: "trend",   label: "Trend",           icon: TrendingUp },
   ] as const;
 
   return (
@@ -334,6 +339,50 @@ export default function PostAnalytics() {
                 </>
               ) : (
                 <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Loading...</div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "trend" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-foreground">Engagement Trend Over Time</h3>
+                <div className="flex items-center gap-1 bg-muted/50 rounded-xl p-1">
+                  {(["7d", "30d", "90d"] as const).map(p => (
+                    <button key={p} onClick={() => setTrendPreset(p)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        trendPreset === p ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}>{p}</button>
+                  ))}
+                </div>
+              </div>
+              {trendData && trendData.trend.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={trendData.trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={d => d.slice(5)} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
+                    <Legend />
+                    <Area type="monotone" dataKey="engagement" stroke="#8b5cf6" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
+                    <Area type="monotone" dataKey="reach" stroke="#06b6d4" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
+                    <Area type="monotone" dataKey="likes" stroke="#f43f5e" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
+                  No trend data available for this period
+                </div>
               )}
             </div>
           )}
