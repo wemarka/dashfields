@@ -5,6 +5,7 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ActiveAccountProvider } from "./contexts/ActiveAccountContext";
+import { WorkspaceProvider } from "./contexts/WorkspaceContext";
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {
@@ -40,6 +41,7 @@ const AudienceOverlap   = lazy(() => import("./pages/AudienceOverlap"));
 const CustomDashboards  = lazy(() => import("./pages/CustomDashboards"));
 const Insights          = lazy(() => import("./pages/Insights"));
 const Publishing        = lazy(() => import("./pages/Publishing"));
+const WorkspaceSettings = lazy(() => import("./pages/WorkspaceSettings"));
 
 // ─── Page loading fallback ────────────────────────────────────────────────────
 function PageLoader() {
@@ -76,8 +78,9 @@ function Router() {
         <Route path="/notifications"        component={Notifications} />
         <Route path="/post-analytics"       component={PostAnalytics} />
         <Route path="/audience-overlap"     component={AudienceOverlap} />
-        <Route path="/compare"              component={PeriodComparison} />
+        <Route path="/compare"             component={PeriodComparison} />
         <Route path="/hashtags"             component={HashtagAnalytics} />
+        <Route path="/workspace-settings"   component={WorkspaceSettings} />
         {/* ── Legacy / backward-compat routes ────────────────────────────── */}
         <Route path="/meta-connect"         component={MetaConnect} />
         <Route path="/insights"             component={Insights} />
@@ -95,10 +98,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <ActiveAccountProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <WorkspaceProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </WorkspaceProvider>
         </ActiveAccountProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -71,6 +71,13 @@
       "when": 1772559292670,
       "tag": "0009_open_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1772567382488,
+      "tag": "0010_known_loa",
+      "breakpoints": true
     }
   ]
 }

@@ -20,10 +20,11 @@ import {
   Link2, Globe2, FileText, Users, User, Swords,
   Sun, Moon, ChevronDown, Check, PlusCircle,
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
-  Facebook, Instagram, Linkedin, Twitter, Youtube,
+  Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
 
 // ─── Dark Mode Hook ───────────────────────────────────────────────────────────
@@ -124,6 +125,73 @@ const navGroups: NavGroup[] = [
     ],
   },
 ];
+
+// ─── Workspace Switcher Modal ───────────────────────────────────────────────
+import type { WorkspaceItem } from "@/contexts/WorkspaceContext";
+function WorkspaceSwitcherModal({
+  workspaces, active, onSelect, onClose,
+}: {
+  workspaces: WorkspaceItem[];
+  active: WorkspaceItem | null;
+  onSelect: (id: number) => void;
+  onClose: () => void;
+}) {
+  const [, setLocation] = useLocation();
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass-strong rounded-2xl w-full max-w-sm mx-4 mb-4 md:mb-0 p-4 shadow-2xl animate-blur-in">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Switch Workspace</h3>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-foreground/8 transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        {workspaces.length === 0 ? (
+          <div className="py-6 text-center">
+            <Building2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No workspaces yet</p>
+          </div>
+        ) : (
+          <div className="space-y-1 max-h-72 overflow-y-auto">
+            {workspaces.map(ws => (
+              <button
+                key={ws.id}
+                onClick={() => onSelect(ws.id)}
+                className={[
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors",
+                  active?.id === ws.id ? "bg-brand/10 border border-brand/20" : "hover:bg-foreground/5",
+                ].join(" ")}
+              >
+                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+                  {ws.logo_url ? (
+                    <img src={ws.logo_url} alt={ws.name} className="w-8 h-8 rounded-lg object-cover" />
+                  ) : (
+                    <Building2 className="w-4 h-4 text-brand" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{ws.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate capitalize">{ws.plan} · {ws.role}</p>
+                </div>
+                {active?.id === ws.id && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => { setLocation("/workspace-settings"); onClose(); }}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Workspace Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Account Switcher Modal ───────────────────────────────────────────────────
 function AccountSwitcherModal({
@@ -279,6 +347,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
+  const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
+  const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => window.location.reload(),
@@ -409,6 +479,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
+        {/* ── Workspace Switcher (above account) ──────────────────────────── */}
+        <div className="px-2 pt-2 shrink-0">
+          <button
+            onClick={() => setShowWorkspaceSwitcher(true)}
+            title={collapsed ? (activeWorkspace?.name ?? "Workspace") : undefined}
+            className={[
+              "w-full flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-foreground/5 transition-colors group",
+              collapsed ? "justify-center" : "",
+              isRTL ? "flex-row-reverse" : "",
+            ].join(" ")}
+          >
+            <div className="w-6 h-6 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+              <Building2 className="w-3.5 h-3.5 text-brand" />
+            </div>
+            {!collapsed && (
+              <>
+                <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
+                  <p className="text-[11px] font-semibold truncate leading-tight">
+                    {activeWorkspace?.name ?? "No Workspace"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/55 truncate capitalize">
+                    {activeWorkspace ? `${activeWorkspace.plan} · ${activeWorkspace.role}` : "Select workspace"}
+                  </p>
+                </div>
+                <ChevronDown className="w-3 h-3 text-muted-foreground/50 shrink-0 group-hover:text-foreground/60 transition-colors" />
+              </>
+            )}
+          </button>
+        </div>
         {/* ── Account Switcher (bottom) ──────────────────────────────────── */}
         <div className="px-2 pb-2 border-t border-white/8 pt-2 shrink-0">
           <button
@@ -535,6 +634,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Mobile Bottom Nav ──────────────────────────────────────────────── */}
       <MobileBottomNav />
 
+      {/* ── Workspace Switcher Modal ──────────────────────────────────────── */}
+      {showWorkspaceSwitcher && (
+        <WorkspaceSwitcherModal
+          workspaces={workspaces}
+          active={activeWorkspace}
+          onSelect={(id) => { setActiveWorkspace(id); setShowWorkspaceSwitcher(false); }}
+          onClose={() => setShowWorkspaceSwitcher(false)}
+        />
+      )}
       {/* ── Account Switcher Modal ─────────────────────────────────────────── */}
       {showAccountSwitcher && (
         <AccountSwitcherModal

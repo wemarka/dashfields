@@ -32,6 +32,7 @@ import { hashtagsRouter }     from "./routers/hashtags";
 import { competitorsRouter }  from "./routers/competitors";
 import { abTestingRouter }         from "./routers/abTesting";
 import { customDashboardsRouter }  from "./routers/customDashboards";
+import { workspacesRouter }        from "./routers/workspaces";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -69,6 +70,7 @@ export const appRouter = router({
   competitors:   competitorsRouter,
   abTesting:        abTestingRouter,
   customDashboards: customDashboardsRouter,
+  workspaces:       workspacesRouter,
 });
 
 export type AppRouter = typeof appRouter;

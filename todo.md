@@ -949,3 +949,18 @@
 - [x] Client: Insights.tsx مرتبط بـ activeAccountId
 - [x] Client: AudienceOverlap.tsx مرتبط بـ activeAccountId
 - [x] 266/266 اختبار ناجح — 0 أخطاء TypeScript
+
+## ✅ Phase — Workspaces Multi-Tenancy SaaS
+
+- [x] Schema: جدول workspaces (id, name, slug, logo_url, plan, created_by)
+- [x] Schema: جدول workspace_members (workspace_id, user_id, role, invited_at, accepted_at)
+- [x] Schema: جدول brand_profiles (workspace_id, tone, industry, language, keywords, avoid_words)
+- [x] Backend: workspaceProcedure middleware في _core/trpc.ts
+- [x] Backend: workspaces router (CRUD + members management + brand profile)
+- [x] Backend: db helpers في server/db/workspaces.ts
+- [x] Frontend: WorkspaceContext منفصل عن ActiveAccountContext
+- [x] Frontend: Workspace Switcher في Sidebar (فوق Account Switcher)
+- [x] Frontend: WorkspaceSwitcherModal في DashboardLayout
+- [x] Frontend: صفحة WorkspaceSettings (General + Team + Brand Profile)
+- [x] Auto-create Default Workspace عند تسجيل مستخدم جديد
+- [x] QA: 281/281 اختبار ناجح + 0 أخطاء TypeScript + Checkpoint

@@ -21,6 +21,9 @@ export const campaignStatusEnum = pgEnum("campaign_status", ["active", "paused",
 export const budgetTypeEnum = pgEnum("budget_type",  ["daily", "lifetime"]);
 export const postStatusEnum = pgEnum("post_status",  ["draft", "scheduled", "published", "failed"]);
 export const notifTypeEnum  = pgEnum("notif_type",   ["info", "warning", "error", "success"]);
+export const workspacePlanEnum = pgEnum("workspace_plan", ["free", "pro", "agency", "enterprise"]);
+export const workspaceMemberRoleEnum = pgEnum("workspace_member_role", ["owner", "admin", "member", "viewer"]);
+export const workspaceInviteStatusEnum = pgEnum("workspace_invite_status", ["pending", "accepted", "expired", "cancelled"]);
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 export const users = pgTable("users", {
@@ -35,10 +38,59 @@ export const users = pgTable("users", {
   lastSignedIn:  timestamp("last_signed_in").defaultNow().notNull(),
 });
 
+// ─── Workspaces ───────────────────────────────────────────────────────────────
+export const workspaces = pgTable("workspaces", {
+  id:          serial("id").primaryKey(),
+  name:        varchar("name", { length: 128 }).notNull(),
+  slug:        varchar("slug", { length: 64 }).notNull().unique(),
+  logoUrl:     text("logo_url"),
+  plan:        workspacePlanEnum("plan").default("free").notNull(),
+  createdBy:   integer("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const workspaceMembers = pgTable("workspace_members", {
+  id:            serial("id").primaryKey(),
+  workspaceId:   integer("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  userId:        integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  role:          workspaceMemberRoleEnum("role").default("member").notNull(),
+  invitedAt:     timestamp("invited_at").defaultNow().notNull(),
+  acceptedAt:    timestamp("accepted_at"),
+}, (t) => [uniqueIndex("workspace_members_workspace_user_idx").on(t.workspaceId, t.userId)]);
+
+export const workspaceInvitations = pgTable("workspace_invitations", {
+  id:            serial("id").primaryKey(),
+  workspaceId:   integer("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  email:         varchar("email", { length: 320 }).notNull(),
+  role:          workspaceMemberRoleEnum("role").default("member").notNull(),
+  token:         varchar("token", { length: 128 }).notNull().unique(),
+  status:        workspaceInviteStatusEnum("status").default("pending").notNull(),
+  invitedBy:     integer("invited_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt:     timestamp("expires_at").notNull(),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+});
+
+export const brandProfiles = pgTable("brand_profiles", {
+  id:            serial("id").primaryKey(),
+  workspaceId:   integer("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }).unique(),
+  industry:      varchar("industry", { length: 64 }),
+  tone:          varchar("tone", { length: 64 }).default("professional"),
+  language:      varchar("language", { length: 8 }).default("ar"),
+  brandName:     varchar("brand_name", { length: 128 }),
+  brandDesc:     text("brand_desc"),
+  keywords:      text("keywords").array().default([]),
+  avoidWords:    text("avoid_words").array().default([]),
+  examplePosts:  text("example_posts").array().default([]),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  updatedAt:     timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── Social Accounts ──────────────────────────────────────────────────────────
 export const socialAccounts = pgTable("social_accounts", {
   id:                  serial("id").primaryKey(),
   userId:              integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:         integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   platform:            platformEnum("platform").notNull(),
   accountType:         accountTypeEnum("account_type").default("profile").notNull(),
   platformAccountId:   varchar("platform_account_id", { length: 128 }).notNull(),
@@ -58,6 +110,7 @@ export const socialAccounts = pgTable("social_accounts", {
 export const campaigns = pgTable("campaigns", {
   id:                  serial("id").primaryKey(),
   userId:              integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:         integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   socialAccountId:     integer("social_account_id").references(() => socialAccounts.id),
   name:                varchar("name", { length: 256 }).notNull(),
   platform:            platformEnum("platform").notNull(),
@@ -97,11 +150,12 @@ export const postTypeEnum = pgEnum("post_type", ["image", "video", "text", "caro
 export const posts = pgTable("posts", {
   id:               serial("id").primaryKey(),
   userId:           integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:      integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   title:            varchar("title", { length: 256 }),
   content:          text("content").notNull(),
   mediaUrls:        jsonb("media_urls"),
-  platforms:        jsonb("platforms").notNull(),        // string[]
-  socialAccountIds: jsonb("social_account_ids"),         // number[]
+  platforms:        jsonb("platforms").notNull(),
+  socialAccountIds: jsonb("social_account_ids"),
   status:           postStatusEnum("status").default("draft").notNull(),
   postType:         postTypeEnum("post_type").default("text"),
   scheduledAt:      timestamp("scheduled_at"),
@@ -144,9 +198,10 @@ export const notifications = pgTable("notifications", {
 export const alertRules = pgTable("alert_rules", {
   id:           serial("id").primaryKey(),
   userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   name:         varchar("name", { length: 256 }).notNull(),
-  metric:       varchar("metric", { length: 64 }).notNull(),   // "ctr" | "cpc" | "spend" | "impressions"
-  operator:     varchar("operator", { length: 8 }).notNull(),  // "lt" | "gt" | "lte" | "gte"
+  metric:       varchar("metric", { length: 64 }).notNull(),
+  operator:     varchar("operator", { length: 8 }).notNull(),
   threshold:    numeric("threshold", { precision: 12, scale: 4 }).notNull(),
   isActive:     boolean("is_active").default(true).notNull(),
   lastTriggeredAt: timestamp("last_triggered_at"),
@@ -161,8 +216,9 @@ export const reportFormatEnum   = pgEnum("report_format",   ["csv", "html"]);
 export const scheduledReports = pgTable("scheduled_reports", {
   id:           serial("id").primaryKey(),
   userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   name:         varchar("name", { length: 256 }).notNull(),
-  platforms:    text("platforms").array().notNull().default([]),  // [] = all
+  platforms:    text("platforms").array().notNull().default([]),
   datePreset:   varchar("date_preset", { length: 32 }).default("last_30d").notNull(),
   format:       reportFormatEnum("format").default("csv").notNull(),
   schedule:     reportScheduleEnum("schedule").default("none").notNull(),
@@ -176,6 +232,7 @@ export const abTestStatusEnum = pgEnum("ab_test_status", ["draft", "running", "p
 export const abTests = pgTable("ab_tests", {
   id:          serial("id").primaryKey(),
   userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId: integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   name:        varchar("name", { length: 256 }).notNull(),
   hypothesis:  text("hypothesis"),
   platform:    varchar("platform", { length: 64 }).default("facebook").notNull(),
@@ -195,6 +252,7 @@ export type InsertAbTest = typeof abTests.$inferInsert;
 export const customDashboards = pgTable("custom_dashboards", {
   id:          serial("id").primaryKey(),
   userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId: integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   name:        varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   widgets:     jsonb("widgets").notNull().default([]),
@@ -233,3 +291,10 @@ export type AlertRule      = typeof alertRules.$inferSelect;
 export type InsertAlertRule = typeof alertRules.$inferInsert;
 export type ScheduledReport = typeof scheduledReports.$inferSelect;
 export type InsertScheduledReport = typeof scheduledReports.$inferInsert;
+export type Workspace            = typeof workspaces.$inferSelect;
+export type InsertWorkspace      = typeof workspaces.$inferInsert;
+export type WorkspaceMember      = typeof workspaceMembers.$inferSelect;
+export type InsertWorkspaceMember = typeof workspaceMembers.$inferInsert;
+export type WorkspaceInvitation  = typeof workspaceInvitations.$inferSelect;
+export type BrandProfile         = typeof brandProfiles.$inferSelect;
+export type InsertBrandProfile   = typeof brandProfiles.$inferInsert;

@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { getUserWorkspaces, createWorkspace, generateSlug } from "../db/workspaces";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,13 +29,34 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      await db.upsertUser({
+      const upsertedUser = await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Auto-create a Default Workspace for new users
+      if (upsertedUser) {
+        try {
+          const existingWorkspaces = await getUserWorkspaces(upsertedUser.id);
+          if (existingWorkspaces.length === 0) {
+            const wsName = `${upsertedUser.name ?? "My"}'s Workspace`;
+            const baseSlug = generateSlug(wsName);
+            await createWorkspace({
+              name: wsName,
+              slug: `${baseSlug}-${upsertedUser.id}`,
+              plan: "free",
+              createdBy: upsertedUser.id,
+            });
+            console.log(`[OAuth] Created default workspace for user ${upsertedUser.id}`);
+          }
+        } catch (wsErr) {
+          // Non-fatal — log but don't block login
+          console.error("[OAuth] Failed to create default workspace:", wsErr);
+        }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
