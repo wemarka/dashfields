@@ -400,3 +400,19 @@
 - [x] Audience.tsx: shows empty state when no posts exist
 - [x] 244/244 tests passing, 0 TypeScript errors
 - [x] Checkpoint saved
+
+## 🔴 BUG FIX — Crash on Profile, Settings, Hashtags Pages
+
+- [ ] Fix Profile page crash
+- [ ] Fix Settings page crash
+- [ ] Fix Hashtags page crash
+- [ ] Run tests and save checkpoint
+
+## 🔴 BUG FIX — Profile, Hashtags, Settings outside DashboardLayout
+
+- [x] Fix Profile.tsx: added DashboardLayout wrapper
+- [x] Fix HashtagAnalytics.tsx: added DashboardLayout wrapper
+- [x] Fix Notifications.tsx: added DashboardLayout wrapper
+- [x] Verified all sidebar links render inside DashboardLayout
+- [x] 0 TypeScript errors
+- [x] Save checkpoint

@@ -11,6 +11,7 @@ import {
 import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PLATFORMS } from "@shared/platforms";
+import DashboardLayout from "@/components/DashboardLayout";
 
 const SORT_OPTIONS = [
   { value: "avgEngagement", label: "Avg Engagement" },
@@ -78,7 +79,8 @@ export default function HashtagAnalytics() {
   const top10 = hashtags.slice(0, 10);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <DashboardLayout>
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -371,5 +373,6 @@ export default function HashtagAnalytics() {
         </>
       )}
     </div>
+    </DashboardLayout>
   );
 }

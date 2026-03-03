@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Mail, Globe, Bell, Shield, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
+import DashboardLayout from "@/components/DashboardLayout";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Los_Angeles", "America/Chicago",
@@ -78,7 +79,8 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <DashboardLayout>
+      <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
         <h1 className="page-header">Profile & Settings</h1>
@@ -265,6 +267,7 @@ export default function Profile() {
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

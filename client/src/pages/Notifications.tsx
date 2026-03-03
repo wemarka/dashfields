@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, BellOff, Check, CheckCheck, Trash2, AlertTriangle, Info, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import DashboardLayout from "@/components/DashboardLayout";
 
 type NotifType = "info" | "warning" | "error" | "success";
 
@@ -59,6 +60,7 @@ export default function Notifications() {
     : notifications;
 
   return (
+    <DashboardLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -191,5 +193,6 @@ export default function Notifications() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }
