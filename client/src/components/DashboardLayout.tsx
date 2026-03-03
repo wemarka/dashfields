@@ -4,6 +4,7 @@
 //  • Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
 //  • Account Switcher at Sidebar bottom (per-platform, multi-account)
 import { useAuth } from "@/_core/hooks/useAuth";
+import { DashfieldsIcon, DashfieldsLogoFull } from "@/components/DashfieldsLogo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { getLoginUrl } from "@/const";
@@ -365,11 +366,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <img
-            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
-            alt="Dashfields"
-            className="w-10 h-10 object-contain dark:invert animate-pulse"
-          />
+          <DashfieldsIcon className="w-10 h-10 text-foreground animate-pulse" />
           <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
@@ -382,16 +379,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass-strong rounded-3xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 animate-blur-in">
           <div className="flex flex-col items-center gap-3">
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
-              alt="Dashfields"
-              className="w-16 h-16 object-contain dark:invert"
-            />
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_LOGO_FULL_SVG_e5842d1d.svg"
-              alt="Dashfields"
-              className="h-8 w-auto object-contain dark:invert"
-            />
+            <DashfieldsIcon className="w-16 h-16 text-foreground" />
+            <DashfieldsLogoFull className="h-8 w-auto text-foreground" />
           </div>
           <div className="text-center">
             <p className="text-[10px] text-muted-foreground/60 tracking-widest uppercase mb-2">{t("auth.tagline")}</p>
@@ -420,22 +409,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className={`flex items-center gap-3 px-4 h-14 border-b border-white/8 shrink-0 ${collapsed ? "justify-center" : ""}`}>
           <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
+            className="w-8 h-8 flex items-center justify-center shrink-0 cursor-pointer"
             onClick={() => setLocation("/")}
           >
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_d328c187.svg"
-              alt="Dashfields"
-              className="w-8 h-8 object-contain dark:invert"
-            />
+            <DashfieldsIcon className="w-8 h-8 text-foreground" />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_LOGO_FULL_SVG_e5842d1d.svg"
-                alt="Dashfields"
-                className="h-5 w-auto object-contain dark:invert"
-              />
+              <DashfieldsLogoFull className="h-5 w-auto text-foreground" />
             </div>
           )}
         </div>
