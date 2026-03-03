@@ -1,0 +1,93 @@
+{
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "campaigns": "الحملات",
+    "alerts": "التنبيهات",
+    "overview": "نظرة عامة",
+    "audience": "الجمهور",
+    "postAnalytics": "تحليل المنشورات",
+    "compare": "المقارنة",
+    "hashtags": "الهاشتاقات",
+    "competitors": "المنافسون",
+    "calendar": "التقويم",
+    "aiStudio": "استوديو الذكاء الاصطناعي",
+    "reports": "التقارير",
+    "connections": "الحسابات المرتبطة",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "signOut": "تسجيل الخروج",
+    "groups": {
+      "advertising": "الإعلانات",
+      "analytics": "التحليلات",
+      "content": "المحتوى",
+      "reports": "التقارير"
+    }
+  },
+  "topbar": {
+    "platformsConnected": "{{count}} منصة مرتبطة",
+    "platformsConnected_other": "{{count}} منصات مرتبطة",
+    "noPlatforms": "لا توجد منصات مرتبطة",
+    "switchDark": "التحويل إلى الوضع الداكن",
+    "switchLight": "التحويل إلى الوضع الفاتح"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "tagline": "جميع المنصات. لوحة تحكم واحدة.",
+    "subtitle": "سجّل دخولك لإدارة وسائل التواصل الاجتماعي",
+    "loading": "جارٍ التحميل..."
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "ربط حسابات وسائل التواصل الاجتماعي للبدء",
+    "totalSpend": "إجمالي الإنفاق",
+    "impressions": "مرات الظهور",
+    "clicks": "النقرات",
+    "reach": "الوصول",
+    "engagements": "التفاعلات",
+    "platforms": "المنصات"
+  },
+  "connections": {
+    "title": "الحسابات المرتبطة",
+    "subtitle": "ربط حسابات وسائل التواصل الاجتماعي والإعلانات",
+    "connect": "ربط",
+    "disconnect": "فصل",
+    "connected": "مرتبط",
+    "reconnect": "إعادة الربط",
+    "lastSync": "آخر مزامنة",
+    "secureOAuth": "ربط آمن",
+    "oauthDesc": "سيتم توجيهك إلى {{platform}} للتفويض. لا حاجة لنسخ الرمز."
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "noData": "لا توجد بيانات",
+    "error": "حدث خطأ ما",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث...",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "refresh": "تحديث",
+    "viewAll": "عرض الكل",
+    "back": "رجوع",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "success": "تم بنجاح",
+    "comingSoon": "قريباً"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "selectLanguage": "اختر اللغة",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "appearance": "المظهر",
+    "darkMode": "الوضع الداكن",
+    "notifications": "الإشعارات",
+    "account": "الحساب",
+    "apiKeys": "مفاتيح API"
+  }
+}

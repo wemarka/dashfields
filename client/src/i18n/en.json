@@ -1,0 +1,93 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "campaigns": "Campaigns",
+    "alerts": "Alerts",
+    "overview": "Overview",
+    "audience": "Audience",
+    "postAnalytics": "Post Analytics",
+    "compare": "Compare",
+    "hashtags": "Hashtags",
+    "competitors": "Competitors",
+    "calendar": "Calendar",
+    "aiStudio": "AI Studio",
+    "reports": "Reports",
+    "connections": "Connections",
+    "settings": "Settings",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "groups": {
+      "advertising": "Advertising",
+      "analytics": "Analytics",
+      "content": "Content",
+      "reports": "Reports"
+    }
+  },
+  "topbar": {
+    "platformsConnected": "{{count}} platform connected",
+    "platformsConnected_other": "{{count}} platforms connected",
+    "noPlatforms": "No platforms connected",
+    "switchDark": "Switch to Dark Mode",
+    "switchLight": "Switch to Light Mode"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "tagline": "All Platforms. One Dashboard.",
+    "subtitle": "Sign in to manage your social media",
+    "loading": "Loading Dashfields..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Connect your social media accounts to get started",
+    "totalSpend": "Total Spend",
+    "impressions": "Impressions",
+    "clicks": "Clicks",
+    "reach": "Reach",
+    "engagements": "Engagements",
+    "platforms": "Platforms"
+  },
+  "connections": {
+    "title": "Connections",
+    "subtitle": "Connect your social media and advertising accounts",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "reconnect": "Reconnect",
+    "lastSync": "Last sync",
+    "secureOAuth": "Secure OAuth",
+    "oauthDesc": "You'll be redirected to {{platform}} to authorize access. No token copying required."
+  },
+  "common": {
+    "loading": "Loading...",
+    "noData": "No data available",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search...",
+    "filter": "Filter",
+    "export": "Export",
+    "refresh": "Refresh",
+    "viewAll": "View all",
+    "back": "Back",
+    "close": "Close",
+    "confirm": "Confirm",
+    "success": "Success",
+    "comingSoon": "Coming soon"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "arabic": "Arabic (العربية)",
+    "appearance": "Appearance",
+    "darkMode": "Dark Mode",
+    "notifications": "Notifications",
+    "account": "Account",
+    "apiKeys": "API Keys"
+  }
+}

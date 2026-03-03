@@ -5,15 +5,16 @@
  */
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
+import { useTranslation } from "react-i18next";
 // Use broader local type to include DB-only platforms
 type PlatformId = "facebook" | "instagram" | "tiktok" | "twitter" | "linkedin" | "youtube" | "google" | "snapchat" | "pinterest";
 import {
   CheckCircle2, Loader2, Link2, Unlink,
-  ChevronRight, X, Zap, Globe, RefreshCw,
+  ChevronRight, X, Zap, Globe, RefreshCw, AlertCircle,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
@@ -339,9 +340,30 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Connections() {
   const utils = trpc.useUtils();
+  const { t } = useTranslation();
   const [connectingPlatform, setConnectingPlatform] = useState<PlatformId | null>(null);
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery();
+
+  // ── Handle OAuth callback result ──────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const metaConnected = params.get("meta_connected");
+    const metaError = params.get("meta_error");
+    const accountCount = params.get("accounts");
+    if (metaConnected) {
+      toast.success(`✅ Facebook connected! ${accountCount ? `${accountCount} ad account(s) linked.` : ""}`);
+      utils.social.list.invalidate();
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (metaError) {
+      const msg = metaError === "no_app_id"
+        ? "Meta App ID not configured. Please contact support."
+        : `Connection failed: ${decodeURIComponent(metaError)}`;
+      toast.error(msg);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   const disconnectMutation = trpc.social.disconnect.useMutation({
     onSuccess: () => {

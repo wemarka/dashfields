@@ -14,6 +14,8 @@ import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
+import { changeLanguage } from "@/i18n";
 
 type Section = "account" | "connections" | "notifications" | "appearance" | "apikeys";
 
@@ -175,6 +177,24 @@ function ApiKeysSection() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Language Selector Component ────────────────────────────────────────────
+function LanguageSelector() {
+  const { i18n } = useTranslation();
+  return (
+    <div className="flex items-center gap-2">
+      <Globe className="w-4 h-4 text-muted-foreground" />
+      <select
+        value={i18n.language}
+        onChange={(e) => changeLanguage(e.target.value)}
+        className="px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+      >
+        <option value="en">English</option>
+        <option value="ar">العربية (Arabic)</option>
+      </select>
     </div>
   );
 }
@@ -446,15 +466,7 @@ export default function Settings() {
                 {/* Language */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-3">Language</p>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-muted-foreground" />
-                    <select className="px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30">
-                      <option value="en">English</option>
-                      <option value="ar">Arabic (العربية)</option>
-                      <option value="fr">French (Français)</option>
-                      <option value="es">Spanish (Español)</option>
-                    </select>
-                  </div>
+                  <LanguageSelector />
                 </div>
 
                 {/* Density */}
