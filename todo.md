@@ -450,3 +450,43 @@
 - [x] TypeScript check (0 errors)
 - [x] 247/247 tests passing
 - [x] Save checkpoint
+
+## 🔄 Phase 78-83 — Full Arabic Translation + UX Polish + Connections OAuth
+
+### Phase 78 — Complete Arabic Translation
+- [x] Expand ar.json to cover all page content (Dashboard, Analytics, Campaigns, Audience, etc.)
+- [x] Apply useTranslation() in all pages (Home, Analytics, Campaigns, Audience, PostAnalytics, Hashtags, Competitors, Calendar, Reports, Alerts, Profile, Settings, Connections, Notifications)
+- [x] Translate all error messages, toast notifications, empty states, and button labels
+- [x] Ensure RTL layout works correctly on all pages
+
+### Phase 79 — Connections Page Redesign + OAuth
+- [x] Redesign Connections page with modern platform cards
+- [x] Show real connected account info (name, followers, last sync)
+- [x] OAuth flow: Facebook/Instagram direct connect button
+- [x] Disconnect button with confirmation dialog
+- [x] Status badges: Connected (green), Expired (yellow), Not Connected (gray)
+- [x] "Sync Now" button per platform
+
+### Phase 80 — Dashboard + Analytics UX Polish
+- [x] Dashboard: show real Meta data when connected (impressions, clicks, spend, reach)
+- [x] Dashboard: better empty state with step-by-step onboarding guide
+- [x] Analytics: improve chart designs and data labels
+- [x] Analytics: add date range picker (7d, 30d, 90d, custom)
+- [x] Analytics: platform comparison table with real data
+
+### Phase 81 — Campaigns + Content Pages Polish
+- [ ] Campaigns: improve campaign creation form with real Meta Ads integration
+- [ ] Calendar: improve post composer with real platform publishing
+- [ ] Post Analytics: improve charts and add export button
+- [ ] Hashtags: improve visualization with trending indicators
+
+### Phase 82 — Settings + Profile + Reports Polish
+- [ ] Profile: edit name/email/avatar with real Supabase update
+- [ ] Settings: improve appearance tab with more theme options
+- [ ] Reports: improve scheduled reports UI with next-run countdown
+- [ ] Alerts: improve alert rules with better threshold UI
+
+### Phase 83 — Tests + Checkpoint
+- [x] TypeScript check (0 errors)
+- [x] 247/247 tests passing
+- [x] Save checkpoint and deliver

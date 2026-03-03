@@ -19,12 +19,12 @@ import { changeLanguage } from "@/i18n";
 
 type Section = "account" | "connections" | "notifications" | "appearance" | "apikeys";
 
-const sections: { id: Section; icon: typeof Shield; label: string }[] = [
-  { id: "account",       icon: Shield,  label: "Account" },
-  { id: "connections",   icon: Link2,   label: "Connections" },
-  { id: "notifications", icon: Bell,    label: "Notifications" },
-  { id: "appearance",    icon: Palette, label: "Appearance" },
-  { id: "apikeys",       icon: Key,     label: "API Keys" },
+const sections: { id: Section; icon: typeof Shield; labelKey: string }[] = [
+  { id: "account",       icon: Shield,  labelKey: "settings.account" },
+  { id: "connections",   icon: Link2,   labelKey: "connections.title" },
+  { id: "notifications", icon: Bell,    labelKey: "settings.notifications" },
+  { id: "appearance",    icon: Palette, labelKey: "settings.appearance" },
+  { id: "apikeys",       icon: Key,     labelKey: "settings.apiKeys" },
 ];
 
 // ─── API Keys Section ─────────────────────────────────────────────────────────
@@ -202,6 +202,7 @@ function LanguageSelector() {
 export default function Settings() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [active, setActive] = useState<Section>("account");
 
   // ── Settings data ──────────────────────────────────────────────────────────
@@ -252,8 +253,8 @@ export default function Settings() {
     <DashboardLayout>
       <div className="p-6 max-w-4xl mx-auto animate-fade-in">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-foreground">Settings</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage your account, connections, and preferences</p>
+          <h1 className="text-xl font-bold text-foreground">{t("settings.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("settings.saveSettings")}</p>
         </div>
 
         <div className="flex gap-5">
@@ -270,7 +271,7 @@ export default function Settings() {
                 }`}
               >
                 <s.icon className="w-4 h-4 shrink-0" />
-                {s.label}
+                {t(s.labelKey)}
                 {s.id === "connections" && connectedPlatformIds.size > 0 && (
                   <span className="ml-auto text-[10px] font-bold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full">
                     {connectedPlatformIds.size}
@@ -286,7 +287,7 @@ export default function Settings() {
             {/* ── Account ─────────────────────────────────────────────────── */}
             {active === "account" && (
               <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
-                <h2 className="text-sm font-semibold text-foreground">Account Information</h2>
+                <h2 className="text-sm font-semibold text-foreground">{t("settings.accountInfo")}</h2>
 
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
@@ -304,14 +305,14 @@ export default function Settings() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1.5 block">Display Name</label>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">{t("profile.name")}</label>
                     <input
                       defaultValue={user?.name ?? ""}
                       className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1.5 block">Email</label>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">{t("profile.email")}</label>
                     <input
                       defaultValue={user?.email ?? ""}
                       disabled
@@ -323,7 +324,7 @@ export default function Settings() {
                 <div className="flex items-center gap-3 pt-1">
                   <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
                     <Save className="w-3.5 h-3.5" />
-                    Save Changes
+                    {t("profile.saveChanges")}
                   </button>
                   <p className="text-xs text-muted-foreground">Changes to name only; email is managed by Manus OAuth</p>
                 </div>
@@ -335,7 +336,7 @@ export default function Settings() {
               <div className="space-y-3">
                 <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-foreground">Connected Platforms</h2>
+                    <h2 className="text-sm font-semibold text-foreground">{t("connections.title")}</h2>
                     <Link href="/connections">
                       <button className="flex items-center gap-1.5 text-xs text-primary hover:underline">
                         Manage all <ExternalLink className="w-3 h-3" />
@@ -360,12 +361,12 @@ export default function Settings() {
                           <div className="flex items-center gap-2">
                             {isConnected ? (
                               <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                                <Check className="w-3 h-3" /> Connected
+                                <Check className="w-3 h-3" /> {t("connections.connected")}
                               </span>
                             ) : (
                               <Link href="/connections">
                                 <button className="text-xs font-medium text-primary hover:underline px-2.5 py-1 rounded-full border border-primary/30 hover:bg-primary/5 transition-colors">
-                                  Connect
+                                  {t("connections.connect")}
                                 </button>
                               </Link>
                             )}
@@ -381,7 +382,7 @@ export default function Settings() {
             {/* ── Notifications ────────────────────────────────────────────── */}
             {active === "notifications" && (
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <h2 className="text-sm font-semibold text-foreground mb-4">Notification Preferences</h2>
+                <h2 className="text-sm font-semibold text-foreground mb-4">{t("settings.notifications")}</h2>
                 <div className="space-y-1">
                   {[
                     {
@@ -426,7 +427,7 @@ export default function Settings() {
                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    {updateMutation.isPending ? "Saving…" : "Save Preferences"}
+                    {updateMutation.isPending ? t("common.loading") : t("common.save")}
                   </button>
                 </div>
               </div>
@@ -440,11 +441,11 @@ export default function Settings() {
             {/* ── Appearance ──────────────────────────────────────────────── */}
             {active === "appearance" && (
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-                <h2 className="text-sm font-semibold text-foreground">Appearance</h2>
+                <h2 className="text-sm font-semibold text-foreground">{t("settings.appearance")}</h2>
 
                 {/* Theme */}
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-3">Theme</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-3">{t("settings.darkMode")}</p>
                   <div className="flex gap-2">
                     {themeOptions.map((t) => (
                       <button
@@ -465,7 +466,7 @@ export default function Settings() {
 
                 {/* Language */}
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-3">Language</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-3">{t("settings.language")}</p>
                   <LanguageSelector />
                 </div>
 

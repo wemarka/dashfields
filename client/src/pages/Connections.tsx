@@ -1,7 +1,7 @@
 /**
  * Connections.tsx
  * Multi-platform social media connections hub.
- * Allows users to connect/disconnect any supported platform.
+ * OAuth-first: clicking Connect on supported platforms goes directly to OAuth.
  */
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -10,53 +10,39 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import { useTranslation } from "react-i18next";
-// Use broader local type to include DB-only platforms
-type PlatformId = "facebook" | "instagram" | "tiktok" | "twitter" | "linkedin" | "youtube" | "google" | "snapchat" | "pinterest";
 import {
-  CheckCircle2, Loader2, Link2, Unlink,
-  ChevronRight, X, Zap, Globe, RefreshCw, AlertCircle,
+  Loader2, Link2, Unlink, Globe, RefreshCw, Zap,
+  CheckCircle2, AlertCircle, X, ChevronRight, Shield,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface ConnectModalProps {
+type PlatformId = "facebook" | "instagram" | "tiktok" | "twitter" | "linkedin" | "youtube" | "google" | "snapchat" | "pinterest";
+
+// Platforms that support direct OAuth (no token needed)
+const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
+
+// ─── Manual Token Modal (for non-OAuth platforms) ─────────────────────────────
+interface ManualConnectModalProps {
   platformId: PlatformId;
   onClose: () => void;
   onConnected: () => void;
 }
 
-// ─── Connect Modal ────────────────────────────────────────────────────────────
-// Platforms that support real OAuth flow
-const OAUTH_PLATFORMS = new Set(["facebook", "instagram", "tiktok", "linkedin", "youtube", "twitter"]);
-
-function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
+function ManualConnectModal({ platformId, onClose, onConnected }: ManualConnectModalProps) {
+  const { t } = useTranslation();
   const platform = getPlatform(platformId);
-  const [step, setStep] = useState<"info" | "token" | "account">("info");
-  const [accessToken, setAccessToken] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accountName, setAccountName] = useState("");
-  const supportsOAuth = OAUTH_PLATFORMS.has(platformId);
+  const [accessToken, setAccessToken] = useState("");
 
   const connectMutation = trpc.social.connect.useMutation({
     onSuccess: () => {
-      toast.success(`${platform.name} connected successfully!`);
+      toast.success(`${platform.name} connected!`);
       onConnected();
       onClose();
     },
     onError: (err) => toast.error("Connection failed: " + err.message),
   });
-
-  const handleOAuthConnect = () => {
-    const origin = window.location.origin;
-    const returnPath = "/connections";
-    // Meta platforms use the meta OAuth route
-    if (platformId === "facebook" || platformId === "instagram") {
-      window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
-    } else {
-      // TikTok, LinkedIn, YouTube, Twitter use the platform OAuth route
-      window.location.href = `/api/oauth/${platformId}/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
-    }
-  };
 
   const handleConnect = () => {
     if (!accountId.trim()) {
@@ -72,12 +58,12 @@ function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-background border border-border rounded-2xl w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-background border border-border rounded-2xl w-full max-w-md shadow-2xl animate-blur-in">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className={"w-9 h-9 rounded-xl flex items-center justify-center " + platform.bgLight}>
+            <div className={"w-10 h-10 rounded-xl flex items-center justify-center " + platform.bgLight}>
               <PlatformIcon platform={platformId} className={"w-5 h-5 " + platform.textColor} />
             </div>
             <div>
@@ -91,124 +77,81 @@ function ConnectModal({ platformId, onClose, onConnected }: ConnectModalProps) {
         </div>
 
         <div className="p-5 space-y-4">
-          {step === "info" && (
-            <>
-              <div className="rounded-xl bg-muted/50 p-4 space-y-2">
-                <p className="text-xs font-medium text-foreground">Supported features:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {platform.features.map((f) => (
-                    <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium capitalize">
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          {/* Token hint */}
+          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/40 p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-300">
+              <strong>How to get your token:</strong> {platform.tokenHint}
+            </p>
+          </div>
 
-              {supportsOAuth ? (
-                <>
-                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
-                    <p className="text-xs text-blue-800">
-                      <strong>Secure OAuth:</strong> You'll be redirected to {platform.name} to authorize access. No token copying required.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleOAuthConnect}
-                    className={"w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-medium transition-colors " + platform.color}
-                  >
-                    <PlatformIcon platform={platformId} className="w-4 h-4" />
-                    Continue with {platform.name}
-                  </button>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-                    <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or enter token manually</span></div>
-                  </div>
-                  <button
-                    onClick={() => setStep("token")}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    Enter Access Token Manually
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </>
+          {/* Supported features */}
+          <div className="rounded-xl bg-muted/50 p-3 space-y-2">
+            <p className="text-xs font-medium text-foreground">Supported features:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {platform.features.map((f) => (
+                <span key={f} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium capitalize">
+                  {f}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Form */}
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">
+              Account / Page ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={accountId}
+              onChange={(e) => setAccountId(e.target.value)}
+              placeholder="e.g. 123456789"
+              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Display Name</label>
+            <input
+              type="text"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              placeholder={`My ${platform.name} Account`}
+              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">
+              Access Token <span className="text-muted-foreground">(optional)</span>
+            </label>
+            <textarea
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value)}
+              placeholder={platform.tokenHint}
+              rows={3}
+              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              onClick={handleConnect}
+              disabled={connectMutation.isPending || !accountId.trim()}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {connectMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <>
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-xs text-amber-800">
-                      <strong>How to get your token:</strong> {platform.tokenHint}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setStep("token")}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Continue
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </>
+                <Link2 className="w-4 h-4" />
               )}
-            </>
-          )}
-
-          {step === "token" && (
-            <>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Account / Page ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  placeholder="e.g. 123456789"
-                  className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  value={accountName}
-                  onChange={(e) => setAccountName(e.target.value)}
-                  placeholder={`My ${platform.name} Account`}
-                  className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Access Token <span className="text-muted-foreground">(optional)</span>
-                </label>
-                <textarea
-                  value={accessToken}
-                  onChange={(e) => setAccessToken(e.target.value)}
-                  placeholder={platform.tokenHint}
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setStep("info")}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleConnect}
-                  disabled={connectMutation.isPending || !accountId.trim()}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {connectMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Link2 className="w-4 h-4" />
-                  )}
-                  Connect
-                </button>
-              </div>
-            </>
-          )}
+              {t("connections.connect")}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -235,55 +178,94 @@ interface PlatformCardProps {
 }
 
 function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, isDisconnecting }: PlatformCardProps) {
+  const { t, i18n } = useTranslation();
   const platform = getPlatform(platformId);
   const isConnected = connectedAccounts.length > 0;
+  const isOAuth = OAUTH_PLATFORMS.has(platformId);
+  const locale = i18n.language === "ar" ? "ar-SA" : "en-US";
+
   const lastSync = connectedAccounts[0]?.updatedAt
-    ? new Date(connectedAccounts[0].updatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    ? new Date(connectedAccounts[0].updatedAt).toLocaleString(locale, {
+        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+      })
     : null;
+
+  const handleConnect = () => {
+    if (isOAuth) {
+      // Direct OAuth — no modal needed
+      const origin = window.location.origin;
+      const returnPath = "/connections";
+      window.location.href = `/api/oauth/meta/init?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    } else {
+      onConnect();
+    }
+  };
 
   return (
     <div className={[
-      "rounded-2xl border transition-all duration-200 overflow-hidden",
-      isConnected ? "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm" : "border-border/40 bg-card/40 hover:bg-card/70 hover:border-border/70",
+      "rounded-2xl border transition-all duration-300 overflow-hidden group",
+      isConnected
+        ? "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm hover:shadow-md"
+        : "border-border/40 bg-card/50 hover:bg-card hover:border-border hover:shadow-sm",
     ].join(" ")}>
       {/* Status stripe */}
-      {isConnected && <div className="h-0.5 bg-gradient-to-r from-emerald-400 to-emerald-500" />}
+      {isConnected && (
+        <div className="h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400" />
+      )}
+
       {/* Platform header */}
       <div className="flex items-center gap-3 p-4">
-        <div className={"relative w-10 h-10 rounded-xl flex items-center justify-center shrink-0 " + platform.bgLight}>
+        <div className={"relative w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 " + platform.bgLight}>
           <PlatformIcon platform={platformId} className={"w-5 h-5 " + platform.textColor} />
           {isConnected && (
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center">
+              <CheckCircle2 className="w-2 h-2 text-white" />
+            </span>
           )}
         </div>
+
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-foreground">{platform.name}</h3>
             {isConnected ? (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold">Active</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50">
+                {t("connections.connected")}
+              </span>
             ) : (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">Not connected</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                {t("connections.noConnections").includes("No") ? "Not connected" : "غير مرتبط"}
+              </span>
+            )}
+            {isOAuth && !isConnected && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium border border-blue-200/50 dark:border-blue-800/50 flex items-center gap-1">
+                <Shield className="w-2.5 h-2.5" />
+                OAuth
+              </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate">
-            {isConnected && lastSync ? `Last sync: ${lastSync}` : platform.description}
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
+            {isConnected && lastSync
+              ? `${t("connections.lastSync")}: ${lastSync}`
+              : platform.description}
           </p>
         </div>
+
+        {/* Action button */}
         {isConnected ? (
           <button
-            onClick={onConnect}
+            onClick={handleConnect}
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
-            Reconnect
+            {t("connections.reconnect")}
           </button>
         ) : (
           <button
-            onClick={onConnect}
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+            onClick={handleConnect}
+            className={"shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95 " + (isOAuth ? platform.color + " text-white shadow-sm" : "bg-primary text-primary-foreground hover:bg-primary/90")}
           >
             <Link2 className="w-3.5 h-3.5" />
-            Connect
+            {t("connections.connect")}
           </button>
         )}
       </div>
@@ -291,22 +273,24 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
       {/* Feature badges */}
       <div className="px-4 pb-3 flex flex-wrap gap-1">
         {platform.features.map((f) => (
-          <span key={f} className="text-xs px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground capitalize">
+          <span key={f} className="text-[11px] px-1.5 py-0.5 rounded-full bg-muted/80 text-muted-foreground capitalize">
             {f}
           </span>
         ))}
       </div>
 
-      {/* Connected accounts */}
+      {/* Connected accounts list */}
       {isConnected && (
         <div className="border-t border-border/50 divide-y divide-border/30">
           {connectedAccounts.map((acc) => (
-            <div key={acc.id} className="flex items-center gap-3 px-4 py-2.5">
+            <div key={acc.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors">
               <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
                 <PlatformIcon platform={platformId} className={"w-3.5 h-3.5 " + platform.textColor} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{acc.name ?? acc.username ?? "Account"}</p>
+                <p className="text-xs font-medium text-foreground truncate">
+                  {acc.name ?? acc.username ?? "Account"}
+                </p>
                 <p className="text-xs text-muted-foreground truncate">ID: {acc.platformAccountId}</p>
               </div>
               <div className="flex items-center gap-2">
@@ -314,8 +298,8 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
                 <button
                   onClick={() => onDisconnect(acc.id)}
                   disabled={isDisconnecting}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                  title="Disconnect"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                  title={t("connections.disconnect")}
                 >
                   <Unlink className="w-3.5 h-3.5" />
                 </button>
@@ -324,11 +308,11 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
           ))}
           <div className="px-4 py-2">
             <button
-              onClick={onConnect}
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              onClick={handleConnect}
+              className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors"
             >
               <Link2 className="w-3 h-3" />
-              Add another account
+              {t("common.connect")}
             </button>
           </div>
         </div>
@@ -341,25 +325,25 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
 export default function Connections() {
   const utils = trpc.useUtils();
   const { t } = useTranslation();
-  const [connectingPlatform, setConnectingPlatform] = useState<PlatformId | null>(null);
+  const [manualPlatform, setManualPlatform] = useState<PlatformId | null>(null);
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery();
 
-  // ── Handle OAuth callback result ──────────────────────────────────────────
+  // Handle OAuth callback result
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const metaConnected = params.get("meta_connected");
     const metaError = params.get("meta_error");
     const accountCount = params.get("accounts");
+
     if (metaConnected) {
-      toast.success(`✅ Facebook connected! ${accountCount ? `${accountCount} ad account(s) linked.` : ""}`);
+      toast.success(`✅ ${t("connections.connectionSuccess", { platform: "Facebook" })} ${accountCount ? `${accountCount} ad account(s) linked.` : ""}`);
       utils.social.list.invalidate();
-      // Clean URL
       window.history.replaceState({}, "", window.location.pathname);
     } else if (metaError) {
       const msg = metaError === "no_app_id"
-        ? "Meta App ID not configured. Please contact support."
-        : `Connection failed: ${decodeURIComponent(metaError)}`;
+        ? "Meta App ID not configured."
+        : `${t("connections.connectionError", { platform: "Facebook" })}: ${decodeURIComponent(metaError)}`;
       toast.error(msg);
       window.history.replaceState({}, "", window.location.pathname);
     }
@@ -385,7 +369,8 @@ export default function Connections() {
       username: acc.username,
       platformAccountId: acc.platform_account_id ?? String(acc.id),
       isActive: acc.is_active,
-    } as ConnectedAccount);
+      updatedAt: acc.updated_at,
+    } as ConnectedAccount & { updatedAt?: string | null });
   });
 
   const totalConnected = accounts.length;
@@ -396,45 +381,58 @@ export default function Connections() {
       <div className="max-w-5xl mx-auto p-6 space-y-6 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="page-header">Connections</h1>
+            <h1 className="page-header">{t("connections.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Connect all your social media accounts to manage them from one place.
+              {t("connections.subtitle")}
             </p>
           </div>
           {totalConnected > 0 && (
-            <div className="flex items-center gap-4 text-right">
-              <div>
-                <p className="page-header">{connectedPlatforms}</p>
-                <p className="text-xs text-muted-foreground">Platforms</p>
+            <div className="flex items-center gap-6 shrink-0">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">{connectedPlatforms}</p>
+                <p className="text-xs text-muted-foreground">{t("analytics.platforms")}</p>
               </div>
-              <div>
-                <p className="page-header">{totalConnected}</p>
-                <p className="text-xs text-muted-foreground">Accounts</p>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">{totalConnected}</p>
+                <p className="text-xs text-muted-foreground">{t("connections.noConnections").includes("No") ? "Accounts" : "حسابات"}</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Stats bar ──────────────────────────────────────────────────── */}
+        {/* ── OAuth info banner ──────────────────────────────────────────── */}
+        <div className="rounded-2xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex items-start gap-3">
+          <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">{t("connections.secureOAuth")}</p>
+            <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-0.5">
+              {t("connections.oauthDesc", { platform: "Meta (Facebook & Instagram)" })}
+            </p>
+          </div>
+        </div>
+
+        {/* ── Empty state ────────────────────────────────────────────────── */}
         {totalConnected === 0 && !isLoading && (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Globe className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-            <h3 className="text-sm font-semibold text-foreground mb-1">No accounts connected yet</h3>
+          <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <Globe className="w-7 h-7 text-muted-foreground/50" />
+            </div>
+            <h3 className="text-sm font-semibold text-foreground mb-1">{t("connections.noConnections")}</h3>
             <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              Connect your social media accounts below to start managing all your content and analytics in one place.
+              {t("connections.noConnectionsSub")}
             </p>
           </div>
         )}
 
-        {/* ── Connected platforms summary ────────────────────────────────── */}
+        {/* ── Connected platforms summary chips ─────────────────────────── */}
         {totalConnected > 0 && (
           <div className="flex flex-wrap gap-2">
             {Object.keys(accountsByPlatform).map((pid) => {
               const p = getPlatform(pid);
               return (
-                <div key={pid} className={"flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium " + p.bgLight + " " + p.textColor + " border-current/20"}>
+                <div key={pid} className={"flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium " + p.bgLight + " " + p.textColor}>
                   <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
                   {p.name}
                   <span className="opacity-60">· {accountsByPlatform[pid].length}</span>
@@ -452,21 +450,21 @@ export default function Connections() {
             ))}
           </div>
         ) : (
-          <>
-            {/* Connected platforms first */}
+          <div className="space-y-6">
+            {/* Connected */}
             {connectedPlatforms > 0 && (
               <div>
                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-emerald-500" />
-                  Connected ({connectedPlatforms})
+                  {t("connections.connected")} ({connectedPlatforms})
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PLATFORMS.filter((p) => accountsByPlatform[p.id]).map((p) => (
                     <PlatformCard
                       key={p.id}
-                      platformId={p.id}
+                      platformId={p.id as PlatformId}
                       connectedAccounts={accountsByPlatform[p.id] ?? []}
-                      onConnect={() => setConnectingPlatform(p.id)}
+                      onConnect={() => setManualPlatform(p.id as PlatformId)}
                       onDisconnect={(id) => disconnectMutation.mutate({ id })}
                       isDisconnecting={disconnectMutation.isPending}
                     />
@@ -475,34 +473,39 @@ export default function Connections() {
               </div>
             )}
 
-            {/* Available platforms */}
+            {/* Available */}
             <div>
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5" />
-                Available Platforms
+                {t("analytics.allPlatforms")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLATFORMS.filter((p) => !accountsByPlatform[p.id]).map((p) => (
                   <PlatformCard
                     key={p.id}
-                    platformId={p.id}
+                    platformId={p.id as PlatformId}
                     connectedAccounts={[]}
-                    onConnect={() => setConnectingPlatform(p.id)}
+                    onConnect={() => {
+                      if (!OAUTH_PLATFORMS.has(p.id)) {
+                        setManualPlatform(p.id as PlatformId);
+                      }
+                      // OAuth platforms handle redirect inside PlatformCard
+                    }}
                     onDisconnect={() => {}}
                     isDisconnecting={false}
                   />
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Connect Modal */}
-      {connectingPlatform && (
-        <ConnectModal
-          platformId={connectingPlatform}
-          onClose={() => setConnectingPlatform(null)}
+      {/* Manual Connect Modal (non-OAuth platforms) */}
+      {manualPlatform && (
+        <ManualConnectModal
+          platformId={manualPlatform}
+          onClose={() => setManualPlatform(null)}
           onConnected={() => utils.social.list.invalidate()}
         />
       )}

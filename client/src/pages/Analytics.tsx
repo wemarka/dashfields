@@ -15,11 +15,7 @@ import { ExportReportModal } from "@/components/ExportReportModal";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState } from "react";
-
-const DATE_PRESET_LABELS: Record<string, string> = {
-  today: "Today", yesterday: "Yesterday", last_7d: "Last 7d",
-  last_30d: "Last 30d", this_month: "This Month", last_month: "Last Month",
-};
+import { useTranslation } from "react-i18next";
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
@@ -34,6 +30,7 @@ export default function Analytics() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [activePlatform, setActivePlatform] = useState<string>("all");
   const [showExport, setShowExport] = useState(false);
+  const { t } = useTranslation();
 
   // Multi-platform data
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =
@@ -98,7 +95,6 @@ export default function Analytics() {
   const kpiData = hasConnections ? {
     spend: agg.spend, impressions: agg.impressions, reach: agg.reach,
     clicks: agg.clicks, ctr: avgCtr, cpc: avgCpc, leads: 0, messages: 0,
-    // Use Meta compare data when available, otherwise estimate
     prevSpend:       compare?.previous?.spend       ?? agg.spend * 0.85,
     prevImpressions: compare?.previous?.impressions ?? agg.impressions * 0.9,
     prevReach:       compare?.previous?.reach       ?? agg.reach * 0.88,
@@ -117,11 +113,11 @@ export default function Analytics() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="page-header">Analytics</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="page-header">{t("analytics.title")}</h1>
+            <p className="page-subtitle">
               {hasConnections
-                ? `Performance across ${connectedPlatforms.length} connected platform${connectedPlatforms.length !== 1 ? "s" : ""}`
-                : "Connect platforms to see analytics"}
+                ? t("analytics.subtitle")
+                : t("analytics.noData")}
             </p>
           </div>
           {hasConnections && (
@@ -131,7 +127,7 @@ export default function Analytics() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl glass text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                Refresh
+                {t("common.refresh")}
               </button>
               <DatePresetSelector value={datePreset} onChange={setDatePreset} />
               <button
@@ -139,7 +135,7 @@ export default function Analytics() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
-                Export
+                {t("analytics.export")}
               </button>
             </div>
           )}
@@ -147,20 +143,20 @@ export default function Analytics() {
 
         {/* ── No connections banner ───────────────────────────────────────────── */}
         {!hasConnections && (
-          <div className="glass rounded-2xl p-12 flex flex-col items-center gap-4 text-center">
+          <div className="glass rounded-2xl p-12 flex flex-col items-center gap-4 text-center animate-fade-in">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
               <BarChart3 className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <p className="text-base font-semibold">Connect platforms to unlock Analytics</p>
+              <p className="text-base font-semibold">{t("analytics.noData")}</p>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                See real performance data, spend breakdown, CTR trends, and audience insights across all your social platforms.
+                {t("analytics.noDataSub")}
               </p>
             </div>
             <Link href="/connections">
-              <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+              <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors hover:scale-105 active:scale-95">
                 <Link2 className="w-4 h-4" />
-                Connect Platforms
+                {t("analytics.connectPlatforms")}
               </button>
             </Link>
           </div>
@@ -179,7 +175,7 @@ export default function Analytics() {
               }
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              All Platforms
+              {t("analytics.allPlatforms")}
             </button>
             {connectedPlatforms.map((pid) => {
               const p = getPlatform(pid);
@@ -206,7 +202,7 @@ export default function Analytics() {
         {hasConnections && insightsLoading && (
           <div className="glass rounded-2xl flex items-center justify-center py-20 gap-2 text-muted-foreground">
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm">Loading analytics data...</span>
+            <span className="text-sm">{t("common.loading")}</span>
           </div>
         )}
 
@@ -242,20 +238,20 @@ export default function Analytics() {
           <div className="glass rounded-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-foreground/5">
               <h2 className="text-sm font-semibold text-foreground">
-                {activePlatform === "all" ? "All Platforms" : getPlatform(activePlatform).name} — Breakdown
+                {activePlatform === "all" ? t("analytics.allPlatforms") : getPlatform(activePlatform).name} — {t("analytics.performanceBreakdown")}
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-foreground/5">
-                    <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground">Platform</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Impressions</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Reach</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Clicks</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Spend</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">CTR</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">CPC</th>
+                    <th className="px-5 py-3 text-start text-xs font-medium text-muted-foreground">{t("campaigns.columns.platform")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.impressions")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.reach")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.clicks")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.spend")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.ctr")}</th>
+                    <th className="px-4 py-3 text-end text-xs font-medium text-muted-foreground">{t("analytics.cpc")}</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">Data</th>
                   </tr>
                 </thead>
@@ -275,12 +271,12 @@ export default function Analytics() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right text-xs font-medium">{fmtNum(ins.impressions)}</td>
-                        <td className="px-4 py-3 text-right text-xs text-muted-foreground">{fmtNum(ins.reach)}</td>
-                        <td className="px-4 py-3 text-right text-xs font-medium">{fmtNum(ins.clicks)}</td>
-                        <td className="px-4 py-3 text-right text-xs font-medium">{fmtMoney(ins.spend)}</td>
-                        <td className="px-4 py-3 text-right text-xs">{ins.ctr.toFixed(2)}%</td>
-                        <td className="px-4 py-3 text-right text-xs">{fmtMoney(ins.cpc)}</td>
+                        <td className="px-4 py-3 text-end text-xs font-medium">{fmtNum(ins.impressions)}</td>
+                        <td className="px-4 py-3 text-end text-xs text-muted-foreground">{fmtNum(ins.reach)}</td>
+                        <td className="px-4 py-3 text-end text-xs font-medium">{fmtNum(ins.clicks)}</td>
+                        <td className="px-4 py-3 text-end text-xs font-medium">{fmtMoney(ins.spend)}</td>
+                        <td className="px-4 py-3 text-end text-xs">{ins.ctr.toFixed(2)}%</td>
+                        <td className="px-4 py-3 text-end text-xs">{fmtMoney(ins.cpc)}</td>
                         <td className="px-4 py-3 text-center">
                           {ins.isLive
                             ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">Live</span>
@@ -302,7 +298,7 @@ export default function Analytics() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <SpendByCampaignChart
                 data={chartData}
-                periodLabel={DATE_PRESET_LABELS[datePreset]}
+                periodLabel={datePreset}
               />
               <CtrCpcChart ctrData={chartData} pieData={pieData} />
             </div>

@@ -10,13 +10,13 @@ import { MetaCampaignTable } from "@/components/campaigns/MetaCampaignTable";
 import { LocalCampaignTable } from "@/components/campaigns/LocalCampaignTable";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare, TrendingUp, Eye, MousePointer2, DollarSign } from "lucide-react";
-import { useMemo } from "react";
 import { CampaignCompareDrawer } from "@/components/campaigns/CampaignCompareDrawer";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 type Tab = "all" | "meta" | "local";
 
@@ -30,6 +30,7 @@ export default function Campaigns() {
     id: string; name: string; status: string; objective?: string; dailyBudget?: number | null
   } | null>(null);
   const [showCompare, setShowCompare] = useState(false);
+  const { t } = useTranslation();
 
   const utils = trpc.useUtils();
 
@@ -66,8 +67,8 @@ export default function Campaigns() {
 
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateStatus = trpc.campaigns.updateStatus.useMutation({
-    onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Campaign status updated"); },
-    onError: () => toast.error("Failed to update status"),
+    onSuccess: () => { utils.campaigns.list.invalidate(); toast.success(t("common.success")); },
+    onError: () => toast.error(t("common.error")),
   });
 
   // ── Filtering ──────────────────────────────────────────────────────────────
@@ -105,11 +106,11 @@ export default function Campaigns() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="page-header">Campaigns</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="page-header">{t("campaigns.title")}</h1>
+            <p className="page-subtitle">
               {hasAnyConnection
-                ? `${totalCount} campaign${totalCount !== 1 ? "s" : ""} across all platforms`
-                : "Connect platforms to manage campaigns"}
+                ? `${totalCount} ${t("campaigns.title").toLowerCase()}`
+                : t("campaigns.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -119,7 +120,7 @@ export default function Campaigns() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl glass text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                Refresh
+                {t("common.refresh")}
               </button>
             )}
             <button
@@ -127,14 +128,14 @@ export default function Campaigns() {
               className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
             >
               <GitCompare className="w-4 h-4" />
-              Compare
+              {t("campaigns.compare")}
             </button>
             <button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Campaign
+              {t("campaigns.newCampaign")}
             </button>
           </div>
         </div>
@@ -145,28 +146,28 @@ export default function Campaigns() {
             <div className="bg-card border border-border rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign className="w-4 h-4 text-emerald-500" />
-                <span className="text-xs text-muted-foreground">Total Spend</span>
+                <span className="text-xs text-muted-foreground">{t("campaigns.totalSpend")}</span>
               </div>
               <p className="stat-value">${kpis.totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="bg-card border border-border rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Eye className="w-4 h-4 text-blue-500" />
-                <span className="text-xs text-muted-foreground">Impressions</span>
+                <span className="text-xs text-muted-foreground">{t("campaigns.totalImpressions")}</span>
               </div>
               <p className="stat-value">{kpis.totalImpressions >= 1000 ? (kpis.totalImpressions / 1000).toFixed(1) + "K" : kpis.totalImpressions.toLocaleString()}</p>
             </div>
             <div className="bg-card border border-border rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <MousePointer2 className="w-4 h-4 text-purple-500" />
-                <span className="text-xs text-muted-foreground">Clicks</span>
+                <span className="text-xs text-muted-foreground">{t("analytics.clicks")}</span>
               </div>
               <p className="stat-value">{kpis.totalClicks.toLocaleString()}</p>
             </div>
             <div className="bg-card border border-border rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="w-4 h-4 text-amber-500" />
-                <span className="text-xs text-muted-foreground">Avg CTR</span>
+                <span className="text-xs text-muted-foreground">{t("campaigns.avgCtr")}</span>
               </div>
               <p className="stat-value">{kpis.avgCtr.toFixed(2)}%</p>
             </div>
@@ -181,13 +182,13 @@ export default function Campaigns() {
                 <Link2 className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Connect platforms to manage campaigns</p>
-                <p className="text-xs text-muted-foreground">Link Meta Ads or other platforms to import and manage campaigns</p>
+                <p className="text-sm font-semibold">{t("campaigns.noCampaigns")}</p>
+                <p className="text-xs text-muted-foreground">{t("campaigns.noCampaignsSub")}</p>
               </div>
             </div>
             <Link href="/connections">
               <button className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap">
-                Connect Now
+                {t("dashboard.connectNow")}
               </button>
             </Link>
           </div>
@@ -195,7 +196,6 @@ export default function Campaigns() {
 
         {/* ── Platform tabs ───────────────────────────────────────────────────── */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1">
-          {/* All tab */}
           <button
             onClick={() => setTab("all")}
             className={
@@ -206,11 +206,10 @@ export default function Campaigns() {
             }
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            All
+            {t("campaigns.allPlatforms")}
             <span className="opacity-60">({metaCampaigns.length + localCampaigns.length})</span>
           </button>
 
-          {/* Meta tab */}
           {isMetaConnected && (
             <button
               onClick={() => setTab("meta")}
@@ -230,23 +229,21 @@ export default function Campaigns() {
             </button>
           )}
 
-          {/* Other connected platforms (future integrations) */}
           {connectedPlatforms.filter((p) => p !== "facebook").map((pid) => {
             const p = getPlatform(pid);
             return (
               <button
                 key={pid}
-                onClick={() => toast.info(`${p.name} campaign management coming soon`)}
+                onClick={() => toast.info(`${p.name} ${t("common.comingSoon")}`)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all whitespace-nowrap"
               >
                 <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
                 {p.name}
-                <span className="text-xs opacity-50">Soon</span>
+                <span className="text-xs opacity-50">{t("common.comingSoon")}</span>
               </button>
             );
           })}
 
-          {/* Local campaigns tab */}
           <button
             onClick={() => setTab("local")}
             className={
