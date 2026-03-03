@@ -20,16 +20,24 @@ import {
 } from "../meta";
 
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
-async function getMetaToken(userId: number): Promise<{ token: string; adAccountId: string } | null> {
+async function getMetaToken(
+  userId: number,
+  accountId?: number
+): Promise<{ token: string; adAccountId: string } | null> {
   const sb = getSupabase();
-  const { data } = await sb
+  let query = sb
     .from("social_accounts")
     .select("access_token, platform_account_id")
     .eq("user_id", userId)
     .eq("platform", "facebook")
-    .eq("is_active", true)
-    .maybeSingle();
+    .eq("is_active", true);
 
+  // If a specific account is requested, filter by id
+  if (accountId) {
+    query = query.eq("id", accountId);
+  }
+
+  const { data } = await query.maybeSingle();
   if (!data?.access_token || !data?.platform_account_id) return null;
   return { token: data.access_token, adAccountId: data.platform_account_id };
 }
@@ -142,9 +150,10 @@ export const metaRouter = router({
         "today", "yesterday", "last_7d", "last_14d", "last_30d",
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
+      accountId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return null;
       const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
       if (insights.length === 0) return null;
@@ -175,9 +184,10 @@ export const metaRouter = router({
         "today", "yesterday", "last_7d", "last_14d", "last_30d",
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
+      accountId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return null;
 
       const prevPresetMap: Record<string, string> = {
@@ -222,9 +232,10 @@ export const metaRouter = router({
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
       limit: z.number().min(1).max(50).default(20),
+      accountId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return [];
       const insights = await getCampaignInsights(
         conn.adAccountId, conn.token, input.datePreset, input.limit
@@ -342,9 +353,9 @@ export const metaRouter = router({
 
   /** Conversion Funnel data — Impressions → Reach → Clicks → Leads → Conversions */
   funnelData: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_30d") }))
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
       try {
         const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
@@ -375,9 +386,9 @@ export const metaRouter = router({
 
   /** Attribution model comparison across campaigns */
   attributionData: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_30d") }))
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return { models: [], totalRoas: 0 };
       try {
         const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 10);
@@ -406,9 +417,9 @@ export const metaRouter = router({
 
   /** Spend forecast: project monthly spend based on current daily burn rate */
   spendForecast: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_7d") }))
+    .input(z.object({ datePreset: z.string().default("last_7d"), accountId: z.number().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return null;
       try {
         const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
@@ -437,9 +448,10 @@ export const metaRouter = router({
   topCampaign: protectedProcedure
     .input(z.object({
       datePreset: z.string().default("last_30d"),
+      accountId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, input.accountId);
       if (!conn) return null;
       try {
         const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 20);

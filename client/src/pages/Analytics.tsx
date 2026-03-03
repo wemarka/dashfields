@@ -20,6 +20,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,
@@ -47,10 +48,14 @@ export default function Analytics() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showExport, setShowExport] = useState(false);
   const { t } = useTranslation();
+  const { activeAccountId } = useActiveAccount();
 
-  // Multi-platform data
+  // Multi-platform data — filtered by active account if selected
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =
-    trpc.platforms.allInsights.useQuery({ datePreset });
+    trpc.platforms.allInsights.useQuery({
+      datePreset,
+      ...(activeAccountId ? { accountId: activeAccountId } : {}),
+    });
   const { data: accounts = [] } = trpc.social.list.useQuery();
 
   // Meta-specific campaign data (for charts when Meta is selected)
@@ -58,11 +63,11 @@ export default function Analytics() {
   const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } =
     trpc.meta.campaignInsights.useQuery(
-      { datePreset, limit: 20 },
+      { datePreset, limit: 20, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
       { enabled: isMetaConnected }
     );
   const { data: compare } = trpc.meta.compareInsights.useQuery(
-    { datePreset },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isMetaConnected }
   );
 

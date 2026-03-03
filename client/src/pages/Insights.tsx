@@ -8,6 +8,7 @@ import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { trpc } from "@/lib/trpc";
 import { useState, useMemo } from "react";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
@@ -132,9 +133,10 @@ function CustomTooltip({ active, payload, label }: any) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Insights() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
+  const { activeAccountId } = useActiveAccount();
 
   const { data: insights = [], isLoading, refetch, isFetching } = trpc.platforms.allInsights.useQuery(
-    { datePreset },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { refetchOnWindowFocus: false }
   );
 

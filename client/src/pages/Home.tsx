@@ -29,6 +29,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { Settings2 } from "lucide-react";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
@@ -243,6 +244,7 @@ export default function Dashboard() {
   const [showWidgetMenu, setShowWidgetMenu] = useState(false);
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { activeAccountId } = useActiveAccount();
 
   const toggleWidget = (key: WidgetKey) => {
     setWidgets((prev) => {
@@ -262,9 +264,15 @@ export default function Dashboard() {
     topCampaign:   "Top Campaign",
   };
 
-  // Multi-platform summary
-  const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({ datePreset });
-  const { data: allInsights = [], isLoading: insightsLoading } = trpc.platforms.allInsights.useQuery({ datePreset });
+  // Multi-platform summary — filtered by active account if selected
+  const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({
+    datePreset,
+    ...(activeAccountId ? { accountId: activeAccountId } : {}),
+  });
+  const { data: allInsights = [], isLoading: insightsLoading } = trpc.platforms.allInsights.useQuery({
+    datePreset,
+    ...(activeAccountId ? { accountId: activeAccountId } : {}),
+  });
 
   // Connected accounts
   const { data: accounts = [] } = trpc.social.list.useQuery();
@@ -274,7 +282,7 @@ export default function Dashboard() {
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
   const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } = trpc.meta.campaignInsights.useQuery(
-    { datePreset, limit: 10 },
+    { datePreset, limit: 10, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isMetaConnected }
   );
 

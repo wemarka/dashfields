@@ -6,6 +6,7 @@
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -128,10 +129,11 @@ function OverlapScoreCard({
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function AudienceOverlap() {
   const [activeTab, setActiveTab] = useState("overview");
+  const { activeAccountId } = useActiveAccount();
 
   // Fetch platform insights to determine connected platforms
   const { data: platformInsights = [], isLoading: loadingAccounts, refetch } = trpc.platforms.allInsights.useQuery(
-    {},
+    { ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { retry: false }
   );
 

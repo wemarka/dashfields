@@ -7,6 +7,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";
 import { trpc } from "@/lib/trpc";
 import { useTranslation } from "react-i18next";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 import {
   FunnelChart, Funnel, Tooltip, ResponsiveContainer, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
@@ -145,16 +146,17 @@ export default function AdvancedAnalytics() {
   const [tab, setTab] = useState<"funnel" | "attribution" | "roi">("funnel");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const { t } = useTranslation();
+  const { activeAccountId } = useActiveAccount();
 
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
   const isConnected = metaStatus?.connected ?? false;
 
   const { data: funnel, isLoading: funnelLoading } = trpc.meta.funnelData.useQuery(
-    { datePreset },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isConnected }
   );
   const { data: attribution, isLoading: attrLoading } = trpc.meta.attributionData.useQuery(
-    { datePreset },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isConnected }
   );
 

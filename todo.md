@@ -921,3 +921,31 @@
 - [x] GlobalSearch.tsx — إضافة DialogDescription مخفية
 - [x] OnboardingModal.tsx — إضافة DialogDescription مخفية
 - [x] 266/266 اختبار ناجح — 0 أخطاء TypeScript
+
+## Phase — Active Account Filtering
+- [ ] تحليل جميع الـ routers لتحديد الـ procedures التي تحتاج فلترة بـ accountId
+- [ ] تحديث platforms.allInsights لقبول accountId اختياري
+- [ ] تحديث meta.insights وmeta.campaigns لقبول accountId
+- [ ] تحديث audience.demographics لقبول accountId
+- [ ] تحديث alerts.list لقبول accountId
+- [ ] تحديث campaigns.list لقبول accountId
+- [ ] تحديث client: Analytics.tsx يمرر activeAccountId
+- [ ] تحديث client: Home.tsx يمرر activeAccountId
+- [ ] تحديث client: Campaigns.tsx يمرر activeAccountId
+- [ ] تحديث client: Audience.tsx يمرر activeAccountId
+- [ ] تحديث client: Alerts.tsx يمرر activeAccountId
+- [ ] TypeScript check (0 errors)
+- [ ] 266/266 اختبار ناجح
+- [ ] Checkpoint
+
+## Phase — Active Account Filtering (Completed)
+- [x] ActiveAccountContext عالمي مشترك بين جميع الصفحات
+- [x] Server-side: platforms.allInsights + platforms.summary يقبلان accountId اختياري
+- [x] Server-side: meta procedures (campaignInsights, funnelData, attributionData, spendForecast, topCampaign) تقبل accountId
+- [x] Client: Home.tsx مرتبط بـ activeAccountId
+- [x] Client: Analytics.tsx مرتبط بـ activeAccountId
+- [x] Client: Campaigns.tsx مرتبط بـ activeAccountId
+- [x] Client: AdvancedAnalytics.tsx مرتبط بـ activeAccountId
+- [x] Client: Insights.tsx مرتبط بـ activeAccountId
+- [x] Client: AudienceOverlap.tsx مرتبط بـ activeAccountId
+- [x] 266/266 اختبار ناجح — 0 أخطاء TypeScript

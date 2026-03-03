@@ -135,9 +135,11 @@ export const platformsRouter = router({
   allInsights: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
+      accountId: z.number().optional(), // filter to a specific social account
     }))
     .query(async ({ ctx, input }) => {
-      const accounts = await getUserSocialAccounts(ctx.user.id);
+      let accounts = await getUserSocialAccounts(ctx.user.id);
+      if (input.accountId) accounts = accounts.filter(a => a.id === input.accountId);
       if (accounts.length === 0) return [] as PlatformInsight[];
 
       const { since, until } = getDateRange(input.datePreset);
@@ -187,9 +189,11 @@ export const platformsRouter = router({
   summary: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
+      accountId: z.number().optional(), // filter to a specific social account
     }))
     .query(async ({ ctx, input }) => {
-      const accounts = await getUserSocialAccounts(ctx.user.id);
+      let accounts = await getUserSocialAccounts(ctx.user.id);
+      if (input.accountId) accounts = accounts.filter(a => a.id === input.accountId);
 
       if (accounts.length === 0) {
         return {

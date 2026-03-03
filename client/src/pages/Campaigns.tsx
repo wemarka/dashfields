@@ -19,6 +19,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { useActiveAccount } from "@/contexts/ActiveAccountContext";
 
 type Tab = "all" | "meta" | "local";
 
@@ -35,6 +36,7 @@ export default function Campaigns() {
   const [showMetaCreate, setShowMetaCreate] = useState(false);
   const [showBuilder, setShowBuilder] = useState(false);
   const { t } = useTranslation();
+  const { activeAccountId } = useActiveAccount();
 
   const utils = trpc.useUtils();
 
@@ -55,7 +57,7 @@ export default function Campaigns() {
     isLoading: insightsLoading,
     refetch: refetchInsights,
   } = trpc.meta.campaignInsights.useQuery(
-    { datePreset: datePreset as any, limit: 50 },
+    { datePreset: datePreset as any, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isMetaConnected }
   );
 
