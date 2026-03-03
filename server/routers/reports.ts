@@ -1,8 +1,6 @@
-/**
- * server/routers/reports.ts
- * Scheduled Reports — create, list, delete, and generate reports.
- * Supports White-Label branding: company name, logo, primary color, footer text.
- */
+// server/routers/reports.ts
+// Scheduled Reports — create, list, delete, and generate reports.
+// Supports White-Label branding: company name, logo, primary color, footer text.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

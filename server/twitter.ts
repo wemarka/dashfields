@@ -1,8 +1,6 @@
-/**
- * server/twitter.ts
- * Twitter (X) API v2 helper functions.
- * Uses OAuth 2.0 Bearer token stored in Supabase connections table.
- */
+// server/twitter.ts
+// Twitter (X) API v2 helper functions.
+// Uses OAuth 2.0 Bearer token stored in Supabase connections table.
 
 const TWITTER_API_BASE = "https://api.twitter.com/2";
 

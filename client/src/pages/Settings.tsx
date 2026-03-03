@@ -1,6 +1,4 @@
-/**
- * Settings.tsx — Improved settings page with real data binding.
- */
+// Settings.tsx — Improved settings page with real data binding.
 import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";

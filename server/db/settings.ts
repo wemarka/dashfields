@@ -1,13 +1,9 @@
-/**
- * server/db/settings.ts
- * Settings, notifications, and alert rules helpers using Supabase client.
- *
- * Actual user_settings columns in Supabase:
- *   id, user_id, default_timezone, notifications_enabled, preferences (jsonb), created_at, updated_at
- *
- * We store extended settings (language, currency, email_notifications, etc.)
- * inside the `preferences` JSONB column.
- */
+// server/db/settings.ts
+// Settings, notifications, and alert rules helpers using Supabase client.
+// Actual user_settings columns in Supabase:
+//   id, user_id, default_timezone, notifications_enabled, preferences (jsonb), created_at, updated_at
+// We store extended settings (language, currency, email_notifications, etc.)
+// inside the `preferences` JSONB column.
 import { getSupabase } from "../supabase";
 
 // ─── Types ───────────────────────────────────────────────────────────────────

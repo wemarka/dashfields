@@ -1,7 +1,5 @@
-/**
- * ActiveCampaignsTable.tsx
- * Compact campaigns table for the Dashboard overview.
- */
+// ActiveCampaignsTable.tsx
+// Compact campaigns table for the Dashboard overview.
 import { Loader2, Link2 } from "lucide-react";
 import { Link } from "wouter";
 

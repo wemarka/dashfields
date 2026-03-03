@@ -1,7 +1,5 @@
-/**
- * server/budget.test.ts
- * Tests for budget tracking logic.
- */
+// server/budget.test.ts
+// Tests for budget tracking logic.
 import { describe, it, expect } from "vitest";
 
 // ─── Replicate core logic from budget router ───────────────────────────────────

@@ -1,10 +1,8 @@
-/**
- * server/routers/platforms.ts
- * Unified multi-platform insights router.
- * Fetches real data from Meta API for facebook accounts.
- * For other platforms, aggregates real data from campaign_metrics in Supabase.
- * Falls back to zero-values (never random) when no data is available.
- */
+// server/routers/platforms.ts
+// Unified multi-platform insights router.
+// Fetches real data from Meta API for facebook accounts.
+// For other platforms, aggregates real data from campaign_metrics in Supabase.
+// Falls back to zero-values (never random) when no data is available.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserSocialAccounts } from "../db/social";

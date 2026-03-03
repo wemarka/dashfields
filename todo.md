@@ -989,3 +989,27 @@
 - [x] server/invitations.test.ts — 11 اختبار (token generation, DB helpers, edge cases, security)
 - [x] 292/292 اختبار ناجح + 0 أخطاء TypeScript
 - [x] Checkpoint نهائي
+
+## ✅ Phase — Workspace Logo in Sidebar + Frontend Filtering + Transfer Ownership
+
+### Phase A — عرض شعار الـ Workspace في Sidebar
+- [x] عرض logo_url في WorkspaceSwitcher (Sidebar bottom) بدلاً من أيقونة Building2
+- [x] عرض logo_url في WorkspaceSwitcherModal (قائمة الـ workspaces)
+- [x] Fallback: أول حرف من اسم الـ workspace إذا لم يكن هناك شعار
+- [x] إصلاح JSDoc comments في 100+ ملف (حل مشكلة عرض المحرر)
+
+### Phase B — فلترة البيانات في Frontend
+- [x] Campaigns.tsx: تمرير activeWorkspace.id لـ campaigns.list و social.list
+- [x] Publishing.tsx: تمرير activeWorkspace.id لـ posts.list
+- [x] Alerts.tsx: تمرير activeWorkspace.id لـ alerts.list و social.list
+- [x] Reports.tsx: تمرير activeWorkspace.id لـ reports.list
+- [x] Connections.tsx: تمرير activeWorkspace.id لـ social.list
+
+### Phase C — نقل الملكية (Transfer Ownership)
+- [x] server/routers/workspaces.ts: transferOwnership procedure (owner only)
+- [x] WorkspaceSettings Team tab: زر "Transfer Ownership" للـ Owner فقط
+- [x] TransferOwnershipModal: اختيار العضو + كتابة TRANSFER للتأكيد
+
+### Phase D — اختبارات + Checkpoint
+- [x] 292/292 اختبار ناجح + 0 أخطاء TypeScript
+- [x] Checkpoint نهائي

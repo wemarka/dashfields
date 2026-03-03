@@ -1,8 +1,6 @@
-/**
- * server/routers/posts.ts
- * tRPC router for scheduled posts management.
- * Supports: Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube
- */
+// server/routers/posts.ts
+// tRPC router for scheduled posts management.
+// Supports: Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserPosts, createPost, updatePostStatus, deletePost } from "../db/posts";

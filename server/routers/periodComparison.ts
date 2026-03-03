@@ -1,8 +1,6 @@
-/**
- * server/routers/periodComparison.ts
- * Compare two time periods side-by-side (e.g., this month vs last month).
- * Fetches real metrics from Supabase campaign_metrics table.
- */
+// server/routers/periodComparison.ts
+// Compare two time periods side-by-side (e.g., this month vs last month).
+// Fetches real metrics from Supabase campaign_metrics table.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

@@ -1,7 +1,5 @@
-/**
- * MobileBottomNav.tsx — Persistent bottom navigation for mobile screens
- * Shows the 5 most important nav items. Hidden on md+ screens.
- */
+// MobileBottomNav.tsx — Persistent bottom navigation for mobile screens
+// Shows the 5 most important nav items. Hidden on md+ screens.
 import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard, Megaphone, BarChart3,

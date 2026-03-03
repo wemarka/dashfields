@@ -1,9 +1,7 @@
-/**
- * Quick example (matches curl usage):
- *   await callDataApi("Youtube/search", {
- *     query: { gl: "US", hl: "en", q: "manus" },
- *   })
- */
+// Quick example (matches curl usage):
+//   await callDataApi("Youtube/search", {
+//     query: { gl: "US", hl: "en", q: "manus" },
+//   })
 import { ENV } from "./env";
 
 export type DataApiCallOptions = {

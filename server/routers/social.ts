@@ -1,7 +1,5 @@
-/**
- * server/routers/social.ts
- * tRPC router for social account management.
- */
+// server/routers/social.ts
+// tRPC router for social account management.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserSocialAccounts, upsertSocialAccount, deleteSocialAccount, getSocialAccountById } from "../db/social";

@@ -1,8 +1,6 @@
-/**
- * Insights.tsx
- * Enhanced cross-platform insights with ROI comparison, performance ranking,
- * cost efficiency table, and AI-powered recommendations.
- */
+// Insights.tsx
+// Enhanced cross-platform insights with ROI comparison, performance ranking,
+// cost efficiency table, and AI-powered recommendations.
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";

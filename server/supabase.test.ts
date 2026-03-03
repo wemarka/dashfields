@@ -1,7 +1,5 @@
-/**
- * server/supabase.test.ts
- * Validates Supabase connection and basic CRUD operations.
- */
+// server/supabase.test.ts
+// Validates Supabase connection and basic CRUD operations.
 import { describe, it, expect, beforeAll } from "vitest";
 import { getSupabase } from "./supabase";
 

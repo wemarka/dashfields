@@ -1,8 +1,6 @@
-/**
- * server/routers/aiContent.ts
- * AI-powered content suggestions using the built-in LLM helper.
- * Generates post ideas, captions, hashtags, and caption length optimization.
- */
+// server/routers/aiContent.ts
+// AI-powered content suggestions using the built-in LLM helper.
+// Generates post ideas, captions, hashtags, and caption length optimization.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";

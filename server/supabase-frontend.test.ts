@@ -1,7 +1,5 @@
-/**
- * supabase-frontend.test.ts
- * Validates that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set and reachable.
- */
+// supabase-frontend.test.ts
+// Validates that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set and reachable.
 import { describe, it, expect } from "vitest";
 
 describe("Supabase frontend env vars", () => {

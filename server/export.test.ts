@@ -1,7 +1,5 @@
-/**
- * export.test.ts
- * Tests for the export router (CSV + HTML report generation).
- */
+// export.test.ts
+// Tests for the export router (CSV + HTML report generation).
 import { describe, it, expect } from "vitest";
 
 // ─── CSV builder (extracted logic) ───────────────────────────────────────────

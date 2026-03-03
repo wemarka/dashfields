@@ -1,7 +1,5 @@
-/**
- * server/routers/ai.ts
- * tRPC router for AI-powered content generation and analysis.
- */
+// server/routers/ai.ts
+// tRPC router for AI-powered content generation and analysis.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { invokeLLM, type ResponseFormat } from "../_core/llm";

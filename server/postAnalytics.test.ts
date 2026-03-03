@@ -1,7 +1,5 @@
-/**
- * server/postAnalytics.test.ts
- * Tests for the postAnalytics router.
- */
+// server/postAnalytics.test.ts
+// Tests for the postAnalytics router.
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Supabase

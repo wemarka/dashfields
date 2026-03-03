@@ -1,7 +1,5 @@
-/**
- * AnalyticsKpiCards.tsx
- * 8-card KPI grid for Analytics page with period comparison chips.
- */
+// AnalyticsKpiCards.tsx
+// 8-card KPI grid for Analytics page with period comparison chips.
 import {
   TrendingUp, TrendingDown, Eye, MousePointerClick,
   DollarSign, Users, MessageCircle, Phone,

@@ -1,8 +1,6 @@
-/**
- * ExportReportModal.tsx
- * Modal for exporting analytics reports as CSV or PDF (HTML print).
- * Allows selecting date range and specific platforms.
- */
+// ExportReportModal.tsx
+// Modal for exporting analytics reports as CSV or PDF (HTML print).
+// Allows selecting date range and specific platforms.
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";

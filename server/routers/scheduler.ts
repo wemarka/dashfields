@@ -1,12 +1,9 @@
-/**
- * server/routers/scheduler.ts
- * Background alert checker — fetches current Meta metrics for all connected users
- * and triggers alert rules automatically.
- *
- * Designed to be called from:
- *  1. A cron job (e.g., every hour) via POST /api/scheduler/run
- *  2. Manually from the Alerts page UI
- */
+// server/routers/scheduler.ts
+// Background alert checker — fetches current Meta metrics for all connected users
+// and triggers alert rules automatically.
+// Designed to be called from:
+//  1. A cron job (e.g., every hour) via POST /api/scheduler/run
+//  2. Manually from the Alerts page UI
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getSupabase } from "../supabase";

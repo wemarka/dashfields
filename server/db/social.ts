@@ -1,11 +1,8 @@
-/**
- * server/db/social.ts
- * Social accounts database query helpers using Supabase client.
- * 
- * Actual DB columns: id, user_id, platform, account_type, platform_account_id,
- *   name, username, profile_picture, access_token, refresh_token,
- *   token_expires_at, is_active, metadata, created_at, updated_at
- */
+// server/db/social.ts
+// Social accounts database query helpers using Supabase client.
+// Actual DB columns: id, user_id, platform, account_type, platform_account_id,
+//   name, username, profile_picture, access_token, refresh_token,
+//   token_expires_at, is_active, metadata, created_at, updated_at
 import { getSupabase } from "../supabase";
 
 export type SocialAccountRow = {

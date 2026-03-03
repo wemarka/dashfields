@@ -1,7 +1,5 @@
-/**
- * Analytics.tsx — Multi-Platform Analytics
- * Shows unified analytics with per-platform filter tabs.
- */
+// Analytics.tsx — Multi-Platform Analytics
+// Shows unified analytics with per-platform filter tabs.
 import DashboardLayout from "@/components/DashboardLayout";
 import { AnalyticsKpiCards } from "@/components/analytics/AnalyticsKpiCards";
 import { SpendByCampaignChart } from "@/components/analytics/SpendByCampaignChart";

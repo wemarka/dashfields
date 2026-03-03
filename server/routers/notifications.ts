@@ -1,7 +1,5 @@
-/**
- * server/routers/notifications.ts
- * In-app notifications — stored in Supabase via db/settings helpers.
- */
+// server/routers/notifications.ts
+// In-app notifications — stored in Supabase via db/settings helpers.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import {

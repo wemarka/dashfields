@@ -1,7 +1,5 @@
-/**
- * server/routers/cron.ts
- * Exposes cron status and manual trigger via tRPC.
- */
+// server/routers/cron.ts
+// Exposes cron status and manual trigger via tRPC.
 import { protectedProcedure, router } from "../_core/trpc";
 import { getCronStatus, runCronJob } from "../cron";
 

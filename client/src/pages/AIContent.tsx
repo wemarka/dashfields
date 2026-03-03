@@ -1,8 +1,6 @@
-/**
- * AIContent.tsx
- * Advanced AI Content Studio — generate ideas, analyze sentiment,
- * find best posting times, and plan a full content calendar.
- */
+// AIContent.tsx
+// Advanced AI Content Studio — generate ideas, analyze sentiment,
+// find best posting times, and plan a full content calendar.
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";

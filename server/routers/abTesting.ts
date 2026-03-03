@@ -1,8 +1,6 @@
-/**
- * server/routers/abTesting.ts
- * A/B Testing router — create, manage, and analyze split tests.
- * Uses Supabase REST client (same pattern as all other routers).
- */
+// server/routers/abTesting.ts
+// A/B Testing router — create, manage, and analyze split tests.
+// Uses Supabase REST client (same pattern as all other routers).
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";

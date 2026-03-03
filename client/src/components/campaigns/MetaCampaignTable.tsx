@@ -1,8 +1,6 @@
-/**
- * MetaCampaignTable.tsx
- * Table for displaying Meta Ads campaigns with insights.
- * Supports status toggle and direct link to Meta Ads Manager.
- */
+// MetaCampaignTable.tsx
+// Table for displaying Meta Ads campaigns with insights.
+// Supports status toggle and direct link to Meta Ads Manager.
 import { Link2, Facebook, ExternalLink, Play, Pause, Loader2 } from "lucide-react";
 import { CampaignRowSkeleton } from "@/components/ui/skeleton-cards";
 import { Link } from "wouter";

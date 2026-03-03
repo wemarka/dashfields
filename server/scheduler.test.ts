@@ -1,7 +1,5 @@
-/**
- * scheduler.test.ts
- * Tests for the alert scheduler logic (evaluateRule helper and edge cases).
- */
+// scheduler.test.ts
+// Tests for the alert scheduler logic (evaluateRule helper and edge cases).
 import { describe, it, expect } from "vitest";
 
 // ─── Inline the evaluateRule logic for unit testing ───────────────────────────

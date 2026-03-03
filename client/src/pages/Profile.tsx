@@ -1,6 +1,4 @@
-/**
- * Profile page — user info + settings from Supabase via tRPC
- */
+// Profile page — user info + settings from Supabase via tRPC
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";

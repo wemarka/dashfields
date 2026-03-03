@@ -1,7 +1,5 @@
-/**
- * CtrCpcChart.tsx
- * CTR bar chart + Spend distribution pie chart side by side.
- */
+// CtrCpcChart.tsx
+// CTR bar chart + Spend distribution pie chart side by side.
 import {
   BarChart, Bar, PieChart, Pie, Cell, Legend,
   CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,

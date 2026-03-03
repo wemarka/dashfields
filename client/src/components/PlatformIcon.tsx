@@ -1,8 +1,6 @@
-/**
- * PlatformIcon.tsx
- * Renders a platform-specific icon using SVG paths.
- * Avoids external icon libraries for custom brand icons.
- */
+// PlatformIcon.tsx
+// Renders a platform-specific icon using SVG paths.
+// Avoids external icon libraries for custom brand icons.
 import { Facebook, Linkedin, Youtube } from "lucide-react";
 import type { PlatformId } from "@shared/platforms";
 

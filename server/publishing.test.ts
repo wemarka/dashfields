@@ -1,7 +1,5 @@
-/**
- * publishing.test.ts
- * Tests for publishing/posts helpers and data transformations.
- */
+// publishing.test.ts
+// Tests for publishing/posts helpers and data transformations.
 import { describe, it, expect } from "vitest";
 
 // ─── Helpers mirrored from PostCard ──────────────────────────────────────────

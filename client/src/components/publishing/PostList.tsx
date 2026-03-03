@@ -1,7 +1,5 @@
-/**
- * PostList.tsx
- * List view of all posts.
- */
+// PostList.tsx
+// List view of all posts.
 import { Loader2, Send, Plus } from "lucide-react";
 import { PostCard } from "./PostCard";
 

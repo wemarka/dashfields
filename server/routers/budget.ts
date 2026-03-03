@@ -1,8 +1,6 @@
-/**
- * server/routers/budget.ts
- * Budget tracking — reads real campaign budgets and spend from Supabase.
- * Falls back to user-configurable budgets stored in the campaigns table.
- */
+// server/routers/budget.ts
+// Budget tracking — reads real campaign budgets and spend from Supabase.
+// Falls back to user-configurable budgets stored in the campaigns table.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

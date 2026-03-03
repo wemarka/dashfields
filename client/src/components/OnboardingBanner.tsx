@@ -1,7 +1,5 @@
-/**
- * OnboardingBanner.tsx — Shown when no platforms are connected yet.
- * Guides new users through the setup steps.
- */
+// OnboardingBanner.tsx — Shown when no platforms are connected yet.
+// Guides new users through the setup steps.
 import { Link } from "wouter";
 import { Zap, Link2, BarChart2, Bell, ChevronRight, CheckCircle2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";

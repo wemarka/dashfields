@@ -1,7 +1,5 @@
-/**
- * Notifications.tsx
- * Advanced Notifications Center — smart alerts, category filtering, bulk actions, and preferences.
- */
+// Notifications.tsx
+// Advanced Notifications Center — smart alerts, category filtering, bulk actions, and preferences.
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";

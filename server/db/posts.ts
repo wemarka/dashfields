@@ -1,7 +1,5 @@
-/**
- * server/db/posts.ts
- * Post-related database query helpers using Supabase client.
- */
+// server/db/posts.ts
+// Post-related database query helpers using Supabase client.
 import { getSupabase } from "../supabase";
 
 export type PostRow = {

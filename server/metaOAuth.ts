@@ -1,9 +1,7 @@
-/**
- * metaOAuth.ts
- * Handles Meta (Facebook + Instagram) OAuth 2.0 flow.
- * Registers /api/oauth/meta/init and /api/oauth/meta/callback routes.
- * After connect: saves ad accounts (facebook) + Instagram business accounts.
- */
+// metaOAuth.ts
+// Handles Meta (Facebook + Instagram) OAuth 2.0 flow.
+// Registers /api/oauth/meta/init and /api/oauth/meta/callback routes.
+// After connect: saves ad accounts (facebook) + Instagram business accounts.
 import type { Express, Request, Response } from "express";
 import { getSupabase } from "./supabase";
 import { getUserByOpenId } from "./db/users";

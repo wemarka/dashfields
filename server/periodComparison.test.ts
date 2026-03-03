@@ -1,7 +1,5 @@
-/**
- * server/periodComparison.test.ts
- * Tests for period comparison logic.
- */
+// server/periodComparison.test.ts
+// Tests for period comparison logic.
 import { describe, it, expect } from "vitest";
 
 // ─── Helpers (duplicated from router for testing) ──────────────────────────────

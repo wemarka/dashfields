@@ -1,7 +1,5 @@
-/**
- * meta.test.ts
- * Tests for Meta Ads helper functions and data transformations.
- */
+// meta.test.ts
+// Tests for Meta Ads helper functions and data transformations.
 import { describe, it, expect } from "vitest";
 
 // ── Date preset helpers ───────────────────────────────────────────────────────

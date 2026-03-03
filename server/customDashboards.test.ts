@@ -1,7 +1,5 @@
-/**
- * customDashboards.test.ts
- * Unit tests for Custom Dashboards logic — widget validation, layout helpers.
- */
+// customDashboards.test.ts
+// Unit tests for Custom Dashboards logic — widget validation, layout helpers.
 import { describe, it, expect } from "vitest";
 
 // ─── Widget Schema Validation ─────────────────────────────────────────────────

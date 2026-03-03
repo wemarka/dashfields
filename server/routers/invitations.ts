@@ -1,8 +1,6 @@
-/**
- * server/routers/invitations.ts
- * tRPC router for workspace invitations.
- * Supports: invite by email, accept via token, list, revoke.
- */
+// server/routers/invitations.ts
+// tRPC router for workspace invitations.
+// Supports: invite by email, accept via token, list, revoke.
 import { z } from "zod";
 import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
 import {

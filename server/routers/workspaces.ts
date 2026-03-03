@@ -1,7 +1,5 @@
-/**
- * server/routers/workspaces.ts
- * tRPC router for Workspace management (CRUD, members, brand profiles).
- */
+// server/routers/workspaces.ts
+// tRPC router for Workspace management (CRUD, members, brand profiles).
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, workspaceProcedure, workspaceAdminProcedure } from "../_core/trpc";
@@ -12,6 +10,7 @@ import {
   updateWorkspace,
   deleteWorkspace,
   getWorkspaceMembers,
+  getWorkspaceMembership,
   updateMemberRole,
   removeMember,
   getBrandProfile,
@@ -271,5 +270,39 @@ export const workspacesRouter = router({
       if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
 
       return { success: true, user };
+    }),
+
+  /** Transfer workspace ownership to another member (owner only) */
+  transferOwnership: workspaceProcedure
+    .input(z.object({
+      workspaceId: z.number().int().positive(),
+      newOwnerId: z.number().int().positive(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Only the current owner can transfer
+      if (ctx.workspaceRole !== "owner") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only the workspace owner can transfer ownership" });
+      }
+      // Verify new owner is a member
+      const newOwnerMembership = await getWorkspaceMembership(ctx.workspaceId, input.newOwnerId);
+      if (!newOwnerMembership) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User is not a member of this workspace" });
+      }
+      const sb = getSupabase();
+      // Demote current owner to admin
+      const { error: demoteErr } = await sb
+        .from("workspace_members")
+        .update({ role: "admin" })
+        .eq("workspace_id", ctx.workspaceId)
+        .eq("user_id", ctx.user.id);
+      if (demoteErr) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: demoteErr.message });
+      // Promote new owner
+      const { error: promoteErr } = await sb
+        .from("workspace_members")
+        .update({ role: "owner" })
+        .eq("workspace_id", ctx.workspaceId)
+        .eq("user_id", input.newOwnerId);
+      if (promoteErr) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: promoteErr.message });
+      return { success: true };
     }),
 });

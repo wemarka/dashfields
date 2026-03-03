@@ -1,8 +1,6 @@
-/**
- * HashtagAnalytics.tsx — Hashtag performance analytics page
- * Shows top hashtags by engagement, reach, and usage frequency.
- * All data is real — pulled from posts table via tRPC.
- */
+// HashtagAnalytics.tsx — Hashtag performance analytics page
+// Shows top hashtags by engagement, reach, and usage frequency.
+// All data is real — pulled from posts table via tRPC.
 import { useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

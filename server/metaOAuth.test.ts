@@ -1,6 +1,4 @@
-/**
- * metaOAuth.test.ts — Tests for Meta OAuth helper logic
- */
+// metaOAuth.test.ts — Tests for Meta OAuth helper logic
 import { describe, it, expect } from "vitest";
 
 // ── Helpers mirroring metaOAuth.ts logic ──────────────────────────────────────

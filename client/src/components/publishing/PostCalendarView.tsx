@@ -1,7 +1,5 @@
-/**
- * PostCalendarView.tsx
- * Monthly calendar grid showing scheduled posts.
- */
+// PostCalendarView.tsx
+// Monthly calendar grid showing scheduled posts.
 
 const DAYS   = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [

@@ -1,8 +1,6 @@
-/**
- * server/db/users.ts
- * User-related database query helpers using Supabase client.
- * Returns camelCase objects matching the Drizzle User type expected by _core.
- */
+// server/db/users.ts
+// User-related database query helpers using Supabase client.
+// Returns camelCase objects matching the Drizzle User type expected by _core.
 import { getSupabase } from "../supabase";
 import type { User } from "../../drizzle/schema";
 

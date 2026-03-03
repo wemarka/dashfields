@@ -1,7 +1,5 @@
-/**
- * CampaignFilters.tsx
- * Search bar + status filter + date preset selector for Campaigns page.
- */
+// CampaignFilters.tsx
+// Search bar + status filter + date preset selector for Campaigns page.
 import { Search } from "lucide-react";
 
 interface CampaignFiltersProps {

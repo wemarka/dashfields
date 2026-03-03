@@ -1,8 +1,6 @@
-/**
- * meta-credentials.test.ts
- * Validates that META_APP_ID and META_APP_SECRET are configured.
- * These are needed for the Meta OAuth flow.
- */
+// meta-credentials.test.ts
+// Validates that META_APP_ID and META_APP_SECRET are configured.
+// These are needed for the Meta OAuth flow.
 import { describe, it, expect } from "vitest";
 
 describe("Meta App Credentials", () => {

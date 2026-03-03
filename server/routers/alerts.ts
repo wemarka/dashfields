@@ -1,8 +1,6 @@
-/**
- * server/routers/alerts.ts
- * tRPC router for performance alert rules.
- * Allows users to set thresholds (e.g., CTR < 1%) and receive notifications.
- */
+// server/routers/alerts.ts
+// tRPC router for performance alert rules.
+// Allows users to set thresholds (e.g., CTR < 1%) and receive notifications.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import {

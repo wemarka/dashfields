@@ -1,8 +1,6 @@
-/**
- * ContentCalendar.tsx
- * Monthly/weekly content calendar for scheduling posts.
- * Supports drag-and-drop rescheduling, status color-coding, and quick post creation.
- */
+// ContentCalendar.tsx
+// Monthly/weekly content calendar for scheduling posts.
+// Supports drag-and-drop rescheduling, status color-coding, and quick post creation.
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";

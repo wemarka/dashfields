@@ -1,8 +1,6 @@
-/**
- * server/supabase.ts
- * Supabase admin client (service_role) for all server-side DB operations.
- * Uses REST API via @supabase/supabase-js — no direct TCP connection needed.
- */
+// server/supabase.ts
+// Supabase admin client (service_role) for all server-side DB operations.
+// Uses REST API via @supabase/supabase-js — no direct TCP connection needed.
 import { createClient } from "@supabase/supabase-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

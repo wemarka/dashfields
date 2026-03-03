@@ -1,7 +1,5 @@
-/**
- * PostCard.tsx
- * Single post row in the list view.
- */
+// PostCard.tsx
+// Single post row in the list view.
 import { Clock, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
 const PLATFORM_ICON: Record<string, React.ElementType> = {

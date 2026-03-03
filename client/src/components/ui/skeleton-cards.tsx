@@ -1,7 +1,5 @@
-/**
- * skeleton-cards.tsx
- * Reusable skeleton loading components for data-heavy pages.
- */
+// skeleton-cards.tsx
+// Reusable skeleton loading components for data-heavy pages.
 import React from "react";
 
 // ─── Base Skeleton ────────────────────────────────────────────────────────────

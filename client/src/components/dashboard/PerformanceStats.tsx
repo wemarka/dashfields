@@ -1,7 +1,5 @@
-/**
- * PerformanceStats.tsx
- * Performance metrics bar chart panel for the Dashboard.
- */
+// PerformanceStats.tsx
+// Performance metrics bar chart panel for the Dashboard.
 
 interface StatItem {
   label: string;

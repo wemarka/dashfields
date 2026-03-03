@@ -1,7 +1,5 @@
-/**
- * server/routers/customDashboards.ts
- * Custom Dashboards — create, manage, and persist user-defined dashboard layouts.
- */
+// server/routers/customDashboards.ts
+// Custom Dashboards — create, manage, and persist user-defined dashboard layouts.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";

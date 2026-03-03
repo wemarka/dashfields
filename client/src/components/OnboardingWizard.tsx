@@ -1,8 +1,6 @@
-/**
- * OnboardingWizard.tsx — First-run guided setup for new users
- * Shows a multi-step wizard to help users connect their first platform,
- * configure budget alerts, and create their first report.
- */
+// OnboardingWizard.tsx — First-run guided setup for new users
+// Shows a multi-step wizard to help users connect their first platform,
+// configure budget alerts, and create their first report.
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";

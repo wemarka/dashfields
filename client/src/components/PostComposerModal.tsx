@@ -1,7 +1,5 @@
-/**
- * PostComposerModal.tsx — Multi-platform post composer
- * Supports all connected social media platforms + AI caption generation + image upload.
- */
+// PostComposerModal.tsx — Multi-platform post composer
+// Supports all connected social media platforms + AI caption generation + image upload.
 import { useState, useRef, useCallback } from "react";
 import {
   X, Calendar, Clock, Send, Loader2, Sparkles, Hash, Wand2,

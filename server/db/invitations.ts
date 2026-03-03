@@ -1,7 +1,5 @@
-/**
- * server/db/invitations.ts
- * Workspace invitation database helpers using Supabase client.
- */
+// server/db/invitations.ts
+// Workspace invitation database helpers using Supabase client.
 import { getSupabase } from "../supabase";
 import crypto from "crypto";
 

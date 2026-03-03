@@ -1,7 +1,5 @@
-/**
- * server/db/campaigns.ts
- * Campaign-related database query helpers using Supabase client.
- */
+// server/db/campaigns.ts
+// Campaign-related database query helpers using Supabase client.
 import { getSupabase } from "../supabase";
 
 export type CampaignRow = {

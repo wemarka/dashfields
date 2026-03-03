@@ -1,8 +1,6 @@
-/**
- * server/routers/apiKeys.ts
- * Manage platform API keys — store encrypted in Supabase.
- * Keys are masked on read (show only last 4 chars).
- */
+// server/routers/apiKeys.ts
+// Manage platform API keys — store encrypted in Supabase.
+// Keys are masked on read (show only last 4 chars).
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

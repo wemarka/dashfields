@@ -1,8 +1,6 @@
-/**
- * server/workspaces.test.ts
- * Unit tests for the workspaces tRPC router.
- * Uses mocked Supabase to avoid real DB calls.
- */
+// server/workspaces.test.ts
+// Unit tests for the workspaces tRPC router.
+// Uses mocked Supabase to avoid real DB calls.
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TRPCError } from "@trpc/server";
 import type { TrpcContext } from "./_core/context";

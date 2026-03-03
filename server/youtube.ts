@@ -1,8 +1,6 @@
-/**
- * server/youtube.ts
- * YouTube Data API v3 helper functions.
- * Uses OAuth 2.0 access token (Google) stored in Supabase connections table.
- */
+// server/youtube.ts
+// YouTube Data API v3 helper functions.
+// Uses OAuth 2.0 access token (Google) stored in Supabase connections table.
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 

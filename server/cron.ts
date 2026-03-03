@@ -1,9 +1,7 @@
-/**
- * server/cron.ts
- * Lightweight cron runner — checks and sends scheduled reports + budget alerts.
- * Runs on a setInterval when the server starts.
- * All state is persisted in Supabase (scheduled_reports, notifications tables).
- */
+// server/cron.ts
+// Lightweight cron runner — checks and sends scheduled reports + budget alerts.
+// Runs on a setInterval when the server starts.
+// All state is persisted in Supabase (scheduled_reports, notifications tables).
 import { getSupabase } from "./supabase";
 import { notifyOwner } from "./_core/notification";
 import { publishToInstagram } from "./meta";

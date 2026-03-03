@@ -1,8 +1,6 @@
-/**
- * AudienceOverlap.tsx
- * Audience Overlap Analysis — visualize audience intersection across platforms
- * using Venn-like diagrams, overlap scores, and AI-powered recommendations.
- */
+// AudienceOverlap.tsx
+// Audience Overlap Analysis — visualize audience intersection across platforms
+// using Venn-like diagrams, overlap scores, and AI-powered recommendations.
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";

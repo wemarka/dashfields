@@ -1,7 +1,5 @@
-/**
- * SpendForecastWidget — Projects monthly ad spend based on current daily burn rate.
- * Shows: daily burn rate, month-to-date spend, projected end-of-month spend.
- */
+// SpendForecastWidget — Projects monthly ad spend based on current daily burn rate.
+// Shows: daily burn rate, month-to-date spend, projected end-of-month spend.
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, Calendar, Zap, AlertTriangle } from "lucide-react";
 

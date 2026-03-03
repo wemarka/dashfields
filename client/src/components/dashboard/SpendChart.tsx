@@ -1,7 +1,5 @@
-/**
- * SpendChart.tsx
- * Area chart showing spend per campaign for the Dashboard.
- */
+// SpendChart.tsx
+// Area chart showing spend per campaign for the Dashboard.
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BarChart2, Loader2 } from "lucide-react";
 

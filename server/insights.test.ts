@@ -1,7 +1,5 @@
-/**
- * insights.test.ts
- * Tests for cross-platform insights logic (ROI comparison, ranking, efficiency).
- */
+// insights.test.ts
+// Tests for cross-platform insights logic (ROI comparison, ranking, efficiency).
 import { describe, it, expect } from "vitest";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

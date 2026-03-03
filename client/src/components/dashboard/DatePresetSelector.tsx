@@ -1,7 +1,5 @@
-/**
- * DatePresetSelector.tsx
- * Date range preset pill selector for the Dashboard.
- */
+// DatePresetSelector.tsx
+// Date range preset pill selector for the Dashboard.
 
 export const DATE_PRESETS = [
   { label: "Today",      value: "today" },

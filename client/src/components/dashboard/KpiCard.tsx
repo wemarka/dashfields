@@ -1,7 +1,5 @@
-/**
- * KpiCard.tsx
- * Reusable KPI metric card for the Dashboard.
- */
+// KpiCard.tsx
+// Reusable KPI metric card for the Dashboard.
 import type { LucideIcon } from "lucide-react";
 
 interface KpiCardProps {

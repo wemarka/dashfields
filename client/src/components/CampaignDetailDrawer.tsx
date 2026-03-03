@@ -1,8 +1,6 @@
-/**
- * CampaignDetailDrawer.tsx
- * Slide-in drawer showing detailed metrics for a Meta Ads campaign.
- * Includes KPI cards + daily performance chart.
- */
+// CampaignDetailDrawer.tsx
+// Slide-in drawer showing detailed metrics for a Meta Ads campaign.
+// Includes KPI cards + daily performance chart.
 import { useState } from "react";
 import {
   Sheet,

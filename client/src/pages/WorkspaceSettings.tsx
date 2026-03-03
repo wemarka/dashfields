@@ -1,10 +1,8 @@
-/**
- * WorkspaceSettings.tsx
- * Workspace management page with 3 tabs:
- *  1. General — name, logo, plan
- *  2. Team — members list, roles, add member
- *  3. Brand Profile — AI brand identity settings
- */
+// WorkspaceSettings.tsx
+// Workspace management page with 3 tabs:
+//  1. General — name, logo, plan
+//  2. Team — members list, roles, add member
+//  3. Brand Profile — AI brand identity settings
 import { useState } from "react";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { trpc } from "@/lib/trpc";
@@ -14,7 +12,7 @@ import {
   Building2, Users, Sparkles, Settings, Trash2,
   ChevronDown, Plus, Shield, Eye, UserCheck, Crown,
   Tag, X, Save, AlertTriangle, Link2, Copy, MailPlus,
-  Clock, CheckCircle2, Ban, Upload, ImageIcon,
+  Clock, CheckCircle2, Ban, Upload, ImageIcon, ArrowRightLeft,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -252,14 +250,31 @@ function GeneralTab() {
 // ─── Team Tab ─────────────────────────────────────────────────────────────────
 function TeamTab() {
   const { activeWorkspace, canAdmin } = useWorkspace();
+  const isOwner = activeWorkspace?.role === "owner";
   const [addEmail, setAddEmail] = useState("");
   const [addRole, setAddRole] = useState<"admin" | "member" | "viewer">("member");
-  const utils = trpc.useUtils();
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [transferTargetId, setTransferTargetId] = useState<number | null>(null);
+  const [transferConfirm, setTransferConfirm] = useState("");
 
   const { data: members, isLoading } = trpc.workspaces.listMembers.useQuery(
     { workspaceId: activeWorkspace?.id ?? 0 },
     { enabled: !!activeWorkspace }
   );
+
+  const utils = trpc.useUtils();
+
+  const transferMutation = trpc.workspaces.transferOwnership.useMutation({
+    onSuccess: () => {
+      toast.success("Ownership transferred successfully");
+      setShowTransfer(false);
+      setTransferTargetId(null);
+      setTransferConfirm("");
+      utils.workspaces.listMembers.invalidate();
+      utils.workspaces.list.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const addMutation = trpc.workspaces.addMemberByEmail.useMutation({
     onSuccess: () => {
@@ -515,6 +530,100 @@ function TeamTab() {
           </div>
         )}
       </div>
+
+      {/* Transfer Ownership (owner only) */}
+      {isOwner && (
+        <div className="glass rounded-2xl p-5 border border-destructive/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-destructive">Transfer Ownership</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Transfer this workspace to another admin or member.</p>
+            </div>
+            <button
+              onClick={() => setShowTransfer(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/5 transition-colors"
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5" />
+              Transfer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Ownership Modal */}
+      {showTransfer && activeWorkspace && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowTransfer(false)} />
+          <div className="relative glass rounded-2xl w-full max-w-md mx-4 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold">Transfer Ownership</h3>
+              <button onClick={() => setShowTransfer(false)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-foreground/8 transition-colors">
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select a member to become the new owner. You will be downgraded to <strong>Admin</strong>.
+            </p>
+            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
+              {(members ?? []).filter((m: Record<string, unknown>) => m.role !== "owner").map((member: Record<string, unknown>) => {
+                const user = member.users as { id: number; name: string | null; email: string | null } | null;
+                const userId = member.user_id as number;
+                const role = member.role as string;
+                return (
+                  <button
+                    key={userId}
+                    onClick={() => setTransferTargetId(userId)}
+                    className={[
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors",
+                      transferTargetId === userId ? "bg-brand/10 border border-brand/20" : "hover:bg-foreground/5",
+                    ].join(" ")}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-xs font-semibold text-brand">
+                      {(user?.name ?? user?.email ?? "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.name ?? "Unknown"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                    <span className="text-[11px] px-2 py-0.5 rounded-lg bg-muted capitalize">{role}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {transferTargetId && (
+              <div className="mb-4">
+                <label className="text-xs text-muted-foreground mb-1.5 block">Type <strong>TRANSFER</strong> to confirm</label>
+                <input
+                  type="text"
+                  value={transferConfirm}
+                  onChange={(e) => setTransferConfirm(e.target.value)}
+                  placeholder="TRANSFER"
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-destructive/30"
+                />
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowTransfer(false)}
+                className="flex-1 py-2 rounded-xl border border-border text-sm hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={!transferTargetId || transferConfirm !== "TRANSFER" || transferMutation.isPending}
+                onClick={() => {
+                  if (transferTargetId) {
+                    transferMutation.mutate({ workspaceId: activeWorkspace.id, newOwnerId: transferTargetId });
+                  }
+                }}
+                className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {transferMutation.isPending ? "Transferring..." : "Transfer Ownership"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

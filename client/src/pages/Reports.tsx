@@ -1,9 +1,8 @@
-/**
- * Reports.tsx
- * Standalone Reports page — create, manage, and download scheduled reports.
- */
+// Reports.tsx
+// Standalone Reports page — create, manage, and download scheduled reports.
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
@@ -488,8 +487,9 @@ export default function Reports() {
   const [showCreate, setShowCreate] = useState(false);
   const [branding, setBranding] = useState<BrandingOptions>(DEFAULT_BRANDING);
   const utils = trpc.useUtils();
+  const { activeWorkspace } = useWorkspace();
 
-  const { data: reports = [], isLoading } = trpc.reports.list.useQuery();
+  const { data: reports = [], isLoading } = trpc.reports.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   const deleteMutation = trpc.reports.delete.useMutation({
     onSuccess: () => {

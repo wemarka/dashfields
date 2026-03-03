@@ -1,6 +1,4 @@
-/**
- * reports.test.ts — Tests for scheduled reports logic
- */
+// reports.test.ts — Tests for scheduled reports logic
 import { describe, it, expect } from "vitest";
 
 // ── Helpers mirroring reports router logic ────────────────────────────────────

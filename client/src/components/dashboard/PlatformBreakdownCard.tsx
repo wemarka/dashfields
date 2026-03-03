@@ -1,7 +1,5 @@
-/**
- * PlatformBreakdownCard.tsx
- * Shows per-platform insights as a mini card row in the Dashboard.
- */
+// PlatformBreakdownCard.tsx
+// Shows per-platform insights as a mini card row in the Dashboard.
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { Loader2 } from "lucide-react";

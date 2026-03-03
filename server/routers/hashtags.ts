@@ -1,8 +1,6 @@
-/**
- * hashtags.ts — Hashtag Analytics router
- * Extracts and aggregates hashtag performance from posts table.
- * All data is real — pulled from Supabase posts.content + engagement columns.
- */
+// hashtags.ts — Hashtag Analytics router
+// Extracts and aggregates hashtag performance from posts table.
+// All data is real — pulled from Supabase posts.content + engagement columns.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

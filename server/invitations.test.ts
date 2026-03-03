@@ -1,7 +1,5 @@
-/**
- * server/invitations.test.ts
- * Unit tests for the workspace invitations system.
- */
+// server/invitations.test.ts
+// Unit tests for the workspace invitations system.
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Mock Supabase ────────────────────────────────────────────────────────────

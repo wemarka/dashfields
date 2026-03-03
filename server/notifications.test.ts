@@ -1,6 +1,4 @@
-/**
- * Tests for notifications router and profile/settings router
- */
+// Tests for notifications router and profile/settings router
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Mock Supabase ────────────────────────────────────────────────────────────

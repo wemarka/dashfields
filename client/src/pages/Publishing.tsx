@@ -1,7 +1,5 @@
-/**
- * Publishing.tsx — Content Publishing page
- * Composed from components in client/src/components/publishing/
- */
+// Publishing.tsx — Content Publishing page
+// Composed from components in client/src/components/publishing/
 import DashboardLayout from "@/components/DashboardLayout";
 import PostComposerModal from "@/components/PostComposerModal";
 import { PostList } from "@/components/publishing/PostList";
@@ -9,6 +7,7 @@ import { PostCalendarView } from "@/components/publishing/PostCalendarView";
 import { useState } from "react";
 import { Plus, Calendar, List } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 export default function Publishing() {
   const [view, setView]           = useState<"list" | "calendar">("list");
@@ -16,7 +15,8 @@ export default function Publishing() {
   const [calMonth, setCalMonth]   = useState(new Date(2026, 2, 1));
 
   const utils = trpc.useUtils();
-  const { data: posts = [], isLoading } = trpc.posts.list.useQuery();
+  const { activeWorkspace } = useWorkspace();
+  const { data: posts = [], isLoading } = trpc.posts.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   return (
     <DashboardLayout>

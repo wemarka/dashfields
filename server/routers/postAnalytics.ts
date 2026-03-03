@@ -1,8 +1,6 @@
-/**
- * server/routers/postAnalytics.ts
- * Post-level analytics: top posts, engagement heatmap, best times, post type breakdown.
- * All data sourced from Supabase posts table — 100% real data, no simulation.
- */
+// server/routers/postAnalytics.ts
+// Post-level analytics: top posts, engagement heatmap, best times, post type breakdown.
+// All data sourced from Supabase posts table — 100% real data, no simulation.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

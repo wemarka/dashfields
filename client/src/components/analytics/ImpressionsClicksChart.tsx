@@ -1,7 +1,5 @@
-/**
- * ImpressionsClicksChart.tsx
- * Grouped bar chart: Impressions vs Clicks per campaign.
- */
+// ImpressionsClicksChart.tsx
+// Grouped bar chart: Impressions vs Clicks per campaign.
 import {
   BarChart, Bar, CartesianGrid, Legend,
   ResponsiveContainer, Tooltip, XAxis, YAxis,

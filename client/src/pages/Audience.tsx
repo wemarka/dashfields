@@ -1,8 +1,6 @@
-/**
- * Audience Analytics Page
- * Shows REAL data only from posts table.
- * Demographics (age/gender/location/devices) require direct platform API — shown as "not available" with CTA.
- */
+// Audience Analytics Page
+// Shows REAL data only from posts table.
+// Demographics (age/gender/location/devices) require direct platform API — shown as "not available" with CTA.
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";

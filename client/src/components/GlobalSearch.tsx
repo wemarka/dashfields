@@ -1,8 +1,6 @@
-/**
- * GlobalSearch.tsx
- * Command-palette style global search (Cmd+K / Ctrl+K).
- * Searches campaigns, pages, reports, and settings in real time.
- */
+// GlobalSearch.tsx
+// Command-palette style global search (Cmd+K / Ctrl+K).
+// Searches campaigns, pages, reports, and settings in real time.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";

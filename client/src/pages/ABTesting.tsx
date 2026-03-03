@@ -1,7 +1,5 @@
-/**
- * ABTesting.tsx — A/B Testing Dashboard
- * Create, manage, and analyze split tests across ad campaigns.
- */
+// ABTesting.tsx — A/B Testing Dashboard
+// Create, manage, and analyze split tests across ad campaigns.
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { useState, useMemo } from "react";

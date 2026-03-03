@@ -1,9 +1,7 @@
-/**
- * server/routers/competitors.ts
- * Competitor Analysis — compare your campaign performance against industry benchmarks
- * and track competitor-style metrics across platforms.
- * Uses real data from campaign_metrics + campaigns tables.
- */
+// server/routers/competitors.ts
+// Competitor Analysis — compare your campaign performance against industry benchmarks
+// and track competitor-style metrics across platforms.
+// Uses real data from campaign_metrics + campaigns tables.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

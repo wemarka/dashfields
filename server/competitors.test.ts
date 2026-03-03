@@ -1,7 +1,5 @@
-/**
- * server/competitors.test.ts
- * Tests for Competitor Analysis logic.
- */
+// server/competitors.test.ts
+// Tests for Competitor Analysis logic.
 import { describe, it, expect } from "vitest";
 
 // ─── Industry benchmarks (mirrored from router) ───────────────────────────────

@@ -1,7 +1,5 @@
-/**
- * server/audience.test.ts
- * Tests for audience demographics data generation and aggregation.
- */
+// server/audience.test.ts
+// Tests for audience demographics data generation and aggregation.
 import { describe, it, expect } from "vitest";
 
 // ─── Replicate core logic from audience router ─────────────────────────────────

@@ -1,7 +1,5 @@
-/**
- * PeriodComparison.tsx
- * Compare current period vs previous period side-by-side with KPI cards and dual-line charts.
- */
+// PeriodComparison.tsx
+// Compare current period vs previous period side-by-side with KPI cards and dual-line charts.
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";

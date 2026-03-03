@@ -1,8 +1,6 @@
-/**
- * ActivityFeed.tsx
- * Real-time activity feed using Supabase Realtime.
- * Shows latest events: new posts, budget alerts, reports, campaign changes.
- */
+// ActivityFeed.tsx
+// Real-time activity feed using Supabase Realtime.
+// Shows latest events: new posts, budget alerts, reports, campaign changes.
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {

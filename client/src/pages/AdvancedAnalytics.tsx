@@ -1,7 +1,5 @@
-/**
- * AdvancedAnalytics.tsx — Conversion Funnel, Attribution Modeling & ROI Calculator
- * Professional-grade analytics for media buyers and performance marketers.
- */
+// AdvancedAnalytics.tsx — Conversion Funnel, Attribution Modeling & ROI Calculator
+// Professional-grade analytics for media buyers and performance marketers.
 import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { DatePresetSelector, type DatePreset } from "@/components/dashboard/DatePresetSelector";

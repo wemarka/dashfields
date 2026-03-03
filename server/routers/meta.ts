@@ -1,9 +1,7 @@
-/**
- * server/routers/meta.ts
- * tRPC router for Meta Ads integration.
- * Connects Meta ad accounts and fetches real campaign data via Meta Graph API.
- * Uses Supabase client for data persistence.
- */
+// server/routers/meta.ts
+// tRPC router for Meta Ads integration.
+// Connects Meta ad accounts and fetches real campaign data via Meta Graph API.
+// Uses Supabase client for data persistence.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

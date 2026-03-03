@@ -1,7 +1,5 @@
-/**
- * Campaigns.tsx — Multi-Platform Campaigns Management
- * Supports Meta Ads + local campaigns across all platforms.
- */
+// Campaigns.tsx — Multi-Platform Campaigns Management
+// Supports Meta Ads + local campaigns across all platforms.
 import DashboardLayout from "@/components/DashboardLayout";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
 import { MetaCampaignCreateModal } from "@/components/campaigns/MetaCampaignCreateModal";
@@ -20,6 +18,7 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 
 type Tab = "all" | "meta" | "local";
 
@@ -37,12 +36,13 @@ export default function Campaigns() {
   const [showBuilder, setShowBuilder] = useState(false);
   const { t } = useTranslation();
   const { activeAccountId } = useActiveAccount();
+  const { activeWorkspace } = useWorkspace();
 
   const utils = trpc.useUtils();
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const { data: localCampaigns = [], isLoading: localLoading } = trpc.campaigns.list.useQuery();
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: localCampaigns = [], isLoading: localLoading } = trpc.campaigns.list.useQuery({ workspaceId: activeWorkspace?.id });
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
   const isMetaConnected = metaStatus?.connected ?? false;
 

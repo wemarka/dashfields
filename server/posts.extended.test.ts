@@ -1,7 +1,5 @@
-/**
- * posts.extended.test.ts
- * Tests for the extended posts router: list with range, delete, reschedule.
- */
+// posts.extended.test.ts
+// Tests for the extended posts router: list with range, delete, reschedule.
 import { describe, it, expect } from "vitest";
 
 // ─── posts.list with range ────────────────────────────────────────────────────

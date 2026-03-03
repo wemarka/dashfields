@@ -1,8 +1,6 @@
-/**
- * OnboardingModal.tsx — First-run interactive onboarding wizard
- * Shown automatically to new users on first login.
- * Multi-step: Welcome → Connect Platform → Set Alert → Done
- */
+// OnboardingModal.tsx — First-run interactive onboarding wizard
+// Shown automatically to new users on first login.
+// Multi-step: Welcome → Connect Platform → Set Alert → Done
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";

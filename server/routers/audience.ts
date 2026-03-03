@@ -1,13 +1,10 @@
-/**
- * server/routers/audience.ts
- * Audience analytics — REAL DATA ONLY.
- *
- * PRINCIPLE: Only show data that actually exists in the database.
- * - reach, impressions, engagement, post types: from posts table (REAL)
- * - age/gender/country/device breakdown: NOT available without direct platform API
- *   → demographicsAvailable: false → frontend shows "Connect account" message
- * - If no posts exist → hasData: false → frontend shows empty state
- */
+// server/routers/audience.ts
+// Audience analytics — REAL DATA ONLY.
+// PRINCIPLE: Only show data that actually exists in the database.
+// - reach, impressions, engagement, post types: from posts table (REAL)
+// - age/gender/country/device breakdown: NOT available without direct platform API
+//   → demographicsAvailable: false → frontend shows "Connect account" message
+// - If no posts exist → hasData: false → frontend shows empty state
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getSupabase } from "../supabase";

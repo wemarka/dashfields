@@ -1,13 +1,12 @@
-/**
- * Connections.tsx
- * Multi-platform social media connections hub.
- * OAuth-first for all platforms that support it.
- * Manual token input for api_key platforms (Snapchat, Pinterest).
- */
+// Connections.tsx
+// Multi-platform social media connections hub.
+// OAuth-first for all platforms that support it.
+// Manual token input for api_key platforms (Snapchat, Pinterest).
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
@@ -427,10 +426,11 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Connections() {
   const utils = trpc.useUtils();
+  const { activeWorkspace } = useWorkspace();
   const { t } = useTranslation();
   const [manualPlatform, setManualPlatform] = useState<PlatformId | null>(null);
 
-  const { data: accounts = [], isLoading } = trpc.social.list.useQuery();
+  const { data: accounts = [], isLoading } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   // Handle OAuth callback results
   useEffect(() => {

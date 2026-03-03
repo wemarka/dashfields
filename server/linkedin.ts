@@ -1,8 +1,6 @@
-/**
- * server/linkedin.ts
- * LinkedIn API v2 helper functions.
- * Uses OAuth 2.0 access token stored in Supabase connections table.
- */
+// server/linkedin.ts
+// LinkedIn API v2 helper functions.
+// Uses OAuth 2.0 access token stored in Supabase connections table.
 
 const LINKEDIN_API_BASE = "https://api.linkedin.com/v2";
 

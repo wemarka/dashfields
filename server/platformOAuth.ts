@@ -1,9 +1,7 @@
-/**
- * server/platformOAuth.ts
- * OAuth 2.0 flows for Twitter/X (PKCE), TikTok, LinkedIn, YouTube (Google).
- * All tokens are stored in Supabase social_accounts table.
- * If CLIENT_ID is missing, returns a friendly "not configured" page.
- */
+// server/platformOAuth.ts
+// OAuth 2.0 flows for Twitter/X (PKCE), TikTok, LinkedIn, YouTube (Google).
+// All tokens are stored in Supabase social_accounts table.
+// If CLIENT_ID is missing, returns a friendly "not configured" page.
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
 import { getSupabase } from "./supabase";

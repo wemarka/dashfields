@@ -1,7 +1,5 @@
-/**
- * server/aiContent.test.ts
- * Tests for AI content generation helpers and apiKeys logic.
- */
+// server/aiContent.test.ts
+// Tests for AI content generation helpers and apiKeys logic.
 import { describe, it, expect, vi } from "vitest";
 
 // ─── Platform hints ────────────────────────────────────────────────────────────

@@ -1,8 +1,6 @@
-/**
- * NotificationBell.tsx
- * Header notification bell with unread count badge and dropdown panel.
- * Uses Supabase Realtime for live push updates — no polling needed.
- */
+// NotificationBell.tsx
+// Header notification bell with unread count badge and dropdown panel.
+// Uses Supabase Realtime for live push updates — no polling needed.
 import { useState, useRef, useEffect } from "react";
 import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, X, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";

@@ -1,8 +1,6 @@
-/**
- * AcceptInvite.tsx
- * Page shown when a user clicks an invitation link.
- * Route: /invite/:token
- */
+// AcceptInvite.tsx
+// Page shown when a user clicks an invitation link.
+// Route: /invite/:token
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";

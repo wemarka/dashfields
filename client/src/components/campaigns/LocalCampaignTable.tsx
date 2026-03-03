@@ -1,8 +1,6 @@
-/**
- * LocalCampaignTable.tsx
- * Table for local DB campaigns with real metrics from campaign_metrics.
- * Includes Clone and Delete actions.
- */
+// LocalCampaignTable.tsx
+// Table for local DB campaigns with real metrics from campaign_metrics.
+// Includes Clone and Delete actions.
 import { useState } from "react";
 import { Loader2, Plus, Play, Pause, ArrowUpRight, Copy, Trash2, MoreHorizontal } from "lucide-react";
 import { PlatformIcon } from "@/components/PlatformIcon";

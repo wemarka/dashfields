@@ -1,7 +1,5 @@
-/**
- * alerts.test.ts
- * Tests for alert rules logic and notification helpers.
- */
+// alerts.test.ts
+// Tests for alert rules logic and notification helpers.
 import { describe, it, expect } from "vitest";
 
 // ── Alert rule threshold evaluation logic ─────────────────────────────────────

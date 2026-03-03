@@ -1,30 +1,25 @@
-/**
- * Voice transcription helper using internal Speech-to-Text service
- *
- * Frontend implementation guide:
- * 1. Capture audio using MediaRecorder API
- * 2. Upload audio to storage (e.g., S3) to get URL
- * 3. Call transcription with the URL
- * 
- * Example usage:
- * ```tsx
- * // Frontend component
- * const transcribeMutation = trpc.voice.transcribe.useMutation({
- *   onSuccess: (data) => {
- *     console.log(data.text); // Full transcription
- *     console.log(data.language); // Detected language
- *     console.log(data.segments); // Timestamped segments
- *   }
- * });
- * 
- * // After uploading audio to storage
- * transcribeMutation.mutate({
- *   audioUrl: uploadedAudioUrl,
- *   language: 'en', // optional
- *   prompt: 'Transcribe the meeting' // optional
- * });
- * ```
- */
+// Voice transcription helper using internal Speech-to-Text service
+// Frontend implementation guide:
+// 1. Capture audio using MediaRecorder API
+// 2. Upload audio to storage (e.g., S3) to get URL
+// 3. Call transcription with the URL
+// Example usage:
+// ```tsx
+// // Frontend component
+// const transcribeMutation = trpc.voice.transcribe.useMutation({
+//   onSuccess: (data) => {
+//     console.log(data.text); // Full transcription
+//     console.log(data.language); // Detected language
+//     console.log(data.segments); // Timestamped segments
+//   }
+// });
+// // After uploading audio to storage
+// transcribeMutation.mutate({
+//   audioUrl: uploadedAudioUrl,
+//   language: 'en', // optional
+//   prompt: 'Transcribe the meeting' // optional
+// });
+// ```
 import { ENV } from "./env";
 
 export type TranscribeOptions = {

@@ -1,8 +1,6 @@
-/**
- * server/db.ts
- * Barrel file — re-exports all database helpers from server/db/
- * Kept for backward compatibility with server/_core imports.
- */
+// server/db.ts
+// Barrel file — re-exports all database helpers from server/db/
+// Kept for backward compatibility with server/_core imports.
 
 // Connection
 export { getDb } from "./db/index";

@@ -1,9 +1,7 @@
-/**
- * server/routers/export.ts
- * Export analytics data as CSV or generate a branded HTML report.
- * All data comes from real Supabase tables (campaigns + campaign_metrics).
- * Falls back to zero-values (never random) when no data is available.
- */
+// server/routers/export.ts
+// Export analytics data as CSV or generate a branded HTML report.
+// All data comes from real Supabase tables (campaigns + campaign_metrics).
+// Falls back to zero-values (never random) when no data is available.
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getUserSocialAccounts } from "../db/social";

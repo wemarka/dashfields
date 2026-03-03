@@ -1,7 +1,5 @@
-/**
- * BudgetTracker — shows daily/monthly spend vs budget per platform
- * Shows alert badge when spend >= 80% of budget
- */
+// BudgetTracker — shows daily/monthly spend vs budget per platform
+// Shows alert badge when spend >= 80% of budget
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

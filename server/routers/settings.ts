@@ -1,7 +1,5 @@
-/**
- * server/routers/settings.ts
- * tRPC router for user settings management.
- */
+// server/routers/settings.ts
+// tRPC router for user settings management.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserSettings, upsertUserSettings } from "../db/settings";

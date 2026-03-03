@@ -1,8 +1,6 @@
-/**
- * server/routers/campaigns.ts
- * tRPC router for campaign management.
- * campaigns.list now enriches each campaign with aggregated metrics from campaign_metrics.
- */
+// server/routers/campaigns.ts
+// tRPC router for campaign management.
+// campaigns.list now enriches each campaign with aggregated metrics from campaign_metrics.
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import {

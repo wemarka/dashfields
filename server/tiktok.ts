@@ -1,9 +1,7 @@
-/**
- * server/tiktok.ts
- * TikTok API helper functions.
- * Uses OAuth 2.0 access token stored in Supabase connections table.
- * Supports TikTok for Business API v2.
- */
+// server/tiktok.ts
+// TikTok API helper functions.
+// Uses OAuth 2.0 access token stored in Supabase connections table.
+// Supports TikTok for Business API v2.
 
 const TIKTOK_API_BASE = "https://open.tiktokapis.com/v2";
 

@@ -1,7 +1,5 @@
-/**
- * Alerts.tsx
- * Multi-Platform Performance Alerts — create threshold rules across all platforms.
- */
+// Alerts.tsx
+// Multi-Platform Performance Alerts — create threshold rules across all platforms.
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
@@ -12,6 +10,7 @@ import {
   FlaskConical, Download, History
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -224,11 +223,12 @@ function CreateAlertForm({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Alerts() {
   const utils = trpc.useUtils();
+  const { activeWorkspace } = useWorkspace();
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
 
-  const { data: rules = [], isLoading: rulesLoading } = trpc.alerts.list.useQuery();
+  const { data: rules = [], isLoading: rulesLoading } = trpc.alerts.list.useQuery({ workspaceId: activeWorkspace?.id });
   const { data: notifications = [], isLoading: notifLoading } = trpc.notifications.list.useQuery();
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
 
   const connectedPlatforms = Array.from(new Set([

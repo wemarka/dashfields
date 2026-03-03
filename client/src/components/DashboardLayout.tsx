@@ -1,10 +1,8 @@
-/**
- * DashboardLayout.tsx
- * Main app shell — redesigned with:
- *  • Lean Sidebar (grouped, no cognitive overload)
- *  • Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
- *  • Account Switcher at Sidebar bottom (per-platform, multi-account)
- */
+// DashboardLayout.tsx
+// Main app shell — redesigned with:
+//  • Lean Sidebar (grouped, no cognitive overload)
+//  • Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
+//  • Account Switcher at Sidebar bottom (per-platform, multi-account)
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
@@ -163,11 +161,13 @@ function WorkspaceSwitcherModal({
                   active?.id === ws.id ? "bg-brand/10 border border-brand/20" : "hover:bg-foreground/5",
                 ].join(" ")}
               >
-                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
                   {ws.logo_url ? (
-                    <img src={ws.logo_url} alt={ws.name} className="w-8 h-8 rounded-lg object-cover" />
+                    <img src={ws.logo_url} alt={ws.name} className="w-full h-full object-cover" />
                   ) : (
-                    <Building2 className="w-4 h-4 text-brand" />
+                    <span className="text-sm font-bold text-brand uppercase leading-none">
+                      {ws.name.charAt(0)}
+                    </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -490,8 +490,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               isRTL ? "flex-row-reverse" : "",
             ].join(" ")}
           >
-            <div className="w-6 h-6 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-              <Building2 className="w-3.5 h-3.5 text-brand" />
+            <div className="w-6 h-6 rounded-lg bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
+              {activeWorkspace?.logo_url ? (
+                <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
+              ) : activeWorkspace ? (
+                <span className="text-[10px] font-bold text-brand uppercase leading-none">
+                  {activeWorkspace.name.charAt(0)}
+                </span>
+              ) : (
+                <Building2 className="w-3.5 h-3.5 text-brand" />
+              )}
             </div>
             {!collapsed && (
               <>

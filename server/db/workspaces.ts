@@ -1,8 +1,6 @@
-/**
- * server/db/workspaces.ts
- * Database helpers for Workspaces, Members, Invitations, and Brand Profiles.
- * All queries use Supabase REST client (no direct TCP).
- */
+// server/db/workspaces.ts
+// Database helpers for Workspaces, Members, Invitations, and Brand Profiles.
+// All queries use Supabase REST client (no direct TCP).
 import { getSupabase } from "../supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

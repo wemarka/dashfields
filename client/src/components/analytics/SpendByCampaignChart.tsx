@@ -1,7 +1,5 @@
-/**
- * SpendByCampaignChart.tsx
- * Bar chart showing spend per campaign.
- */
+// SpendByCampaignChart.tsx
+// Bar chart showing spend per campaign.
 import {
   BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";

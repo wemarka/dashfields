@@ -1,7 +1,5 @@
-/**
- * Meta Graph API helper
- * Calls Meta Marketing API using a stored user access token.
- */
+// Meta Graph API helper
+// Calls Meta Marketing API using a stored user access token.
 
 const META_GRAPH_BASE = "https://graph.facebook.com/v19.0";
 

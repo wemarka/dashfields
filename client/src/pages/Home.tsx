@@ -1,7 +1,5 @@
-/**
- * Home.tsx — Unified Multi-Platform Dashboard
- * Shows aggregated KPIs from ALL connected social platforms.
- */
+// Home.tsx — Unified Multi-Platform Dashboard
+// Shows aggregated KPIs from ALL connected social platforms.
 import DashboardLayout from "@/components/DashboardLayout";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SpendChart } from "@/components/dashboard/SpendChart";

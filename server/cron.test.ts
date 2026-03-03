@@ -1,7 +1,5 @@
-/**
- * server/cron.test.ts
- * Tests for cron job logic and platform OAuth URL builders.
- */
+// server/cron.test.ts
+// Tests for cron job logic and platform OAuth URL builders.
 import { describe, it, expect } from "vitest";
 
 // ─── Cron helpers ──────────────────────────────────────────────────────────────

@@ -1,11 +1,9 @@
-/**
- * CampaignBuilder.tsx
- * Full-featured 4-step campaign wizard:
- * Step 1 — Campaign (name, objective, platform)
- * Step 2 — Ad Set (budget, schedule, audience targeting)
- * Step 3 — Ad Creative (headline, body, image, CTA)
- * Step 4 — Review & Launch
- */
+// CampaignBuilder.tsx
+// Full-featured 4-step campaign wizard:
+// Step 1 — Campaign (name, objective, platform)
+// Step 2 — Ad Set (budget, schedule, audience targeting)
+// Step 3 — Ad Creative (headline, body, image, CTA)
+// Step 4 — Review & Launch
 import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
