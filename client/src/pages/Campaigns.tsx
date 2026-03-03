@@ -11,7 +11,8 @@ import { LocalCampaignTable } from "@/components/campaigns/LocalCampaignTable";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
-import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, Link2, GitCompare, TrendingUp, Eye, MousePointer2, DollarSign } from "lucide-react";
+import { useMemo } from "react";
 import { CampaignCompareDrawer } from "@/components/campaigns/CampaignCompareDrawer";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -87,6 +88,16 @@ export default function Campaigns() {
     ? localCampaigns.length
     : metaCampaigns.length + localCampaigns.length;
 
+  // KPI aggregates from Meta insights
+  const kpis = useMemo(() => {
+    if (!metaInsights.length) return null;
+    const totalSpend = metaInsights.reduce((s, i) => s + (Number(i.spend) || 0), 0);
+    const totalImpressions = metaInsights.reduce((s, i) => s + (Number(i.impressions) || 0), 0);
+    const totalClicks = metaInsights.reduce((s, i) => s + (Number(i.clicks) || 0), 0);
+    const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+    return { totalSpend, totalImpressions, totalClicks, avgCtr };
+  }, [metaInsights]);
+
   return (
     <DashboardLayout>
       <div className="p-6 space-y-5 animate-fade-in">
@@ -127,6 +138,40 @@ export default function Campaigns() {
             </button>
           </div>
         </div>
+
+        {/* ── KPI Summary Cards ─────────────────────────────────────────────── */}
+        {isMetaConnected && kpis && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-card border border-border rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <DollarSign className="w-4 h-4 text-emerald-500" />
+                <span className="text-xs text-muted-foreground">Total Spend</span>
+              </div>
+              <p className="stat-value">${kpis.totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Eye className="w-4 h-4 text-blue-500" />
+                <span className="text-xs text-muted-foreground">Impressions</span>
+              </div>
+              <p className="stat-value">{kpis.totalImpressions >= 1000 ? (kpis.totalImpressions / 1000).toFixed(1) + "K" : kpis.totalImpressions.toLocaleString()}</p>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <MousePointer2 className="w-4 h-4 text-purple-500" />
+                <span className="text-xs text-muted-foreground">Clicks</span>
+              </div>
+              <p className="stat-value">{kpis.totalClicks.toLocaleString()}</p>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-amber-500" />
+                <span className="text-xs text-muted-foreground">Avg CTR</span>
+              </div>
+              <p className="stat-value">{kpis.avgCtr.toFixed(2)}%</p>
+            </div>
+          </div>
+        )}
 
         {/* ── No connections banner ───────────────────────────────────────────── */}
         {!hasAnyConnection && (

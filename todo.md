@@ -315,3 +315,27 @@
 - [ ] TypeScript check (0 errors)
 - [ ] Tests passing
 - [ ] Checkpoint and deliver
+
+## 🔄 Phase 57-60 — Dark Mode + Connections + Calendar Merge + Campaigns
+
+### Phase 57 — Dark Mode + Connections Improvement
+- [ ] Dark Mode toggle in Topbar (sun/moon icon, saves to localStorage)
+- [ ] ThemeProvider update to support dark/light toggle
+- [ ] Connections page: better platform cards with last-sync, reconnect button
+- [ ] Connections page: status indicators (connected/expired/disconnected)
+
+### Phase 58 — Merge Publishing into Calendar
+- [ ] Calendar page: add List View tab alongside Calendar View
+- [ ] List View: shows all scheduled posts sorted by date
+- [ ] Remove Publishing from sidebar (merged into Calendar)
+- [ ] Update App.tsx routes (/publishing → /calendar)
+
+### Phase 59 — Campaigns Improvements
+- [ ] Campaigns: search bar to filter by name
+- [ ] Campaigns: summary KPI bar (total spend, active count, avg CTR)
+- [ ] Campaigns: better status badges (ACTIVE=green, PAUSED=yellow, ENDED=gray)
+
+### Phase 60 — Tests + Checkpoint
+- [ ] TypeScript check (0 errors)
+- [ ] Tests passing
+- [ ] Checkpoint and deliver

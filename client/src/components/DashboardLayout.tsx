@@ -7,10 +7,32 @@ import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
-  PieChart, GitCompare, Zap,
+  PieChart, GitCompare, Zap, Sun, Moon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+
+// ─── Dark Mode Hook ───────────────────────────────────────────────────────────
+function useDarkMode() {
+  const [dark, setDark] = useState<boolean>(() => {
+    const saved = localStorage.getItem("dashfields-theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add("dark");
+      localStorage.setItem("dashfields-theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("dashfields-theme", "light");
+    }
+  }, [dark]);
+
+  return { dark, toggle: () => setDark((d) => !d) };
+}
 
 // ─── Nav Structure ────────────────────────────────────────────────────────────
 const navGroups = [
@@ -61,6 +83,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [location, setLocation] = useLocation();
   const { loading, user } = useAuth();
+  const { dark, toggle: toggleDark } = useDarkMode();
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => window.location.reload(),
   });
@@ -262,7 +285,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
           </div>
-          <NotificationBell />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleDark}
+              title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+            >
+              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <NotificationBell />
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           {children}

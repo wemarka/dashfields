@@ -13,7 +13,7 @@ import { PLATFORMS, getPlatform } from "@shared/platforms";
 type PlatformId = "facebook" | "instagram" | "tiktok" | "twitter" | "linkedin" | "youtube" | "google" | "snapchat" | "pinterest";
 import {
   CheckCircle2, Loader2, Link2, Unlink,
-  ChevronRight, X, Zap, Globe
+  ChevronRight, X, Zap, Globe, RefreshCw,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/components/ui/skeleton-cards";
 
@@ -222,6 +222,7 @@ interface ConnectedAccount {
   username?: string | null;
   platformAccountId: string;
   isActive: boolean;
+  updatedAt?: string | null;
 }
 
 interface PlatformCardProps {
@@ -235,27 +236,47 @@ interface PlatformCardProps {
 function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, isDisconnecting }: PlatformCardProps) {
   const platform = getPlatform(platformId);
   const isConnected = connectedAccounts.length > 0;
+  const lastSync = connectedAccounts[0]?.updatedAt
+    ? new Date(connectedAccounts[0].updatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    : null;
 
   return (
-    <div className={"rounded-2xl border transition-all " + (isConnected ? "border-border bg-card" : "border-border/50 bg-card/50")}>
+    <div className={[
+      "rounded-2xl border transition-all duration-200 overflow-hidden",
+      isConnected ? "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm" : "border-border/40 bg-card/40 hover:bg-card/70 hover:border-border/70",
+    ].join(" ")}>
+      {/* Status stripe */}
+      {isConnected && <div className="h-0.5 bg-gradient-to-r from-emerald-400 to-emerald-500" />}
       {/* Platform header */}
       <div className="flex items-center gap-3 p-4">
-        <div className={"w-10 h-10 rounded-xl flex items-center justify-center shrink-0 " + platform.bgLight}>
+        <div className={"relative w-10 h-10 rounded-xl flex items-center justify-center shrink-0 " + platform.bgLight}>
           <PlatformIcon platform={platformId} className={"w-5 h-5 " + platform.textColor} />
+          {isConnected && (
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-foreground">{platform.name}</h3>
-            {isConnected && (
-              <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                <CheckCircle2 className="w-3 h-3" />
-                Connected
-              </span>
+            {isConnected ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold">Active</span>
+            ) : (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">Not connected</span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate">{platform.description}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {isConnected && lastSync ? `Last sync: ${lastSync}` : platform.description}
+          </p>
         </div>
-        {!isConnected && (
+        {isConnected ? (
+          <button
+            onClick={onConnect}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Reconnect
+          </button>
+        ) : (
           <button
             onClick={onConnect}
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"

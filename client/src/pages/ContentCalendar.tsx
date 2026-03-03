@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type ViewMode = "month" | "week";
+type ViewMode = "month" | "week" | "list";
 
 interface CalendarPost {
   id: number;
@@ -555,7 +555,13 @@ export default function ContentCalendar() {
                 onClick={() => setViewMode("week")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === "week" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <List className="w-3.5 h-3.5" /> Week
+                <Calendar className="w-3.5 h-3.5" /> Week
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === "list" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <List className="w-3.5 h-3.5" /> List
               </button>
             </div>
             {/* New post button */}
@@ -602,13 +608,54 @@ export default function ContentCalendar() {
               onDayClick={date => setCreateDate(date)}
               onPostClick={post => setSelectedPost(post)}
             />
-          ) : (
+          ) : viewMode === "week" ? (
             <WeekView
               weekStart={weekStart}
               posts={posts}
               onDayClick={date => setCreateDate(date)}
               onPostClick={post => setSelectedPost(post)}
             />
+          ) : (
+            /* List View — all posts sorted by date */
+            <div className="space-y-2 min-h-[200px]">
+              {posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <List className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No posts this period</p>
+                  <button onClick={() => setCreateDate(today)} className="mt-3 text-xs text-primary hover:underline">Create your first post</button>
+                </div>
+              ) : (
+                [...posts]
+                  .sort((a, b) => {
+                    const da = a.scheduledAt ? new Date(a.scheduledAt).getTime() : 0;
+                    const db = b.scheduledAt ? new Date(b.scheduledAt).getTime() : 0;
+                    return da - db;
+                  })
+                  .map(post => {
+                    const style = STATUS_STYLES[post.status] ?? STATUS_STYLES.draft;
+                    const dt = post.scheduledAt ? new Date(post.scheduledAt) : null;
+                    return (
+                      <div
+                        key={post.id}
+                        onClick={() => setSelectedPost(post)}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors border border-border/40"
+                      >
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{post.title ?? post.content.slice(0, 60)}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {post.platforms.map(pid => (
+                              <PlatformIcon key={pid} platform={pid} className="w-3 h-3 text-muted-foreground" />
+                            ))}
+                            {dt && <span className="text-xs text-muted-foreground">{dt.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>}
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.bg} ${style.text} capitalize shrink-0`}>{post.status}</span>
+                      </div>
+                    );
+                  })
+              )}
+            </div>
           )}
         </div>
 
