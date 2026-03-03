@@ -7,7 +7,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getSupabase } from "../supabase";
-import { getAccountInsights } from "../meta";
+import { getAccountInsights } from "../services/integrations/meta";
 import { getUserAlertRules, createNotification } from "../db/settings";
 import { notifyOwner } from "../_core/notification";
 

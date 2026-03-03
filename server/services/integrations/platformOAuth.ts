@@ -4,10 +4,10 @@
 // If CLIENT_ID is missing, returns a friendly "not configured" page.
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
-import { getSupabase } from "./supabase";
+import { getSupabase } from "../../supabase";
 import { COOKIE_NAME } from "@shared/const";
 import * as jose from "jose";
-import { getUserByOpenId } from "./db/users";
+import { getUserByOpenId } from "../../db/users";
 
 // ─── OAuth configs per platform ────────────────────────────────────────────────
 interface OAuthConfig {

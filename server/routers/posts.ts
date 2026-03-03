@@ -5,10 +5,10 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserPosts, createPost, updatePostStatus, deletePost } from "../db/posts";
 import { getSupabase } from "../supabase";
-import { publishToInstagram, publishInstagramReel } from "../meta";
-import { postTweet } from "../twitter";
-import { postLinkedInShare, getLinkedInUser } from "../linkedin";
-import { createTikTokPost } from "../tiktok";
+import { publishToInstagram, publishInstagramReel } from "../services/integrations/meta";
+import { postTweet } from "../services/integrations/twitter";
+import { postLinkedInShare, getLinkedInUser } from "../services/integrations/linkedin";
+import { createTikTokPost } from "../services/integrations/tiktok";
 import { storagePut } from "../storage";
 
 // ─── Platform character limits ────────────────────────────────────────────────
@@ -254,7 +254,7 @@ export const postsRouter = router({
           }
 
           // For now, post as community post (text)
-          const { postYouTubeCommunityPost } = await import("../youtube");
+          const { postYouTubeCommunityPost } = await import("../services/integrations/youtube");
           const result = await postYouTubeCommunityPost(conn.access_token, content);
           resultId = result.postId;
           break;

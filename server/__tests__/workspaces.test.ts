@@ -3,10 +3,10 @@
 // Uses mocked Supabase to avoid real DB calls.
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TRPCError } from "@trpc/server";
-import type { TrpcContext } from "./_core/context";
+import type { TrpcContext } from "../_core/context";
 
 // ─── Mock Supabase ────────────────────────────────────────────────────────────
-vi.mock("./supabase", () => ({
+vi.mock("../supabase", () => ({
   getSupabase: () => ({
     from: (table: string) => ({
       select: () => ({
@@ -86,8 +86,8 @@ vi.mock("./supabase", () => ({
 }));
 
 // ─── Mock workspace DB helpers ────────────────────────────────────────────────
-vi.mock("./db/workspaces", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./db/workspaces")>();
+vi.mock("../db/workspaces", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../db/workspaces")>();
   return {
     ...actual,
     getUserWorkspaces: vi.fn().mockResolvedValue([
@@ -191,7 +191,7 @@ vi.mock("./db/workspaces", async (importOriginal) => {
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-import { appRouter } from "./routers";
+import { appRouter } from "../routers";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -349,7 +349,7 @@ describe("workspaces.upsertBrandProfile", () => {
 
 describe("generateSlug helper", () => {
   it("converts name to URL-safe slug", async () => {
-    const { generateSlug } = await import("./db/workspaces");
+    const { generateSlug } = await import("../db/workspaces");
     expect(generateSlug("My Awesome Company!")).toBe("my-awesome-company");
     expect(generateSlug("  Test  Workspace  ")).toBe("test-workspace");
     expect(generateSlug("Hello World 123")).toBe("hello-world-123");

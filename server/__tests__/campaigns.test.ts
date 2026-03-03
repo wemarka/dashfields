@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the db module
-vi.mock("./db", () => ({
+vi.mock("../db", () => ({
   getUserCampaigns: vi.fn().mockResolvedValue([
     {
       id: 1,
@@ -21,14 +21,14 @@ vi.mock("./db", () => ({
 
 describe("Campaign DB helpers", () => {
   it("getUserCampaigns returns array", async () => {
-    const { getUserCampaigns } = await import("./db");
+    const { getUserCampaigns } = await import("../db");
     const result = await getUserCampaigns(1);
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
 
   it("createCampaign resolves without error", async () => {
-    const { createCampaign } = await import("./db");
+    const { createCampaign } = await import("../db");
     const result = await createCampaign({
       userId: 1,
       name: "New Campaign",
@@ -39,13 +39,13 @@ describe("Campaign DB helpers", () => {
   });
 
   it("updateCampaignStatus resolves without error", async () => {
-    const { updateCampaignStatus } = await import("./db");
+    const { updateCampaignStatus } = await import("../db");
     const result = await updateCampaignStatus(1, 1, "paused");
     expect(result).toBeDefined();
   });
 
   it("getCampaignMetrics returns array", async () => {
-    const { getCampaignMetrics } = await import("./db");
+    const { getCampaignMetrics } = await import("../db");
     const result = await getCampaignMetrics(1, 7);
     expect(Array.isArray(result)).toBe(true);
   });

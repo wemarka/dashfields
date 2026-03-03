@@ -1121,3 +1121,10 @@
 - [x] تحويل /meta-connect إلى redirect لـ /connections
 - [x] تحديث ActiveCampaignsTable: رابط Connect يوجه إلى /connections
 - [x] التأكد أن جميع الصفحات تعرض بيانات حقيقية فقط (صفر أو empty state عند عدم وجود بيانات)
+
+## Refactoring Phase 1 — Backend (Feature-Based Architecture)
+- [x] إنشاء server/services/integrations/ و server/__tests__/
+- [x] نقل ملفات integrations (meta, metaOAuth, platformOAuth, tiktok, linkedin, youtube, twitter)
+- [x] نقل جميع .test.ts إلى server/__tests__/
+- [x] تحديث جميع import paths في routers/ و _core/ و cron.ts
+- [x] تشغيل الاختبارات: 292/292 passing ✅

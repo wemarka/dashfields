@@ -1,7 +1,7 @@
 // platforms.test.ts
 // Tests for multi-platform unified insights router and shared/platforms config.
 import { describe, it, expect } from "vitest";
-import { PLATFORMS, getPlatform, type PlatformId } from "../shared/platforms";
+import { PLATFORMS, getPlatform, type PlatformId } from "../../shared/platforms";
 
 // ── PLATFORMS config tests ────────────────────────────────────────────────────
 describe("PLATFORMS config", () => {

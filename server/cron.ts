@@ -4,7 +4,7 @@
 // All state is persisted in Supabase (scheduled_reports, notifications tables).
 import { getSupabase } from "./supabase";
 import { notifyOwner } from "./_core/notification";
-import { publishToInstagram } from "./meta";
+import { publishToInstagram } from "./services/integrations/meta";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface ReportRow {

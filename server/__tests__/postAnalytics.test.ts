@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Supabase
-vi.mock("./supabase", () => ({
+vi.mock("../supabase", () => ({
   getSupabase: () => ({
     from: (table: string) => ({
       select: () => ({

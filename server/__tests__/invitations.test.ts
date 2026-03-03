@@ -19,11 +19,11 @@ const supabaseMock = {
   single: vi.fn().mockResolvedValue({ data: null, error: null }),
 };
 
-vi.mock("./supabase", () => ({
+vi.mock("../supabase", () => ({
   getSupabase: () => supabaseMock,
 }));
 
-vi.mock("./db/workspaces", () => ({
+vi.mock("../db/workspaces", () => ({
   getWorkspaceById: vi.fn().mockResolvedValue({
     id: 1,
     name: "Test Workspace",
@@ -41,14 +41,14 @@ vi.mock("./db/workspaces", () => ({
 
 describe("generateInviteToken", () => {
   it("should generate a 64-character hex token", async () => {
-    const { generateInviteToken } = await import("./db/invitations");
+    const { generateInviteToken } = await import("../db/invitations");
     const token = generateInviteToken();
     expect(token).toHaveLength(64);
     expect(/^[a-f0-9]+$/.test(token)).toBe(true);
   });
 
   it("should generate unique tokens", async () => {
-    const { generateInviteToken } = await import("./db/invitations");
+    const { generateInviteToken } = await import("../db/invitations");
     const tokens = new Set(Array.from({ length: 100 }, () => generateInviteToken()));
     expect(tokens.size).toBe(100);
   });
@@ -85,7 +85,7 @@ describe("Invitation DB helpers", () => {
 
     supabaseMock.maybeSingle.mockResolvedValueOnce({ data: mockInvitation, error: null });
 
-    const { createInvitation } = await import("./db/invitations");
+    const { createInvitation } = await import("../db/invitations");
     const result = await createInvitation({
       workspaceId: 1,
       invitedBy: 1,
@@ -101,7 +101,7 @@ describe("Invitation DB helpers", () => {
   it("getInvitationByToken: should query by token", async () => {
     supabaseMock.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
 
-    const { getInvitationByToken } = await import("./db/invitations");
+    const { getInvitationByToken } = await import("../db/invitations");
     const result = await getInvitationByToken("sometoken");
 
     expect(supabaseMock.from).toHaveBeenCalledWith("workspace_invitations");
@@ -111,7 +111,7 @@ describe("Invitation DB helpers", () => {
   it("getWorkspaceInvitations: should query by workspace_id", async () => {
     supabaseMock.order.mockResolvedValueOnce({ data: [], error: null });
 
-    const { getWorkspaceInvitations } = await import("./db/invitations");
+    const { getWorkspaceInvitations } = await import("../db/invitations");
     const result = await getWorkspaceInvitations(1);
 
     expect(supabaseMock.from).toHaveBeenCalledWith("workspace_invitations");
@@ -125,7 +125,7 @@ describe("Invitation DB helpers", () => {
       .mockReturnValueOnce(supabaseMock)  // first .eq() returns chain
       .mockResolvedValueOnce({ data: null, error: null }); // second .eq() resolves
 
-    const { revokeInvitation } = await import("./db/invitations");
+    const { revokeInvitation } = await import("../db/invitations");
     await expect(revokeInvitation(1, 1)).resolves.not.toThrow();
   });
 });
@@ -146,7 +146,7 @@ describe("acceptInvitation edge cases", () => {
   it("should return null if invitation not found", async () => {
     supabaseMock.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
 
-    const { acceptInvitation } = await import("./db/invitations");
+    const { acceptInvitation } = await import("../db/invitations");
     const result = await acceptInvitation("nonexistent-token", 1);
     expect(result).toBeNull();
   });
@@ -169,7 +169,7 @@ describe("acceptInvitation edge cases", () => {
       error: null,
     });
 
-    const { acceptInvitation } = await import("./db/invitations");
+    const { acceptInvitation } = await import("../db/invitations");
     await expect(acceptInvitation("abc", 2)).rejects.toThrow("no longer valid");
   });
 
@@ -194,7 +194,7 @@ describe("acceptInvitation edge cases", () => {
     // Mock the update chain for marking as expired: from().update().eq()
     supabaseMock.eq.mockResolvedValueOnce({ data: null, error: null });
 
-    const { acceptInvitation } = await import("./db/invitations");
+    const { acceptInvitation } = await import("../db/invitations");
     // The function first calls getInvitationByToken (maybeSingle above),
     // then tries to update status to 'expired', then throws
     // Since mock chain may fail on second .eq(), we just verify it rejects
@@ -204,7 +204,7 @@ describe("acceptInvitation edge cases", () => {
 
 describe("Invitation token security", () => {
   it("token should be at least 32 bytes of entropy", async () => {
-    const { generateInviteToken } = await import("./db/invitations");
+    const { generateInviteToken } = await import("../db/invitations");
     // 64 hex chars = 32 bytes = 256 bits of entropy
     const token = generateInviteToken();
     expect(token.length).toBeGreaterThanOrEqual(64);
@@ -213,7 +213,7 @@ describe("Invitation token security", () => {
   it("email should be normalized to lowercase", async () => {
     supabaseMock.maybeSingle.mockResolvedValue({ data: null, error: null });
 
-    const { createInvitation } = await import("./db/invitations");
+    const { createInvitation } = await import("../db/invitations");
     // Should not throw even with uppercase email
     await createInvitation({
       workspaceId: 1,

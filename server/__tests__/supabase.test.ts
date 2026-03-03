@@ -1,7 +1,7 @@
 // server/supabase.test.ts
 // Validates Supabase connection and basic CRUD operations.
 import { describe, it, expect, beforeAll } from "vitest";
-import { getSupabase } from "./supabase";
+import { getSupabase } from "../supabase";
 
 describe("Supabase connection", () => {
   let sb: ReturnType<typeof getSupabase>;

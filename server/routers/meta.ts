@@ -15,7 +15,7 @@ import {
   createMetaCampaign,
   updateMetaCampaignStatus,
   updateMetaCampaignBudget,
-} from "../meta";
+} from "../services/integrations/meta";
 
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
 async function getMetaToken(

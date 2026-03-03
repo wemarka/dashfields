@@ -1,7 +1,7 @@
 // connections.test.ts
 // Tests for multi-platform connection management logic.
 import { describe, it, expect } from "vitest";
-import { PLATFORMS } from "../shared/platforms";
+import { PLATFORMS } from "../../shared/platforms";
 
 // ── Connection status logic ───────────────────────────────────────────────────
 describe("Connection status logic", () => {

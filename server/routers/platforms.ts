@@ -6,7 +6,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserSocialAccounts } from "../db/social";
-import { getAccountInsights } from "../meta";
+import { getAccountInsights } from "../services/integrations/meta";
 import { getSupabase } from "../supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

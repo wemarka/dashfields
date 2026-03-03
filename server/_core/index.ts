@@ -4,12 +4,12 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-import { registerMetaOAuthRoutes } from "../metaOAuth";
+import { registerMetaOAuthRoutes } from "../services/integrations/metaOAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startCron } from "../cron";
-import { registerPlatformOAuthRoutes } from "../platformOAuth";
+import { registerPlatformOAuthRoutes } from "../services/integrations/platformOAuth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {

@@ -25,7 +25,7 @@ const mockSettings = {
   updated_at: new Date().toISOString(),
 };
 
-vi.mock("./supabase", () => ({
+vi.mock("../supabase", () => ({
   getSupabase: () => ({
     from: (table: string) => ({
       select: () => ({
@@ -72,7 +72,7 @@ import {
   createNotification,
   markNotificationRead,
   markAllNotificationsRead,
-} from "./db/settings";
+} from "../db/settings";
 
 describe("getUserNotifications", () => {
   it("returns array of notifications for user", async () => {
@@ -120,7 +120,7 @@ describe("markAllNotificationsRead", () => {
 });
 
 // ─── Settings DB helpers ──────────────────────────────────────────────────────
-import { getUserSettings, upsertUserSettings } from "./db/settings";
+import { getUserSettings, upsertUserSettings } from "../db/settings";
 
 describe("getUserSettings", () => {
   it("returns settings for user", async () => {
