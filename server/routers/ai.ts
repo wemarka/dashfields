@@ -3,6 +3,34 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { invokeLLM, type ResponseFormat } from "../_core/llm";
+import { getWorkspaceById, getBrandProfile } from "../db/workspaces";
+
+// ─── Brand-Aware System Prompt Builder ───────────────────────────────────────
+async function buildBrandContext(workspaceId?: number | null): Promise<string> {
+  if (!workspaceId) return "";
+  try {
+    const [ws, brand] = await Promise.all([
+      getWorkspaceById(workspaceId),
+      getBrandProfile(workspaceId),
+    ]);
+    const parts: string[] = [];
+    if (ws?.brand_guidelines) parts.push(`Brand Guidelines:\n${ws.brand_guidelines}`);
+    if (brand) {
+      if (brand.brand_name) parts.push(`Brand Name: ${brand.brand_name}`);
+      if (brand.brand_desc) parts.push(`Brand Description: ${brand.brand_desc}`);
+      if (brand.tone) parts.push(`Tone of Voice: ${brand.tone}`);
+      if (brand.industry) parts.push(`Industry: ${brand.industry}`);
+      if (brand.language) parts.push(`Primary Language: ${brand.language}`);
+      if (brand.keywords?.length) parts.push(`Keywords to use: ${brand.keywords.join(", ")}`);
+      if (brand.avoid_words?.length) parts.push(`Words to AVOID: ${brand.avoid_words.join(", ")}`);
+      if (brand.example_posts?.length) parts.push(`Example posts:\n${brand.example_posts.join("\n---\n")}`);
+    }
+    if (parts.length === 0) return "";
+    return `\n\n--- BRAND CONTEXT (follow strictly) ---\n${parts.join("\n")}\n--- END BRAND CONTEXT ---`;
+  } catch {
+    return "";
+  }
+}
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   copy: `You are an expert Meta Ads copywriter. Generate compelling, conversion-focused ad copy.
@@ -42,11 +70,14 @@ const PLATFORM_TONE: Record<string, string> = {
 export const aiRouter = router({
   generate: protectedProcedure
     .input(z.object({
-      prompt: z.string().min(1),
-      tool:   z.enum(["copy", "audience", "creative", "strategy", "hashtags", "caption"]),
+      prompt:      z.string().min(1),
+      tool:        z.enum(["copy", "audience", "creative", "strategy", "hashtags", "caption"]),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ input }) => {
-      const systemPrompt = SYSTEM_PROMPTS[input.tool] ?? SYSTEM_PROMPTS.copy;
+      const brandCtx = await buildBrandContext(input.workspaceId);
+      const basePrompt = SYSTEM_PROMPTS[input.tool] ?? SYSTEM_PROMPTS.copy;
+      const systemPrompt = basePrompt + brandCtx;
       const response = await invokeLLM({
         messages: [
           { role: "system", content: systemPrompt },
@@ -61,22 +92,23 @@ export const aiRouter = router({
   /** Generate a platform-aware caption for a post */
   generateCaption: protectedProcedure
     .input(z.object({
-      topic:     z.string().min(1).max(500),
-      platform:  z.string().default("facebook"),
-      tone:      z.enum(["professional", "casual", "humorous", "inspirational"]).default("casual"),
-      language:  z.enum(["en", "ar"]).default("en"),
+      topic:       z.string().min(1).max(500),
+      platform:    z.string().default("facebook"),
+      tone:        z.enum(["professional", "casual", "humorous", "inspirational"]).default("casual"),
+      language:    z.enum(["en", "ar"]).default("en"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ input }) => {
       const platformTone = PLATFORM_TONE[input.platform] ?? PLATFORM_TONE.facebook;
       const langInstruction = input.language === "ar"
         ? "Write the caption in Arabic (العربية)."
         : "Write the caption in English.";
-
+      const brandCtx = await buildBrandContext(input.workspaceId);
       const systemPrompt = `You are an expert social media content writer.
 ${platformTone}
 Tone: ${input.tone}.
 ${langInstruction}
-Return ONLY the caption text, no extra explanation.`;
+Return ONLY the caption text, no extra explanation.${brandCtx}`;
 
       const response = await invokeLLM({
         messages: [
@@ -93,17 +125,19 @@ Return ONLY the caption text, no extra explanation.`;
   /** Generate hashtag suggestions for a post */
   generateHashtags: protectedProcedure
     .input(z.object({
-      topic:    z.string().min(1).max(500),
-      platform: z.string().default("instagram"),
-      count:    z.number().int().min(5).max(30).default(15),
+      topic:       z.string().min(1).max(500),
+      platform:    z.string().default("instagram"),
+      count:       z.number().int().min(5).max(30).default(15),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ input }) => {
+      const brandCtx = await buildBrandContext(input.workspaceId);
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a social media hashtag expert. Generate exactly ${input.count} relevant hashtags for ${input.platform}.
-Return ONLY the hashtags as a space-separated list, each starting with #. No explanations.`,
+Return ONLY the hashtags as a space-separated list, each starting with #. No explanations.${brandCtx}`,
           },
           {
             role: "user",
@@ -172,9 +206,10 @@ Keep it concise and practical.`,
   /** Improve existing post content */
   improveContent: protectedProcedure
     .input(z.object({
-      content:  z.string().min(1).max(2000),
-      platform: z.string().default("facebook"),
-      goal:     z.enum(["engagement", "clarity", "shorter", "longer", "professional"]).default("engagement"),
+      content:     z.string().min(1).max(2000),
+      platform:    z.string().default("facebook"),
+      goal:        z.enum(["engagement", "clarity", "shorter", "longer", "professional"]).default("engagement"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ input }) => {
       const goalMap: Record<string, string> = {
@@ -185,12 +220,13 @@ Keep it concise and practical.`,
         professional: "Rewrite in a more professional tone.",
       };
 
+      const brandCtx = await buildBrandContext(input.workspaceId);
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a social media content editor. ${goalMap[input.goal]}
-Platform: ${input.platform}. Return ONLY the improved text, no explanation.`,
+Platform: ${input.platform}. Return ONLY the improved text, no explanation.${brandCtx}`,
           },
           { role: "user", content: input.content },
         ],
@@ -338,18 +374,19 @@ Target Region: ${input.targetRegion}`,
       goals:       z.array(z.string()).default(["engagement", "brand awareness"]),
       weekCount:   z.number().int().min(1).max(4).default(1),
       language:    z.enum(["en", "ar"]).default("en"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ input }) => {
       const langInstruction = input.language === "ar"
         ? "Write all content ideas in Arabic (العربية)."
         : "Write all content ideas in English.";
-
+      const brandCtx = await buildBrandContext(input.workspaceId);
       const response = await invokeLLM({
         messages: [
           {
             role: "system",
             content: `You are a professional social media content strategist.
-${langInstruction}
+${langInstruction}${brandCtx}
 Create a detailed content calendar plan. Return a JSON object:
 {
   "weeks": [

@@ -17,6 +17,8 @@ import {
   upsertBrandProfile,
   isSlugAvailable,
   generateSlug,
+  logWorkspaceActivity,
+  getWorkspaceActivity,
 } from "../db/workspaces";
 import { getSupabase } from "../supabase";
 import { storagePut } from "../storage";
@@ -32,6 +34,7 @@ const updateWorkspaceInput = z.object({
   workspaceId: z.number().int().positive(),
   name: z.string().min(2).max(128).optional(),
   logoUrl: z.string().url().nullable().optional(),
+  brandGuidelines: z.string().max(5000).nullable().optional(),
 });
 
 const memberRoleSchema = z.enum(["owner", "admin", "member", "viewer"]);
@@ -89,10 +92,22 @@ export const workspacesRouter = router({
   update: workspaceAdminProcedure
     .input(updateWorkspaceInput)
     .mutation(async ({ ctx, input }) => {
-      return updateWorkspace(ctx.workspaceId, {
+      const updated = await updateWorkspace(ctx.workspaceId, {
         name: input.name,
         logoUrl: input.logoUrl,
+        brandGuidelines: input.brandGuidelines,
       });
+      await logWorkspaceActivity(ctx.workspaceId, ctx.user.id, "workspace.updated", {
+        fields: Object.keys(input).filter(k => k !== "workspaceId" && input[k as keyof typeof input] !== undefined),
+      });
+      return updated;
+    }),
+
+  /** Get workspace activity log (admin/owner only) */
+  activityLog: workspaceAdminProcedure
+    .input(z.object({ workspaceId: z.number().int().positive(), limit: z.number().int().min(1).max(200).optional() }))
+    .query(async ({ ctx, input }) => {
+      return getWorkspaceActivity(ctx.workspaceId, input.limit ?? 50);
     }),
 
   /** Delete workspace (owner only) */
@@ -186,12 +201,18 @@ export const workspacesRouter = router({
       language: z.string().max(8).optional(),
       brandName: z.string().max(128).optional(),
       brandDesc: z.string().optional(),
+      brandGuidelines: z.string().max(2000).optional(),
       keywords: z.array(z.string()).max(20).optional(),
       avoidWords: z.array(z.string()).max(20).optional(),
       examplePosts: z.array(z.string()).max(5).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { workspaceId: _wid, ...updates } = input;
+      const { workspaceId: _wid, brandGuidelines, ...updates } = input;
+      // Save brandGuidelines to workspaces.brand_guidelines (workspace-level field)
+      if (brandGuidelines !== undefined) {
+        await updateWorkspace(ctx.workspaceId, { brandGuidelines: brandGuidelines || null });
+      }
+      // Save other brand profile fields to brand_profiles table
       const dbUpdates: Record<string, unknown> = {};
       if (updates.industry !== undefined) dbUpdates.industry = updates.industry;
       if (updates.tone !== undefined) dbUpdates.tone = updates.tone;

@@ -78,6 +78,13 @@
       "when": 1772567382488,
       "tag": "0010_known_loa",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1772575180147,
+      "tag": "0011_mean_leopardon",
+      "breakpoints": true
     }
   ]
 }

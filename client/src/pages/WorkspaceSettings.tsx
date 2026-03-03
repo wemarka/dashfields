@@ -642,6 +642,7 @@ function BrandProfileTab() {
   const [industry, setIndustry] = useState(profile?.industry ?? "");
   const [brandName, setBrandName] = useState(profile?.brand_name ?? "");
   const [brandDesc, setBrandDesc] = useState(profile?.brand_desc ?? "");
+  const [brandGuidelines, setBrandGuidelines] = useState((profile as { brand_guidelines?: string } | undefined)?.brand_guidelines ?? "");
   const [keywords, setKeywords] = useState<string[]>(profile?.keywords ?? []);
   const [avoidWords, setAvoidWords] = useState<string[]>(profile?.avoid_words ?? []);
   const [newKeyword, setNewKeyword] = useState("");
@@ -684,6 +685,7 @@ function BrandProfileTab() {
       industry: industry || undefined,
       brandName: brandName || undefined,
       brandDesc: brandDesc || undefined,
+      brandGuidelines: brandGuidelines || undefined,
       keywords,
       avoidWords,
     });
@@ -836,6 +838,26 @@ function BrandProfileTab() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Brand Guidelines */}
+        <div className="space-y-1.5">
+          <label className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-brand" />
+            Brand Guidelines
+          </label>
+          <p className="text-xs text-muted-foreground/70">
+            Describe your brand voice, writing rules, and any instructions the AI must follow when generating content.
+          </p>
+          <textarea
+            value={brandGuidelines}
+            onChange={(e) => setBrandGuidelines(e.target.value.slice(0, 2000))}
+            disabled={!canAdmin}
+            placeholder={`e.g.\n- Always write in a friendly, conversational tone\n- Never use the word 'cheap' or 'discount'\n- Use short sentences and bullet points\n- Target audience: young professionals aged 25-35\n- Always end posts with a call-to-action`}
+            rows={6}
+            className="w-full px-3 py-2 rounded-xl bg-background border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:opacity-60 resize-none leading-relaxed"
+          />
+          <p className="text-[11px] text-muted-foreground/50 text-right">{brandGuidelines.length}/2000</p>
         </div>
 
         {canAdmin && (

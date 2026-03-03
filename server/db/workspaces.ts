@@ -15,6 +15,7 @@ export interface Workspace {
   logo_url: string | null;
   plan: WorkspacePlan;
   created_by: number;
+  brand_guidelines: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -137,13 +138,14 @@ export async function createWorkspace(params: {
 /** Update workspace details */
 export async function updateWorkspace(
   id: number,
-  updates: { name?: string; logoUrl?: string | null; plan?: WorkspacePlan }
+  updates: { name?: string; logoUrl?: string | null; plan?: WorkspacePlan; brandGuidelines?: string | null }
 ): Promise<Workspace> {
   const sb = getSupabase();
   const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.name !== undefined) payload.name = updates.name;
   if (updates.logoUrl !== undefined) payload.logo_url = updates.logoUrl;
   if (updates.plan !== undefined) payload.plan = updates.plan;
+  if (updates.brandGuidelines !== undefined) payload.brand_guidelines = updates.brandGuidelines;
 
   const { data, error } = await sb
     .from("workspaces")
@@ -246,6 +248,50 @@ export async function upsertBrandProfile(
 
   if (error) throw new Error(`[DB] upsertBrandProfile: ${error.message}`);
   return data as BrandProfile;
+}
+
+// ─── Activity Log Queries ────────────────────────────────────────────────────
+
+export interface WorkspaceActivity {
+  id: number;
+  workspace_id: number;
+  user_id: number | null;
+  action: string;
+  metadata: string | null;
+  created_at: string;
+}
+
+/** Log a workspace activity event */
+export async function logWorkspaceActivity(
+  workspaceId: number,
+  userId: number | null,
+  action: string,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  const sb = getSupabase();
+  const { error } = await sb.from("workspace_activity").insert({
+    workspace_id: workspaceId,
+    user_id: userId,
+    action,
+    metadata: metadata ? JSON.stringify(metadata) : null,
+  });
+  if (error) console.warn(`[DB] logWorkspaceActivity: ${error.message}`);
+}
+
+/** Get activity log for a workspace (latest 50) */
+export async function getWorkspaceActivity(
+  workspaceId: number,
+  limit = 50
+): Promise<WorkspaceActivity[]> {
+  const sb = getSupabase();
+  const { data, error } = await sb
+    .from("workspace_activity")
+    .select("*, users(id, name, email)")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`[DB] getWorkspaceActivity: ${error.message}`);
+  return (data ?? []) as WorkspaceActivity[];
 }
 
 /** Generate a URL-safe slug from a name */

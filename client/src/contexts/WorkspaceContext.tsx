@@ -79,10 +79,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
   }, [workspaces, activeWorkspaceId]);
 
+  const utils = trpc.useUtils();
   const setActiveWorkspace = useCallback((id: number) => {
     setActiveWorkspaceIdState(id);
     localStorage.setItem(LS_KEY, String(id));
-  }, []);
+    // Invalidate all cached queries when switching workspace
+    // This prevents data leakage between workspaces in the UI
+    utils.invalidate();
+  }, [utils]);
 
   const activeWorkspace = useMemo(
     () => workspaces.find((w) => w.id === activeWorkspaceId) ?? null,

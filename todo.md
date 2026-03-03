@@ -1048,3 +1048,50 @@
 - [x] TypeScript check (0 errors)
 - [x] 292/292 اختبار ناجح
 - [x] Checkpoint نهائي
+
+## 🔄 Phase — Billing + Activity Log + Date Range Picker
+
+### Phase A — Workspace Billing
+- [ ] صفحة Billing.tsx — مقارنة Free/Pro/Enterprise مع feature list
+- [ ] Stripe integration — webdev_add_feature stripe
+- [ ] server/routers/billing.ts — createCheckoutSession + getSubscription + cancelSubscription
+- [ ] Billing tab في WorkspaceSettings أو route منفصل /billing
+- [ ] عرض الـ plan الحالي في Workspace Switcher
+
+### Phase B — Workspace Activity Log
+- [ ] جدول workspace_activity في Supabase (id, workspace_id, user_id, action, metadata, created_at)
+- [ ] server/db/activity.ts — logActivity + getWorkspaceActivity
+- [ ] تسجيل الأحداث: إضافة عضو، تغيير دور، نقل ملكية، تحديث إعدادات، رفع شعار
+- [ ] server/routers/activity.ts — list procedure
+- [ ] WorkspaceSettings: tab جديد "Activity" مع timeline
+
+### Phase C — Custom Date Range Picker
+- [ ] DateRangeContext عالمي (startDate, endDate, preset: 7d/30d/90d/custom)
+- [ ] DateRangePicker component في Topbar
+- [ ] تطبيق dateRange على: Home.tsx, Analytics.tsx, Campaigns.tsx, Reports.tsx
+- [ ] حفظ التفضيل في localStorage
+
+### Phase D — اختبارات + Checkpoint
+- [ ] TypeScript check (0 errors)
+- [ ] All tests passing (292+)
+- [ ] Checkpoint نهائي
+
+## ✅ Phase — Brand-Aware AI
+
+### Step 3 — Backend
+- [x] drizzle/schema.ts: إضافة brandGuidelines (text) لجدول workspaces
+- [x] Supabase SQL migration — تم تشغيله يدوياً في SQL Editor
+- [x] server/db/workspaces.ts: إضافة brandGuidelines في getWorkspaceById + updateWorkspace
+- [x] server/routers/workspaces.ts: قبول brandGuidelines في update + upsertBrandProfile procedures
+- [x] server/routers/ai.ts: buildBrandContext() يدمج brandGuidelines + brandProfile في System Prompt
+- [x] تطبيق brand-aware context على: generate, generateCaption, generateHashtags, improveContent, contentCalendarPlan
+- [x] التحقق من auto-create workspace في oauth.ts ✔
+
+### Step 4 — Frontend
+- [x] WorkspaceSettings.tsx: Textarea كبير لـ Brand Guidelines في Brand Profile tab (2000 حرف max)
+- [x] WorkspaceContext.tsx: utils.invalidate() عند تغيير الـ workspace — يمنع تسرب البيانات
+
+### Step 5 — QA
+- [x] TypeScript check (0 errors)
+- [x] 292/292 اختبار ناجح
+- [x] Checkpoint نهائي

@@ -44,8 +44,9 @@ export const workspaces = pgTable("workspaces", {
   name:        varchar("name", { length: 128 }).notNull(),
   slug:        varchar("slug", { length: 64 }).notNull().unique(),
   logoUrl:     text("logo_url"),
-  plan:        workspacePlanEnum("plan").default("free").notNull(),
-  createdBy:   integer("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  plan:            workspacePlanEnum("plan").default("free").notNull(),
+  brandGuidelines: text("brand_guidelines"),
+  createdBy:       integer("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
   createdAt:   timestamp("created_at").defaultNow().notNull(),
   updatedAt:   timestamp("updated_at").defaultNow().notNull(),
 });
