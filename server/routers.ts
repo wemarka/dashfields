@@ -29,6 +29,7 @@ import { periodComparisonRouter } from "./routers/periodComparison";
 import { aiContentRouter }    from "./routers/aiContent";
 import { apiKeysRouter }      from "./routers/apiKeys";
 import { hashtagsRouter }     from "./routers/hashtags";
+import { competitorsRouter }  from "./routers/competitors";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -63,6 +64,7 @@ export const appRouter = router({
   aiContent:     aiContentRouter,
   apiKeys:       apiKeysRouter,
   hashtags:      hashtagsRouter,
+  competitors:   competitorsRouter,
 });
 
 export type AppRouter = typeof appRouter;

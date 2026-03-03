@@ -7,7 +7,7 @@ import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
   TrendingUp, Link2, Globe2, FileText, Users, Wand2,
-  PieChart, GitCompare, Zap, Sun, Moon, User, Hash,
+  PieChart, GitCompare, Zap, Sun, Moon, User, Hash, Swords,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -57,6 +57,7 @@ const navGroups = [
       { icon: PieChart,    label: "Post Analytics",  path: "/post-analytics" },
       { icon: GitCompare,  label: "Compare",         path: "/compare" },
       { icon: Hash,        label: "Hashtags",         path: "/hashtags" },
+      { icon: Swords,      label: "Competitors",      path: "/competitors" },
     ],
   },
   {

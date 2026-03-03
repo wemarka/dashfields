@@ -1,13 +1,14 @@
 /**
  * server/routers/export.ts
- * Export analytics data as CSV or generate a branded PDF report summary.
- * CSV is generated server-side as a string; PDF uses a simple HTML template
- * rendered to a buffer via the built-in html-to-text approach.
+ * Export analytics data as CSV or generate a branded HTML report.
+ * All data comes from real Supabase tables (campaigns + campaign_metrics).
+ * Falls back to zero-values (never random) when no data is available.
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getUserSocialAccounts } from "../db/social";
 import { getAccountInsights } from "../meta";
+import { getSupabase } from "../supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface PlatformRow {
@@ -34,34 +35,114 @@ const DATE_PRESET_LABELS: Record<string, string> = {
   last_month:  "Last Month",
 };
 
-// ─── Mock data helper (mirrors platforms.ts) ─────────────────────────────────
-function mockRow(platform: string, accountName: string): PlatformRow {
-  const seed = platform.charCodeAt(0) + platform.charCodeAt(1);
-  const impressions = 10000 + seed * 500;
-  const clicks      = Math.round(impressions * (0.02 + (seed % 5) * 0.005));
-  const spend       = parseFloat((clicks * (0.5 + (seed % 10) * 0.1)).toFixed(2));
-  const engagements = Math.round(impressions * 0.04);
+// ─── Date range helper ────────────────────────────────────────────────────────
+function getDateRange(preset: string): { since: string; until: string } {
+  const now = new Date();
+  const until = now.toISOString().split("T")[0];
+  const since = new Date(now);
+  switch (preset) {
+    case "today":      since.setDate(since.getDate()); break;
+    case "yesterday":  since.setDate(since.getDate() - 1); break;
+    case "last_7d":    since.setDate(since.getDate() - 7); break;
+    case "this_month": since.setDate(1); break;
+    case "last_month":
+      since.setMonth(since.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { since: since.toISOString().split("T")[0], until: lastDay.toISOString().split("T")[0] };
+    default: since.setDate(since.getDate() - 30); // last_30d
+  }
+  return { since: since.toISOString().split("T")[0], until };
+}
+
+// ─── Real DB data for a platform ─────────────────────────────────────────────
+async function getDbRow(
+  userId: number,
+  platform: string,
+  accountName: string,
+  since: string,
+  until: string
+): Promise<PlatformRow> {
+  const sb = getSupabase();
+
+  const { data: campaigns } = await sb
+    .from("campaigns")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("platform", platform);
+
+  const campaignIds = (campaigns ?? []).map((c: { id: number }) => c.id);
+
+  if (campaignIds.length === 0) {
+    // No campaigns — check posts for engagement data
+    const { data: posts } = await sb
+      .from("posts")
+      .select("likes, comments, shares, reach, impressions")
+      .eq("user_id", userId)
+      .eq("status", "published")
+      .gte("published_at", since)
+      .lte("published_at", until + "T23:59:59");
+
+    const postList = posts ?? [];
+    const totalLikes    = postList.reduce((s, p) => s + (p.likes ?? 0), 0);
+    const totalComments = postList.reduce((s, p) => s + (p.comments ?? 0), 0);
+    const totalShares   = postList.reduce((s, p) => s + (p.shares ?? 0), 0);
+    const totalReach    = postList.reduce((s, p) => s + (p.reach ?? 0), 0);
+    const totalImpressions = postList.reduce((s, p) => s + (p.impressions ?? 0), 0);
+
+    return {
+      platform,
+      accountName,
+      impressions: totalImpressions,
+      reach: totalReach,
+      clicks: 0,
+      spend: 0,
+      ctr: 0,
+      cpc: 0,
+      cpm: 0,
+      engagements: totalLikes + totalComments + totalShares,
+      currency: "USD",
+      isLive: false,
+    };
+  }
+
+  const { data: metrics } = await sb
+    .from("campaign_metrics")
+    .select("impressions, clicks, spend, reach")
+    .in("campaign_id", campaignIds)
+    .gte("date", since)
+    .lte("date", until);
+
+  const rows = metrics ?? [];
+  const impressions = rows.reduce((s, r) => s + (r.impressions ?? 0), 0);
+  const clicks      = rows.reduce((s, r) => s + (r.clicks ?? 0), 0);
+  const spend       = rows.reduce((s, r) => s + Number(r.spend ?? 0), 0);
+  const reach       = rows.reduce((s, r) => s + (r.reach ?? 0), 0);
+  const spendRounded = Math.round(spend * 100) / 100;
+
   return {
     platform,
     accountName,
     impressions,
-    reach:       Math.round(impressions * 0.85),
+    reach,
     clicks,
-    spend,
-    ctr:         parseFloat((clicks / impressions * 100).toFixed(2)),
-    cpc:         clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
-    cpm:         impressions > 0 ? parseFloat((spend / impressions * 1000).toFixed(2)) : 0,
-    engagements,
-    currency:    "USD",
-    isLive:      false,
+    spend: spendRounded,
+    ctr: impressions > 0 ? Math.round((clicks / impressions) * 10000) / 100 : 0,
+    cpc: clicks > 0 ? Math.round((spendRounded / clicks) * 100) / 100 : 0,
+    cpm: impressions > 0 ? Math.round((spendRounded / impressions) * 100000) / 100 : 0,
+    engagements: clicks,
+    currency: "USD",
+    isLive: false,
   };
 }
 
-// ─── Gather data (reuses platforms logic) ────────────────────────────────────
+// ─── Gather data (real Supabase + Meta API) ───────────────────────────────────
 async function gatherData(userId: number, datePreset: string): Promise<PlatformRow[]> {
   const accounts = await getUserSocialAccounts(userId);
   if (accounts.length === 0) return [];
+
+  const { since, until } = getDateRange(datePreset);
   const rows: PlatformRow[] = [];
+
   for (const acc of accounts) {
     try {
       if (acc.platform === "facebook" && acc.access_token && acc.platform_account_id) {
@@ -88,9 +169,12 @@ async function gatherData(userId: number, datePreset: string): Promise<PlatformR
           continue;
         }
       }
-      rows.push(mockRow(acc.platform, acc.display_name ?? acc.username ?? acc.platform));
+      // Real DB data for all other platforms
+      const row = await getDbRow(userId, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+      rows.push(row);
     } catch {
-      rows.push(mockRow(acc.platform, acc.display_name ?? acc.username ?? acc.platform));
+      const row = await getDbRow(userId, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+      rows.push(row);
     }
   }
   return rows;
@@ -115,7 +199,7 @@ function buildCsv(rows: PlatformRow[], datePreset: string): string {
       r.cpc.toFixed(2),
       r.cpm.toFixed(2),
       r.engagements,
-      r.isLive ? "Live API" : "Estimated",
+      r.isLive ? "Live API" : "Database",
     ].join(",")
   );
 
@@ -171,7 +255,7 @@ function buildHtmlReport(rows: PlatformRow[], datePreset: string, userName: stri
       <td>$${r.cpc.toFixed(2)}</td>
       <td>$${r.cpm.toFixed(2)}</td>
       <td>${r.engagements.toLocaleString()}</td>
-      <td><span style="color:${r.isLive ? "#16a34a" : "#9ca3af"}">${r.isLive ? "Live" : "Est."}</span></td>
+      <td><span style="color:${r.isLive ? "#16a34a" : "#6366f1"}">${r.isLive ? "Live API" : "Database"}</span></td>
     </tr>`
     )
     .join("");
@@ -199,6 +283,10 @@ function buildHtmlReport(rows: PlatformRow[], datePreset: string, userName: stri
   td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #374151; }
   tr:last-child td { border-bottom: none; }
   .footer { margin-top: 32px; font-size: 11px; color: #9ca3af; text-align: center; }
+  @media print {
+    body { padding: 20px; }
+    .footer { position: fixed; bottom: 0; width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -231,7 +319,7 @@ function buildHtmlReport(rows: PlatformRow[], datePreset: string, userName: stri
 
   <div class="footer">
     This report was generated by Dashfields — All your social media in one place.<br/>
-    Data marked "Est." is based on platform averages and should be used for reference only.
+    Data source: Supabase database (real campaign metrics).
   </div>
 </body>
 </html>`;
@@ -246,7 +334,7 @@ export const exportRouter = router({
   csv: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
-      platforms:  z.array(z.string()).optional(), // filter by platform(s)
+      platforms:  z.array(z.string()).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       let rows = await gatherData(ctx.user.id, input.datePreset);
@@ -285,11 +373,11 @@ export const exportRouter = router({
     .query(async ({ ctx, input }) => {
       const rows = await gatherData(ctx.user.id, input.datePreset);
       return {
-        rowCount:   rows.length,
-        platforms:  rows.map((r) => r.platform),
-        datePreset: input.datePreset,
-        label:      DATE_PRESET_LABELS[input.datePreset] ?? input.datePreset,
-        totalSpend: parseFloat(rows.reduce((s, r) => s + r.spend, 0).toFixed(2)),
+        rowCount:    rows.length,
+        platforms:   rows.map((r) => r.platform),
+        datePreset:  input.datePreset,
+        label:       DATE_PRESET_LABELS[input.datePreset] ?? input.datePreset,
+        totalSpend:  parseFloat(rows.reduce((s, r) => s + r.spend, 0).toFixed(2)),
         hasLiveData: rows.some((r) => r.isLive),
       };
     }),

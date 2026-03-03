@@ -295,50 +295,50 @@
 - [x] Tests passing (213/213)
 - [x] Checkpoint and deliver
 
-## 🔄 Phase 53-56 — Feature Completion Round 3
+## ✅ Phase 53-56 — Feature Completion Round 3 (Complete)
 
 ### Phase 53 — Analytics Merge + Dark Mode
-- [ ] Merge Insights page content into Analytics as a Tab
-- [ ] Add Dark Mode toggle button in Topbar
-- [ ] Update sidebar to remove standalone Insights entry (now under Analytics)
+- [x] Merge Insights page content into Analytics as a Tab
+- [x] Add Dark Mode toggle button in Topbar
+- [x] Update sidebar to remove standalone Insights entry (now under Analytics)
 
 ### Phase 54 — Dashboard Quick Actions + Publishing
-- [ ] Add Quick Actions bar in Dashboard (New Post, New Campaign, View Reports)
-- [ ] Improve Publishing page with better layout and scheduling UI
+- [x] Add Quick Actions bar in Dashboard (New Post, New Campaign, View Reports)
+- [x] Improve Publishing page with better layout and scheduling UI
 
 ### Phase 55 — Campaigns + Connections Polish
-- [ ] Add filters (status, platform, date) to Campaigns page
-- [ ] Add status badges and better empty states to Campaigns
-- [ ] Improve Connections page with platform health indicators
+- [x] Add filters (status, platform, date) to Campaigns page
+- [x] Add status badges and better empty states to Campaigns
+- [x] Improve Connections page with platform health indicators
 
 ### Phase 56 — Tests + Checkpoint
-- [ ] TypeScript check (0 errors)
-- [ ] Tests passing
-- [ ] Checkpoint and deliver
+- [x] TypeScript check (0 errors)
+- [x] Tests passing (225/225)
+- [x] Checkpoint and deliver
 
-## 🔄 Phase 57-60 — Dark Mode + Connections + Calendar Merge + Campaigns
+## ✅ Phase 57-60 — Dark Mode + Connections + Calendar Merge + Campaigns (Complete)
 
 ### Phase 57 — Dark Mode + Connections Improvement
-- [ ] Dark Mode toggle in Topbar (sun/moon icon, saves to localStorage)
-- [ ] ThemeProvider update to support dark/light toggle
-- [ ] Connections page: better platform cards with last-sync, reconnect button
-- [ ] Connections page: status indicators (connected/expired/disconnected)
+- [x] Dark Mode toggle in Topbar (sun/moon icon, saves to localStorage)
+- [x] ThemeProvider update to support dark/light toggle
+- [x] Connections page: better platform cards with last-sync, reconnect button
+- [x] Connections page: status indicators (connected/expired/disconnected)
 
 ### Phase 58 — Merge Publishing into Calendar
-- [ ] Calendar page: add List View tab alongside Calendar View
-- [ ] List View: shows all scheduled posts sorted by date
-- [ ] Remove Publishing from sidebar (merged into Calendar)
-- [ ] Update App.tsx routes (/publishing → /calendar)
+- [x] Calendar page: add List View tab alongside Calendar View
+- [x] List View: shows all scheduled posts sorted by date
+- [x] Remove Publishing from sidebar (merged into Calendar)
+- [x] Update App.tsx routes (/publishing → /calendar)
 
 ### Phase 59 — Campaigns Improvements
-- [ ] Campaigns: search bar to filter by name
-- [ ] Campaigns: summary KPI bar (total spend, active count, avg CTR)
-- [ ] Campaigns: better status badges (ACTIVE=green, PAUSED=yellow, ENDED=gray)
+- [x] Campaigns: search bar to filter by name
+- [x] Campaigns: summary KPI bar (total spend, active count, avg CTR)
+- [x] Campaigns: better status badges (ACTIVE=green, PAUSED=yellow, ENDED=gray)
 
 ### Phase 60 — Tests + Checkpoint
-- [ ] TypeScript check (0 errors)
-- [ ] Tests passing
-- [ ] Checkpoint and deliver
+- [x] TypeScript check (0 errors)
+- [x] Tests passing (225/225)
+- [x] Checkpoint and deliver
 
 ## ✅ Phase 69-73 — Hashtag Analytics + Post Trend Chart
 - [x] Hashtag Analytics page (/hashtags) with real data from posts table
@@ -348,3 +348,33 @@
 - [x] Post Analytics — engagementTrend procedure (real data from posts table)
 - [x] Post Analytics — Trend tab with AreaChart (Engagement, Reach, Likes over time)
 - [x] 225/225 tests passing, 0 TypeScript errors
+
+## ✅ Phase 74-77 — Backend Data Wiring + Competitor Analysis + PDF Export
+
+### Phase 74 — Fix All Mock Data
+- [x] export.ts: Replace mockRow() with real getDbRow() from campaign_metrics
+- [x] platforms.ts: Already using real getDbInsight() from campaign_metrics (no mock)
+- [x] budget.ts: Already using real campaign_metrics queries (no mock)
+- [x] All data sources verified: 100% real Supabase data, no random/simulated values
+
+### Phase 75 — PDF Export
+- [x] Reports page: Add "📄 PDF Report" as a 3rd format option
+- [x] PDF generation: Opens HTML report in new window + triggers browser print dialog
+- [x] User can save as PDF from browser's native print dialog
+
+### Phase 76 — Competitor Analysis Page
+- [x] server/routers/competitors.ts — benchmarkComparison + platformTrend + getBenchmarks
+- [x] Industry benchmarks for 8 platforms (Facebook, Instagram, TikTok, LinkedIn, YouTube, Twitter, Snapchat, Pinterest)
+- [x] Competitors page (/competitors) with platform cards showing score rings
+- [x] CTR comparison bar chart (your performance vs industry average)
+- [x] Radar chart for selected platform (5-metric performance spider)
+- [x] CTR trend line chart vs benchmark over time
+- [x] Industry benchmarks reference table
+- [x] Added "Competitors" to Analytics section in sidebar
+- [x] App.tsx: /competitors route added
+
+### Phase 77 — Tests + Checkpoint
+- [x] server/competitors.test.ts — 19 tests (benchmarks, score calculation, metrics, ranking)
+- [x] 244/244 tests passing across 23 test files
+- [x] 0 TypeScript errors
+- [x] Checkpoint and deliver

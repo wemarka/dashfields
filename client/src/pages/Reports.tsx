@@ -8,14 +8,14 @@ import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   FileText, Plus, Download, Trash2, Calendar, RefreshCw,
-  Clock, CheckCircle2, AlertCircle, ChevronDown, X, Zap,
+  Clock, CheckCircle2, AlertCircle, ChevronDown, X, Zap, Printer,
 } from "lucide-react";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type DatePreset   = "last_7d" | "last_14d" | "last_30d" | "last_90d";
-type ReportFormat = "csv" | "html";
+type ReportFormat = "csv" | "html" | "pdf";
 type Schedule     = "none" | "weekly" | "monthly";
 
 interface ReportRow {
@@ -145,7 +145,7 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
           <div>
             <label className="block text-xs font-medium text-foreground mb-2">Export Format</label>
             <div className="grid grid-cols-2 gap-2">
-              {(["csv", "html"] as const).map((f) => (
+              {(["csv", "html", "pdf"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFormat(f)}
@@ -155,7 +155,7 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
                       : "border-border bg-muted text-muted-foreground hover:border-primary/50"
                   }`}
                 >
-                  {f === "csv" ? "📊 CSV Spreadsheet" : "🌐 HTML Report"}
+                  {f === "csv" ? "📊 CSV Spreadsheet" : f === "html" ? "🌐 HTML Report" : "📄 PDF Report"}
                 </button>
               ))}
             </div>
@@ -198,7 +198,7 @@ function CreateReportModal({ onClose, onCreated }: { onClose: () => void; onCrea
               Cancel
             </button>
             <button
-              onClick={() => createMutation.mutate({ name, platforms, datePreset, format, schedule })}
+              onClick={() => createMutation.mutate({ name, platforms, datePreset, format: format === "pdf" ? "html" : format as "csv" | "html", schedule })}
               disabled={createMutation.isPending || !name.trim()}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
@@ -347,13 +347,39 @@ export default function Reports() {
   });
 
   const handleDownload = (report: ReportRow) => {
-    generateMutation.mutate({
-      id:         report.id,
-      name:       report.name,
-      platforms:  report.platforms,
-      datePreset: report.date_preset as DatePreset,
-      format:     report.format,
-    });
+    const exportFormat = report.format === "pdf" ? "html" : report.format as "csv" | "html";
+    generateMutation.mutate(
+      {
+        id:         report.id,
+        name:       report.name,
+        platforms:  report.platforms,
+        datePreset: report.date_preset as DatePreset,
+        format:     exportFormat,
+      },
+      {
+        onSuccess: (data) => {
+          if (report.format === "pdf") {
+            // Open HTML in new window and trigger print dialog for PDF save
+            const win = window.open("", "_blank");
+            if (win) {
+              win.document.write(data.content);
+              win.document.close();
+              setTimeout(() => win.print(), 600);
+            }
+            toast.success("PDF print dialog opened — choose \"Save as PDF\"");
+          } else {
+            const blob = new Blob([data.content], { type: data.mimeType });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement("a");
+            a.href     = url;
+            a.download = data.filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success(`Downloaded ${data.filename} (${data.rowCount} rows)`);
+          }
+        },
+      }
+    );
   };
 
   const scheduledCount = reports.filter(r => r.schedule !== "none").length;
