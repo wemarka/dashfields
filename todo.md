@@ -378,3 +378,25 @@
 - [x] 244/244 tests passing across 23 test files
 - [x] 0 TypeScript errors
 - [x] Checkpoint and deliver
+
+## ✅ CRITICAL — Real Data Only (No Mock/Seed/Random) — DONE
+
+### Principle: Only show data from connected accounts. If no account connected → show 0 / empty state.
+
+- [x] Clean Supabase: delete all seed/fake campaigns, campaign_metrics, posts
+- [x] Fix platforms.ts — only Meta API for FB/IG, only real DB for others
+- [x] Fix audience.ts — only real posts from DB (no industry distribution fallback)
+- [x] Fix postAnalytics.ts — only real posts from DB
+- [x] Fix hashtags.ts — only real hashtags extracted from real posts
+- [x] Fix competitors.ts — only real metrics from connected campaigns
+- [x] Fix periodComparison.ts — only real campaign_metrics
+- [x] Fix export.ts — only real connected account data
+- [x] Fix reports.ts — only real data
+- [x] Fix social.ts: use 'name' column (not 'display_name' which doesn't exist in DB)
+- [x] Fix Connections.tsx: use acc.name instead of acc.display_name
+- [x] Fix platforms.ts + export.ts: use acc.name instead of acc.display_name
+- [x] Verified Meta API works: 423K impressions, 12.5K clicks, $745 spend (real data)
+- [x] Analytics.tsx: shows "Connect platforms" CTA when no accounts connected
+- [x] Audience.tsx: shows empty state when no posts exist
+- [x] 244/244 tests passing, 0 TypeScript errors
+- [x] Checkpoint saved

@@ -155,7 +155,7 @@ export const platformsRouter = router({
               const spend       = parseFloat(r.spend ?? "0");
               results.push({
                 platform:    "facebook",
-                accountName: acc.display_name ?? acc.username ?? "Facebook Account",
+                accountName: acc.name ?? acc.username ?? "Facebook Account",
                 impressions,
                 reach:       parseInt(r.reach ?? "0"),
                 clicks,
@@ -170,10 +170,10 @@ export const platformsRouter = router({
             }
           }
           // Real DB data for all other platforms
-          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           results.push(insight);
         } catch {
-          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           results.push(insight);
         }
       }
@@ -219,7 +219,7 @@ export const platformsRouter = router({
               const spend       = parseFloat(r.spend ?? "0");
               insights.push({
                 platform: "facebook",
-                accountName: acc.display_name ?? "Facebook",
+                accountName: acc.name ?? acc.username ?? "Facebook",
                 impressions,
                 reach: parseInt(r.reach ?? "0"),
                 clicks,
@@ -233,10 +233,10 @@ export const platformsRouter = router({
               continue;
             }
           }
-          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.display_name ?? acc.platform, since, until);
+          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           insights.push(insight);
         } catch {
-          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.platform, since, until);
+          const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           insights.push(insight);
         }
       }

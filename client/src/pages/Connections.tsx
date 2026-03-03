@@ -359,9 +359,9 @@ export default function Connections() {
     accountsByPlatform[pid].push({
       id: acc.id,
       platform: acc.platform,
-      name: acc.display_name ?? acc.username,
+      name: acc.name ?? acc.username,
       username: acc.username,
-      platformAccountId: acc.platform_account_id ?? acc.platform_user_id ?? String(acc.id),
+      platformAccountId: acc.platform_account_id ?? String(acc.id),
       isActive: acc.is_active,
     } as ConnectedAccount);
   });

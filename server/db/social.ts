@@ -1,6 +1,10 @@
 /**
  * server/db/social.ts
  * Social accounts database query helpers using Supabase client.
+ * 
+ * Actual DB columns: id, user_id, platform, account_type, platform_account_id,
+ *   name, username, profile_picture, access_token, refresh_token,
+ *   token_expires_at, is_active, metadata, created_at, updated_at
  */
 import { getSupabase } from "../supabase";
 
@@ -8,15 +12,16 @@ export type SocialAccountRow = {
   id: number;
   user_id: number;
   platform: string;
-  platform_user_id: string | null;
+  account_type: string | null;
+  platform_account_id: string | null;
+  name: string | null;          // display name (was incorrectly called display_name)
   username: string | null;
-  display_name: string | null;
+  profile_picture: string | null;
   access_token: string | null;
   refresh_token: string | null;
   token_expires_at: string | null;
-  platform_account_id: string | null;
-  metadata: Record<string, unknown> | null;
   is_active: boolean;
+  metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 };
@@ -80,18 +85,17 @@ export async function upsertSocialAccount(account: {
     .maybeSingle();
 
   const payload: Record<string, unknown> = {
-    user_id:          account.userId,
-    platform:         account.platform,
-    platform_user_id: account.platformAccountId ?? null,
-    username:         account.name ?? null,
-    display_name:     account.name ?? null,
-    access_token:     account.accessToken ?? null,
-    refresh_token:    account.refreshToken ?? null,
-    token_expires_at: account.tokenExpiresAt ?? null,
-    platform_account_id: account.adAccountId ?? null,
-    metadata:         account.metadata ?? null,
-    is_active:        account.isActive ?? true,
-    updated_at:       new Date().toISOString(),
+    user_id:             account.userId,
+    platform:            account.platform,
+    platform_account_id: account.platformAccountId ?? account.adAccountId ?? null,
+    name:                account.name ?? null,
+    username:            account.name ?? null,
+    access_token:        account.accessToken ?? null,
+    refresh_token:       account.refreshToken ?? null,
+    token_expires_at:    account.tokenExpiresAt ?? null,
+    metadata:            account.metadata ?? null,
+    is_active:           account.isActive ?? true,
+    updated_at:          new Date().toISOString(),
   };
 
   if (existing) {

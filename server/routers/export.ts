@@ -154,7 +154,7 @@ async function gatherData(userId: number, datePreset: string): Promise<PlatformR
           const spend       = parseFloat(r.spend ?? "0");
           rows.push({
             platform:    "facebook",
-            accountName: acc.display_name ?? acc.username ?? "Facebook Account",
+            accountName: acc.name ?? acc.username ?? "Facebook Account",
             impressions,
             reach:       parseInt(r.reach ?? "0"),
             clicks,
@@ -170,10 +170,10 @@ async function gatherData(userId: number, datePreset: string): Promise<PlatformR
         }
       }
       // Real DB data for all other platforms
-      const row = await getDbRow(userId, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+      const row = await getDbRow(userId, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
       rows.push(row);
     } catch {
-      const row = await getDbRow(userId, acc.platform, acc.display_name ?? acc.username ?? acc.platform, since, until);
+      const row = await getDbRow(userId, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
       rows.push(row);
     }
   }

@@ -146,7 +146,7 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
   // Merge and enrich campaigns
   const allCampaigns = useMemo<Campaign[]>(() => {
     const meta = metaCampaigns.map((c: any) => ({
-      id:          parseInt(c.id?.replace("act_", "") ?? "0") || Math.random() * 1e9,
+      id:          parseInt(c.id?.replace("act_", "") ?? "0") || 0,
       name:        c.name ?? "Unknown",
       platform:    "facebook",
       status:      c.status ?? "unknown",
@@ -160,11 +160,18 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
     }));
 
     const local = localCampaigns.map((c: any) => ({
-      id:       c.id,
-      name:     c.name,
-      platform: c.platform,
-      status:   c.status,
-      budget:   c.budget,
+      id:          c.id,
+      name:        c.name,
+      platform:    c.platform,
+      status:      c.status,
+      budget:      c.budget,
+      spend:       c.totalSpend       ?? undefined,
+      impressions: c.totalImpressions ?? undefined,
+      clicks:      c.totalClicks      ?? undefined,
+      reach:       c.totalReach       ?? undefined,
+      ctr:         c.avgCtr           ?? undefined,
+      cpc:         c.avgCpc           ?? undefined,
+      cpm:         c.avgCpm           ?? undefined,
     }));
 
     return [...meta, ...local];
