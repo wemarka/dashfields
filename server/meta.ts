@@ -201,6 +201,77 @@ export async function updateMetaCampaignBudget(
   return json.success === true;
 }
 
+/** Publish photo to Instagram Feed via Instagram Graph API */
+export async function publishToInstagram(
+  igUserId: string,
+  accessToken: string,
+  caption: string,
+  imageUrl: string
+): Promise<{ id: string }> {
+  // Step 1: Create media container
+  const containerUrl = new URL(`${META_GRAPH_BASE}/${igUserId}/media`);
+  const containerBody = new URLSearchParams();
+  containerBody.set("access_token", accessToken);
+  containerBody.set("image_url", imageUrl);
+  containerBody.set("caption", caption);
+  const containerRes = await fetch(containerUrl.toString(), { method: "POST", body: containerBody });
+  const containerJson = await containerRes.json() as Record<string, unknown>;
+  if (!containerRes.ok || containerJson.error) {
+    const err = containerJson.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Instagram container error: ${containerRes.status}`);
+  }
+  const containerId = containerJson.id as string;
+
+  // Step 2: Publish the container
+  const publishUrl = new URL(`${META_GRAPH_BASE}/${igUserId}/media_publish`);
+  const publishBody = new URLSearchParams();
+  publishBody.set("access_token", accessToken);
+  publishBody.set("creation_id", containerId);
+  const publishRes = await fetch(publishUrl.toString(), { method: "POST", body: publishBody });
+  const publishJson = await publishRes.json() as Record<string, unknown>;
+  if (!publishRes.ok || publishJson.error) {
+    const err = publishJson.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Instagram publish error: ${publishRes.status}`);
+  }
+  return { id: publishJson.id as string };
+}
+
+/** Publish Reel to Instagram */
+export async function publishInstagramReel(
+  igUserId: string,
+  accessToken: string,
+  caption: string,
+  videoUrl: string
+): Promise<{ id: string }> {
+  // Step 1: Create reel container
+  const containerUrl = new URL(`${META_GRAPH_BASE}/${igUserId}/media`);
+  const containerBody = new URLSearchParams();
+  containerBody.set("access_token", accessToken);
+  containerBody.set("media_type", "REELS");
+  containerBody.set("video_url", videoUrl);
+  containerBody.set("caption", caption);
+  const containerRes = await fetch(containerUrl.toString(), { method: "POST", body: containerBody });
+  const containerJson = await containerRes.json() as Record<string, unknown>;
+  if (!containerRes.ok || containerJson.error) {
+    const err = containerJson.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Instagram Reel container error: ${containerRes.status}`);
+  }
+  const containerId = containerJson.id as string;
+
+  // Step 2: Publish the reel
+  const publishUrl = new URL(`${META_GRAPH_BASE}/${igUserId}/media_publish`);
+  const publishBody = new URLSearchParams();
+  publishBody.set("access_token", accessToken);
+  publishBody.set("creation_id", containerId);
+  const publishRes = await fetch(publishUrl.toString(), { method: "POST", body: publishBody });
+  const publishJson = await publishRes.json() as Record<string, unknown>;
+  if (!publishRes.ok || publishJson.error) {
+    const err = publishJson.error as Record<string, string> | undefined;
+    throw new Error(err?.message ?? `Instagram Reel publish error: ${publishRes.status}`);
+  }
+  return { id: publishJson.id as string };
+}
+
 /** Get daily time-series insights for a campaign */
 export async function getCampaignDailyInsights(
   campaignId: string,

@@ -6,6 +6,7 @@
  */
 import { getSupabase } from "./supabase";
 import { notifyOwner } from "./_core/notification";
+import { publishToInstagram } from "./meta";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface ReportRow {
@@ -138,6 +139,70 @@ export async function runCronJob(): Promise<{
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`Reports fetch: ${msg}`);
     console.error("[Cron] Error fetching reports:", msg);
+  }
+
+  // ── 2. Auto-publish scheduled posts that are due ────────────────────────────
+  let postsAutoPublished = 0;
+  try {
+    const { data: duePosts } = await sb
+      .from("posts")
+      .select("id, user_id, content, platforms, image_url")
+      .eq("status", "scheduled")
+      .lte("scheduled_at", now.toISOString());
+
+    for (const post of (duePosts ?? []) as Record<string, unknown>[]) {
+      try {
+        const platforms = (post.platforms as string[]) ?? [];
+        for (const platform of platforms) {
+          if (platform === "instagram" && post.image_url) {
+            const { data: igAccount } = await sb
+              .from("social_accounts")
+              .select("access_token, platform_account_id")
+              .eq("user_id", post.user_id as number)
+              .eq("platform", "instagram")
+              .eq("is_active", true)
+              .maybeSingle();
+            if (igAccount?.access_token && igAccount?.platform_account_id) {
+              await publishToInstagram(
+                igAccount.platform_account_id,
+                igAccount.access_token,
+                post.content as string,
+                post.image_url as string
+              );
+            }
+          } else if (platform === "facebook") {
+            const { data: fbAccount } = await sb
+              .from("social_accounts")
+              .select("access_token, platform_account_id")
+              .eq("user_id", post.user_id as number)
+              .eq("platform", "facebook")
+              .eq("is_active", true)
+              .maybeSingle();
+            if (fbAccount?.access_token && fbAccount?.platform_account_id) {
+              const fbUrl = new URL(`https://graph.facebook.com/v19.0/${fbAccount.platform_account_id}/feed`);
+              const fbBody = new URLSearchParams();
+              fbBody.set("access_token", fbAccount.access_token);
+              fbBody.set("message", post.content as string);
+              await fetch(fbUrl.toString(), { method: "POST", body: fbBody });
+            }
+          }
+        }
+        await sb.from("posts").update({
+          status: "published",
+          published_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        } as Record<string, unknown>).eq("id", post.id as number);
+        postsAutoPublished++;
+      } catch (err) {
+        await sb.from("posts").update({ status: "failed", updated_at: now.toISOString() } as Record<string, unknown>).eq("id", post.id as number);
+        errors.push(`Post ${post.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+    if (postsAutoPublished > 0) {
+      console.log(`[Cron] Auto-published ${postsAutoPublished} scheduled posts`);
+    }
+  } catch (err) {
+    errors.push(`Auto-publish: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   // ── 2. Check budget thresholds ────────────────────────────────────────────

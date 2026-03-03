@@ -6,9 +6,10 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getUserPosts, createPost, updatePostStatus, deletePost } from "../db/posts";
 import { getSupabase } from "../supabase";
+import { publishToInstagram, publishInstagramReel } from "../meta";
 
 // ─── Meta Graph API post publisher ───────────────────────────────────────────
-async function publishToMeta(
+async function publishToFacebook(
   pageId: string,
   accessToken: string,
   message: string,
@@ -98,11 +99,14 @@ export const postsRouter = router({
       return { success: true };
     }),
 
-  /** Publish post immediately to Meta (Facebook Page) */
+  /** Publish post immediately to Facebook or Instagram */
   publishNow: protectedProcedure
     .input(z.object({
       postId:   z.number(),
+      platform: z.enum(["facebook", "instagram"]).default("facebook"),
       imageUrl: z.string().optional(),
+      videoUrl: z.string().optional(),
+      isReel:   z.boolean().optional().default(false),
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
@@ -115,25 +119,64 @@ export const postsRouter = router({
         .maybeSingle();
       if (!post) throw new Error("Post not found");
 
-      // Get Meta token + page ID
-      const { data: account } = await sb
-        .from("social_accounts")
-        .select("access_token, platform_account_id")
-        .eq("user_id", ctx.user.id)
-        .eq("platform", "facebook")
-        .eq("is_active", true)
-        .maybeSingle();
+      const content = (post as Record<string, unknown>).content as string;
+      let resultId: string;
 
-      if (!account?.access_token || !account?.platform_account_id) {
-        throw new Error("Meta not connected. Please connect your Facebook account first.");
+      if (input.platform === "instagram") {
+        // Get Instagram account
+        const { data: igAccount } = await sb
+          .from("social_accounts")
+          .select("access_token, platform_account_id")
+          .eq("user_id", ctx.user.id)
+          .eq("platform", "instagram")
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (!igAccount?.access_token || !igAccount?.platform_account_id) {
+          throw new Error("Instagram not connected. Please connect your Instagram account first.");
+        }
+
+        if (input.isReel && input.videoUrl) {
+          const result = await publishInstagramReel(
+            igAccount.platform_account_id,
+            igAccount.access_token,
+            content,
+            input.videoUrl
+          );
+          resultId = result.id;
+        } else if (input.imageUrl) {
+          const result = await publishToInstagram(
+            igAccount.platform_account_id,
+            igAccount.access_token,
+            content,
+            input.imageUrl
+          );
+          resultId = result.id;
+        } else {
+          throw new Error("Instagram requires an image or video URL.");
+        }
+      } else {
+        // Facebook
+        const { data: fbAccount } = await sb
+          .from("social_accounts")
+          .select("access_token, platform_account_id")
+          .eq("user_id", ctx.user.id)
+          .eq("platform", "facebook")
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (!fbAccount?.access_token || !fbAccount?.platform_account_id) {
+          throw new Error("Meta not connected. Please connect your Facebook account first.");
+        }
+
+        const result = await publishToFacebook(
+          fbAccount.platform_account_id,
+          fbAccount.access_token,
+          content,
+          input.imageUrl
+        );
+        resultId = result.id;
       }
-
-      const result = await publishToMeta(
-        account.platform_account_id,
-        account.access_token,
-        (post as Record<string, unknown>).content as string,
-        input.imageUrl
-      );
 
       // Mark as published
       await sb
@@ -146,7 +189,81 @@ export const postsRouter = router({
         .eq("id", input.postId)
         .eq("user_id", ctx.user.id);
 
-      return { success: true, metaPostId: result.id };
+      return { success: true, platformPostId: resultId, platform: input.platform };
+    }),
+
+  /** Auto-publish all scheduled posts that are due */
+  autoPublishDue: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const sb = getSupabase();
+      const now = new Date().toISOString();
+
+      // Fetch all scheduled posts that are due
+      const { data: duePosts, error } = await sb
+        .from("posts")
+        .select("*")
+        .eq("user_id", ctx.user.id)
+        .eq("status", "scheduled")
+        .lte("scheduled_at", now);
+
+      if (error) throw error;
+      if (!duePosts || duePosts.length === 0) return { published: 0, failed: 0 };
+
+      let published = 0;
+      let failed = 0;
+
+      for (const post of duePosts as Record<string, unknown>[]) {
+        try {
+          const platforms = (post.platforms as string[]) ?? ["facebook"];
+          for (const platform of platforms) {
+            if (platform === "facebook" || platform === "instagram") {
+              const { data: account } = await sb
+                .from("social_accounts")
+                .select("access_token, platform_account_id")
+                .eq("user_id", ctx.user.id)
+                .eq("platform", platform)
+                .eq("is_active", true)
+                .maybeSingle();
+
+              if (!account?.access_token || !account?.platform_account_id) continue;
+
+              if (platform === "facebook") {
+                await publishToFacebook(
+                  account.platform_account_id,
+                  account.access_token,
+                  post.content as string
+                );
+              } else if (platform === "instagram" && post.image_url) {
+                await publishToInstagram(
+                  account.platform_account_id,
+                  account.access_token,
+                  post.content as string,
+                  post.image_url as string
+                );
+              }
+            }
+          }
+
+          await sb
+            .from("posts")
+            .update({
+              status: "published",
+              published_at: now,
+              updated_at: now,
+            } as Record<string, unknown>)
+            .eq("id", post.id as number);
+
+          published++;
+        } catch {
+          await sb
+            .from("posts")
+            .update({ status: "failed", updated_at: now } as Record<string, unknown>)
+            .eq("id", post.id as number);
+          failed++;
+        }
+      }
+
+      return { published, failed };
     }),
 
   reschedule: protectedProcedure

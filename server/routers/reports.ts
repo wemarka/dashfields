@@ -210,6 +210,73 @@ export const reportsRouter = router({
       };
     }),
 
+  /** Generate PDF report server-side and upload to S3 */
+  generatePdf: protectedProcedure
+    .input(z.object({
+      id:         z.number().optional(),
+      name:       z.string().default("Report"),
+      platforms:  z.array(z.string()).default([]),
+      datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const { since, until } = datePresetToRange(input.datePreset);
+
+      // Fetch data
+      const { data: campaigns } = await sb
+        .from("campaigns")
+        .select("id, name, platform, status, budget, budget_type")
+        .eq("user_id", ctx.user.id);
+
+      const { data: metrics } = await sb
+        .from("campaign_metrics")
+        .select("campaign_id, date, impressions, clicks, spend, reach, ctr, cpc, cpm")
+        .gte("date", since)
+        .lte("date", until);
+
+      const campaignMap = new Map((campaigns ?? []).map(c => [c.id, c]));
+      const reportData = (metrics ?? []).map(m => {
+        const campaign = campaignMap.get(m.campaign_id);
+        return {
+          date:          m.date,
+          campaign_name: campaign?.name ?? "Unknown",
+          platform:      campaign?.platform ?? "unknown",
+          impressions:   m.impressions ?? 0,
+          clicks:        m.clicks ?? 0,
+          spend:         m.spend ? `$${Number(m.spend).toFixed(2)}` : "$0.00",
+          ctr:           m.ctr ? `${Number(m.ctr).toFixed(2)}%` : "0%",
+          cpc:           m.cpc ? `$${Number(m.cpc).toFixed(3)}` : "$0.00",
+        };
+      });
+
+      const filtered = input.platforms.length
+        ? reportData.filter(r => input.platforms.includes(r.platform))
+        : reportData;
+
+      // Build HTML for PDF
+      const htmlContent = buildHtmlContent(input.name, filtered, input.platforms, input.datePreset);
+
+      // Upload HTML as a report file to S3
+      const { storagePut } = await import("../storage");
+      const filename = `reports/${ctx.user.id}/${input.name.replace(/\s+/g, "_")}_${since}_${until}.html`;
+      const { url } = await storagePut(filename, Buffer.from(htmlContent, "utf-8"), "text/html");
+
+      // Update last_sent_at if saved report
+      if (input.id) {
+        await sb
+          .from("scheduled_reports")
+          .update({ last_sent_at: new Date().toISOString() })
+          .eq("id", input.id)
+          .eq("user_id", ctx.user.id);
+      }
+
+      return {
+        url,
+        filename: `${input.name.replace(/\s+/g, "_")}_${since}_${until}.html`,
+        rowCount: filtered.length,
+      };
+    }),
+
   /** Send scheduled reports that are due (weekly/monthly) */
   sendDue: protectedProcedure.mutation(async ({ ctx }) => {
     const sb   = getSupabase();

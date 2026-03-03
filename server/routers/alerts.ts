@@ -84,4 +84,54 @@ export const alertsRouter = router({
 
       return { triggered: triggered.length };
     }),
+
+  /** Send a test alert notification to verify the alert system is working */
+  testAlert: protectedProcedure
+    .input(z.object({
+      metric:    z.string(),
+      threshold: z.number(),
+      operator:  z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const message = `🧪 Test Alert: ${input.metric} ${input.operator} ${input.threshold} — This is a test notification from Dashfields.`;
+      await createNotification({
+        userId:  ctx.user.id,
+        title:   `🧪 Test Alert: ${input.metric}`,
+        message,
+        type:    "info",
+      });
+      await notifyOwner({
+        title:   `[TEST] Dashfields Alert: ${input.metric}`,
+        content: message,
+      });
+      return { success: true };
+    }),
+
+  /** List alert history (recent notifications triggered by alert rules) */
+  history: protectedProcedure
+    .input(z.object({ limit: z.number().int().min(1).max(100).default(20) }))
+    .query(async ({ ctx, input }) => {
+      const { getSupabase } = await import("../supabase");
+      const sb = getSupabase();
+      const { data, error } = await sb
+        .from("notifications")
+        .select("id, title, message, type, created_at")
+        .eq("user_id", ctx.user.id)
+        .ilike("title", "%Alert%")
+        .order("created_at", { ascending: false })
+        .limit(input.limit);
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    }),
+
+  /** Export all alert rules as CSV */
+  exportRules: protectedProcedure.mutation(async ({ ctx }) => {
+    const rules = await getUserAlertRules(ctx.user.id);
+    if (!rules.length) return { content: "metric,operator,threshold\n", filename: "alert_rules.csv" };
+    const rows = rules.map(r => `${r.metric},${r.operator},${r.threshold}`).join("\n");
+    return {
+      content: `metric,operator,threshold\n${rows}`,
+      filename: `alert_rules_${new Date().toISOString().split("T")[0]}.csv`,
+    };
+  }),
 });

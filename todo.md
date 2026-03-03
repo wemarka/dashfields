@@ -542,3 +542,32 @@
 - [x] i18n: إضافة common.saving وcommon.saveChanges في كلا الملفين
 - [x] TypeScript: 0 أخطاء
 - [x] Tests: 247/247 ناجح
+
+## Phase 89-93 — Instagram + Cron + PDF + Profile + Alerts
+
+### Phase 89 — Instagram Publishing + Auto-Schedule Cron
+- [x] Instagram Graph API: publish photo/video to Instagram Feed
+- [x] Instagram Graph API: publish Reels
+- [x] Cron job: auto-publish scheduled posts when due time arrives
+- [x] PostComposerModal: platform selector shows Instagram as publishable
+- [x] Calendar: Publish Now button for Instagram + Facebook
+
+### Phase 90 — PDF Reports Server-Side
+- [x] server/routers/reports.ts: generatePdf procedure (HTML → S3)
+- [x] Download PDF button in Reports page (opens S3 URL in new tab)
+- [x] Store HTML report in S3 and return download URL
+
+### Phase 91 — Profile: Avatar Upload + Edit Name
+- [x] Profile page: avatar upload button → S3 upload → save URL in user_settings
+- [x] Profile page: editable name field with save button
+- [x] server/routers/settings.ts: updateProfile + uploadAvatar procedures
+
+### Phase 92 — Alerts: History + Test Alert + Data Export
+- [x] Alerts page: Alert History section (last 20 triggered alerts)
+- [x] Alerts page: "Test Alert" button → simulate trigger → show toast
+- [x] Alerts page: "Export CSV" button → download alert rules
+
+### Phase 93 — Tests + Checkpoint
+- [x] TypeScript check (0 errors)
+- [x] 247/247 tests passing
+- [x] Save checkpoint and deliver

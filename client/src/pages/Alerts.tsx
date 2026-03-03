@@ -8,7 +8,8 @@ import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
 import {
   Bell, Plus, Trash2, AlertTriangle, CheckCircle2,
-  Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid, SlidersHorizontal
+  Info, XCircle, Loader2, BellRing, Play, Clock, LayoutGrid, SlidersHorizontal,
+  FlaskConical, Download, History
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -243,6 +244,30 @@ export default function Alerts() {
     onError: e => toast.error(e.message),
   });
 
+  const testAlertMutation = trpc.alerts.testAlert.useMutation({
+    onSuccess: () => {
+      toast.success("Test alert sent! Check Notification History below.");
+      utils.notifications.list.invalidate();
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  const exportRulesMutation = trpc.alerts.exportRules.useMutation({
+    onSuccess: (data) => {
+      const blob = new Blob([data.content], { type: "text/csv" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = data.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Alert rules exported");
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  const { data: alertHistory = [] } = trpc.alerts.history.useQuery({ limit: 20 });
+
   const markRead = trpc.notifications.markRead.useMutation({
     onSuccess: () => utils.notifications.list.invalidate(),
   });
@@ -280,13 +305,37 @@ export default function Alerts() {
               {t("alerts.subtitle")}
             </p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {lastCheckedData?.lastChecked && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" />
-                <span>Last checked: {new Date(lastCheckedData.lastChecked).toLocaleString()}</span>
+                <span>Last: {new Date(lastCheckedData.lastChecked).toLocaleTimeString()}</span>
               </div>
             )}
+            {/* Export Rules */}
+            <button
+              onClick={() => exportRulesMutation.mutate()}
+              disabled={exportRulesMutation.isPending || rules.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            >
+              {exportRulesMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              Export CSV
+            </button>
+            {/* Test Alert */}
+            {rules.length > 0 && (
+              <button
+                onClick={() => {
+                  const r = rules[0];
+                  testAlertMutation.mutate({ metric: r.metric, threshold: parseFloat(r.threshold as string), operator: r.operator });
+                }}
+                disabled={testAlertMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:bg-muted transition-colors disabled:opacity-40"
+              >
+                {testAlertMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FlaskConical className="h-3.5 w-3.5" />}
+                Test Alert
+              </button>
+            )}
+            {/* Run Check */}
             <button
               onClick={() => runCheck.mutate({ datePreset: "today" })}
               disabled={runCheck.isPending}
@@ -360,6 +409,33 @@ export default function Alerts() {
             </div>
           )}
         </div>
+
+        {/* Alert History (from server) */}
+        {alertHistory.length > 0 && (
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/10 flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold text-foreground">Alert History</h2>
+              <span className="ml-auto text-xs text-muted-foreground">{alertHistory.length} records</span>
+            </div>
+            <div className="divide-y divide-white/5">
+              {alertHistory.map(h => (
+                <div key={h.id} className="flex items-start gap-3 px-5 py-3.5">
+                  <div className="mt-0.5 shrink-0">
+                    {NOTIFICATION_ICONS[(h.type as keyof typeof NOTIFICATION_ICONS)] ?? NOTIFICATION_ICONS.info}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{h.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{h.message}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">
+                      {new Date(h.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notification History */}
         <div className="glass rounded-2xl overflow-hidden">

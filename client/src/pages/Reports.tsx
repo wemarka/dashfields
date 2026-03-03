@@ -384,6 +384,18 @@ export default function Reports() {
     onError: (err) => toast.error("Cron failed: " + err.message),
   });
 
+  const generatePdfMutation = trpc.reports.generatePdf.useMutation({
+    onSuccess: (data) => {
+      // Open the S3 URL in a new tab
+      window.open(data.url, "_blank");
+      toast.success(`Report ready — ${data.rowCount} rows`, {
+        description: "Opened in new tab. Use browser Print → Save as PDF.",
+        duration: 6000,
+      });
+    },
+    onError: (err) => toast.error("PDF generation failed: " + err.message),
+  });
+
   const sendDueMutation = trpc.reports.sendDue.useMutation({
     onSuccess: (data) => {
       if (data.sent.length > 0) {
@@ -396,39 +408,24 @@ export default function Reports() {
   });
 
   const handleDownload = (report: ReportRow) => {
-    const exportFormat = report.format === "pdf" ? "html" : report.format as "csv" | "html";
-    generateMutation.mutate(
-      {
+    if (report.format === "pdf") {
+      // Use server-side HTML generation + S3 upload
+      generatePdfMutation.mutate({
+        id:         report.id,
+        name:       report.name,
+        platforms:  report.platforms,
+        datePreset: report.date_preset as DatePreset,
+      });
+    } else {
+      const exportFormat = report.format as "csv" | "html";
+      generateMutation.mutate({
         id:         report.id,
         name:       report.name,
         platforms:  report.platforms,
         datePreset: report.date_preset as DatePreset,
         format:     exportFormat,
-      },
-      {
-        onSuccess: (data) => {
-          if (report.format === "pdf") {
-            // Open HTML in new window and trigger print dialog for PDF save
-            const win = window.open("", "_blank");
-            if (win) {
-              win.document.write(data.content);
-              win.document.close();
-              setTimeout(() => win.print(), 600);
-            }
-            toast.success("PDF print dialog opened — choose \"Save as PDF\"");
-          } else {
-            const blob = new Blob([data.content], { type: data.mimeType });
-            const url  = URL.createObjectURL(blob);
-            const a    = document.createElement("a");
-            a.href     = url;
-            a.download = data.filename;
-            a.click();
-            URL.revokeObjectURL(url);
-            toast.success(`Downloaded ${data.filename} (${data.rowCount} rows)`);
-          }
-        },
-      }
-    );
+      });
+    }
   };
 
   const scheduledCount = reports.filter(r => r.schedule !== "none").length;

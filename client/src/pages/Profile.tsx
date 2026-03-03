@@ -1,7 +1,7 @@
 /**
  * Profile page — user info + settings from Supabase via tRPC
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Globe, Bell, Shield, Calendar, Clock, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Mail, Globe, Bell, Shield, Calendar, Clock, Save, Loader2, Camera, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,7 @@ export default function Profile() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const { t } = useTranslation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: settings, isLoading } = trpc.settings.get.useQuery();
 
@@ -41,6 +42,15 @@ export default function Profile() {
   const [alertThresholdCpc, setAlertCpc]      = useState("2.0");
   const [alertThresholdSpend, setAlertSpend]  = useState("80");
   const [isSaving, setIsSaving]               = useState(false);
+
+  // Avatar state
+  const [avatarUrl, setAvatarUrl]   = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Display name edit state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [displayName, setDisplayName]     = useState("");
+  const [isSavingName, setIsSavingName]   = useState(false);
 
   // Populate from Supabase
   useEffect(() => {
@@ -55,15 +65,45 @@ export default function Profile() {
     if (settings.alert_threshold_spend) setAlertSpend(settings.alert_threshold_spend);
   }, [settings]);
 
+  useEffect(() => {
+    if (user?.name) setDisplayName(user.name);
+  }, [user]);
+
   const updateSettings = trpc.settings.update.useMutation({
     onSuccess: () => {
       utils.settings.get.invalidate();
-      toast.success("Settings saved successfully");
+      toast.success(t("common.saveSuccess", "Settings saved successfully"));
       setIsSaving(false);
     },
     onError: (err) => {
-      toast.error("Failed to save settings: " + err.message);
+      toast.error(t("common.saveError", "Failed to save: ") + err.message);
       setIsSaving(false);
+    },
+  });
+
+  const updateProfileMutation = trpc.settings.updateProfile.useMutation({
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+      toast.success(t("profile.nameSaved", "Display name updated"));
+      setIsEditingName(false);
+      setIsSavingName(false);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+      setIsSavingName(false);
+    },
+  });
+
+  const uploadAvatarMutation = trpc.settings.uploadAvatar.useMutation({
+    onSuccess: (data) => {
+      setAvatarUrl(data.url);
+      utils.auth.me.invalidate();
+      toast.success(t("profile.avatarUpdated", "Profile picture updated"));
+      setIsUploadingAvatar(false);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+      setIsUploadingAvatar(false);
     },
   });
 
@@ -85,6 +125,32 @@ export default function Profile() {
     }
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
+    setIsUploadingAvatar(true);
+    // Convert to base64 for upload
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(",")[1];
+      uploadAvatarMutation.mutate({ base64, mimeType: file.type });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveName = () => {
+    if (!displayName.trim()) return;
+    setIsSavingName(true);
+    updateProfileMutation.mutate({ name: displayName.trim() });
+  };
+
+  const currentAvatarUrl = avatarUrl || (user as Record<string, unknown>)?.avatarUrl as string | undefined;
+  const initials = (displayName || user?.name || "U").charAt(0).toUpperCase();
+
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-3xl">
@@ -105,12 +171,74 @@ export default function Profile() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
-            {/* Avatar */}
-            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-brand to-violet-500 flex items-center justify-center text-white text-xl font-bold shrink-0">
-              {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
+            {/* Avatar with upload */}
+            <div className="relative group shrink-0">
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-brand to-violet-500 flex items-center justify-center text-white text-xl font-bold overflow-hidden">
+                {currentAvatarUrl ? (
+                  <img src={currentAvatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              >
+                {isUploadingAvatar ? (
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 text-white" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
             </div>
-            <div>
-              <p className="font-semibold text-foreground">{user?.name ?? "—"}</p>
+
+            <div className="flex-1 min-w-0">
+              {/* Editable display name */}
+              {isEditingName ? (
+                <div className="flex items-center gap-2 mb-1">
+                  <Input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="h-8 text-sm font-semibold"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveName();
+                      if (e.key === "Escape") setIsEditingName(false);
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    disabled={isSavingName}
+                    className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
+                  >
+                    {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={() => { setIsEditingName(false); setDisplayName(user?.name ?? ""); }}
+                    className="p-1 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-semibold text-foreground">{displayName || user?.name || "—"}</p>
+                  <button
+                    onClick={() => setIsEditingName(true)}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground">{user?.email ?? "—"}</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-xs capitalize">

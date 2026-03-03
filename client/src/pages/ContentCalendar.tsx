@@ -89,8 +89,9 @@ function PostDetailModal({ post, onClose, onDelete, onReschedule, onPublished }:
 
   const publishNowMutation = trpcClient.posts.publishNow.useMutation({
     onSuccess: (data) => {
-      toast.success("Post published to Facebook!", {
-        description: `Meta Post ID: ${data.metaPostId}`,
+      const platformLabel = data.platform === "instagram" ? "Instagram" : "Facebook";
+      toast.success(`Post published to ${platformLabel}!`, {
+        description: `Post ID: ${data.platformPostId}`,
       });
       onPublished?.();
       onClose();
@@ -177,7 +178,7 @@ function PostDetailModal({ post, onClose, onDelete, onReschedule, onPublished }:
           </button>
           {(post.status === "draft" || post.status === "scheduled") && post.platforms.includes("facebook") && (
             <button
-              onClick={() => publishNowMutation.mutate({ postId: post.id })}
+              onClick={() => publishNowMutation.mutate({ postId: post.id, platform: "facebook" })}
               disabled={publishNowMutation.isPending}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1877F2] text-white text-xs font-medium hover:bg-[#1877F2]/90 transition-colors disabled:opacity-50"
             >
@@ -186,7 +187,21 @@ function PostDetailModal({ post, onClose, onDelete, onReschedule, onPublished }:
               ) : (
                 <Send className="w-3.5 h-3.5" />
               )}
-              Publish Now
+              Facebook
+            </button>
+          )}
+          {(post.status === "draft" || post.status === "scheduled") && post.platforms.includes("instagram") && (
+            <button
+              onClick={() => publishNowMutation.mutate({ postId: post.id, platform: "instagram", imageUrl: undefined })}
+              disabled={publishNowMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] text-white text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {publishNowMutation.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5" />
+              )}
+              Instagram
             </button>
           )}
           <button
