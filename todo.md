@@ -890,3 +890,26 @@
 - [x] اختبارات vitest للـ customDashboards router
 - [x] TypeScript check (0 errors)
 - [ ] Save checkpoint
+
+## Phase 139-143 — إعادة هيكلة التطبيق (IA Redesign)
+- [ ] Sidebar: تقليل العناصر لـ 10 فقط مع تجميع منطقي (Overview, Advertising, Content, Analytics, Reports)
+- [ ] Sidebar: إزالة Publishing, Insights, Hashtags, PeriodCompare, AudienceOverlap, Advanced Analytics من القائمة الرئيسية
+- [ ] Sidebar: دمج Alerts + Notifications في عنصر واحد
+- [ ] Topbar: Profile Dropdown (Avatar → Profile, Settings, Logout)
+- [ ] Sidebar: إزالة Profile + Settings من القائمة الجانبية
+- [ ] Account Switcher في أسفل Sidebar مع أيقونة المنصة + اسم الحساب
+- [ ] Account Switcher Modal: قائمة الحسابات المربوطة مقسمة حسب المنصة
+- [ ] فلترة البيانات حسب الحساب المختار (activeAccountId في context)
+- [ ] دمج Insights كـ tab داخل Analytics
+- [ ] دمج Hashtags كـ tab داخل Post Analytics
+- [ ] اختبارات + TypeScript check
+- [ ] Checkpoint
+
+## Phase — UI Restructure (2026-03-03)
+- [x] Sidebar redesign — 6 groups, ~13 items, no cognitive overload
+- [x] Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
+- [x] Account Switcher at Sidebar bottom (per-platform, multi-account)
+- [x] Active account stored in localStorage
+- [x] Redirect routes for deprecated paths (/ai-tools, etc.)
+- [x] i18n keys for topbar and account switcher (en + ar)
+- [x] 266/266 tests passing, 0 TypeScript errors

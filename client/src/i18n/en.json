@@ -33,7 +33,8 @@
       "analytics": "Analytics",
       "content": "Content",
       "reports": "Reports",
-      "insights": "Insights & Alerts"
+      "insights": "Insights & Alerts",
+      "tools": "Tools"
     },
     "publishing": "Publishing",
     "insights": "Insights",
@@ -42,13 +43,21 @@
     "customDashboards": "Custom Dashboards"
   },
   "topbar": {
-    "platformsConnected": "{{count}} platform connected",
+    "platformsConnected": "{{count}} platforms connected",
     "platformsConnected_other": "{{count}} platforms connected",
     "noPlatforms": "No platforms connected",
     "switchDark": "Switch to Dark Mode",
     "switchLight": "Switch to Light Mode",
     "search": "Search...",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "viewProfile": "View Profile",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "switchAccount": "Switch Account",
+    "activeAccount": "Active Account",
+    "noAccounts": "No accounts connected",
+    "connectAccount": "Connect Account",
+    "allAccounts": "All Accounts"
   },
   "auth": {
     "signIn": "Sign In",

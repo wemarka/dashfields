@@ -33,7 +33,8 @@
       "analytics": "التحليلات",
       "content": "المحتوى",
       "reports": "التقارير",
-      "insights": "الرؤى والتنبيهات"
+      "insights": "الرؤى والتنبيهات",
+      "tools": "الأدوات"
     },
     "publishing": "النشر",
     "insights": "الرؤى",
@@ -42,13 +43,21 @@
     "customDashboards": "لوحات مخصصة"
   },
   "topbar": {
-    "platformsConnected": "{{count}} منصة مرتبطة",
+    "platformsConnected": "{{count}} منصات مربوطة",
     "platformsConnected_other": "{{count}} منصات مرتبطة",
-    "noPlatforms": "لا توجد منصات مرتبطة",
-    "switchDark": "التحويل إلى الوضع الداكن",
-    "switchLight": "التحويل إلى الوضع الفاتح",
+    "noPlatforms": "لا توجد منصات مربوطة",
+    "switchDark": "التحويل للوضع الداكن",
+    "switchLight": "التحويل للوضع الفاتح",
     "search": "بحث...",
-    "notifications": "الإشعارات"
+    "notifications": "الإشعارات",
+    "viewProfile": "عرض الملف الشخصي",
+    "settings": "الإعدادات",
+    "signOut": "تسجيل الخروج",
+    "switchAccount": "تبديل الحساب",
+    "activeAccount": "الحساب النشط",
+    "noAccounts": "لا توجد حسابات مربوطة",
+    "connectAccount": "ربط حساب",
+    "allAccounts": "جميع الحسابات"
   },
   "auth": {
     "signIn": "تسجيل الدخول",
