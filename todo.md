@@ -1108,3 +1108,8 @@
 - [x] Sidebar: شعار كامل بدون أيقونة منفصلة + حجم أكبر
 - [x] Splash Screen عند التحميل الأولي
 - [x] Open Graph Meta Tags (og:title, og:image, og:description)
+
+## Brand Polish Round 3
+- [x] تلوين الشعار بلون Brand رسمي
+- [x] Dark Mode: شعار أبيض تلقائياً عند تفعيل Dark Mode
+- [x] تحسين Splash Screen بحجم أكبر وتصميم أفضل

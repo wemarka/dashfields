@@ -366,7 +366,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <DashfieldsIcon className="w-10 h-10 text-foreground animate-pulse" />
+          <DashfieldsIcon className="w-10 h-10 text-brand dark:text-white animate-pulse" />
           <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
@@ -379,8 +379,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass-strong rounded-3xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 animate-blur-in">
           <div className="flex flex-col items-center gap-3">
-            <DashfieldsIcon className="w-16 h-16 text-foreground" />
-            <DashfieldsLogoFull className="h-8 w-auto text-foreground" />
+            <DashfieldsIcon className="w-16 h-16 text-brand dark:text-white" />
+            <DashfieldsLogoFull className="h-8 w-auto text-brand dark:text-white" />
           </div>
           <div className="text-center">
             <p className="text-[10px] text-muted-foreground/60 tracking-widest uppercase mb-2">{t("auth.tagline")}</p>
@@ -412,9 +412,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onClick={() => setLocation("/")}
         >
           {collapsed ? (
-            <DashfieldsIcon className="w-8 h-8 text-foreground" />
+            <DashfieldsIcon className="w-8 h-8 text-brand dark:text-white" />
           ) : (
-            <DashfieldsLogoFull className="h-7 w-auto text-foreground" />
+            <DashfieldsLogoFull className="h-7 w-auto text-brand dark:text-white" />
           )}
         </div>
 
