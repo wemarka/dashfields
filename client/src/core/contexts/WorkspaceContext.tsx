@@ -63,6 +63,26 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const workspaces = useMemo(() => (data ?? []) as WorkspaceItem[], [data]);
 
+  // Auto-Onboarding: if user has no workspaces, create a default one and assign orphan accounts
+  const ensureDefault = trpc.workspaces.ensureDefault.useMutation({
+    onSuccess: (result) => {
+      if (result.created) {
+        console.log(`[Auto-Onboarding] Created default workspace ${result.workspaceId}, assigned ${result.orphansAssigned} orphan accounts`);
+        refetch();
+      }
+    },
+  });
+
+  const [onboardingTriggered, setOnboardingTriggered] = useState(false);
+
+  useEffect(() => {
+    // Only trigger once when we know the list is loaded and empty
+    if (!isLoading && data !== undefined && workspaces.length === 0 && !onboardingTriggered) {
+      setOnboardingTriggered(true);
+      ensureDefault.mutate();
+    }
+  }, [isLoading, data, workspaces.length, onboardingTriggered, ensureDefault]);
+
   const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<number | null>(() => {
     const stored = localStorage.getItem(LS_KEY);
     return stored ? parseInt(stored, 10) : null;

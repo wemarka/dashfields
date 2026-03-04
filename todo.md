@@ -1175,3 +1175,14 @@
 - [x] تحديث Analytics.tsx + Home.tsx + AdvancedAnalytics.tsx + Campaigns.tsx لتمرير workspaceId
 - [x] كتابة server/workspace.isolation.test.ts (11 اختباراً)
 - [x] التحقق النهائي: 303/303 tests + 0 TS errors ✅
+
+## Phase 6 — Token Refresh + Auto-Onboarding + WorkspaceSwitcher ✅
+- [x] Token Refresh: refreshMetaTokens function في server/cron.ts (إصلاح استخدام access_token بدلاً من refresh_token)
+- [x] Token Refresh: Cron Job يومي يبحث عن tokens تنتهي خلال 10 أيام
+- [x] Token Refresh: System Notification عند فشل التجديد (إعادة الربط يدوياً)
+- [x] Auto-Onboarding: workspaces.ensureDefault procedure (idempotent)
+- [x] Auto-Onboarding: WorkspaceContext يستدعي ensureDefault عند عدم وجود workspaces
+- [x] Auto-Onboarding: ربط الحسابات اليتيمة (workspace_id=null) بالـ Default Workspace
+- [x] WorkspaceSwitcher: موجود بالفعل في DashboardLayout Sidebar مع Modal للتبديل
+- [x] Tests: server/token.refresh.test.ts (25 اختباراً: Token logic + URL builder + Auto-Onboarding + Notifications)
+- [x] التحقق النهائي: 328/328 tests + 0 TS errors ✅

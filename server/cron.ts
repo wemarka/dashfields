@@ -139,35 +139,50 @@ export async function runCronJob(): Promise<{
     console.error("[Cron] Error fetching reports:", msg);
   }
 
- // -- 1b. Token Auto-Refresh (7 days before expiry) --
+ // -- 1b. Token Auto-Refresh (10 days before expiry) --
+  // Meta long-lived tokens last 60 days. We refresh them when < 10 days remain.
+  // Endpoint: GET /oauth/access_token?grant_type=fb_exchange_token&fb_exchange_token={current_token}
+  // Note: We use the current access_token as fb_exchange_token (not a separate refresh_token).
+  let tokensRefreshed = 0;
+  let tokensFailed = 0;
   try {
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 86400000).toISOString();
+    const tenDaysFromNow = new Date(now.getTime() + 10 * 86400000).toISOString();
     const { data: expiringAccounts } = await sb
       .from("social_accounts")
-      .select("id, user_id, platform, refresh_token, name")
+      .select("id, user_id, platform, access_token, name")
       .eq("is_active", true)
-      .not("refresh_token", "is", null)
-      .lt("token_expires_at", sevenDaysFromNow);
+      .not("access_token", "is", null)
+      .lt("token_expires_at", tenDaysFromNow);
 
     for (const acc of (expiringAccounts ?? []) as Record<string, unknown>[]) {
       try {
-        // Attempt token refresh based on platform
         let newToken: string | null = null;
         let newExpiry: string | null = null;
 
         if (acc.platform === "facebook" || acc.platform === "instagram") {
-          // Meta long-lived token refresh
+          // Meta: exchange current long-lived token for a new one (resets 60-day clock)
           const appId     = process.env.META_APP_ID ?? "";
           const appSecret = process.env.META_APP_SECRET ?? "";
-          if (appId && appSecret && acc.refresh_token) {
-            const res = await fetch(
-              `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${acc.refresh_token}`
-            );
+          const currentToken = acc.access_token as string;
+
+          if (appId && appSecret && currentToken) {
+            const url = new URL("https://graph.facebook.com/v19.0/oauth/access_token");
+            url.searchParams.set("grant_type",        "fb_exchange_token");
+            url.searchParams.set("client_id",         appId);
+            url.searchParams.set("client_secret",     appSecret);
+            url.searchParams.set("fb_exchange_token", currentToken);
+
+            const res  = await fetch(url.toString());
             const json = await res.json() as Record<string, unknown>;
+
             if (json.access_token) {
               newToken  = json.access_token as string;
-              const expiresIn = Number(json.expires_in ?? 5184000);
+              const expiresIn = Number(json.expires_in ?? 5184000); // default 60 days
               newExpiry = new Date(now.getTime() + expiresIn * 1000).toISOString();
+            } else if (json.error) {
+              // Token is expired or invalid — cannot refresh, must re-authenticate
+              const errMsg = (json.error as Record<string, unknown>).message as string ?? "Token expired";
+              throw new Error(errMsg);
             }
           }
         }
@@ -179,20 +194,50 @@ export async function runCronJob(): Promise<{
             updated_at:       now.toISOString(),
           } as Record<string, unknown>).eq("id", acc.id as number);
 
-          // Notify user
+          // In-app success notification
           await sb.from("notifications").insert({
-            user_id:    acc.user_id,
-            title:      `Token Refreshed: ${String(acc.platform).charAt(0).toUpperCase() + String(acc.platform).slice(1)}`,
-            message:    `Your ${acc.platform} connection token has been automatically renewed.`,
-            type:       "success",
-            platform:   acc.platform,
-            read:       false,
+            user_id:  acc.user_id,
+            title:    `✅ Token Renewed: ${String(acc.name ?? acc.platform)}`,
+            message:  `Your ${acc.platform} connection "${acc.name}" was automatically renewed for 60 more days.`,
+            type:     "success",
+            platform: acc.platform,
+            read:     false,
           } as Record<string, unknown>);
-          console.log(`[Cron] Refreshed token for ${acc.platform} account ${acc.id}`);
+
+          tokensRefreshed++;
+          console.log(`[Cron] ✅ Refreshed ${acc.platform} token for account ${acc.id} (${acc.name})`);
         }
       } catch (err) {
-        errors.push(`Token refresh ${acc.id}: ${err instanceof Error ? err.message : String(err)}`);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        errors.push(`Token refresh ${acc.id}: ${errMsg}`);
+        tokensFailed++;
+
+        // Failure notification: prompt user to reconnect manually
+        try {
+          await sb.from("notifications").insert({
+            user_id:  acc.user_id,
+            title:    `⚠️ Reconnection Required: ${String(acc.name ?? acc.platform)}`,
+            message:  `Could not auto-renew your ${acc.platform} connection "${acc.name}". Please go to Connections and reconnect manually.`,
+            type:     "warning",
+            platform: acc.platform,
+            read:     false,
+          } as Record<string, unknown>);
+
+          // Also notify owner via push notification
+          await notifyOwner({
+            title:   `⚠️ Token Refresh Failed: ${String(acc.name ?? acc.platform)}`,
+            content: `Failed to auto-renew ${acc.platform} token for "${acc.name}".\nError: ${errMsg}\n\nPlease reconnect this account manually in the Connections page.`,
+          });
+        } catch {
+          // ignore notification errors
+        }
+
+        console.error(`[Cron] ❌ Token refresh failed for account ${acc.id} (${acc.name}):`, errMsg);
       }
+    }
+
+    if (tokensRefreshed > 0 || tokensFailed > 0) {
+      console.log(`[Cron] Token refresh: ${tokensRefreshed} renewed, ${tokensFailed} failed`);
     }
   } catch (err) {
     errors.push(`Token refresh: ${err instanceof Error ? err.message : String(err)}`);

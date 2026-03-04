@@ -293,6 +293,56 @@ export const workspacesRouter = router({
       return { success: true, user };
     }),
 
+  /**
+   * Ensure the user has at least one workspace.
+   * If none exists, creates a "Default Workspace" and assigns all orphan social accounts to it.
+   * Idempotent — safe to call on every login.
+   */
+  ensureDefault: protectedProcedure.mutation(async ({ ctx }) => {
+    const sb = getSupabase();
+    const userId = ctx.user.id;
+
+    // Check if user already has workspaces
+    const existing = await getUserWorkspaces(userId);
+    if (existing.length > 0) {
+      return { created: false, workspaceId: existing[0].id, orphansAssigned: 0 };
+    }
+
+    // Create default workspace
+    const slug = generateSlug(`${ctx.user.name ?? "my"}-workspace`);
+    const uniqueSlug = (await isSlugAvailable(slug)) ? slug : `${slug}-${Date.now().toString(36)}`;
+
+    const workspace = await createWorkspace({
+      name: `${ctx.user.name ?? "My"}'s Workspace`,
+      slug: uniqueSlug,
+      plan: "free",
+      createdBy: userId,
+    });
+
+    // Assign all orphan social accounts (workspace_id = null) belonging to this user
+    const { data: orphans } = await sb
+      .from("social_accounts")
+      .select("id")
+      .eq("user_id", userId)
+      .is("workspace_id", null);
+
+    const orphanIds = (orphans ?? []).map((r: { id: number }) => r.id);
+    let orphansAssigned = 0;
+
+    if (orphanIds.length > 0) {
+      const { error: updateErr } = await sb
+        .from("social_accounts")
+        .update({ workspace_id: workspace.id, updated_at: new Date().toISOString() })
+        .in("id", orphanIds);
+
+      if (!updateErr) orphansAssigned = orphanIds.length;
+    }
+
+    console.log(`[Auto-Onboarding] Created default workspace ${workspace.id} for user ${userId}, assigned ${orphansAssigned} orphan accounts`);
+
+    return { created: true, workspaceId: workspace.id, orphansAssigned };
+  }),
+
   /** Transfer workspace ownership to another member (owner only) */
   transferOwnership: workspaceProcedure
     .input(z.object({
