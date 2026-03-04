@@ -1,7 +1,7 @@
 // ContentCalendar.tsx
 // Monthly/weekly content calendar for scheduling posts.
 // Supports drag-and-drop rescheduling, status color-coding, and quick post creation.
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -480,9 +480,9 @@ function WeekView({ weekStart, posts, onDayClick, onPostClick, onReschedule }: {
       {/* Time grid */}
       <div className="grid" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
         {HOURS.map(hour => (
-          <>
+          <React.Fragment key={hour}>
             {/* Hour label */}
-            <div key={`label-${hour}`} className="h-14 flex items-start justify-end pr-2 pt-1">
+            <div className="h-14 flex items-start justify-end pr-2 pt-1">
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                 {hour === 12 ? "12 PM" : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
               </span>
@@ -543,7 +543,7 @@ function WeekView({ weekStart, posts, onDayClick, onPostClick, onReschedule }: {
                 </div>
               );
             })}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </div>
