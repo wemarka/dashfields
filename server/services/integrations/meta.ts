@@ -57,8 +57,16 @@ async function metaGet<T>(
   const res = await fetch(url.toString());
   const json = await res.json() as Record<string, unknown>;
   if (!res.ok || json.error) {
-    const err = json.error as Record<string, string> | undefined;
-    throw new Error(err?.message ?? `Meta API error: ${res.status}`);
+    const err = json.error as Record<string, unknown> | undefined;
+    const code = err?.code as number | undefined;
+    const msg = (err?.message as string) ?? `Meta API error: ${res.status}`;
+    // Error #100: nonexisting field — usually means no insights data or missing ads_read permission.
+    // Return empty data structure instead of throwing to avoid breaking the UI.
+    if (code === 100 || msg.includes("nonexisting field")) {
+      console.warn(`[Meta API] Graceful fallback for path=${path}: ${msg}`);
+      return { data: [] } as unknown as T;
+    }
+    throw new Error(msg);
   }
   return json as T;
 }
