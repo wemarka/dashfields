@@ -12,6 +12,7 @@ import {
   jsonb,
   uniqueIndex,
   uuid,
+  real,
 } from "drizzle-orm/pg-core";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -306,3 +307,23 @@ export type InsertWorkspaceMember = typeof workspaceMembers.$inferInsert;
 export type WorkspaceInvitation  = typeof workspaceInvitations.$inferSelect;
 export type BrandProfile         = typeof brandProfiles.$inferSelect;
 export type InsertBrandProfile   = typeof brandProfiles.$inferInsert;
+
+// ─── Sentiment Analyses ────────────────────────────────────────────────────────
+export const sentimentAnalyses = pgTable("sentiment_analyses", {
+  id:          serial("id").primaryKey(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  text:        text("text").notNull(),
+  sentiment:   varchar("sentiment", { length: 20 }).notNull().default("neutral"),
+  score:       real("score").notNull().default(0),
+  confidence:  real("confidence").notNull().default(0.5),
+  emotions:    jsonb("emotions").notNull().default([]),
+  summary:     text("summary").notNull().default(""),
+  suggestions: jsonb("suggestions").notNull().default([]),
+  keywords:    jsonb("keywords").notNull().default([]),
+  platform:    varchar("platform", { length: 50 }),
+  label:       varchar("label", { length: 100 }),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+});
+export type SentimentAnalysis       = typeof sentimentAnalyses.$inferSelect;
+export type InsertSentimentAnalysis = typeof sentimentAnalyses.$inferInsert;
+

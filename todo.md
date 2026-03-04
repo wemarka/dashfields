@@ -1363,3 +1363,57 @@
 - [x] LandingPage CTAs — /login and /register links use appUrl() for cross-domain navigation
 - [x] 0 TypeScript errors
 - [x] All 410 tests passing
+
+## Phase 16 — 6 Advanced Competitive Features
+
+### Feature 1: Sentiment Analysis Dashboard
+- [ ] Quick Analyze: gauge/meter + highlighted keywords + tone suggestions
+- [ ] Bulk Analysis: CSV upload + batch analysis table with color coding
+- [ ] Analysis History: save last 50, timeline view, filter by platform/sentiment/date
+- [ ] Sentiment Dashboard: time-series chart + platform comparison + word cloud
+- [ ] Backend: sentiment router with LLM-powered analysis
+- [ ] DB schema: sentiment_analyses table
+
+### Feature 2: Post Preview Component
+- [ ] PostPreview component: Facebook, Instagram, Twitter/X, LinkedIn, TikTok
+- [ ] Integrate into Schedule Post modal
+- [ ] Integrate into AI Content Studio (after generate)
+- [ ] Integrate into Content Calendar (on post click)
+
+### Feature 3: Interactive Demo Mode
+- [ ] Demo data: 5 campaigns, 15 posts, analytics, 3 alerts, activity feed
+- [ ] Demo banner: fixed top bar with Sign Up CTA
+- [ ] Demo route: /demo accessible without login
+- [ ] Disabled actions with tooltip in demo mode
+- [ ] AI Tools work with demo prompts
+- [ ] "Try Demo" button in Landing Page
+
+### Feature 4: Time-Slot Calendar View
+- [ ] Hour column (6AM-11PM) in week view
+- [ ] 30-minute slot grid per day
+- [ ] Posts appear as cards in correct time slots
+- [ ] Drag & drop to reschedule
+- [ ] Click empty slot → Schedule Post modal with pre-filled time
+- [ ] Best time to post highlight
+
+### Feature 5: Campaign Quick Actions + Bulk Operations
+- [ ] Three-dot menu per campaign: Edit, Duplicate, Pause, Delete, View Analytics
+- [ ] Checkbox multi-select per row
+- [ ] Bulk action bar: Pause All, Resume All, Delete All, Export
+- [ ] Column Visibility toggle with localStorage persistence
+
+### Feature 6: Keyboard Shortcuts
+- [ ] Ctrl+K → Search (existing)
+- [ ] Ctrl+N → New Post
+- [ ] Ctrl+Shift+N → New Campaign
+- [ ] G+D → Dashboard, G+C → Calendar, G+A → Analytics
+- [ ] ? → Shortcuts modal
+- [ ] useKeyboardShortcuts hook
+
+## Phase 16 — 6 Advanced Competitive Features
+- [x] Feature 1: Sentiment Analysis Dashboard (dedicated page /sentiment with Quick Analyze, Bulk, History, Dashboard tabs)
+- [x] Feature 2: PostPreview component for all 5 platforms (Instagram, Facebook, Twitter, LinkedIn, TikTok)
+- [x] Feature 3: Interactive Demo Mode (DemoModeContext + DemoBanner + sample data)
+- [x] Feature 4: Time-Slot Week View Calendar with drag-and-drop rescheduling
+- [x] Feature 5: Campaign Bulk Operations (checkbox selection, bulk delete, bulk status change, column visibility)
+- [x] Feature 6: Keyboard Shortcuts system (useKeyboardShortcuts hook + KeyboardShortcutsModal)

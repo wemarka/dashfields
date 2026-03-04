@@ -33,6 +33,7 @@ import { customDashboardsRouter }  from "./routers/customDashboards";
 import { workspacesRouter }        from "./routers/workspaces";
 import { invitationsRouter }       from "./routers/invitations";
 import { smartRecommendationsRouter } from "./routers/smartRecommendations";
+import { sentimentRouter }            from "./routers/sentiment";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -73,6 +74,7 @@ export const appRouter = router({
   workspaces:       workspacesRouter,
   invitations:      invitationsRouter,
   smartRecommendations: smartRecommendationsRouter,
+  sentiment:            sentimentRouter,
 });
 
 export type AppRouter = typeof appRouter;

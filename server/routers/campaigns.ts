@@ -149,4 +149,33 @@ export const campaignsRouter = router({
         .eq("user_id", ctx.user.id);
       return { success: true };
     }),
+
+  /** Bulk delete campaigns */
+  bulkDelete: protectedProcedure
+    .input(z.object({ campaignIds: z.array(z.number()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await sb
+        .from("campaigns")
+        .delete()
+        .in("id", input.campaignIds)
+        .eq("user_id", ctx.user.id);
+      return { success: true, count: input.campaignIds.length };
+    }),
+
+  /** Bulk update campaign status */
+  bulkUpdateStatus: protectedProcedure
+    .input(z.object({
+      campaignIds: z.array(z.number()).min(1),
+      status: z.enum(["active", "paused", "ended", "draft"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await sb
+        .from("campaigns")
+        .update({ status: input.status, updated_at: new Date().toISOString() })
+        .in("id", input.campaignIds)
+        .eq("user_id", ctx.user.id);
+      return { success: true, count: input.campaignIds.length };
+    }),
 });

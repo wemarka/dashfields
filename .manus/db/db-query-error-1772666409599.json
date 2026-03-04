@@ -1,0 +1,15 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS sentiment_analyses (\n  id SERIAL PRIMARY KEY,\n  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n  text TEXT NOT NULL,\n  sentiment VARCHAR(20) NOT NULL DEFAULT 'neutral',\n  score REAL NOT NULL DEFAULT 0,\n  confidence REAL NOT NULL DEFAULT 0.5,\n  emotions JSONB NOT NULL DEFAULT '[]',\n  summary TEXT NOT NULL DEFAULT '',\n  suggestions JSONB NOT NULL DEFAULT '[]',\n  keywords JSONB NOT NULL DEFAULT '[]',\n  platform VARCHAR(50),\n  label VARCHAR(100),\n  created_at TIMESTAMP DEFAULT NOW() NOT NULL\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \nCREATE TABLE IF NOT EXISTS sentiment_analyses (\n  id SERIAL PRIMARY KEY,\n  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n  text TEXT NOT NULL,\n  sentiment VARCHAR(20) NOT NULL DEFAULT 'neutral',\n  score REAL NOT NULL DEFAULT 0,\n  confidence REAL NOT NULL DEFAULT 0.5,\n  emotions JSONB NOT NULL DEFAULT '[]',\n  summary TEXT NOT NULL DEFAULT '',\n  suggestions JSONB NOT NULL DEFAULT '[]',\n  keywords JSONB NOT NULL DEFAULT '[]',\n  platform VARCHAR(50),\n  label VARCHAR(100),\n  created_at TIMESTAMP DEFAULT NOW() NOT NULL\n);\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 2: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 8 column 17 near \"JSONB NOT NULL DEFAULT '[]',",
+    "  summary TEXT NOT NULL DEFAULT '',",
+    "  suggestions JSONB NOT NULL DEFAULT '[]',",
+    "  keywords JSONB NOT NULL DEFAULT '[]',",
+    "  platform VARCHAR(50),",
+    "  label VARCHAR(100),",
+    "  created_at TIMESTAMP DEFAULT NOW() NOT NULL",
+    ")\""
+  ]
+}

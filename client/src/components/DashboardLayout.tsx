@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 import { changeLanguage } from "@/core/i18n";
 import { UpgradeModal } from "@/features/billing/UpgradeModal";
 import { PLAN_LIMITS, type WorkspacePlan } from "../../../shared/planLimits";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { KeyboardShortcutsModal } from "@/components/KeyboardShortcutsModal";
 import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
@@ -22,7 +24,7 @@ import {
   Sun, Moon, ChevronDown, Check, PlusCircle,
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  Activity, CreditCard,
+  Activity, CreditCard, Brain,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -101,6 +103,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: CalendarDays, labelKey: "nav.calendar",  path: "/calendar",   iconAnimation: "icon-bounce" },
       { icon: Sparkles,     labelKey: "nav.aiStudio",  path: "/ai-content", iconAnimation: "icon-pop" },
+      { icon: Brain,         labelKey: "nav.sentiment", path: "/sentiment",  iconAnimation: "icon-pop" },
     ],
   },
   {
@@ -361,6 +364,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  useKeyboardShortcuts({
+    onNewPost: () => setLocation("/calendar"),
+    onOpenSearch: () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+    },
+    onShowShortcuts: () => setShowShortcuts(s => !s),
+  });
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
@@ -687,6 +699,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"}
         reason={upgradeReason}
       />
+      {/* ── Keyboard Shortcuts Modal ─────────────────────────────────────────────────── */}
+      <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   );
 }

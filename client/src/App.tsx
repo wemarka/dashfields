@@ -7,6 +7,8 @@ import { ThemeProvider } from "./core/contexts/ThemeContext";
 import { ActiveAccountProvider } from "./core/contexts/ActiveAccountContext";
 import { WorkspaceProvider } from "./core/contexts/WorkspaceContext";
 import { isMarketingDomain, APP_DOMAIN } from "./lib/domain";
+import { DemoModeProvider } from "./core/contexts/DemoModeContext";
+import { DemoBanner } from "./components/DemoBanner";
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {
@@ -36,7 +38,8 @@ const Reports           = lazy(() => import("./features/reports/Reports"));
 const Audience          = lazy(() => import("./features/audience/Audience"));
 const PostAnalytics     = lazy(() => import("./features/post-analytics/PostAnalytics"));
 const PeriodComparison  = lazy(() => import("./features/analytics/PeriodComparison"));
-const AIContent         = lazy(() => import("./features/ai/AIContent"));
+const AIContent          = lazy(() => import("./features/ai/AIContent"));
+const SentimentDashboard = lazy(() => import("./features/sentiment/SentimentDashboard"));
 const ContentCalendar   = lazy(() => import("./features/publishing/ContentCalendar"));
 const Notifications     = lazy(() => import("./features/notifications/Notifications"));
 const Profile           = lazy(() => import("./features/settings/Profile"));
@@ -115,6 +118,7 @@ function AppRouter() {
         <Route path="/alerts"               component={Alerts} />
         <Route path="/calendar"             component={ContentCalendar} />
         <Route path="/ai-content"           component={AIContent} />
+        <Route path="/sentiment"             component={SentimentDashboard} />
         <Route path="/audience"             component={Audience} />
         <Route path="/competitors"          component={Competitors} />
         <Route path="/reports"              component={Reports} />
@@ -173,17 +177,20 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
+      <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <ActiveAccountProvider>
-          <WorkspaceProvider>
-            <TooltipProvider>
-              <Toaster />
-              {showSplash && <SplashScreen onDone={handleSplashDone} />}
-              <Router />
-            </TooltipProvider>
-          </WorkspaceProvider>
-        </ActiveAccountProvider>
+        <DemoModeProvider>
+          <ActiveAccountProvider>
+            <WorkspaceProvider>
+              <TooltipProvider>
+                <Toaster />
+                <DemoBanner />
+                {showSplash && <SplashScreen onDone={handleSplashDone} />}
+                <Router />
+              </TooltipProvider>
+            </WorkspaceProvider>
+          </ActiveAccountProvider>
+        </DemoModeProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
