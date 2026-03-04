@@ -526,7 +526,8 @@ export function CampaignBuilder({ onClose, onCreated }: { onClose: () => void; o
   // Step 1
   const [name,      setName]      = useState("");
   const [objective, setObjective] = useState("AWARENESS");
-  const [platform,  setPlatform]  = useState("facebook");
+  type CampaignPlatform = "facebook" | "instagram" | "linkedin" | "twitter" | "youtube" | "tiktok" | "google";
+  const [platform,  setPlatform]  = useState<CampaignPlatform>("facebook");
 
   // Step 2
   const [budget,    setBudget]    = useState("50");
@@ -566,7 +567,7 @@ export function CampaignBuilder({ onClose, onCreated }: { onClose: () => void; o
   const handleLaunch = () => {
     createMutation.mutate({
       name,
-      platform: platform as any,
+      platform,
       objective: objective.toLowerCase(),
       budget: parseFloat(budget) || 0,
       budgetType,
@@ -600,7 +601,7 @@ export function CampaignBuilder({ onClose, onCreated }: { onClose: () => void; o
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <StepIndicator step={step} />
-          {step === 1 && <Step1Campaign name={name} setName={setName} objective={objective} setObjective={setObjective} platform={platform} setPlatform={setPlatform} />}
+          {step === 1 && <Step1Campaign name={name} setName={setName} objective={objective} setObjective={setObjective} platform={platform} setPlatform={(v) => setPlatform(v as CampaignPlatform)} />}
           {step === 2 && <Step2AdSet budget={budget} setBudget={setBudget} budgetType={budgetType} setBudgetType={setBudgetType} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} ageMin={ageMin} setAgeMin={setAgeMin} ageMax={ageMax} setAgeMax={setAgeMax} gender={gender} setGender={setGender} selectedInterests={selectedInterests} setSelectedInterests={setSelectedInterests} selectedLocations={selectedLocations} setSelectedLocations={setSelectedLocations} />}
           {step === 3 && <Step3Creative headline={headline} setHeadline={setHeadline} body={body} setBody={setBody} cta={cta} setCta={setCta} imageUrl={imageUrl} setImageUrl={setImageUrl} destinationUrl={destinationUrl} setDestinationUrl={setDestinationUrl} platform={platform} />}
           {step === 4 && <Step4Review name={name} objective={objective} platform={platform} budget={budget} budgetType={budgetType} startDate={startDate} endDate={endDate} ageMin={ageMin} ageMax={ageMax} gender={gender} selectedInterests={selectedInterests} selectedLocations={selectedLocations} headline={headline} body={body} cta={cta} imageUrl={imageUrl} destinationUrl={destinationUrl} />}

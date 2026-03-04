@@ -143,34 +143,48 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
 
   // Merge and enrich campaigns
   const allCampaigns = useMemo<Campaign[]>(() => {
-    const meta = metaCampaigns.map((c: any) => ({
-      id:          parseInt(c.id?.replace("act_", "") ?? "0") || 0,
-      name:        c.name ?? "Unknown",
-      platform:    "facebook",
-      status:      c.status ?? "unknown",
-      spend:       c.insights?.spend ? Number(c.insights.spend) : undefined,
-      impressions: c.insights?.impressions ? Number(c.insights.impressions) : undefined,
-      clicks:      c.insights?.clicks ? Number(c.insights.clicks) : undefined,
-      reach:       c.insights?.reach ? Number(c.insights.reach) : undefined,
-      ctr:         c.insights?.ctr ? Number(c.insights.ctr) : undefined,
-      cpc:         c.insights?.cpc ? Number(c.insights.cpc) : undefined,
-      cpm:         c.insights?.cpm ? Number(c.insights.cpm) : undefined,
-    }));
+    const meta = metaCampaigns.map((c) => {
+      // meta.campaigns returns campaigns without insights; meta.campaignInsights is separate
+      const enriched = c as typeof c & {
+        insights?: { spend?: number; impressions?: number; clicks?: number;
+                     reach?: number; ctr?: number; cpc?: number; cpm?: number };
+      };
+      return {
+        id:          parseInt(c.id?.replace("act_", "") ?? "0") || 0,
+        name:        c.name ?? "Unknown",
+        platform:    "facebook" as const,
+        status:      c.status ?? "unknown",
+        spend:       enriched.insights?.spend       ? Number(enriched.insights.spend)       : undefined,
+        impressions: enriched.insights?.impressions ? Number(enriched.insights.impressions) : undefined,
+        clicks:      enriched.insights?.clicks      ? Number(enriched.insights.clicks)      : undefined,
+        reach:       enriched.insights?.reach       ? Number(enriched.insights.reach)       : undefined,
+        ctr:         enriched.insights?.ctr         ? Number(enriched.insights.ctr)         : undefined,
+        cpc:         enriched.insights?.cpc         ? Number(enriched.insights.cpc)         : undefined,
+        cpm:         enriched.insights?.cpm         ? Number(enriched.insights.cpm)         : undefined,
+      };
+    });
 
-    const local = localCampaigns.map((c: any) => ({
-      id:          c.id,
-      name:        c.name,
-      platform:    c.platform,
-      status:      c.status,
-      budget:      c.budget,
-      spend:       c.totalSpend       ?? undefined,
-      impressions: c.totalImpressions ?? undefined,
-      clicks:      c.totalClicks      ?? undefined,
-      reach:       c.totalReach       ?? undefined,
-      ctr:         c.avgCtr           ?? undefined,
-      cpc:         c.avgCpc           ?? undefined,
-      cpm:         c.avgCpm           ?? undefined,
-    }));
+    const local = localCampaigns.map((c) => {
+      // campaigns.list enriches rows with aggregated metric fields
+      const enriched = c as typeof c & {
+        totalSpend?: number; totalImpressions?: number; totalClicks?: number;
+        totalReach?: number; avgCtr?: number; avgCpc?: number; avgCpm?: number;
+      };
+      return {
+        id:          c.id,
+        name:        c.name,
+        platform:    c.platform,
+        status:      c.status,
+        budget:      c.budget,
+        spend:       enriched.totalSpend       ?? undefined,
+        impressions: enriched.totalImpressions ?? undefined,
+        clicks:      enriched.totalClicks      ?? undefined,
+        reach:       enriched.totalReach       ?? undefined,
+        ctr:         enriched.avgCtr           ?? undefined,
+        cpc:         enriched.avgCpc           ?? undefined,
+        cpm:         enriched.avgCpm           ?? undefined,
+      };
+    });
 
     return [...meta, ...local];
   }, [metaCampaigns, localCampaigns]);

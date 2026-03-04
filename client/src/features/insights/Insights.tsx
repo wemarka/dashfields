@@ -102,12 +102,14 @@ const ICON_COLORS: Record<string, string> = {
 };
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipPayloadEntry { name: string; value: number | string; fill?: string; color?: string; }
+interface CustomTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-background border border-border rounded-xl p-3 shadow-lg text-xs">
       <p className="font-semibold text-foreground mb-1">{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: p.fill ?? p.color }} />
           <span className="text-muted-foreground">{p.name}:</span>

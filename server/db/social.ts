@@ -97,10 +97,11 @@ export async function upsertSocialAccount(account: {
   };
 
   if (existing) {
+    const existingRow = existing as { id: number };
     const { data, error } = await sb
       .from("social_accounts")
-      .update(payload as any)
-      .eq("id", (existing as any).id)
+      .update(payload)
+      .eq("id", existingRow.id)
       .select("*")
       .maybeSingle();
     if (error) throw error;
@@ -109,7 +110,7 @@ export async function upsertSocialAccount(account: {
 
   const { data, error } = await sb
     .from("social_accounts")
-    .insert(payload as any)
+    .insert(payload)
     .select("*")
     .maybeSingle();
   if (error) throw error;

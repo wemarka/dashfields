@@ -47,8 +47,23 @@ async function fetchPosts(userId: number, since: string, until: string) {
   return data ?? [];
 }
 
+// ─── Post record type ────────────────────────────────────────────────────────
+interface AudiencePostRecord {
+  id: number;
+  platforms: string | string[] | null;
+  status: string | null;
+  post_type: string | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  reach: number | null;
+  impressions: number | null;
+  published_at: string | null;
+  content: string | null;
+}
+
 // ─── Filter posts by platform ─────────────────────────────────────────────────
-function filterByPlatform(posts: any[], platform: string | null) {
+function filterByPlatform(posts: AudiencePostRecord[], platform: string | null) {
   if (!platform || platform === "all") return posts;
   return posts.filter(p => {
     try {
@@ -59,7 +74,7 @@ function filterByPlatform(posts: any[], platform: string | null) {
 }
 
 // ─── Build real summary ───────────────────────────────────────────────────────
-function buildSummary(posts: any[], platform: string) {
+function buildSummary(posts: AudiencePostRecord[], platform: string) {
   if (posts.length === 0) {
     return {
       platform,

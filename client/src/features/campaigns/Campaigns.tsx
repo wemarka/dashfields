@@ -21,13 +21,15 @@ import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 
 type Tab = "all" | "meta" | "local";
+type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month";
+type LocalCampaignStatus = "active" | "paused" | "ended" | "draft" | "scheduled";
 
 export default function Campaigns() {
   const [search, setSearch]         = useState("");
   const [filter, setFilter]         = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [tab, setTab]               = useState<Tab>("all");
-  const [datePreset, setDatePreset] = useState("last_30d");
+  const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [selectedCampaign, setSelectedCampaign] = useState<{
     id: string; name: string; status: string; objective?: string; dailyBudget?: number | null
   } | null>(null);
@@ -57,7 +59,7 @@ export default function Campaigns() {
     isLoading: insightsLoading,
     refetch: refetchInsights,
   } = trpc.meta.campaignInsights.useQuery(
-    { datePreset: datePreset as any, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
     { enabled: isMetaConnected }
   );
 
@@ -281,7 +283,7 @@ export default function Campaigns() {
           onFilterChange={setFilter}
           showDatePreset={(tab === "meta" || tab === "all") && isMetaConnected}
           datePreset={datePreset}
-          onDatePresetChange={setDatePreset}
+          onDatePresetChange={(v) => setDatePreset(v as DatePreset)}
         />
 
         {/* ── Tables ─────────────────────────────────────────────────────────── */}
@@ -298,7 +300,7 @@ export default function Campaigns() {
           <LocalCampaignTable
             campaigns={filteredLocal}
             loading={localLoading}
-            onStatusChange={(id, status) => updateStatus.mutate({ campaignId: id, status: status as any })}
+            onStatusChange={(id, status) => updateStatus.mutate({ campaignId: id, status: status as LocalCampaignStatus })}
             onCreateNew={() => setShowCreate(true)}
           />
         )}

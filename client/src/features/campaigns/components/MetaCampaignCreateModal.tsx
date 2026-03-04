@@ -25,7 +25,8 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
   const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
-  const [objective, setObjective] = useState("");
+  type MetaObjective = "OUTCOME_AWARENESS" | "OUTCOME_TRAFFIC" | "OUTCOME_ENGAGEMENT" | "OUTCOME_LEADS" | "OUTCOME_APP_PROMOTION" | "OUTCOME_SALES";
+  const [objective, setObjective] = useState<MetaObjective | "">("")
   const [status, setStatus] = useState<"ACTIVE" | "PAUSED">("PAUSED");
   const [budgetType, setBudgetType] = useState<"daily" | "lifetime">("daily");
   const [budget, setBudget] = useState("");
@@ -74,7 +75,7 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
     }
     createMutation.mutate({
       name: name.trim(),
-      objective: objective as any,
+      objective: objective as MetaObjective,
       status,
       dailyBudget:    budgetType === "daily"    ? budgetNum : undefined,
       lifetimeBudget: budgetType === "lifetime" ? budgetNum : undefined,
@@ -131,7 +132,7 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
                 {OBJECTIVES.map((obj) => (
                   <button
                     key={obj.value}
-                    onClick={() => setObjective(obj.value)}
+                    onClick={() => setObjective(obj.value as MetaObjective)}
                     className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all ${
                       objective === obj.value
                         ? "border-[#1877F2] bg-[#1877F2]/5"
@@ -276,14 +277,14 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-border">
           <button
-            onClick={() => step > 1 ? setStep((s) => (s - 1) as any) : handleClose()}
+            onClick={() => step > 1 ? setStep((s) => (s - 1) as 1 | 2 | 3) : handleClose()}
             className="px-4 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             {step === 1 ? t("common.cancel") : "Back"}
           </button>
           {step < 3 ? (
             <button
-              onClick={() => setStep((s) => (s + 1) as any)}
+              onClick={() => setStep((s) => (s + 1) as 1 | 2 | 3)}
               disabled={step === 1 && (!name.trim() || !objective)}
               className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1877F2] text-white text-sm font-medium hover:bg-[#1877F2]/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >

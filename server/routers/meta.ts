@@ -51,7 +51,7 @@ export const metaRouter = router({
       .eq("user_id", ctx.user.id)
       .eq("platform", "facebook");
 
-    const accounts = (data ?? []) as any[];
+    const accounts = (data ?? []) as { id: number; name: string | null; platform_account_id: string | null; is_active: boolean; updated_at: string }[];
     return {
       connected: accounts.length > 0 && !!accounts[0]?.is_active,
       accounts: accounts.map(a => ({
@@ -97,8 +97,8 @@ export const metaRouter = router({
             username:              accountName,
             is_active:             true,
             updated_at:            new Date().toISOString(),
-          } as any)
-          .eq("id", (existing as any).id);
+          })
+          .eq("id", (existing as { id: number }).id);
       } else {
         await sb
           .from("social_accounts")
@@ -110,7 +110,7 @@ export const metaRouter = router({
             name:                 accountName,
             username:             accountName,
             is_active:            true,
-          } as any);
+          });
       }
       return { success: true, accountName };
     }),
@@ -122,7 +122,7 @@ export const metaRouter = router({
       const sb = getSupabase();
       await sb
         .from("social_accounts")
-        .update({ is_active: false, updated_at: new Date().toISOString() } as any)
+        .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq("id", input.socialAccountId)
         .eq("user_id", ctx.user.id);
       return { success: true };
@@ -422,7 +422,7 @@ export const metaRouter = router({
       try {
         const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
         if (!insights || !insights.length) return null;
-        const totalSpend = Number((insights as any)[0]?.spend ?? 0);
+        const totalSpend = Number(insights[0]?.spend ?? 0);
         const now = new Date();
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         const dayOfMonth = now.getDate();

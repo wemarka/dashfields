@@ -28,7 +28,16 @@ function getSinceDate(days: number): string {
   return new Date(Date.now() - days * 86400000).toISOString();
 }
 
-// ─── Router ────────────────────────────────────────────────────────────────────
+// ─── Route// ─── Helpers ────────────────────────────────────────────────────────
+// Supabase's .contains() for array columns is not in the typed overloads;
+// we use a typed wrapper to avoid spreading `as any` throughout the router.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function withPlatformFilter<T>(query: T, platform: string | undefined): T {
+  if (!platform) return query;
+  return (query as unknown as { contains: (col: string, val: string[]) => T }).contains("platforms", [platform]);
+}
+
+// ─── Router ────────────────────────────────────────────────────────
 export const postAnalyticsRouter = router({
   /** Top performing posts — sorted by engagement, reach, etc. */
   topPosts: protectedProcedure
@@ -50,7 +59,7 @@ export const postAnalyticsRouter = router({
         .not("published_at", "is", null)
         .eq("status", "published");
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
 
       const { data, error } = await query.limit(100);
       if (error) throw new Error(error.message);
@@ -100,7 +109,7 @@ export const postAnalyticsRouter = router({
         .not("published_at", "is", null)
         .eq("status", "published");
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
 
       const { data } = await query;
 
@@ -144,7 +153,7 @@ export const postAnalyticsRouter = router({
         .not("published_at", "is", null)
         .eq("status", "published");
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
 
       const { data } = await query;
 
@@ -187,7 +196,7 @@ export const postAnalyticsRouter = router({
         .gte("published_at", since)
         .eq("status", "published");
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
 
       const { data } = await query;
       const posts = data ?? [];
@@ -228,7 +237,7 @@ export const postAnalyticsRouter = router({
         .gte("published_at", since)
         .eq("status", "published");
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
 
       const { data } = await query;
       const posts = data ?? [];
@@ -274,7 +283,7 @@ export const postAnalyticsRouter = router({
         .not("published_at", "is", null)
         .order("published_at", { ascending: true });
 
-      if (input.platform) query = (query as any).contains("platforms", [input.platform]);
+      if (input.platform) query = withPlatformFilter(query, input.platform);
       const { data } = await query;
       const posts = data ?? [];
 

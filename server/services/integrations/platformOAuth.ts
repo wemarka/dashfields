@@ -163,43 +163,45 @@ async function fetchUserInfo(platform: string, accessToken: string, clientId?: s
 
   const res = await fetch(config.userInfoUrl, { headers });
   if (!res.ok) return null;
-  const data = await res.json() as any;
-
-  // Normalize per platform
+  // Platform-specific API response shapes — each platform has a different structure
   if (platform === "twitter") {
+    const d = await res.json() as { data?: { id?: string; name?: string; username?: string; profile_image_url?: string } };
     return {
-      id:      data.data?.id ?? "unknown",
-      name:    data.data?.name ?? "Twitter User",
-      username: data.data?.username ?? null,
-      picture: data.data?.profile_image_url ?? null,
+      id:       d.data?.id ?? "unknown",
+      name:     d.data?.name ?? "Twitter User",
+      username: d.data?.username ?? null,
+      picture:  d.data?.profile_image_url ?? null,
     };
   }
   if (platform === "tiktok") {
-    const u = data.data?.user ?? {};
+    const d = await res.json() as { data?: { user?: { open_id?: string; display_name?: string; avatar_url?: string } } };
+    const u = d.data?.user ?? {};
     return {
-      id:      u.open_id ?? "unknown",
-      name:    u.display_name ?? "TikTok User",
+      id:       u.open_id ?? "unknown",
+      name:     u.display_name ?? "TikTok User",
       username: null,
-      picture: u.avatar_url ?? null,
+      picture:  u.avatar_url ?? null,
     };
   }
   if (platform === "linkedin") {
-    const firstName = data.localizedFirstName ?? "";
-    const lastName  = data.localizedLastName  ?? "";
+    const d = await res.json() as { id?: string; localizedFirstName?: string; localizedLastName?: string };
+    const firstName = d.localizedFirstName ?? "";
+    const lastName  = d.localizedLastName  ?? "";
     return {
-      id:      data.id ?? "unknown",
-      name:    `${firstName} ${lastName}`.trim() || "LinkedIn User",
+      id:       d.id ?? "unknown",
+      name:     `${firstName} ${lastName}`.trim() || "LinkedIn User",
       username: null,
-      picture: null,
+      picture:  null,
     };
   }
   if (platform === "youtube") {
-    const channel = (data.items ?? [])[0];
+    const d = await res.json() as { items?: Array<{ id?: string; snippet?: { title?: string; customUrl?: string; thumbnails?: { default?: { url?: string } } } }> };
+    const channel = d.items?.[0];
     return {
-      id:      channel?.id ?? "unknown",
-      name:    channel?.snippet?.title ?? "YouTube Channel",
+      id:       channel?.id ?? "unknown",
+      name:     channel?.snippet?.title ?? "YouTube Channel",
       username: channel?.snippet?.customUrl ?? null,
-      picture: channel?.snippet?.thumbnails?.default?.url ?? null,
+      picture:  channel?.snippet?.thumbnails?.default?.url ?? null,
     };
   }
   return null;

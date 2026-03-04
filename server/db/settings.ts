@@ -146,7 +146,7 @@ export async function upsertUserSettings(
   if (existingRaw) {
     const { data, error } = await sb
       .from("user_settings")
-      .update(topLevel as any)
+      .update(topLevel)
       .eq("user_id", userId)
       .select("*")
       .maybeSingle();
@@ -156,7 +156,7 @@ export async function upsertUserSettings(
 
   const { data, error } = await sb
     .from("user_settings")
-    .insert(topLevel as any)
+    .insert(topLevel)
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -205,7 +205,7 @@ export async function createNotification(notification: {
       message:  notification.message,
       is_read:  false,
       metadata: notification.metadata ?? null,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -216,7 +216,7 @@ export async function markNotificationRead(id: number, userId: number): Promise<
   const sb = getSupabase();
   const { error } = await sb
     .from("notifications")
-    .update({ is_read: true } as any)
+    .update({ is_read: true })
     .eq("id", id)
     .eq("user_id", userId);
   if (error) throw error;
@@ -226,7 +226,7 @@ export async function markAllNotificationsRead(userId: number): Promise<void> {
   const sb = getSupabase();
   const { error } = await sb
     .from("notifications")
-    .update({ is_read: true } as any)
+    .update({ is_read: true })
     .eq("user_id", userId)
     .eq("is_read", false);
   if (error) throw error;
@@ -281,7 +281,7 @@ export async function createAlertRule(rule: {
       name:         rule.name ?? null,
       is_active:    true,
       workspace_id: rule.workspaceId ?? null,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -301,7 +301,7 @@ export async function updateAlertRule(
 
   const { data, error } = await sb
     .from("alert_rules")
-    .update(payload as any)
+    .update(payload)
     .eq("id", id)
     .eq("user_id", userId)
     .select("*")

@@ -36,7 +36,7 @@ export async function createInvitation(params: {
   // Revoke any existing pending invitations for this email+workspace
   await sb
     .from("workspace_invitations")
-    .update({ status: "revoked", updated_at: new Date().toISOString() } as any)
+    .update({ status: "revoked", updated_at: new Date().toISOString() })
     .eq("workspace_id", params.workspaceId)
     .eq("email", params.email.toLowerCase())
     .eq("status", "pending");
@@ -51,7 +51,7 @@ export async function createInvitation(params: {
       token,
       status:       "pending",
       expires_at:   expiresAt,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -79,7 +79,7 @@ export async function acceptInvitation(token: string, userId: number): Promise<{
   if (!inv) return null;
   if (inv.status !== "pending") throw new Error("Invitation is no longer valid.");
   if (new Date(inv.expires_at) < new Date()) {
-    await sb.from("workspace_invitations").update({ status: "expired", updated_at: new Date().toISOString() } as any).eq("id", inv.id);
+    await sb.from("workspace_invitations").update({ status: "expired", updated_at: new Date().toISOString() }).eq("id", inv.id);
     throw new Error("Invitation has expired.");
   }
 
@@ -91,7 +91,7 @@ export async function acceptInvitation(token: string, userId: number): Promise<{
       user_id:      userId,
       role:         inv.role,
       accepted_at:  new Date().toISOString(),
-    } as any, { onConflict: "workspace_id,user_id" });
+    }, { onConflict: "workspace_id,user_id" });
   if (memberError) throw memberError;
 
   // Mark invitation as accepted
@@ -101,7 +101,7 @@ export async function acceptInvitation(token: string, userId: number): Promise<{
       status:      "accepted",
       accepted_at: new Date().toISOString(),
       updated_at:  new Date().toISOString(),
-    } as any)
+    })
     .eq("id", inv.id);
 
   return { workspaceId: inv.workspace_id, role: inv.role };
@@ -124,7 +124,7 @@ export async function revokeInvitation(id: number, workspaceId: number): Promise
   const sb = getSupabase();
   const { error } = await sb
     .from("workspace_invitations")
-    .update({ status: "revoked", updated_at: new Date().toISOString() } as any)
+    .update({ status: "revoked", updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("workspace_id", workspaceId);
   if (error) throw error;

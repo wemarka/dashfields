@@ -1,4 +1,4 @@
-// metaOAuth.ts
+// server/services/integrations/metaOAuth.ts
 // Handles Meta (Facebook + Instagram) OAuth 2.0 flow.
 // Registers /api/oauth/meta/init and /api/oauth/meta/callback routes.
 // After connect: saves ad accounts (facebook) + Instagram business accounts.
@@ -8,6 +8,13 @@ import { getUserByOpenId } from "../../db/users";
 import { sdk } from "../../_core/sdk";
 import { COOKIE_NAME } from "@shared/const";
 import * as jose from "jose";
+import type {
+  MetaTokenResponse,
+  MetaUser,
+  MetaAdAccount,
+  MetaFacebookPage,
+  MetaApiErrorResponse,
+} from "@shared/types/meta";
 
 const META_GRAPH_BASE = "https://graph.facebook.com/v19.0";
 
@@ -27,52 +34,40 @@ async function exchangeForLongLivedToken(shortToken: string): Promise<string> {
   url.searchParams.set("fb_exchange_token", shortToken);
 
   const res  = await fetch(url.toString());
-  const json = await res.json() as Record<string, unknown>;
-  if (json.error) throw new Error(String((json.error as any).message ?? "Token exchange failed"));
-  return String(json.access_token ?? shortToken);
+  const json = await res.json() as MetaTokenResponse;
+  if (json.error) throw new Error(json.error.message ?? "Token exchange failed");
+  return json.access_token ?? shortToken;
 }
 
 /** Fetch user's ad accounts from Meta */
-async function getAdAccounts(accessToken: string) {
+async function getAdAccounts(accessToken: string): Promise<MetaAdAccount[]> {
   const url = new URL(`${META_GRAPH_BASE}/me/adaccounts`);
   url.searchParams.set("access_token", accessToken);
   url.searchParams.set("fields", "id,name,account_status,currency,timezone_name");
   const res  = await fetch(url.toString());
-  const json = await res.json() as any;
+  const json = await res.json() as { data?: MetaAdAccount[] } & Partial<MetaApiErrorResponse>;
   if (json.error) throw new Error(json.error.message ?? "Failed to fetch ad accounts");
-  return (json.data ?? []) as Array<{ id: string; name: string; account_status: number; currency: string }>;
+  return json.data ?? [];
 }
 
 /** Fetch Meta user info */
-async function getMetaUserInfo(accessToken: string) {
+async function getMetaUserInfo(accessToken: string): Promise<MetaUser> {
   const url = new URL(`${META_GRAPH_BASE}/me`);
   url.searchParams.set("access_token", accessToken);
   url.searchParams.set("fields", "id,name,picture");
   const res  = await fetch(url.toString());
-  const json = await res.json() as any;
-  return json as { id: string; name: string; picture?: { data?: { url?: string } } };
+  return res.json() as Promise<MetaUser>;
 }
 
 /** Fetch Facebook Pages with Instagram business accounts */
-async function getFacebookPages(accessToken: string) {
+async function getFacebookPages(accessToken: string): Promise<MetaFacebookPage[]> {
   const url = new URL(`${META_GRAPH_BASE}/me/accounts`);
   url.searchParams.set("access_token", accessToken);
   url.searchParams.set("fields", "id,name,access_token,instagram_business_account{id,name,username,profile_picture_url,followers_count}");
   const res  = await fetch(url.toString());
-  const json = await res.json() as any;
+  const json = await res.json() as { data?: MetaFacebookPage[] } & Partial<MetaApiErrorResponse>;
   if (json.error) return [];
-  return (json.data ?? []) as Array<{
-    id: string;
-    name: string;
-    access_token: string;
-    instagram_business_account?: {
-      id: string;
-      name?: string;
-      username?: string;
-      profile_picture_url?: string;
-      followers_count?: number;
-    };
-  }>;
+  return json.data ?? [];
 }
 
 /** Extract user ID from session cookie */
@@ -84,7 +79,7 @@ async function getUserIdFromCookie(req: Request): Promise<number | null> {
     const token = match[1];
     const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "");
     const { payload } = await jose.jwtVerify(token, secret);
-    const openId = payload.sub ?? payload.openId as string;
+    const openId = payload.sub ?? (payload.openId as string);
     if (!openId) return null;
     const user = await getUserByOpenId(String(openId));
     return user?.id ?? null;
@@ -113,7 +108,7 @@ async function upsertAccount(params: {
     .eq("user_id", params.userId)
     .eq("platform", params.platform)
     .eq("platform_account_id", params.platformAccountId)
-    .maybeSingle();
+    .maybeSingle<{ id: number }>();
 
   if (existing) {
     await sb
@@ -198,7 +193,10 @@ export function registerMetaOAuthRoutes(app: Express) {
     let returnPath = "/connections";
 
     try {
-      const parsed = JSON.parse(Buffer.from(state, "base64url").toString());
+      const parsed = JSON.parse(Buffer.from(state, "base64url").toString()) as {
+        origin?: string;
+        returnPath?: string;
+      };
       origin     = parsed.origin     ?? "";
       returnPath = parsed.returnPath ?? "/connections";
     } catch {
@@ -223,10 +221,10 @@ export function registerMetaOAuthRoutes(app: Express) {
       tokenUrl.searchParams.set("code",          code);
 
       const tokenRes  = await fetch(tokenUrl.toString());
-      const tokenJson = await tokenRes.json() as any;
+      const tokenJson = await tokenRes.json() as MetaTokenResponse;
       if (tokenJson.error) throw new Error(tokenJson.error.message ?? "Token exchange failed");
 
-      const shortToken = String(tokenJson.access_token);
+      const shortToken = tokenJson.access_token;
 
       // Exchange for long-lived token (60 days)
       const longToken = await exchangeForLongLivedToken(shortToken);
@@ -234,8 +232,8 @@ export function registerMetaOAuthRoutes(app: Express) {
       // Get Meta user info + ad accounts + pages
       const [metaUser, adAccounts, pages] = await Promise.all([
         getMetaUserInfo(longToken),
-        getAdAccounts(longToken).catch(() => []),
-        getFacebookPages(longToken).catch(() => []),
+        getAdAccounts(longToken).catch(() => [] as MetaAdAccount[]),
+        getFacebookPages(longToken).catch(() => [] as MetaFacebookPage[]),
       ]);
 
       // Get our app user from session
@@ -295,9 +293,10 @@ export function registerMetaOAuthRoutes(app: Express) {
       ].filter(Boolean).join(", ");
 
       res.redirect(302, `${origin}${returnPath}?meta_connected=1&accounts=${fbCount + igCount}&summary=${encodeURIComponent(summary)}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "unknown";
       console.error("[Meta OAuth] Callback error:", err);
-      res.redirect(302, `${origin}${returnPath}?meta_error=${encodeURIComponent(err.message ?? "unknown")}`);
+      res.redirect(302, `${origin}${returnPath}?meta_error=${encodeURIComponent(message)}`);
     }
   });
 }

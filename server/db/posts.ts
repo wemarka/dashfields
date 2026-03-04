@@ -68,7 +68,7 @@ export async function createPost(post: {
       scheduled_at:       post.scheduledAt ?? null,
       metadata:           post.metadata ?? null,
       workspace_id:       post.workspaceId ?? null,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -90,7 +90,7 @@ export async function updatePostStatus(
   }
   const { data, error } = await sb
     .from("posts")
-    .update(payload as any)
+    .update(payload)
     .eq("id", postId)
     .eq("user_id", userId)
     .select("*")

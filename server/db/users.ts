@@ -76,7 +76,7 @@ export async function upsertUser(user: {
         login_method:   user.loginMethod  ?? existing.loginMethod,
         last_signed_in: user.lastSignedIn?.toISOString() ?? now,
         updated_at:     now,
-      } as any)
+      })
       .eq("open_id", user.openId)
       .select("*")
       .maybeSingle();
@@ -92,7 +92,7 @@ export async function upsertUser(user: {
       email:          user.email ?? null,
       login_method:   user.loginMethod ?? null,
       last_signed_in: user.lastSignedIn?.toISOString() ?? now,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;

@@ -93,7 +93,7 @@ export async function createCampaign(campaign: {
       platform_campaign_id: campaign.platformCampaignId ?? null,
       metadata:             campaign.metadata ?? null,
       workspace_id:         campaign.workspaceId ?? null,
-    } as any)
+    })
     .select("*")
     .maybeSingle();
   if (error) throw error;
@@ -108,7 +108,7 @@ export async function updateCampaignStatus(
   const sb = getSupabase();
   const { data, error } = await sb
     .from("campaigns")
-    .update({ status, updated_at: new Date().toISOString() } as any)
+    .update({ status, updated_at: new Date().toISOString() })
     .eq("id", campaignId)
     .eq("user_id", userId)
     .select("*")
@@ -173,6 +173,6 @@ export async function upsertCampaignMetric(metric: {
       cpm:         metric.cpm ?? null,
       ctr:         metric.ctr ?? null,
       roas:        metric.roas ?? null,
-    } as any, { onConflict: "campaign_id,date" });
+    }, { onConflict: "campaign_id,date" });
   if (error) throw error;
 }

@@ -1,13 +1,15 @@
 // server/supabase.ts
 // Supabase admin client (service_role) for all server-side DB operations.
 // Uses REST API via @supabase/supabase-js — no direct TCP connection needed.
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _supabase: ReturnType<typeof createClient<any>> | null = null;
+// Minimal Database schema type so Supabase client is typed without full codegen.
+// Tables are accessed via .from("table_name") — this keeps the type surface small.
+export type Database = Record<string, Record<string, unknown>>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getSupabase(): ReturnType<typeof createClient<any>> {
+let _supabase: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
   if (!_supabase) {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;

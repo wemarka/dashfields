@@ -614,8 +614,8 @@ export default function Connections() {
       username:          acc.username,
       platformAccountId: acc.platform_account_id ?? String(acc.id),
       isActive:          acc.is_active,
-      profilePicture:    (acc as any).profile_picture ?? null,
-      tokenExpiresAt:    (acc as any).token_expires_at ?? null,
+      profilePicture:    acc.profile_picture ?? null,
+      tokenExpiresAt:    acc.token_expires_at ?? null,
       updatedAt:         acc.updated_at,
     });
   });
@@ -623,7 +623,7 @@ export default function Connections() {
   const totalConnected    = accounts.length;
   const connectedPlatforms = Object.keys(accountsByPlatform).length;
   const expiredCount      = accounts.filter((a) => {
-    const exp = (a as any).token_expires_at;
+    const exp = a.token_expires_at;
     return exp && new Date(exp) < new Date();
   }).length;
 

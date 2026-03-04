@@ -134,12 +134,14 @@ class SDKServer {
     const data = await this.oauthService.getUserInfoByToken({
       accessToken,
     } as ExchangeTokenResponse);
+    // The API may return a `platforms` array in addition to `platform`
+    const rawData = data as GetUserInfoResponse & { platforms?: unknown };
     const loginMethod = this.deriveLoginMethod(
-      (data as any)?.platforms,
-      (data as any)?.platform ?? data.platform ?? null
+      rawData?.platforms,
+      rawData?.platform ?? null
     );
     return {
-      ...(data as any),
+      ...rawData,
       platform: loginMethod,
       loginMethod,
     } as GetUserInfoResponse;
@@ -245,15 +247,17 @@ class SDKServer {
       payload
     );
 
-    const loginMethod = this.deriveLoginMethod(
-      (data as any)?.platforms,
-      (data as any)?.platform ?? data.platform ?? null
+    // The API may return a `platforms` array in addition to `platform`
+    const rawData2 = data as GetUserInfoResponse & { platforms?: unknown };
+    const loginMethod2 = this.deriveLoginMethod(
+      rawData2?.platforms,
+      rawData2?.platform ?? null
     );
     return {
-      ...(data as any),
-      platform: loginMethod,
-      loginMethod,
-    } as GetUserInfoWithJwtResponse;
+      ...rawData2,
+      platform: loginMethod2,
+      loginMethod: loginMethod2,
+    } as GetUserInfoResponse;
   }
 
   async authenticateRequest(req: Request): Promise<User> {

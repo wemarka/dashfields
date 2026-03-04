@@ -148,7 +148,7 @@ function ApiKeysSection() {
           </div>
         ) : (
           <div className="space-y-2">
-            {keys.map((k: any) => (
+            {keys.map((k) => (
               <div key={k.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
                 <div className="flex items-center gap-3">
                   <PlatformIcon platform={k.platform} className="w-4 h-4 text-muted-foreground" />
@@ -195,7 +195,7 @@ function DangerZone() {
       toast.success("Account deleted. You will be logged out.");
       setTimeout(() => { window.location.href = "/"; }, 2000);
     },
-    onError: (e: any) => toast.error("Failed: " + e.message),
+    onError: (e: { message: string }) => toast.error("Failed: " + e.message),
   });
   return (
     <div className="pt-4 border-t border-red-200 dark:border-red-900">
@@ -290,7 +290,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (settings?.timezone) setTimezone(settings.timezone);
-    if ((settings as any)?.currency) setCurrency((settings as any).currency);
+    if (settings?.currency) setCurrency(settings.currency);
   }, [settings]);
 
   const handleSaveAccount = () => {
@@ -308,8 +308,8 @@ export default function Settings() {
 
   // ── Data Export ────────────────────────────────────────────────────────────
   const exportDataMutation = trpc.settings.exportData?.useMutation?.({
-    onSuccess: (data: any) => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    onSuccess: (data: unknown) => {
+      const blob = new Blob([JSON.stringify(data ?? {}, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -318,7 +318,7 @@ export default function Settings() {
       URL.revokeObjectURL(url);
       toast.success("Data exported successfully");
     },
-    onError: (e: any) => toast.error("Export failed: " + e.message),
+    onError: (e: { message: string }) => toast.error("Export failed: " + e.message),
   });
 
   // ── Font size ──────────────────────────────────────────────────────────────
@@ -354,7 +354,7 @@ export default function Settings() {
   const { data: metaStatus }    = trpc.meta.connectionStatus.useQuery();
 
   const connectedPlatformIds = new Set([
-    ...accounts.map((a: any) => a.platform),
+    ...accounts.map((a) => a.platform),
     ...(metaStatus?.connected ? ["facebook"] : []),
   ]);
 

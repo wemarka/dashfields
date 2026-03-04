@@ -144,7 +144,7 @@ async function gatherData(userId: number, datePreset: string): Promise<PlatformR
   for (const acc of accounts) {
     try {
       if (acc.platform === "facebook" && acc.access_token && acc.platform_account_id) {
-        const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, datePreset as any);
+        const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, datePreset);
         if (raw && raw.length > 0) {
           const r = raw[0];
           const impressions = parseInt(r.impressions ?? "0");
@@ -160,7 +160,7 @@ async function gatherData(userId: number, datePreset: string): Promise<PlatformR
             ctr:         impressions > 0 ? parseFloat((clicks / impressions * 100).toFixed(2)) : 0,
             cpc:         clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
             cpm:         impressions > 0 ? parseFloat((spend / impressions * 1000).toFixed(2)) : 0,
-            engagements: parseInt(r.actions?.find((a: any) => a.action_type === "post_engagement")?.value ?? "0"),
+            engagements: parseInt(r.actions?.find((a: { action_type: string; value: string }) => a.action_type === "post_engagement")?.value ?? "0"),
             currency:    "USD",
             isLive:      true,
           });

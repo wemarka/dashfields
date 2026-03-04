@@ -197,7 +197,7 @@ export default function Audience() {
       : "";
     analyzeAudience.mutate({
       platforms,
-      totalPosts:    (data as any)?.summary?.totalPosts ?? 0,
+      totalPosts:    data?.postCount ?? 0,
       totalReach:    data?.summary?.totalReach ?? 0,
       avgEngagement: Number(data?.summary?.avgEngagementRate ?? 0),
       topPlatform,

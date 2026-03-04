@@ -131,6 +131,6 @@ export const schedulerRouter = router({
       .eq("user_id", ctx.user.id)
       .maybeSingle();
 
-    return { lastChecked: (data as any)?.alerts_last_checked ?? null };
+    return { lastChecked: (data as { alerts_last_checked: string | null } | null)?.alerts_last_checked ?? null };
   }),
 });
