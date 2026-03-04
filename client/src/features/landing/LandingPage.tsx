@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/core/components/ui/button";
+import { appUrl } from "@/lib/domain";
 import {
   Brain,
   BarChart3,
@@ -149,7 +150,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              <Link href="/login">
+              <a href={appUrl("/login")}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -157,15 +158,15 @@ export default function LandingPage() {
                 >
                   Sign In
                 </Button>
-              </Link>
-              <Link href="/register">
+              </a>
+              <a href={appUrl("/register")}>
                 <Button
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200"
                 >
                   Start Free Trial
                 </Button>
-              </Link>
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -200,16 +201,16 @@ export default function LandingPage() {
               Integrations
             </button>
             <div className="flex gap-3 pt-2">
-              <Link href="/login" className="flex-1">
+              <a href={appUrl("/login")} className="flex-1">
                 <Button variant="outline" size="sm" className="w-full">
                   Sign In
                 </Button>
-              </Link>
-              <Link href="/register" className="flex-1">
+              </a>
+              <a href={appUrl("/register")} className="flex-1">
                 <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   Start Free Trial
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         )}
@@ -247,7 +248,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Link href="/register">
+              <a href={appUrl("/register")}>
                 <Button
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base shadow-lg shadow-blue-200 w-full sm:w-auto"
@@ -255,7 +256,7 @@ export default function LandingPage() {
                   Start Free Trial — No Credit Card
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </Link>
+              </a>
               <button
                 onClick={() => scrollTo("features")}
                 className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
@@ -555,7 +556,7 @@ export default function LandingPage() {
           </div>
 
           <AnimatedSection className="text-center mt-12">
-            <Link href="/register">
+            <a href={appUrl("/register")}>
               <Button
                 size="lg"
                 className="bg-white text-blue-700 hover:bg-blue-50 px-8 font-semibold shadow-lg"
@@ -563,7 +564,7 @@ export default function LandingPage() {
                 Try AI Tools Free
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
-            </Link>
+            </a>
           </AnimatedSection>
         </div>
       </section>
@@ -658,11 +659,11 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/register">
+                <a href={appUrl("/register")}>
                   <Button variant="outline" className="w-full border-gray-200 hover:border-blue-300">
                     Get Started Free
                   </Button>
-                </Link>
+                </a>
               </div>
             </AnimatedSection>
 
@@ -698,12 +699,12 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/register">
+                <a href={appUrl("/register")}>
                   <Button className="w-full bg-white text-blue-700 hover:bg-blue-50 font-semibold">
                     Start Pro Trial
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
-                </Link>
+                </a>
               </div>
             </AnimatedSection>
 
@@ -786,7 +787,7 @@ export default function LandingPage() {
               their business faster.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
+              <a href={appUrl("/register")}>
                 <Button
                   size="lg"
                   className="bg-white text-blue-700 hover:bg-blue-50 px-8 font-semibold shadow-lg w-full sm:w-auto"
@@ -794,7 +795,7 @@ export default function LandingPage() {
                   Start Your Free Trial
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </Link>
+              </a>
               <p className="text-blue-200 text-sm">No credit card required · Cancel anytime</p>
             </div>
           </AnimatedSection>

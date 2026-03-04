@@ -1355,3 +1355,11 @@
 - [x] RTL support via lang attribute
 - [x] 0 TypeScript errors
 - [x] All tests passing
+
+## Phase 15 — Domain-Based Routing
+- [x] Create client/src/lib/domain.ts with isMarketingDomain() and appUrl() helpers
+- [x] App.tsx — MarketingRouter (dashfields.com shows Landing only, redirects app routes to app.dashfields.com)
+- [x] App.tsx — AppRouter (app.dashfields.com shows full application)
+- [x] LandingPage CTAs — /login and /register links use appUrl() for cross-domain navigation
+- [x] 0 TypeScript errors
+- [x] All 410 tests passing

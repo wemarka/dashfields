@@ -6,11 +6,18 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./core/contexts/ThemeContext";
 import { ActiveAccountProvider } from "./core/contexts/ActiveAccountContext";
 import { WorkspaceProvider } from "./core/contexts/WorkspaceContext";
+import { isMarketingDomain, APP_DOMAIN } from "./lib/domain";
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {
   const [, setLocation] = useLocation();
   useEffect(() => { setLocation(to); }, [to, setLocation]);
+  return null;
+}
+
+// ─── External redirect (hard navigation to another domain) ───────────────────
+function ExternalRedirect({ to }: { to: string }) {
+  useEffect(() => { window.location.href = to; }, [to]);
   return null;
 }
 
@@ -68,7 +75,32 @@ function PageLoader() {
   );
 }
 
-function Router() {
+// ─── Marketing Router (dashfields.com / www.dashfields.com) ──────────────────
+// Only shows Landing Page + legal pages.
+// Auth/app routes redirect to app.dashfields.com.
+function MarketingRouter() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/"        component={LandingPage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/terms"   component={TermsPage} />
+        {/* Redirect any app/auth routes to app subdomain */}
+        <Route path="/login"            component={() => <ExternalRedirect to={`${APP_DOMAIN}/login`} />} />
+        <Route path="/register"         component={() => <ExternalRedirect to={`${APP_DOMAIN}/register`} />} />
+        <Route path="/dashboard"        component={() => <ExternalRedirect to={`${APP_DOMAIN}/dashboard`} />} />
+        <Route path="/forgot-password"  component={() => <ExternalRedirect to={`${APP_DOMAIN}/forgot-password`} />} />
+        <Route path="/auth/:rest*"      component={() => <ExternalRedirect to={`${APP_DOMAIN}${window.location.pathname}`} />} />
+        {/* Catch-all: redirect to landing */}
+        <Route component={LandingPage} />
+      </Switch>
+    </Suspense>
+  );
+}
+
+// ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
+// Full application with all routes.
+function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -98,7 +130,7 @@ function Router() {
         <Route path="/compare"             component={PeriodComparison} />
         <Route path="/hashtags"             component={HashtagAnalytics} />
         <Route path="/workspace-settings"   component={WorkspaceSettings} />
-        <Route path="/invite/:token"          component={AcceptInvite} />
+        <Route path="/invite/:token"        component={AcceptInvite} />
         {/* ── Auth routes (Supabase) ─────────────────────────────────── */}
         <Route path="/login"                component={LoginPage} />
         <Route path="/register"             component={RegisterPage} />
@@ -117,6 +149,14 @@ function Router() {
       </Switch>
     </Suspense>
   );
+}
+
+// ─── Domain-aware Router ─────────────────────────────────────────────────────
+function Router() {
+  if (isMarketingDomain()) {
+    return <MarketingRouter />;
+  }
+  return <AppRouter />;
 }
 
 // Show splash only once per session
