@@ -32,10 +32,10 @@ function getDateRange(preset: string): { since: string; until: string } {
   return { since: since.toISOString().split("T")[0], until };
 }
 
-// ─── Query posts ──────────────────────────────────────────────────────────────
-async function fetchPosts(userId: number, since: string, until: string) {
+// ─── Query posts ─────────────────// ─── Query posts ────────────────────────────────────
+async function fetchPosts(userId: number, since: string, until: string, workspaceId?: number | null) {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("posts")
     .select("id, platforms, status, post_type, likes, comments, shares, reach, impressions, published_at, content")
     .eq("user_id", userId)
@@ -43,11 +43,13 @@ async function fetchPosts(userId: number, since: string, until: string) {
     .gte("published_at", since)
     .lte("published_at", until + "T23:59:59")
     .order("published_at", { ascending: false });
+  if (workspaceId != null) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query;
   if (error) throw error;
   return data ?? [];
 }
 
-// ─── Post record type ────────────────────────────────────────────────────────
+// ─── Post record type ────────────────────────────────────────────────
 interface AudiencePostRecord {
   id: number;
   platforms: string | string[] | null;
@@ -154,12 +156,13 @@ export const audienceRouter = router({
    */
   getAudienceData: protectedProcedure
     .input(z.object({
-      platform:   z.string().default("all"),
-      datePreset: z.string().default("last_30d"),
+      platform:    z.string().default("all"),
+      datePreset:  z.string().default("last_30d"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
       const { since, until } = getDateRange(input.datePreset);
-      const allPosts = await fetchPosts(ctx.user.id, since, until);
+      const allPosts = await fetchPosts(ctx.user.id, since, until, input.workspaceId);
       const posts    = filterByPlatform(allPosts, input.platform === "all" ? null : input.platform);
       return buildSummary(posts, input.platform);
     }),
@@ -170,12 +173,13 @@ export const audienceRouter = router({
    */
   getPlatformComparison: protectedProcedure
     .input(z.object({
-      metric:     z.enum(["reach", "impressions", "engagement"]).default("reach"),
-      datePreset: z.string().default("last_30d"),
+      metric:      z.enum(["reach", "impressions", "engagement"]).default("reach"),
+      datePreset:  z.string().default("last_30d"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
       const { since, until } = getDateRange(input.datePreset);
-      const allPosts = await fetchPosts(ctx.user.id, since, until);
+      const allPosts = await fetchPosts(ctx.user.id, since, until, input.workspaceId);
 
       return KNOWN_PLATFORMS
         .map(platform => {
@@ -198,13 +202,14 @@ export const audienceRouter = router({
    */
   getTopPosts: protectedProcedure
     .input(z.object({
-      platform:   z.string().default("all"),
-      datePreset: z.string().default("last_30d"),
-      limit:      z.number().default(10),
+      platform:    z.string().default("all"),
+      datePreset:  z.string().default("last_30d"),
+      limit:       z.number().default(10),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
       const { since, until } = getDateRange(input.datePreset);
-      const allPosts = await fetchPosts(ctx.user.id, since, until);
+      const allPosts = await fetchPosts(ctx.user.id, since, until, input.workspaceId);
       const posts    = filterByPlatform(allPosts, input.platform === "all" ? null : input.platform);
       return posts
         .map(p => ({

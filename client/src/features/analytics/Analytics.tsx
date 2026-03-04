@@ -19,6 +19,7 @@ import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,
@@ -47,25 +48,28 @@ export default function Analytics() {
   const [showExport, setShowExport] = useState(false);
   const { t } = useTranslation();
   const { activeAccountId } = useActiveAccount();
+  const { activeWorkspace } = useWorkspace();
+  const workspaceId = activeWorkspace?.id;
 
   // Multi-platform data — filtered by active account if selected
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =
     trpc.platforms.allInsights.useQuery({
       datePreset,
       ...(activeAccountId ? { accountId: activeAccountId } : {}),
+      ...(workspaceId ? { workspaceId } : {}),
     });
   const { data: accounts = [] } = trpc.social.list.useQuery();
 
   // Meta-specific campaign data (for charts when Meta is selected)
-  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
+  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId });
   const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } =
     trpc.meta.campaignInsights.useQuery(
-      { datePreset, limit: 20, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+      { datePreset, limit: 20, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
       { enabled: isMetaConnected }
     );
   const { data: compare } = trpc.meta.compareInsights.useQuery(
-    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
     { enabled: isMetaConnected }
   );
 

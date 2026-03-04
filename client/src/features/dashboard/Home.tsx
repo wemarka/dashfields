@@ -28,6 +28,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { Settings2 } from "lucide-react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
@@ -243,6 +244,8 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { activeAccountId } = useActiveAccount();
+  const { activeWorkspace } = useWorkspace();
+  const workspaceId = activeWorkspace?.id;
 
   const toggleWidget = (key: WidgetKey) => {
     setWidgets((prev) => {
@@ -266,21 +269,23 @@ export default function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = trpc.platforms.summary.useQuery({
     datePreset,
     ...(activeAccountId ? { accountId: activeAccountId } : {}),
+    ...(workspaceId ? { workspaceId } : {}),
   });
   const { data: allInsights = [], isLoading: insightsLoading } = trpc.platforms.allInsights.useQuery({
     datePreset,
     ...(activeAccountId ? { accountId: activeAccountId } : {}),
+    ...(workspaceId ? { workspaceId } : {}),
   });
 
   // Connected accounts
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId });
   const hasConnections = accounts.length > 0;
 
   // Meta-specific data
-  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
+  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId });
   const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } = trpc.meta.campaignInsights.useQuery(
-    { datePreset, limit: 10, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, limit: 10, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
     { enabled: isMetaConnected }
   );
 

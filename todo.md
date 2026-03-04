@@ -1166,3 +1166,12 @@
 - [x] إصلاح client/src/features/*.tsx: إزالة as any
 - [x] إصلاح client/src/core/components/ui/*.tsx
 - [x] التحقق النهائي: 0 any + 292/292 tests ✅
+
+## Phase 5 — Workspace Multi-Account Isolation ✅
+- [x] تعديل upsertSocialAccount لحفظ workspaceId عند OAuth
+- [x] تعديل OAuth callback (metaOAuth.ts) لتمرير workspaceId من state
+- [x] تعديل meta.ts router لفلترة social_accounts بـ workspace_id
+- [x] تعديل audience.ts: fetchPosts + 3 procedures بـ workspaceId
+- [x] تحديث Analytics.tsx + Home.tsx + AdvancedAnalytics.tsx + Campaigns.tsx لتمرير workspaceId
+- [x] كتابة server/workspace.isolation.test.ts (11 اختباراً)
+- [x] التحقق النهائي: 303/303 tests + 0 TS errors ✅

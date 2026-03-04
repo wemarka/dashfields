@@ -91,6 +91,7 @@ async function getUserIdFromCookie(req: Request): Promise<number | null> {
 /** Upsert a social account in Supabase */
 async function upsertAccount(params: {
   userId: number;
+  workspaceId?: number | null;
   platform: string;
   platformAccountId: string;
   name: string;
@@ -122,11 +123,14 @@ async function upsertAccount(params: {
         name:             params.name,
         username:         params.username ?? null,
         metadata:         params.metadata ?? {},
+        // Update workspace_id if provided (allows re-assigning to a workspace)
+        ...(params.workspaceId != null ? { workspace_id: params.workspaceId } : {}),
       })
       .eq("id", existing.id);
   } else {
     await sb.from("social_accounts").insert({
       user_id:             params.userId,
+      workspace_id:        params.workspaceId ?? null,
       platform:            params.platform,
       account_type:        params.platform === "facebook" ? "ad_account" : "business",
       platform_account_id: params.platformAccountId,
@@ -148,9 +152,10 @@ export function registerMetaOAuthRoutes(app: Express) {
    * Query params: ?origin=https://...&returnPath=/connections
    */
   app.get("/api/oauth/meta/init", (req: Request, res: Response) => {
-    const appId      = getMetaAppId();
-    const origin     = String(req.query.origin ?? "");
-    const returnPath = String(req.query.returnPath ?? "/connections");
+    const appId       = getMetaAppId();
+    const origin      = String(req.query.origin ?? "");
+    const returnPath  = String(req.query.returnPath ?? "/connections");
+    const workspaceId = req.query.workspaceId ? Number(req.query.workspaceId) : null;
 
     if (!appId) {
       res.redirect(302, `${origin}${returnPath}?meta_error=no_app_id`);
@@ -158,7 +163,7 @@ export function registerMetaOAuthRoutes(app: Express) {
     }
 
     const redirectUri = `${origin}/api/oauth/meta/callback`;
-    const state       = Buffer.from(JSON.stringify({ origin, returnPath })).toString("base64url");
+    const state       = Buffer.from(JSON.stringify({ origin, returnPath, workspaceId })).toString("base64url");
 
     const authUrl = new URL("https://www.facebook.com/v19.0/dialog/oauth");
     authUrl.searchParams.set("client_id",     appId);
@@ -192,13 +197,16 @@ export function registerMetaOAuthRoutes(app: Express) {
     let origin     = "";
     let returnPath = "/connections";
 
+    let workspaceId: number | null = null;
     try {
       const parsed = JSON.parse(Buffer.from(state, "base64url").toString()) as {
         origin?: string;
         returnPath?: string;
+        workspaceId?: number | null;
       };
-      origin     = parsed.origin     ?? "";
-      returnPath = parsed.returnPath ?? "/connections";
+      origin      = parsed.origin      ?? "";
+      returnPath  = parsed.returnPath  ?? "/connections";
+      workspaceId = parsed.workspaceId ?? null;
     } catch {
       // ignore parse error
     }
@@ -251,6 +259,7 @@ export function registerMetaOAuthRoutes(app: Express) {
         const accountId = account.id.replace("act_", "");
         await upsertAccount({
           userId,
+          workspaceId,
           platform: "facebook",
           platformAccountId: accountId,
           name: account.name,
@@ -270,6 +279,7 @@ export function registerMetaOAuthRoutes(app: Express) {
           const igToken = page.access_token || longToken;
           await upsertAccount({
             userId,
+            workspaceId,
             platform: "instagram",
             platformAccountId: ig.id,
             name: ig.name ?? page.name,

@@ -6,6 +6,7 @@ import { DatePresetSelector, type DatePreset } from "@/features/dashboard/compon
 import { trpc } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import {
   FunnelChart, Funnel, Tooltip, ResponsiveContainer, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
@@ -145,16 +146,18 @@ export default function AdvancedAnalytics() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const { t } = useTranslation();
   const { activeAccountId } = useActiveAccount();
+  const { activeWorkspace } = useWorkspace();
+  const workspaceId = activeWorkspace?.id;
 
-  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
+  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId });
   const isConnected = metaStatus?.connected ?? false;
 
   const { data: funnel, isLoading: funnelLoading } = trpc.meta.funnelData.useQuery(
-    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
     { enabled: isConnected }
   );
   const { data: attribution, isLoading: attrLoading } = trpc.meta.attributionData.useQuery(
-    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
     { enabled: isConnected }
   );
 

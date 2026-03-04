@@ -20,7 +20,8 @@ import {
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
 async function getMetaToken(
   userId: number,
-  accountId?: number
+  accountId?: number,
+  workspaceId?: number | null
 ): Promise<{ token: string; adAccountId: string } | null> {
   const sb = getSupabase();
   let query = sb
@@ -29,6 +30,11 @@ async function getMetaToken(
     .eq("user_id", userId)
     .eq("platform", "facebook")
     .eq("is_active", true);
+
+  // Filter by workspace if provided
+  if (workspaceId != null) {
+    query = query.eq("workspace_id", workspaceId);
+  }
 
   // If a specific account is requested, filter by id
   if (accountId) {
@@ -43,26 +49,33 @@ async function getMetaToken(
 // ─── Meta Router ─────────────────────────────────────────────────────────────
 export const metaRouter = router({
   /** Check if user has a connected Meta ad account */
-  connectionStatus: protectedProcedure.query(async ({ ctx }) => {
-    const sb = getSupabase();
-    const { data } = await sb
-      .from("social_accounts")
-      .select("id, name, platform_account_id, is_active, updated_at")
-      .eq("user_id", ctx.user.id)
-      .eq("platform", "facebook");
+  connectionStatus: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("social_accounts")
+        .select("id, name, platform_account_id, is_active, updated_at")
+        .eq("user_id", ctx.user.id)
+        .eq("platform", "facebook");
 
-    const accounts = (data ?? []) as { id: number; name: string | null; platform_account_id: string | null; is_active: boolean; updated_at: string }[];
-    return {
-      connected: accounts.length > 0 && !!accounts[0]?.is_active,
-      accounts: accounts.map(a => ({
-        id:                a.id,
-        name:              a.name,
-        platformAccountId: a.platform_account_id,
-        isActive:          a.is_active,
-        updatedAt:         a.updated_at,
-      })),
-    };
-  }),
+      if (input?.workspaceId != null) {
+        query = query.eq("workspace_id", input.workspaceId);
+      }
+
+      const { data } = await query;
+      const accounts = (data ?? []) as { id: number; name: string | null; platform_account_id: string | null; is_active: boolean; updated_at: string }[];
+      return {
+        connected: accounts.length > 0 && !!accounts[0]?.is_active,
+        accounts: accounts.map(a => ({
+          id:                a.id,
+          name:              a.name,
+          platformAccountId: a.platform_account_id,
+          isActive:          a.is_active,
+          updatedAt:         a.updated_at,
+        })),
+      };
+    }),
 
   /** Connect a Meta ad account by saving access token + account selection */
   connect: protectedProcedure
@@ -149,9 +162,10 @@ export const metaRouter = router({
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
       accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
       const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
       if (insights.length === 0) return null;
@@ -183,9 +197,10 @@ export const metaRouter = router({
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
       accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
 
       const prevPresetMap: Record<string, string> = {
@@ -231,9 +246,10 @@ export const metaRouter = router({
       ]).default("last_30d"),
       limit: z.number().min(1).max(50).default(20),
       accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return [];
       const insights = await getCampaignInsights(
         conn.adAccountId, conn.token, input.datePreset, input.limit
@@ -259,9 +275,10 @@ export const metaRouter = router({
         "today", "yesterday", "last_7d", "last_14d", "last_30d",
         "last_90d", "this_month", "last_month",
       ]).default("last_30d"),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
       if (!conn) return [];
       const daily = await getCampaignDailyInsights(
         input.campaignId, conn.token, input.datePreset
@@ -280,9 +297,9 @@ export const metaRouter = router({
 
   /** Get campaigns list from Meta */
   campaigns: protectedProcedure
-    .input(z.object({ limit: z.number().min(1).max(50).default(20) }))
+    .input(z.object({ limit: z.number().min(1).max(50).default(20), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
       if (!conn) return [];
       const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
       return campaigns.map(c => ({
@@ -307,9 +324,10 @@ export const metaRouter = router({
       lifetimeBudget: z.number().min(1).optional(),  // USD
       startTime:      z.string().optional(),
       stopTime:       z.string().optional(),
+      workspaceId:    z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
       if (!conn) throw new Error("Meta not connected");
       const result = await createMetaCampaign(conn.adAccountId, conn.token, {
         name:           input.name,
@@ -326,11 +344,12 @@ export const metaRouter = router({
   /** Toggle Meta campaign status (ACTIVE ↔ PAUSED) */
   toggleCampaignStatus: protectedProcedure
     .input(z.object({
-      campaignId: z.string().min(1),
-      status:     z.enum(["ACTIVE", "PAUSED"]),
+      campaignId:  z.string().min(1),
+      status:      z.enum(["ACTIVE", "PAUSED"]),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
       if (!conn) throw new Error("Meta not connected");
       const ok = await updateMetaCampaignStatus(input.campaignId, conn.token, input.status);
       return { success: ok };
@@ -341,9 +360,10 @@ export const metaRouter = router({
     .input(z.object({
       campaignId:  z.string().min(1),
       dailyBudget: z.number().min(1),  // USD
+      workspaceId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id);
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
       if (!conn) throw new Error("Meta not connected");
       const ok = await updateMetaCampaignBudget(input.campaignId, conn.token, input.dailyBudget);
       return { success: ok };
@@ -351,9 +371,9 @@ export const metaRouter = router({
 
   /** Conversion Funnel data — Impressions → Reach → Clicks → Leads → Conversions */
   funnelData: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional() }))
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
       try {
         const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
@@ -384,9 +404,9 @@ export const metaRouter = router({
 
   /** Attribution model comparison across campaigns */
   attributionData: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional() }))
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return { models: [], totalRoas: 0 };
       try {
         const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 10);
@@ -415,9 +435,9 @@ export const metaRouter = router({
 
   /** Spend forecast: project monthly spend based on current daily burn rate */
   spendForecast: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_7d"), accountId: z.number().optional() }))
+    .input(z.object({ datePreset: z.string().default("last_7d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
       try {
         const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
@@ -445,11 +465,12 @@ export const metaRouter = router({
   /** Get top performing campaign by spend */
   topCampaign: protectedProcedure
     .input(z.object({
-      datePreset: z.string().default("last_30d"),
-      accountId: z.number().optional(),
+      datePreset:  z.string().default("last_30d"),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId);
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
       try {
         const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 20);

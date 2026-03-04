@@ -45,21 +45,21 @@ export default function Campaigns() {
   // ── Data fetching ──────────────────────────────────────────────────────────
   const { data: localCampaigns = [], isLoading: localLoading } = trpc.campaigns.list.useQuery({ workspaceId: activeWorkspace?.id });
   const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
-  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
+  const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId: activeWorkspace?.id });
   const isMetaConnected = metaStatus?.connected ?? false;
 
   const {
     data: metaCampaigns = [],
     isLoading: metaLoading,
     refetch: refetchMeta,
-  } = trpc.meta.campaigns.useQuery({ limit: 50 }, { enabled: isMetaConnected });
+  } = trpc.meta.campaigns.useQuery({ limit: 50, workspaceId: activeWorkspace?.id }, { enabled: isMetaConnected });
 
   const {
     data: metaInsights = [],
     isLoading: insightsLoading,
     refetch: refetchInsights,
   } = trpc.meta.campaignInsights.useQuery(
-    { datePreset, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
+    { datePreset, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}), workspaceId: activeWorkspace?.id },
     { enabled: isMetaConnected }
   );
 
