@@ -11,6 +11,7 @@ import {
   numeric,
   jsonb,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ export const workspaceInviteStatusEnum = pgEnum("workspace_invite_status", ["pen
 export const users = pgTable("users", {
   id:            serial("id").primaryKey(),
   openId:        varchar("open_id", { length: 64 }).notNull().unique(),
+  supabaseUid:   uuid("supabase_uid").unique(),
   name:          text("name"),
   email:         varchar("email", { length: 320 }),
   loginMethod:   varchar("login_method", { length: 64 }),

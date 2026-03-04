@@ -43,6 +43,12 @@ const Insights          = lazy(() => import("./features/insights/Insights"));
 const Publishing        = lazy(() => import("./features/publishing/Publishing"));
 const WorkspaceSettings = lazy(() => import("./features/settings/WorkspaceSettings"));
 const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite"));
+// ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
+const LoginPage          = lazy(() => import("./features/auth/LoginPage"));
+const RegisterPage       = lazy(() => import("./features/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./features/auth/ForgotPasswordPage"));
+const ResetPasswordPage  = lazy(() => import("./features/auth/ResetPasswordPage"));
+const AuthCallbackPage   = lazy(() => import("./features/auth/AuthCallbackPage"));
 
 // ─── Page loading fallback ────────────────────────────────────────────────────
 function PageLoader() {
@@ -83,6 +89,12 @@ function Router() {
         <Route path="/hashtags"             component={HashtagAnalytics} />
         <Route path="/workspace-settings"   component={WorkspaceSettings} />
         <Route path="/invite/:token"          component={AcceptInvite} />
+        {/* ── Auth routes (Supabase) ─────────────────────────────────── */}
+        <Route path="/login"                component={LoginPage} />
+        <Route path="/register"             component={RegisterPage} />
+        <Route path="/forgot-password"      component={ForgotPasswordPage} />
+        <Route path="/auth/reset-password"  component={ResetPasswordPage} />
+        <Route path="/auth/callback"        component={AuthCallbackPage} />
         {/* ── Legacy / backward-compat routes ────────────────────────────── */}
         <Route path="/meta-connect"         component={() => <Redirect to="/connections" />} />
         <Route path="/insights"             component={Insights} />

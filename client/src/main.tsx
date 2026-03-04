@@ -7,20 +7,22 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl } from "./const";
 import "./index.css";
+import { supabase } from "@/core/lib/supabase";
+import { SupabaseAuthProvider } from "@/core/contexts/SupabaseAuthContext";
 
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
-
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
-
   if (!isUnauthorized) return;
-
-  window.location.href = getLoginUrl();
+  // Redirect to internal login page instead of Manus OAuth
+  const currentPath = window.location.pathname;
+  if (currentPath !== "/login" && !currentPath.startsWith("/auth/")) {
+    window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+  }
 };
 
 queryClient.getQueryCache().subscribe(event => {
@@ -44,6 +46,21 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
+      async headers() {
+        // Attach Supabase access token as Bearer if available
+        if (supabase) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            const token = data.session?.access_token;
+            if (token) {
+              return { Authorization: `Bearer ${token}` };
+            }
+          } catch {
+            // ignore — fall through to cookie-based auth (Manus)
+          }
+        }
+        return {};
+      },
       fetch(input, init) {
         return globalThis.fetch(input, {
           ...(init ?? {}),
@@ -55,10 +72,12 @@ const trpcClient = trpc.createClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-      <Toaster position="bottom-right" richColors />
-    </QueryClientProvider>
-  </trpc.Provider>
+  <SupabaseAuthProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <Toaster position="bottom-right" richColors />
+      </QueryClientProvider>
+    </trpc.Provider>
+  </SupabaseAuthProvider>
 );

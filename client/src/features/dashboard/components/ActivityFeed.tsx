@@ -2,7 +2,7 @@
 // Real-time activity feed using Supabase Realtime.
 // Shows latest events: new posts, budget alerts, reports, campaign changes.
 import { useEffect, useState, useRef } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase as sharedSupabase } from "@/core/lib/supabase";
 import {
   FileText, DollarSign, Bell, BarChart2, Calendar,
   CheckCircle2, AlertTriangle, Info, Zap,
@@ -78,16 +78,15 @@ interface ActivityFeedProps {
 export default function ActivityFeed({ userId, maxItems = 8 }: ActivityFeedProps) {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const channelRef = useRef<ReturnType<NonNullable<typeof sharedSupabase>["channel"]> | null>(null);
 
   useEffect(() => {
-    const sb = createClient(
-      import.meta.env.VITE_SUPABASE_URL as string,
-      import.meta.env.VITE_SUPABASE_ANON_KEY as string,
-    );
+    const sb = sharedSupabase;
+    if (!sb) { setLoading(false); return; }
 
     // ── Initial load ──────────────────────────────────────────────────────────
     async function loadInitial() {
+      if (!sb) return;
       setLoading(true);
       const initial: ActivityEvent[] = [];
 
@@ -102,7 +101,7 @@ export default function ActivityFeed({ userId, maxItems = 8 }: ActivityFeedProps
       (posts ?? []).forEach(p => initial.push(buildEventsFromPost(p as Record<string, unknown>)));
 
       // Recent notifications
-      const { data: notifs } = await sb
+      const { data: notifs } = await (sb as NonNullable<typeof sb>)
         .from("notifications")
         .select("id, title, message, type, created_at")
         .eq("user_id", userId)

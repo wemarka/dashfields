@@ -1265,3 +1265,61 @@
 - [x] AI Planner Panel: topic input + platform selector + days selector (7/14/30d)
 - [x] Generated Plan cards مع "+ Add to Calendar" action
 - [x] 383/383 tests + 0 TS errors ✅
+
+## Phase 12 — Supabase Migration (Independent Architecture)
+- [ ] Phase 1: تحليل تبعيات Manus وإنشاء تقرير كامل
+- [ ] Phase 2: صفحات Auth داخلية (Login/Register/Forgot/Reset) + Supabase Auth
+- [ ] Phase 2: AuthContext/AuthProvider + useAuth() hook + ProtectedRoute
+- [ ] Phase 2: استبدال كل redirect إلى manus.im بصفحات Auth الداخلية
+- [ ] Phase 3: تحديث Drizzle config → Supabase PostgreSQL
+- [ ] Phase 3: RLS policies لكل الجداول
+- [ ] Phase 5: تنظيف Manus references من الكود
+- [ ] Phase 5: MIGRATION.md + .env.example محدّث
+
+## Phase 12 — Supabase Auth Migration
+- [ ] تحديث server/_core/context.ts لاستخدام Supabase JWT
+- [ ] تحديث server/_core/env.ts بإزالة Manus vars وإضافة Supabase vars
+- [ ] تحديث server/db/users.ts لدعم supabase_uid
+- [ ] تحديث server/routers.ts - auth.logout يمسح Supabase session
+- [ ] بناء client/src/core/lib/supabase.ts بـ Auth enabled
+- [ ] بناء client/src/core/contexts/AuthContext.tsx (SupabaseAuthProvider + useAuth)
+- [ ] بناء صفحة /login (Glassmorphism + Email/Password + Google OAuth)
+- [ ] بناء صفحة /register (Name + Email + Password + Confirm + Google)
+- [ ] بناء صفحة /forgot-password
+- [ ] بناء صفحة /reset-password
+- [ ] تحديث client/src/_core/hooks/useAuth.ts لاستخدام Supabase session
+- [ ] تحديث client/src/const.ts - إزالة getLoginUrl Manus
+- [ ] تحديث client/src/main.tsx - إزالة redirect Manus
+- [ ] تحديث client/src/App.tsx - إضافة routes جديدة + ProtectedRoute
+- [ ] تحديث DashboardLayout لاستخدام Supabase logout
+- [ ] إنشاء MIGRATION.md
+
+## ✅ Phase 12 — Supabase Auth Migration (COMPLETE)
+- [x] تحديث server/_core/context.ts لاستخدام Supabase JWT (Bearer token) + Manus fallback
+- [x] تحديث server/db/users.ts لدعم supabase_uid (upsertUserBySupabaseUid + getUserBySupabaseUid)
+- [x] إضافة عمود supabase_uid لجدول users في قاعدة البيانات
+- [x] بناء client/src/core/lib/supabase.ts بـ Auth session persistence
+- [x] بناء client/src/core/contexts/SupabaseAuthContext.tsx (SupabaseAuthProvider + useSupabaseAuth)
+- [x] بناء صفحة /login (Glassmorphism + Email/Password + Google OAuth)
+- [x] بناء صفحة /register (Name + Email + Password + Confirm + Google)
+- [x] بناء صفحة /forgot-password
+- [x] بناء صفحة /reset-password
+- [x] بناء صفحة /auth/callback (OAuth redirect handler)
+- [x] تحديث client/src/main.tsx - إضافة SupabaseAuthProvider + Bearer token في tRPC headers
+- [x] تحديث client/src/App.tsx - إضافة auth routes
+- [x] تحديث DashboardLayout لاستخدام Supabase logout + redirect إلى /login
+- [x] إصلاح ActivityFeed.tsx لاستخدام shared supabase client (لا multiple instances)
+- [x] server/auth.supabase.test.ts — 17 tests ✅
+- [x] 400/400 tests + 0 TS errors ✅
+
+## Phase 12 Supabase Auth Migration COMPLETE
+- [x] context.ts updated for Supabase JWT + Manus fallback
+- [x] users.ts updated with upsertUserBySupabaseUid
+- [x] supabase_uid column added to users table
+- [x] SupabaseAuthContext.tsx built
+- [x] LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage built
+- [x] main.tsx updated with SupabaseAuthProvider + Bearer token
+- [x] App.tsx updated with auth routes
+- [x] DashboardLayout updated with Supabase logout
+- [x] ActivityFeed.tsx fixed for single supabase instance
+- [x] 400/400 tests + 0 TS errors

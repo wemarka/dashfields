@@ -4,10 +4,10 @@
 //  • Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
 //  • Account Switcher at Sidebar bottom (per-platform, multi-account)
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 import { DashfieldsIcon, DashfieldsLogoFull } from "@/components/DashfieldsLogo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/core/lib/trpc";
 import { NotificationBell } from "@/components/NotificationBell";
 import { GlobalSearch } from "@/components/GlobalSearch";
@@ -356,9 +356,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
+  const { signOut: supabaseSignOut } = useSupabaseAuth();
   const logoutMutation = trpc.auth.logout.useMutation({
-    onSuccess: () => window.location.reload(),
+    onSuccess: () => { window.location.href = "/login"; },
   });
+  const handleLogout = async () => {
+    await supabaseSignOut();
+    logoutMutation.mutate();
+  };
 
   const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
 
@@ -392,7 +397,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <p className="text-sm text-muted-foreground">{t("auth.subtitle")}</p>
           </div>
           <a
-            href={getLoginUrl()}
+            href="/login"
             className="w-full py-3 px-6 rounded-xl bg-brand text-brand-foreground text-sm font-semibold text-center hover:opacity-90 transition-opacity"
           >
             {t("auth.signIn")}
@@ -635,7 +640,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Profile Dropdown */}
             <ProfileDropdown
               user={{ name: user?.name ?? undefined, email: user?.email ?? undefined }}
-              onLogout={() => logoutMutation.mutate()}
+              onLogout={handleLogout}
             />
           </div>
         </div>
