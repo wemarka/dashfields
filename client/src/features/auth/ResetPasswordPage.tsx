@@ -70,7 +70,7 @@ export default function ResetPasswordPage() {
       }
       setSuccess(true);
       toast.success("Password updated successfully!");
-      setTimeout(() => setLocation("/"), 2000);
+      setTimeout(() => setLocation("/dashboard"), 2000);
     } finally {
       setSubmitting(false);
     }

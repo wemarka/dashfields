@@ -29,7 +29,7 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      setLocation("/");
+      setLocation("/dashboard");
     }
   }, [isAuthenticated, isLoading, setLocation]);
 

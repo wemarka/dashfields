@@ -86,7 +86,7 @@ const navGroups: NavGroup[] = [
   {
     labelKey: null,
     items: [
-      { icon: LayoutDashboard, labelKey: "nav.dashboard", path: "/", iconAnimation: "icon-bounce" },
+      { icon: LayoutDashboard, labelKey: "nav.dashboard", path: "/dashboard", iconAnimation: "icon-bounce" },
     ],
   },
   {
@@ -427,7 +427,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div
           className={`flex items-center px-4 h-14 border-b border-white/8 shrink-0 cursor-pointer ${collapsed ? "justify-center" : ""}`}
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/dashboard")}
         >
           {collapsed ? (
             <DashfieldsIcon className="w-8 h-8 text-brand dark:text-white" />

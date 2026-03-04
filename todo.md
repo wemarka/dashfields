@@ -1333,3 +1333,25 @@
 - [ ] Real-time Performance Monitor (/monitor) with Supabase Realtime
 - [ ] Tests for all new routers
 - [ ] 0 TS errors
+
+## Phase 14 — Landing Page + Legal Pages + Auth Flow Update
+- [x] Landing Page (/) — Hero + Features + AI Showcase + Platforms + Pricing + CTA + Footer
+- [x] Navigation Bar — Logo + Links + Sign In + Start Free Trial
+- [x] Hero Section — Headline + CTA buttons + Dashboard mockup
+- [x] Trusted By section — 500+ marketers logos bar
+- [x] Features Section — 4 feature cards
+- [x] AI Features Showcase — 5 AI tools with icons
+- [x] Platform Support — 8 platforms grid
+- [x] Pricing Section — Free/Pro/Enterprise cards
+- [x] CTA Section — Final call to action
+- [x] Footer — Product/Company/Legal columns + social links
+- [x] Privacy Policy page (/privacy) — GDPR + Jordan law compliant
+- [x] Terms of Service page (/terms) — Full ToS
+- [x] Update /login — Add "Don't have an account? Sign up" link
+- [x] Update /register — Add Name + Confirm Password + Google OAuth
+- [x] Update App.tsx routes — /privacy, /terms
+- [x] Smooth scroll animations (Framer Motion)
+- [x] Mobile responsive (mobile-first)
+- [x] RTL support via lang attribute
+- [x] 0 TypeScript errors
+- [x] All tests passing

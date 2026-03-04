@@ -26,7 +26,7 @@ export default function AuthCallbackPage() {
         // Invalidate tRPC auth cache so the app re-fetches user info
         await utils.auth.me.invalidate();
         // Redirect to dashboard
-        setLocation("/");
+        setLocation("/dashboard");
       } else if (event === "PASSWORD_RECOVERY") {
         // Redirect to reset password page
         setLocation("/auth/reset-password");
@@ -39,7 +39,7 @@ export default function AuthCallbackPage() {
     supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
         await utils.auth.me.invalidate();
-        setLocation("/");
+        setLocation("/dashboard");
       }
     });
 

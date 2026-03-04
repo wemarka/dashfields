@@ -27,7 +27,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Get returnTo from query params
-  const returnTo = new URLSearchParams(window.location.search).get("returnTo") ?? "/";
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo") ?? "/dashboard";
 
   // Redirect if already authenticated
   useEffect(() => {

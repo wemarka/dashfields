@@ -45,6 +45,10 @@ const WorkspaceSettings = lazy(() => import("./features/settings/WorkspaceSettin
 const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite"));
 const BillingPage       = lazy(() => import("./features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
 const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
+// ─── Landing + Legal pages ───────────────────────────────────────────────────
+const LandingPage        = lazy(() => import("./features/landing/LandingPage"));
+const PrivacyPage        = lazy(() => import("./features/landing/PrivacyPage"));
+const TermsPage          = lazy(() => import("./features/landing/TermsPage"));
 // ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
 const LoginPage          = lazy(() => import("./features/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("./features/auth/RegisterPage"));
@@ -68,8 +72,12 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        {/* ── Landing + Legal routes ─────────────────────────────────── */}
+        <Route path="/"                     component={LandingPage} />
+        <Route path="/privacy"              component={PrivacyPage} />
+        <Route path="/terms"                component={TermsPage} />
         {/* ── Core routes ────────────────────────────────────────────────── */}
-        <Route path="/"                     component={Home} />
+        <Route path="/dashboard"            component={Home} />
         <Route path="/campaigns"            component={Campaigns} />
         <Route path="/analytics"            component={Analytics} />
         <Route path="/alerts"               component={Alerts} />
