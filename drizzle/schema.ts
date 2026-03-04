@@ -45,10 +45,15 @@ export const workspaces = pgTable("workspaces", {
   slug:        varchar("slug", { length: 64 }).notNull().unique(),
   logoUrl:     text("logo_url"),
   plan:            workspacePlanEnum("plan").default("free").notNull(),
-  brandGuidelines: text("brand_guidelines"),
-  createdBy:       integer("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
-  createdAt:   timestamp("created_at").defaultNow().notNull(),
-  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+  brandGuidelines:    text("brand_guidelines"),
+  // Onboarding settings
+  currency:            varchar("currency", { length: 8 }).default("USD").notNull(),
+  targetRoas:          varchar("target_roas", { length: 16 }).default("3.0").notNull(),
+  monthlyBudget:       varchar("monthly_budget", { length: 32 }).default(""),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  createdBy:           integer("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  createdAt:           timestamp("created_at").defaultNow().notNull(),
+  updatedAt:           timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const workspaceMembers = pgTable("workspace_members", {

@@ -429,4 +429,57 @@ export const workspacesRouter = router({
       if (promoteErr) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: promoteErr.message });
       return { success: true };
     }),
+
+  /**
+   * Save onboarding wizard settings for a workspace.
+   * Called at the end of the 3-step onboarding flow.
+   */
+  saveOnboardingSettings: workspaceProcedure
+    .input(z.object({
+      workspaceId:   z.number().int().positive(),
+      name:          z.string().min(2).max(128),
+      currency:      z.string().min(3).max(8).default("USD"),
+      targetRoas:    z.string().regex(/^\d+(\.\d+)?$/, "Must be a positive number").default("3.0"),
+      monthlyBudget: z.string().max(32).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.workspaceRole !== "owner" && ctx.workspaceRole !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only workspace owners and admins can update settings" });
+      }
+      const updated = await updateWorkspace(ctx.workspaceId, {
+        name:                input.name,
+        currency:            input.currency,
+        targetRoas:          input.targetRoas,
+        monthlyBudget:       input.monthlyBudget ?? null,
+        onboardingCompleted: true,
+      });
+      return {
+        ok: true,
+        workspace: {
+          id:                  updated.id,
+          name:                updated.name,
+          currency:            updated.currency,
+          target_roas:         updated.target_roas,
+          monthly_budget:      updated.monthly_budget,
+          onboarding_completed: updated.onboarding_completed,
+        },
+      };
+    }),
+
+  /**
+   * Get the onboarding status for the active workspace.
+   */
+  getOnboardingStatus: workspaceProcedure
+    .input(z.object({ workspaceId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
+      const ws = await getWorkspaceById(ctx.workspaceId);
+      if (!ws) throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+      return {
+        onboardingCompleted: ws.onboarding_completed,
+        currency:            ws.currency ?? "USD",
+        targetRoas:          ws.target_roas ?? "3.0",
+        monthlyBudget:       ws.monthly_budget ?? "",
+        name:                ws.name,
+      };
+    }),
 });

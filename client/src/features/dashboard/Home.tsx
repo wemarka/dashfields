@@ -21,6 +21,7 @@ import { useState, useEffect, useRef } from "react";
 import { SmartOnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { OnboardingModal } from "@/components/OnboardingModal";
+import { OnboardingWizardModal } from "@/components/OnboardingWizardModal";
 import { BudgetTracker } from "@/features/dashboard/components/BudgetTracker";
 import { SpendForecastWidget } from "@/features/dashboard/components/SpendForecastWidget";
 import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
@@ -560,7 +561,44 @@ export default function Dashboard() {
 
       {/* Onboarding Modal — shown automatically on first login */}
       <OnboardingModal />
+      {/* Workspace Setup Wizard — shown when workspace onboarding is not completed */}
+      <WorkspaceOnboardingGate />
 
     </DashboardLayout>
+  );
+}
+
+// ─── Workspace Onboarding Gate ────────────────────────────────────────────────
+// Shows the OnboardingWizardModal if the active workspace hasn't completed onboarding.
+function WorkspaceOnboardingGate() {
+  const { activeWorkspaceId } = useWorkspace();
+  const [open, setOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  // Query onboarding status for the active workspace
+  const { data: onboardingStatus } = trpc.workspaces.getOnboardingStatus.useQuery(
+    { workspaceId: activeWorkspaceId ?? 0 },
+    { enabled: !!activeWorkspaceId && !dismissed }
+  );
+
+  useEffect(() => {
+    if (!activeWorkspaceId) return;
+    if (dismissed) return;
+    // Show wizard if workspace hasn't completed onboarding
+    if (onboardingStatus && !onboardingStatus.onboardingCompleted) {
+      // Small delay to let the dashboard render first
+      const timer = setTimeout(() => setOpen(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [activeWorkspaceId, onboardingStatus, dismissed]);
+
+  if (!activeWorkspaceId || !open) return null;
+
+  return (
+    <OnboardingWizardModal
+      open={open}
+      onComplete={() => { setOpen(false); }}
+      onSkip={() => { setOpen(false); setDismissed(true); }}
+    />
   );
 }

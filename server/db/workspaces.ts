@@ -16,6 +16,11 @@ export interface Workspace {
   plan: WorkspacePlan;
   created_by: number;
   brand_guidelines: string | null;
+  // Onboarding settings
+  currency: string;
+  target_roas: string;
+  monthly_budget: string | null;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -138,7 +143,16 @@ export async function createWorkspace(params: {
 /** Update workspace details */
 export async function updateWorkspace(
   id: number,
-  updates: { name?: string; logoUrl?: string | null; plan?: WorkspacePlan; brandGuidelines?: string | null }
+  updates: {
+    name?: string;
+    logoUrl?: string | null;
+    plan?: WorkspacePlan;
+    brandGuidelines?: string | null;
+    currency?: string;
+    targetRoas?: string;
+    monthlyBudget?: string | null;
+    onboardingCompleted?: boolean;
+  }
 ): Promise<Workspace> {
   const sb = getSupabase();
   const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -146,6 +160,10 @@ export async function updateWorkspace(
   if (updates.logoUrl !== undefined) payload.logo_url = updates.logoUrl;
   if (updates.plan !== undefined) payload.plan = updates.plan;
   if (updates.brandGuidelines !== undefined) payload.brand_guidelines = updates.brandGuidelines;
+  if (updates.currency !== undefined) payload.currency = updates.currency;
+  if (updates.targetRoas !== undefined) payload.target_roas = updates.targetRoas;
+  if (updates.monthlyBudget !== undefined) payload.monthly_budget = updates.monthlyBudget;
+  if (updates.onboardingCompleted !== undefined) payload.onboarding_completed = updates.onboardingCompleted;
 
   const { data, error } = await sb
     .from("workspaces")

@@ -1198,3 +1198,27 @@
 - [x] Tests: server/billing.limits.test.ts (24 اختباراً: PLAN_LIMITS + canCreateWorkspace + workspaceLimitMessage)
 - [x] Tests: workspaces.create محدّث لاختبار blocks + allows scenarios
 - [x] التحقق النهائي: 352/352 tests + 0 TS errors ✅
+
+## Phase 8 — Stripe Integration & Subscription Flow
+- [ ] إعداد Stripe feature وإضافة المفاتيح
+- [ ] Database: إضافة stripe_customer_id + stripe_subscription_id إلى workspaces
+- [ ] Backend: server/services/stripe.ts — Stripe client + helpers
+- [ ] Backend: server/routers/billing.ts — createCheckout + customerPortal + webhook procedures
+- [ ] Backend: Stripe Webhook handler لتحديث plan بعد نجاح الدفع
+- [ ] Backend: Stripe Products config (pro + agency plans)
+- [ ] Frontend: ربط UpgradeModal بـ createCheckout procedure
+- [ ] Frontend: صفحة billing/success (شكر + تأكيد الترقية)
+- [ ] Frontend: صفحة billing/canceled (إلغاء + العودة)
+- [ ] Frontend: Billing section في Settings page (plan info + Customer Portal button)
+- [ ] Tests: اختبارات Billing logic
+- [ ] التحقق النهائي: 352+ tests + 0 TS errors
+
+## Phase 8 — Mock Billing + Onboarding Wizard
+- [x] Mock Billing: upgradeWorkspace procedure يحدث plan مباشرة في DB
+- [x] Mock Billing: UpgradeModal — 2s loading state + success toast + badge update
+- [x] Onboarding Wizard: إضافة حقول currency + target_roas + monthly_budget + onboarding_completed في workspaces table (SQL migration)
+- [x] Onboarding Wizard: saveOnboardingSettings + getOnboardingStatus procedures في workspaces router
+- [x] Onboarding Wizard: OnboardingWizardModal — 3-step Wizard (Name → Currency → Goals) مع confetti animation
+- [x] Onboarding Wizard: WorkspaceOnboardingGate في Home.tsx يظهر الـ Wizard تلقائياً للـ workspaces الجديدة
+- [x] Tests: server/__tests__/onboarding.test.ts — 12 اختباراً (saveOnboardingSettings + getOnboardingStatus + validation)
+- [x] التحقق النهائي: 12/12 onboarding tests + 0 TS errors ✅

@@ -32,7 +32,7 @@ function getDateRange(preset: string): { since: string; until: string } {
   return { since: since.toISOString().split("T")[0], until };
 }
 
-// ─── Query posts ─────────────────// ─── Query posts ────────────────────────────────────
+// ─── Query posts ────────────────────────────────────
 async function fetchPosts(userId: number, since: string, until: string, workspaceId?: number | null) {
   const sb = getSupabase();
   let query = sb
