@@ -25,11 +25,9 @@ export function SampleDataBanner({ hasRealData = false }: SampleDataBannerProps)
         This is <span className="font-medium text-blue-600 dark:text-blue-400">sample data</span> to show you what Dashfields can do.{" "}
         Connect your platforms to see real data.
       </p>
-      <Link href="/connections">
-        <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shrink-0">
-          <Plug className="w-3.5 h-3.5" />
-          Connect Platform
-        </a>
+      <Link href="/connections" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shrink-0">
+        <Plug className="w-3.5 h-3.5" />
+        Connect Platform
       </Link>
       <button
         onClick={() => setDismissed(true)}
