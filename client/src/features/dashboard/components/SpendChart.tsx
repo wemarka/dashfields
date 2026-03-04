@@ -1,7 +1,8 @@
 // SpendChart.tsx
 // Area chart showing spend per campaign for the Dashboard.
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { BarChart2, Loader2 } from "lucide-react";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 interface CampaignData {
   campaignName: string;
@@ -16,11 +17,15 @@ interface SpendChartProps {
 }
 
 export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps) {
+  const { fmt, targetRoas } = useCurrency();
   const chartData = campaigns.slice(0, 8).map((c) => ({
     name: c.campaignName.length > 20 ? c.campaignName.slice(0, 18) + "…" : c.campaignName,
     spend: c.spend,
     clicks: c.clicks,
   }));
+  const avgSpend = chartData.length > 0
+    ? chartData.reduce((s, c) => s + c.spend, 0) / chartData.length
+    : 0;
 
   return (
     <div className="lg:col-span-2 glass rounded-2xl p-5">
@@ -57,9 +62,18 @@ export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps)
                 borderRadius: "12px",
                 fontSize: "12px",
               }}
-              formatter={(v: number) => ["$" + v.toFixed(2), "Spend"]}
+              formatter={(v: number) => [fmt(v), "Spend"]}
             />
             <Area type="monotone" dataKey="spend" stroke="#374151" strokeWidth={2} fill="url(#spendGrad)" />
+            {targetRoas > 0 && avgSpend > 0 && (
+              <ReferenceLine
+                y={avgSpend * targetRoas}
+                stroke="#10b981"
+                strokeDasharray="4 3"
+                strokeWidth={1.5}
+                label={{ value: `Target ROAS ${targetRoas}x`, position: "insideTopRight", fontSize: 10, fill: "#10b981" }}
+              />
+            )}
           </AreaChart>
         </ResponsiveContainer>
       ) : (

@@ -12,6 +12,7 @@ import {
   TrendingUp, TrendingDown, Minus, Eye, MousePointer, DollarSign,
   Users, Zap, BarChart2,
 } from "lucide-react";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type DateRange = "last_7d" | "last_14d" | "last_30d" | "last_90d";
@@ -47,6 +48,7 @@ function ComparisonKpiCard({ kpi }: {
     lowerIsBetter?: boolean;
   };
 }) {
+  const { fmt } = useCurrency();
   const IconComp = ICON_MAP[kpi.icon] ?? BarChart2;
   const colorClass = COLOR_MAP[kpi.color] ?? "text-violet-500 bg-violet-500/10";
 
@@ -54,7 +56,7 @@ function ComparisonKpiCard({ kpi }: {
   const isNeutral  = kpi.delta === 0;
 
   const formatValue = (v: number) => {
-    if (kpi.format === "currency") return `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (kpi.format === "currency") return fmt(v);
     if (kpi.format === "percent")  return `${v.toFixed(2)}%`;
     return v.toLocaleString();
   };

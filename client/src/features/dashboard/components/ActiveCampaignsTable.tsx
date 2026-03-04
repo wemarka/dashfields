@@ -2,6 +2,7 @@
 // Compact campaigns table for the Dashboard overview.
 import { Loader2, Link2 } from "lucide-react";
 import { Link } from "wouter";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 interface Campaign {
   campaignId: string;
@@ -17,9 +18,7 @@ interface ActiveCampaignsTableProps {
   isConnected: boolean;
 }
 
-function fmtMoney(n: number) {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 function fmtPct(n: number) {
   return n.toFixed(2) + "%";
 }
@@ -30,6 +29,7 @@ function fmtNum(n: number) {
 }
 
 export function ActiveCampaignsTable({ campaigns, loading, isConnected }: ActiveCampaignsTableProps) {
+  const { fmt: fmtMoney } = useCurrency();
   return (
     <div className="glass rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-foreground/8">

@@ -18,6 +18,7 @@ import {
   BarChart2, RefreshCw, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { DashboardKpiSkeleton, ChartSkeleton } from "@/core/components/ui/skeleton-cards";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_30d" | "this_month" | "last_month";
@@ -105,6 +106,7 @@ const ICON_COLORS: Record<string, string> = {
 interface TooltipPayloadEntry { name: string; value: number | string; fill?: string; color?: string; }
 interface CustomTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  const { fmt } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-background border border-border rounded-xl p-3 shadow-lg text-xs">
@@ -115,11 +117,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
           <span className="text-muted-foreground">{p.name}:</span>
           <span className="font-medium text-foreground">
             {typeof p.value === "number" && p.name.toLowerCase().includes("spend")
-              ? `$${p.value.toFixed(2)}`
+              ? fmt(p.value)
               : typeof p.value === "number" && p.name.toLowerCase().includes("ctr")
               ? `${p.value.toFixed(2)}%`
               : typeof p.value === "number" && p.name.toLowerCase().includes("cpc")
-              ? `$${p.value.toFixed(2)}`
+              ? fmt(p.value)
               : typeof p.value === "number"
               ? p.value.toLocaleString()
               : p.value}
@@ -134,6 +136,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export default function Insights() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const { activeAccountId } = useActiveAccount();
+  const { fmt } = useCurrency();
 
   const { data: insights = [], isLoading, refetch, isFetching } = trpc.platforms.allInsights.useQuery(
     { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}) },
@@ -257,7 +260,7 @@ export default function Insights() {
               {[
                 { icon: Eye,          label: "Total Impressions", value: totalImpressions.toLocaleString(), color: "text-violet-500" },
                 { icon: MousePointer, label: "Total Clicks",      value: totalClicks.toLocaleString(),      color: "text-blue-500" },
-                { icon: DollarSign,   label: "Total Spend",       value: `$${totalSpend.toFixed(2)}`,       color: "text-emerald-500" },
+                { icon: DollarSign,   label: "Total Spend",       value: fmt(totalSpend),       color: "text-emerald-500" },
                 { icon: Users,        label: "Engagements",       value: totalEngagements.toLocaleString(), color: "text-pink-500" },
               ].map((kpi) => (
                 <div key={kpi.label} className="glass rounded-2xl p-4">

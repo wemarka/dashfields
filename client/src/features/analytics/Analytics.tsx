@@ -20,6 +20,7 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { useCurrency } from "@/core/hooks/useCurrency";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,
@@ -37,10 +38,6 @@ function fmtNum(n: number): string {
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toLocaleString();
 }
-function fmtMoney(n: number): string {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
 export default function Analytics() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [activePlatform, setActivePlatform] = useState<string>("all");
@@ -50,6 +47,7 @@ export default function Analytics() {
   const { activeAccountId } = useActiveAccount();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id;
+  const { fmt: fmtMoney } = useCurrency();
 
   // Multi-platform data — filtered by active account if selected
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =

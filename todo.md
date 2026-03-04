@@ -1222,3 +1222,13 @@
 - [x] Onboarding Wizard: WorkspaceOnboardingGate في Home.tsx يظهر الـ Wizard تلقائياً للـ workspaces الجديدة
 - [x] Tests: server/__tests__/onboarding.test.ts — 12 اختباراً (saveOnboardingSettings + getOnboardingStatus + validation)
 - [x] التحقق النهائي: 12/12 onboarding tests + 0 TS errors ✅
+
+## Phase 9 — Dashboard Personalization & Workspace Financials Settings
+- [x] WorkspaceContext: إضافة workspaceFinancials (currency + targetRoas + monthlyBudget + onboardingCompleted) + refetchFinancials
+- [x] useCurrency hook: formatMoney + getCurrencySymbol مع 26 عملة مدعومة (عربية + عالمية)
+- [x] تحديث 13 مكوناً لاستخدام useCurrency بدلاً من $ الثابت
+- [x] SpendChart: إضافة ROAS Reference Line بلون بنفسجي يعكس Target ROAS من الـ Onboarding
+- [x] WorkspaceSettings: إضافة تبويب "Financials & Goals" مع نماذج Currency + Monthly Budget + Target ROAS
+- [x] Real-time sync: utils.invalidate() + refetchFinancials بعد حفظ الإعدادات
+- [x] Tests: financials.test.ts — 15 اختباراً (getCurrencySymbol + formatMoney + ROAS validation)
+- [x] التحقق النهائي: 383/383 tests + 0 TS errors ✅

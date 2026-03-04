@@ -29,6 +29,13 @@ export interface WorkspaceItem {
   role: WorkspaceRole;
 }
 
+export interface WorkspaceFinancials {
+  currency: string;
+  targetRoas: string;
+  monthlyBudget: string | null;
+  onboardingCompleted: boolean;
+}
+
 interface WorkspaceContextValue {
   workspaces: WorkspaceItem[];
   activeWorkspace: WorkspaceItem | null;
@@ -40,6 +47,10 @@ interface WorkspaceContextValue {
   canAdmin: boolean;
   /** Whether the current user is the owner of the active workspace */
   isOwner: boolean;
+  /** Financial settings from onboarding (currency, targetRoas, monthlyBudget) */
+  workspaceFinancials: WorkspaceFinancials | null;
+  /** Refresh financial settings (call after updating them) */
+  refetchFinancials: () => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue>({
@@ -51,6 +62,8 @@ const WorkspaceContext = createContext<WorkspaceContextValue>({
   refetch: () => {},
   canAdmin: false,
   isOwner: false,
+  workspaceFinancials: null,
+  refetchFinancials: () => {},
 });
 
 const LS_KEY = "dashfields_active_workspace_id";
@@ -99,6 +112,28 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
   }, [workspaces, activeWorkspaceId]);
 
+  // ─── Financials (currency + targetRoas + monthlyBudget) ─────────────────────
+  const {
+    data: financialsData,
+    refetch: refetchFinancials,
+  } = trpc.workspaces.getOnboardingStatus.useQuery(
+    { workspaceId: activeWorkspaceId ?? 0 },
+    {
+      enabled: !!activeWorkspaceId,
+      staleTime: 30_000,
+    }
+  );
+
+  const workspaceFinancials = useMemo<WorkspaceFinancials | null>(() => {
+    if (!financialsData) return null;
+    return {
+      currency: financialsData.currency ?? "USD",
+      targetRoas: financialsData.targetRoas ?? "3.0",
+      monthlyBudget: financialsData.monthlyBudget || null,
+      onboardingCompleted: financialsData.onboardingCompleted,
+    };
+  }, [financialsData]);
+
   const utils = trpc.useUtils();
   const setActiveWorkspace = useCallback((id: number) => {
     setActiveWorkspaceIdState(id);
@@ -133,8 +168,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       refetch,
       canAdmin,
       isOwner,
+      workspaceFinancials,
+      refetchFinancials,
     }),
-    [workspaces, activeWorkspace, activeWorkspaceId, setActiveWorkspace, isLoading, refetch, canAdmin, isOwner]
+    [workspaces, activeWorkspace, activeWorkspaceId, setActiveWorkspace, isLoading, refetch, canAdmin, isOwner, workspaceFinancials, refetchFinancials]
   );
 
   return (

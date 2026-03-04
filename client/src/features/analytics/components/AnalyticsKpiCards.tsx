@@ -4,11 +4,9 @@ import {
   TrendingUp, TrendingDown, Eye, MousePointerClick,
   DollarSign, Users, MessageCircle, Phone,
 } from "lucide-react";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function fmtMoney(n: number) {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 function fmtNum(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
@@ -49,6 +47,8 @@ interface AnalyticsKpiCardsProps {
 }
 
 export function AnalyticsKpiCards({ insights, prevData, comparePrevPreset }: AnalyticsKpiCardsProps) {
+  const { fmt: fmtMoney } = useCurrency();
+
   const mainKpis = [
     { label: "Total Spend",  value: fmtMoney(insights.spend),           rawVal: insights.spend,        icon: DollarSign,        color: "bg-blue-50 text-blue-600",     prev: prevData?.spend },
     { label: "Impressions",  value: fmtNum(insights.impressions),        rawVal: insights.impressions,  icon: Eye,               color: "bg-purple-50 text-purple-600", prev: prevData?.impressions },

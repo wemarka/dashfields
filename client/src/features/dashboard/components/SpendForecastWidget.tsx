@@ -2,6 +2,7 @@
 // Shows: daily burn rate, month-to-date spend, projected end-of-month spend.
 import { trpc } from "@/core/lib/trpc";
 import { TrendingUp, Calendar, Zap, AlertTriangle } from "lucide-react";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = Math.min((value / max) * 100, 100);
@@ -35,8 +36,7 @@ export function SpendForecastWidget() {
   const monthProgress = (dayOfMonth / daysInMonth) * 100;
   const isOverpacing = projectedMonthlySpend > monthToDateSpend * 1.5;
 
-  const fmt = (n: number) =>
-    "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const { fmt } = useCurrency();
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5">

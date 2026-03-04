@@ -4,6 +4,7 @@ import { trpc } from "@/core/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Badge } from "@/core/components/ui/badge";
 import { AlertTriangle, DollarSign, TrendingUp } from "lucide-react";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 function SpendBar({ percent, label }: { percent: number; label: string }) {
   const color =
@@ -38,6 +39,7 @@ function SpendBar({ percent, label }: { percent: number; label: string }) {
 }
 
 export function BudgetTracker() {
+  const { fmt } = useCurrency();
   const { data, isLoading } = trpc.budget.getBudgetStatus.useQuery({});
 
   if (isLoading) {
@@ -77,20 +79,20 @@ export function BudgetTracker() {
           <div className="glass rounded-xl p-3">
             <p className="text-xs text-muted-foreground mb-1">Daily Spend</p>
             <p className="text-lg font-semibold">
-              ${totals.dailySpend.toLocaleString()}
+              {fmt(totals.dailySpend, 0)}
             </p>
             <p className="text-xs text-muted-foreground">
-              of ${totals.dailyBudget.toLocaleString()} budget
+              of {fmt(totals.dailyBudget, 0)} budget
             </p>
             <SpendBar percent={totals.dailyPercent} label="" />
           </div>
           <div className="glass rounded-xl p-3">
             <p className="text-xs text-muted-foreground mb-1">Monthly Spend</p>
             <p className="text-lg font-semibold">
-              ${totals.monthlySpend.toLocaleString()}
+              {fmt(totals.monthlySpend, 0)}
             </p>
             <p className="text-xs text-muted-foreground">
-              of ${totals.monthlyBudget.toLocaleString()} budget
+              of {fmt(totals.monthlyBudget, 0)} budget
             </p>
             <SpendBar percent={totals.monthlyPercent} label="" />
           </div>

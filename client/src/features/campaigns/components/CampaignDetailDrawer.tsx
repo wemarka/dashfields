@@ -23,6 +23,7 @@ import { Badge } from "@/core/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/core/components/ui/tabs";
 import { Loader2, TrendingUp, MousePointerClick, DollarSign, Eye } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MetaCampaign {
@@ -83,6 +84,7 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Main Drawer ──────────────────────────────────────────────────────────────
 export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
+  const { fmt: fmtCurrencyHook } = useCurrency();
 
   const { data: daily, isLoading } = trpc.meta.campaignDailyInsights.useQuery(
     { campaignId: campaign?.id ?? "", datePreset },
@@ -101,7 +103,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     n >= 1_000     ? `${(n / 1_000).toFixed(1)}K` :
     n.toLocaleString();
 
-  const fmtCurrency = (n: number) => `$${n.toFixed(2)}`;
+  const fmtCurrency = (n: number) => fmtCurrencyHook(n);
   const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 
   return (

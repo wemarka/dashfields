@@ -30,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { Settings2 } from "lucide-react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
@@ -58,9 +59,7 @@ function fmtNum(n: number): string {
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toLocaleString();
 }
-function fmtMoney(n: number): string {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+// fmtMoney is now provided by useCurrency hook inside Dashboard component
 function fmtPct(n: number): string {
   return n.toFixed(2) + "%";
 }
@@ -91,8 +90,8 @@ function LiveSpendTicker({ spend }: { spend: number }) {
   }, [spend]);
 
   return (
-    <span className="font-black text-2xl tabular-nums text-foreground">
-      ${displayed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      <span className="font-black text-2xl tabular-nums text-foreground">
+      {displayed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     </span>
   );
 }
@@ -133,6 +132,7 @@ interface TopCampaignWidgetProps {
   isConnected: boolean;
 }
 function TopCampaignWidget({ datePreset, isConnected }: TopCampaignWidgetProps) {
+  const { fmt: fmtMoney } = useCurrency();
   const { data: top, isLoading } = trpc.meta.topCampaign.useQuery(
     { datePreset },
     { enabled: isConnected }
@@ -247,6 +247,7 @@ export default function Dashboard() {
   const { activeAccountId } = useActiveAccount();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id;
+  const { fmt: fmtMoney } = useCurrency();
 
   const toggleWidget = (key: WidgetKey) => {
     setWidgets((prev) => {

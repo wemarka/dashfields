@@ -8,6 +8,7 @@ import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 const statusDot: Record<string, string> = {
   active: "bg-emerald-500", ACTIVE: "bg-emerald-500",
@@ -24,9 +25,7 @@ const statusText: Record<string, string> = {
   scheduled: "text-blue-700",
 };
 
-function fmtMoney(n: number) {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 function fmtNum(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
@@ -101,6 +100,7 @@ function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggl
 }
 
 export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick }: MetaCampaignTableProps) {
+  const { fmt: fmtMoney } = useCurrency();
   const { t } = useTranslation();
   const utils = trpc.useUtils();
 

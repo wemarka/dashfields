@@ -17,15 +17,13 @@ import {
   ArrowRight, Info, Link2, Zap,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────────────────
 function fmtNum(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toLocaleString();
-}
-function fmtMoney(n: number) {
-  return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // ─── Funnel Stage ─────────────────────────────────────────────────────────────
@@ -59,6 +57,7 @@ function FunnelStage({ name, value, pct, color, isLast }: {
 
 // ─── ROI Calculator ───────────────────────────────────────────────────────────
 function RoiCalculator() {
+  const { fmt: fmtMoney } = useCurrency();
   const [spend, setSpend] = useState(1000);
   const [revenue, setRevenue] = useState(4500);
   const [cac, setCac] = useState(25);
@@ -148,6 +147,7 @@ export default function AdvancedAnalytics() {
   const { activeAccountId } = useActiveAccount();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id;
+  const { fmt: fmtMoney } = useCurrency();
 
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId });
   const isConnected = metaStatus?.connected ?? false;

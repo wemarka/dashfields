@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { getPlatform } from "@shared/platforms";
 import { PlatformIcon } from "@/components/PlatformIcon";
+import { useCurrency } from "@/core/hooks/useCurrency";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface Campaign {
@@ -43,16 +44,7 @@ const METRICS: Metric[] = [
   { key: "cpm",         label: "CPM",           format: "currency",  higherIsBetter: false },
 ];
 
-function formatValue(value: number | undefined | null, format: Metric["format"]): string {
-  if (value == null || isNaN(Number(value))) return "—";
-  const n = Number(value);
-  switch (format) {
-    case "currency":  return `$${n.toFixed(2)}`;
-    case "currency3": return `$${n.toFixed(3)}`;
-    case "percent":   return `${n.toFixed(2)}%`;
-    case "number":    return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-  }
-}
+// formatValue is now a hook-based function inside the component
 
 function getWinner(a: number | undefined | null, b: number | undefined | null, higherIsBetter: boolean): "a" | "b" | "tie" {
   const na = Number(a ?? 0);
@@ -133,6 +125,18 @@ interface CampaignCompareDrawerProps {
 export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
   const [campaignA, setCampaignA] = useState<Campaign | null>(null);
   const [campaignB, setCampaignB] = useState<Campaign | null>(null);
+  const { fmt } = useCurrency();
+
+  const formatValue = (value: number | undefined | null, format: Metric["format"]): string => {
+    if (value == null || isNaN(Number(value))) return "—";
+    const n = Number(value);
+    switch (format) {
+      case "currency":  return fmt(n);
+      case "currency3": return fmt(n, 3);
+      case "percent":   return `${n.toFixed(2)}%`;
+      case "number":    return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+    }
+  };
 
   // Fetch campaigns with metrics
   const { data: metaCampaigns = [] } = trpc.meta.campaigns.useQuery({ limit: 50 }, {
