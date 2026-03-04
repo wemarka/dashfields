@@ -1232,3 +1232,9 @@
 - [x] Real-time sync: utils.invalidate() + refetchFinancials بعد حفظ الإعدادات
 - [x] Tests: financials.test.ts — 15 اختباراً (getCurrencySymbol + formatMoney + ROAS validation)
 - [x] التحقق النهائي: 383/383 tests + 0 TS errors ✅
+
+## Phase 10 (New) — Account Switcher في الـ Topbar
+- [x] نقل عنصر اختيار الحساب (صورة + اسم + منصة + عدد) من الـ Sidebar إلى الـ Topbar
+- [x] تصميم Pill أنيق في الـ Topbar بجانب Search مع Avatar + اسم + منصة + badge عدد الحسابات
+- [x] إزالة العنصر من أسفل الـ Sidebar
+- [x] 0 TypeScript errors ✅

@@ -538,57 +538,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
           )}
         </div>
-        {/* ── Account Switcher (bottom) ──────────────────────────────────── */}
-        <div className="px-2 pb-2 border-t border-white/8 pt-2 shrink-0">
-          <button
-            onClick={() => setShowAccountSwitcher(true)}
-            title={collapsed ? (activeAccount?.name ?? t("topbar.switchAccount")) : undefined}
-            className={[
-              "w-full flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-foreground/5 transition-colors group",
-              collapsed ? "justify-center" : "",
-              isRTL ? "flex-row-reverse" : "",
-            ].join(" ")}
-          >
-            {activeAccount ? (
-              <>
-                <div className="relative shrink-0">
-                  <Avatar className="w-7 h-7">
-                    {activeAccount.profile_picture && <AvatarImage src={activeAccount.profile_picture} />}
-                    <AvatarFallback className="text-[10px] bg-brand/10 text-brand font-semibold">
-                      {(activeAccount.name ?? activeAccount.platform).charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-background flex items-center justify-center">
-                    <PlatformIcon platform={activeAccount.platform} className="w-2.5 h-2.5" />
-                  </div>
-                </div>
-                {!collapsed && (
-                  <>
-                    <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
-                      <p className="text-[11px] font-semibold truncate leading-tight">
-                        {activeAccount.name ?? activeAccount.username ?? activeAccount.platform}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground/55 truncate">
-                        {activeAccount.platform.charAt(0).toUpperCase() + activeAccount.platform.slice(1)}
-                        {accounts.length > 1 && ` · ${accounts.length}`}
-                      </p>
-                    </div>
-                    <ChevronDown className="w-3 h-3 text-muted-foreground/50 shrink-0 group-hover:text-foreground/60 transition-colors" />
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="w-7 h-7 rounded-full border-2 border-dashed border-border/50 flex items-center justify-center shrink-0">
-                  <PlusCircle className="w-3.5 h-3.5 text-muted-foreground/50" />
-                </div>
-                {!collapsed && (
-                  <span className="text-[11px] text-muted-foreground/60 truncate">{t("topbar.connectAccount")}</span>
-                )}
-              </>
-            )}
-          </button>
-        </div>
+        {/* Account Switcher moved to Topbar */}
 
         {/* Collapse Toggle */}
         <button
@@ -606,20 +556,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         {/* Top bar */}
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: search + connection status */}
-          <div className="flex items-center gap-3">
+          {/* Left: search + Account Switcher Pill */}
+          <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <GlobalSearch />
-            {accounts.length > 0 ? (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                {t("topbar.platformsConnected", { count: accounts.length })}
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/45">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/25 inline-block" />
-                {t("topbar.noPlatforms")}
-              </div>
-            )}
+            {/* ── Account Switcher Pill ─────────────────────────────────── */}
+            <button
+              onClick={() => setShowAccountSwitcher(true)}
+              className={[
+                "flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
+                isRTL ? "flex-row-reverse" : "",
+              ].join(" ")}
+            >
+              {activeAccount ? (
+                <>
+                  <div className="relative shrink-0">
+                    <Avatar className="w-6 h-6">
+                      {activeAccount.profile_picture && <AvatarImage src={activeAccount.profile_picture} />}
+                      <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-bold">
+                        {(activeAccount.name ?? activeAccount.platform).charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/40 flex items-center justify-center">
+                      <PlatformIcon platform={activeAccount.platform} className="w-2 h-2" />
+                    </div>
+                  </div>
+                  <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
+                    <p className="text-[11px] font-semibold truncate leading-tight text-foreground">
+                      {activeAccount.name ?? activeAccount.username ?? activeAccount.platform}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/60 truncate leading-tight flex items-center gap-1">
+                      <span>{activeAccount.platform.charAt(0).toUpperCase() + activeAccount.platform.slice(1)}</span>
+                      {accounts.length > 1 && (
+                        <span className="px-1 py-0 rounded-full bg-brand/10 text-brand text-[9px] font-semibold">
+                          {accounts.length}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0 group-hover:text-brand/60 transition-colors" />
+                </>
+              ) : (
+                <>
+                  <div className="w-6 h-6 rounded-full border-2 border-dashed border-border/50 flex items-center justify-center shrink-0">
+                    <PlusCircle className="w-3 h-3 text-muted-foreground/50" />
+                  </div>
+                  <span className="text-[11px] text-muted-foreground/60 truncate">{t("topbar.connectAccount")}</span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                </>
+              )}
+            </button>
           </div>
 
           {/* Right: actions + profile */}
