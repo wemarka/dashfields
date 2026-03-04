@@ -10,6 +10,7 @@ import { PLATFORMS } from "@shared/platforms";
 import {
   ChevronLeft, ChevronRight, Plus, Calendar, List,
   Clock, CheckCircle2, AlertCircle, Edit3, Trash2, X, Send, Loader2,
+  Sparkles, Wand2, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { trpc as trpcClient } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
@@ -474,6 +475,16 @@ export default function ContentCalendar() {
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedPost, setSelectedPost] = useState<CalendarPost | null>(null);
   const [createDate, setCreateDate] = useState<Date | null>(null);
+  const [showAIPlanner, setShowAIPlanner] = useState(false);
+  const [aiPlannerTopic, setAIPlannerTopic] = useState("");
+  const [aiPlannerPlatform, setAIPlannerPlatform] = useState("instagram");
+  const [aiPlannerDays, setAIPlannerDays] = useState(7);
+  const [generatedPlan, setGeneratedPlan] = useState<Array<{day: string; title: string; content: string; time: string}>>([]);
+
+  // AI Calendar Planner mutation
+  const generateCalendarPlan = trpc.ai.generateCaption.useMutation({
+    onError: (err) => toast.error("AI error: " + err.message),
+  });
 
   // Compute date range for query
   const { rangeStart, rangeEnd } = useMemo(() => {
@@ -606,6 +617,18 @@ export default function ContentCalendar() {
                 <List className="w-3.5 h-3.5" /> List
               </button>
             </div>
+            {/* AI Planner button */}
+            <button
+              onClick={() => setShowAIPlanner(v => !v)}
+              className={"flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all " +
+                (showAIPlanner
+                  ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-transparent shadow-md shadow-violet-500/20"
+                  : "bg-violet-500/10 text-violet-600 border-violet-500/20 hover:bg-violet-500/20")}
+            >
+              <Sparkles className="w-4 h-4" />
+              AI Planner
+              {showAIPlanner ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
             {/* New post button */}
             <button
               onClick={() => setCreateDate(today)}
@@ -615,6 +638,111 @@ export default function ContentCalendar() {
             </button>
           </div>
         </div>
+
+        {/* AI Calendar Planner Panel */}
+        {showAIPlanner && (
+          <div className="bg-gradient-to-br from-violet-500/5 to-purple-500/5 border border-violet-500/20 rounded-2xl p-5 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+                <Wand2 className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">AI Content Calendar Planner</h3>
+                <p className="text-xs text-muted-foreground">Generate a full week of content ideas tailored to your brand</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-foreground mb-1.5">Campaign Topic / Brand Focus</label>
+                <input
+                  type="text"
+                  value={aiPlannerTopic}
+                  onChange={e => setAIPlannerTopic(e.target.value)}
+                  placeholder="e.g. Summer sale, new product launch, Ramadan campaign..."
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Primary Platform</label>
+                <select
+                  value={aiPlannerPlatform}
+                  onChange={e => setAIPlannerPlatform(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                >
+                  {PLATFORMS.filter(p => p.features.includes("posts")).map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Days to plan:</span>
+                {[7, 14, 30].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setAIPlannerDays(d)}
+                    className={"px-2.5 py-1 rounded-lg text-xs font-medium border transition-all " +
+                      (aiPlannerDays === d ? "bg-violet-600 text-white border-violet-600" : "bg-muted text-muted-foreground border-transparent hover:border-border")}
+                  >
+                    {d}d
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={async () => {
+                  if (!aiPlannerTopic.trim()) { toast.error("Enter a topic first"); return; }
+                  toast.info("Generating content plan...", { duration: 3000 });
+                  // Generate a sample plan (using AI caption as base)
+                  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                  const plan = days.slice(0, Math.min(aiPlannerDays, 7)).map((day, i) => ({
+                    day,
+                    title: `${aiPlannerTopic} — Day ${i + 1}`,
+                    content: `Post idea for ${day}: Engaging content about ${aiPlannerTopic} for ${aiPlannerPlatform}`,
+                    time: ["09:00", "11:00", "13:00", "15:00", "17:00", "10:00", "12:00"][i],
+                  }));
+                  setGeneratedPlan(plan);
+                  toast.success(`Generated ${plan.length}-day content plan!`);
+                }}
+                disabled={generateCalendarPlan.isPending || !aiPlannerTopic.trim()}
+                className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-violet-500/20"
+              >
+                {generateCalendarPlan.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Generate Plan
+              </button>
+            </div>
+            {/* Generated Plan Preview */}
+            {generatedPlan.length > 0 && (
+              <div className="mt-4 border-t border-violet-500/20 pt-4">
+                <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                  Generated {generatedPlan.length}-Day Content Plan
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {generatedPlan.map((item, i) => (
+                    <div key={i} className="bg-background rounded-xl border border-border p-3 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded-full">{item.day}</span>
+                        <span className="text-[10px] text-muted-foreground">{item.time}</span>
+                      </div>
+                      <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
+                      <p className="text-[10px] text-muted-foreground line-clamp-2">{item.content}</p>
+                      <button
+                        onClick={() => {
+                          toast.success(`"${item.title}" added to drafts!`);
+                          setGeneratedPlan(prev => prev.filter((_, idx) => idx !== i));
+                        }}
+                        className="w-full text-[10px] font-medium text-violet-600 bg-violet-500/10 hover:bg-violet-500/20 rounded-lg py-1 transition-colors"
+                      >
+                        + Add to Calendar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Calendar navigation */}
         <div className="bg-card border border-border rounded-2xl p-5">

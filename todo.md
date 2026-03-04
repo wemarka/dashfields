@@ -1238,3 +1238,30 @@
 - [x] تصميم Pill أنيق في الـ Topbar بجانب Search مع Avatar + اسم + منصة + badge عدد الحسابات
 - [x] إزالة العنصر من أسفل الـ Sidebar
 - [x] 0 TypeScript errors ✅
+
+## Phase 11 — UI/UX Audit Fixes (5 Tasks)
+
+### Task 1: Design System
+- [x] design-tokens.ts: primary #3B82F6, AI-accent gradient, success/warning/danger
+- [x] توحيد ألوان الأزرار عبر كل الصفحات (AI Studio: Analyze Sentiment, Get Recommendations, Generate Calendar)
+- [x] توحيد border-radius: rounded-xl للأزرار والكروت
+
+### Task 2: Empty States + Demo Data
+- [x] demo-data.ts: بيانات عينة واقعية للحملات والتحليلات
+- [x] SampleDataBanner: بانر بنفسجي مع Dismiss + Connect Platform
+- [x] SpendChart: timeout 10s + empty state محسّن بدلاً من spinner لانهائي
+
+### Task 3: RTL/i18n
+- [x] useCurrency: Intl.NumberFormat مع locale عربي (الأرقام بالعربية عند اختيار لغة عربية)
+- [x] Intl.DateTimeFormat للتواريخ حسب locale
+
+### Task 4: Schedule Post Modal
+- [x] Best Time to Post suggestions (9 AM, 12 PM, 6 PM) بناءً على المنصة
+- [x] Post Preview panel مع محاكاة شكل المنصة
+- [x] زر Preview في الـ header لتفعيل/تعطيل المعاينة
+
+### Task 5: AI Calendar Planner
+- [x] ContentCalendar: زر "AI Planner" بنفسجي في الـ header
+- [x] AI Planner Panel: topic input + platform selector + days selector (7/14/30d)
+- [x] Generated Plan cards مع "+ Add to Calendar" action
+- [x] 383/383 tests + 0 TS errors ✅

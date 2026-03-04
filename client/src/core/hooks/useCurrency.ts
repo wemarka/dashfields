@@ -63,18 +63,22 @@ export function getCurrencySymbol(currency: string): string {
 
 /**
  * Format a monetary amount using the workspace currency.
+ * Uses Intl.NumberFormat for locale-aware formatting.
  * @param amount  Numeric value
  * @param currency  ISO 4217 currency code (e.g. "USD", "SAR")
  * @param decimals  Number of decimal places (default 2)
  */
 export function formatMoney(amount: number, currency: string, decimals = 2): string {
   const symbol = getCurrencySymbol(currency);
-  const formatted = amount.toLocaleString(undefined, {
+  // Use Intl.NumberFormat for proper locale-aware number formatting
+  const currentLang = typeof localStorage !== "undefined" ? (localStorage.getItem("dashfields-lang") ?? "en") : "en";
+  const locale = currentLang === "ar" ? "ar-SA" : "en-US";
+  const formatted = new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  });
-  // For currencies that typically go after the amount
-  const postfixCurrencies = ["SAR", "AED", "KWD", "BHD", "OMR", "QAR", "JOD", "EGP", "IQD", "SYP", "LBP", "YER", "SDG"];
+  }).format(amount);
+  // For Arabic currencies that go after the amount
+  const postfixCurrencies = ["SAR", "AED", "KWD", "BHD", "OMR", "QAR", "JOD", "EGP", "IQD", "SYP", "LBP", "YER", "SDG", "MAD", "TND", "LYD", "DZD"];
   if (postfixCurrencies.includes(currency.toUpperCase())) {
     return `${formatted} ${symbol}`;
   }

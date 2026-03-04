@@ -1,5 +1,6 @@
 // SpendChart.tsx
 // Area chart showing spend per campaign for the Dashboard.
+import { useState, useEffect } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { BarChart2, Loader2 } from "lucide-react";
 import { useCurrency } from "@/core/hooks/useCurrency";
@@ -18,6 +19,16 @@ interface SpendChartProps {
 
 export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps) {
   const { fmt, targetRoas } = useCurrency();
+
+  // Timeout: if loading for more than 10s, show empty state instead of infinite spinner
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    if (!loading) { setTimedOut(false); return; }
+    const t = setTimeout(() => setTimedOut(true), 10_000);
+    return () => clearTimeout(t);
+  }, [loading]);
+  const isActuallyLoading = loading && !timedOut;
+
   const chartData = campaigns.slice(0, 8).map((c) => ({
     name: c.campaignName.length > 20 ? c.campaignName.slice(0, 18) + "…" : c.campaignName,
     spend: c.spend,
@@ -39,7 +50,7 @@ export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps)
         )}
       </div>
 
-      {loading ? (
+      {isActuallyLoading ? (
         <div className="h-[200px] flex items-center justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
@@ -82,6 +93,9 @@ export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps)
           <p className="text-sm">
             {isConnected ? "No campaign data for this period" : "Connect Meta Ads to see data"}
           </p>
+          {timedOut && (
+            <p className="text-xs text-muted-foreground/60">Loading timed out — check your connection</p>
+          )}
         </div>
       )}
     </div>

@@ -173,11 +173,11 @@ function AdToolsTab() {
           <button
             onClick={handleGenerate}
             disabled={generateMutation.isPending || !prompt.trim()}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {generateMutation.isPending
               ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</>
-              : <><Zap className="w-4 h-4" />Generate</>
+              : <><Zap className="w-4 h-4" />Generate ✨</>
             }
           </button>
         </div>
@@ -372,9 +372,9 @@ function SentimentTab() {
         <button
           onClick={() => text.trim() && mutation.mutate({ text })}
           disabled={mutation.isPending || !text.trim()}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
         >
-          {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Brain className="w-4 h-4" />Analyze Sentiment</>}
+          {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Brain className="w-4 h-4" />Analyze Sentiment ✨</>}
         </button>
       </div>
 
@@ -509,9 +509,9 @@ function TimingTab() {
           <button
             onClick={() => selectedPlatforms.length > 0 && mutation.mutate({ platforms: selectedPlatforms, industry: industry || "general", targetRegion: region })}
             disabled={mutation.isPending || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
           >
-            {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Zap className="w-4 h-4" />Get Recommendations</>}
+            {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Zap className="w-4 h-4" />Get Recommendations ✨</>}
           </button>
         </div>
       </div>
@@ -696,9 +696,9 @@ function CalendarPlannerTab() {
           <button
             onClick={() => brand.trim() && industry.trim() && mutation.mutate({ brand, industry, platforms: selectedPlatforms, weekCount })}
             disabled={mutation.isPending || !brand.trim() || !industry.trim() || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
           >
-            {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Planning...</> : <><Calendar className="w-4 h-4" />Generate Calendar</>}
+            {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Planning...</> : <><Calendar className="w-4 h-4" />Generate Calendar ✨</>}
           </button>
         </div>
       </div>
@@ -941,8 +941,8 @@ export default function AIContent() {
                       className="w-full accent-violet-500" />
                   </div>
                   <button onClick={handleGenerate} disabled={generateMutation.isPending || !topic.trim()}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                    {generateMutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</> : <><Wand2 className="w-4 h-4" />Generate Ideas</>}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
+                    {generateMutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</> : <><Wand2 className="w-4 h-4" />Generate Ideas ✨</>}
                   </button>
                 </div>
               </div>

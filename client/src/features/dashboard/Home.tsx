@@ -31,6 +31,7 @@ import { Settings2 } from "lucide-react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/core/hooks/useCurrency";
+import { SampleDataBanner } from "@/components/SampleDataBanner";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
@@ -413,6 +414,9 @@ export default function Dashboard() {
 
         {/* - Onboarding Wizard (first-run) - */}
         {!hasConnections && <OnboardingWizard />}
+
+        {/* - Sample Data Banner (shown when no real data) - */}
+        <SampleDataBanner hasRealData={hasConnections} />
 
         {/* - Onboarding Banner (post-connect) - */}
         {hasConnections && <SmartOnboardingBanner />}

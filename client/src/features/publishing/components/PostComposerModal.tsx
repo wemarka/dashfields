@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import {
   X, Calendar, Clock, Send, Loader2, Sparkles, Hash, Wand2,
   ChevronDown, ChevronUp, Image, Upload, Trash2, AlertCircle,
+  Eye, Zap, TrendingUp,
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
@@ -21,6 +22,24 @@ interface Props {
 const SUPPORTED_PLATFORMS = ALL_PLATFORMS.filter((p) =>
   p.features.includes("posts")
 );
+
+// Best times to post per platform (based on industry research)
+const BEST_TIMES: Record<string, { day: string; time: string; label: string }[]> = {
+  facebook:  [{ day: "Wed", time: "13:00", label: "Wed 1 PM" }, { day: "Thu", time: "10:00", label: "Thu 10 AM" }],
+  instagram: [{ day: "Tue", time: "11:00", label: "Tue 11 AM" }, { day: "Fri", time: "10:00", label: "Fri 10 AM" }],
+  twitter:   [{ day: "Wed", time: "09:00", label: "Wed 9 AM" }, { day: "Fri", time: "09:00", label: "Fri 9 AM" }],
+  linkedin:  [{ day: "Tue", time: "10:00", label: "Tue 10 AM" }, { day: "Thu", time: "10:00", label: "Thu 10 AM" }],
+  tiktok:    [{ day: "Tue", time: "09:00", label: "Tue 9 AM" }, { day: "Fri", time: "17:00", label: "Fri 5 PM" }],
+  youtube:   [{ day: "Sat", time: "09:00", label: "Sat 9 AM" }, { day: "Sun", time: "11:00", label: "Sun 11 AM" }],
+};
+
+function getBestTime(platforms: string[]): string | null {
+  const primary = platforms[0];
+  if (!primary) return null;
+  const times = BEST_TIMES[primary];
+  if (!times || times.length === 0) return null;
+  return times[0].label;
+}
 
 // Platform-specific character limits
 const CHAR_LIMITS: Record<string, number> = {
@@ -52,6 +71,9 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
   const [imageUrl, setImageUrl]             = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Preview state
+  const [showPreview, setShowPreview]       = useState(false);
 
   // AI state
   const [aiTopic, setAiTopic]               = useState("");
@@ -242,10 +264,25 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-background z-10">
-          <h2 className="text-sm font-semibold text-foreground">Create Post</h2>
-          <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <h2 className="text-sm font-semibold text-foreground">Create Post</h2>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowPreview(v => !v)}
+              className={"flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all " +
+                (showPreview ? "bg-primary/10 text-primary border-primary/30" : "bg-muted text-muted-foreground border-transparent hover:border-border")}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Preview
+            </button>
+            <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         <div className="p-5 space-y-4">
@@ -469,6 +506,75 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
               </p>
             )}
           </div>
+
+          {/* Post Preview */}
+          {showPreview && content.trim() && (
+            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-primary" />
+                Post Preview
+              </p>
+              <div className="bg-background rounded-xl border border-border p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">W</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">Your Page</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {scheduleMode === "schedule" && scheduleDate
+                        ? new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()
+                        : "Now"}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{content}</p>
+                {imagePreview && (
+                  <img src={imagePreview} alt="Preview" className="w-full max-h-40 object-cover rounded-lg" />
+                )}
+                <div className="flex items-center gap-3 pt-1 border-t border-border/50">
+                  <span className="text-[10px] text-muted-foreground">👍 Like</span>
+                  <span className="text-[10px] text-muted-foreground">💬 Comment</span>
+                  <span className="text-[10px] text-muted-foreground">↗️ Share</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Best Time to Post */}
+          {scheduleMode === "schedule" && selectedPlatforms.length > 0 && (() => {
+            const bestTime = getBestTime(selectedPlatforms);
+            if (!bestTime) return null;
+            return (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <TrendingUp className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  <span className="font-semibold">Best time to post</span> on {selectedPlatforms[0]}: <span className="font-semibold">{bestTime}</span>
+                </p>
+                <button
+                  onClick={() => {
+                    const times = BEST_TIMES[selectedPlatforms[0]];
+                    if (times && times[0]) {
+                      setScheduleTime(times[0].time);
+                      // Set to next occurrence of the day
+                      const today = new Date();
+                      const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+                      const targetDay = dayMap[times[0].day] ?? 3;
+                      const daysUntil = (targetDay - today.getDay() + 7) % 7 || 7;
+                      const targetDate = new Date(today);
+                      targetDate.setDate(today.getDate() + daysUntil);
+                      setScheduleDate(targetDate.toISOString().split("T")[0]);
+                      toast.success(`Scheduled for ${bestTime}!`);
+                    }
+                  }}
+                  className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-700 text-[10px] font-medium hover:bg-amber-500/30 transition-colors whitespace-nowrap"
+                >
+                  <Zap className="w-3 h-3" />
+                  Use this time
+                </button>
+              </div>
+            );
+          })()}
 
           {/* Schedule */}
           <div>
