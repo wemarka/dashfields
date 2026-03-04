@@ -22,6 +22,7 @@ import {
   Sun, Moon, ChevronDown, Check, PlusCircle,
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
+  Activity, CreditCard,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -123,6 +124,13 @@ const navGroups: NavGroup[] = [
       { icon: SplitSquareHorizontal, labelKey: "nav.abTesting",        path: "/ab-testing",        iconAnimation: "icon-spin" },
       { icon: LayoutGrid,            labelKey: "nav.customDashboards",  path: "/custom-dashboards", iconAnimation: "icon-bounce" },
       { icon: FlaskConical,          labelKey: "nav.advancedAnalytics", path: "/advanced-analytics", iconAnimation: "icon-pop" },
+    ],
+  },
+  {
+    labelKey: "nav.groups.workspace",
+    items: [
+      { icon: Activity,   labelKey: "nav.monitor", path: "/monitor", iconAnimation: "icon-bounce" },
+      { icon: CreditCard, labelKey: "nav.billing", path: "/billing", iconAnimation: "icon-pop" },
     ],
   },
 ];

@@ -34,13 +34,16 @@
       "content": "Content",
       "reports": "Reports",
       "insights": "Insights & Alerts",
-      "tools": "Tools"
+      "tools": "Tools",
+      "workspace": "Workspace"
     },
     "publishing": "Publishing",
     "insights": "Insights",
     "abTesting": "A/B Testing",
     "audienceOverlap": "Audience Overlap",
-    "customDashboards": "Custom Dashboards"
+    "customDashboards": "Custom Dashboards",
+    "monitor": "Live Monitor",
+    "billing": "Billing & Plans"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

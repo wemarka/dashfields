@@ -1323,3 +1323,13 @@
 - [x] DashboardLayout updated with Supabase logout
 - [x] ActivityFeed.tsx fixed for single supabase instance
 - [x] 400/400 tests + 0 TS errors
+
+## Phase 13 — AI Smart Recommendations + Advanced Campaign Builder + Billing + Realtime Monitor
+- [ ] server/routers/recommendations.ts — AI-powered recommendations engine
+- [ ] RecommendationsWidget on Dashboard
+- [ ] server/routers/campaignBuilder.ts — AI copy + budget optimizer
+- [ ] AdvancedCampaignBuilder page (/campaigns/builder)
+- [ ] Billing/Subscription page (/billing) with plan comparison + usage meters
+- [ ] Real-time Performance Monitor (/monitor) with Supabase Realtime
+- [ ] Tests for all new routers
+- [ ] 0 TS errors

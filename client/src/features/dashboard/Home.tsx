@@ -32,6 +32,7 @@ import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/core/hooks/useCurrency";
 import { SampleDataBanner } from "@/components/SampleDataBanner";
+import { SmartRecommendationsWidget } from "@/features/dashboard/components/SmartRecommendationsWidget";
 
 // Widget visibility stored in localStorage
 const WIDGET_STORAGE_KEY = "dashfields_widget_visibility";
@@ -539,6 +540,8 @@ export default function Dashboard() {
           <SpendForecastWidget />
         )}
 
+        {/* - AI Smart Recommendations - */}
+        <SmartRecommendationsWidget />
         {/* - Budget Tracker + Activity Feed - */}
         {hasConnections && (widgets.budget || widgets.activity) && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

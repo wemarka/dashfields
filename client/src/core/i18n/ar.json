@@ -34,13 +34,16 @@
       "content": "المحتوى",
       "reports": "التقارير",
       "insights": "الرؤى والتنبيهات",
-      "tools": "الأدوات"
+      "tools": "الأدوات",
+      "workspace": "مساحة العمل"
     },
     "publishing": "النشر",
     "insights": "الرؤى",
     "abTesting": "اختبار A/B",
     "audienceOverlap": "تداخل الجماهير",
-    "customDashboards": "لوحات مخصصة"
+    "customDashboards": "لوحات مخصصة",
+    "monitor": "المراقبة المباشرة",
+    "billing": "الاشتراكات والخطط"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

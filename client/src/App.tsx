@@ -43,6 +43,8 @@ const Insights          = lazy(() => import("./features/insights/Insights"));
 const Publishing        = lazy(() => import("./features/publishing/Publishing"));
 const WorkspaceSettings = lazy(() => import("./features/settings/WorkspaceSettings"));
 const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite"));
+const BillingPage       = lazy(() => import("./features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
+const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
 // ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
 const LoginPage          = lazy(() => import("./features/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("./features/auth/RegisterPage"));
@@ -99,6 +101,8 @@ function Router() {
         <Route path="/meta-connect"         component={() => <Redirect to="/connections" />} />
         <Route path="/insights"             component={Insights} />
         <Route path="/publishing"           component={Publishing} />
+        <Route path="/billing"              component={BillingPage} />
+        <Route path="/monitor"              component={PerformanceMonitor} />
         <Route path="/ai-tools"             component={() => <Redirect to="/ai-content" />} />
         <Route path="/404"                  component={NotFound} />
         <Route                              component={NotFound} />

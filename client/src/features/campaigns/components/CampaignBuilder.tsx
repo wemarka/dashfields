@@ -2,9 +2,9 @@
 // Full-featured 4-step campaign wizard:
 // Step 1 — Campaign (name, objective, platform)
 // Step 2 — Ad Set (budget, schedule, audience targeting)
-// Step 3 — Ad Creative (headline, body, image, CTA)
+// Step 3 — Ad Creative (headline, body, image, CTA) + AI Copy Generator
 // Step 4 — Review & Launch
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -12,7 +12,7 @@ import {
   X, ChevronRight, ChevronLeft, Rocket, Target, Users, Image,
   DollarSign, Calendar, Globe, Wand2, Upload, CheckCircle2,
   Sparkles, BarChart3, ShoppingCart, MessageSquare, Heart,
-  Play, Eye, MousePointer, Loader2, Info,
+  Play, Eye, MousePointer, Loader2, Info, RefreshCw, Copy,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -231,7 +231,6 @@ function Step2AdSet({
           <div>
             <label className="text-[10px] text-muted-foreground mb-1 block">End Date (optional)</label>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
               className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
         </div>
@@ -241,54 +240,56 @@ function Step2AdSet({
         <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
           <Users className="w-3.5 h-3.5 text-primary" /> Audience Targeting
         </h3>
-        {/* Age + Gender */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Age & Gender */}
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[10px] text-muted-foreground mb-1 block">Min Age</label>
-            <select value={ageMin} onChange={(e) => setAgeMin(e.target.value)}
-              className="w-full px-2 py-2 rounded-xl bg-background border border-border text-xs text-foreground outline-none">
-              {[18,21,25,30,35,40,45,50,55,60,65].map((a) => <option key={a} value={String(a)}>{a}</option>)}
-            </select>
+            <label className="text-[10px] text-muted-foreground mb-1.5 block">Age Range</label>
+            <div className="flex gap-1.5">
+              <select value={ageMin} onChange={(e) => setAgeMin(e.target.value)}
+                className="flex-1 px-2 py-1.5 rounded-lg bg-background border border-border text-xs text-foreground outline-none">
+                {["18","25","35","45","55","65"].map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+              <span className="text-xs text-muted-foreground self-center">–</span>
+              <select value={ageMax} onChange={(e) => setAgeMax(e.target.value)}
+                className="flex-1 px-2 py-1.5 rounded-lg bg-background border border-border text-xs text-foreground outline-none">
+                {["24","34","44","54","64","65"].map((a) => <option key={a} value={a}>{a === "65" ? "65+" : a}</option>)}
+              </select>
+            </div>
           </div>
           <div>
-            <label className="text-[10px] text-muted-foreground mb-1 block">Max Age</label>
-            <select value={ageMax} onChange={(e) => setAgeMax(e.target.value)}
-              className="w-full px-2 py-2 rounded-xl bg-background border border-border text-xs text-foreground outline-none">
-              {[24,30,35,40,45,50,55,60,65,99].map((a) => <option key={a} value={String(a)}>{a === 99 ? "65+" : a}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] text-muted-foreground mb-1 block">Gender</label>
-            <select value={gender} onChange={(e) => setGender(e.target.value)}
-              className="w-full px-2 py-2 rounded-xl bg-background border border-border text-xs text-foreground outline-none">
-              {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-        </div>
-        {/* Locations */}
-        <div>
-          <label className="text-[10px] text-muted-foreground mb-2 block flex items-center gap-1">
-            <Globe className="w-3 h-3" /> Locations ({selectedLocations.length} selected)
-          </label>
-          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-            {LOCATIONS.map((l) => (
-              <button key={l} onClick={() => toggleLocation(l)}
-                className={`text-[11px] px-2.5 py-1 rounded-full border transition-all ${selectedLocations.includes(l) ? "bg-primary/10 border-primary/30 text-primary font-medium" : "bg-background border-border text-muted-foreground hover:border-primary/20"}`}>
-                {l}
-              </button>
-            ))}
+            <label className="text-[10px] text-muted-foreground mb-1.5 block">Gender</label>
+            <div className="flex gap-1">
+              {GENDERS.map((g) => (
+                <button key={g} onClick={() => setGender(g)}
+                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium transition-all ${gender === g ? "bg-primary text-primary-foreground" : "bg-background border border-border text-muted-foreground hover:bg-muted"}`}>
+                  {g}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         {/* Interests */}
         <div>
-          <label className="text-[10px] text-muted-foreground mb-2 block flex items-center gap-1">
-            <Target className="w-3 h-3" /> Interests ({selectedInterests.length} selected)
-          </label>
-          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+          <label className="text-[10px] text-muted-foreground mb-1.5 block">Interests ({selectedInterests.length} selected)</label>
+          <div className="flex flex-wrap gap-1.5">
             {INTERESTS.map((i) => (
               <button key={i} onClick={() => toggleInterest(i)}
-                className={`text-[11px] px-2.5 py-1 rounded-full border transition-all ${selectedInterests.includes(i) ? "bg-violet-100 dark:bg-violet-900/30 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-400 font-medium" : "bg-background border-border text-muted-foreground hover:border-violet-200"}`}>
+                className={`text-[10px] px-2 py-1 rounded-full border transition-all ${selectedInterests.includes(i) ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted"}`}>
                 {i}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Locations */}
+        <div>
+          <label className="text-[10px] text-muted-foreground mb-1.5 block flex items-center gap-1">
+            <Globe className="w-3 h-3" /> Locations ({selectedLocations.length || "All"})
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {LOCATIONS.map((l) => (
+              <button key={l} onClick={() => toggleLocation(l)}
+                className={`text-[10px] px-2 py-1 rounded-full border transition-all ${selectedLocations.includes(l) ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                {l}
               </button>
             ))}
           </div>
@@ -302,16 +303,54 @@ function Step2AdSet({
 function Step3Creative({
   headline, setHeadline, body, setBody, cta, setCta,
   imageUrl, setImageUrl, destinationUrl, setDestinationUrl,
-  platform,
+  platform, objective, campaignName,
 }: {
   headline: string; setHeadline: (v: string) => void;
   body: string; setBody: (v: string) => void;
   cta: string; setCta: (v: string) => void;
   imageUrl: string; setImageUrl: (v: string) => void;
   destinationUrl: string; setDestinationUrl: (v: string) => void;
-  platform: string;
+  platform: string; objective: string; campaignName: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [aiTone, setAiTone] = useState<"professional" | "casual" | "urgent" | "inspirational">("professional");
+  const [aiVariants, setAiVariants] = useState<Array<{ headline: string; body: string }>>([]);
+  const [showAiPanel, setShowAiPanel] = useState(false);
+
+  const generateCopyMutation = trpc.ai.generate.useMutation({
+    onSuccess: (data) => {
+      try {
+        // Ensure content is a string
+        const rawContent = data.content;
+        const content = typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent);
+        // Try to extract JSON array from the response
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setAiVariants(parsed);
+            setShowAiPanel(true);
+            return;
+          }
+        }
+        // Fallback: create a single variant from the text
+        setAiVariants([{ headline: campaignName || "Compelling Headline", body: content }]);
+        setShowAiPanel(true);
+      } catch {
+        const fallback = typeof data.content === "string" ? data.content : "";
+        setAiVariants([{ headline: campaignName || "Compelling Headline", body: fallback }]);
+        setShowAiPanel(true);
+      }
+    },
+    onError: (err) => toast.error("AI generation failed: " + err.message),
+  });
+
+  const handleGenerateCopy = useCallback(() => {
+    const obj = OBJECTIVES.find(o => o.id === objective);
+    const prompt = `Generate exactly 3 ad copy variants for a ${platform} ${obj?.label ?? objective} campaign called "${campaignName || "Campaign"}". Tone: ${aiTone}. Return ONLY a valid JSON array with no extra text: [{"headline": "...", "body": "..."}, {"headline": "...", "body": "..."}, {"headline": "...", "body": "..."}]`;
+    generateCopyMutation.mutate({ tool: "copy", prompt });
+  }, [objective, platform, campaignName, aiTone, generateCopyMutation]);
+
   const uploadMutation = trpc.posts.uploadImage.useMutation({
     onSuccess: (data) => { setImageUrl(data.url); toast.success("Image uploaded!"); },
     onError: (err) => toast.error("Upload failed: " + err.message),
@@ -333,6 +372,83 @@ function Step3Creative({
 
   return (
     <div className="space-y-4">
+      {/* AI Copy Generator */}
+      <div className="bg-gradient-to-br from-primary/5 via-violet-500/5 to-fuchsia-500/5 border border-primary/20 rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-foreground">AI Copy Generator</p>
+              <p className="text-[10px] text-muted-foreground">Generate compelling ad copy with AI</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowAiPanel(!showAiPanel)}
+            className="text-[10px] text-primary hover:underline"
+          >
+            {showAiPanel ? "Hide" : "Show variants"}
+          </button>
+        </div>
+        {/* Tone selector */}
+        <div className="flex gap-1.5 mb-3">
+          {(["professional", "casual", "urgent", "inspirational"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setAiTone(t)}
+              className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium capitalize transition-all ${aiTone === t ? "bg-primary text-primary-foreground" : "bg-background/60 border border-border text-muted-foreground hover:bg-muted"}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleGenerateCopy}
+          disabled={generateCopyMutation.isPending}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+        >
+          {generateCopyMutation.isPending ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating...</>
+          ) : (
+            <><Wand2 className="w-3.5 h-3.5" /> Generate 3 Variants</>
+          )}
+        </button>
+        {/* AI Variants */}
+        {showAiPanel && aiVariants.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Choose a variant:</p>
+            {aiVariants.map((v, i) => (
+              <div key={i} className="bg-background/80 border border-border rounded-xl p-3 group hover:border-primary/30 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground mb-1 line-clamp-1">{v.headline}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2">{v.body}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setHeadline(v.headline);
+                      setBody(v.body);
+                      toast.success(`Variant ${i + 1} applied!`);
+                    }}
+                    className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-medium hover:bg-primary/20 transition-colors"
+                  >
+                    <Copy className="w-3 h-3" /> Use
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={handleGenerateCopy}
+              disabled={generateCopyMutation.isPending}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className="w-3 h-3" /> Regenerate
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Image Upload */}
       <div>
         <label className="text-xs font-semibold text-foreground mb-2 block flex items-center gap-1.5">
@@ -603,7 +719,7 @@ export function CampaignBuilder({ onClose, onCreated }: { onClose: () => void; o
           <StepIndicator step={step} />
           {step === 1 && <Step1Campaign name={name} setName={setName} objective={objective} setObjective={setObjective} platform={platform} setPlatform={(v) => setPlatform(v as CampaignPlatform)} />}
           {step === 2 && <Step2AdSet budget={budget} setBudget={setBudget} budgetType={budgetType} setBudgetType={setBudgetType} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} ageMin={ageMin} setAgeMin={setAgeMin} ageMax={ageMax} setAgeMax={setAgeMax} gender={gender} setGender={setGender} selectedInterests={selectedInterests} setSelectedInterests={setSelectedInterests} selectedLocations={selectedLocations} setSelectedLocations={setSelectedLocations} />}
-          {step === 3 && <Step3Creative headline={headline} setHeadline={setHeadline} body={body} setBody={setBody} cta={cta} setCta={setCta} imageUrl={imageUrl} setImageUrl={setImageUrl} destinationUrl={destinationUrl} setDestinationUrl={setDestinationUrl} platform={platform} />}
+          {step === 3 && <Step3Creative headline={headline} setHeadline={setHeadline} body={body} setBody={setBody} cta={cta} setCta={setCta} imageUrl={imageUrl} setImageUrl={setImageUrl} destinationUrl={destinationUrl} setDestinationUrl={setDestinationUrl} platform={platform} objective={objective} campaignName={name} />}
           {step === 4 && <Step4Review name={name} objective={objective} platform={platform} budget={budget} budgetType={budgetType} startDate={startDate} endDate={endDate} ageMin={ageMin} ageMax={ageMax} gender={gender} selectedInterests={selectedInterests} selectedLocations={selectedLocations} headline={headline} body={body} cta={cta} imageUrl={imageUrl} destinationUrl={destinationUrl} />}
         </div>
         {/* Footer */}

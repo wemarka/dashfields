@@ -467,6 +467,27 @@ export const workspacesRouter = router({
     }),
 
   /**
+   * Get usage stats for the active workspace (for billing page).
+   */
+  getUsage: workspaceProcedure
+    .input(z.object({ workspaceId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
+      const sb = getSupabase();
+      const [socialRes, memberRes, campaignRes, postRes] = await Promise.all([
+        sb.from("social_accounts").select("id", { count: "exact", head: true }).eq("workspace_id", ctx.workspaceId),
+        sb.from("workspace_members").select("id", { count: "exact", head: true }).eq("workspace_id", ctx.workspaceId),
+        sb.from("campaigns").select("id", { count: "exact", head: true }).eq("workspace_id", ctx.workspaceId),
+        sb.from("posts").select("id", { count: "exact", head: true }).eq("workspace_id", ctx.workspaceId),
+      ]);
+      return {
+        socialAccounts: socialRes.count ?? 0,
+        teamMembers: memberRes.count ?? 0,
+        campaigns: campaignRes.count ?? 0,
+        posts: postRes.count ?? 0,
+      };
+    }),
+
+  /**
    * Get the onboarding status for the active workspace.
    */
   getOnboardingStatus: workspaceProcedure
