@@ -1186,3 +1186,15 @@
 - [x] WorkspaceSwitcher: موجود بالفعل في DashboardLayout Sidebar مع Modal للتبديل
 - [x] Tests: server/token.refresh.test.ts (25 اختباراً: Token logic + URL builder + Auto-Onboarding + Notifications)
 - [x] التحقق النهائي: 328/328 tests + 0 TS errors ✅
+
+## Phase 7 — Multi-Workspace Billing Logic ✅
+- [x] Backend: PLAN_LIMITS config في shared/planLimits.ts (free=1, pro=3, agency=∞, enterprise=∞)
+- [x] Backend: canCreateWorkspace() + workspaceLimitMessage() helpers
+- [x] Backend: فحص حدود الخطة في createWorkspace procedure (FORBIDDEN error)
+- [x] Backend: upgradeWorkspace procedure لتغيير الـ plan
+- [x] Frontend: UpgradeModal بمقارنة الخطط الثلاث (Free vs Pro vs Agency)
+- [x] Frontend: Plan Badge في WorkspaceSwitcher بالـ Sidebar
+- [x] Frontend: ربط "Create New Workspace" بـ UpgradeModal عند تجاوز الحد
+- [x] Tests: server/billing.limits.test.ts (24 اختباراً: PLAN_LIMITS + canCreateWorkspace + workspaceLimitMessage)
+- [x] Tests: workspaces.create محدّث لاختبار blocks + allows scenarios
+- [x] التحقق النهائي: 352/352 tests + 0 TS errors ✅

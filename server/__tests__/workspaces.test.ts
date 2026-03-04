@@ -256,11 +256,22 @@ describe("workspaces.checkSlug", () => {
 });
 
 describe("workspaces.create", () => {
-  it("creates a workspace and returns it", async () => {
+  it("creates a workspace and returns it when user has no owned workspaces", async () => {
+    // Override mock to return empty list (no existing owned workspaces)
+    const { getUserWorkspaces } = await import("../db/workspaces");
+    vi.mocked(getUserWorkspaces).mockResolvedValueOnce([]);
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.workspaces.create({ name: "New Workspace" });
     expect(result).toHaveProperty("id");
     expect(result).toHaveProperty("name", "New Workspace");
+  });
+
+  it("blocks creation when free plan limit is reached", async () => {
+    // Default mock returns 1 owned workspace with free plan — should be blocked
+    const caller = appRouter.createCaller(makeCtx());
+    await expect(caller.workspaces.create({ name: "Second Workspace" })).rejects.toMatchObject({
+      message: expect.stringMatching(/Free plan|upgrade/i),
+    });
   });
 });
 

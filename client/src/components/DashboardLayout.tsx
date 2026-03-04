@@ -13,6 +13,8 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
 import { changeLanguage } from "@/core/i18n";
+import { UpgradeModal } from "@/features/billing/UpgradeModal";
+import { PLAN_LIMITS, type WorkspacePlan } from "../../../shared/planLimits";
 import {
   BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
@@ -349,6 +351,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isRTL = i18n.language === "ar";
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
+  const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -504,14 +509,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <p className="text-[11px] font-semibold truncate leading-tight">
                     {activeWorkspace?.name ?? "No Workspace"}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/55 truncate capitalize">
-                    {activeWorkspace ? `${activeWorkspace.plan} · ${activeWorkspace.role}` : "Select workspace"}
-                  </p>
+                  <div className="flex items-center gap-1">
+                    {activeWorkspace?.plan && (() => {
+                      const planCfg = PLAN_LIMITS[activeWorkspace.plan as WorkspacePlan];
+                      return planCfg ? (
+                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${planCfg.badge.color}`}>
+                          {planCfg.badge.label}
+                        </span>
+                      ) : null;
+                    })()}
+                    <p className="text-[10px] text-muted-foreground/55 truncate capitalize">
+                      {activeWorkspace?.role ?? "Select workspace"}
+                    </p>
+                  </div>
                 </div>
                 <ChevronDown className="w-3 h-3 text-muted-foreground/50 shrink-0 group-hover:text-foreground/60 transition-colors" />
               </>
             )}
           </button>
+          {/* Upgrade CTA — shown only for free plan */}
+          {!collapsed && planInfoQuery.data && !planInfoQuery.data.canCreate && (
+            <button
+              onClick={() => { setUpgradeReason("You've reached your workspace limit."); setShowUpgradeModal(true); }}
+              className="w-full mt-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[10px] font-medium text-blue-700 transition-colors"
+            >
+              <PlusCircle className="w-3 h-3" />
+              Upgrade for more workspaces
+            </button>
+          )}
         </div>
         {/* ── Account Switcher (bottom) ──────────────────────────────────── */}
         <div className="px-2 pb-2 border-t border-white/8 pt-2 shrink-0">
@@ -648,7 +673,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onClose={() => setShowWorkspaceSwitcher(false)}
         />
       )}
-      {/* ── Account Switcher Modal ─────────────────────────────────────────── */}
+            {/* ── Account Switcher Modal ───────────────────────────────────── */}
       {showAccountSwitcher && (
         <AccountSwitcherModal
           accounts={accounts}
@@ -657,6 +682,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onClose={() => setShowAccountSwitcher(false)}
         />
       )}
+      {/* ── Upgrade Modal ────────────────────────────────────────────────────────────── */}
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"}
+        reason={upgradeReason}
+      />
     </div>
   );
 }

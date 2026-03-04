@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, workspaceProcedure, workspaceAdminProcedure } from "../_core/trpc";
+import { canCreateWorkspace, workspaceLimitMessage, PLAN_LIMITS, type WorkspacePlan } from "../../shared/planLimits";
 import {
   getUserWorkspaces,
   getWorkspaceById,
@@ -68,6 +69,26 @@ export const workspacesRouter = router({
   create: protectedProcedure
     .input(createWorkspaceInput)
     .mutation(async ({ ctx, input }) => {
+      // ── Plan limit enforcement ──────────────────────────────────────────────
+      const existingWorkspaces = await getUserWorkspaces(ctx.user.id);
+      // Determine the highest plan among owned workspaces (owner role)
+      const ownedPlans = existingWorkspaces
+        .filter(w => w.role === "owner")
+        .map(w => w.plan as WorkspacePlan);
+
+      // Use the best plan the user owns (priority: enterprise > agency > pro > free)
+      const planPriority: WorkspacePlan[] = ["enterprise", "agency", "pro", "free"];
+      const userPlan: WorkspacePlan = planPriority.find(p => ownedPlans.includes(p)) ?? "free";
+
+      const ownedCount = ownedPlans.length;
+      if (!canCreateWorkspace(userPlan, ownedCount)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: workspaceLimitMessage(userPlan),
+          cause: { plan: userPlan, currentCount: ownedCount, limit: PLAN_LIMITS[userPlan].maxWorkspaces },
+        });
+      }
+
       // Generate slug if not provided
       let slug = input.slug ?? generateSlug(input.name);
 
@@ -87,6 +108,38 @@ export const workspacesRouter = router({
 
       return workspace;
     }),
+
+  /** Upgrade workspace plan (owner only) */
+  upgradePlan: workspaceProcedure
+    .input(z.object({
+      workspaceId: z.number().int().positive(),
+      plan: z.enum(["free", "pro", "agency", "enterprise"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.workspaceRole !== "owner") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only the workspace owner can upgrade the plan" });
+      }
+      const updated = await updateWorkspace(ctx.workspaceId, { plan: input.plan as WorkspacePlan });
+      await logWorkspaceActivity(ctx.workspaceId, ctx.user.id, "workspace.plan_upgraded", { plan: input.plan });
+      return updated;
+    }),
+
+  /** Get plan limits for current user */
+  getPlanInfo: protectedProcedure.query(async ({ ctx }) => {
+    const workspaces = await getUserWorkspaces(ctx.user.id);
+    const ownedPlans = workspaces
+      .filter(w => w.role === "owner")
+      .map(w => w.plan as WorkspacePlan);
+    const planPriority: WorkspacePlan[] = ["enterprise", "agency", "pro", "free"];
+    const userPlan: WorkspacePlan = planPriority.find(p => ownedPlans.includes(p)) ?? "free";
+    const ownedCount = ownedPlans.length;
+    return {
+      plan: userPlan,
+      limits: PLAN_LIMITS[userPlan],
+      currentWorkspaces: ownedCount,
+      canCreate: canCreateWorkspace(userPlan, ownedCount),
+    };
+  }),
 
   /** Update workspace details (admin/owner only) */
   update: workspaceAdminProcedure
