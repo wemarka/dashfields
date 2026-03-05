@@ -47,10 +47,22 @@ const trpcClient = trpc.createClient({
       transformer: superjson,
       async headers() {
         // Attach Supabase access token as Bearer if available
+        // Auto-refresh if token is expired or about to expire
         if (supabase) {
           try {
             const { data } = await supabase.auth.getSession();
-            const token = data.session?.access_token;
+            let session = data.session;
+            if (session) {
+              // Check if token expires within the next 60 seconds
+              const expiresAt = session.expires_at ?? 0;
+              const nowSecs = Math.floor(Date.now() / 1000);
+              if (expiresAt - nowSecs < 60) {
+                // Token expired or about to expire — refresh it
+                const { data: refreshed } = await supabase.auth.refreshSession();
+                session = refreshed.session;
+              }
+            }
+            const token = session?.access_token;
             if (token) {
               return { Authorization: `Bearer ${token}` };
             }

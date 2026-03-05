@@ -1794,3 +1794,8 @@
 - [ ] Step 10: Clean up unused imports (sdk, COOKIE_NAME) after migration
 - [x] Fix "Please login (10001)" error on /analytics/overview - DashboardLayout now auto-redirects unauthenticated users to /login
 - [x] Clear Dashboard page and remove Splash screen, Onboarding Wizard, Welcome components and their files
+- [ ] Remove logo from entire app (sidebar + topbar)
+- [ ] Fix Collapse button overlap/positioning in Sidebar
+- [ ] Remove Settings section from Sidebar, keep only Integrations at bottom
+- [ ] Move Workspace & Team to Profile Menu in topbar
+- [ ] Delete Settings-related files that are no longer needed

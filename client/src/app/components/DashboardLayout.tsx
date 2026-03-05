@@ -5,7 +5,7 @@
 //  • Settings as direct link pinned at bottom (not collapsible)
 //  • Navigation config driven by src/config/navigation.ts
 import { useAuth } from "@/shared/hooks/useAuth";
-import { DashfieldsIcon, DashfieldsLogoFull } from "@/app/components/DashfieldsLogo";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
 import { trpc } from "@/core/lib/trpc";
@@ -26,7 +26,7 @@ import {
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
   CreditCard,
 } from "lucide-react";
-import { navSections, settingsNavItem as settingsNavConfig } from "@/config/navigation";
+import { navSections } from "@/config/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -86,7 +86,6 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 /// ─── Nav Structure — driven by navigation.ts config ────────────────────────
 // Settings item pinned at sidebar bottom (not collapsible)
-const settingsNavItem = settingsNavConfig;
 
 // ─── Workspace Switcher Modal ───────────────────────────────────────────────
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
@@ -402,18 +401,18 @@ function ProfileDropdown({
               {t("topbar.viewProfile")}
             </button>
             <button
+              onClick={() => { setLocation("/settings/workspace"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
+            >
+              <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+              Workspace &amp; Team
+            </button>
+            <button
               onClick={() => { setLocation("/settings/billing"); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
             >
               <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
               {t("topbar.billing", "Billing & Plans")}
-            </button>
-            <button
-              onClick={() => { setLocation("/settings"); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
-            >
-              <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-              {t("topbar.settings")}
             </button>
           </div>
 
@@ -464,7 +463,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const allNavItems = [
     ...navSections.flatMap(s => s.items).flatMap(item => item.subItems ?? [item]),
     ...settingsSubItems,
-    settingsNavItem,
   ];
   const currentNavItem = allNavItems.find(item => {
     if (item.path === "/dashboard") return location === "/dashboard" || location === "/";
@@ -502,7 +500,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <DashfieldsIcon className="w-10 h-10 text-brand dark:text-white animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-brand/10 animate-pulse" />
           <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
@@ -518,7 +516,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="app-bg flex h-screen items-center justify-center">
         <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <DashfieldsIcon className="w-10 h-10 text-brand dark:text-white animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-brand/10 animate-pulse" />
           <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
@@ -540,9 +538,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onClick={() => setLocation("/dashboard")}
         >
           {collapsed ? (
-            <DashfieldsIcon className="w-8 h-8 text-brand dark:text-white" />
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_3bd5ad8c.svg"
+              alt="Dashfields"
+              className="w-8 h-8"
+            />
           ) : (
-            <DashfieldsLogoFull className="h-7 w-auto text-brand dark:text-white" />
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_61e255da.svg"
+              alt="Dashfields"
+              className="h-7 w-auto"
+            />
           )}
         </div>
 
@@ -649,94 +655,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Settings pinned at bottom — collapsible with sub-items */}
+        {/* Integrations pinned at bottom */}
         <div className="px-2 pb-3 shrink-0">
           <div className="h-px bg-border/30 mx-1 mb-2" />
           {(() => {
-            const item = settingsNavItem;
-            const isActive = location.startsWith("/settings");
-            const isOpen = openSections["/settings"] ?? isActive;
+            const isActive = location.startsWith("/settings/integrations");
             return (
-              <div>
-                <button
-                  onClick={() => collapsed ? setLocation("/settings/integrations") : toggleSection("/settings")}
-                  title={collapsed ? t(item.labelKey) : undefined}
-                  className={[
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
-                    "transition-all duration-200 group relative",
-                    isRTL ? "flex-row-reverse text-right" : "text-left",
-                    isActive
-                      ? "text-foreground"
-                      : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
-                    collapsed ? "justify-center" : "",
-                  ].join(" ")}
-                >
-                  <item.icon
-                    className={[
-                      "w-[18px] h-[18px] shrink-0 transition-all duration-200",
-                      item.iconAnimation ?? "",
-                      isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
-                    ].join(" ")}
-                  />
-                  {!collapsed && (
-                    <>
-                      <span className="truncate flex-1">{t(item.labelKey)}</span>
-                      <ChevronDown
-                        className={[
-                          "w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0",
-                          isOpen ? "rotate-180" : "",
-                        ].join(" ")}
-                      />
-                    </>
-                  )}
-                </button>
-                {/* Settings Sub-items */}
-                {!collapsed && item.subItems && (
-                  <div
-                    className="overflow-hidden transition-all duration-200 ease-out"
-                    style={{ maxHeight: isOpen ? `${item.subItems.length * 44}px` : "0px" }}
-                  >
-                    <div className="ml-3 pl-3 border-l border-border/40 space-y-0.5 py-0.5">
-                      {item.subItems.map(sub => {
-                        const isSubActive = location.startsWith(sub.path);
-                        return (
-                          <button
-                            key={sub.path}
-                            onClick={() => setLocation(sub.path)}
-                            className={[
-                              "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium",
-                              "transition-all duration-150",
-                              isRTL ? "flex-row-reverse text-right" : "text-left",
-                              isSubActive
-                                ? "bg-brand/10 text-brand"
-                                : "text-foreground/50 hover:text-foreground hover:bg-foreground/5",
-                            ].join(" ")}
-                          >
-                            <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-brand" : "text-foreground/35"].join(" ")} />
-                            <span className="truncate">{t(sub.labelKey)}</span>
-                            {isSubActive && <span className="ml-auto w-1 h-1 rounded-full bg-brand shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+              <button
+                onClick={() => setLocation("/settings/integrations")}
+                title={collapsed ? t("nav.integrations") : undefined}
+                className={[
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                  "transition-all duration-200 group relative",
+                  isRTL ? "flex-row-reverse text-right" : "text-left",
+                  isActive
+                    ? "bg-brand/10 text-brand shadow-sm"
+                    : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                  collapsed ? "justify-center" : "",
+                ].join(" ")}
+              >
+                {isActive && !collapsed && (
+                  <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
                 )}
-              </div>
+                <svg className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                {!collapsed && <span className="truncate flex-1">{t("nav.integrations")}</span>}
+              </button>
             );
           })()}
         </div>
 
         {/* Workspace Switcher moved to Topbar */}
 
-        {/* Collapse Toggle */}
+        {/* Collapse Toggle — inside sidebar, bottom of nav area */}
         <button
           onClick={() => setCollapsed(c => !c)}
-          className={`absolute ${isRTL ? "-left-3" : "-right-3"} top-[72px] w-6 h-6 rounded-full glass-strong flex items-center justify-center hover:bg-brand/10 transition-colors z-10 shadow-sm border border-border/50`}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={[
+            "mx-2 mb-2 flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium",
+            "transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5",
+            collapsed ? "justify-center" : "",
+          ].join(" ")}
         >
           {(isRTL ? !collapsed : collapsed)
-            ? <ChevronRight className="w-3 h-3 text-foreground/60" />
-            : <ChevronLeft className="w-3 h-3 text-foreground/60" />
+            ? <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+            : <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
           }
+          {!collapsed && <span className="truncate">Collapse</span>}
         </button>
       </aside>
 
