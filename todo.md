@@ -1653,3 +1653,42 @@
 - [x] Add nav items to DashboardLayout with icons
 - [x] Add EN/AR translations for all 3 new nav items
 - [x] 410/410 tests passing, 0 TypeScript errors
+
+## Phase 26 — Project Restructuring (Application / Website Separation)
+
+### Phase 1: Cleanup & Hooks Consolidation
+- [ ] Delete unused files: demo-data.ts, demoData.ts, design-tokens.ts
+- [ ] Create shared/hooks/ and move all hooks there
+- [ ] Update all imports for moved hooks
+- [ ] Delete empty old hooks directories
+
+### Phase 2: Website Separation
+- [ ] Create client/src/website/pages/ directory
+- [ ] Move features/landing/* → website/pages/
+- [ ] Create website/router.tsx
+- [ ] Update App.tsx and all imports
+
+### Phase 3: App + Server Restructuring
+- [ ] Create client/src/app/features/ structure
+- [ ] Move all app features → app/features/
+- [ ] Create app/components/ for app-specific components
+- [ ] Move server/routers/ → server/app/routers/
+- [ ] Move server/db/ → server/app/db/
+- [ ] Update all import paths
+
+### Verification
+- [ ] 0 TypeScript errors
+- [ ] All tests passing
+- [ ] Save checkpoint
+
+## Phase 26 — Project Restructuring (Completed)
+- [x] Delete unused files (demo-data.ts, demoData.ts, design-tokens.ts)
+- [x] Consolidate hooks into client/src/shared/hooks/
+- [x] Move website pages to client/src/website/pages/
+- [x] Move app features to client/src/app/features/
+- [x] Move app components to client/src/app/components/
+- [x] Move server routers to server/app/routers/
+- [x] Move server db helpers to server/app/db/
+- [x] Update all import paths across the entire codebase
+- [x] Fix all test file imports and mock paths
+- [x] Verify 410/410 tests passing, 0 TypeScript errors

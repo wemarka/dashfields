@@ -2,8 +2,8 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
 import { getSupabase } from "../supabase";
-import { upsertUserBySupabaseUid } from "../db/users";
-import { getUserWorkspaces, createWorkspace, generateSlug } from "../db/workspaces";
+import { upsertUserBySupabaseUid } from "../app/db/users";
+import { getUserWorkspaces, createWorkspace, generateSlug } from "../app/db/workspaces";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];

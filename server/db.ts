@@ -3,14 +3,14 @@
 // Kept for backward compatibility with server/_core imports.
 
 // Connection
-export { getDb } from "./db/index";
+export { getDb } from "./app/db/index";
 
 // User helpers
 export {
   getUserByOpenId,
   getUserById,
   upsertUser,
-} from "./db/users";
+} from "./app/db/users";
 
 // Campaign helpers
 export {
@@ -19,21 +19,21 @@ export {
   createCampaign,
   updateCampaignStatus,
   getCampaignMetrics,
-} from "./db/campaigns";
+} from "./app/db/campaigns";
 
 // Post helpers
 export {
   getUserPosts,
   createPost,
   updatePostStatus,
-} from "./db/posts";
+} from "./app/db/posts";
 
 // Social account helpers
 export {
   getUserSocialAccounts,
   upsertSocialAccount,
   deleteSocialAccount,
-} from "./db/social";
+} from "./app/db/social";
 
 // Settings, notifications, alerts
 export {
@@ -45,4 +45,4 @@ export {
   getUserAlertRules,
   createAlertRule,
   deleteAlertRule,
-} from "./db/settings";
+} from "./app/db/settings";

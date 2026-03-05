@@ -53,7 +53,7 @@ vi.mock("../_core/llm", () => ({
   }),
 }));
 
-vi.mock("../db/workspaces", () => ({
+vi.mock("../app/db/workspaces", () => ({
   getWorkspaceById: vi.fn().mockResolvedValue({
     id: 1,
     name: "Test Workspace",
@@ -66,32 +66,32 @@ vi.mock("../db/workspaces", () => ({
   getBrandProfile: vi.fn().mockResolvedValue(null),
 }));
 
-vi.mock("../db/campaigns", () => ({
+vi.mock("../app/db/campaigns", () => ({
   getCampaigns: vi.fn().mockResolvedValue([
     { id: 1, name: "Summer Sale", status: "active", budget: 1000, platform: "meta" },
   ]),
 }));
 
-vi.mock("../db/social", () => ({
+vi.mock("../app/db/social", () => ({
   getWorkspaceSocialAccounts: vi.fn().mockResolvedValue([
     { id: 1, platform: "instagram", username: "testbrand" },
   ]),
 }));
 
-vi.mock("../db/posts", () => ({
+vi.mock("../app/db/posts", () => ({
   getWorkspacePosts: vi.fn().mockResolvedValue([]),
 }));
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 describe("Phase 13 — Smart Recommendations Router", () => {
   it("should export a router with getRecommendations procedure", async () => {
-    const { smartRecommendationsRouter } = await import("../routers/smartRecommendations");
+    const { smartRecommendationsRouter } = await import("../app/routers/smartRecommendations");
     expect(smartRecommendationsRouter).toBeDefined();
     expect(typeof smartRecommendationsRouter).toBe("object");
   });
 
   it("should have getRecommendations and refresh procedures", async () => {
-    const { smartRecommendationsRouter } = await import("../routers/smartRecommendations");
+    const { smartRecommendationsRouter } = await import("../app/routers/smartRecommendations");
     const procedures = Object.keys(smartRecommendationsRouter._def.procedures ?? {});
     // Router may be structured differently — just check it's a valid tRPC router
     expect(smartRecommendationsRouter).toBeTruthy();

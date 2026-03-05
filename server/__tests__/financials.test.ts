@@ -1,7 +1,7 @@
 // financials.test.ts
 // Unit tests for currency formatting helpers and financials settings validation
 import { describe, expect, it } from "vitest";
-import { formatMoney, getCurrencySymbol } from "../../client/src/core/hooks/useCurrency";
+import { formatMoney, getCurrencySymbol } from "../../client/src/shared/hooks/useCurrency";
 
 describe("getCurrencySymbol", () => {
   it("returns $ for USD", () => {

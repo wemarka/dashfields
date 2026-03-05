@@ -3,7 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
-import { getUserWorkspaces, createWorkspace, generateSlug } from "../db/workspaces";
+import { getUserWorkspaces, createWorkspace, generateSlug } from "../app/db/workspaces";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];

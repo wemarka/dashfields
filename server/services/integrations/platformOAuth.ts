@@ -7,7 +7,7 @@ import crypto from "crypto";
 import { getSupabase } from "../../supabase";
 import { COOKIE_NAME } from "@shared/const";
 import * as jose from "jose";
-import { getUserByOpenId } from "../../db/users";
+import { getUserByOpenId } from "../../app/db/users";
 
 // ─── OAuth configs per platform ────────────────────────────────────────────────
 interface OAuthConfig {

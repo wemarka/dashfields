@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 import type { TrpcContext } from "../_core/context";
 
 // ─── Mocks (must use inline values, no top-level variables) ──────────────────
-vi.mock("../supabase", () => ({
+vi.mock("../../supabase", () => ({
   getSupabase: () => ({
     from: () => ({
       select: () => ({
@@ -108,12 +108,12 @@ vi.mock("../supabase", () => ({
   }),
 }));
 
-vi.mock("../storage", () => ({
+vi.mock("../../storage", () => ({
   storagePut: vi.fn().mockResolvedValue({ url: "https://cdn.example.com/logo.png", key: "logo.png" }),
 }));
 
-vi.mock("../db/workspaces", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../db/workspaces")>();
+vi.mock("../app/db/workspaces", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../app/db/workspaces")>();
   return {
     ...actual,
     getWorkspaceMembership: vi.fn().mockResolvedValue("owner"),
@@ -200,7 +200,7 @@ describe("workspaces.saveOnboardingSettings", () => {
 
   it("rejects member role (FORBIDDEN)", async () => {
     // Override mock to return "member" for this test
-    const { getWorkspaceMembership } = await import("../db/workspaces");
+    const { getWorkspaceMembership } = await import("../app/db/workspaces");
     vi.mocked(getWorkspaceMembership).mockResolvedValueOnce("member");
     const caller = appRouter.createCaller(makeMemberCtx());
     await expect(

@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
 import type { TrpcContext } from "./context";
-import { getWorkspaceMembership } from "../db/workspaces";
+import { getWorkspaceMembership } from "../app/db/workspaces";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,

@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
-import { useIsMobile } from "@/core/hooks/useMobile";
+import { useIsMobile } from "@/shared/hooks/useMobile";
 import { cn } from "@/core/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";

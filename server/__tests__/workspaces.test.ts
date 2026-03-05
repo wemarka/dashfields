@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import type { TrpcContext } from "../_core/context";
 
 // ─── Mock Supabase ────────────────────────────────────────────────────────────
-vi.mock("../supabase", () => ({
+vi.mock("../../supabase", () => ({
   getSupabase: () => ({
     from: (table: string) => ({
       select: () => ({
@@ -86,8 +86,8 @@ vi.mock("../supabase", () => ({
 }));
 
 // ─── Mock workspace DB helpers ────────────────────────────────────────────────
-vi.mock("../db/workspaces", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../db/workspaces")>();
+vi.mock("../app/db/workspaces", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../app/db/workspaces")>();
   return {
     ...actual,
     getUserWorkspaces: vi.fn().mockResolvedValue([
@@ -258,7 +258,7 @@ describe("workspaces.checkSlug", () => {
 describe("workspaces.create", () => {
   it("creates a workspace and returns it when user has no owned workspaces", async () => {
     // Override mock to return empty list (no existing owned workspaces)
-    const { getUserWorkspaces } = await import("../db/workspaces");
+    const { getUserWorkspaces } = await import("../app/db/workspaces");
     vi.mocked(getUserWorkspaces).mockResolvedValueOnce([]);
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.workspaces.create({ name: "New Workspace" });
@@ -360,7 +360,7 @@ describe("workspaces.upsertBrandProfile", () => {
 
 describe("generateSlug helper", () => {
   it("converts name to URL-safe slug", async () => {
-    const { generateSlug } = await import("../db/workspaces");
+    const { generateSlug } = await import("../app/db/workspaces");
     expect(generateSlug("My Awesome Company!")).toBe("my-awesome-company");
     expect(generateSlug("  Test  Workspace  ")).toBe("test-workspace");
     expect(generateSlug("Hello World 123")).toBe("hello-world-123");

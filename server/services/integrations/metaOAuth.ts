@@ -4,7 +4,7 @@
 // After connect: saves ad accounts (facebook) + Instagram business accounts.
 import type { Express, Request, Response } from "express";
 import { getSupabase } from "../../supabase";
-import { getUserByOpenId } from "../../db/users";
+import { getUserByOpenId } from "../../app/db/users";
 import { sdk } from "../../_core/sdk";
 import { COOKIE_NAME } from "@shared/const";
 import * as jose from "jose";
