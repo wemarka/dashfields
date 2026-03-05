@@ -16,6 +16,9 @@ import {
   LineChart,
   FileBarChart,
   Settings,
+  Link2,
+  Building2,
+  CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -88,10 +91,15 @@ export const navSections: NavSection[] = [
   },
 ];
 
-// ─── Settings — pinned at bottom, NOT collapsible ────────────────────────────
+// ─── Settings — pinned at bottom, collapsible with sub-items ─────────────────
 
 export const settingsNavItem: NavItem = {
   labelKey: "nav.settings",
   path: "/settings",
   icon: Settings,
+  subItems: [
+    { labelKey: "nav.integrations",  path: "/settings/integrations", icon: Link2 },
+    { labelKey: "nav.workspace",     path: "/settings/workspace",    icon: Building2 },
+    { labelKey: "nav.billing",       path: "/settings/billing",      icon: CreditCard },
+  ],
 };
