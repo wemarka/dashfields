@@ -10,6 +10,50 @@ import { isMarketingDomain, APP_DOMAIN } from "./shared/lib/domain";
 import { DemoModeProvider } from "./core/contexts/DemoModeContext";
 import { DemoBanner } from "./app/components/DemoBanner";
 
+// ─── Manus Visual Editor: expose all routes for page navigation ─────────────
+// The visual editor reads window.__WOUTER_ROUTES__ to build the page dropdown.
+// Keep this list in sync with the Route definitions in AppRouter below.
+(window as unknown as Record<string, unknown>).__WOUTER_ROUTES__ = [
+  // Public / Marketing
+  "/",
+  "/privacy",
+  "/terms",
+  "/demo",
+  "/changelog",
+  "/blog",
+  // Auth
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/auth/reset-password",
+  "/auth/callback",
+  // Dashboard
+  "/dashboard",
+  // Ads
+  "/ads/campaigns",
+  "/ads/audiences",
+  "/ads/ai-analyzer",
+  // Content
+  "/content/planner",
+  "/content/ai-studio",
+  "/content/assets",
+  // Analytics
+  "/analytics/overview",
+  "/analytics/paid-organic",
+  "/analytics/competitors",
+  "/analytics/reports",
+  // Settings
+  "/settings/integrations",
+  "/settings/workspace",
+  "/settings/billing",
+  // Other app pages
+  "/alerts",
+  "/profile",
+  "/notifications",
+  "/monitor",
+  "/performance-goals",
+];
+
 // ─── Redirect helper ──────────────────────────────────────────────────────────
 function Redirect({ to }: { to: string }) {
   const [, setLocation] = useLocation();
