@@ -5,7 +5,6 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";
 import { Streamdown } from "streamdown";
@@ -860,7 +859,7 @@ export default function AIContent() {
   const platformList = useMemo(() => PLATFORMS.slice(0, 8), []);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -1026,6 +1025,6 @@ export default function AIContent() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

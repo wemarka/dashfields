@@ -27,6 +27,7 @@ function ExternalRedirect({ to }: { to: string }) {
 import Home from "./app/features/dashboard/Home";
 import NotFound from "./app/features/shared/NotFound";
 import SplashScreen from "./app/components/SplashScreen";
+import DashboardLayout from "./app/components/DashboardLayout";
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
 const Campaigns         = lazy(() => import("./app/features/campaigns/Campaigns"));
@@ -132,85 +133,95 @@ function MarketingRouter() {
 }
 
 // ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
-// Full application with all routes.
+
+// ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
+// DashboardLayout is the single shared wrapper for ALL authenticated app routes.
+// Auth/public routes (login, register, landing) are rendered OUTSIDE the layout.
 function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        {/* ── Landing + Legal routes ─────────────────────────────────── */}
+        {/* ── Public / Landing routes (NO DashboardLayout) ──────────────── */}
         <Route path="/"                     component={LandingPage} />
         <Route path="/privacy"              component={PrivacyPage} />
         <Route path="/terms"                component={TermsPage} />
         <Route path="/demo"                 component={DemoPage} />
-        <Route path="/changelog"             component={ChangelogPage} />
-        <Route path="/blog/:slug"             component={BlogPage} />
-        <Route path="/blog"                   component={BlogPage} />
-        {/* ── Core routes ────────────────────────────────────────────────── */}
-        <Route path="/dashboard"            component={Home} />
-        {/* ── Ads sub-pages ─────────────────────────────────────────────────── */}
-        <Route path="/ads"                  component={() => <Redirect to="/ads/campaigns" />} />
-        <Route path="/ads/campaigns"        component={CampaignsPage} />
-        <Route path="/ads/audiences"        component={AudiencesPage} />
-        <Route path="/ads/ai-analyzer"      component={AIAnalyzerPage} />
-        {/* ── Content sub-pages ─────────────────────────────────────────────── */}
-        <Route path="/content"              component={() => <Redirect to="/content/planner" />} />
-        <Route path="/content/planner"      component={PlannerPage} />
-        <Route path="/content/ai-studio"    component={AIStudioPage} />
-        <Route path="/content/assets"       component={AssetsPage} />
-        {/* ── Analytics sub-pages ───────────────────────────────────────────── */}
-        <Route path="/analytics"            component={() => <Redirect to="/analytics/overview" />} />
-        <Route path="/analytics/overview"   component={OverviewPage} />
-        <Route path="/analytics/paid-organic" component={PaidOrganicPage} />
-        <Route path="/analytics/competitors" component={CompetitorsPage} />
-        <Route path="/analytics/reports"    component={ReportsPage} />
-        {/* ── Settings sub-pages ────────────────────────────────────────────── */}
-        <Route path="/settings"             component={() => <Redirect to="/settings/integrations" />} />
-        <Route path="/settings/integrations" component={IntegrationsPage} />
-        <Route path="/settings/workspace"   component={WorkspaceTeamPage} />
-        <Route path="/settings/billing"     component={SettingsBillingPage} />
-        {/* ── Preserved standalone routes ──────────────────────────────────── */}
-        <Route path="/alerts"               component={Alerts} />
-        <Route path="/profile"              component={Profile} />
-        <Route path="/notifications"        component={Notifications} />
-        <Route path="/invite/:token"        component={AcceptInvite} />
-        {/* ── Auth routes (Supabase) ─────────────────────────────────── */}
+        <Route path="/changelog"            component={ChangelogPage} />
+        <Route path="/blog/:slug"           component={BlogPage} />
+        <Route path="/blog"                 component={BlogPage} />
+        {/* ── Auth routes (NO DashboardLayout) ──────────────────────────── */}
         <Route path="/login"                component={LoginPage} />
         <Route path="/register"             component={RegisterPage} />
         <Route path="/forgot-password"      component={ForgotPasswordPage} />
         <Route path="/auth/reset-password"  component={ResetPasswordPage} />
         <Route path="/auth/callback"        component={AuthCallbackPage} />
-        {/* ── Legacy / backward-compat redirects ──────────────────────────── */}
-        <Route path="/campaigns"            component={() => <Redirect to="/ads/campaigns" />} />
-        <Route path="/audience"             component={() => <Redirect to="/ads/audiences" />} />
-        <Route path="/ads-analyzer"         component={() => <Redirect to="/ads/ai-analyzer" />} />
-        <Route path="/audience-overlap"     component={() => <Redirect to="/ads/audiences" />} />
-        <Route path="/saved-audiences"      component={() => <Redirect to="/ads/audiences" />} />
-        <Route path="/ab-testing"           component={() => <Redirect to="/ads/campaigns" />} />
-        <Route path="/calendar"             component={() => <Redirect to="/content/planner" />} />
-        <Route path="/ai-content"           component={() => <Redirect to="/content/ai-studio" />} />
-        <Route path="/brand-kit"            component={() => <Redirect to="/content/assets" />} />
-        <Route path="/content-templates"    component={() => <Redirect to="/content/assets" />} />
-        <Route path="/publishing"           component={() => <Redirect to="/content/planner" />} />
-        <Route path="/post-analytics"       component={() => <Redirect to="/analytics/overview" />} />
-        <Route path="/insights"             component={() => <Redirect to="/analytics/overview" />} />
-        <Route path="/sentiment"            component={() => <Redirect to="/analytics/overview" />} />
-        <Route path="/hashtags"             component={() => <Redirect to="/analytics/overview" />} />
-        <Route path="/competitors"          component={() => <Redirect to="/analytics/competitors" />} />
-        <Route path="/reports"              component={() => <Redirect to="/analytics/reports" />} />
-        <Route path="/advanced-analytics"   component={() => <Redirect to="/analytics/paid-organic" />} />
-        <Route path="/compare"              component={() => <Redirect to="/analytics/paid-organic" />} />
-        <Route path="/connections"          component={() => <Redirect to="/settings/integrations" />} />
-        <Route path="/workspace-settings"   component={() => <Redirect to="/settings/workspace" />} />
-        <Route path="/team"                 component={() => <Redirect to="/settings/workspace" />} />
-        <Route path="/billing"              component={() => <Redirect to="/settings/billing" />} />
-        <Route path="/meta-connect"         component={() => <Redirect to="/settings/integrations" />} />
-        <Route path="/ai-tools"             component={() => <Redirect to="/content/ai-studio" />} />
-        <Route path="/ai-hub"               component={() => <Redirect to="/content/ai-studio" />} />
-        <Route path="/custom-dashboards"    component={() => <Redirect to="/dashboard" />} />
-        <Route path="/monitor"              component={PerformanceMonitor} />
-        <Route path="/performance-goals"    component={PerformanceGoals} />
-        <Route path="/404"                  component={NotFound} />
-        <Route                              component={NotFound} />
+        {/* ── All app routes — single shared DashboardLayout ────────────── */}
+        <Route>
+          <DashboardLayout>
+            <Switch>
+              {/* ── Core ──────────────────────────────────────────────────── */}
+              <Route path="/dashboard"              component={Home} />
+              {/* ── Ads sub-pages ──────────────────────────────────────────── */}
+              <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
+              <Route path="/ads/campaigns"          component={CampaignsPage} />
+              <Route path="/ads/audiences"          component={AudiencesPage} />
+              <Route path="/ads/ai-analyzer"        component={AIAnalyzerPage} />
+              {/* ── Content sub-pages ──────────────────────────────────────── */}
+              <Route path="/content"                component={() => <Redirect to="/content/planner" />} />
+              <Route path="/content/planner"        component={PlannerPage} />
+              <Route path="/content/ai-studio"      component={AIStudioPage} />
+              <Route path="/content/assets"         component={AssetsPage} />
+              {/* ── Analytics sub-pages ────────────────────────────────────── */}
+              <Route path="/analytics"              component={() => <Redirect to="/analytics/overview" />} />
+              <Route path="/analytics/overview"     component={OverviewPage} />
+              <Route path="/analytics/paid-organic" component={PaidOrganicPage} />
+              <Route path="/analytics/competitors"  component={CompetitorsPage} />
+              <Route path="/analytics/reports"      component={ReportsPage} />
+              {/* ── Settings sub-pages ─────────────────────────────────────── */}
+              <Route path="/settings"               component={() => <Redirect to="/settings/integrations" />} />
+              <Route path="/settings/integrations"  component={IntegrationsPage} />
+              <Route path="/settings/workspace"     component={WorkspaceTeamPage} />
+              <Route path="/settings/billing"       component={SettingsBillingPage} />
+              {/* ── Standalone app routes ──────────────────────────────────── */}
+              <Route path="/alerts"                 component={Alerts} />
+              <Route path="/profile"                component={Profile} />
+              <Route path="/notifications"          component={Notifications} />
+              <Route path="/invite/:token"          component={AcceptInvite} />
+              <Route path="/monitor"                component={PerformanceMonitor} />
+              <Route path="/performance-goals"      component={PerformanceGoals} />
+              {/* ── Legacy redirects ───────────────────────────────────────── */}
+              <Route path="/campaigns"              component={() => <Redirect to="/ads/campaigns" />} />
+              <Route path="/audience"               component={() => <Redirect to="/ads/audiences" />} />
+              <Route path="/ads-analyzer"           component={() => <Redirect to="/ads/ai-analyzer" />} />
+              <Route path="/audience-overlap"       component={() => <Redirect to="/ads/audiences" />} />
+              <Route path="/saved-audiences"        component={() => <Redirect to="/ads/audiences" />} />
+              <Route path="/ab-testing"             component={() => <Redirect to="/ads/campaigns" />} />
+              <Route path="/calendar"               component={() => <Redirect to="/content/planner" />} />
+              <Route path="/ai-content"             component={() => <Redirect to="/content/ai-studio" />} />
+              <Route path="/brand-kit"              component={() => <Redirect to="/content/assets" />} />
+              <Route path="/content-templates"      component={() => <Redirect to="/content/assets" />} />
+              <Route path="/publishing"             component={() => <Redirect to="/content/planner" />} />
+              <Route path="/post-analytics"         component={() => <Redirect to="/analytics/overview" />} />
+              <Route path="/insights"               component={() => <Redirect to="/analytics/overview" />} />
+              <Route path="/sentiment"              component={() => <Redirect to="/analytics/overview" />} />
+              <Route path="/hashtags"               component={() => <Redirect to="/analytics/overview" />} />
+              <Route path="/competitors"            component={() => <Redirect to="/analytics/competitors" />} />
+              <Route path="/reports"                component={() => <Redirect to="/analytics/reports" />} />
+              <Route path="/advanced-analytics"     component={() => <Redirect to="/analytics/paid-organic" />} />
+              <Route path="/compare"                component={() => <Redirect to="/analytics/paid-organic" />} />
+              <Route path="/connections"            component={() => <Redirect to="/settings/integrations" />} />
+              <Route path="/workspace-settings"     component={() => <Redirect to="/settings/workspace" />} />
+              <Route path="/team"                   component={() => <Redirect to="/settings/workspace" />} />
+              <Route path="/billing"                component={() => <Redirect to="/settings/billing" />} />
+              <Route path="/meta-connect"           component={() => <Redirect to="/settings/integrations" />} />
+              <Route path="/ai-tools"               component={() => <Redirect to="/content/ai-studio" />} />
+              <Route path="/ai-hub"                 component={() => <Redirect to="/content/ai-studio" />} />
+              <Route path="/custom-dashboards"      component={() => <Redirect to="/dashboard" />} />
+              <Route path="/404"                    component={NotFound} />
+              <Route                                component={NotFound} />
+            </Switch>
+          </DashboardLayout>
+        </Route>
       </Switch>
     </Suspense>
   );

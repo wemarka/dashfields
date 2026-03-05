@@ -5,7 +5,6 @@ import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import {
   FileText, Plus, Download, Trash2, Calendar, RefreshCw,
   Clock, CheckCircle2, AlertCircle, X, Zap, Timer, Palette, ChevronDown, ChevronUp,
@@ -582,7 +581,7 @@ export default function Reports() {
   const { t } = useTranslation();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -724,6 +723,6 @@ export default function Reports() {
           onCreated={() => utils.reports.list.invalidate()}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

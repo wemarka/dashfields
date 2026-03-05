@@ -2,7 +2,6 @@
 // 4 tabs: Campaigns | Audiences | Performance | AI Analyzer
 // Each tab renders the existing feature page stripped of its DashboardLayout wrapper.
 import { useState, useEffect, lazy, Suspense } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { Megaphone, Users, BarChart3, Zap } from "lucide-react";
@@ -55,7 +54,7 @@ export default function Ads() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col h-full">
         {/* ── Tab Bar ─────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-1 px-6 pt-4 pb-0 border-b border-border/40 shrink-0">
@@ -89,6 +88,6 @@ export default function Ads() {
           </Suspense>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

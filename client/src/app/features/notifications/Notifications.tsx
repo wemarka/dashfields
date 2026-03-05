@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { formatDistanceToNow } from "date-fns";
 import {
   Bell, BellOff, Check, CheckCheck, Trash2, AlertTriangle, Info,
@@ -258,7 +257,7 @@ export default function Notifications() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-4xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -469,6 +468,6 @@ export default function Notifications() {
           </>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

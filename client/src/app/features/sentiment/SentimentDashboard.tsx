@@ -7,7 +7,6 @@
  * - Dashboard tab (charts: time series, platform breakdown, keyword cloud)
  */
 import { useState, useRef, useCallback } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
@@ -728,7 +727,7 @@ export default function SentimentDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("quick");
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -767,6 +766,6 @@ export default function SentimentDashboard() {
         {activeTab === "history"   && <HistoryTab />}
         {activeTab === "dashboard" && <DashboardTab />}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

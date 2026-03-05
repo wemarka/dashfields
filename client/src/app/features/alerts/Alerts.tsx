@@ -1,6 +1,5 @@
 // Alerts.tsx
 // Multi-Platform Performance Alerts — create threshold rules across all platforms.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { useState } from "react";
@@ -296,7 +295,7 @@ export default function Alerts() {
     : notifications.filter((n) => n.message?.toLowerCase().includes(filterPlatform));
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
 
         {/* Header */}
@@ -522,6 +521,6 @@ export default function Alerts() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

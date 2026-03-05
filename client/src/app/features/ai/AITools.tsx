@@ -1,4 +1,3 @@
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useState } from "react";
 import { Sparkles, Send, Copy, RefreshCw, Wand2, Target, FileText, Image, Check } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
@@ -66,7 +65,7 @@ export default function AITools() {
   const examples = examplesByTool[activeTool] ?? [];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-5 animate-fade-in">
         <div>
           <h1 className="page-header">AI Tools</h1>
@@ -167,6 +166,6 @@ export default function AITools() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

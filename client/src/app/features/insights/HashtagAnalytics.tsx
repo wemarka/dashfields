@@ -10,7 +10,6 @@ import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown, Sparkles, L
 import { trpc } from "@/core/lib/trpc";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { PLATFORMS } from "@shared/platforms";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { toast } from "sonner";
 
 const SORT_OPTIONS = [
@@ -106,7 +105,7 @@ export default function HashtagAnalytics() {
   const top10 = hashtags.slice(0, 10);
 
   return (
-    <DashboardLayout>
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -463,6 +462,6 @@ export default function HashtagAnalytics() {
         </>
       )}
     </div>
-    </DashboardLayout>
+    </>
   );
 }

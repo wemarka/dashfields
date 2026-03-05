@@ -2,7 +2,6 @@
 // Competitor Analysis page — compare your performance vs industry benchmarks.
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -216,7 +215,7 @@ export default function Competitors() {
   }).filter(d => d.yourCtr > 0) ?? [];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -529,6 +528,6 @@ export default function Competitors() {
           </>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

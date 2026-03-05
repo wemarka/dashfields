@@ -1,6 +1,5 @@
 // ABTesting.tsx — A/B Testing Dashboard
 // Create, manage, and analyze split tests across ad campaigns.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
 import { useState, useMemo } from "react";
 import { Button } from "@/core/components/ui/button";
@@ -566,7 +565,7 @@ export default function ABTesting() {
   }), [tests]);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -653,6 +652,6 @@ export default function ABTesting() {
       {showCreate && <TestFormModal open onClose={() => setShowCreate(false)} />}
       {editTest   && <TestFormModal open editTest={editTest} onClose={() => setEditTest(undefined)} />}
       {metricsTest && <MetricsModal test={metricsTest} onClose={() => setMetricsTest(undefined)} />}
-    </DashboardLayout>
+    </>
   );
 }

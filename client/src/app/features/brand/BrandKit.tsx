@@ -1,6 +1,5 @@
 // client/src/features/brand/BrandKit.tsx
 import { useState, useRef, useCallback } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
@@ -259,7 +258,7 @@ export default function BrandKit() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -625,6 +624,6 @@ export default function BrandKit() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 // Publishing.tsx — Content Publishing page
 // Composed from components in client/src/components/publishing/
-import DashboardLayout from "@/app/components/DashboardLayout";
 import PostComposerModal from "@/app/features/publishing/components/PostComposerModal";
 import { PostList } from "@/app/features/publishing/components/PostList";
 import { PostCalendarView } from "@/app/features/publishing/components/PostCalendarView";
@@ -19,7 +18,7 @@ export default function Publishing() {
   const { data: posts = [], isLoading } = trpc.posts.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-5 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -83,6 +82,6 @@ export default function Publishing() {
         onClose={() => setShowCompose(false)}
         onCreated={() => utils.posts.list.invalidate()}
       />
-    </DashboardLayout>
+    </>
   );
 }

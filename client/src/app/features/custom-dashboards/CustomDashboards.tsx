@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import {
   LayoutDashboard, Plus, Trash2, Edit3, Copy, Star, StarOff,
   X, GripVertical, BarChart3, TrendingUp, Users, DollarSign,
@@ -305,7 +304,7 @@ export default function CustomDashboards() {
   const editDashboard = dashboards.find(d => d.id === editTarget);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -493,6 +492,6 @@ export default function CustomDashboards() {
           onSaved={() => refetch()}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

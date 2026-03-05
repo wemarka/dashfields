@@ -1,6 +1,5 @@
 // Home.tsx — Unified Multi-Platform Dashboard
 // Shows aggregated KPIs from ALL connected social platforms.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { KpiCard } from "@/app/features/dashboard/components/KpiCard";
 import { SpendChart } from "@/app/features/dashboard/components/SpendChart";
 import { PerformanceStats } from "@/app/features/dashboard/components/PerformanceStats";
@@ -322,7 +321,7 @@ export default function Dashboard() {
   }));
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-6 animate-fade-in">
 
         {/* - Header - */}
@@ -609,7 +608,7 @@ export default function Dashboard() {
       {/* Workspace Setup Wizard — shown when workspace onboarding is not completed */}
       <WorkspaceOnboardingGate />
 
-    </DashboardLayout>
+    </>
   );
 }
 

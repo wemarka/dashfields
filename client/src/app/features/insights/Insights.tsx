@@ -1,7 +1,6 @@
 // Insights.tsx
 // Enhanced cross-platform insights with ROI comparison, performance ranking,
 // cost efficiency table, and AI-powered recommendations.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { trpc } from "@/core/lib/trpc";
@@ -200,7 +199,7 @@ export default function Insights() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 max-w-6xl mx-auto space-y-6 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -490,6 +489,6 @@ export default function Insights() {
         </div>
 
       </div>
-    </DashboardLayout>
+    </>
   );
 }

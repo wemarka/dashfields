@@ -1,7 +1,6 @@
 // AnalyticsHub.tsx — Unified Analytics Hub
 // 4 tabs: Overview | Paid vs Organic | Competitors | Reports
 import { useState, useEffect, lazy, Suspense } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { LayoutDashboard, TrendingUp, Users2, FileText } from "lucide-react";
@@ -52,7 +51,7 @@ export default function AnalyticsHub() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col h-full">
         {/* ── Tab Bar ─────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-1 px-6 pt-4 pb-0 border-b border-border/40 shrink-0">
@@ -86,6 +85,6 @@ export default function AnalyticsHub() {
           </Suspense>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
