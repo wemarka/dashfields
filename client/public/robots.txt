@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+
+# Disallow app routes on marketing domain
+Disallow: /dashboard
+Disallow: /campaigns
+Disallow: /analytics
+Disallow: /calendar
+Disallow: /ai-content
+Disallow: /sentiment
+Disallow: /audience
+Disallow: /competitors
+Disallow: /reports
+Disallow: /connections
+Disallow: /ab-testing
+Disallow: /custom-dashboards
+Disallow: /advanced-analytics
+Disallow: /settings
+Disallow: /profile
+Disallow: /notifications
+Disallow: /billing
+Disallow: /monitor
+Disallow: /alerts
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /api/
+
+Sitemap: https://dashfields.com/sitemap.xml

@@ -10,6 +10,40 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startCron } from "../cron";
 import { registerPlatformOAuthRoutes } from "../services/integrations/platformOAuth";
+import rateLimit from "express-rate-limit";
+
+// ─── Rate Limiters ────────────────────────────────────────────────────────────
+const isDev = process.env.NODE_ENV === "development";
+
+// General API: 300 requests per minute per IP
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+  skip: () => isDev,
+});
+
+// Auth endpoints: 15 requests per minute per IP (stricter)
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many authentication attempts, please try again later." },
+  skip: () => isDev,
+});
+
+// AI endpoints: 30 requests per minute per IP (expensive operations)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "AI rate limit exceeded, please wait before making more requests." },
+  skip: () => isDev,
+});
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -33,15 +67,26 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Apply general rate limiter to all API routes
+  app.use("/api/", generalLimiter);
+  // Stricter rate limiting for auth routes
+  app.use("/api/oauth/", authLimiter);
+  // AI-specific rate limiting
+  app.use("/api/trpc/ai.", aiLimiter);
+  app.use("/api/trpc/sentiment.", aiLimiter);
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Meta OAuth routes
   registerMetaOAuthRoutes(app);
   // Platform OAuth routes (TikTok, LinkedIn, YouTube, Twitter)
   registerPlatformOAuthRoutes(app);
+
   // tRPC API
   app.use(
     "/api/trpc",
@@ -50,6 +95,7 @@ async function startServer() {
       createContext,
     })
   );
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);

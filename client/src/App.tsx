@@ -59,6 +59,8 @@ const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMoni
 const LandingPage        = lazy(() => import("./features/landing/LandingPage"));
 const PrivacyPage        = lazy(() => import("./features/landing/PrivacyPage"));
 const TermsPage          = lazy(() => import("./features/landing/TermsPage"));
+const DemoPage           = lazy(() => import("./features/landing/DemoPage"));
+const ChangelogPage      = lazy(() => import("./features/landing/ChangelogPage"));
 // ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
 const LoginPage          = lazy(() => import("./features/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("./features/auth/RegisterPage"));
@@ -88,6 +90,8 @@ function MarketingRouter() {
         <Route path="/"        component={LandingPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms"   component={TermsPage} />
+        <Route path="/demo"      component={() => <ExternalRedirect to={`${APP_DOMAIN}/demo`} />} />
+        <Route path="/changelog" component={ChangelogPage} />
         {/* Redirect any app/auth routes to app subdomain */}
         <Route path="/login"            component={() => <ExternalRedirect to={`${APP_DOMAIN}/login`} />} />
         <Route path="/register"         component={() => <ExternalRedirect to={`${APP_DOMAIN}/register`} />} />
@@ -111,6 +115,8 @@ function AppRouter() {
         <Route path="/"                     component={LandingPage} />
         <Route path="/privacy"              component={PrivacyPage} />
         <Route path="/terms"                component={TermsPage} />
+        <Route path="/demo"                 component={DemoPage} />
+        <Route path="/changelog"             component={ChangelogPage} />
         {/* ── Core routes ────────────────────────────────────────────────── */}
         <Route path="/dashboard"            component={Home} />
         <Route path="/campaigns"            component={Campaigns} />

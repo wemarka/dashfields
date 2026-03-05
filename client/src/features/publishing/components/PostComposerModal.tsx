@@ -11,6 +11,9 @@ import { toast } from "sonner";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS as ALL_PLATFORMS } from "@shared/platforms";
 import { useTranslation } from "react-i18next";
+import { PostPreview, type PreviewPlatform } from "@/components/PostPreview";
+
+const PREVIEW_PLATFORMS: PreviewPlatform[] = ["instagram", "facebook", "twitter", "linkedin", "tiktok"];
 
 interface Props {
   open: boolean;
@@ -74,6 +77,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
   // Preview state
   const [showPreview, setShowPreview]       = useState(false);
+  const [previewPlatform, setPreviewPlatform] = useState<PreviewPlatform>("instagram");
 
   // AI state
   const [aiTopic, setAiTopic]               = useState("");
@@ -507,36 +511,42 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
             )}
           </div>
 
-          {/* Post Preview */}
+          {/* Post Preview — uses real PostPreview component with platform tabs */}
           {showPreview && content.trim() && (
             <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
               <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-primary" />
                 Post Preview
               </p>
-              <div className="bg-background rounded-xl border border-border p-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary">W</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">Your Page</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {scheduleMode === "schedule" && scheduleDate
-                        ? new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()
-                        : "Now"}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{content}</p>
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="w-full max-h-40 object-cover rounded-lg" />
-                )}
-                <div className="flex items-center gap-3 pt-1 border-t border-border/50">
-                  <span className="text-[10px] text-muted-foreground">👍 Like</span>
-                  <span className="text-[10px] text-muted-foreground">💬 Comment</span>
-                  <span className="text-[10px] text-muted-foreground">↗️ Share</span>
-                </div>
+              {/* Platform selector tabs */}
+              <div className="flex items-center gap-1 flex-wrap">
+                {PREVIEW_PLATFORMS.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={
+                      "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition-all capitalize " +
+                      (previewPlatform === p
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-transparent hover:border-border")
+                    }
+                  >
+                    <PlatformIcon platform={p} className="w-3 h-3" />
+                    {p === "twitter" ? "X" : p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
+              {/* Real PostPreview */}
+              <div className="overflow-hidden rounded-xl">
+                <PostPreview
+                  platform={previewPlatform}
+                  content={content}
+                  mediaUrl={imagePreview ?? undefined}
+                  mediaType="image"
+                  accountName="Your Page"
+                  accountHandle="@yourpage"
+                  className="max-w-full"
+                />
               </div>
             </div>
           )}

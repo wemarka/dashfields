@@ -1417,3 +1417,51 @@
 - [x] Feature 4: Time-Slot Week View Calendar with drag-and-drop rescheduling
 - [x] Feature 5: Campaign Bulk Operations (checkbox selection, bulk delete, bulk status change, column visibility)
 - [x] Feature 6: Keyboard Shortcuts system (useKeyboardShortcuts hook + KeyboardShortcutsModal)
+
+## Phase 17 — Comprehensive Development Roadmap (Manager-Led)
+
+### Sprint 1 — UX Polish
+- [ ] Onboarding wizard for new users (3-step: workspace name, connect platform, invite team)
+- [ ] Empty states for all pages (Campaigns, Posts, Analytics, Alerts, Competitors)
+- [ ] Global loading skeleton components (TableSkeleton, CardSkeleton, ChartSkeleton)
+- [ ] Improved error boundaries with retry buttons
+- [ ] Toast notification improvements (persistent errors, action buttons)
+- [ ] Mobile sidebar improvements (swipe to close, overlay)
+
+### Sprint 2 — Security
+- [ ] Supabase RLS policies for sentiment_analyses, campaigns, posts, alerts tables
+- [ ] API rate limiting middleware on tRPC routes
+- [ ] Input sanitization for all user-generated content
+- [ ] CSRF protection headers
+
+### Sprint 3 — Missing Features
+- [ ] /demo route accessible without login (Demo Mode)
+- [ ] PostPreview integrated into PostComposerModal
+- [ ] Publishing page: schedule queue view with drag reorder
+- [ ] Hashtag suggestions in PostComposerModal
+- [ ] "Best time to post" indicator in Calendar
+
+### Sprint 4 — Performance
+- [ ] Route-based code splitting audit
+- [ ] Image lazy loading in PostPreview
+- [ ] Memoize heavy computations in Analytics
+- [ ] Reduce bundle size: remove unused dependencies
+
+### Sprint 5 — Monetization Readiness
+- [ ] Plan enforcement: block actions over plan limits with upgrade prompt
+- [ ] Usage meters on Billing page (posts used, campaigns used, connections used)
+- [ ] "Upgrade" CTA banners on feature pages for free users
+- [ ] Trial countdown banner for pro trial users
+
+## Phase 17 — Development Roadmap (Sprint 1-4)
+- [x] PostPreview integrated into PostComposerModal (real platform previews)
+- [x] /demo route added (Interactive Demo Mode accessible publicly)
+- [x] "Try Interactive Demo" button added to Landing Page Hero
+- [x] "Live Demo" link added to Landing Page Navbar
+- [x] Changelog page at /changelog with full release history
+- [x] Changelog link added to Landing Page footer
+- [x] Open Graph meta tags enhanced (summary_large_image, canonical, structured data)
+- [x] robots.txt created with proper allow/disallow rules
+- [x] sitemap.xml created for SEO
+- [x] Rate Limiting added: general (300/min), auth (15/min), AI (30/min)
+- [x] express-rate-limit installed and configured

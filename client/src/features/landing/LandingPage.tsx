@@ -150,6 +150,10 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
+              <a href={appUrl("/demo")} className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 transition-colors">
+                <Play className="w-3.5 h-3.5" />
+                Live Demo
+              </a>
               <a href={appUrl("/login")}>
                 <Button
                   variant="outline"
@@ -200,17 +204,25 @@ export default function LandingPage() {
             >
               Integrations
             </button>
-            <div className="flex gap-3 pt-2">
-              <a href={appUrl("/login")} className="flex-1">
-                <Button variant="outline" size="sm" className="w-full">
-                  Sign In
+            <div className="flex flex-col gap-2 pt-2">
+              <a href={appUrl("/demo")} className="w-full">
+                <Button variant="outline" size="sm" className="w-full border-blue-200 text-blue-700">
+                  <Play className="w-3.5 h-3.5 mr-1.5" />
+                  Try Interactive Demo
                 </Button>
               </a>
-              <a href={appUrl("/register")} className="flex-1">
-                <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Start Free Trial
-                </Button>
-              </a>
+              <div className="flex gap-3">
+                <a href={appUrl("/login")} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Sign In
+                  </Button>
+                </a>
+                <a href={appUrl("/register")} className="flex-1">
+                  <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    Start Free Trial
+                  </Button>
+                </a>
+              </div>
             </div>
           </div>
         )}
@@ -257,9 +269,19 @@ export default function LandingPage() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </a>
+              <a href={appUrl("/demo")}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-blue-200 bg-white text-blue-700 hover:bg-blue-50 px-8 py-3 text-base w-full sm:w-auto"
+                >
+                  <Play className="w-4 h-4 mr-2 text-blue-600" />
+                  Try Interactive Demo
+                </Button>
+              </a>
               <button
                 onClick={() => scrollTo("features")}
-                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+                className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
               >
                 <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center">
                   <Play className="w-4 h-4 text-blue-600 ml-0.5" />
@@ -873,6 +895,7 @@ export default function LandingPage() {
                 {[
                   { label: "Privacy Policy", href: "/privacy" },
                   { label: "Terms of Service", href: "/terms" },
+                  { label: "Changelog", href: "/changelog" },
                   { label: "Cookie Policy", href: "/privacy#cookies" },
                   { label: "GDPR", href: "/privacy#gdpr" },
                 ].map((l) => (
@@ -895,6 +918,9 @@ export default function LandingPage() {
               </Link>
               <Link href="/terms" className="hover:text-white transition-colors">
                 Terms
+              </Link>
+              <Link href="/changelog" className="hover:text-white transition-colors">
+                Changelog
               </Link>
               <span className="flex items-center gap-1">
                 <Shield className="w-3.5 h-3.5 text-green-400" />
