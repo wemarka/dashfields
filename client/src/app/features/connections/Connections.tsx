@@ -496,7 +496,7 @@ export default function Connections() {
     if (metaConnected) {
       const msg = summary
         ? `✅ Connected: ${decodeURIComponent(summary)}`
-        : "✅ Meta accounts connected successfully!";
+        : "✅ Accounts connected successfully!";
 
       if (isPopup) {
         // Notify parent window and close popup

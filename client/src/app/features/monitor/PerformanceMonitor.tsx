@@ -401,7 +401,7 @@ export function PerformanceMonitor() {
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
                 <BarChart3 className="w-8 h-8 opacity-30" />
                 <p className="text-sm">No campaign data available</p>
-                <p className="text-xs opacity-70">Connect a Meta Ads account to see campaigns</p>
+                <p className="text-xs opacity-70">Connect an ad platform account to see campaigns</p>
               </div>
             ) : (
               <div className="space-y-4">

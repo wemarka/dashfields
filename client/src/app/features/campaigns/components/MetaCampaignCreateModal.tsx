@@ -37,10 +37,10 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
 
   const createMutation = trpc.meta.createCampaign.useMutation({
     onSuccess: (data) => {
-      toast.success(`Campaign "${data.name}" created in Meta Ads!`, {
+      toast.success(`Campaign "${data.name}" created successfully!`, {
         description: `Campaign ID: ${data.id}`,
         action: {
-          label: "View in Meta",
+          label: "View in Ads Manager",
           onClick: () => window.open(`https://www.facebook.com/adsmanager/manage/campaigns?act=${data.id}`, "_blank"),
         },
       });
@@ -269,7 +269,7 @@ export function MetaCampaignCreateModal({ open, onClose, onCreated }: MetaCampai
 
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-blue-50 rounded-xl p-3">
               <ExternalLink className="w-3 h-3 text-blue-500 shrink-0" />
-              <span>This will create a real campaign in your Meta Ads Manager account. You can manage it here or in Meta Ads Manager.</span>
+              <span>This will create a real campaign in your connected ad platform. You can manage it here or in the platform's Ads Manager.</span>
             </div>
           </div>
         )}

@@ -257,7 +257,6 @@ function AppRouter() {
               <Route path="/workspace-settings"     component={() => <Redirect to="/settings/workspace" />} />
               <Route path="/team"                   component={() => <Redirect to="/settings/workspace" />} />
               <Route path="/billing"                component={() => <Redirect to="/settings/billing" />} />
-              <Route path="/meta-connect"           component={() => <Redirect to="/settings/integrations" />} />
               <Route path="/ai-tools"               component={() => <Redirect to="/content/ai-studio" />} />
               <Route path="/ai-hub"                 component={() => <Redirect to="/content/ai-studio" />} />
               <Route path="/custom-dashboards"      component={() => <Redirect to="/dashboard" />} />

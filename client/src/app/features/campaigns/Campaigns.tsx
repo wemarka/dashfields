@@ -152,7 +152,7 @@ export default function Campaigns() {
                 className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#1877F2]/30 text-[#1877F2] text-xs font-medium hover:bg-[#1877F2]/5 transition-colors"
               >
                 <PlatformIcon platform="facebook" className="w-3.5 h-3.5" />
-                Meta Ads
+                Meta / Facebook
               </button>
             )}
           </div>
@@ -239,7 +239,7 @@ export default function Campaigns() {
               }
             >
               <PlatformIcon platform="facebook" className="w-3.5 h-3.5" />
-              Meta Ads
+              Meta / Facebook
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                 <span className="opacity-60">({metaCampaigns.length})</span>

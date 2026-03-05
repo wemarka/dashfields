@@ -91,7 +91,7 @@ export function SpendChart({ campaigns, loading, isConnected }: SpendChartProps)
         <div className="h-[200px] flex flex-col items-center justify-center gap-2 text-muted-foreground">
           <BarChart2 className="w-8 h-8 opacity-30" />
           <p className="text-sm">
-            {isConnected ? "No campaign data for this period" : "Connect Meta Ads to see data"}
+            {isConnected ? "No campaign data for this period" : "Connect an ad platform to see data"}
           </p>
           {timedOut && (
             <p className="text-xs text-muted-foreground/60">Loading timed out — check your connection</p>

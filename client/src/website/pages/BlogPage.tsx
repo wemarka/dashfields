@@ -9,14 +9,14 @@ import { usePageTitle } from "@/shared/hooks/usePageTitle";
 const BLOG_POSTS = [
   {
     slug: "meta-ads-roas-optimization-2025",
-    title: "How to Improve Your Meta Ads ROAS in 2025: A Complete Guide",
+    title: "How to Improve Your Paid Ads ROAS in 2025: A Complete Guide",
     excerpt: "Discover proven strategies to maximize your Return on Ad Spend on Facebook and Instagram. From audience targeting to creative testing, learn what actually works.",
-    category: "Meta Ads",
+    category: "Paid Ads",
     readTime: "8 min read",
     date: "March 3, 2025",
     image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80",
     featured: true,
-    tags: ["Meta Ads", "ROAS", "Facebook", "Instagram"],
+    tags: ["Paid Ads", "ROAS", "Multi-Platform", "Analytics"],
   },
   {
     slug: "social-media-analytics-dashboard-guide",
@@ -97,10 +97,10 @@ const BLOG_POSTS = [
   },
 ];
 
-const CATEGORIES = ["All", "Meta Ads", "Analytics", "AI & Automation", "TikTok", "Instagram", "LinkedIn", "Content Strategy", "Strategy"];
+const CATEGORIES = ["All", "Paid Ads", "Analytics", "AI & Automation", "TikTok", "Instagram", "LinkedIn", "Content Strategy", "Strategy"];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  "Meta Ads": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  "Paid Ads": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   "Analytics": "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   "AI & Automation": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   "TikTok": "bg-pink-500/10 text-pink-600 dark:text-pink-400",

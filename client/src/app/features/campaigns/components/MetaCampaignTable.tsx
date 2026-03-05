@@ -1,7 +1,7 @@
 // MetaCampaignTable.tsx
 // Table for displaying Meta Ads campaigns with insights.
 // Supports status toggle and direct link to Meta Ads Manager.
-import { Link2, Facebook, ExternalLink, Play, Pause, Loader2 } from "lucide-react";
+import { Link2, LayoutGrid, ExternalLink, Play, Pause, Loader2 } from "lucide-react";
 import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
 import { Link } from "wouter";
 import { trpc } from "@/core/lib/trpc";
@@ -107,12 +107,12 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
   if (!isConnected) {
     return (
       <div className="glass rounded-2xl p-10 flex flex-col items-center gap-4 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center">
-          <Facebook className="w-7 h-7 text-blue-600" />
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <Link2 className="w-7 h-7 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-semibold">Connect Meta Ads</p>
-          <p className="text-xs text-muted-foreground mt-1">Link your Meta Ads account to see real campaign data</p>
+          <p className="text-sm font-semibold">Connect an Ad Platform</p>
+          <p className="text-xs text-muted-foreground mt-1">Link your ad account (Meta, TikTok, LinkedIn...) to see real campaign data</p>
         </div>
         <Link href="/connections">
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
@@ -151,8 +151,8 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
     <div className="glass rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/5">
         <div className="flex items-center gap-2">
-          <Facebook className="w-4 h-4 text-[#1877F2]" />
-          <span className="text-xs font-semibold text-foreground">Meta Ads Campaigns</span>
+          <LayoutGrid className="w-4 h-4 text-primary" />
+          <span className="text-xs font-semibold text-foreground">Ad Campaigns</span>
           <span className="text-xs text-muted-foreground">({campaigns.length})</span>
         </div>
         <a
@@ -162,7 +162,7 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
           onClick={(e) => e.stopPropagation()}
           className="flex items-center gap-1 text-xs text-[#1877F2] hover:underline"
         >
-          Open in Meta Ads Manager <ExternalLink className="w-3 h-3" />
+          Open in Ads Manager <ExternalLink className="w-3 h-3" />
         </a>
       </div>
       <div className="overflow-x-auto">

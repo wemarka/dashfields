@@ -78,7 +78,7 @@ export function ActiveCampaignsTable({ campaigns, loading, isConnected }: Active
         ) : (
           <div className="py-10 text-center">
             <p className="text-sm text-muted-foreground">
-              {isConnected ? "No campaign data for this period." : "Connect Meta Ads to see real campaigns."}
+              {isConnected ? "No campaign data for this period." : "Connect an ad platform to see real campaigns."}
             </p>
             {!isConnected && (
               <Link href="/connections">

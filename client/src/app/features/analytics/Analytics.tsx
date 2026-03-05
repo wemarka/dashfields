@@ -424,7 +424,7 @@ export default function Analytics() {
             {!kpiData ? (
               <div className="glass rounded-2xl p-12 flex flex-col items-center gap-3 text-center">
                 <BarChart3 className="w-10 h-10 text-muted-foreground/30" />
-                <p className="text-sm font-medium text-muted-foreground">Connect Meta Ads to see period comparison</p>
+                <p className="text-sm font-medium text-muted-foreground">Connect an ad platform to see period comparison</p>
                 <Link href="/connections">
                   <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
                     <Link2 className="w-3.5 h-3.5" /> Connect Platform

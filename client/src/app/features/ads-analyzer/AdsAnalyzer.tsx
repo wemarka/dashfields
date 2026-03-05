@@ -1,6 +1,6 @@
 /**
  * client/src/features/ads-analyzer/AdsAnalyzer.tsx
- * AI-powered Meta Ads campaign analyzer with performance scoring and LLM recommendations.
+ * AI-powered ad campaign analyzer with performance scoring and LLM recommendations.
  */
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
@@ -153,7 +153,7 @@ export default function AdsAnalyzer() {
 
   const handleAnalyze = () => {
     if (!activeAccountId) {
-      toast.error("Please connect a Meta Ads account first");
+      toast.error("Please connect an ad platform account first");
       return;
     }
     setIsAnalyzing(true);
@@ -213,8 +213,8 @@ export default function AdsAnalyzer() {
             <CardContent className="flex items-center gap-3 py-4">
               <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">No Meta Ads account connected</p>
-                <p className="text-xs text-amber-600 dark:text-amber-400">Connect your Meta Ads account from the Connections page to use AI Analyzer.</p>
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">No ad platform connected</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Connect an ad platform from the Connections page to use AI Analyzer.</p>
               </div>
             </CardContent>
           </Card>

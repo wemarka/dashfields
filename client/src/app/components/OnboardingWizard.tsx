@@ -24,7 +24,7 @@ const STEPS: Step[] = [
   {
     id: "connect",
     title: "Connect your first platform",
-    description: "Link Meta Ads, TikTok, LinkedIn, or any ad platform to start importing real data.",
+    description: "Link Meta, TikTok, LinkedIn, Google, or any ad platform to start importing real data.",
     icon: Link2,
     cta: "Go to Connections",
     href: "/connections",

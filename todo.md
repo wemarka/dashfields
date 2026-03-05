@@ -1772,3 +1772,11 @@
 - [x] Add p-6 padding to BillingPage component (was missing)
 - [x] Verify all pages render consistently with correct padding
 - [x] Save checkpoint
+
+## Phase 30 — Multi-Platform Cleanup
+- [x] Remove all "Meta Ads" specific text from UI (AdsAnalyzer, Analytics, AdvancedAnalytics, SpendChart, ActiveCampaignsTable, PerformanceMonitor, Home, Campaigns, MetaCampaignTable, MetaCampaignCreateModal, AIInsightsHub, Connections, OnboardingWizard, OnboardingModal, AITools, LandingPage, BlogPage)
+- [x] Delete orphaned files: MetaConnect.tsx, AITools.tsx, AnalyticsHub.tsx, SettingsHub.tsx
+- [x] Remove /meta-connect route from App.tsx
+- [x] Replace Facebook icon in MetaCampaignTable empty state with generic Link2 icon
+- [x] Change "Meta Ads Campaigns" table header to "Ad Campaigns"
+- [x] Change "Meta Ads" tab label in Campaigns to "Meta / Facebook"

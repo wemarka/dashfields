@@ -231,15 +231,15 @@ export default function AdvancedAnalytics() {
               <TrendingUp className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <p className="text-base font-semibold">Connect Meta Ads</p>
+              <p className="text-base font-semibold">Connect Ad Platform</p>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                Connect your Meta Ads account to unlock funnel analysis and attribution modeling with real campaign data.
+                Connect your ad platform account to unlock funnel analysis and attribution modeling with real campaign data.
               </p>
             </div>
             <Link href="/connections">
               <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
                 <Link2 className="w-4 h-4" />
-                Connect Meta Ads
+                Connect Ad Platform
               </button>
             </Link>
           </div>

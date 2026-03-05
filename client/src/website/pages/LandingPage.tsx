@@ -849,7 +849,7 @@ export default function LandingPage() {
                 company: "Aramex",
                 avatar: "OK",
                 color: "bg-violet-500",
-                quote: "The Meta Ads AI Analyzer alone is worth the subscription. It identified a 40% budget waste in our campaigns within the first week. ROI has never been better.",
+                quote: "The AI Ads Analyzer alone is worth the subscription. It identified a 40% budget waste in our campaigns within the first week. ROI has never been better.",
                 rating: 5,
               },
               {
@@ -915,11 +915,11 @@ export default function LandingPage() {
           </AnimatedSection>
           <div className="space-y-3">
             {[
-              { q: "Which social media platforms does DashFields support?", a: "DashFields supports Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Pinterest, and Snapchat. We also integrate with Meta Ads Manager for paid campaign analytics." },
+              { q: "Which social media platforms does DashFields support?", a: "DashFields supports Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Pinterest, and Snapchat. We also integrate with Meta Ads, Google Ads, TikTok Ads, LinkedIn Ads, and more for paid campaign analytics." },
               { q: "Is there a free plan available?", a: "Yes! Our Free plan includes 1 workspace, 3 connected accounts, 30 scheduled posts/month, and basic analytics. No credit card required to get started." },
               { q: "How does the AI content generation work?", a: "Our AI analyzes your brand voice, past performance data, and current trends to generate platform-optimized content. It supports Arabic and English, and learns from your edits over time." },
               { q: "Can I manage multiple brands or clients?", a: "Absolutely. The Agency and Enterprise plans support multiple workspaces, each with its own brand profile, team members, and connected accounts. Perfect for agencies managing multiple clients." },
-              { q: "How does the Meta Ads AI Analyzer work?", a: "It connects to your Meta Ads account via our secure OAuth integration, pulls campaign performance data, and uses AI to identify budget waste, audience fatigue, and optimization opportunities." },
+              { q: "How does the AI Ads Analyzer work?", a: "It connects to your ad platform accounts via secure OAuth integration, pulls campaign performance data, and uses AI to identify budget waste, audience fatigue, and optimization opportunities." },
               { q: "Is my data secure?", a: "Yes. All data is encrypted in transit (TLS 1.3) and at rest (AES-256). We're GDPR compliant, SOC 2 Type II certified, and our servers are hosted in MENA-region data centers." },
               { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel anytime from your billing settings. Your account will remain active until the end of the current billing period with no cancellation fees." },
             ].map((item, i) => (

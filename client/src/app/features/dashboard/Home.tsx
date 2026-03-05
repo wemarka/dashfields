@@ -544,7 +544,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* - Spend chart (Meta campaigns) - */}
+        {/* - Spend chart (All platforms) - */}
         {isMetaConnected && widgets.spendChart && (
           <SpendChart
             campaigns={metaCampaigns}

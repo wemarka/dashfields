@@ -84,7 +84,7 @@ const AI_TOOLS = [
   {
     id: "ad-tools",
     title: "Ad Copy Tools",
-    description: "Generate high-converting Meta Ads copy, audience segments, and creative briefs.",
+    description: "Generate high-converting ad copy, audience segments, and creative briefs for any platform.",
     icon: Target,
     color: "text-pink-500",
     bg: "bg-pink-500/10",
