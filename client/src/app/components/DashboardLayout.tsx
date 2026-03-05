@@ -1,8 +1,9 @@
 // DashboardLayout.tsx
-// Main app shell — Ultra-Minimalist Sidebar:
-//  • 4 primary destinations only: Dashboard, Ads, Content, Analytics
-//  • Settings pinned at bottom
-//  • Everything else lives as Tabs inside each page
+// Main app shell — Accordion Sidebar:
+//  • 4 collapsible sections: Ads, Content, Analytics
+//  • Dashboard as single link at top
+//  • Settings as direct link pinned at bottom (not collapsible)
+//  • Navigation config driven by src/config/navigation.ts
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 import { DashfieldsIcon, DashfieldsLogoFull } from "@/app/components/DashfieldsLogo";
@@ -18,14 +19,15 @@ import { PLAN_LIMITS, type WorkspacePlan } from "@shared/planLimits";
 import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsModal } from "@/app/components/KeyboardShortcutsModal";
 import {
-  BarChart3, ChevronLeft, ChevronRight,
-  LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
+  ChevronLeft, ChevronRight,
+  LogOut, Sparkles, Settings,
   Globe2, User,
-  Sun, Moon, ChevronDown, Check, PlusCircle,
+  Sun, Moon, ChevronDown, ChevronRight as ChevronRightSm, Check, PlusCircle,
   X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  CreditCard, PenSquare,
+  CreditCard,
 } from "lucide-react";
+import { navSections, settingsNavItem as settingsNavConfig } from "@/config/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -83,22 +85,9 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 // useActiveAccount is now provided by ActiveAccountContext
 
-// ─── Nav Structure (Ultra-Minimalist — 4 primary + Settings) ────────────────
-// Philosophy: Sidebar = destinations only. Details live as Tabs inside each page.
-const navGroups: NavGroup[] = [
-  {
-    labelKey: null,
-    items: [
-      { icon: LayoutDashboard, labelKey: "nav.dashboard", path: "/dashboard", iconAnimation: "icon-bounce" },
-      { icon: Megaphone,       labelKey: "nav.ads",       path: "/ads",       iconAnimation: "icon-shake" },
-      { icon: PenSquare,       labelKey: "nav.content",   path: "/content",   iconAnimation: "icon-pop" },
-      { icon: BarChart3,       labelKey: "nav.analytics", path: "/analytics", iconAnimation: "icon-pop" },
-    ],
-  },
-];
-
-// Settings item pinned at sidebar bottom
-const settingsNavItem: NavItem = { icon: Settings, labelKey: "nav.settings", path: "/settings", iconAnimation: "icon-spin" };
+/// ─── Nav Structure — driven by navigation.ts config ────────────────────────
+// Settings item pinned at sidebar bottom (not collapsible)
+const settingsNavItem = settingsNavConfig;
 
 // ─── Workspace Switcher Modal ───────────────────────────────────────────────
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
@@ -414,7 +403,7 @@ function ProfileDropdown({
               {t("topbar.viewProfile")}
             </button>
             <button
-              onClick={() => { setLocation("/settings#billing"); setOpen(false); }}
+              onClick={() => { setLocation("/settings/billing"); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
             >
               <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
@@ -449,6 +438,17 @@ function ProfileDropdown({
 // ─── Main Layout ──────────────────────────────────────────────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  // Accordion open state — auto-open the section that matches current location
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    navSections.forEach(s => s.items.forEach(item => {
+      if (item.subItems && window.location.pathname.startsWith(item.path)) {
+        initial[item.path] = true;
+      }
+    }));
+    return initial;
+  });
+  const toggleSection = (path: string) => setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   const [location, setLocation] = useLocation();
   const { loading, user } = useAuth();
   const { dark, toggle: toggleDark } = useDarkMode();
@@ -456,7 +456,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isRTL = i18n.language === "ar";
 
   // ── Current page label from nav ──────────────────────────────────────────────
-  const allNavItems = [...navGroups.flatMap(g => g.items), settingsNavItem];
+  // Include all sub-items + settings sub-pages for breadcrumb matching
+  const settingsSubItems = [
+    { labelKey: "nav.integrations", path: "/settings/integrations" },
+    { labelKey: "nav.workspace",    path: "/settings/workspace" },
+    { labelKey: "nav.billing",      path: "/settings/billing" },
+  ];
+  const allNavItems = [
+    ...navSections.flatMap(s => s.items).flatMap(item => item.subItems ?? [item]),
+    ...settingsSubItems,
+    settingsNavItem,
+  ];
   const currentNavItem = allNavItems.find(item => {
     if (item.path === "/dashboard") return location === "/dashboard" || location === "/";
     return location.startsWith(item.path);
@@ -550,39 +560,105 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </div>
 
-        {/* Nav Groups */}
-        <nav className={`flex-1 px-2 py-3 overflow-y-auto space-y-1 scrollbar-none ${isRTL ? "text-right" : ""}`}>
-          {navGroups.flatMap(g => g.items).map(item => {
-            const isActive = item.path === "/"
-              ? location === "/"
-              : location.startsWith(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => setLocation(item.path)}
-                title={collapsed ? t(item.labelKey) : undefined}
-                className={[
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
-                  "transition-all duration-200 group relative",
-                  isRTL ? "flex-row-reverse text-right" : "text-left",
-                  isActive
-                    ? "bg-brand/10 text-brand shadow-sm"
-                    : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
-                  collapsed ? "justify-center" : "",
-                ].join(" ")}
-              >
-                {isActive && !collapsed && (
-                  <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
-                )}
-                <item.icon
+        {/* Nav Groups — Accordion Pattern */}
+        <nav className={`flex-1 px-2 py-3 overflow-y-auto space-y-0.5 scrollbar-none ${isRTL ? "text-right" : ""}`}>
+          {navSections.flatMap(s => s.items).map(item => {
+            const hasChildren = !!(item.subItems && item.subItems.length > 0);
+            const isSectionActive = location.startsWith(item.path);
+            const isOpen = openSections[item.path] ?? false;
+
+            if (!hasChildren) {
+              // Single link (Dashboard)
+              const isActive = item.path === "/dashboard"
+                ? location === "/dashboard" || location === "/"
+                : location.startsWith(item.path);
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => setLocation(item.path)}
+                  title={collapsed ? t(item.labelKey) : undefined}
                   className={[
-                    "w-[18px] h-[18px] shrink-0 transition-all duration-200",
-                    item.iconAnimation ?? "",
-                    isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                    "transition-all duration-200 group relative",
+                    isRTL ? "flex-row-reverse text-right" : "text-left",
+                    isActive
+                      ? "bg-brand/10 text-brand shadow-sm"
+                      : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                    collapsed ? "justify-center" : "",
                   ].join(" ")}
-                />
-                {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
-              </button>
+                >
+                  {isActive && !collapsed && (
+                    <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
+                  )}
+                  <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
+                  {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
+                </button>
+              );
+            }
+
+            // Collapsible accordion section
+            return (
+              <div key={item.path}>
+                {/* Section header button */}
+                <button
+                  onClick={() => collapsed ? setLocation(item.subItems![0].path) : toggleSection(item.path)}
+                  title={collapsed ? t(item.labelKey) : undefined}
+                  className={[
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                    "transition-all duration-200 group relative",
+                    isRTL ? "flex-row-reverse text-right" : "text-left",
+                    isSectionActive
+                      ? "text-foreground"
+                      : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                    collapsed ? "justify-center" : "",
+                  ].join(" ")}
+                >
+                  <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isSectionActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
+                  {!collapsed && (
+                    <>
+                      <span className="truncate flex-1">{t(item.labelKey)}</span>
+                      <ChevronDown
+                        className={[
+                          "w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0",
+                          isOpen ? "rotate-180" : "",
+                        ].join(" ")}
+                      />
+                    </>
+                  )}
+                </button>
+
+                {/* Sub-items */}
+                {!collapsed && (
+                  <div
+                    className="overflow-hidden transition-all duration-200 ease-out"
+                    style={{ maxHeight: isOpen ? `${(item.subItems?.length ?? 0) * 44}px` : "0px" }}
+                  >
+                    <div className="ml-3 pl-3 border-l border-border/40 space-y-0.5 py-0.5">
+                      {item.subItems!.map(sub => {
+                        const isSubActive = location.startsWith(sub.path);
+                        return (
+                          <button
+                            key={sub.path}
+                            onClick={() => setLocation(sub.path)}
+                            className={[
+                              "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium",
+                              "transition-all duration-150",
+                              isRTL ? "flex-row-reverse text-right" : "text-left",
+                              isSubActive
+                                ? "bg-brand/10 text-brand"
+                                : "text-foreground/50 hover:text-foreground hover:bg-foreground/5",
+                            ].join(" ")}
+                          >
+                            <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-brand" : "text-foreground/35"].join(" ")} />
+                            <span className="truncate">{t(sub.labelKey)}</span>
+                            {isSubActive && <span className="ml-auto w-1 h-1 rounded-full bg-brand shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
@@ -592,10 +668,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="h-px bg-border/30 mx-1 mb-2" />
           {(() => {
             const item = settingsNavItem;
-            const isActive = location.startsWith(item.path);
+            const isActive = location.startsWith("/settings");
             return (
               <button
-                onClick={() => setLocation(item.path)}
+                onClick={() => setLocation("/settings/integrations")}
                 title={collapsed ? t(item.labelKey) : undefined}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",

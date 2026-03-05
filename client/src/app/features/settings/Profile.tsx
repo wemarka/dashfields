@@ -12,7 +12,6 @@ import { Separator } from "@/core/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import { User, Mail, Globe, Bell, Shield, Calendar, Clock, Save, Loader2, Camera, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
 import i18n from "@/core/i18n";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
@@ -152,7 +151,6 @@ export default function Profile() {
   const initials = (displayName || user?.name || "U").charAt(0).toUpperCase();
 
   return (
-    <DashboardLayout>
       <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
@@ -407,6 +405,5 @@ export default function Profile() {
         </Button>
       </div>
       </div>
-    </DashboardLayout>
   );
 }

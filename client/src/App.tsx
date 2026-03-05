@@ -62,11 +62,24 @@ const AIInsightsHub      = lazy(() => import("./app/features/ai/AIInsightsHub"))
 const SavedAudiences     = lazy(() => import("./app/features/audience/SavedAudiences"));
 const PerformanceGoals   = lazy(() => import("./app/features/analytics/PerformanceGoals"));
 const ContentTemplates   = lazy(() => import("./app/features/content/ContentTemplates"));
-// ─── Hub pages (new ultra-minimalist structure) ──────────────────────────────
-const AdsHub         = lazy(() => import("./app/features/ads/Ads"));
-const ContentHub     = lazy(() => import("./app/features/content/Content"));
-const AnalyticsHub   = lazy(() => import("./app/features/analytics-hub/AnalyticsHub"));
-const SettingsHub    = lazy(() => import("./app/features/settings-hub/SettingsHub"));
+// ─── Standalone sub-pages (Accordion Sidebar architecture) ──────────────────
+// Ads
+const CampaignsPage    = lazy(() => import("./app/pages/ads/CampaignsPage"));
+const AudiencesPage    = lazy(() => import("./app/pages/ads/AudiencesPage"));
+const AIAnalyzerPage   = lazy(() => import("./app/pages/ads/AIAnalyzerPage"));
+// Content
+const PlannerPage      = lazy(() => import("./app/pages/content/PlannerPage"));
+const AIStudioPage     = lazy(() => import("./app/pages/content/AIStudioPage"));
+const AssetsPage       = lazy(() => import("./app/pages/content/AssetsPage"));
+// Analytics
+const OverviewPage     = lazy(() => import("./app/pages/analytics/OverviewPage"));
+const PaidOrganicPage  = lazy(() => import("./app/pages/analytics/PaidOrganicPage"));
+const CompetitorsPage  = lazy(() => import("./app/pages/analytics/CompetitorsPage"));
+const ReportsPage      = lazy(() => import("./app/pages/analytics/ReportsPage"));
+// Settings
+const IntegrationsPage  = lazy(() => import("./app/pages/settings/IntegrationsPage"));
+const WorkspaceTeamPage = lazy(() => import("./app/pages/settings/WorkspaceTeamPage"));
+const SettingsBillingPage = lazy(() => import("./app/pages/settings/BillingPage"));
 /// ─── Website pages (dashfields.com — public marketing site) ─────────────────────
 const LandingPage        = lazy(() => import("./website/pages/LandingPage"));
 const PrivacyPage        = lazy(() => import("./website/pages/PrivacyPage"));
@@ -134,11 +147,27 @@ function AppRouter() {
         <Route path="/blog"                   component={BlogPage} />
         {/* ── Core routes ────────────────────────────────────────────────── */}
         <Route path="/dashboard"            component={Home} />
-        {/* ── Hub routes (new ultra-minimalist structure) ─────────────────── */}
-        <Route path="/ads"                  component={AdsHub} />
-        <Route path="/content"              component={ContentHub} />
-        <Route path="/analytics"            component={AnalyticsHub} />
-        <Route path="/settings"             component={SettingsHub} />
+        {/* ── Ads sub-pages ─────────────────────────────────────────────────── */}
+        <Route path="/ads"                  component={() => <Redirect to="/ads/campaigns" />} />
+        <Route path="/ads/campaigns"        component={CampaignsPage} />
+        <Route path="/ads/audiences"        component={AudiencesPage} />
+        <Route path="/ads/ai-analyzer"      component={AIAnalyzerPage} />
+        {/* ── Content sub-pages ─────────────────────────────────────────────── */}
+        <Route path="/content"              component={() => <Redirect to="/content/planner" />} />
+        <Route path="/content/planner"      component={PlannerPage} />
+        <Route path="/content/ai-studio"    component={AIStudioPage} />
+        <Route path="/content/assets"       component={AssetsPage} />
+        {/* ── Analytics sub-pages ───────────────────────────────────────────── */}
+        <Route path="/analytics"            component={() => <Redirect to="/analytics/overview" />} />
+        <Route path="/analytics/overview"   component={OverviewPage} />
+        <Route path="/analytics/paid-organic" component={PaidOrganicPage} />
+        <Route path="/analytics/competitors" component={CompetitorsPage} />
+        <Route path="/analytics/reports"    component={ReportsPage} />
+        {/* ── Settings sub-pages ────────────────────────────────────────────── */}
+        <Route path="/settings"             component={() => <Redirect to="/settings/integrations" />} />
+        <Route path="/settings/integrations" component={IntegrationsPage} />
+        <Route path="/settings/workspace"   component={WorkspaceTeamPage} />
+        <Route path="/settings/billing"     component={SettingsBillingPage} />
         {/* ── Preserved standalone routes ──────────────────────────────────── */}
         <Route path="/alerts"               component={Alerts} />
         <Route path="/profile"              component={Profile} />
@@ -151,32 +180,32 @@ function AppRouter() {
         <Route path="/auth/reset-password"  component={ResetPasswordPage} />
         <Route path="/auth/callback"        component={AuthCallbackPage} />
         {/* ── Legacy / backward-compat redirects ──────────────────────────── */}
-        <Route path="/campaigns"            component={() => <Redirect to="/ads" />} />
-        <Route path="/audience"             component={() => <Redirect to="/ads#audiences" />} />
-        <Route path="/ads-analyzer"         component={() => <Redirect to="/ads#ai-analyzer" />} />
-        <Route path="/audience-overlap"     component={() => <Redirect to="/ads#audiences" />} />
-        <Route path="/saved-audiences"      component={() => <Redirect to="/ads#audiences" />} />
-        <Route path="/ab-testing"           component={() => <Redirect to="/ads#campaigns" />} />
-        <Route path="/calendar"             component={() => <Redirect to="/content" />} />
-        <Route path="/ai-content"           component={() => <Redirect to="/content#ai-studio" />} />
-        <Route path="/brand-kit"            component={() => <Redirect to="/content#assets" />} />
-        <Route path="/content-templates"    component={() => <Redirect to="/content#assets" />} />
-        <Route path="/publishing"           component={() => <Redirect to="/content" />} />
-        <Route path="/post-analytics"       component={() => <Redirect to="/analytics" />} />
-        <Route path="/insights"             component={() => <Redirect to="/analytics" />} />
-        <Route path="/sentiment"            component={() => <Redirect to="/analytics" />} />
-        <Route path="/hashtags"             component={() => <Redirect to="/analytics" />} />
-        <Route path="/competitors"          component={() => <Redirect to="/analytics#competitors" />} />
-        <Route path="/reports"              component={() => <Redirect to="/analytics#reports" />} />
-        <Route path="/advanced-analytics"   component={() => <Redirect to="/analytics#paid-organic" />} />
-        <Route path="/compare"              component={() => <Redirect to="/analytics#paid-organic" />} />
-        <Route path="/connections"          component={() => <Redirect to="/settings" />} />
-        <Route path="/workspace-settings"   component={() => <Redirect to="/settings#workspace" />} />
-        <Route path="/team"                 component={() => <Redirect to="/settings#workspace" />} />
-        <Route path="/billing"              component={() => <Redirect to="/settings#billing" />} />
-        <Route path="/meta-connect"         component={() => <Redirect to="/settings" />} />
-        <Route path="/ai-tools"             component={() => <Redirect to="/content#ai-studio" />} />
-        <Route path="/ai-hub"               component={() => <Redirect to="/content#ai-studio" />} />
+        <Route path="/campaigns"            component={() => <Redirect to="/ads/campaigns" />} />
+        <Route path="/audience"             component={() => <Redirect to="/ads/audiences" />} />
+        <Route path="/ads-analyzer"         component={() => <Redirect to="/ads/ai-analyzer" />} />
+        <Route path="/audience-overlap"     component={() => <Redirect to="/ads/audiences" />} />
+        <Route path="/saved-audiences"      component={() => <Redirect to="/ads/audiences" />} />
+        <Route path="/ab-testing"           component={() => <Redirect to="/ads/campaigns" />} />
+        <Route path="/calendar"             component={() => <Redirect to="/content/planner" />} />
+        <Route path="/ai-content"           component={() => <Redirect to="/content/ai-studio" />} />
+        <Route path="/brand-kit"            component={() => <Redirect to="/content/assets" />} />
+        <Route path="/content-templates"    component={() => <Redirect to="/content/assets" />} />
+        <Route path="/publishing"           component={() => <Redirect to="/content/planner" />} />
+        <Route path="/post-analytics"       component={() => <Redirect to="/analytics/overview" />} />
+        <Route path="/insights"             component={() => <Redirect to="/analytics/overview" />} />
+        <Route path="/sentiment"            component={() => <Redirect to="/analytics/overview" />} />
+        <Route path="/hashtags"             component={() => <Redirect to="/analytics/overview" />} />
+        <Route path="/competitors"          component={() => <Redirect to="/analytics/competitors" />} />
+        <Route path="/reports"              component={() => <Redirect to="/analytics/reports" />} />
+        <Route path="/advanced-analytics"   component={() => <Redirect to="/analytics/paid-organic" />} />
+        <Route path="/compare"              component={() => <Redirect to="/analytics/paid-organic" />} />
+        <Route path="/connections"          component={() => <Redirect to="/settings/integrations" />} />
+        <Route path="/workspace-settings"   component={() => <Redirect to="/settings/workspace" />} />
+        <Route path="/team"                 component={() => <Redirect to="/settings/workspace" />} />
+        <Route path="/billing"              component={() => <Redirect to="/settings/billing" />} />
+        <Route path="/meta-connect"         component={() => <Redirect to="/settings/integrations" />} />
+        <Route path="/ai-tools"             component={() => <Redirect to="/content/ai-studio" />} />
+        <Route path="/ai-hub"               component={() => <Redirect to="/content/ai-studio" />} />
         <Route path="/custom-dashboards"    component={() => <Redirect to="/dashboard" />} />
         <Route path="/monitor"              component={PerformanceMonitor} />
         <Route path="/performance-goals"    component={PerformanceGoals} />

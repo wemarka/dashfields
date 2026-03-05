@@ -1,6 +1,5 @@
 // Analytics.tsx — Multi-Platform Analytics
 // Shows unified analytics with per-platform filter tabs.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { AnalyticsKpiCards } from "@/app/features/analytics/components/AnalyticsKpiCards";
 import { SpendByCampaignChart } from "@/app/features/analytics/components/SpendByCampaignChart";
 import { CtrCpcChart } from "@/app/features/analytics/components/CtrCpcChart";
@@ -162,7 +161,7 @@ export default function Analytics() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-6 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -484,6 +483,6 @@ export default function Analytics() {
 
       {/* Export Modal */}
       {showExport && <ExportReportModal onClose={() => setShowExport(false)} />}
-    </DashboardLayout>
+    </>
   );
 }

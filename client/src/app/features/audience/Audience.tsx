@@ -2,7 +2,6 @@
 // Shows REAL data only from posts table.
 // Demographics (age/gender/location/devices) require direct platform API — shown as "not available" with CTA.
 import { useState } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Button } from "@/core/components/ui/button";
@@ -216,7 +215,6 @@ export default function Audience() {
   };
 
   return (
-    <DashboardLayout>
       <div className="p-6 space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -388,6 +386,5 @@ export default function Audience() {
           </>
         )}
       </div>
-    </DashboardLayout>
   );
 }

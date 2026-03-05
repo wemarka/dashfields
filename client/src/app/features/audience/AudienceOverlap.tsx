@@ -2,7 +2,6 @@
 // Audience Overlap Analysis — visualize audience intersection across platforms
 // using Venn-like diagrams, overlap scores, and AI-powered recommendations.
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/core/components/ui/card";
@@ -266,7 +265,6 @@ export default function AudienceOverlap() {
   const radarColors = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
   return (
-    <DashboardLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -464,6 +462,5 @@ export default function AudienceOverlap() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
   );
 }

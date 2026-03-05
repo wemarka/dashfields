@@ -2,7 +2,6 @@
 // Compare current period vs previous period side-by-side with KPI cards and dual-line charts.
 import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";
 import {
@@ -126,7 +125,6 @@ export default function PeriodComparison() {
   ];
 
   return (
-    <DashboardLayout>
       <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -245,6 +243,5 @@ export default function PeriodComparison() {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 }

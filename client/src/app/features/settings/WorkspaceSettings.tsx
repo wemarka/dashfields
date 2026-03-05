@@ -7,7 +7,6 @@
 import { useState, useEffect } from "react";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { trpc } from "@/core/lib/trpc";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { toast } from "sonner";
 import {
   Building2, Users, Sparkles, Settings, Trash2,
@@ -1096,7 +1095,6 @@ export default function WorkspaceSettings() {
   ];
 
   return (
-    <DashboardLayout>
       <div className="p-6 max-w-4xl">
         {/* Header */}
         <div className="mb-6">
@@ -1155,7 +1153,6 @@ export default function WorkspaceSettings() {
           </>
         )}
       </div>
-    </DashboardLayout>
   );
 }
 

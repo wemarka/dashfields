@@ -1,5 +1,4 @@
 // Settings.tsx — Improved settings page with real data binding.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { trpc } from "@/core/lib/trpc";
 import { useState, useEffect } from "react";
@@ -374,7 +373,6 @@ export default function Settings() {
   };
 
   return (
-    <DashboardLayout>
       <div className="p-6 max-w-4xl mx-auto animate-fade-in">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-foreground">{t("settings.title")}</h1>
@@ -685,6 +683,5 @@ export default function Settings() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

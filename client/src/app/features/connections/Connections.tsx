@@ -2,7 +2,6 @@
 // Multi-platform social media connections hub.
 // OAuth-first for all platforms that support it.
 // Manual token input for api_key platforms (Snapchat, Pinterest).
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { useState, useEffect } from "react";
 import { trpc } from "@/core/lib/trpc";
@@ -630,7 +629,7 @@ export default function Connections() {
   }).length;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-5xl mx-auto p-6 space-y-6 animate-fade-in">
 
         {/* - Header - */}
@@ -803,6 +802,6 @@ export default function Connections() {
           onConnected={() => utils.social.list.invalidate()}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

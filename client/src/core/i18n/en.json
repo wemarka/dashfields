@@ -54,7 +54,11 @@
     "contentTemplates": "Content Templates",
     "ads": "Ads",
     "content": "Content",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "integrations": "Integrations",
+    "workspace": "Workspace & Team",
+    "assets": "Assets",
+    "paidOrganic": "Paid vs Organic"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

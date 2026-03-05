@@ -1,4 +1,3 @@
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
@@ -79,7 +78,6 @@ export default function MetaConnect() {
   };
 
   return (
-    <DashboardLayout>
       <div className="p-6 max-w-2xl mx-auto space-y-6 animate-fade-in">
         {/* Header */}
         <div>
@@ -298,6 +296,5 @@ export default function MetaConnect() {
           </ul>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

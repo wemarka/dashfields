@@ -54,7 +54,11 @@
     "contentTemplates": "قوالب المحتوى",
     "ads": "الإعلانات",
     "content": "المحتوى",
-    "analytics": "التحليلات"
+    "analytics": "التحليلات",
+    "integrations": "التكاملات",
+    "workspace": "مساحة العمل والفريق",
+    "assets": "الأصول",
+    "paidOrganic": "المدفوع مقابل المجاني"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

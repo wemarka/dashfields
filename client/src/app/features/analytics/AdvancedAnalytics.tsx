@@ -1,7 +1,6 @@
 // AdvancedAnalytics.tsx — Conversion Funnel, Attribution Modeling & ROI Calculator
 // Professional-grade analytics for media buyers and performance marketers.
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { DatePresetSelector, type DatePreset } from "@/app/features/dashboard/components/DatePresetSelector";
 import { trpc } from "@/core/lib/trpc";
 import { useTranslation } from "react-i18next";
@@ -196,7 +195,6 @@ export default function AdvancedAnalytics() {
   ] as const;
 
   return (
-    <DashboardLayout>
       <div className="p-6 space-y-6 animate-fade-in">
 
         {/* Header */}
@@ -461,6 +459,5 @@ export default function AdvancedAnalytics() {
         )}
 
       </div>
-    </DashboardLayout>
   );
 }

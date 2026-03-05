@@ -1752,3 +1752,15 @@
 - [x] Update MobileBottomNav to mirror new 4+1 structure
 - [x] Update i18n EN + AR with new translation keys
 - [x] All 410 tests passing, 0 TypeScript errors
+
+## Phase 28 — Accordion Sidebar + Inception Bug Fix
+- [x] Created navigation.ts central config
+- [x] Stripped DashboardLayout wrapper from all individual page components
+- [x] Refactored sidebar to Accordion pattern with smooth animations
+- [x] Created standalone sub-pages for all routes (ads/*, content/*, analytics/*, settings/*)
+- [x] Updated App.tsx with clean Wouter routes
+- [x] Updated MobileBottomNav to use new sub-page paths
+- [x] Fixed Settings pinned button to navigate to /settings/integrations
+- [x] Updated ProfileDropdown billing link to /settings/billing
+- [x] Added missing i18n keys (integrations, workspace, assets, paidOrganic)
+- [x] All 410 tests passing

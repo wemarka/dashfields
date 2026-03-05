@@ -1,6 +1,5 @@
 // Campaigns.tsx — Multi-Platform Campaigns Management
 // Supports Meta Ads + local campaigns across all platforms.
-import DashboardLayout from "@/app/components/DashboardLayout";
 import CreateCampaignModal from "@/app/features/campaigns/components/CreateCampaignModal";
 import { MetaCampaignCreateModal } from "@/app/features/campaigns/components/MetaCampaignCreateModal";
 import { CampaignBuilder } from "@/app/features/campaigns/components/CampaignBuilder";
@@ -110,7 +109,7 @@ export default function Campaigns() {
   }, [metaInsights]);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 space-y-5 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -332,6 +331,6 @@ export default function Campaigns() {
           onCreated={() => { setShowBuilder(false); utils.campaigns.list.invalidate(); }}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

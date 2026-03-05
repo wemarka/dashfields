@@ -4,7 +4,6 @@
  */
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
-import DashboardLayout from "@/app/components/DashboardLayout";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { Button } from "@/core/components/ui/button";
@@ -174,7 +173,6 @@ export default function AdsAnalyzer() {
   }, {});
 
   return (
-    <DashboardLayout>
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -380,6 +378,5 @@ export default function AdsAnalyzer() {
           </Card>
         )}
       </div>
-    </DashboardLayout>
   );
 }
