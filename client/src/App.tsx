@@ -40,6 +40,7 @@ const PostAnalytics     = lazy(() => import("./features/post-analytics/PostAnaly
 const PeriodComparison  = lazy(() => import("./features/analytics/PeriodComparison"));
 const AIContent          = lazy(() => import("./features/ai/AIContent"));
 const SentimentDashboard = lazy(() => import("./features/sentiment/SentimentDashboard"));
+const AdsAnalyzer       = lazy(() => import("./features/ads-analyzer/AdsAnalyzer"));
 const ContentCalendar   = lazy(() => import("./features/publishing/ContentCalendar"));
 const Notifications     = lazy(() => import("./features/notifications/Notifications"));
 const Profile           = lazy(() => import("./features/settings/Profile"));
@@ -125,6 +126,7 @@ function AppRouter() {
         <Route path="/calendar"             component={ContentCalendar} />
         <Route path="/ai-content"           component={AIContent} />
         <Route path="/sentiment"             component={SentimentDashboard} />
+        <Route path="/ads-analyzer"           component={AdsAnalyzer} />
         <Route path="/audience"             component={Audience} />
         <Route path="/competitors"          component={Competitors} />
         <Route path="/reports"              component={Reports} />

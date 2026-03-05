@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -222,6 +223,7 @@ function CreateAlertForm({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Alerts() {
+  usePageTitle("Alerts");
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
   const [filterPlatform, setFilterPlatform] = useState<string>("all");

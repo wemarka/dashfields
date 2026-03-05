@@ -9,6 +9,7 @@
 import { useState, useRef, useCallback } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import {
   Brain, RefreshCw, Lightbulb, History, BarChart2, Upload,
@@ -722,6 +723,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function SentimentDashboard() {
+  usePageTitle("Sentiment Analysis");
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>("quick");
 

@@ -3,6 +3,7 @@
 // find best posting times, and plan a full content calendar.
 import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
@@ -821,6 +822,7 @@ function CalendarPlannerTab() {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function AIContent() {
+  usePageTitle("AI Studio");
   const [activeTab, setActiveTab] = useState<StudioTab>("generate");
   const [topic,    setTopic]    = useState("");
   const [platform, setPlatform] = useState("instagram");

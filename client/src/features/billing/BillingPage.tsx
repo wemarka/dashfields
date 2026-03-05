@@ -12,6 +12,7 @@ import { Separator } from "@/core/components/ui/separator";
 import { PLAN_LIMITS, type WorkspacePlan } from "../../../../shared/planLimits";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { UpgradeModal } from "./UpgradeModal";
 import { toast } from "sonner";
 
@@ -230,6 +231,7 @@ export function BillingPage() {
   const usage = usageQuery.data;
 
   const handleUpgrade = (plan: WorkspacePlan) => {
+  usePageTitle("Billing & Plans");
     setUpgradeToPlan(plan);
     setShowUpgradeModal(true);
   };

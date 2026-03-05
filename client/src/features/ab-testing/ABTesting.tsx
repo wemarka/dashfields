@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/core/components/ui/label";
 import { Progress } from "@/core/components/ui/progress";
 import { Separator } from "@/core/components/ui/separator";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import {
   Plus, Trash2, Play, Pause, Trophy, FlaskConical,
@@ -544,6 +545,7 @@ function SignificanceBar({ control, variant }: { control: Variant; variant: Vari
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ABTesting() {
+  usePageTitle("A/B Testing");
   const [showCreate, setShowCreate]     = useState(false);
   const [editTest, setEditTest]         = useState<ABTest | undefined>();
   const [metricsTest, setMetricsTest]   = useState<ABTest | undefined>();

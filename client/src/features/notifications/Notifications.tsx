@@ -2,6 +2,7 @@
 // Advanced Notifications Center — smart alerts, category filtering, bulk actions, and preferences.
 import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { formatDistanceToNow } from "date-fns";
@@ -157,6 +158,7 @@ function NotificationItem({
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Notifications() {
+  usePageTitle("Notifications");
   const [filter,      setFilter]      = useState<"all" | "unread">("all");
   const [category,    setCategory]    = useState<NotifCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");

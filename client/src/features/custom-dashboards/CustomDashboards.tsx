@@ -2,6 +2,7 @@
 // Allows users to build personalized dashboards with drag-and-drop widgets.
 import { useState, useCallback } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
@@ -282,6 +283,7 @@ function DashboardModal({ mode, initial, onClose, onSaved }: DashboardModalProps
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function CustomDashboards() {
+  usePageTitle("Custom Dashboards");
   const [showCreate, setShowCreate] = useState(false);
   const [editTarget, setEditTarget] = useState<number | null>(null);
 

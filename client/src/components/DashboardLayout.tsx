@@ -24,7 +24,7 @@ import {
   Sun, Moon, ChevronDown, Check, PlusCircle,
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  Activity, CreditCard, Brain,
+  Activity, CreditCard, Brain, Zap,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -104,6 +104,7 @@ const navGroups: NavGroup[] = [
       { icon: CalendarDays, labelKey: "nav.calendar",  path: "/calendar",   iconAnimation: "icon-bounce" },
       { icon: Sparkles,     labelKey: "nav.aiStudio",  path: "/ai-content", iconAnimation: "icon-pop" },
       { icon: Brain,         labelKey: "nav.sentiment", path: "/sentiment",  iconAnimation: "icon-pop" },
+      { icon: Zap,           labelKey: "nav.adsAnalyzer", path: "/ads-analyzer", iconAnimation: "icon-pop" },
     ],
   },
   {
@@ -360,6 +361,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+
+  // ── Current page label from nav ──────────────────────────────────────────
+  const currentNavItem = navGroups.flatMap(g => g.items).find(item => {
+    if (item.path === "/dashboard") return location === "/dashboard" || location === "/";
+    return location.startsWith(item.path);
+  });
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -631,8 +638,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </button>
           </div>
-
-          {/* Right: actions + profile */}
+          {/* Center: Page Title Breadcrumb */}
+          {currentNavItem && (
+            <div className="hidden md:flex items-center gap-1.5 text-sm">
+              <span className="text-muted-foreground/40 text-xs">Dashfields</span>
+              <span className="text-muted-foreground/40 text-xs">/</span>
+              <span className="text-foreground/80 font-medium text-xs">{t(currentNavItem.labelKey)}</span>
+            </div>
+          )}
+          {/* Right: controls */}
           <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
             {/* Language toggle */}
             <button

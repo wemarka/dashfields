@@ -20,6 +20,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import i18n from "@/core/i18n";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Streamdown } from "streamdown";
 
 const PLATFORM_OPTIONS = [
@@ -168,6 +169,7 @@ function PlatformReachChart({ data }: { data: { platform: string; reach: number;
 }
 
 export default function Audience() {
+  usePageTitle("Audience");
   const { t } = useTranslation();
   const [platform, setPlatform]   = useState("all");
   const [datePreset, setDatePreset] = useState("last_30d");

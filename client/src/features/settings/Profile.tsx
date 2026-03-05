@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTranslation } from "react-i18next";
 import i18n from "@/core/i18n";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const TIMEZONES = [
   "UTC", "America/New_York", "America/Los_Angeles", "America/Chicago",
@@ -24,6 +25,7 @@ const TIMEZONES = [
 ];
 
 export default function Profile() {
+  usePageTitle("Profile");
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const { t } = useTranslation();

@@ -13,6 +13,7 @@ import {
   Sparkles, Wand2, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { trpc as trpcClient } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useTranslation } from "react-i18next";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -552,6 +553,7 @@ function WeekView({ weekStart, posts, onDayClick, onPostClick, onReschedule }: {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function ContentCalendar() {
+  usePageTitle("Content Calendar");
   const today = new Date();
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [currentDate, setCurrentDate] = useState(today);

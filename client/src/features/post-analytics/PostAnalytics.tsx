@@ -2,6 +2,7 @@
 // Detailed post-level analytics: top posts, engagement heatmap, best times, post type breakdown.
 import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import DashboardLayout from "@/components/DashboardLayout";
 import { PlatformIcon } from "@/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";
@@ -175,6 +176,7 @@ function TopPostsTable({ posts, sortBy, onSortChange }: {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function PostAnalytics() {
+  usePageTitle("Post Analytics");
   const [platform,  setPlatform]  = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<DateRange>("last_30d");
   const [sortBy,    setSortBy]    = useState<SortBy>("engagement");

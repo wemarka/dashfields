@@ -19,12 +19,14 @@ import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 type Tab = "all" | "meta" | "local";
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month";
 type LocalCampaignStatus = "active" | "paused" | "ended" | "draft" | "scheduled";
 
 export default function Campaigns() {
+  usePageTitle("Campaigns");
   const [search, setSearch]         = useState("");
   const [filter, setFilter]         = useState("all");
   const [showCreate, setShowCreate] = useState(false);

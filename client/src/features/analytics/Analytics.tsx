@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/core/hooks/useCurrency";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,
@@ -39,6 +40,7 @@ function fmtNum(n: number): string {
   return n.toLocaleString();
 }
 export default function Analytics() {
+  usePageTitle("Analytics");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [activePlatform, setActivePlatform] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<TabId>("overview");

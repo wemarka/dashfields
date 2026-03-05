@@ -8,6 +8,7 @@ import {
 } from "recharts";
 import { Hash, TrendingUp, TrendingDown, Minus, Search, ArrowUpDown, Sparkles, Loader2, Copy, Download } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { PLATFORMS } from "@shared/platforms";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "sonner";
@@ -50,6 +51,7 @@ function fmtNum(n: number): string {
 }
 
 export default function HashtagAnalytics() {
+  usePageTitle("Hashtag Analytics");
   const [platform, setPlatform] = useState("all");
   const [sortBy, setSortBy] = useState<"avgEngagement" | "count" | "totalReach">("avgEngagement");
   const [search, setSearch] = useState("");

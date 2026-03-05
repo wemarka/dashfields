@@ -1465,3 +1465,89 @@
 - [x] sitemap.xml created for SEO
 - [x] Rate Limiting added: general (300/min), auth (15/min), AI (30/min)
 - [x] express-rate-limit installed and configured
+
+## Phase 18 — Strategic Development Roadmap
+
+### Sprint A — Meta Ads AI Analyzer
+- [ ] AI-powered campaign analysis page with deep insights
+- [ ] Integration with Meta MCP data for real campaign analysis
+- [ ] AI recommendations engine using LLM
+- [ ] Performance score cards per campaign
+
+### Sprint B — Post Analytics Deep-Dive
+- [ ] Best time to post heatmap (day x hour grid)
+- [ ] Top performing posts ranking with engagement breakdown
+- [ ] Content type performance comparison (image vs video vs text)
+- [ ] Engagement rate trend chart
+
+### Sprint C — Smart Notifications Center
+- [ ] Notification preferences page (toggle per notification type)
+- [ ] Mark all as read button
+- [ ] Notification grouping by type
+- [ ] Real-time notification badge in sidebar
+
+### Sprint D — Profile Completeness
+- [ ] Profile completeness score widget in settings
+- [ ] Missing fields prompt with action buttons
+- [ ] Workspace setup checklist
+
+### Sprint E — Global UX Polish
+- [ ] Dark/Light mode toggle in top nav
+- [ ] Page title updates (document.title per route)
+- [ ] Improved 404 page with navigation options
+- [ ] Breadcrumbs in inner pages
+
+## Phase 18 — Strategic Development Roadmap
+
+### Sprint A — Meta Ads AI Analyzer
+- [ ] AI-powered campaign analysis page with deep insights
+- [ ] Integration with Meta MCP data for real campaign analysis
+- [ ] AI recommendations engine using LLM
+- [ ] Performance score cards per campaign
+
+### Sprint B — Post Analytics Deep-Dive
+- [ ] Best time to post heatmap (day x hour grid)
+- [ ] Top performing posts ranking with engagement breakdown
+- [ ] Content type performance comparison (image vs video vs text)
+- [ ] Engagement rate trend chart
+
+### Sprint C — Smart Notifications Center
+- [ ] Notification preferences page (toggle per notification type)
+- [ ] Mark all as read button
+- [ ] Notification grouping by type
+- [ ] Real-time notification badge in sidebar
+
+### Sprint D — Profile Completeness
+- [ ] Profile completeness score widget in settings
+- [ ] Missing fields prompt with action buttons
+- [ ] Workspace setup checklist
+
+### Sprint E — Global UX Polish
+- [ ] Dark/Light mode toggle in top nav
+- [ ] Page title updates (document.title per route)
+- [ ] Improved 404 page with navigation options
+- [ ] Breadcrumbs in inner pages
+
+## Phase 18 — Strategic Development Roadmap
+- [x] Meta Ads AI Analyzer page (/ads-analyzer) with LLM-powered campaign analysis
+- [x] Ads Analyzer nav item in sidebar
+- [x] usePageTitle hook for dynamic browser tab titles
+- [x] Page titles added to 20 pages
+- [x] Breadcrumb in topbar showing current page
+- [x] Changelog page (/changelog) with version history
+- [x] SEO: Open Graph tags, robots.txt, sitemap.xml
+- [x] Rate limiting middleware (300/min general, 15/min auth, 30/min AI)
+- [x] Demo Mode: /demo route + DemoPage + Try Demo button in Landing Page
+- [x] PostPreview integrated into PostComposerModal
+
+## Phase 18 — Strategic Development Roadmap (Complete)
+- [x] Meta Ads AI Analyzer page (/ads-analyzer) with LLM-powered campaign analysis
+- [x] Ads Analyzer nav item in sidebar with i18n translations (EN + AR)
+- [x] usePageTitle hook for dynamic browser tab titles
+- [x] Page titles added to 20 pages
+- [x] Breadcrumb in topbar showing current page name
+- [x] Changelog page (/changelog) with version history
+- [x] SEO: Open Graph tags, robots.txt, sitemap.xml, Structured Data
+- [x] Rate limiting middleware (300/min general, 15/min auth, 30/min AI)
+- [x] Demo Mode: /demo route + DemoPage + Try Demo button in Landing Page
+- [x] PostPreview integrated into PostComposerModal

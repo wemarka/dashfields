@@ -31,6 +31,7 @@ import { Settings2 } from "lucide-react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/core/hooks/useCurrency";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { SampleDataBanner } from "@/components/SampleDataBanner";
 import { SmartRecommendationsWidget } from "@/features/dashboard/components/SmartRecommendationsWidget";
 
@@ -241,6 +242,7 @@ function EmptyDashboard() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  usePageTitle("Dashboard");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [widgets, setWidgets] = useState<typeof DEFAULT_WIDGETS>(loadWidgets);
   const [showWidgetMenu, setShowWidgetMenu] = useState(false);

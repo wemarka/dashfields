@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
@@ -484,6 +485,7 @@ function BrandingPanel({ branding, onChange }: { branding: BrandingOptions; onCh
 }
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Reports() {
+  usePageTitle("Reports");
   const [showCreate, setShowCreate] = useState(false);
   const [branding, setBranding] = useState<BrandingOptions>(DEFAULT_BRANDING);
   const utils = trpc.useUtils();

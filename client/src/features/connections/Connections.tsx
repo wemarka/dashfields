@@ -17,6 +17,7 @@ import {
   AlertTriangle, Key, Info, Activity,
 } from "lucide-react";
 import { PlatformCardSkeleton } from "@/core/components/ui/skeleton-cards";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ─── Manual Token Modal ────────────────────────────────────────────────────────
 interface ManualConnectModalProps {
@@ -443,6 +444,7 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Connections() {
+  usePageTitle("Connections");
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
   const { t } = useTranslation();

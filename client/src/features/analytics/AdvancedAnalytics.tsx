@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useCurrency } from "@/core/hooks/useCurrency";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────────────────
 function fmtNum(n: number) {
@@ -141,6 +142,7 @@ function RoiCalculator() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AdvancedAnalytics() {
+  usePageTitle("Advanced Analytics");
   const [tab, setTab] = useState<"funnel" | "attribution" | "roi">("funnel");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const { t } = useTranslation();

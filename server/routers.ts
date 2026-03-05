@@ -34,6 +34,7 @@ import { workspacesRouter }        from "./routers/workspaces";
 import { invitationsRouter }       from "./routers/invitations";
 import { smartRecommendationsRouter } from "./routers/smartRecommendations";
 import { sentimentRouter }            from "./routers/sentiment";
+import { adsAnalyzerRouter }          from "./routers/adsAnalyzer";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -75,6 +76,7 @@ export const appRouter = router({
   invitations:      invitationsRouter,
   smartRecommendations: smartRecommendationsRouter,
   sentiment:            sentimentRouter,
+  adsAnalyzer:          adsAnalyzerRouter,
 });
 
 export type AppRouter = typeof appRouter;

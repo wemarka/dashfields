@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState as useLocalState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Streamdown } from "streamdown";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -155,6 +156,7 @@ function PlatformCard({
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Competitors() {
+  usePageTitle("Competitors");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [aiStrategy, setAiStrategy] = useLocalState<string | null>(null);
