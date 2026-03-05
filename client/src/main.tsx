@@ -71,12 +71,12 @@ const trpcClient = trpc.createClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <SupabaseAuthProvider>
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
+  <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <SupabaseAuthProvider>
         <App />
         <Toaster position="bottom-right" richColors />
-      </QueryClientProvider>
-    </trpc.Provider>
-  </SupabaseAuthProvider>
+      </SupabaseAuthProvider>
+    </QueryClientProvider>
+  </trpc.Provider>
 );

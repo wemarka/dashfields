@@ -1,0 +1,9 @@
+{
+  "query": "\n-- Check triggers on auth.users\nSELECT trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement\nFROM information_schema.triggers\nWHERE event_object_schema = 'auth' AND event_object_table = 'users';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \n-- Check triggers on auth.users\nSELECT trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement\nFROM information_schema.triggers\nWHERE event_object_schema = 'auth' AND event_object_table = 'users';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1749
+}

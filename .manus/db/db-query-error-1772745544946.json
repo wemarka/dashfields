@@ -1,0 +1,8 @@
+{
+  "query": "\n-- Check RLS status on public.users\nSELECT schemaname, tablename, rowsecurity, forcerowsecurity\nFROM pg_tables\nWHERE tablename = 'users';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \n-- Check RLS status on public.users\nSELECT schemaname, tablename, rowsecurity, forcerowsecurity\nFROM pg_tables\nWHERE tablename = 'users';\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 3: Table 'kxbj95igqtqdrviqhur8ny.pg_tables' doesn't exist"
+  ]
+}

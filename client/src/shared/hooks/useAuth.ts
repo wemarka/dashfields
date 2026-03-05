@@ -9,7 +9,7 @@
 //   isLoading     — true while initial auth state is being resolved
 //   isAuthenticated — true when a valid session exists
 //   signOut       — signs out via Supabase then redirects to /login
-//   signInWithEmail / signUpWithEmail / signInWithGoogle / resetPassword / updatePassword
+//   signInWithEmail / signUpWithEmail / resetPassword / updatePassword
 //   refresh       — re-fetch the tRPC user profile
 //   logout        — alias for signOut (backward compat)
 
@@ -39,7 +39,6 @@ export function useAuth(options?: UseAuthOptions) {
     signOut: supabaseSignOut,
     signInWithEmail,
     signUpWithEmail,
-    signInWithGoogle,
     resetPassword,
     updatePassword,
     refreshSession,
@@ -89,7 +88,6 @@ export function useAuth(options?: UseAuthOptions) {
     logout: signOut,           // backward compat alias
     signInWithEmail,
     signUpWithEmail,
-    signInWithGoogle,
     resetPassword,
     updatePassword,
     refreshSession,

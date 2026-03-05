@@ -11,6 +11,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Session, User as SupabaseUser, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/core/lib/supabase";
 
@@ -29,7 +30,6 @@ export interface SupabaseAuthState {
 export interface SupabaseAuthActions {
   signInWithEmail: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error: AuthError | null }>;
-  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
@@ -48,6 +48,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [session, setSession] = useState<Session | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const queryClient = useQueryClient();
 
   // Initialize session from storage
   useEffect(() => {
@@ -63,17 +64,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setStatus(data.session ? "authenticated" : "unauthenticated");
     });
 
-    // Listen for auth state changes
+    // Listen for auth state changes — invalidate all tRPC queries so they
+    // re-fetch with the new (or cleared) Bearer token.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         setSession(newSession);
         setSupabaseUser(newSession?.user ?? null);
         setStatus(newSession ? "authenticated" : "unauthenticated");
+        // Force tRPC to re-fetch all queries with the updated token
+        queryClient.invalidateQueries();
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   // ─── Actions ────────────────────────────────────────────────────────────────
 
@@ -96,19 +100,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     return { error };
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    if (!supabase) return { error: { message: "Supabase not configured", name: "AuthError", status: 500 } as AuthError };
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: { access_type: "offline", prompt: "consent" },
-      },
-    });
-    return { error };
-  }, []);
-
-  const signOut = useCallback(async () => {
+   const signOut = useCallback(async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
     setSession(null);
@@ -148,7 +140,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: status === "authenticated",
     signInWithEmail,
     signUpWithEmail,
-    signInWithGoogle,
     signOut,
     resetPassword,
     updatePassword,
