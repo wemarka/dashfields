@@ -335,20 +335,20 @@ function ProfileDropdown({
       <button
         onClick={() => setOpen(o => !o)}
         className={[
-          "flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl transition-all duration-200",
+          "flex items-center gap-1.5 p-1 rounded-xl transition-all duration-200",
           open ? "bg-foreground/8" : "hover:bg-foreground/5",
         ].join(" ")}
       >
-        {/* Workspace icon + user avatar stacked */}
+        {/* Avatar with workspace badge */}
         <div className="relative">
-          <Avatar className="w-7 h-7">
-            <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-bold">
+          <Avatar className="w-8 h-8">
+            <AvatarFallback className="text-[12px] bg-brand/10 text-brand font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>
           {/* Workspace badge */}
           {activeWorkspace && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-sm bg-background border border-border/50 flex items-center justify-center overflow-hidden shadow-sm">
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-sm bg-background border border-border/60 flex items-center justify-center overflow-hidden shadow-sm">
               {activeWorkspace.logo_url ? (
                 <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
               ) : (
@@ -358,14 +358,6 @@ function ProfileDropdown({
               )}
             </div>
           )}
-        </div>
-        <div className="hidden sm:flex flex-col items-start min-w-0 max-w-[110px]">
-          <span className="text-[11px] font-semibold truncate leading-tight text-foreground">
-            {user?.name ?? "User"}
-          </span>
-          <span className="text-[10px] text-muted-foreground/60 truncate leading-tight">
-            {activeWorkspace?.name ?? "No workspace"}
-          </span>
         </div>
         <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
