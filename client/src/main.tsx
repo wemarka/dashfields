@@ -18,7 +18,6 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (typeof window === "undefined") return;
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
   if (!isUnauthorized) return;
-  // Redirect to internal login page instead of Manus OAuth
   const currentPath = window.location.pathname;
   if (currentPath !== "/login" && !currentPath.startsWith("/auth/")) {
     window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
@@ -56,7 +55,7 @@ const trpcClient = trpc.createClient({
               return { Authorization: `Bearer ${token}` };
             }
           } catch {
-            // ignore — fall through to cookie-based auth (Manus)
+            // ignore — no session available
           }
         }
         return {};

@@ -1,7 +1,22 @@
-import { getLoginUrl } from "@/const";
+// shared/hooks/useAuth.ts
+// Unified auth hook — Supabase is the sole auth provider.
+// Replaces the old split between useAuth (tRPC) + useSupabaseAuth (Supabase).
+//
+// Provides:
+//   user          — public.users record from tRPC (has id, name, email, role)
+//   session       — raw Supabase Session (has access_token, expires_at, etc.)
+//   supabaseUser  — raw Supabase User object
+//   isLoading     — true while initial auth state is being resolved
+//   isAuthenticated — true when a valid session exists
+//   signOut       — signs out via Supabase then redirects to /login
+//   signInWithEmail / signUpWithEmail / signInWithGoogle / resetPassword / updatePassword
+//   refresh       — re-fetch the tRPC user profile
+//   logout        — alias for signOut (backward compat)
+
+import { useCallback, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 import { trpc } from "@/core/lib/trpc";
-import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo } from "react";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -9,76 +24,75 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
+  const { redirectOnUnauthenticated = false, redirectPath = "/login" } =
     options ?? {};
-  const utils = trpc.useUtils();
 
+  const [, navigate] = useLocation();
+
+  // ── Supabase session state ────────────────────────────────────────────────
+  const {
+    status,
+    session,
+    supabaseUser,
+    isLoading: supabaseLoading,
+    isAuthenticated,
+    signOut: supabaseSignOut,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithGoogle,
+    resetPassword,
+    updatePassword,
+    refreshSession,
+  } = useSupabaseAuth();
+
+  // ── tRPC user profile (only when authenticated) ───────────────────────────
   const meQuery = trpc.auth.me.useQuery(undefined, {
+    enabled: isAuthenticated,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  const logoutMutation = trpc.auth.logout.useMutation({
-    onSuccess: () => {
-      utils.auth.me.setData(undefined, null);
-    },
-  });
+  const loading = supabaseLoading || (isAuthenticated && meQuery.isLoading);
+  const user = meQuery.data ?? null;
 
-  const logout = useCallback(async () => {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch (error: unknown) {
-      if (
-        error instanceof TRPCClientError &&
-        error.data?.code === "UNAUTHORIZED"
-      ) {
-        return;
-      }
-      throw error;
-    } finally {
-      utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
-    }
-  }, [logoutMutation, utils]);
-
-  const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
-    return {
-      user: meQuery.data ?? null,
-      loading: meQuery.isLoading || logoutMutation.isPending,
-      error: meQuery.error ?? logoutMutation.error ?? null,
-      isAuthenticated: Boolean(meQuery.data),
-    };
-  }, [
-    meQuery.data,
-    meQuery.error,
-    meQuery.isLoading,
-    logoutMutation.error,
-    logoutMutation.isPending,
-  ]);
-
+  // ── Redirect when unauthenticated ─────────────────────────────────────────
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
-    if (meQuery.isLoading || logoutMutation.isPending) return;
-    if (state.user) return;
+    if (loading) return;
+    if (status === "loading") return;
+    if (isAuthenticated) return;
     if (typeof window === "undefined") return;
     if (window.location.pathname === redirectPath) return;
+    navigate(redirectPath);
+  }, [redirectOnUnauthenticated, redirectPath, loading, status, isAuthenticated, navigate]);
 
-    window.location.href = redirectPath
-  }, [
-    redirectOnUnauthenticated,
-    redirectPath,
-    logoutMutation.isPending,
-    meQuery.isLoading,
-    state.user,
-  ]);
+  // ── Sign out: Supabase + redirect ─────────────────────────────────────────
+  const signOut = useCallback(async () => {
+    await supabaseSignOut();
+    navigate("/login");
+  }, [supabaseSignOut, navigate]);
 
   return {
-    ...state,
+    // Profile data
+    user,
+    session,
+    supabaseUser,
+
+    // Status
+    loading,
+    isLoading: loading,
+    isAuthenticated,
+    error: meQuery.error ?? null,
+
+    // Actions
+    signOut,
+    logout: signOut,           // backward compat alias
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithGoogle,
+    resetPassword,
+    updatePassword,
+    refreshSession,
     refresh: () => meQuery.refetch(),
-    logout,
   };
 }

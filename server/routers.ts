@@ -1,8 +1,6 @@
 // server/routers.ts
 // Main tRPC app router — assembles all sub-routers.
 // Each feature lives in its own file under server/routers/
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 
@@ -45,9 +43,9 @@ export const appRouter = router({
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+    // Logout is handled client-side via supabase.auth.signOut().
+    // This stub exists for backward compatibility.
+    logout: publicProcedure.mutation(() => {
       return { success: true } as const;
     }),
   }),

@@ -4,7 +4,6 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-import { registerMetaOAuthRoutes } from "../services/integrations/metaOAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -83,9 +82,7 @@ async function startServer() {
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  // Meta OAuth routes
-  registerMetaOAuthRoutes(app);
-  // Platform OAuth routes (TikTok, LinkedIn, YouTube, Twitter)
+  // Unified platform OAuth routes (Meta, TikTok, LinkedIn, YouTube, Twitter, Snapchat, Pinterest)
   registerPlatformOAuthRoutes(app);
 
   // tRPC API

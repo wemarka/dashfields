@@ -1780,3 +1780,15 @@
 - [x] Replace Facebook icon in MetaCampaignTable empty state with generic Link2 icon
 - [x] Change "Meta Ads Campaigns" table header to "Ad Campaigns"
 - [x] Change "Meta Ads" tab label in Campaigns to "Meta / Facebook"
+
+## Phase 30-Supabase — Full Supabase Auth Migration
+- [ ] Step 1: Replace getLoginUrl() in const.ts with /login redirect
+- [ ] Step 2: Merge useAuth + useSupabaseAuth into single unified useAuth hook
+- [ ] Step 3: Update DashboardLayout to use unified useAuth (remove dual hook import)
+- [ ] Step 4: Update AcceptInvite to use /login instead of getLoginUrl()
+- [ ] Step 5: Merge metaOAuth.ts into platformOAuth.ts (unified multi-platform OAuth)
+- [ ] Step 6: Replace getUserIdFromCookie (Manus) with Supabase JWT extraction in platformOAuth.ts
+- [ ] Step 7: Simplify server auth.logout — remove Manus cookie clearing
+- [ ] Step 8: Remove Manus SDK fallback from server/_core/context.ts
+- [ ] Step 9: Remove localStorage manus-runtime-user-info from useAuth
+- [ ] Step 10: Clean up unused imports (sdk, COOKIE_NAME) after migration

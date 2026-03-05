@@ -1,6 +1,5 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
 import { getSupabase } from "../supabase";
 import { upsertUserBySupabaseUid } from "../app/db/users";
 import { getUserWorkspaces, createWorkspace, generateSlug } from "../app/db/workspaces";
@@ -12,7 +11,7 @@ export type TrpcContext = {
 };
 
 /**
- * Attempt to authenticate via Supabase Bearer JWT.
+ * Authenticate via Supabase Bearer JWT.
  * Returns the public.users record if valid, null otherwise.
  */
 async function authenticateSupabaseJwt(authHeader: string): Promise<User | null> {
@@ -71,15 +70,9 @@ export async function createContext(
   let user: User | null = null;
 
   try {
-    // 1️⃣ Try Supabase Bearer token first (new auth system)
     const authHeader = opts.req.headers.authorization ?? "";
     if (authHeader.toLowerCase().startsWith("bearer ")) {
       user = await authenticateSupabaseJwt(authHeader);
-    }
-
-    // 2️⃣ Fall back to Manus session cookie (legacy / Manus environment)
-    if (!user) {
-      user = await sdk.authenticateRequest(opts.req);
     }
   } catch {
     // Authentication is optional for public procedures.

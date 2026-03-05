@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { trpc } from "@/core/lib/trpc";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { Button } from "@/core/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Badge } from "@/core/components/ui/badge";
@@ -42,7 +41,8 @@ export default function AcceptInvite() {
       // Redirect to login with return path
       // Store return path and redirect to login
       sessionStorage.setItem("invite_return", `/invite/${token}`);
-      window.location.href = getLoginUrl();
+      window.location.href = `/login?next=${encodeURIComponent(`/invite/${token}`)}`;
+
       return;
     }
     acceptMutation.mutate({ token });

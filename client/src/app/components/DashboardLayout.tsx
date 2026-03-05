@@ -5,7 +5,6 @@
 //  • Settings as direct link pinned at bottom (not collapsible)
 //  • Navigation config driven by src/config/navigation.ts
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 import { DashfieldsIcon, DashfieldsLogoFull } from "@/app/components/DashfieldsLogo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
@@ -450,7 +449,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
   const toggleSection = (path: string) => setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   const [location, setLocation] = useLocation();
-  const { loading, user } = useAuth();
+  const { loading, user, signOut } = useAuth();
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
@@ -488,13 +487,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
-  const { signOut: supabaseSignOut } = useSupabaseAuth();
-  const logoutMutation = trpc.auth.logout.useMutation({
-    onSuccess: () => { window.location.href = "/login"; },
-  });
   const handleLogout = async () => {
-    await supabaseSignOut();
-    logoutMutation.mutate();
+    await signOut();
   };
 
   const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
