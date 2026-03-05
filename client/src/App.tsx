@@ -56,6 +56,7 @@ const WorkspaceSettings = lazy(() => import("./features/settings/WorkspaceSettin
 const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite"));
 const BillingPage       = lazy(() => import("./features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
 const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
+const BrandKit           = lazy(() => import("./features/brand/BrandKit"));
 // ─── Landing + Legal pages ───────────────────────────────────────────────────
 const LandingPage        = lazy(() => import("./features/landing/LandingPage"));
 const PrivacyPage        = lazy(() => import("./features/landing/PrivacyPage"));
@@ -155,6 +156,7 @@ function AppRouter() {
         <Route path="/publishing"           component={Publishing} />
         <Route path="/billing"              component={BillingPage} />
         <Route path="/monitor"              component={PerformanceMonitor} />
+        <Route path="/brand-kit"            component={BrandKit} />
         <Route path="/ai-tools"             component={() => <Redirect to="/ai-content" />} />
         <Route path="/404"                  component={NotFound} />
         <Route                              component={NotFound} />

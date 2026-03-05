@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_colors TEXT[] DEFAULT '{}'; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_fonts TEXT[] DEFAULT '{}'; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(256);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_colors TEXT[] DEFAULT '{}'; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_fonts TEXT[] DEFAULT '{}'; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(256);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 70 near \"[] DEFAULT '{}'\""
+  ]
+}

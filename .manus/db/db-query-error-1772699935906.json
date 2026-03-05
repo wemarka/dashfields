@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_colors JSON; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_fonts JSON; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(256);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_colors JSON; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS brand_fonts JSON; ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS website_url VARCHAR(256);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'kxbj95igqtqdrviqhur8ny.brand_profiles' doesn't exist"
+  ]
+}

@@ -91,6 +91,9 @@ export const brandProfiles = pgTable("brand_profiles", {
   keywords:      text("keywords").array().default([]),
   avoidWords:    text("avoid_words").array().default([]),
   examplePosts:  text("example_posts").array().default([]),
+  brandColors:   jsonb("brand_colors").$type<string[]>().default([]),
+  brandFonts:    jsonb("brand_fonts").$type<string[]>().default([]),
+  websiteUrl:    varchar("website_url", { length: 256 }),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   updatedAt:     timestamp("updated_at").defaultNow().notNull(),
 });

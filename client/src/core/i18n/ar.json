@@ -45,7 +45,8 @@
     "audienceOverlap": "تداخل الجماهير",
     "customDashboards": "لوحات مخصصة",
     "monitor": "المراقبة المباشرة",
-    "billing": "الاشتراكات والخطط"
+    "billing": "الاشتراكات والخطط",
+    "brandKit": "هوية العلامة التجارية"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

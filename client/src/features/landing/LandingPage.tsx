@@ -93,7 +93,30 @@ function AnimatedSection({
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+/// ─── FAQ Item Component ─────────────────────────────────────────────────────
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
+      >
+        <span className="font-medium text-gray-900 text-sm pr-4">{question}</span>
+        <span className={`shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 transition-transform ${open ? 'rotate-45' : ''}`}>
+          <X className="w-3 h-3" />
+        </span>
+      </button>
+      {open && (
+        <div className="px-5 pb-4 bg-white">
+          <p className="text-sm text-gray-600 leading-relaxed">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Component ─────────────────────────────────────────────────────────
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -784,6 +807,115 @@ export default function LandingPage() {
                   </div>
                   <div className="text-sm text-gray-600">{stat.label}</div>
                 </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ──────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <div className="text-center mb-12">
+              <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">CUSTOMER STORIES</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Trusted by marketing teams worldwide</h2>
+              <p className="text-lg text-gray-600">See how DashFields helps teams grow faster with smarter social media management.</p>
+            </div>
+          </AnimatedSection>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Sarah Al-Mansouri",
+                role: "Head of Digital Marketing",
+                company: "Majid Al Futtaim",
+                avatar: "SA",
+                color: "bg-blue-500",
+                quote: "DashFields cut our campaign setup time by 60%. The AI content suggestions are incredibly accurate for our Gulf audience — it understands regional nuances that other tools miss completely.",
+                rating: 5,
+              },
+              {
+                name: "Omar Khalil",
+                role: "Social Media Manager",
+                company: "Aramex",
+                avatar: "OK",
+                color: "bg-violet-500",
+                quote: "The Meta Ads AI Analyzer alone is worth the subscription. It identified a 40% budget waste in our campaigns within the first week. ROI has never been better.",
+                rating: 5,
+              },
+              {
+                name: "Lina Haddad",
+                role: "Marketing Director",
+                company: "Zain Jordan",
+                avatar: "LH",
+                color: "bg-emerald-500",
+                quote: "Managing 12 brand accounts across 6 platforms used to be a nightmare. Now it's streamlined. The bulk scheduling and sentiment analysis save us 15+ hours every week.",
+                rating: 5,
+              },
+            ].map((t, i) => (
+              <AnimatedSection key={t.name} delay={i * 100}>
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
+                  <div className="flex items-center gap-1 mb-4">
+                    {Array.from({ length: t.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 text-sm leading-relaxed flex-1 italic">&ldquo;{t.quote}&rdquo;</p>
+                  <div className="flex items-center gap-3 mt-5 pt-4 border-t border-gray-100">
+                    <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                      <p className="text-xs text-gray-500">{t.role} · {t.company}</p>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+          {/* Trust Badges */}
+          <AnimatedSection delay={300}>
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+              {[
+                { icon: "🔒", label: "SSL Encrypted" },
+                { icon: "🇪🇺", label: "GDPR Compliant" },
+                { icon: "🛡️", label: "SOC 2 Type II" },
+                { icon: "⚡", label: "99.9% Uptime SLA" },
+                { icon: "🌍", label: "MENA Data Centers" },
+              ].map((badge) => (
+                <div key={badge.label} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 text-sm text-gray-600">
+                  <span>{badge.icon}</span>
+                  <span className="font-medium">{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
+      <section id="faq" className="py-20 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <div className="text-center mb-12">
+              <span className="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">FAQ</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Frequently asked questions</h2>
+              <p className="text-lg text-gray-600">Everything you need to know about DashFields.</p>
+            </div>
+          </AnimatedSection>
+          <div className="space-y-3">
+            {[
+              { q: "Which social media platforms does DashFields support?", a: "DashFields supports Facebook, Instagram, Twitter/X, LinkedIn, TikTok, YouTube, Pinterest, and Snapchat. We also integrate with Meta Ads Manager for paid campaign analytics." },
+              { q: "Is there a free plan available?", a: "Yes! Our Free plan includes 1 workspace, 3 connected accounts, 30 scheduled posts/month, and basic analytics. No credit card required to get started." },
+              { q: "How does the AI content generation work?", a: "Our AI analyzes your brand voice, past performance data, and current trends to generate platform-optimized content. It supports Arabic and English, and learns from your edits over time." },
+              { q: "Can I manage multiple brands or clients?", a: "Absolutely. The Agency and Enterprise plans support multiple workspaces, each with its own brand profile, team members, and connected accounts. Perfect for agencies managing multiple clients." },
+              { q: "How does the Meta Ads AI Analyzer work?", a: "It connects to your Meta Ads account via our secure OAuth integration, pulls campaign performance data, and uses AI to identify budget waste, audience fatigue, and optimization opportunities." },
+              { q: "Is my data secure?", a: "Yes. All data is encrypted in transit (TLS 1.3) and at rest (AES-256). We're GDPR compliant, SOC 2 Type II certified, and our servers are hosted in MENA-region data centers." },
+              { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel anytime from your billing settings. Your account will remain active until the end of the current billing period with no cancellation fees." },
+            ].map((item, i) => (
+              <AnimatedSection key={i} delay={i * 50}>
+                <FAQItem question={item.q} answer={item.a} />
               </AnimatedSection>
             ))}
           </div>

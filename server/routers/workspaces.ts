@@ -258,6 +258,9 @@ export const workspacesRouter = router({
       keywords: z.array(z.string()).max(20).optional(),
       avoidWords: z.array(z.string()).max(20).optional(),
       examplePosts: z.array(z.string()).max(5).optional(),
+      brandColors: z.array(z.string()).max(10).optional(),
+      brandFonts: z.array(z.string()).max(5).optional(),
+      websiteUrl: z.string().max(256).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const { workspaceId: _wid, brandGuidelines, ...updates } = input;
@@ -275,6 +278,9 @@ export const workspacesRouter = router({
       if (updates.keywords !== undefined) dbUpdates.keywords = updates.keywords;
       if (updates.avoidWords !== undefined) dbUpdates.avoid_words = updates.avoidWords;
       if (updates.examplePosts !== undefined) dbUpdates.example_posts = updates.examplePosts;
+      if (updates.brandColors !== undefined) dbUpdates.brand_colors = updates.brandColors;
+      if (updates.brandFonts !== undefined) dbUpdates.brand_fonts = updates.brandFonts;
+      if (updates.websiteUrl !== undefined) dbUpdates.website_url = updates.websiteUrl;
 
       return upsertBrandProfile(ctx.workspaceId, dbUpdates as Parameters<typeof upsertBrandProfile>[1]);
     }),

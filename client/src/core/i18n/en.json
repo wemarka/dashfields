@@ -45,7 +45,8 @@
     "audienceOverlap": "Audience Overlap",
     "customDashboards": "Custom Dashboards",
     "monitor": "Live Monitor",
-    "billing": "Billing & Plans"
+    "billing": "Billing & Plans",
+    "brandKit": "Brand Kit"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

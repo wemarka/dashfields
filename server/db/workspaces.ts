@@ -47,9 +47,13 @@ export interface BrandProfile {
   language: string;
   brand_name: string | null;
   brand_desc: string | null;
+  brand_guidelines: string | null;
   keywords: string[];
   avoid_words: string[];
   example_posts: string[];
+  brand_colors: string[] | null;
+  brand_fonts: string[] | null;
+  website_url: string | null;
   created_at: string;
   updated_at: string;
 }
