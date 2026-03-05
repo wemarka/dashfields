@@ -24,7 +24,7 @@ import {
   Sun, Moon, ChevronDown, Check, PlusCircle,
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  Activity, CreditCard, Brain, Zap, Paintbrush,
+  Activity, CreditCard, Brain, Zap, Paintbrush, UsersRound,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -103,6 +103,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: CalendarDays, labelKey: "nav.calendar",  path: "/calendar",   iconAnimation: "icon-bounce" },
       { icon: Sparkles,     labelKey: "nav.aiStudio",  path: "/ai-content", iconAnimation: "icon-pop" },
+      { icon: Brain,         labelKey: "nav.aiHub",       path: "/ai-hub",       iconAnimation: "icon-pop" },
       { icon: Brain,         labelKey: "nav.sentiment",   path: "/sentiment",    iconAnimation: "icon-pop" },
       { icon: Zap,           labelKey: "nav.adsAnalyzer",  path: "/ads-analyzer", iconAnimation: "icon-pop" },
       { icon: Paintbrush,    labelKey: "nav.brandKit",     path: "/brand-kit",    iconAnimation: "icon-pop" },
@@ -134,6 +135,7 @@ const navGroups: NavGroup[] = [
   {
     labelKey: "nav.groups.workspace",
     items: [
+      { icon: UsersRound, labelKey: "nav.team",    path: "/team",    iconAnimation: "icon-bounce" },
       { icon: Activity,   labelKey: "nav.monitor", path: "/monitor", iconAnimation: "icon-bounce" },
       { icon: CreditCard, labelKey: "nav.billing", path: "/billing", iconAnimation: "icon-pop" },
     ],

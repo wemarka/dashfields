@@ -46,7 +46,9 @@
     "customDashboards": "Custom Dashboards",
     "monitor": "Live Monitor",
     "billing": "Billing & Plans",
-    "brandKit": "Brand Kit"
+    "brandKit": "Brand Kit",
+    "team": "Team",
+    "aiHub": "AI Insights Hub"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

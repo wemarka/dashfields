@@ -1613,3 +1613,27 @@
 - [x] Brand Kit nav item added to DashboardLayout sidebar (Content group)
 - [x] i18n translations added: en.json + ar.json (brandKit key)
 - [x] 0 TypeScript errors, 410/410 tests passing
+
+## Phase 21 — Team Management Page (Completed)
+- [x] Dedicated /team page with full member management UI
+- [x] Invite members by email with role selection
+- [x] View/manage/remove existing members
+- [x] i18n translations (en + ar)
+
+## Phase 22 — Blog / SEO Pages (Completed)
+- [x] /blog page with SEO-optimized articles about social media management
+- [x] Blog link in LandingPage navigation (desktop + mobile)
+- [x] Article detail pages at /blog/:slug
+
+## Phase 23 — AI Insights Hub (Completed)
+- [x] /ai-hub central page for all AI tools
+- [x] Quick Caption Generator widget
+- [x] AI Stats widget (recommendations count, high priority, opportunities)
+- [x] 8 AI tool cards linking to relevant pages
+- [x] AI Best Practices section
+- [x] Nav item in DashboardLayout sidebar
+- [x] Mobile bottom nav updated with AI Hub
+
+## Phase 24 — Mobile UX Improvements (Completed)
+- [x] MobileBottomNav updated with AI Hub instead of Connections
+- [x] Improved active state detection in bottom nav

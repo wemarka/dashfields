@@ -3,16 +3,16 @@
 import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard, Megaphone, BarChart3,
-  CalendarDays, Link2,
+  CalendarDays, Brain,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, labelKey: "nav.dashboard",   path: "/" },
+  { icon: LayoutDashboard, labelKey: "nav.dashboard",   path: "/dashboard" },
   { icon: Megaphone,       labelKey: "nav.campaigns",   path: "/campaigns" },
   { icon: BarChart3,       labelKey: "nav.overview",    path: "/analytics" },
   { icon: CalendarDays,    labelKey: "nav.calendar",    path: "/calendar" },
-  { icon: Link2,           labelKey: "nav.connections", path: "/connections" },
+  { icon: Brain,           labelKey: "nav.aiHub",       path: "/ai-hub" },
 ];
 
 export function MobileBottomNav() {
@@ -23,7 +23,7 @@ export function MobileBottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-xl border-t border-border/50 safe-area-pb">
       <div className="flex items-center justify-around px-2 py-2">
         {NAV_ITEMS.map(({ icon: Icon, labelKey, path }) => {
-          const isActive = path === "/" ? location === "/" : location.startsWith(path);
+          const isActive = location === path || (path !== "/dashboard" && location.startsWith(path));
           return (
             <Link key={path} href={path}>
               <button

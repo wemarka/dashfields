@@ -46,7 +46,9 @@
     "customDashboards": "لوحات مخصصة",
     "monitor": "المراقبة المباشرة",
     "billing": "الاشتراكات والخطط",
-    "brandKit": "هوية العلامة التجارية"
+    "brandKit": "هوية العلامة التجارية",
+    "team": "الفريق",
+    "aiHub": "مركز الذكاء الاصطناعي"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

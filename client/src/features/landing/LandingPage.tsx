@@ -169,6 +169,12 @@ export default function LandingPage() {
               >
                 Integrations
               </button>
+              <a
+                href="/blog"
+                className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                Blog
+              </a>
             </div>
 
             {/* CTA Buttons */}
@@ -227,6 +233,9 @@ export default function LandingPage() {
             >
               Integrations
             </button>
+            <a href="/blog" className="block w-full text-left text-sm font-medium text-gray-700 py-2">
+              Blog
+            </a>
             <div className="flex flex-col gap-2 pt-2">
               <a href={appUrl("/demo")} className="w-full">
                 <Button variant="outline" size="sm" className="w-full border-blue-200 text-blue-700">

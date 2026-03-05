@@ -57,12 +57,15 @@ const AcceptInvite      = lazy(() => import("./features/workspace/AcceptInvite")
 const BillingPage       = lazy(() => import("./features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
 const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
 const BrandKit           = lazy(() => import("./features/brand/BrandKit"));
+const TeamPage           = lazy(() => import("./features/team/TeamPage"));
+const AIInsightsHub      = lazy(() => import("./features/ai/AIInsightsHub"));
 // ─── Landing + Legal pages ───────────────────────────────────────────────────
 const LandingPage        = lazy(() => import("./features/landing/LandingPage"));
 const PrivacyPage        = lazy(() => import("./features/landing/PrivacyPage"));
 const TermsPage          = lazy(() => import("./features/landing/TermsPage"));
 const DemoPage           = lazy(() => import("./features/landing/DemoPage"));
 const ChangelogPage      = lazy(() => import("./features/landing/ChangelogPage"));
+const BlogPage           = lazy(() => import("./features/landing/BlogPage"));
 // ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
 const LoginPage          = lazy(() => import("./features/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("./features/auth/RegisterPage"));
@@ -119,6 +122,8 @@ function AppRouter() {
         <Route path="/terms"                component={TermsPage} />
         <Route path="/demo"                 component={DemoPage} />
         <Route path="/changelog"             component={ChangelogPage} />
+        <Route path="/blog/:slug"             component={BlogPage} />
+        <Route path="/blog"                   component={BlogPage} />
         {/* ── Core routes ────────────────────────────────────────────────── */}
         <Route path="/dashboard"            component={Home} />
         <Route path="/campaigns"            component={Campaigns} />
@@ -157,6 +162,8 @@ function AppRouter() {
         <Route path="/billing"              component={BillingPage} />
         <Route path="/monitor"              component={PerformanceMonitor} />
         <Route path="/brand-kit"            component={BrandKit} />
+        <Route path="/team"                 component={TeamPage} />
+        <Route path="/ai-hub"               component={AIInsightsHub} />
         <Route path="/ai-tools"             component={() => <Redirect to="/ai-content" />} />
         <Route path="/404"                  component={NotFound} />
         <Route                              component={NotFound} />
