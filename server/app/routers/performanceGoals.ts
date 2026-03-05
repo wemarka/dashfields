@@ -4,6 +4,10 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../../_core/trpc";
 import { getSupabase } from "../../supabase";
 
+function isTableMissing(error: { message?: string } | null): boolean {
+  return !!error?.message?.includes("schema cache");
+}
+
 const METRICS = [
   "impressions", "clicks", "conversions", "spend", "roas", "ctr", "cpc", "cpm",
   "followers", "engagement_rate", "reach", "video_views",
@@ -28,7 +32,10 @@ export const performanceGoalsRouter = router({
       if (input?.workspaceId) query = query.eq("workspace_id", input.workspaceId);
       if (input?.status)      query = query.eq("status", input.status);
       const { data, error } = await query;
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (isTableMissing(error)) return [];
+        throw new Error(error.message);
+      }
       return data ?? [];
     }),
 

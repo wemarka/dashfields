@@ -4,6 +4,11 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../../_core/trpc";
 import { getSupabase } from "../../supabase";
 
+// Helper: check if error is "table not found" (schema cache miss)
+function isTableMissing(error: { message?: string } | null): boolean {
+  return !!error?.message?.includes("schema cache");
+}
+
 export const savedAudiencesRouter = router({
   list: protectedProcedure
     .input(z.object({ workspaceId: z.number().optional() }).optional())
@@ -18,7 +23,10 @@ export const savedAudiencesRouter = router({
         query = query.eq("workspace_id", input.workspaceId);
       }
       const { data, error } = await query;
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (isTableMissing(error)) return []; // Table not yet created
+        throw new Error(error.message);
+      }
       return data ?? [];
     }),
 

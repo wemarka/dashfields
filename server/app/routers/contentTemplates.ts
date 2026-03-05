@@ -4,6 +4,10 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../../_core/trpc";
 import { getSupabase } from "../../supabase";
 
+function isTableMissing(error: { message?: string } | null): boolean {
+  return !!error?.message?.includes("schema cache");
+}
+
 const CATEGORIES = [
   "promotional", "educational", "engagement", "announcement",
   "seasonal", "product", "testimonial", "behind_scenes",
@@ -40,7 +44,10 @@ export const contentTemplatesRouter = router({
       if (input?.platform)    query = query.eq("platform", input.platform);
 
       const { data, error } = await query;
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (isTableMissing(error)) return [];
+        throw new Error(error.message);
+      }
       return data ?? [];
     }),
 

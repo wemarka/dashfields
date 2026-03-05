@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startCron } from "../cron";
+import { runMissingMigrations } from "../migrations";
 import { registerPlatformOAuthRoutes } from "../services/integrations/platformOAuth";
 import rateLimit from "express-rate-limit";
 
@@ -114,6 +115,8 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start cron scheduler for reports and budget alerts
     startCron();
+    // Run any missing DB migrations (non-blocking)
+    runMissingMigrations().catch(err => console.warn("[Migrations] Non-fatal error:", err));
   });
 }
 

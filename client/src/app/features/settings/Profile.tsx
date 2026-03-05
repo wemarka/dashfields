@@ -151,7 +151,7 @@ export default function Profile() {
   const initials = (displayName || user?.name || "U").charAt(0).toUpperCase();
 
   return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="p-6 space-y-6 max-w-3xl">
       {/* Header */}
       <div>
         <h1 className="page-header">{t("profile.title")}</h1>
