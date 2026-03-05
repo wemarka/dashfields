@@ -51,7 +51,10 @@
     "aiHub": "مركز الذكاء الاصطناعي",
     "savedAudiences": "الجماهير المحفوظة",
     "performanceGoals": "أهداف الأداء",
-    "contentTemplates": "قوالب المحتوى"
+    "contentTemplates": "قوالب المحتوى",
+    "ads": "الإعلانات",
+    "content": "المحتوى",
+    "analytics": "التحليلات"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",
@@ -68,7 +71,8 @@
     "activeAccount": "الحساب النشط",
     "noAccounts": "لا توجد حسابات مربوطة",
     "connectAccount": "ربط حساب",
-    "allAccounts": "جميع الحسابات"
+    "allAccounts": "جميع الحسابات",
+    "billing": "الفواتير والخطط"
   },
   "auth": {
     "signIn": "تسجيل الدخول",
@@ -195,7 +199,13 @@
     "performanceBreakdown": "تفصيل الأداء",
     "platformComparison": "مقارنة المنصات",
     "vsLastPeriod": "مقارنة بالفترة السابقة",
-    "export": "تصدير التقرير"
+    "export": "تصدير التقرير",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "paidOrganic": "مدفوع مقابل مجاني",
+      "competitors": "المنافسون",
+      "reports": "التقارير"
+    }
   },
   "audience": {
     "title": "الجمهور",
@@ -376,7 +386,12 @@
     "monthlyBudget": "الميزانية الشهرية",
     "currency": "العملة",
     "saveSettings": "حفظ الإعدادات",
-    "saved": "تم حفظ الإعدادات!"
+    "saved": "تم حفظ الإعدادات!",
+    "tabs": {
+      "integrations": "التكاملات",
+      "workspace": "مساحة العمل والفريق",
+      "billing": "الفواتير"
+    }
   },
   "common": {
     "loading": "جارٍ التحميل...",

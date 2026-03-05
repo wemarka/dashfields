@@ -1,8 +1,8 @@
 // DashboardLayout.tsx
-// Main app shell — redesigned with:
-//  • Lean Sidebar (grouped, no cognitive overload)
-//  • Profile Dropdown in Topbar (avatar → Profile, Settings, Logout)
-//  • Account Switcher at Sidebar bottom (per-platform, multi-account)
+// Main app shell — Ultra-Minimalist Sidebar:
+//  • 4 primary destinations only: Dashboard, Ads, Content, Analytics
+//  • Settings pinned at bottom
+//  • Everything else lives as Tabs inside each page
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 import { DashfieldsIcon, DashfieldsLogoFull } from "@/app/components/DashfieldsLogo";
@@ -18,14 +18,13 @@ import { PLAN_LIMITS, type WorkspacePlan } from "@shared/planLimits";
 import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsModal } from "@/app/components/KeyboardShortcutsModal";
 import {
-  BarChart3, Bell, CalendarDays, ChevronLeft, ChevronRight,
+  BarChart3, ChevronLeft, ChevronRight,
   LayoutDashboard, LogOut, Megaphone, Settings, Sparkles,
-  Link2, Globe2, FileText, Users, User, Swords,
+  Globe2, User,
   Sun, Moon, ChevronDown, Check, PlusCircle,
-  FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
+  X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  Activity, CreditCard, Brain, Zap, Paintbrush, UsersRound,
-  BookmarkCheck, Target,
+  CreditCard, PenSquare,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -84,67 +83,22 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 // useActiveAccount is now provided by ActiveAccountContext
 
-// ─── Nav Structure (lean — 5 groups, ~13 items) ───────────────────────────────
+// ─── Nav Structure (Ultra-Minimalist — 4 primary + Settings) ────────────────
+// Philosophy: Sidebar = destinations only. Details live as Tabs inside each page.
 const navGroups: NavGroup[] = [
   {
     labelKey: null,
     items: [
       { icon: LayoutDashboard, labelKey: "nav.dashboard", path: "/dashboard", iconAnimation: "icon-bounce" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.advertising",
-    items: [
-      { icon: Megaphone, labelKey: "nav.campaigns", path: "/campaigns", iconAnimation: "icon-shake" },
-      { icon: Bell,      labelKey: "nav.alerts",    path: "/alerts",    iconAnimation: "icon-bounce" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.content",
-    items: [
-      { icon: CalendarDays, labelKey: "nav.calendar",         path: "/calendar",          iconAnimation: "icon-bounce" },
-      { icon: Sparkles,     labelKey: "nav.aiStudio",         path: "/ai-content",         iconAnimation: "icon-pop" },
-      { icon: FileText,     labelKey: "nav.contentTemplates", path: "/content-templates",  iconAnimation: "icon-pop" },
-      { icon: Brain,         labelKey: "nav.aiHub",       path: "/ai-hub",       iconAnimation: "icon-pop" },
-      { icon: Brain,         labelKey: "nav.sentiment",   path: "/sentiment",    iconAnimation: "icon-pop" },
-      { icon: Zap,           labelKey: "nav.adsAnalyzer",  path: "/ads-analyzer", iconAnimation: "icon-pop" },
-      { icon: Paintbrush,    labelKey: "nav.brandKit",     path: "/brand-kit",    iconAnimation: "icon-pop" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.analytics",
-    items: [
-      { icon: BarChart3, labelKey: "nav.overview",    path: "/analytics",   iconAnimation: "icon-pop" },
-      { icon: Users,         labelKey: "nav.audience",         path: "/audience",          iconAnimation: "icon-bounce" },
-      { icon: BookmarkCheck, labelKey: "nav.savedAudiences",  path: "/saved-audiences",   iconAnimation: "icon-pop" },
-      { icon: Target,        labelKey: "nav.performanceGoals",path: "/performance-goals",  iconAnimation: "icon-pop" },
-      { icon: Swords,        labelKey: "nav.competitors",     path: "/competitors",       iconAnimation: "icon-shake" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.reports",
-    items: [
-      { icon: FileText, labelKey: "nav.reports",     path: "/reports",     iconAnimation: "icon-bounce" },
-      { icon: Link2,    labelKey: "nav.connections", path: "/connections", iconAnimation: "icon-pop" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.tools",
-    items: [
-      { icon: SplitSquareHorizontal, labelKey: "nav.abTesting",        path: "/ab-testing",        iconAnimation: "icon-spin" },
-      { icon: LayoutGrid,            labelKey: "nav.customDashboards",  path: "/custom-dashboards", iconAnimation: "icon-bounce" },
-      { icon: FlaskConical,          labelKey: "nav.advancedAnalytics", path: "/advanced-analytics", iconAnimation: "icon-pop" },
-    ],
-  },
-  {
-    labelKey: "nav.groups.workspace",
-    items: [
-      { icon: UsersRound, labelKey: "nav.team",    path: "/team",    iconAnimation: "icon-bounce" },
-      { icon: Activity,   labelKey: "nav.monitor", path: "/monitor", iconAnimation: "icon-bounce" },
-      { icon: CreditCard, labelKey: "nav.billing", path: "/billing", iconAnimation: "icon-pop" },
+      { icon: Megaphone,       labelKey: "nav.ads",       path: "/ads",       iconAnimation: "icon-shake" },
+      { icon: PenSquare,       labelKey: "nav.content",   path: "/content",   iconAnimation: "icon-pop" },
+      { icon: BarChart3,       labelKey: "nav.analytics", path: "/analytics", iconAnimation: "icon-pop" },
     ],
   },
 ];
+
+// Settings item pinned at sidebar bottom
+const settingsNavItem: NavItem = { icon: Settings, labelKey: "nav.settings", path: "/settings", iconAnimation: "icon-spin" };
 
 // ─── Workspace Switcher Modal ───────────────────────────────────────────────
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
@@ -460,6 +414,13 @@ function ProfileDropdown({
               {t("topbar.viewProfile")}
             </button>
             <button
+              onClick={() => { setLocation("/settings#billing"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+              {t("topbar.billing", "Billing & Plans")}
+            </button>
+            <button
               onClick={() => { setLocation("/settings"); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
             >
@@ -494,11 +455,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
-  // ── Current page label from nav ──────────────────────────────────────────
-  const currentNavItem = navGroups.flatMap(g => g.items).find(item => {
+  // ── Current page label from nav ──────────────────────────────────────────────
+  const allNavItems = [...navGroups.flatMap(g => g.items), settingsNavItem];
+  const currentNavItem = allNavItems.find(item => {
     if (item.path === "/dashboard") return location === "/dashboard" || location === "/";
     return location.startsWith(item.path);
   });
+
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -588,62 +551,77 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Nav Groups */}
-        <nav className={`flex-1 px-2 py-2 overflow-y-auto space-y-0.5 scrollbar-none ${isRTL ? "text-right" : ""}`}>
-          {navGroups.map((group, gi) => (
-            <div key={gi} className={gi > 0 ? "mt-1" : ""}>
-              {group.labelKey && !collapsed && (
-                <p className={`px-3 pt-2 pb-1 text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/35 select-none ${isRTL ? "text-right" : ""}`}>
-                  {t(group.labelKey)}
-                </p>
-              )}
-              {group.labelKey && collapsed && gi > 0 && (
-                <div className="mx-3 my-1.5 h-px bg-border/50" />
-              )}
-              {group.items.map(item => {
-                const isActive = item.path === "/"
-                  ? location === "/"
-                  : location.startsWith(item.path);
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => setLocation(item.path)}
-                    title={collapsed ? t(item.labelKey) : undefined}
-                    className={[
-                      "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium",
-                      "transition-all duration-200 group relative",
-                      isRTL ? "flex-row-reverse text-right" : "text-left",
-                      isActive
-                        ? "bg-brand/10 text-brand shadow-sm"
-                        : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
-                      collapsed ? "justify-center" : "",
-                    ].join(" ")}
-                  >
-                    {isActive && !collapsed && (
-                      <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
-                    )}
-                    <item.icon
-                      className={[
-                        "w-4 h-4 shrink-0 transition-all duration-200",
-                        item.iconAnimation ?? "",
-                        isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
-                      ].join(" ")}
-                    />
-                    {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
-                    {/* Connections badge */}
-                    {item.path === "/connections" && !collapsed && accounts.length > 0 && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-semibold">
-                        {accounts.length}
-                      </span>
-                    )}
-                    {item.path === "/connections" && collapsed && accounts.length > 0 && (
-                      <span className="absolute right-2 top-2 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+        <nav className={`flex-1 px-2 py-3 overflow-y-auto space-y-1 scrollbar-none ${isRTL ? "text-right" : ""}`}>
+          {navGroups.flatMap(g => g.items).map(item => {
+            const isActive = item.path === "/"
+              ? location === "/"
+              : location.startsWith(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => setLocation(item.path)}
+                title={collapsed ? t(item.labelKey) : undefined}
+                className={[
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                  "transition-all duration-200 group relative",
+                  isRTL ? "flex-row-reverse text-right" : "text-left",
+                  isActive
+                    ? "bg-brand/10 text-brand shadow-sm"
+                    : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                  collapsed ? "justify-center" : "",
+                ].join(" ")}
+              >
+                {isActive && !collapsed && (
+                  <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
+                )}
+                <item.icon
+                  className={[
+                    "w-[18px] h-[18px] shrink-0 transition-all duration-200",
+                    item.iconAnimation ?? "",
+                    isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
+                  ].join(" ")}
+                />
+                {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
+              </button>
+            );
+          })}
         </nav>
+
+        {/* Settings pinned at bottom */}
+        <div className="px-2 pb-3 shrink-0">
+          <div className="h-px bg-border/30 mx-1 mb-2" />
+          {(() => {
+            const item = settingsNavItem;
+            const isActive = location.startsWith(item.path);
+            return (
+              <button
+                onClick={() => setLocation(item.path)}
+                title={collapsed ? t(item.labelKey) : undefined}
+                className={[
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                  "transition-all duration-200 group relative",
+                  isRTL ? "flex-row-reverse text-right" : "text-left",
+                  isActive
+                    ? "bg-brand/10 text-brand shadow-sm"
+                    : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                  collapsed ? "justify-center" : "",
+                ].join(" ")}
+              >
+                {isActive && !collapsed && (
+                  <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
+                )}
+                <item.icon
+                  className={[
+                    "w-[18px] h-[18px] shrink-0 transition-all duration-200",
+                    item.iconAnimation ?? "",
+                    isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
+                  ].join(" ")}
+                />
+                {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
+              </button>
+            );
+          })()}
+        </div>
 
         {/* Workspace Switcher moved to Topbar */}
 

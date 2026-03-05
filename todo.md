@@ -1692,3 +1692,63 @@
 - [x] Update all import paths across the entire codebase
 - [x] Fix all test file imports and mock paths
 - [x] Verify 410/410 tests passing, 0 TypeScript errors
+
+## Phase 27 — Ultra-Minimalist Navigation Restructure
+
+### Sidebar (4 items only)
+- [ ] Rebuild navGroups to: Dashboard, Ads, Content, Analytics + Settings at bottom
+- [ ] Update MobileBottomNav to match new 4-item structure
+
+### Ads Page (/ads) — 4 Tabs
+- [ ] Create new /ads page with tabs: Campaigns, Audiences, Performance, AI Analyzer
+- [ ] Campaigns tab: embed existing Campaigns component
+- [ ] Audiences tab: embed Audience + SavedAudiences + AudienceOverlap
+- [ ] Performance tab: embed Analytics (ads-focused) + Ad Spend
+- [ ] AI Analyzer tab: embed AdsAnalyzer
+
+### Content Page (/content) — 3 Tabs
+- [ ] Create new /content page with tabs: Planner, AI Studio, Assets
+- [ ] Planner tab: embed ContentCalendar
+- [ ] AI Studio tab: embed AIContent
+- [ ] Assets tab: embed BrandKit + MediaLibrary
+
+### Analytics Page (/analytics) — 4 Tabs
+- [ ] Rebuild /analytics with tabs: Overview, Paid vs Organic, Competitors, Reports
+- [ ] Overview tab: merged KPIs
+- [ ] Paid vs Organic tab: merge AdvancedAnalytics + PostAnalytics + Sentiment
+- [ ] Competitors tab: embed Competitors
+- [ ] Reports tab: embed Reports
+
+### Settings Page (/settings) — 3 Sections
+- [ ] Rebuild /settings with sections: Integrations, Workspace & Team, Billing
+- [ ] Integrations: embed Connections
+- [ ] Workspace & Team: embed WorkspaceSettings + TeamPage
+- [ ] Billing: embed BillingPage
+
+### Profile Dropdown
+- [ ] Add Billing & Plans link to ProfileDropdown
+- [ ] Add Team link to ProfileDropdown
+
+### Dashboard (/dashboard) — Smart Decision Center
+- [ ] Rebuild Dashboard with "What needs attention now?" focus
+- [ ] Show: campaigns needing attention, upcoming posts, top alert, quick actions
+
+### Cleanup
+- [ ] Update App.tsx routes (old routes redirect to new ones)
+- [ ] Update i18n EN + AR translations
+- [ ] Run tests, fix any issues
+- [ ] Save checkpoint
+
+## Phase 27 — Ultra-Minimalist Sidebar Restructure
+
+- [x] Restructure Sidebar to 4 main items (Dashboard, Ads, Content, Analytics) + Settings pinned at bottom
+- [x] Rebuild Dashboard with "Needs Attention" decision-center section
+- [x] Create Ads hub page with 4 tabs: Campaigns, Audiences, Performance, AI Analyzer
+- [x] Create Content hub page with 3 tabs: Planner, AI Studio, Assets
+- [x] Create Analytics hub page with 4 tabs: Overview, Paid vs Organic, Competitors, Reports
+- [x] Create Settings hub page with 3 tabs: Integrations, Workspace & Team, Billing
+- [x] Add Billing link to Profile Dropdown
+- [x] Update App.tsx routes — new hubs + legacy redirects
+- [x] Update MobileBottomNav to mirror new 4+1 structure
+- [x] Update i18n EN + AR with new translation keys
+- [x] All 410 tests passing, 0 TypeScript errors

@@ -1,18 +1,17 @@
 // MobileBottomNav.tsx — Persistent bottom navigation for mobile screens
-// Shows the 5 most important nav items. Hidden on md+ screens.
+// Mirrors the ultra-minimalist sidebar: Dashboard, Ads, Content, Analytics, Settings
 import { useLocation, Link } from "wouter";
 import {
-  LayoutDashboard, Megaphone, BarChart3,
-  CalendarDays, Brain,
+  LayoutDashboard, Megaphone, PenSquare, BarChart3, Settings,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, labelKey: "nav.dashboard",   path: "/dashboard" },
-  { icon: Megaphone,       labelKey: "nav.campaigns",   path: "/campaigns" },
-  { icon: BarChart3,       labelKey: "nav.overview",    path: "/analytics" },
-  { icon: CalendarDays,    labelKey: "nav.calendar",    path: "/calendar" },
-  { icon: Brain,           labelKey: "nav.aiHub",       path: "/ai-hub" },
+  { icon: LayoutDashboard, labelKey: "nav.dashboard", path: "/dashboard" },
+  { icon: Megaphone,       labelKey: "nav.ads",       path: "/ads" },
+  { icon: PenSquare,       labelKey: "nav.content",   path: "/content" },
+  { icon: BarChart3,       labelKey: "nav.analytics", path: "/analytics" },
+  { icon: Settings,        labelKey: "nav.settings",  path: "/settings" },
 ];
 
 export function MobileBottomNav() {
@@ -29,14 +28,14 @@ export function MobileBottomNav() {
               <button
                 className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${
                   isActive
-                    ? "text-primary"
+                    ? "text-brand"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className={`relative p-1.5 rounded-xl transition-all ${isActive ? "bg-primary/10" : ""}`}>
+                <div className={`relative p-1.5 rounded-xl transition-all ${isActive ? "bg-brand/10" : ""}`}>
                   <Icon className="w-5 h-5" />
                   {isActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand" />
                   )}
                 </div>
                 <span className="text-[10px] font-medium leading-none">{t(labelKey)}</span>

@@ -392,12 +392,12 @@ export default function Dashboard() {
         {/* - Quick Actions - */}
         {hasConnections && (
           <div className="flex items-center gap-2 flex-wrap">
-            <Link href="/calendar">
+            <Link href="/content">
               <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-all hover:scale-105 active:scale-95">
                 <Plus className="w-3.5 h-3.5" />{t("dashboard.newPost")}
               </button>
             </Link>
-            <Link href="/campaigns">
+            <Link href="/ads">
               <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-xs font-medium hover:bg-foreground/5 transition-colors">
                 <Zap className="w-3.5 h-3.5" />{t("dashboard.newCampaign")}
               </button>
@@ -407,13 +407,48 @@ export default function Dashboard() {
                 <BarChart3 className="w-3.5 h-3.5" />{t("sidebar.analytics")}
               </button>
             </Link>
-            <Link href="/reports">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-xs font-medium hover:bg-foreground/5 transition-colors">
-                <FileText className="w-3.5 h-3.5" />{t("sidebar.reports")}
-              </button>
-            </Link>
           </div>
         )}
+
+        {/* - Needs Attention - */}
+        {hasConnections && isMetaConnected && metaCampaigns.length > 0 && (() => {
+          const paused = metaCampaigns.filter((c) => (c as { status?: string }).status === "PAUSED");
+          const lowCtr = metaCampaigns.filter((c) => (c.ctr ?? 0) < 0.5 && (c.ctr ?? 0) > 0);
+          const items = [
+            ...paused.map((c) => ({ type: "paused" as const, label: (c as { campaignName?: string }).campaignName ?? "Campaign", id: (c as { campaignId?: string }).campaignId ?? "" })),
+            ...lowCtr.slice(0, 2).map((c) => ({ type: "low_ctr" as const, label: (c as { campaignName?: string }).campaignName ?? "Campaign", id: (c as { campaignId?: string }).campaignId ?? "" })),
+          ].slice(0, 4);
+          if (items.length === 0) return null;
+          return (
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertCircle className="w-4 h-4 text-amber-500" />
+                <h3 className="text-sm font-semibold text-foreground">Needs Attention</h3>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 font-semibold">{items.length}</span>
+              </div>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.type === "paused" ? "bg-amber-500" : "bg-red-500"}`} />
+                      <span className="text-xs text-foreground/80 truncate">{item.label}</span>
+                    </div>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                      item.type === "paused" ? "bg-amber-500/15 text-amber-600" : "bg-red-500/15 text-red-600"
+                    }`}>
+                      {item.type === "paused" ? "Paused" : "Low CTR"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Link href="/ads">
+                <button className="mt-3 text-xs text-amber-600 font-medium flex items-center gap-1 hover:gap-2 transition-all">
+                  Review campaigns <ArrowRight className="w-3 h-3" />
+                </button>
+              </Link>
+            </div>
+          );
+        })()}
 
         {/* - Onboarding Wizard (first-run) - */}
         {!hasConnections && <OnboardingWizard />}

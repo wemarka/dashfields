@@ -51,7 +51,10 @@
     "aiHub": "AI Insights Hub",
     "savedAudiences": "Saved Audiences",
     "performanceGoals": "Performance Goals",
-    "contentTemplates": "Content Templates"
+    "contentTemplates": "Content Templates",
+    "ads": "Ads",
+    "content": "Content",
+    "analytics": "Analytics"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",
@@ -68,7 +71,8 @@
     "activeAccount": "Active Account",
     "noAccounts": "No accounts connected",
     "connectAccount": "Connect Account",
-    "allAccounts": "All Accounts"
+    "allAccounts": "All Accounts",
+    "billing": "Billing & Plans"
   },
   "auth": {
     "signIn": "Sign In",
@@ -195,7 +199,13 @@
     "performanceBreakdown": "Performance Breakdown",
     "platformComparison": "Platform Comparison",
     "vsLastPeriod": "vs last period",
-    "export": "Export Report"
+    "export": "Export Report",
+    "tabs": {
+      "overview": "Overview",
+      "paidOrganic": "Paid vs Organic",
+      "competitors": "Competitors",
+      "reports": "Reports"
+    }
   },
   "audience": {
     "title": "Audience",
@@ -376,7 +386,12 @@
     "monthlyBudget": "Monthly Budget",
     "currency": "Currency",
     "saveSettings": "Save Settings",
-    "saved": "Settings saved!"
+    "saved": "Settings saved!",
+    "tabs": {
+      "integrations": "Integrations",
+      "workspace": "Workspace & Team",
+      "billing": "Billing"
+    }
   },
   "common": {
     "loading": "Loading...",
