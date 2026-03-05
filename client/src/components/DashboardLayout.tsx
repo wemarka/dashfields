@@ -25,6 +25,7 @@ import {
   FlaskConical, SplitSquareHorizontal, LayoutGrid, X,
   Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
   Activity, CreditCard, Brain, Zap, Paintbrush, UsersRound,
+  BookmarkCheck, Target,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -101,8 +102,9 @@ const navGroups: NavGroup[] = [
   {
     labelKey: "nav.groups.content",
     items: [
-      { icon: CalendarDays, labelKey: "nav.calendar",  path: "/calendar",   iconAnimation: "icon-bounce" },
-      { icon: Sparkles,     labelKey: "nav.aiStudio",  path: "/ai-content", iconAnimation: "icon-pop" },
+      { icon: CalendarDays, labelKey: "nav.calendar",         path: "/calendar",          iconAnimation: "icon-bounce" },
+      { icon: Sparkles,     labelKey: "nav.aiStudio",         path: "/ai-content",         iconAnimation: "icon-pop" },
+      { icon: FileText,     labelKey: "nav.contentTemplates", path: "/content-templates",  iconAnimation: "icon-pop" },
       { icon: Brain,         labelKey: "nav.aiHub",       path: "/ai-hub",       iconAnimation: "icon-pop" },
       { icon: Brain,         labelKey: "nav.sentiment",   path: "/sentiment",    iconAnimation: "icon-pop" },
       { icon: Zap,           labelKey: "nav.adsAnalyzer",  path: "/ads-analyzer", iconAnimation: "icon-pop" },
@@ -113,8 +115,10 @@ const navGroups: NavGroup[] = [
     labelKey: "nav.groups.analytics",
     items: [
       { icon: BarChart3, labelKey: "nav.overview",    path: "/analytics",   iconAnimation: "icon-pop" },
-      { icon: Users,     labelKey: "nav.audience",    path: "/audience",    iconAnimation: "icon-bounce" },
-      { icon: Swords,    labelKey: "nav.competitors", path: "/competitors", iconAnimation: "icon-shake" },
+      { icon: Users,         labelKey: "nav.audience",         path: "/audience",          iconAnimation: "icon-bounce" },
+      { icon: BookmarkCheck, labelKey: "nav.savedAudiences",  path: "/saved-audiences",   iconAnimation: "icon-pop" },
+      { icon: Target,        labelKey: "nav.performanceGoals",path: "/performance-goals",  iconAnimation: "icon-pop" },
+      { icon: Swords,        labelKey: "nav.competitors",     path: "/competitors",       iconAnimation: "icon-shake" },
     ],
   },
   {

@@ -1637,3 +1637,19 @@
 ## Phase 24 — Mobile UX Improvements (Completed)
 - [x] MobileBottomNav updated with AI Hub instead of Connections
 - [x] Improved active state detection in bottom nav
+
+## Phase 25 — Saved Audiences, Performance Goals, Content Templates (Completed)
+- [x] Create saved_audiences table in DB
+- [x] Create performance_goals table in DB
+- [x] Create content_templates table in DB
+- [x] Build savedAudiences tRPC router
+- [x] Build performanceGoals tRPC router
+- [x] Build contentTemplates tRPC router
+- [x] Register new routers in routers.ts
+- [x] Build SavedAudiences.tsx page with full CRUD
+- [x] Build PerformanceGoals.tsx page with KPI tracking and progress updates
+- [x] Build ContentTemplates.tsx page with library and copy-to-clipboard
+- [x] Add routes /saved-audiences, /performance-goals, /content-templates to App.tsx
+- [x] Add nav items to DashboardLayout with icons
+- [x] Add EN/AR translations for all 3 new nav items
+- [x] 410/410 tests passing, 0 TypeScript errors

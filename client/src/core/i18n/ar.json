@@ -48,7 +48,10 @@
     "billing": "الاشتراكات والخطط",
     "brandKit": "هوية العلامة التجارية",
     "team": "الفريق",
-    "aiHub": "مركز الذكاء الاصطناعي"
+    "aiHub": "مركز الذكاء الاصطناعي",
+    "savedAudiences": "الجماهير المحفوظة",
+    "performanceGoals": "أهداف الأداء",
+    "contentTemplates": "قوالب المحتوى"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

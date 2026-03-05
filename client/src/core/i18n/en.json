@@ -48,7 +48,10 @@
     "billing": "Billing & Plans",
     "brandKit": "Brand Kit",
     "team": "Team",
-    "aiHub": "AI Insights Hub"
+    "aiHub": "AI Insights Hub",
+    "savedAudiences": "Saved Audiences",
+    "performanceGoals": "Performance Goals",
+    "contentTemplates": "Content Templates"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

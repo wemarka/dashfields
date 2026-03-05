@@ -59,6 +59,9 @@ const PerformanceMonitor = lazy(() => import("./features/monitor/PerformanceMoni
 const BrandKit           = lazy(() => import("./features/brand/BrandKit"));
 const TeamPage           = lazy(() => import("./features/team/TeamPage"));
 const AIInsightsHub      = lazy(() => import("./features/ai/AIInsightsHub"));
+const SavedAudiences     = lazy(() => import("./features/audience/SavedAudiences"));
+const PerformanceGoals   = lazy(() => import("./features/analytics/PerformanceGoals"));
+const ContentTemplates   = lazy(() => import("./features/content/ContentTemplates"));
 // ─── Landing + Legal pages ───────────────────────────────────────────────────
 const LandingPage        = lazy(() => import("./features/landing/LandingPage"));
 const PrivacyPage        = lazy(() => import("./features/landing/PrivacyPage"));
@@ -164,6 +167,9 @@ function AppRouter() {
         <Route path="/brand-kit"            component={BrandKit} />
         <Route path="/team"                 component={TeamPage} />
         <Route path="/ai-hub"               component={AIInsightsHub} />
+        <Route path="/saved-audiences"      component={SavedAudiences} />
+        <Route path="/performance-goals"    component={PerformanceGoals} />
+        <Route path="/content-templates"    component={ContentTemplates} />
         <Route path="/ai-tools"             component={() => <Redirect to="/ai-content" />} />
         <Route path="/404"                  component={NotFound} />
         <Route                              component={NotFound} />

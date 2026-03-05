@@ -35,6 +35,9 @@ import { invitationsRouter }       from "./routers/invitations";
 import { smartRecommendationsRouter } from "./routers/smartRecommendations";
 import { sentimentRouter }            from "./routers/sentiment";
 import { adsAnalyzerRouter }          from "./routers/adsAnalyzer";
+import { savedAudiencesRouter }       from "./routers/savedAudiences";
+import { performanceGoalsRouter }     from "./routers/performanceGoals";
+import { contentTemplatesRouter }     from "./routers/contentTemplates";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -77,6 +80,9 @@ export const appRouter = router({
   smartRecommendations: smartRecommendationsRouter,
   sentiment:            sentimentRouter,
   adsAnalyzer:          adsAnalyzerRouter,
+  savedAudiences:       savedAudiencesRouter,
+  performanceGoals:     performanceGoalsRouter,
+  contentTemplates:     contentTemplatesRouter,
 });
 
 export type AppRouter = typeof appRouter;

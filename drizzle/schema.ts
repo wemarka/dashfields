@@ -330,3 +330,78 @@ export const sentimentAnalyses = pgTable("sentiment_analyses", {
 export type SentimentAnalysis       = typeof sentimentAnalyses.$inferSelect;
 export type InsertSentimentAnalysis = typeof sentimentAnalyses.$inferInsert;
 
+
+// ─── Saved Audiences ──────────────────────────────────────────────────────────
+export const savedAudiences = pgTable("saved_audiences", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  name:         varchar("name", { length: 128 }).notNull(),
+  description:  text("description"),
+  platforms:    jsonb("platforms").notNull().default([]),
+  ageMin:       integer("age_min"),
+  ageMax:       integer("age_max"),
+  genders:      jsonb("genders").notNull().default([]),
+  locations:    jsonb("locations").notNull().default([]),
+  interests:    jsonb("interests").notNull().default([]),
+  behaviors:    jsonb("behaviors").notNull().default([]),
+  languages:    jsonb("languages").notNull().default([]),
+  estimatedSize: integer("estimated_size"),
+  tags:         jsonb("tags").notNull().default([]),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+});
+export type SavedAudience       = typeof savedAudiences.$inferSelect;
+export type InsertSavedAudience = typeof savedAudiences.$inferInsert;
+
+// ─── Performance Goals ────────────────────────────────────────────────────────
+export const goalPeriodEnum = pgEnum("goal_period", ["weekly", "monthly", "quarterly", "yearly"]);
+export const goalStatusEnum = pgEnum("goal_status", ["active", "completed", "paused", "failed"]);
+export const goalMetricEnum = pgEnum("goal_metric", [
+  "impressions", "clicks", "conversions", "spend", "roas", "ctr", "cpc", "cpm",
+  "followers", "engagement_rate", "reach", "video_views",
+]);
+
+export const performanceGoals = pgTable("performance_goals", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  name:         varchar("name", { length: 128 }).notNull(),
+  metric:       goalMetricEnum("metric").notNull(),
+  targetValue:  real("target_value").notNull(),
+  currentValue: real("current_value").notNull().default(0),
+  platform:     varchar("platform", { length: 64 }),
+  period:       goalPeriodEnum("period").notNull().default("monthly"),
+  status:       goalStatusEnum("status").notNull().default("active"),
+  startDate:    timestamp("start_date").defaultNow().notNull(),
+  endDate:      timestamp("end_date"),
+  notes:        text("notes"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+});
+export type PerformanceGoal       = typeof performanceGoals.$inferSelect;
+export type InsertPerformanceGoal = typeof performanceGoals.$inferInsert;
+
+// ─── Content Templates ────────────────────────────────────────────────────────
+export const templateCategoryEnum = pgEnum("template_category", [
+  "promotional", "educational", "engagement", "announcement", "seasonal", "product", "testimonial", "behind_scenes",
+]);
+
+export const contentTemplates = pgTable("content_templates", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  name:         varchar("name", { length: 128 }).notNull(),
+  category:     templateCategoryEnum("category").notNull().default("promotional"),
+  platform:     varchar("platform", { length: 64 }).notNull().default("instagram"),
+  caption:      text("caption").notNull(),
+  hashtags:     jsonb("hashtags").notNull().default([]),
+  tone:         varchar("tone", { length: 64 }).notNull().default("casual"),
+  isPublic:     boolean("is_public").notNull().default(false),
+  usageCount:   integer("usage_count").notNull().default(0),
+  tags:         jsonb("tags").notNull().default([]),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+});
+export type ContentTemplate       = typeof contentTemplates.$inferSelect;
+export type InsertContentTemplate = typeof contentTemplates.$inferInsert;
