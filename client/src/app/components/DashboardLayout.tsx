@@ -297,7 +297,21 @@ function AccountSwitcherModal({
 }
 
 // ─── Profile Dropdown ─────────────────────────────────────────────────────────
-function ProfileDropdown({ user, onLogout }: { user: { name?: string; email?: string }; onLogout: () => void }) {
+function ProfileDropdown({
+  user,
+  onLogout,
+  workspaces,
+  activeWorkspace,
+  onSelectWorkspace,
+  onNewWorkspace,
+}: {
+  user: { name?: string; email?: string };
+  onLogout: () => void;
+  workspaces: WorkspaceItem[];
+  activeWorkspace: WorkspaceItem | null;
+  onSelectWorkspace: (id: number) => void;
+  onNewWorkspace: () => void;
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [, setLocation] = useLocation();
@@ -311,44 +325,163 @@ function ProfileDropdown({ user, onLogout }: { user: { name?: string; email?: st
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const initials = user?.name
+    ? user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()
+    : "U";
+
   return (
     <div className="relative" ref={ref}>
+      {/* Trigger button */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 hover:bg-foreground/5 transition-colors"
+        className={[
+          "flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl transition-all duration-200",
+          open ? "bg-foreground/8" : "hover:bg-foreground/5",
+        ].join(" ")}
       >
-        <Avatar className="w-7 h-7">
-          <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-semibold">
-            {user?.name?.charAt(0).toUpperCase() ?? "U"}
-          </AvatarFallback>
-        </Avatar>
-        <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+        {/* Workspace icon + user avatar stacked */}
+        <div className="relative">
+          <Avatar className="w-7 h-7">
+            <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          {/* Workspace badge */}
+          {activeWorkspace && (
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-sm bg-background border border-border/50 flex items-center justify-center overflow-hidden shadow-sm">
+              {activeWorkspace.logo_url ? (
+                <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-[7px] font-black text-brand uppercase leading-none">
+                  {activeWorkspace.name.charAt(0)}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="hidden sm:flex flex-col items-start min-w-0 max-w-[110px]">
+          <span className="text-[11px] font-semibold truncate leading-tight text-foreground">
+            {user?.name ?? "User"}
+          </span>
+          <span className="text-[10px] text-muted-foreground/60 truncate leading-tight">
+            {activeWorkspace?.name ?? "No workspace"}
+          </span>
+        </div>
+        <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
+      {/* Dropdown panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-52 glass-strong rounded-xl shadow-xl border border-border/50 py-1.5 z-50 animate-blur-in">
-          <div className="px-3 py-2 border-b border-border/40 mb-1">
-            <p className="text-xs font-semibold truncate">{user?.name ?? "User"}</p>
-            {user?.email && <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>}
+        <div className="absolute right-0 top-full mt-2 w-72 glass-strong rounded-2xl shadow-2xl border border-border/40 z-50 overflow-hidden animate-blur-in">
+
+          {/* ── User info header ── */}
+          <div className="px-4 py-3.5 flex items-center gap-3 border-b border-border/30">
+            <Avatar className="w-9 h-9 shrink-0">
+              <AvatarFallback className="text-sm bg-brand/10 text-brand font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate">{user?.name ?? "User"}</p>
+              {user?.email && (
+                <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+              )}
+            </div>
           </div>
-          <button
-            onClick={() => { setLocation("/profile"); setOpen(false); }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-foreground/5 transition-colors"
-          >
-            <User className="w-3.5 h-3.5 text-muted-foreground" />
-            {t("topbar.viewProfile")}
-          </button>
-          <button
-            onClick={() => { setLocation("/settings"); setOpen(false); }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-foreground/5 transition-colors"
-          >
-            <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-            {t("topbar.settings")}
-          </button>
-          <div className="border-t border-border/40 mt-1 pt-1">
+
+          {/* ── Workspace section ── */}
+          <div className="px-2 pt-2 pb-1">
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-2 mb-1.5">
+              Workspaces
+            </p>
+            <div className="space-y-0.5 max-h-48 overflow-y-auto">
+              {workspaces.length === 0 ? (
+                <div className="py-3 text-center">
+                  <p className="text-xs text-muted-foreground">No workspaces yet</p>
+                </div>
+              ) : (
+                workspaces.map(ws => {
+                  const isActive = activeWorkspace?.id === ws.id;
+                  const planCfg = PLAN_LIMITS[ws.plan as WorkspacePlan];
+                  return (
+                    <button
+                      key={ws.id}
+                      onClick={() => { onSelectWorkspace(ws.id); setOpen(false); }}
+                      className={[
+                        "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all duration-150",
+                        isActive
+                          ? "bg-brand/8 border border-brand/15"
+                          : "hover:bg-foreground/5",
+                      ].join(" ")}
+                    >
+                      {/* Workspace logo */}
+                      <div className={[
+                        "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden",
+                        isActive ? "bg-brand/15" : "bg-foreground/8",
+                      ].join(" ")}>
+                        {ws.logo_url ? (
+                          <img src={ws.logo_url} alt={ws.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className={`text-[11px] font-black uppercase leading-none ${isActive ? "text-brand" : "text-foreground/60"}`}>
+                            {ws.name.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      {/* Name + plan */}
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-medium truncate ${isActive ? "text-foreground" : "text-foreground/80"}`}>
+                          {ws.name}
+                        </p>
+                        {planCfg && (
+                          <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${planCfg.badge.color}`}>
+                            {planCfg.badge.label}
+                          </span>
+                        )}
+                      </div>
+                      {/* Active check */}
+                      {isActive && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            {/* New workspace button */}
+            <button
+              onClick={() => { onNewWorkspace(); setOpen(false); }}
+              className="mt-1 w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors border border-dashed border-border/40 hover:border-border/70"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              New workspace
+            </button>
+          </div>
+
+          {/* ── Divider ── */}
+          <div className="border-t border-border/30 mx-2" />
+
+          {/* ── Actions ── */}
+          <div className="px-2 py-1.5 space-y-0.5">
+            <button
+              onClick={() => { setLocation("/profile"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
+            >
+              <User className="w-3.5 h-3.5 text-muted-foreground" />
+              {t("topbar.viewProfile")}
+            </button>
+            <button
+              onClick={() => { setLocation("/settings"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
+            >
+              <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+              {t("topbar.settings")}
+            </button>
+          </div>
+
+          {/* ── Sign out ── */}
+          <div className="border-t border-border/30 mx-2 mb-1" />
+          <div className="px-2 pb-2">
             <button
               onClick={() => { onLogout(); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 transition-colors"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm text-destructive hover:bg-destructive/8 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               {t("topbar.signOut")}
@@ -538,56 +671,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         {/* Top bar */}
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: Workspace Switcher + search + Account Switcher Pill */}
+          {/* Left: search + Account Switcher Pill */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-            {/* ── Workspace Switcher Pill ───────────────────────────────── */}
-            <button
-              onClick={() => setShowWorkspaceSwitcher(true)}
-              className={[
-                "flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
-                isRTL ? "flex-row-reverse" : "",
-              ].join(" ")}
-            >
-              <div className="w-5 h-5 rounded-md bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
-                {activeWorkspace?.logo_url ? (
-                  <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
-                ) : activeWorkspace ? (
-                  <span className="text-[9px] font-bold text-brand uppercase leading-none">
-                    {activeWorkspace.name.charAt(0)}
-                  </span>
-                ) : (
-                  <Building2 className="w-3 h-3 text-brand" />
-                )}
-              </div>
-              <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
-                <p className="text-[11px] font-semibold truncate leading-tight text-foreground">
-                  {activeWorkspace?.name ?? "No Workspace"}
-                </p>
-                {activeWorkspace?.plan && (() => {
-                  const planCfg = PLAN_LIMITS[activeWorkspace.plan as WorkspacePlan];
-                  return planCfg ? (
-                    <p className={`text-[9px] font-semibold truncate leading-tight ${planCfg.badge.color.replace("bg-", "text-").split(" ")[0]}`}>
-                      {planCfg.badge.label}
-                    </p>
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground/60 truncate leading-tight capitalize">
-                      {activeWorkspace?.role ?? "workspace"}
-                    </p>
-                  );
-                })()}
-              </div>
-              <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0 group-hover:text-brand/60 transition-colors" />
-            </button>
-            {/* Upgrade CTA inline — shown only for free plan */}
-            {planInfoQuery.data && !planInfoQuery.data.canCreate && (
-              <button
-                onClick={() => { setUpgradeReason("You've reached your workspace limit."); setShowUpgradeModal(true); }}
-                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[10px] font-medium text-blue-700 transition-colors shrink-0 border border-blue-200/50"
-              >
-                <PlusCircle className="w-3 h-3" />
-                Upgrade
-              </button>
-            )}
             <GlobalSearch />
             {/* ── Account Switcher Pill ─────────────────────────────────── */}
             <button
@@ -673,6 +758,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ProfileDropdown
               user={{ name: user?.name ?? undefined, email: user?.email ?? undefined }}
               onLogout={handleLogout}
+              workspaces={workspaces}
+              activeWorkspace={activeWorkspace}
+              onSelectWorkspace={(id) => setActiveWorkspace(id)}
+              onNewWorkspace={() => setShowWorkspaceSwitcher(true)}
             />
           </div>
         </div>
