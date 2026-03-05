@@ -520,64 +520,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* ── Workspace Switcher (above account) ──────────────────────────── */}
-        <div className="px-2 pt-2 shrink-0">
-          <button
-            onClick={() => setShowWorkspaceSwitcher(true)}
-            title={collapsed ? (activeWorkspace?.name ?? "Workspace") : undefined}
-            className={[
-              "w-full flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-foreground/5 transition-colors group",
-              collapsed ? "justify-center" : "",
-              isRTL ? "flex-row-reverse" : "",
-            ].join(" ")}
-          >
-            <div className="w-6 h-6 rounded-lg bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
-              {activeWorkspace?.logo_url ? (
-                <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
-              ) : activeWorkspace ? (
-                <span className="text-[10px] font-bold text-brand uppercase leading-none">
-                  {activeWorkspace.name.charAt(0)}
-                </span>
-              ) : (
-                <Building2 className="w-3.5 h-3.5 text-brand" />
-              )}
-            </div>
-            {!collapsed && (
-              <>
-                <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
-                  <p className="text-[11px] font-semibold truncate leading-tight">
-                    {activeWorkspace?.name ?? "No Workspace"}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    {activeWorkspace?.plan && (() => {
-                      const planCfg = PLAN_LIMITS[activeWorkspace.plan as WorkspacePlan];
-                      return planCfg ? (
-                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${planCfg.badge.color}`}>
-                          {planCfg.badge.label}
-                        </span>
-                      ) : null;
-                    })()}
-                    <p className="text-[10px] text-muted-foreground/55 truncate capitalize">
-                      {activeWorkspace?.role ?? "Select workspace"}
-                    </p>
-                  </div>
-                </div>
-                <ChevronDown className="w-3 h-3 text-muted-foreground/50 shrink-0 group-hover:text-foreground/60 transition-colors" />
-              </>
-            )}
-          </button>
-          {/* Upgrade CTA — shown only for free plan */}
-          {!collapsed && planInfoQuery.data && !planInfoQuery.data.canCreate && (
-            <button
-              onClick={() => { setUpgradeReason("You've reached your workspace limit."); setShowUpgradeModal(true); }}
-              className="w-full mt-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[10px] font-medium text-blue-700 transition-colors"
-            >
-              <PlusCircle className="w-3 h-3" />
-              Upgrade for more workspaces
-            </button>
-          )}
-        </div>
-        {/* Account Switcher moved to Topbar */}
+        {/* Workspace Switcher moved to Topbar */}
 
         {/* Collapse Toggle */}
         <button
@@ -595,8 +538,56 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         {/* Top bar */}
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: search + Account Switcher Pill */}
+          {/* Left: Workspace Switcher + search + Account Switcher Pill */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+            {/* ── Workspace Switcher Pill ───────────────────────────────── */}
+            <button
+              onClick={() => setShowWorkspaceSwitcher(true)}
+              className={[
+                "flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
+                isRTL ? "flex-row-reverse" : "",
+              ].join(" ")}
+            >
+              <div className="w-5 h-5 rounded-md bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
+                {activeWorkspace?.logo_url ? (
+                  <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
+                ) : activeWorkspace ? (
+                  <span className="text-[9px] font-bold text-brand uppercase leading-none">
+                    {activeWorkspace.name.charAt(0)}
+                  </span>
+                ) : (
+                  <Building2 className="w-3 h-3 text-brand" />
+                )}
+              </div>
+              <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
+                <p className="text-[11px] font-semibold truncate leading-tight text-foreground">
+                  {activeWorkspace?.name ?? "No Workspace"}
+                </p>
+                {activeWorkspace?.plan && (() => {
+                  const planCfg = PLAN_LIMITS[activeWorkspace.plan as WorkspacePlan];
+                  return planCfg ? (
+                    <p className={`text-[9px] font-semibold truncate leading-tight ${planCfg.badge.color.replace("bg-", "text-").split(" ")[0]}`}>
+                      {planCfg.badge.label}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground/60 truncate leading-tight capitalize">
+                      {activeWorkspace?.role ?? "workspace"}
+                    </p>
+                  );
+                })()}
+              </div>
+              <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0 group-hover:text-brand/60 transition-colors" />
+            </button>
+            {/* Upgrade CTA inline — shown only for free plan */}
+            {planInfoQuery.data && !planInfoQuery.data.canCreate && (
+              <button
+                onClick={() => { setUpgradeReason("You've reached your workspace limit."); setShowUpgradeModal(true); }}
+                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[10px] font-medium text-blue-700 transition-colors shrink-0 border border-blue-200/50"
+              >
+                <PlusCircle className="w-3 h-3" />
+                Upgrade
+              </button>
+            )}
             <GlobalSearch />
             {/* ── Account Switcher Pill ─────────────────────────────────── */}
             <button

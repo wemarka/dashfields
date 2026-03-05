@@ -1,0 +1,46 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "ab_tests"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "campaign_metrics"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "campaigns"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "content_templates"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "notifications"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "performance_goals"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "posts"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "saved_audiences"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "social_accounts"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "user_settings"
+    },
+    {
+      "Tables_in_KXbJ95iGQTQDrViqhuR8ny": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_KXbJ95iGQTQDrViqhuR8ny\n__drizzle_migrations\nab_tests\ncampaign_metrics\ncampaigns\ncontent_templates\nnotifications\nperformance_goals\nposts\nsaved_audiences\nsocial_accounts\nuser_settings\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 1546
+}
