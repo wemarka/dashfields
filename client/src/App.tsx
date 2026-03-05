@@ -70,7 +70,6 @@ function ExternalRedirect({ to }: { to: string }) {
 // ─── Eager-loaded (critical path) ────────────────────────────────────────────
 import Home from "./app/features/dashboard/Home";
 import NotFound from "./app/features/shared/NotFound";
-import SplashScreen from "./app/components/SplashScreen";
 import DashboardLayout from "./app/components/DashboardLayout";
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
@@ -278,21 +277,9 @@ function Router() {
   return <AppRouter />;
 }
 
-// Show splash only once per session
-const SPLASH_KEY = "dashfields-splash-shown";
-
 function App() {
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem(SPLASH_KEY);
-  });
-
-  const handleSplashDone = useCallback(() => {
-    sessionStorage.setItem(SPLASH_KEY, "1");
-    setShowSplash(false);
-  }, []);
-
   return (
-      <ErrorBoundary>
+    <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <DemoModeProvider>
           <ActiveAccountProvider>
@@ -300,7 +287,6 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <DemoBanner />
-                {showSplash && <SplashScreen onDone={handleSplashDone} />}
                 <Router />
               </TooltipProvider>
             </WorkspaceProvider>

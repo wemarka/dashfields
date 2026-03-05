@@ -4,7 +4,7 @@ import { AnalyticsKpiCards } from "@/app/features/analytics/components/Analytics
 import { SpendByCampaignChart } from "@/app/features/analytics/components/SpendByCampaignChart";
 import { CtrCpcChart } from "@/app/features/analytics/components/CtrCpcChart";
 import { ImpressionsClicksChart } from "@/app/features/analytics/components/ImpressionsClicksChart";
-import { DatePresetSelector, type DatePreset } from "@/app/features/dashboard/components/DatePresetSelector";
+import { DatePresetSelector, type DatePreset } from "@/app/components/DatePresetSelector";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import {
