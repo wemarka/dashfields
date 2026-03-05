@@ -449,7 +449,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
   const toggleSection = (path: string) => setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   const [location, setLocation] = useLocation();
-  const { loading, user, signOut } = useAuth();
+  const { loading, user, isAuthenticated, signOut } = useAuth();
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
@@ -509,25 +509,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // ── Unauthenticated ──────────────────────────────────────────────────────
-  if (!user) {
+  // ── Unauthenticated — auto-redirect to /login ────────────────────────────────
+  if (!loading && !isAuthenticated) {
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+      const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/login?returnTo=${returnTo}`;
+    }
     return (
       <div className="app-bg flex h-screen items-center justify-center">
-        <div className="glass-strong rounded-3xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 animate-blur-in">
-          <div className="flex flex-col items-center gap-3">
-            <DashfieldsIcon className="w-16 h-16 text-brand dark:text-white" />
-            <DashfieldsLogoFull className="h-8 w-auto text-brand dark:text-white" />
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-muted-foreground/60 tracking-widest uppercase mb-2">{t("auth.tagline")}</p>
-            <p className="text-sm text-muted-foreground">{t("auth.subtitle")}</p>
-          </div>
-          <a
-            href="/login"
-            className="w-full py-3 px-6 rounded-xl bg-brand text-brand-foreground text-sm font-semibold text-center hover:opacity-90 transition-opacity"
-          >
-            {t("auth.signIn")}
-          </a>
+        <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
+          <DashfieldsIcon className="w-10 h-10 text-brand dark:text-white animate-pulse" />
+          <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
         </div>
       </div>
     );
