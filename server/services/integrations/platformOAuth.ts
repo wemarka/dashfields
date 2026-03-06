@@ -486,7 +486,7 @@ export function registerPlatformOAuthRoutes(app: Express) {
             accessToken: longToken,
             profilePicture: metaUser.picture?.data?.url ?? null,
             accountType: "ad_account",
-            metadata: { currency: account.currency, metaUserId: metaUser.id },
+            metadata: { currency: account.currency, metaUserId: metaUser.id, userProfilePicture: metaUser.picture?.data?.url ?? null },
           });
           fbCount++;
         }

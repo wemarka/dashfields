@@ -1849,3 +1849,8 @@
 - [x] Fetch Facebook Page picture from Meta Graph API for each ad account
 - [x] Store page picture URL in social_accounts table (profile_picture field)
 - [x] Update frontend account selector to display the correct page picture
+
+## 🐛 Fix: Profile picture logic - connected account vs ad accounts
+- [x] Connected Facebook account (parent) should keep user's personal profile picture
+- [x] Ad Accounts should show their business/page profile picture
+- [x] refreshAccountPictures saves userProfilePicture in metadata + updates ad account page pictures

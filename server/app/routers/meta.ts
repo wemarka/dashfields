@@ -574,7 +574,7 @@ export const metaRouter = router({
       // Get all facebook accounts for this user
       let query = sb
         .from("social_accounts")
-        .select("id, platform_account_id, access_token")
+        .select("id, platform_account_id, access_token, metadata")
         .eq("user_id", ctx.user.id)
         .eq("platform", "facebook")
         .eq("is_active", true);
@@ -584,17 +584,38 @@ export const metaRouter = router({
       const { data: accounts } = await query;
       if (!accounts || accounts.length === 0) return { updated: 0 };
 
+      // Fetch the user's personal FB profile picture (same for all ad accounts)
+      let userProfilePicUrl: string | null = null;
+      const firstToken = accounts.find(a => a.access_token)?.access_token;
+      if (firstToken) {
+        try {
+          const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=picture.width(200).height(200)&access_token=${firstToken}`);
+          const meJson = await meRes.json() as { picture?: { data?: { url?: string } } };
+          userProfilePicUrl = meJson.picture?.data?.url ?? null;
+        } catch { /* ignore */ }
+      }
+
       let updated = 0;
       for (const acct of accounts) {
         if (!acct.access_token || !acct.platform_account_id) continue;
         const pictureUrl = await getAdAccountPicture(acct.platform_account_id, acct.access_token);
-        if (pictureUrl) {
-          await sb
-            .from("social_accounts")
-            .update({ profile_picture: pictureUrl, updated_at: new Date().toISOString() })
-            .eq("id", acct.id);
-          updated++;
+        const existingMeta = (acct.metadata ?? {}) as Record<string, unknown>;
+        const updatedMeta = { ...existingMeta };
+        if (userProfilePicUrl) {
+          updatedMeta.userProfilePicture = userProfilePicUrl;
         }
+        const updatePayload: Record<string, unknown> = {
+          metadata: updatedMeta,
+          updated_at: new Date().toISOString(),
+        };
+        if (pictureUrl) {
+          updatePayload.profile_picture = pictureUrl;
+        }
+        await sb
+          .from("social_accounts")
+          .update(updatePayload)
+          .eq("id", acct.id);
+        updated++;
       }
       return { updated };
     }),

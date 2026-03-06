@@ -209,6 +209,8 @@ interface ConnectedAccount {
   platformAccountId: string;
   isActive: boolean;
   profilePicture?: string | null;
+  userProfilePicture?: string | null;
+  accountType?: string | null;
   tokenExpiresAt?: string | null;
   updatedAt?: string | null;
 }
@@ -298,9 +300,9 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
       <div className="flex items-center gap-3 p-4">
         {/* Avatar / Icon */}
         <div className="relative shrink-0">
-          {isConnected && connectedAccounts[0]?.profilePicture ? (
+          {isConnected && (connectedAccounts[0]?.userProfilePicture || connectedAccounts[0]?.profilePicture) ? (
             <img
-              src={connectedAccounts[0].profilePicture}
+              src={connectedAccounts[0].userProfilePicture || connectedAccounts[0].profilePicture!}
               alt={connectedAccounts[0].name ?? platform.name}
               className="w-11 h-11 rounded-xl object-cover"
             />
@@ -610,6 +612,7 @@ export default function Connections() {
   accounts.forEach((acc) => {
     const pid = acc.platform;
     if (!accountsByPlatform[pid]) accountsByPlatform[pid] = [];
+    const metadata = acc.metadata as Record<string, unknown> | null;
     accountsByPlatform[pid].push({
       id:                acc.id,
       platform:          acc.platform,
@@ -618,6 +621,8 @@ export default function Connections() {
       platformAccountId: acc.platform_account_id ?? String(acc.id),
       isActive:          acc.is_active,
       profilePicture:    acc.profile_picture ?? null,
+      userProfilePicture: (metadata?.userProfilePicture as string) ?? null,
+      accountType:       acc.account_type ?? null,
       tokenExpiresAt:    acc.token_expires_at ?? null,
       updatedAt:         acc.updated_at,
     });
