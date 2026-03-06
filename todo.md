@@ -1812,3 +1812,13 @@
 - [ ] Audit: scheduler.ts uses correct Meta API calls
 - [ ] Audit: cron.ts uses correct Meta API calls
 - [ ] Audit: All frontend pages pass workspaceId correctly
+
+## 🐛 Fix: Meta Campaigns Not Loading (Multi-Account Bug)
+- [x] Fix getMetaToken() - replaced .maybeSingle() with .limit(1) to handle multiple Facebook accounts
+- [x] Add getAllMetaTokens() helper to fetch tokens for ALL connected ad accounts
+- [x] Update meta.campaigns endpoint to fetch campaigns from ALL connected accounts (not just first)
+- [x] Update meta.campaignInsights endpoint to aggregate insights from ALL accounts
+- [x] Add accountName + adAccountId fields to campaign data for multi-account identification
+- [x] Update MetaCampaignTable to show account name under campaign name
+- [x] Write meta-multi-account.test.ts (16 tests: ensureActPrefix, token filtering, campaign aggregation, query strategy)
+- [x] All 426 tests passing, 0 TypeScript errors

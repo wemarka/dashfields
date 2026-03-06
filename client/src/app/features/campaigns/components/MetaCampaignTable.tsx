@@ -48,6 +48,8 @@ interface MetaCampaign {
   dailyBudget?: number | null;
   lifetimeBudget?: number | null;
   insights: CampaignInsight | null;
+  accountName?: string;
+  adAccountId?: string;
 }
 
 interface MetaCampaignTableProps {
@@ -185,6 +187,7 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
                   <div className="flex flex-col">
                     <span className="text-sm font-medium max-w-[180px] truncate" title={c.name}>{c.name}</span>
                     <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
+                    {c.accountName && <span className="text-[10px] text-blue-400">{c.accountName}</span>}
                   </div>
                 </td>
                 <td className="px-4 py-3.5">

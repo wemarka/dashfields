@@ -41,9 +41,34 @@ async function getMetaToken(
     query = query.eq("id", accountId);
   }
 
-  const { data } = await query.maybeSingle();
-  if (!data?.access_token || !data?.platform_account_id) return null;
-  return { token: data.access_token, adAccountId: data.platform_account_id };
+  const { data } = await query.order("id", { ascending: true }).limit(1);
+  const first = data?.[0];
+  if (!first?.access_token || !first?.platform_account_id) return null;
+  return { token: first.access_token, adAccountId: first.platform_account_id };
+}
+
+// Helper: get ALL Meta tokens for a user (for aggregate queries across all ad accounts)
+async function getAllMetaTokens(
+  userId: number,
+  workspaceId?: number | null
+): Promise<{ token: string; adAccountId: string; name: string }[]> {
+  const sb = getSupabase();
+  let query = sb
+    .from("social_accounts")
+    .select("access_token, platform_account_id, name")
+    .eq("user_id", userId)
+    .eq("platform", "facebook")
+    .eq("is_active", true);
+
+  if (workspaceId != null) {
+    query = query.eq("workspace_id", workspaceId);
+  }
+
+  const { data } = await query.order("id", { ascending: true });
+  if (!data || data.length === 0) return [];
+  return data
+    .filter(d => d.access_token && d.platform_account_id)
+    .map(d => ({ token: d.access_token, adAccountId: d.platform_account_id, name: d.name ?? "" }));
 }
 
 // ─── Meta Router ─────────────────────────────────────────────────────────────
@@ -237,7 +262,7 @@ export const metaRouter = router({
       return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
     }),
 
-  /** Get campaign-level insights */
+  /** Get campaign-level insights from ALL connected ad accounts */
   campaignInsights: protectedProcedure
     .input(z.object({
       datePreset: z.enum([
@@ -249,22 +274,52 @@ export const metaRouter = router({
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return [];
-      const insights = await getCampaignInsights(
-        conn.adAccountId, conn.token, input.datePreset, input.limit
+      // If specific account requested, use single token
+      if (input.accountId) {
+        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+        if (!conn) return [];
+        const insights = await getCampaignInsights(
+          conn.adAccountId, conn.token, input.datePreset, input.limit
+        );
+        return insights.map(d => ({
+          campaignId:   d.campaign_id ?? "",
+          campaignName: d.campaign_name ?? "Unknown",
+          impressions:  Number(d.impressions ?? 0),
+          reach:        Number(d.reach ?? 0),
+          clicks:       Number(d.clicks ?? 0),
+          spend:        Number(d.spend ?? 0),
+          ctr:          Number(d.ctr ?? 0),
+          cpc:          Number(d.cpc ?? 0),
+          cpm:          Number(d.cpm ?? 0),
+        }));
+      }
+
+      // Otherwise, fetch from ALL connected accounts
+      const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
+      if (allConns.length === 0) return [];
+
+      const results = await Promise.allSettled(
+        allConns.map(async (conn) => {
+          const insights = await getCampaignInsights(
+            conn.adAccountId, conn.token, input.datePreset, input.limit
+          );
+          return insights.map(d => ({
+            campaignId:   d.campaign_id ?? "",
+            campaignName: d.campaign_name ?? "Unknown",
+            impressions:  Number(d.impressions ?? 0),
+            reach:        Number(d.reach ?? 0),
+            clicks:       Number(d.clicks ?? 0),
+            spend:        Number(d.spend ?? 0),
+            ctr:          Number(d.ctr ?? 0),
+            cpc:          Number(d.cpc ?? 0),
+            cpm:          Number(d.cpm ?? 0),
+          }));
+        })
       );
-      return insights.map(d => ({
-        campaignId:   d.campaign_id ?? "",
-        campaignName: d.campaign_name ?? "Unknown",
-        impressions:  Number(d.impressions ?? 0),
-        reach:        Number(d.reach ?? 0),
-        clicks:       Number(d.clicks ?? 0),
-        spend:        Number(d.spend ?? 0),
-        ctr:          Number(d.ctr ?? 0),
-        cpc:          Number(d.cpc ?? 0),
-        cpm:          Number(d.cpm ?? 0),
-      }));
+
+      return results
+        .filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled")
+        .flatMap(r => r.value);
     }),
 
   /** Get daily breakdown for a specific campaign */
@@ -295,23 +350,34 @@ export const metaRouter = router({
       }));
     }),
 
-  /** Get campaigns list from Meta */
+  /** Get campaigns list from ALL connected Meta ad accounts */
   campaigns: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(50).default(20), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
-      if (!conn) return [];
-      const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
-      return campaigns.map(c => ({
-        id:             c.id,
-        name:           c.name,
-        status:         c.effective_status ?? c.status,
-        objective:      c.objective,
-        dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
-        lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
-        startTime:      c.start_time,
-        stopTime:       c.stop_time,
-      }));
+      const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
+      if (allConns.length === 0) return [];
+
+      const results = await Promise.allSettled(
+        allConns.map(async (conn) => {
+          const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
+          return campaigns.map(c => ({
+            id:             c.id,
+            name:           c.name,
+            status:         c.effective_status ?? c.status,
+            objective:      c.objective,
+            dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
+            lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
+            startTime:      c.start_time,
+            stopTime:       c.stop_time,
+            accountName:    conn.name,
+            adAccountId:    conn.adAccountId,
+          }));
+        })
+      );
+
+      return results
+        .filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled")
+        .flatMap(r => r.value);
     }),
 
   /** Create a new campaign in Meta Ads */
