@@ -219,9 +219,10 @@ interface PlatformCardProps {
   onConnect: () => void;
   onDisconnect: (id: number) => void;
   isDisconnecting: boolean;
+  workspaceId?: number;
 }
 
-function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, isDisconnecting }: PlatformCardProps) {
+function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, isDisconnecting, workspaceId }: PlatformCardProps) {
   const { i18n } = useTranslation();
   const platform    = getPlatform(platformId);
   const isConnected = connectedAccounts.length > 0;
@@ -238,7 +239,8 @@ function PlatformCard({ platformId, connectedAccounts, onConnect, onDisconnect, 
     const origin      = window.location.origin;
     const returnPath  = "/connections";
     const initPath    = platform.oauthInitPath ?? `/api/oauth/${platformId}/init`;
-    const oauthUrl    = `${origin}${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}`;
+    const wsId        = workspaceId ?? "";
+    const oauthUrl    = `${origin}${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}${wsId ? `&workspaceId=${wsId}` : ""}`;
 
     // Open in a new tab/window to avoid iframe restrictions (Facebook blocks login in iframes)
     const popup = window.open(oauthUrl, `oauth_${platformId}`, "width=600,height=700,scrollbars=yes,resizable=yes");
@@ -760,6 +762,7 @@ export default function Connections() {
                       }}
                       onDisconnect={(id) => disconnectMutation.mutate({ id })}
                       isDisconnecting={disconnectMutation.isPending}
+                      workspaceId={activeWorkspace?.id}
                     />
                   ))}
                 </div>
@@ -786,6 +789,7 @@ export default function Connections() {
                     }}
                     onDisconnect={() => {}}
                     isDisconnecting={false}
+                    workspaceId={activeWorkspace?.id}
                   />
                 ))}
               </div>
