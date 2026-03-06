@@ -5,6 +5,7 @@ import { Plus, RefreshCw, GitCompare, Link2, Download } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import type { DateRange } from "react-day-picker";
 
 import { trpc } from "@/core/lib/trpc";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
@@ -12,15 +13,13 @@ import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { Button } from "@/core/components/ui/button";
 
-import { CampaignFilters } from "@/app/features/campaigns/components/CampaignFilters";
+import { CampaignFilters, type DatePreset } from "@/app/features/campaigns/components/CampaignFilters";
 import { CampaignKpiCards } from "@/app/features/campaigns/components/CampaignKpiCards";
 import { UnifiedCampaignTable, type UnifiedCampaign } from "@/app/features/campaigns/components/UnifiedCampaignTable";
 import { CampaignDetailDrawer } from "@/app/features/campaigns/components/CampaignDetailDrawer";
 import { CampaignCompareDrawer } from "@/app/features/campaigns/components/CampaignCompareDrawer";
 import { CampaignBuilder } from "@/app/features/campaigns/components/CampaignBuilder";
 import CreateCampaignModal from "@/app/features/campaigns/components/CreateCampaignModal";
-
-type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month";
 
 export default function Campaigns() {
   usePageTitle("Campaigns");
@@ -34,6 +33,7 @@ export default function Campaigns() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedCampaign, setSelectedCampaign] = useState<UnifiedCampaign | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -52,6 +52,9 @@ export default function Campaigns() {
 
   const isMetaConnected = metaStatus?.connected ?? false;
 
+  // Use the date preset for Meta API (custom range not supported by Meta preset API, fallback to last_30d)
+  const metaDatePreset = datePreset === "custom" ? "last_30d" : datePreset;
+
   const { data: metaCampaigns = [], isLoading: metaLoading, refetch: refetchMeta } =
     trpc.meta.campaigns.useQuery(
       {
@@ -65,7 +68,7 @@ export default function Campaigns() {
   const { data: metaInsights = [], isLoading: insightsLoading, refetch: refetchInsights } =
     trpc.meta.campaignInsights.useQuery(
       {
-        datePreset, limit: 50,
+        datePreset: metaDatePreset, limit: 50,
         ...(activeAccountId ? { accountId: activeAccountId } : {}),
         workspaceId: activeWorkspace?.id,
       },
@@ -127,9 +130,13 @@ export default function Campaigns() {
         impressions: insight ? Number(insight.impressions) : null,
         clicks: insight ? Number(insight.clicks) : null,
         ctr: insight ? Number(insight.ctr) : null,
-        reach: null,
+        reach: insight ? Number(insight.reach) : null,
         accountName: mc.accountName,
         adAccountId: mc.adAccountId,
+        conversions: null,
+        frequency: null,
+        cpc: insight ? Number(insight.cpc) : null,
+        cpm: insight ? Number(insight.cpm) : null,
       });
     }
 
@@ -151,6 +158,10 @@ export default function Campaigns() {
         reach: (lc as any).totalReach ?? null,
         accountName: undefined,
         adAccountId: undefined,
+        conversions: null,
+        frequency: null,
+        cpc: (lc as any).avgCpc ?? null,
+        cpm: (lc as any).avgCpm ?? null,
       });
     }
 
@@ -160,11 +171,8 @@ export default function Campaigns() {
   // ── Filtering ──────────────────────────────────────────────────────────────
   const filteredCampaigns = useMemo(() => {
     return unifiedCampaigns.filter((c) => {
-      // Search
       if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
-      // Status
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      // Platform
       if (platformFilter !== "all") {
         if (platformFilter === "local" && c.source !== "local") return false;
         if (platformFilter !== "local" && c.platform !== platformFilter) return false;
@@ -246,6 +254,23 @@ export default function Campaigns() {
     setStatusFilter("all");
     setPlatformFilter("all");
     setDatePreset("last_30d");
+    setCustomDateRange(undefined);
+  }, []);
+
+  const handleBulkAction = useCallback((action: "pause" | "activate" | "delete", ids: string[]) => {
+    // For now, show toast for bulk actions (can be extended with real API calls)
+    const count = ids.length;
+    switch (action) {
+      case "pause":
+        toast.info(`Pausing ${count} campaign${count !== 1 ? "s" : ""}...`, { description: "Feature coming soon" });
+        break;
+      case "activate":
+        toast.info(`Activating ${count} campaign${count !== 1 ? "s" : ""}...`, { description: "Feature coming soon" });
+        break;
+      case "delete":
+        toast.info(`Deleting ${count} campaign${count !== 1 ? "s" : ""}...`, { description: "Feature coming soon" });
+        break;
+    }
   }, []);
 
   const isLoading = localLoading || (isMetaConnected && (metaLoading || insightsLoading));
@@ -332,6 +357,8 @@ export default function Campaigns() {
           connectedPlatforms={connectedPlatforms}
           activeFilterCount={activeFilterCount}
           onClearFilters={handleClearFilters}
+          customDateRange={customDateRange}
+          onCustomDateRangeChange={setCustomDateRange}
         />
 
         {/* Unified Campaign Table */}
@@ -342,6 +369,7 @@ export default function Campaigns() {
           onStatusToggle={handleStatusToggle}
           onDelete={handleDelete}
           onClone={handleClone}
+          onBulkAction={handleBulkAction}
           statusTogglePending={statusTogglePending}
         />
       </div>

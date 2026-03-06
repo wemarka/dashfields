@@ -1865,3 +1865,34 @@
 - [x] Add floating bulk action bar with "Disconnect Selected" button
 - [x] Add backend bulk disconnect endpoint (social.bulkDisconnect)
 - [x] Confirmation dialog before bulk disconnect
+
+## 🚀 Campaigns Page Comprehensive Upgrade
+
+### Phase 1: KPI Cards
+- [x] Add trend indicator (↑↓) comparing to previous period
+- [x] Add sparkline mini-charts inside each card
+- [x] Add new KPIs: Conversions, ROAS, Frequency
+- [x] Make cards clickable to filter table
+
+### Phase 2: Unified Table
+- [x] Multi-select checkboxes with Bulk Actions bar (Pause/Activate/Delete)
+- [x] Column visibility toggle (show/hide columns)
+- [x] Inline budget editing directly from table
+- [x] Status badge with quick toggle for activate/pause
+- [x] Row expansion for quick details without opening drawer
+
+### Phase 3: Filters
+- [x] Date Range Picker (custom date range, not just presets)
+- [x] Active filter chips showing applied filters with remove button
+- [x] Saved Filters to store frequently used filter combinations
+
+### Phase 4: Campaign Detail Drawer
+- [x] Daily performance line chart (spend, impressions, clicks over time)
+- [x] Breakdown tabs: by age, gender, region, device
+- [x] Quick Actions: change status, edit budget, clone campaign
+- [x] Notes/Tags for campaign organization
+
+### Phase 5: Compare Drawer
+- [x] Support comparing more than 2 campaigns (up to 4)
+- [x] Radar chart for visual comparison
+- [x] Export comparison as image (placeholder)

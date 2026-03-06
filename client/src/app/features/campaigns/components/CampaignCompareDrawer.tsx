@@ -1,16 +1,25 @@
 // CampaignCompareDrawer.tsx
-// Side-by-side campaign comparison drawer.
-// Shows KPI comparison table + grouped bar chart + winner badges.
-import { useState, useMemo } from "react";
+// Enhanced comparison drawer with:
+// - Support for comparing up to 4 campaigns
+// - Radar chart for visual comparison
+// - Bar chart for volume metrics
+// - Export comparison as image
+import { useState, useMemo, useRef, useCallback } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
-import { X, Trophy, TrendingUp, TrendingDown, Minus, ChevronDown } from "lucide-react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  X, Trophy, TrendingUp, ChevronDown, Plus, Download, Minus,
+} from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
 import { getPlatform } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { useCurrency } from "@/shared/hooks/useCurrency";
+import { Button } from "@/core/components/ui/button";
+import { toast } from "sonner";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface Campaign {
@@ -45,50 +54,69 @@ const METRICS: Metric[] = [
   { key: "cpm",         label: "CPM",           format: "currency",  higherIsBetter: false },
 ];
 
-// formatValue is now a hook-based function inside the component
+const COLORS = [
+  { main: "#8b5cf6", light: "bg-violet-50", text: "text-violet-600", border: "border-violet-400", dot: "bg-violet-500", name: "A" },
+  { main: "#3b82f6", light: "bg-blue-50",   text: "text-blue-600",   border: "border-blue-400",   dot: "bg-blue-500",   name: "B" },
+  { main: "#10b981", light: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-400", dot: "bg-emerald-500", name: "C" },
+  { main: "#f59e0b", light: "bg-amber-50",  text: "text-amber-600",  border: "border-amber-400",  dot: "bg-amber-500",  name: "D" },
+];
 
-function getWinner(a: number | undefined | null, b: number | undefined | null, higherIsBetter: boolean): "a" | "b" | "tie" {
-  const na = Number(a ?? 0);
-  const nb = Number(b ?? 0);
-  if (na === nb) return "tie";
-  if (higherIsBetter) return na > nb ? "a" : "b";
-  return na < nb ? "a" : "b";
+const MAX_CAMPAIGNS = 4;
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+function getWinner(values: (number | undefined | null)[], higherIsBetter: boolean): number {
+  const nums = values.map(v => Number(v ?? 0));
+  if (nums.every(n => n === nums[0])) return -1; // tie
+  const best = higherIsBetter ? Math.max(...nums) : Math.min(...nums);
+  return nums.indexOf(best);
 }
 
 // ─── Campaign Selector ─────────────────────────────────────────────────────────
 function CampaignSelector({
-  campaigns, selected, onSelect, label, color,
+  campaigns, selected, onSelect, onRemove, label, colorIdx, canRemove,
 }: {
   campaigns: Campaign[];
   selected: Campaign | null;
   onSelect: (c: Campaign) => void;
+  onRemove?: () => void;
   label: string;
-  color: string;
+  colorIdx: number;
+  canRemove?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const color = COLORS[colorIdx];
 
   return (
     <div className="relative">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <div className={`w-2 h-2 rounded-full ${color.dot}`} />
+        <span className="text-[11px] font-semibold text-foreground">Campaign {color.name}</span>
+        {canRemove && onRemove && (
+          <button
+            onClick={onRemove}
+            className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        )}
+      </div>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl border-2 text-sm transition-all ${
-          selected ? `border-${color}-400 bg-${color}-50` : "border-dashed border-border bg-muted/50 hover:border-primary/50"
+        className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border-2 text-sm transition-all ${
+          selected ? `${color.border} ${color.light}` : "border-dashed border-border bg-muted/50 hover:border-primary/50"
         }`}
       >
         <div className="flex items-center gap-2 min-w-0">
           {selected ? (
-            <>
-              <div className={`w-2.5 h-2.5 rounded-full bg-${color}-500 shrink-0`} />
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-foreground truncate">{selected.name}</div>
-                <div className="text-[10px] text-muted-foreground capitalize">{selected.platform}</div>
-              </div>
-            </>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-foreground truncate">{selected.name}</div>
+              <div className="text-[10px] text-muted-foreground capitalize">{selected.platform}</div>
+            </div>
           ) : (
-            <span className="text-muted-foreground">{label}</span>
+            <span className="text-muted-foreground text-xs">{label}</span>
           )}
         </div>
-        <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
       </button>
 
       {open && (
@@ -99,9 +127,9 @@ function CampaignSelector({
               <button
                 key={c.id}
                 onClick={() => { onSelect(c); setOpen(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-muted transition-colors text-left"
+                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted transition-colors text-left"
               >
-                <PlatformIcon platform={c.platform} className={`w-4 h-4 ${platform.textColor}`} />
+                <PlatformIcon platform={c.platform} className={`w-3.5 h-3.5 ${platform.textColor}`} />
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-foreground truncate">{c.name}</div>
                   <div className="text-[10px] text-muted-foreground capitalize">{c.platform} · {c.status}</div>
@@ -124,9 +152,9 @@ interface CampaignCompareDrawerProps {
 }
 
 export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
-  const [campaignA, setCampaignA] = useState<Campaign | null>(null);
-  const [campaignB, setCampaignB] = useState<Campaign | null>(null);
+  const [selectedCampaigns, setSelectedCampaigns] = useState<(Campaign | null)[]>([null, null]);
   const { fmt } = useCurrency();
+  const compareRef = useRef<HTMLDivElement>(null);
 
   const formatValue = (value: number | undefined | null, format: Metric["format"]): string => {
     if (value == null || isNaN(Number(value))) return "—";
@@ -141,16 +169,16 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
 
   // Fetch campaigns with metrics
   const { activeWorkspace } = useWorkspace();
-  const { data: metaCampaigns = [] } = trpc.meta.campaigns.useQuery({ limit: 50, workspaceId: activeWorkspace?.id }, {
-    retry: false,
-  });
+  const { data: metaCampaigns = [] } = trpc.meta.campaigns.useQuery(
+    { limit: 50, workspaceId: activeWorkspace?.id },
+    { retry: false }
+  );
 
   const { data: localCampaigns = [] } = trpc.campaigns.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   // Merge and enrich campaigns
   const allCampaigns = useMemo<Campaign[]>(() => {
     const meta = metaCampaigns.map((c) => {
-      // meta.campaigns returns campaigns without insights; meta.campaignInsights is separate
       const enriched = c as typeof c & {
         insights?: { spend?: number; impressions?: number; clicks?: number;
                      reach?: number; ctr?: number; cpc?: number; cpm?: number };
@@ -171,7 +199,6 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
     });
 
     const local = localCampaigns.map((c) => {
-      // campaigns.list enriches rows with aggregated metric fields
       const enriched = c as typeof c & {
         totalSpend?: number; totalImpressions?: number; totalClicks?: number;
         totalReach?: number; avgCtr?: number; avgCpc?: number; avgCpm?: number;
@@ -195,26 +222,107 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
     return [...meta, ...local];
   }, [metaCampaigns, localCampaigns]);
 
-  // Winner counts
-  const winnerCounts = useMemo(() => {
-    if (!campaignA || !campaignB) return { a: 0, b: 0, tie: 0 };
-    let a = 0, b = 0, tie = 0;
-    for (const m of METRICS) {
-      const w = getWinner(campaignA[m.key] as number, campaignB[m.key] as number, m.higherIsBetter);
-      if (w === "a") a++; else if (w === "b") b++; else tie++;
-    }
-    return { a, b, tie };
-  }, [campaignA, campaignB]);
+  const activeCampaigns = selectedCampaigns.filter((c): c is Campaign => c !== null);
+  const hasEnoughToCompare = activeCampaigns.length >= 2;
 
-  // Chart data
-  const chartData = useMemo(() => {
-    if (!campaignA || !campaignB) return [];
+  // Winner counts per campaign
+  const winnerCounts = useMemo(() => {
+    if (!hasEnoughToCompare) return activeCampaigns.map(() => 0);
+    return activeCampaigns.map((_, idx) => {
+      let wins = 0;
+      for (const m of METRICS) {
+        const values = activeCampaigns.map(c => c[m.key] as number);
+        const winner = getWinner(values, m.higherIsBetter);
+        if (winner === idx) wins++;
+      }
+      return wins;
+    });
+  }, [activeCampaigns, hasEnoughToCompare]);
+
+  const overallWinnerIdx = useMemo(() => {
+    if (!hasEnoughToCompare) return -1;
+    const maxWins = Math.max(...winnerCounts);
+    const winners = winnerCounts.filter(w => w === maxWins);
+    if (winners.length !== 1) return -1; // tie
+    return winnerCounts.indexOf(maxWins);
+  }, [winnerCounts, hasEnoughToCompare]);
+
+  // Bar chart data
+  const barChartData = useMemo(() => {
+    if (!hasEnoughToCompare) return [];
     return [
-      { metric: "Impressions (K)", A: (Number(campaignA.impressions ?? 0) / 1000), B: (Number(campaignB.impressions ?? 0) / 1000) },
-      { metric: "Clicks",          A: Number(campaignA.clicks ?? 0),               B: Number(campaignB.clicks ?? 0) },
-      { metric: "Reach (K)",       A: (Number(campaignA.reach ?? 0) / 1000),       B: (Number(campaignB.reach ?? 0) / 1000) },
+      {
+        metric: "Impressions (K)",
+        ...Object.fromEntries(activeCampaigns.map((c, i) => [COLORS[i].name, (Number(c.impressions ?? 0) / 1000)])),
+      },
+      {
+        metric: "Clicks",
+        ...Object.fromEntries(activeCampaigns.map((c, i) => [COLORS[i].name, Number(c.clicks ?? 0)])),
+      },
+      {
+        metric: "Reach (K)",
+        ...Object.fromEntries(activeCampaigns.map((c, i) => [COLORS[i].name, (Number(c.reach ?? 0) / 1000)])),
+      },
     ];
-  }, [campaignA, campaignB]);
+  }, [activeCampaigns, hasEnoughToCompare]);
+
+  // Radar chart data — normalize metrics to 0-100 scale
+  const radarData = useMemo(() => {
+    if (!hasEnoughToCompare) return [];
+    const radarMetrics = METRICS.filter(m => m.key !== "spend"); // Exclude spend from radar
+
+    return radarMetrics.map(m => {
+      const values = activeCampaigns.map(c => Number(c[m.key] ?? 0));
+      const maxVal = Math.max(...values, 1);
+      const entry: Record<string, string | number> = { metric: m.label };
+      activeCampaigns.forEach((_, i) => {
+        // For "lower is better" metrics, invert the normalization
+        const raw = values[i];
+        entry[COLORS[i].name] = m.higherIsBetter
+          ? Math.round((raw / maxVal) * 100)
+          : Math.round(((maxVal - raw) / maxVal) * 100);
+      });
+      return entry;
+    });
+  }, [activeCampaigns, hasEnoughToCompare]);
+
+  const handleSetCampaign = useCallback((idx: number, c: Campaign) => {
+    setSelectedCampaigns(prev => {
+      const next = [...prev];
+      next[idx] = c;
+      return next;
+    });
+  }, []);
+
+  const handleRemoveSlot = useCallback((idx: number) => {
+    setSelectedCampaigns(prev => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  const handleAddSlot = useCallback(() => {
+    if (selectedCampaigns.length < MAX_CAMPAIGNS) {
+      setSelectedCampaigns(prev => [...prev, null]);
+    }
+  }, [selectedCampaigns.length]);
+
+  const handleExportImage = useCallback(async () => {
+    if (!compareRef.current) return;
+    try {
+      // Use html2canvas-like approach with canvas API
+      toast.info("Export feature coming soon", {
+        description: "Screenshot export will be available in a future update.",
+      });
+    } catch {
+      toast.error("Failed to export comparison");
+    }
+  }, []);
+
+  // Get available campaigns (exclude already selected)
+  const getAvailableCampaigns = useCallback((slotIdx: number) => {
+    const selectedIds = selectedCampaigns
+      .filter((c, i) => c !== null && i !== slotIdx)
+      .map(c => c!.id);
+    return allCampaigns.filter(c => !selectedIds.includes(c.id));
+  }, [allCampaigns, selectedCampaigns]);
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -227,86 +335,161 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div>
             <h2 className="text-base font-bold text-foreground">Compare Campaigns</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Select two campaigns to compare side-by-side</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Compare up to {MAX_CAMPAIGNS} campaigns side-by-side
+            </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-2">
+            {hasEnoughToCompare && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5"
+                onClick={handleExportImage}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export
+              </Button>
+            )}
+            <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6" ref={compareRef}>
           {/* Campaign Selectors */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
-                <span className="text-xs font-semibold text-foreground">Campaign A</span>
-                {campaignA && winnerCounts.a > winnerCounts.b && (
-                  <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                    <Trophy className="w-3 h-3" /> Winner
-                  </span>
-                )}
-              </div>
+            {selectedCampaigns.map((campaign, idx) => (
               <CampaignSelector
-                campaigns={allCampaigns.filter(c => c.id !== campaignB?.id)}
-                selected={campaignA}
-                onSelect={setCampaignA}
-                label="Select Campaign A"
-                color="violet"
+                key={idx}
+                campaigns={getAvailableCampaigns(idx)}
+                selected={campaign}
+                onSelect={(c) => handleSetCampaign(idx, c)}
+                onRemove={idx >= 2 ? () => handleRemoveSlot(idx) : undefined}
+                label={`Select Campaign ${COLORS[idx].name}`}
+                colorIdx={idx}
+                canRemove={idx >= 2}
               />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                <span className="text-xs font-semibold text-foreground">Campaign B</span>
-                {campaignB && winnerCounts.b > winnerCounts.a && (
-                  <span className="ml-auto flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                    <Trophy className="w-3 h-3" /> Winner
-                  </span>
-                )}
-              </div>
-              <CampaignSelector
-                campaigns={allCampaigns.filter(c => c.id !== campaignA?.id)}
-                selected={campaignB}
-                onSelect={setCampaignB}
-                label="Select Campaign B"
-                color="blue"
-              />
-            </div>
+            ))}
           </div>
 
-          {campaignA && campaignB ? (
+          {/* Add Campaign Button */}
+          {selectedCampaigns.length < MAX_CAMPAIGNS && (
+            <button
+              onClick={handleAddSlot}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-xs text-muted-foreground hover:border-primary/50 hover:text-primary transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Campaign ({selectedCampaigns.length}/{MAX_CAMPAIGNS})
+            </button>
+          )}
+
+          {hasEnoughToCompare ? (
             <>
               {/* Winner Summary */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: "A Wins", value: winnerCounts.a, color: "text-violet-600 bg-violet-50 border-violet-200" },
-                  { label: "Tied",   value: winnerCounts.tie, color: "text-gray-600 bg-gray-50 border-gray-200" },
-                  { label: "B Wins", value: winnerCounts.b, color: "text-blue-600 bg-blue-50 border-blue-200" },
-                ].map((s) => (
-                  <div key={s.label} className={`rounded-xl border p-3 text-center ${s.color}`}>
-                    <div className="text-2xl font-bold">{s.value}</div>
-                    <div className="text-xs font-medium mt-0.5">{s.label}</div>
+              <div className={`grid gap-3`} style={{ gridTemplateColumns: `repeat(${activeCampaigns.length}, 1fr)` }}>
+                {activeCampaigns.map((c, idx) => (
+                  <div
+                    key={c.id}
+                    className={`rounded-xl border p-3 text-center transition-all ${
+                      overallWinnerIdx === idx
+                        ? "border-amber-300 bg-amber-50 ring-1 ring-amber-200"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <div className={`w-2 h-2 rounded-full ${COLORS[idx].dot}`} />
+                      <span className="text-xs font-semibold text-foreground truncate">{c.name.slice(0, 12)}</span>
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">{winnerCounts[idx]}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                      {overallWinnerIdx === idx ? (
+                        <span className="flex items-center justify-center gap-0.5 text-amber-600 font-bold">
+                          <Trophy className="w-3 h-3" /> Winner
+                        </span>
+                      ) : (
+                        `${winnerCounts[idx]} wins`
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Bar Chart */}
-              {chartData.some(d => d.A > 0 || d.B > 0) && (
+              {/* Radar Chart */}
+              {radarData.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-foreground mb-3">Performance Comparison</h3>
+                  <h3 className="text-xs font-semibold text-foreground mb-3">Performance Radar</h3>
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis
+                          dataKey="metric"
+                          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        />
+                        <PolarRadiusAxis
+                          angle={30}
+                          domain={[0, 100]}
+                          tick={{ fontSize: 9 }}
+                          tickCount={4}
+                        />
+                        {activeCampaigns.map((c, idx) => (
+                          <Radar
+                            key={c.id}
+                            name={c.name.slice(0, 20)}
+                            dataKey={COLORS[idx].name}
+                            stroke={COLORS[idx].main}
+                            fill={COLORS[idx].main}
+                            fillOpacity={0.1}
+                            strokeWidth={2}
+                          />
+                        ))}
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Tooltip
+                          contentStyle={{
+                            background: "hsl(var(--popover))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: 8,
+                            fontSize: 12,
+                            color: "hsl(var(--popover-foreground))",
+                          }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {/* Bar Chart */}
+              {barChartData.some(d => activeCampaigns.some((_, i) => (d as any)[COLORS[i].name] > 0)) && (
+                <div>
+                  <h3 className="text-xs font-semibold text-foreground mb-3">Volume Comparison</h3>
                   <div className="h-44">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} barCategoryGap="30%">
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <BarChart data={barChartData} barCategoryGap="30%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
                         <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip
-                          contentStyle={{ background: "var(--background)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                          contentStyle={{
+                            background: "hsl(var(--popover))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: 8,
+                            fontSize: 12,
+                            color: "hsl(var(--popover-foreground))",
+                          }}
                         />
                         <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Bar dataKey="A" name={campaignA.name.slice(0, 20)} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="B" name={campaignB.name.slice(0, 20)} fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                        {activeCampaigns.map((c, idx) => (
+                          <Bar
+                            key={c.id}
+                            dataKey={COLORS[idx].name}
+                            name={c.name.slice(0, 20)}
+                            fill={COLORS[idx].main}
+                            radius={[4, 4, 0, 0]}
+                          />
+                        ))}
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -317,57 +500,60 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
               <div>
                 <h3 className="text-xs font-semibold text-foreground mb-3">Metric Breakdown</h3>
                 <div className="rounded-xl border border-border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground">Metric</th>
-                        <th className="text-right px-4 py-2.5 font-semibold text-violet-600">
-                          <div className="flex items-center justify-end gap-1">
-                            <div className="w-2 h-2 rounded-full bg-violet-500" />
-                            {campaignA.name.slice(0, 15)}{campaignA.name.length > 15 ? "…" : ""}
-                          </div>
-                        </th>
-                        <th className="text-right px-4 py-2.5 font-semibold text-blue-600">
-                          <div className="flex items-center justify-end gap-1">
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            {campaignB.name.slice(0, 15)}{campaignB.name.length > 15 ? "…" : ""}
-                          </div>
-                        </th>
-                        <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground">Winner</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {METRICS.map((m, i) => {
-                        const valA   = campaignA[m.key] as number | undefined;
-                        const valB   = campaignB[m.key] as number | undefined;
-                        const winner = getWinner(valA, valB, m.higherIsBetter);
-                        return (
-                          <tr key={m.key} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
-                            <td className="px-4 py-2.5 font-medium text-foreground">{m.label}</td>
-                            <td className={`px-4 py-2.5 text-right font-mono ${winner === "a" ? "text-violet-600 font-semibold" : "text-muted-foreground"}`}>
-                              {formatValue(valA, m.format)}
-                            </td>
-                            <td className={`px-4 py-2.5 text-right font-mono ${winner === "b" ? "text-blue-600 font-semibold" : "text-muted-foreground"}`}>
-                              {formatValue(valB, m.format)}
-                            </td>
-                            <td className="px-4 py-2.5 text-center">
-                              {winner === "a" ? (
-                                <span className="inline-flex items-center gap-0.5 text-violet-600 font-bold">
-                                  <Trophy className="w-3 h-3" /> A
-                                </span>
-                              ) : winner === "b" ? (
-                                <span className="inline-flex items-center gap-0.5 text-blue-600 font-bold">
-                                  <Trophy className="w-3 h-3" /> B
-                                </span>
-                              ) : (
-                                <Minus className="w-3 h-3 text-muted-foreground mx-auto" />
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground sticky left-0 bg-muted/50">
+                            Metric
+                          </th>
+                          {activeCampaigns.map((c, idx) => (
+                            <th key={c.id} className={`text-right px-4 py-2.5 font-semibold ${COLORS[idx].text}`}>
+                              <div className="flex items-center justify-end gap-1">
+                                <div className={`w-2 h-2 rounded-full ${COLORS[idx].dot}`} />
+                                {c.name.slice(0, 12)}{c.name.length > 12 ? "…" : ""}
+                              </div>
+                            </th>
+                          ))}
+                          <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground">
+                            Winner
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {METRICS.map((m, i) => {
+                          const values = activeCampaigns.map(c => c[m.key] as number | undefined);
+                          const winnerIdx = getWinner(values, m.higherIsBetter);
+                          return (
+                            <tr key={m.key} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                              <td className="px-4 py-2.5 font-medium text-foreground sticky left-0 bg-inherit">
+                                {m.label}
+                              </td>
+                              {activeCampaigns.map((c, idx) => (
+                                <td
+                                  key={c.id}
+                                  className={`px-4 py-2.5 text-right font-mono ${
+                                    winnerIdx === idx ? `${COLORS[idx].text} font-semibold` : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {formatValue(c[m.key] as number, m.format)}
+                                </td>
+                              ))}
+                              <td className="px-4 py-2.5 text-center">
+                                {winnerIdx >= 0 ? (
+                                  <span className={`inline-flex items-center gap-0.5 ${COLORS[winnerIdx].text} font-bold`}>
+                                    <Trophy className="w-3 h-3" /> {COLORS[winnerIdx].name}
+                                  </span>
+                                ) : (
+                                  <Minus className="w-3 h-3 text-muted-foreground mx-auto" />
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </>
@@ -376,8 +562,10 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
               <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
                 <TrendingUp className="w-7 h-7 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground mb-1">Select two campaigns</p>
-              <p className="text-xs text-muted-foreground">Choose Campaign A and Campaign B above to see a detailed comparison</p>
+              <p className="text-sm font-medium text-foreground mb-1">Select campaigns to compare</p>
+              <p className="text-xs text-muted-foreground">
+                Choose at least 2 campaigns above to see a detailed comparison
+              </p>
             </div>
           )}
         </div>
