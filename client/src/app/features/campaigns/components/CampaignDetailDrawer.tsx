@@ -340,11 +340,13 @@ function AdSetCard({
     g === 1 ? "Male" : g === 2 ? "Female" : "All"
   );
 
-  const platforms = adset.targeting?.publisherPlatforms ?? [];
-  const positions = [
+  const platforms = Array.from(new Set(adset.targeting?.publisherPlatforms ?? []));
+  // Deduplicate positions: facebook and instagram may share values like 'story'
+  const rawPositions = [
     ...(adset.targeting?.facebookPositions ?? []),
     ...(adset.targeting?.instagramPositions ?? []),
   ];
+  const positions = Array.from(new Set(rawPositions));
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden transition-all">
@@ -438,8 +440,8 @@ function AdSetCard({
                     {p}
                   </Badge>
                 ))}
-                {positions.map(p => (
-                  <Badge key={p} variant="outline" className="text-[10px] capitalize">
+                {positions.map((p, idx) => (
+                  <Badge key={`position-${p}-${idx}`} variant="outline" className="text-[10px] capitalize">
                     {p.replace(/_/g, " ")}
                   </Badge>
                 ))}
