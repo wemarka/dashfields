@@ -89,6 +89,20 @@ export const socialRouter = router({
       return { success: true };
     }),
 
+  /** Bulk disconnect multiple accounts at once */
+  bulkDisconnect: protectedProcedure
+    .input(z.object({ ids: z.array(z.number()).min(1).max(50) }))
+    .mutation(async ({ ctx, input }) => {
+      let deleted = 0;
+      for (const id of input.ids) {
+        try {
+          await deleteSocialAccount(id, ctx.user.id);
+          deleted++;
+        } catch { /* skip if already deleted */ }
+      }
+      return { success: true, deleted };
+    }),
+
   /** Check health of all connected accounts */
   healthCheck: protectedProcedure
     .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())

@@ -1858,3 +1858,10 @@
 ## 🐛 Fix: Ad account names showing personal name + inactive accounts displayed
 - [x] Fix: Ad accounts show "Abdulrhman Al-HosaRy" instead of actual ad account name (e.g. "i Lang Center")
 - [x] Fix: Inactive/disabled ad accounts should not be shown in Connections page
+
+## 🔧 Feature: Multi-select + Bulk Disconnect in Connections page
+- [x] Add checkboxes to each ad account row for multi-selection
+- [x] Add "Select All" checkbox in platform card header
+- [x] Add floating bulk action bar with "Disconnect Selected" button
+- [x] Add backend bulk disconnect endpoint (social.bulkDisconnect)
+- [x] Confirmation dialog before bulk disconnect
