@@ -2045,3 +2045,30 @@
 - [x] "Best Time" button in AdSetsPage row actions
 - [x] Derive best hours from CreativeHeatmap data per ad set
 - [x] Show recommended schedule modal with top 3 time slots
+
+## 🔄 Phase 62 — Unified Campaigns Hub (Merge Ad Sets + Creatives into Campaigns)
+
+### Phase 62A — Campaigns Page Tabs
+- [ ] Add top-level tabs to Campaigns page: Overview | Ad Sets | Creatives | Heatmap
+- [ ] Move AdSetsPage content into Campaigns "Ad Sets" tab
+- [ ] Move AdCreativesPage content into Campaigns "Creatives" tab
+- [ ] Move CreativeHeatmap into Campaigns "Heatmap" tab
+- [ ] Preserve all existing functionality (filters, bulk actions, compare, schedule)
+
+### Phase 62B — Navigation Cleanup
+- [ ] Remove /ads/adsets and /ads/creatives from navigation sidebar
+- [ ] Remove standalone AdSetsPage and AdCreativesPage routes from App.tsx
+- [ ] Keep /ads/campaigns as the single entry point for all ad management
+
+### Phase 62C — Polish
+- [ ] Ensure consistent header/filters across all tabs
+- [ ] Smooth tab transition animations
+- [ ] Preserve URL state for active tab (optional: ?tab=adsets)
+
+## ✅ Phase 62 — Unified Campaigns Hub
+- [x] Merged Ad Sets tab into Campaigns page (Overview | Ad Sets | Creatives | Heatmap)
+- [x] Merged Creatives tab into Campaigns page with bulk actions and A/B compare
+- [x] Merged Heatmap tab into Campaigns page
+- [x] Removed /ads/adsets and /ads/creatives from sidebar navigation
+- [x] Added redirect from old routes to /ads/campaigns
+- [x] 585/585 tests passing, 0 TypeScript errors

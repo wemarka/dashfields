@@ -109,8 +109,6 @@ const ContentTemplates   = lazy(() => import("./app/features/content/ContentTemp
 // ─── Standalone sub-pages (Accordion Sidebar architecture) ──────────────────
 // Ads
 const CampaignsPage    = lazy(() => import("./app/pages/ads/CampaignsPage"));
-const AdCreativesPage  = lazy(() => import("./app/pages/ads/AdCreativesPage"));
-const AdSetsPage       = lazy(() => import("./app/pages/ads/AdSetsPage"));
 const AudiencesPage    = lazy(() => import("./app/pages/ads/AudiencesPage"));
 const AIAnalyzerPage   = lazy(() => import("./app/pages/ads/AIAnalyzerPage"));
 // Content
@@ -202,8 +200,8 @@ function AppRouter() {
               {/* ── Ads sub-pages ──────────────────────────────────────────── */}
               <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/campaigns"          component={CampaignsPage} />
-              <Route path="/ads/creatives"          component={AdCreativesPage} />
-              <Route path="/ads/adsets"             component={AdSetsPage} />
+              <Route path="/ads/creatives"          component={() => <Redirect to="/ads/campaigns" />} />
+              <Route path="/ads/adsets"             component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/audiences"          component={AudiencesPage} />
               <Route path="/ads/ai-analyzer"        component={AIAnalyzerPage} />
               {/* ── Content sub-pages ──────────────────────────────────────── */}
