@@ -20,6 +20,7 @@ import {
   Building2,
   CreditCard,
   Image,
+  Layers,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -63,6 +64,7 @@ export const navSections: NavSection[] = [
         icon: Megaphone,
         subItems: [
           { labelKey: "nav.campaigns",    path: "/ads/campaigns",    icon: Megaphone },
+          { labelKey: "nav.adSets",       path: "/ads/adsets",       icon: Layers },
           { labelKey: "nav.creatives",    path: "/ads/creatives",    icon: Image },
           { labelKey: "nav.audience",     path: "/ads/audiences",    icon: Users },
           { labelKey: "nav.adsAnalyzer",  path: "/ads/ai-analyzer",  icon: Brain },

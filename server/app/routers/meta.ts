@@ -1001,4 +1001,115 @@ export const metaRouter = router({
         return [];
       }
     }),
+
+  /** Get all ad sets across campaigns for the active account */
+  allAdSets: protectedProcedure
+    .input(z.object({
+      datePreset:  z.string().default("last_30d"),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+      limit:       z.number().min(1).max(50).default(25),
+    }))
+    .query(async ({ ctx, input }) => {
+      const allConns = input.accountId
+        ? [await getMetaToken(ctx.user.id, input.accountId, input.workspaceId)].filter(Boolean) as Awaited<ReturnType<typeof getMetaToken>>[]
+        : await getAllMetaTokens(ctx.user.id, input.workspaceId);
+      if (!allConns.length) return [];
+      try {
+        // Get campaigns first
+        const allCampaigns = await Promise.allSettled(
+          allConns.map((conn, i) =>
+            getMetaCampaigns(conn!.adAccountId, conn!.token, input.limit)
+              .then(cs => cs.map(c => ({ ...c, _connIdx: i })))
+          )
+        );
+        const campaigns = allCampaigns
+          .filter((r): r is PromiseFulfilledResult<(MetaCampaign & { _connIdx: number })[]> => r.status === "fulfilled")
+          .flatMap(r => r.value);
+        if (!campaigns.length) return [];
+
+        // Get ad sets for first 10 campaigns to avoid rate limiting
+        const campaignSlice = campaigns.slice(0, 10);
+        const adSetResults = await Promise.allSettled(
+          campaignSlice.map(async (c) => {
+            const conn = allConns[c._connIdx];
+            if (!conn) return [];
+            const [adSets, insights] = await Promise.all([
+              getCampaignAdSets(c.id, conn.token),
+              getAdSetInsights(c.id, conn.token, input.datePreset),
+            ]);
+            const insightMap = new Map(
+              insights.map(i => [
+                (i as any).adset_id ?? "",
+                {
+                  impressions: Number(i.impressions ?? 0),
+                  reach:       Number(i.reach ?? 0),
+                  clicks:      Number(i.clicks ?? 0),
+                  spend:       Number(i.spend ?? 0),
+                  ctr:         Number(i.ctr ?? 0),
+                  cpc:         Number(i.cpc ?? 0),
+                  cpm:         Number(i.cpm ?? 0),
+                },
+              ])
+            );
+            return adSets.map(s => ({
+              id:               s.id,
+              name:             s.name,
+              status:           s.effective_status ?? s.status,
+              campaignId:       c.id,
+              campaignName:     c.name,
+              dailyBudget:      s.daily_budget    ? Number(s.daily_budget)    / 100 : null,
+              lifetimeBudget:   s.lifetime_budget ? Number(s.lifetime_budget) / 100 : null,
+              bidAmount:        s.bid_amount      ? Number(s.bid_amount)      / 100 : null,
+              billingEvent:     s.billing_event   ?? null,
+              optimizationGoal: s.optimization_goal ?? null,
+              targeting: s.targeting ? {
+                ageMin:             s.targeting.age_min ?? null,
+                ageMax:             s.targeting.age_max ?? null,
+                genders:            s.targeting.genders ?? [],
+                countries:          s.targeting.geo_locations?.countries ?? [],
+                cities:             (s.targeting.geo_locations?.cities ?? []).map(ci => ci.name),
+                devicePlatforms:    s.targeting.device_platforms ?? [],
+                publisherPlatforms: s.targeting.publisher_platforms ?? [],
+                facebookPositions:  s.targeting.facebook_positions ?? [],
+                instagramPositions: s.targeting.instagram_positions ?? [],
+              } : null,
+              startTime: s.start_time ?? null,
+              endTime:   s.end_time   ?? null,
+              insights:  insightMap.get(s.id) ?? null,
+            }));
+          })
+        );
+        return adSetResults
+          .filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled")
+          .flatMap(r => r.value);
+      } catch (err) {
+        console.error("[Meta] allAdSets error:", err);
+        return [];
+      }
+    }),
+
+  /** Bulk pause ads by ID */
+  bulkPauseAds: protectedProcedure
+    .input(z.object({
+      adIds:       z.array(z.string()).min(1).max(50),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) throw new Error("No Meta connection found");
+      const results = await Promise.allSettled(
+        input.adIds.map(adId =>
+          fetch(`https://graph.facebook.com/v19.0/${adId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "PAUSED", access_token: conn.token }),
+          }).then(r => r.json())
+        )
+      );
+      const succeeded = results.filter(r => r.status === "fulfilled" && (r.value as any).success).length;
+      const failed    = results.length - succeeded;
+      return { succeeded, failed, total: results.length };
+    }),
 });

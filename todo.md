@@ -2002,3 +2002,26 @@
 - [x] Pass platform info through tRPC to frontend
 - [x] Update MetaCampaign type to include platform array
 - [x] Auto-select correct preview (FB/IG/TikTok/Snapchat) based on campaign platform
+
+## ## ✅ Phase 60 — Ad Sets Page + Heatmap + Bulk Actions
+### Phase 60A — Ad Sets Standalone Page (/ads/adsets)
+- [x] Add allAdSets tRPC endpoint in meta router (cross-campaign ad sets listing)
+- [x] Create AdSetsPage component at client/src/app/features/adsets/AdSetsPage.tsx
+- [x] Add route /ads/adsets in App.tsx
+- [x] Add "Ad Sets" nav item in navigation.ts under Ads section
+- [x] Filters: status, platform, budget type, date preset
+- [x] Sortable table with: name, campaign, status, budget, impressions, clicks, spend, CTR, CPC
+- [x] Row expansion with targeting details and performance metrics
+- [x] Quick status toggle (pause/activate)
+### Phase 60B — Creative Performance Heatmap
+- [x] Add hourly/daily breakdown tRPC endpoint (meta.creativeHourlyBreakdown)
+- [x] CreativeHeatmap component using CSS grid (7 days × 24 hours)
+- [x] Color scale: low=muted, high=primary
+- [x] Integrate in AdCreativesPage as a new tab/section
+- [x] Tooltip on hover showing impressions/CTR for that time slot
+### Phase 60C — Bulk Creative Actions
+- [x] Multi-select checkboxes on creative cards in AdCreativesPage
+- [x] Bulk action bar: "Pause Selected", "Select All Fatigued"
+- [x] bulkPauseAds tRPC mutation in meta router
+- [x] Confirmation dialog before bulk pause
+- [x] Success/error toast with count of affected ads

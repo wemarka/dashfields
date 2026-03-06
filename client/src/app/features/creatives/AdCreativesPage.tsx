@@ -26,6 +26,10 @@ import {
   Search,
   Trophy,
   Zap,
+  PauseCircle,
+  CheckSquare,
+  Square,
+  X,
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { Button } from "@/core/components/ui/button";
@@ -46,6 +50,8 @@ import {
 } from "@/core/components/ui/tooltip";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
+import { CreativeHeatmap } from "./CreativeHeatmap";
+import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CreativeType = "image" | "video" | "carousel" | "dynamic" | "unknown";
@@ -136,10 +142,16 @@ function CreativeCard({
   ad,
   isBest,
   onViewCampaign,
+  selectable,
+  selected,
+  onToggleSelect,
 }: {
   ad: AdCreative;
   isBest: boolean;
   onViewCampaign: (campaignId: string) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const fmt = (n: number) =>
     n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M`
@@ -152,7 +164,22 @@ function CreativeCard({
   const isActive = ad.status === "ACTIVE";
 
   return (
-    <div className={`relative rounded-xl border bg-card overflow-hidden transition-all hover:shadow-md hover:border-primary/30 ${ad.isFatigued ? "border-amber-500/30" : "border-border"}`}>
+    <div
+      className={`relative rounded-xl border bg-card overflow-hidden transition-all hover:shadow-md ${
+        selected ? "border-primary ring-1 ring-primary" : ad.isFatigued ? "border-amber-500/30 hover:border-primary/30" : "border-border hover:border-primary/30"
+      }`}
+      onClick={selectable ? () => onToggleSelect?.(ad.id) : undefined}
+    >
+      {/* Selection checkbox */}
+      {selectable && (
+        <div className="absolute top-2 left-2 z-20">
+          <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-colors ${
+            selected ? "bg-primary border-primary" : "bg-black/40 border-white/60"
+          }`}>
+            {selected && <X className="w-3 h-3 text-white" />}
+          </div>
+        </div>
+      )}
       {/* Best performer badge */}
       {isBest && (
         <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-amber-500/90 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow">
@@ -289,6 +316,9 @@ export default function AdCreativesPage() {
   const [sortField, setSortField] = useState<SortField>("ctr");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [datePreset, setDatePreset] = useState("last_30d");
+  const [activeTab, setActiveTab] = useState<"creatives" | "heatmap">("creatives");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
 
   // Fetch all ads
   const { data: ads = [], isLoading, refetch } = trpc.meta.allAds.useQuery({
@@ -346,6 +376,40 @@ export default function AdCreativesPage() {
     setLocation("/ads/campaigns");
   };
 
+  // Bulk pause mutation
+  const utils = trpc.useUtils();
+  const bulkPause = trpc.meta.bulkPauseAds.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Paused ${result.succeeded} ad${result.succeeded !== 1 ? "s" : ""}${result.failed > 0 ? `, ${result.failed} failed` : ""}`);
+      setSelectedIds(new Set());
+      setBulkMode(false);
+      utils.meta.allAds.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleBulkPause = () => {
+    if (selectedIds.size === 0) return;
+    bulkPause.mutate({
+      adIds: Array.from(selectedIds),
+      accountId: activeAccountId ?? undefined,
+      workspaceId: activeWorkspace?.id,
+    });
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllFatigued = () => {
+    const fatiguedIds = (ads as AdCreative[]).filter(a => a.isFatigued && a.status === "ACTIVE").map(a => a.id);
+    setSelectedIds(new Set(fatiguedIds));
+  };
+
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDir(d => d === "desc" ? "asc" : "desc");
@@ -386,8 +450,57 @@ export default function AdCreativesPage() {
             <Button variant="outline" size="sm" onClick={() => refetch()} className="h-8">
               <RefreshCw className="w-3.5 h-3.5" />
             </Button>
+            {fatiguedCount > 0 && (
+              <Button
+                variant={bulkMode ? "secondary" : "outline"}
+                size="sm"
+                className="h-8 text-xs gap-1.5"
+                onClick={() => { setBulkMode(m => !m); setSelectedIds(new Set()); }}
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                {bulkMode ? "Cancel" : "Bulk Select"}
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Bulk action bar */}
+        {bulkMode && (
+          <div className="flex items-center gap-3 mt-3 p-2.5 rounded-lg bg-muted/50 border border-border">
+            <span className="text-xs text-muted-foreground">
+              {selectedIds.size} selected
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={selectAllFatigued}
+            >
+              Select all fatigued ({fatiguedCount})
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setSelectedIds(new Set())}
+              disabled={selectedIds.size === 0}
+            >
+              Clear
+            </Button>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-7 text-xs gap-1.5"
+                disabled={selectedIds.size === 0 || bulkPause.isPending}
+                onClick={handleBulkPause}
+              >
+                <PauseCircle className="w-3.5 h-3.5" />
+                {bulkPause.isPending ? "Pausing..." : `Pause ${selectedIds.size > 0 ? selectedIds.size : ""} Selected`}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Filters row */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -462,9 +575,34 @@ export default function AdCreativesPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex-shrink-0 px-6 border-b border-border/50">
+        <div className="flex gap-1">
+          {(["creatives", "heatmap"] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab === "heatmap" ? "Performance Heatmap" : "Creatives"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
-        {isLoading ? (
+        {/* Heatmap tab */}
+        {activeTab === "heatmap" && (
+          <CreativeHeatmap ads={ads as any[]} isLoading={isLoading} />
+        )}
+        {/* Creatives tab */}
+        {activeTab === "creatives" && (
+          isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
@@ -507,10 +645,14 @@ export default function AdCreativesPage() {
                   ad={ad}
                   isBest={ad.id === bestAdId}
                   onViewCampaign={handleViewCampaign}
+                  selectable={bulkMode}
+                  selected={selectedIds.has(ad.id)}
+                  onToggleSelect={toggleSelect}
                 />
               ))}
             </div>
           </>
+          )
         )}
       </div>
     </div>
