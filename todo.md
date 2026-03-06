@@ -2072,3 +2072,9 @@
 - [x] Removed /ads/adsets and /ads/creatives from sidebar navigation
 - [x] Added redirect from old routes to /ads/campaigns
 - [x] 585/585 tests passing, 0 TypeScript errors
+
+## ✅ Phase 63 — Campaign Row Click → Auto-filter Tabs
+- [x] When clicking a campaign row in Overview, set campaignFilter and show it as "selected" state
+- [x] Ad Sets / Creatives / Heatmap tabs auto-filter by selected campaign
+- [x] Add visual indicator in Overview showing which campaign is selected
+- [x] Allow clicking the same campaign again to deselect

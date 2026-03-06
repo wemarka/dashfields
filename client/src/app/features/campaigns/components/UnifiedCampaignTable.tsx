@@ -63,6 +63,8 @@ interface UnifiedCampaignTableProps {
   campaigns: UnifiedCampaign[];
   loading: boolean;
   onRowClick: (campaign: UnifiedCampaign) => void;
+  onOpenDrawer?: (campaign: UnifiedCampaign) => void;
+  selectedCampaignId?: string | null;
   onStatusToggle?: (campaign: UnifiedCampaign) => void;
   onDelete?: (campaign: UnifiedCampaign) => void;
   onClone?: (campaign: UnifiedCampaign) => void;
@@ -340,7 +342,7 @@ function BulkActionBar({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 function UnifiedCampaignTableInner({
-  campaigns, loading, onRowClick,
+  campaigns, loading, onRowClick, onOpenDrawer, selectedCampaignId,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
   onFilterByAdSets, onFilterByCreatives,  statusTogglePending,
   pageSize = 20,
@@ -638,11 +640,14 @@ function UnifiedCampaignTableInner({
               const isExpanded = expandedIds.has(c.id);
               const isActive = c.status.toLowerCase() === "active";
 
+              const isCampaignSelected = selectedCampaignId === c.id;
               return (
                 <Fragment key={c.id}>
                   <TableRow
                     className={`group transition-colors cursor-pointer ${
-                      isSelected ? "bg-primary/5" : "hover:bg-muted/40"
+                      isCampaignSelected
+                        ? "bg-primary/10 border-l-2 border-l-primary"
+                        : isSelected ? "bg-primary/5" : "hover:bg-muted/40"
                     }`}
                     onClick={() => onRowClick(c)}
                   >
@@ -685,7 +690,7 @@ function UnifiedCampaignTableInner({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => onRowClick(c)} className="text-xs gap-2">
+                          <DropdownMenuItem onClick={() => onOpenDrawer?.(c)} className="text-xs gap-2">
                             <Eye className="w-3.5 h-3.5" /> View Details
                           </DropdownMenuItem>
                           {c.source === "api" && onFilterByAdSets && (

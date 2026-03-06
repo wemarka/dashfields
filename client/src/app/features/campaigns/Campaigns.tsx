@@ -784,6 +784,12 @@ export default function Campaigns() {
     if (campaign.source === "local") cloneCampaign.mutate({ campaignId: Number(campaign.id) });
   }, [cloneCampaign]);
   const handleRowClick = useCallback((campaign: UnifiedCampaign) => {
+    // Toggle campaign filter — clicking the same campaign again deselects it
+    setCampaignFilter(prev =>
+      prev?.id === campaign.id ? null : { id: campaign.id, name: campaign.name }
+    );
+  }, []);
+  const handleOpenDrawer = useCallback((campaign: UnifiedCampaign) => {
     setSelectedCampaign(campaign);
   }, []);
   const handleRefresh = useCallback(() => {
@@ -937,9 +943,26 @@ export default function Campaigns() {
               customDateRange={customDateRange} onCustomDateRangeChange={setCustomDateRange}
               tagFilter={tagFilter} onTagFilterChange={setTagFilter} availableTags={allTags}
             />
+            {/* Selected Campaign Banner */}
+            {campaignFilter && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm">
+                <Target className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-muted-foreground">Selected campaign:</span>
+                <span className="font-medium text-foreground truncate">{campaignFilter.name}</span>
+                <span className="text-xs text-muted-foreground ml-1">(Ad Sets, Creatives & Heatmap tabs are filtered)</span>
+                <button
+                  onClick={() => setCampaignFilter(null)}
+                  className="ml-auto shrink-0 rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-primary" />
+                </button>
+              </div>
+            )}
             <UnifiedCampaignTable
               campaigns={filteredCampaigns} loading={isLoading}
-              onRowClick={handleRowClick} onStatusToggle={handleStatusToggle}
+              onRowClick={handleRowClick} onOpenDrawer={handleOpenDrawer}
+              selectedCampaignId={campaignFilter?.id ?? null}
+              onStatusToggle={handleStatusToggle}
               onDelete={handleDelete} onClone={handleClone}
               onBulkAction={handleBulkAction} statusTogglePending={statusTogglePending}
               onFilterByAdSets={handleFilterByAdSets}
