@@ -3,6 +3,7 @@
 // Allows selecting date range and specific platforms.
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
@@ -30,10 +31,11 @@ export function ExportReportModal({ onClose }: ExportReportModalProps) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [exportType, setExportType] = useState<"csv" | "pdf">("csv");
+  const { activeWorkspace } = useWorkspace();
 
   // Preview query
   const { data: preview, isLoading: previewLoading } = trpc.export.preview.useQuery(
-    { datePreset },
+    { datePreset, workspaceId: activeWorkspace?.id },
     { refetchOnWindowFocus: false }
   );
 
@@ -82,9 +84,9 @@ export function ExportReportModal({ onClose }: ExportReportModalProps) {
   const handleExport = () => {
     const platforms = selectedPlatforms.length > 0 ? selectedPlatforms : undefined;
     if (exportType === "csv") {
-      csvMutation.mutate({ datePreset, platforms });
+      csvMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id });
     } else {
-      htmlMutation.mutate({ datePreset, platforms });
+      htmlMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id });
     }
   };
 

@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/core/components/ui/dialog";
 import { Badge } from "@/core/components/ui/badge";
 import {
@@ -55,16 +56,17 @@ export function GlobalSearch() {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { activeWorkspace } = useWorkspace();
 
   // Fetch campaigns for search
   const { data: campaigns = [] } = trpc.campaigns.list.useQuery(
-    undefined,
+    { workspaceId: activeWorkspace?.id },
     { enabled: open }
   );
 
   // Fetch reports for search
   const { data: reports = [] } = trpc.reports.list.useQuery(
-    undefined,
+    { workspaceId: activeWorkspace?.id },
     { enabled: open }
   );
 

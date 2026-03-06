@@ -1,6 +1,7 @@
 // Settings.tsx — Improved settings page with real data binding.
 import { useAuth } from "@/shared/hooks/useAuth";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Shield, Bell, Palette, Link2, ChevronRight, Check,
@@ -349,8 +350,9 @@ export default function Settings() {
   }, [settings]);
 
   // ── Connected platforms ────────────────────────────────────────────────────
-  const { data: accounts = [] } = trpc.social.list.useQuery();
-  const { data: metaStatus }    = trpc.meta.connectionStatus.useQuery();
+  const { activeWorkspace } = useWorkspace();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
+  const { data: metaStatus }    = trpc.meta.connectionStatus.useQuery({ workspaceId: activeWorkspace?.id });
 
   const connectedPlatformIds = new Set([
     ...accounts.map((a) => a.platform),

@@ -57,7 +57,7 @@ export default function Analytics() {
       ...(activeAccountId ? { accountId: activeAccountId } : {}),
       ...(workspaceId ? { workspaceId } : {}),
     });
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   // Meta-specific campaign data (for charts when Meta is selected)
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId });

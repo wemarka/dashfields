@@ -7,6 +7,7 @@ import {
   Eye, Zap, TrendingUp,
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { PLATFORMS as ALL_PLATFORMS } from "@shared/platforms";
@@ -86,7 +87,8 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
   const [suggestedHashtags, setSuggestedHashtags] = useState<string[]>([]);
 
   // Get connected accounts to highlight available platforms
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { activeWorkspace } = useWorkspace();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
   const connectedPlatformIds = new Set(accounts.map((a) => a.platform));
 
   const uploadImageMutation = trpc.posts.uploadImage.useMutation({

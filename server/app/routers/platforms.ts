@@ -125,6 +125,53 @@ async function getDbInsight(
   };
 }
 
+/** Helper to fetch real Meta insights for a facebook account */
+async function fetchMetaInsight(acc: { platform_account_id: string | null; access_token: string | null; name: string | null; username: string | null }): Promise<PlatformInsight | null> {
+  if (!acc.access_token || !acc.platform_account_id) return null;
+  const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, "last_30d");
+  if (!raw || raw.length === 0) return null;
+  const r = raw[0];
+  const impressions = parseInt(r.impressions ?? "0");
+  const clicks      = parseInt(r.clicks ?? "0");
+  const spend       = parseFloat(r.spend ?? "0");
+  return {
+    platform:    "facebook",
+    accountName: acc.name ?? acc.username ?? "Facebook Account",
+    impressions,
+    reach:       parseInt(r.reach ?? "0"),
+    clicks,
+    spend,
+    ctr:         impressions > 0 ? parseFloat((clicks / impressions * 100).toFixed(2)) : 0,
+    cpc:         clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
+    engagements: parseInt(r.actions?.find((a: { action_type: string; value: string }) => a.action_type === "post_engagement")?.value ?? "0"),
+    currency:    "USD",
+    isLive:      true,
+  };
+}
+
+async function fetchMetaInsightWithPreset(acc: { platform_account_id: string | null; access_token: string | null; name: string | null; username: string | null }, datePreset: string): Promise<PlatformInsight | null> {
+  if (!acc.access_token || !acc.platform_account_id) return null;
+  const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, datePreset);
+  if (!raw || raw.length === 0) return null;
+  const r = raw[0];
+  const impressions = parseInt(r.impressions ?? "0");
+  const clicks      = parseInt(r.clicks ?? "0");
+  const spend       = parseFloat(r.spend ?? "0");
+  return {
+    platform:    "facebook",
+    accountName: acc.name ?? acc.username ?? "Facebook Account",
+    impressions,
+    reach:       parseInt(r.reach ?? "0"),
+    clicks,
+    spend,
+    ctr:         impressions > 0 ? parseFloat((clicks / impressions * 100).toFixed(2)) : 0,
+    cpc:         clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
+    engagements: parseInt(r.actions?.find((a: { action_type: string; value: string }) => a.action_type === "post_engagement")?.value ?? "0"),
+    currency:    "USD",
+    isLive:      true,
+  };
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 export const platformsRouter = router({
   /**
@@ -133,10 +180,11 @@ export const platformsRouter = router({
   allInsights: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
-      accountId: z.number().optional(), // filter to a specific social account
+      accountId: z.number().optional(),
+      workspaceId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      let accounts = await getUserSocialAccounts(ctx.user.id);
+      let accounts = await getUserSocialAccounts(ctx.user.id, input.workspaceId);
       if (input.accountId) accounts = accounts.filter(a => a.id === input.accountId);
       if (accounts.length === 0) return [] as PlatformInsight[];
 
@@ -146,30 +194,9 @@ export const platformsRouter = router({
       for (const acc of accounts) {
         try {
           if (acc.platform === "facebook" && acc.access_token && acc.platform_account_id) {
-            // Real Meta API data
-            const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, input.datePreset);
-            if (raw && raw.length > 0) {
-              const r = raw[0];
-              const impressions = parseInt(r.impressions ?? "0");
-              const clicks      = parseInt(r.clicks ?? "0");
-              const spend       = parseFloat(r.spend ?? "0");
-              results.push({
-                platform:    "facebook",
-                accountName: acc.name ?? acc.username ?? "Facebook Account",
-                impressions,
-                reach:       parseInt(r.reach ?? "0"),
-                clicks,
-                spend,
-                ctr:         impressions > 0 ? parseFloat((clicks / impressions * 100).toFixed(2)) : 0,
-                cpc:         clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
-                engagements: parseInt(r.actions?.find((a: { action_type: string; value: string }) => a.action_type === "post_engagement")?.value ?? "0"),
-                currency:    "USD",
-                isLive:      true,
-              });
-              continue;
-            }
+            const insight = await fetchMetaInsightWithPreset(acc, input.datePreset);
+            if (insight) { results.push(insight); continue; }
           }
-          // Real DB data for all other platforms
           const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           results.push(insight);
         } catch {
@@ -187,10 +214,11 @@ export const platformsRouter = router({
   summary: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
-      accountId: z.number().optional(), // filter to a specific social account
+      accountId: z.number().optional(),
+      workspaceId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      let accounts = await getUserSocialAccounts(ctx.user.id);
+      let accounts = await getUserSocialAccounts(ctx.user.id, input.workspaceId);
       if (input.accountId) accounts = accounts.filter(a => a.id === input.accountId);
 
       if (accounts.length === 0) {
@@ -213,27 +241,8 @@ export const platformsRouter = router({
       for (const acc of accounts) {
         try {
           if (acc.platform === "facebook" && acc.access_token && acc.platform_account_id) {
-            const raw = await getAccountInsights(acc.platform_account_id, acc.access_token, input.datePreset);
-            if (raw && raw.length > 0) {
-              const r = raw[0];
-              const impressions = parseInt(r.impressions ?? "0");
-              const clicks      = parseInt(r.clicks ?? "0");
-              const spend       = parseFloat(r.spend ?? "0");
-              insights.push({
-                platform: "facebook",
-                accountName: acc.name ?? acc.username ?? "Facebook",
-                impressions,
-                reach: parseInt(r.reach ?? "0"),
-                clicks,
-                spend,
-                ctr: impressions > 0 ? parseFloat((clicks / impressions * 100).toFixed(2)) : 0,
-                cpc: clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
-                engagements: 0,
-                currency: "USD",
-                isLive: true,
-              });
-              continue;
-            }
+            const insight = await fetchMetaInsightWithPreset(acc, input.datePreset);
+            if (insight) { insights.push(insight); continue; }
           }
           const insight = await getDbInsight(ctx.user.id, acc.platform, acc.name ?? acc.username ?? acc.platform, since, until);
           insights.push(insight);

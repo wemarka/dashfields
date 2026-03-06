@@ -3,6 +3,7 @@
 // Shows KPI comparison table + grouped bar chart + winner badges.
 import { useState, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { X, Trophy, TrendingUp, TrendingDown, Minus, ChevronDown } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -139,11 +140,12 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
   };
 
   // Fetch campaigns with metrics
-  const { data: metaCampaigns = [] } = trpc.meta.campaigns.useQuery({ limit: 50 }, {
+  const { activeWorkspace } = useWorkspace();
+  const { data: metaCampaigns = [] } = trpc.meta.campaigns.useQuery({ limit: 50, workspaceId: activeWorkspace?.id }, {
     retry: false,
   });
 
-  const { data: localCampaigns = [] } = trpc.campaigns.list.useQuery();
+  const { data: localCampaigns = [] } = trpc.campaigns.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   // Merge and enrich campaigns
   const allCampaigns = useMemo<Campaign[]>(() => {

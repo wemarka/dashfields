@@ -3,6 +3,7 @@
 // Demographics (age/gender/location/devices) require direct platform API — shown as "not available" with CTA.
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Button } from "@/core/components/ui/button";
 import { Badge } from "@/core/components/ui/badge";
@@ -172,13 +173,14 @@ export default function Audience() {
   const { t } = useTranslation();
   const [platform, setPlatform]   = useState("all");
   const [datePreset, setDatePreset] = useState("last_30d");
+  const { activeWorkspace } = useWorkspace();
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [showAI, setShowAI]         = useState(false);
   const [copied, setCopied]         = useState(false);
 
   const { data, isLoading } = trpc.audience.getAudienceData.useQuery({ platform, datePreset });
   const { data: comparison = [] } = trpc.audience.getPlatformComparison.useQuery({ metric: "reach", datePreset });
-  const { data: accounts = [] } = trpc.social.list.useQuery();
+  const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
 
   const analyzeAudience = trpc.ai.analyzeAudience.useMutation({
     onSuccess: (res) => {

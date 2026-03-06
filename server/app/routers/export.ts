@@ -134,8 +134,8 @@ async function getDbRow(
 }
 
 // ─── Gather data (real Supabase + Meta API) ───────────────────────────────────
-async function gatherData(userId: number, datePreset: string): Promise<PlatformRow[]> {
-  const accounts = await getUserSocialAccounts(userId);
+async function gatherData(userId: number, datePreset: string, workspaceId?: number): Promise<PlatformRow[]> {
+  const accounts = await getUserSocialAccounts(userId, workspaceId);
   if (accounts.length === 0) return [];
 
   const { since, until } = getDateRange(datePreset);
@@ -333,9 +333,10 @@ export const exportRouter = router({
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
       platforms:  z.array(z.string()).optional(),
+      workspaceId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      let rows = await gatherData(ctx.user.id, input.datePreset);
+      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
       if (input.platforms && input.platforms.length > 0) {
         rows = rows.filter((r) => input.platforms!.includes(r.platform));
       }
@@ -351,9 +352,10 @@ export const exportRouter = router({
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
       platforms:  z.array(z.string()).optional(),
+      workspaceId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      let rows = await gatherData(ctx.user.id, input.datePreset);
+      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
       if (input.platforms && input.platforms.length > 0) {
         rows = rows.filter((r) => input.platforms!.includes(r.platform));
       }
@@ -367,9 +369,10 @@ export const exportRouter = router({
   preview: protectedProcedure
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
+      workspaceId: z.number().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const rows = await gatherData(ctx.user.id, input.datePreset);
+      const rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
       return {
         rowCount:    rows.length,
         platforms:   rows.map((r) => r.platform),

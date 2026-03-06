@@ -90,8 +90,10 @@ export const socialRouter = router({
     }),
 
   /** Check health of all connected accounts */
-  healthCheck: protectedProcedure.mutation(async ({ ctx }) => {
-    const accounts = await getUserSocialAccounts(ctx.user.id);
+  healthCheck: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+    const accounts = await getUserSocialAccounts(ctx.user.id, input?.workspaceId);
     const sb = getSupabase();
     const results: Array<{ id: number; platform: string; valid: boolean; name?: string }> = [];
 

@@ -23,6 +23,7 @@ import { Badge } from "@/core/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/core/components/ui/tabs";
 import { Loader2, TrendingUp, MousePointerClick, DollarSign, Eye } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -85,14 +86,15 @@ function StatusBadge({ status }: { status: string }) {
 export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const { fmt: fmtCurrencyHook } = useCurrency();
+  const { activeWorkspace } = useWorkspace();
 
   const { data: daily, isLoading } = trpc.meta.campaignDailyInsights.useQuery(
-    { campaignId: campaign?.id ?? "", datePreset },
+    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id }
   );
 
   const { data: insights } = trpc.meta.campaignInsights.useQuery(
-    { datePreset, limit: 50 },
+    { datePreset, limit: 50, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id }
   );
 

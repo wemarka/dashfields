@@ -1799,3 +1799,16 @@
 - [ ] Remove Settings section from Sidebar, keep only Integrations at bottom
 - [ ] Move Workspace & Team to Profile Menu in topbar
 - [ ] Delete Settings-related files that are no longer needed
+
+## 🔍 Full Audit — Connected Accounts & Real Data Flow
+- [ ] Audit: Dashboard page fetches real Meta data with correct account/workspace params
+- [ ] Audit: Ads/Campaigns page fetches real campaign data from Meta API
+- [ ] Audit: Analytics/Insights page uses real platform data
+- [ ] Audit: Audience page uses real data
+- [ ] Audit: Content/Posts page works with connected accounts
+- [ ] Audit: Connections page shows correct connected status
+- [ ] Audit: platforms.ts allInsights uses correct Meta API calls
+- [ ] Audit: adsAnalyzer.ts uses correct Meta API calls
+- [ ] Audit: scheduler.ts uses correct Meta API calls
+- [ ] Audit: cron.ts uses correct Meta API calls
+- [ ] Audit: All frontend pages pass workspaceId correctly
