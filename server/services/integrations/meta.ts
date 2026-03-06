@@ -87,29 +87,42 @@ export async function getAdAccounts(accessToken: string): Promise<MetaAdAccount[
 }
 
 /** Get the profile picture URL for an ad account.
- * For ad accounts, we fetch the associated Facebook Page picture.
- * Falls back to the ad account's own picture endpoint. */
+ * Strategy: promote_pages → ads creative page → null.
+ * Each fallback is tried in order until a valid picture URL is found. */
 export async function getAdAccountPicture(
   adAccountId: string,
   accessToken: string
 ): Promise<string | null> {
+  const actId = ensureActPrefix(adAccountId);
   try {
-    // Try to get the ad account's promoted pages (the Facebook Page linked to the ad account)
+    // Strategy 1: Get the ad account's promoted pages (Facebook Page linked to the ad account)
     const pagesData = await metaGet<{ data: Array<{ id: string; name: string; picture?: { data?: { url?: string } } }> }>(
-      `${ensureActPrefix(adAccountId)}/promote_pages`,
+      `${actId}/promote_pages`,
       accessToken,
       { fields: "id,name,picture{url}", limit: "1" }
     );
     const pageUrl = pagesData.data?.[0]?.picture?.data?.url;
     if (pageUrl) return pageUrl;
 
-    // Fallback: try the ad account picture endpoint directly
-    const picData = await metaGet<{ data?: { url?: string } }>(
-      `${ensureActPrefix(adAccountId)}/picture`,
+    // Strategy 2: Get the page from the ad account's ads creative
+    // Each ad has a creative with effective_object_story_id = "pageId_postId"
+    const adsData = await metaGet<{ data: Array<{ creative?: { effective_object_story_id?: string } }> }>(
+      `${actId}/ads`,
       accessToken,
-      { redirect: "false" }
+      { fields: "creative{effective_object_story_id}", limit: "1" }
     );
-    if (picData.data?.url) return picData.data.url;
+    const storyId = adsData.data?.[0]?.creative?.effective_object_story_id;
+    if (storyId) {
+      const pageId = storyId.split("_")[0];
+      if (pageId) {
+        const pagePicData = await metaGet<{ data?: { url?: string } }>(
+          `${pageId}/picture`,
+          accessToken,
+          { redirect: "false", type: "small" }
+        );
+        if (pagePicData.data?.url) return pagePicData.data.url;
+      }
+    }
 
     return null;
   } catch {
