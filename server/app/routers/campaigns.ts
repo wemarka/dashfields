@@ -12,6 +12,30 @@ import {
 } from "../db/campaigns";
 import { getSupabase } from "../../supabase";
 
+// ─── Notes & Tags DB helpers ────────────────────────────────────────────────
+async function getCampaignNote(userId: number, campaignKey: string) {
+  const sb = getSupabase();
+  const { data } = await sb
+    .from("campaign_notes")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("campaign_key", campaignKey)
+    .limit(1)
+    .single();
+  return data;
+}
+
+async function getCampaignTags(userId: number, campaignKey: string) {
+  const sb = getSupabase();
+  const { data } = await sb
+    .from("campaign_tags")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("campaign_key", campaignKey)
+    .order("created_at", { ascending: true });
+  return data ?? [];
+}
+
 export const campaignsRouter = router({
   list: protectedProcedure
     .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
@@ -161,6 +185,87 @@ export const campaignsRouter = router({
         .in("id", input.campaignIds)
         .eq("user_id", ctx.user.id);
       return { success: true, count: input.campaignIds.length };
+    }),
+
+  // ─── Notes & Tags ─────────────────────────────────────────────────────────
+  /** Get note for a campaign */
+  getNote: protectedProcedure
+    .input(z.object({ campaignKey: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const note = await getCampaignNote(ctx.user.id, input.campaignKey);
+      return { content: note?.content ?? "" };
+    }),
+
+  /** Upsert note for a campaign */
+  saveNote: protectedProcedure
+    .input(z.object({
+      campaignKey: z.string(),
+      content: z.string(),
+      workspaceId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const existing = await getCampaignNote(ctx.user.id, input.campaignKey);
+      if (existing) {
+        await sb
+          .from("campaign_notes")
+          .update({ content: input.content, updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+      } else {
+        await sb
+          .from("campaign_notes")
+          .insert({
+            user_id: ctx.user.id,
+            workspace_id: input.workspaceId ?? null,
+            campaign_key: input.campaignKey,
+            content: input.content,
+          });
+      }
+      return { success: true };
+    }),
+
+  /** Get tags for a campaign */
+  getTags: protectedProcedure
+    .input(z.object({ campaignKey: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const tags = await getCampaignTags(ctx.user.id, input.campaignKey);
+      return tags.map(t => ({ id: t.id, tag: t.tag }));
+    }),
+
+  /** Add a tag to a campaign */
+  addTag: protectedProcedure
+    .input(z.object({
+      campaignKey: z.string(),
+      tag: z.string().min(1).max(64),
+      workspaceId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      // Check if tag already exists
+      const existing = await getCampaignTags(ctx.user.id, input.campaignKey);
+      if (existing.some(t => t.tag === input.tag)) {
+        return { success: true, message: "Tag already exists" };
+      }
+      await sb.from("campaign_tags").insert({
+        user_id: ctx.user.id,
+        workspace_id: input.workspaceId ?? null,
+        campaign_key: input.campaignKey,
+        tag: input.tag,
+      });
+      return { success: true };
+    }),
+
+  /** Remove a tag from a campaign */
+  removeTag: protectedProcedure
+    .input(z.object({ tagId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await sb
+        .from("campaign_tags")
+        .delete()
+        .eq("id", input.tagId)
+        .eq("user_id", ctx.user.id);
+      return { success: true };
     }),
 
   /** Bulk update campaign status */

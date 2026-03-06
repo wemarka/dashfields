@@ -327,6 +327,35 @@ export async function publishInstagramReel(
   return { id: publishJson.id as string };
 }
 
+/** Breakdown types supported by Meta Graph API */
+export type BreakdownType = "age" | "gender" | "country" | "impression_device";
+
+export interface MetaBreakdownInsight extends MetaInsight {
+  age?: string;
+  gender?: string;
+  country?: string;
+  impression_device?: string;
+}
+
+/** Get campaign insights broken down by a dimension (age, gender, country, device) */
+export async function getCampaignBreakdown(
+  campaignId: string,
+  accessToken: string,
+  breakdown: BreakdownType,
+  datePreset = "last_30d"
+): Promise<MetaBreakdownInsight[]> {
+  const data = await metaGet<{ data: MetaBreakdownInsight[] }>(
+    `${campaignId}/insights`,
+    accessToken,
+    {
+      fields: "impressions,reach,clicks,spend,ctr,cpc,cpm",
+      breakdowns: breakdown,
+      date_preset: datePreset,
+    }
+  );
+  return data.data ?? [];
+}
+
 /** Get daily time-series insights for a campaign */
 export async function getCampaignDailyInsights(
   campaignId: string,

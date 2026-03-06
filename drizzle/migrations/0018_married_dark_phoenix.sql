@@ -1,0 +1,1 @@
+ALTER TABLE "campaign_notes" ALTER COLUMN "content" DROP DEFAULT;

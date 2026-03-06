@@ -13,6 +13,7 @@ import {
   getAccountInsights,
   getCampaignInsights,
   getCampaignDailyInsights,
+  getCampaignBreakdown,
   createMetaCampaign,
   updateMetaCampaignStatus,
   updateMetaCampaignBudget,
@@ -645,6 +646,48 @@ export const metaRouter = router({
         updated++;
       }
       return { updated };
+    }),
+
+  /** Get campaign breakdown by dimension (age, gender, country, device) */
+  campaignBreakdown: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      breakdown: z.enum(["age", "gender", "country", "impression_device"]),
+      datePreset: z.enum([
+        "today", "yesterday", "last_7d", "last_14d", "last_30d",
+        "last_90d", "this_month", "last_month",
+      ]).default("last_30d"),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
+      if (!conn) return [];
+      try {
+        const data = await getCampaignBreakdown(
+          input.campaignId, conn.token, input.breakdown, input.datePreset
+        );
+        return data.map(d => {
+          // Map the breakdown dimension to a generic "label" field
+          let label = "Unknown";
+          if (input.breakdown === "age") label = d.age ?? "Unknown";
+          else if (input.breakdown === "gender") label = d.gender ?? "Unknown";
+          else if (input.breakdown === "country") label = d.country ?? "Unknown";
+          else if (input.breakdown === "impression_device") label = d.impression_device ?? "Unknown";
+
+          return {
+            label,
+            impressions: Number(d.impressions ?? 0),
+            reach:       Number(d.reach ?? 0),
+            clicks:      Number(d.clicks ?? 0),
+            spend:       Number(d.spend ?? 0),
+            ctr:         Number(d.ctr ?? 0),
+            cpc:         Number(d.cpc ?? 0),
+            cpm:         Number(d.cpm ?? 0),
+          };
+        });
+      } catch {
+        return [];
+      }
     }),
 
   /** Get top performing campaign by spend */

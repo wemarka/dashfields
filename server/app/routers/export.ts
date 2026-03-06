@@ -364,6 +364,88 @@ export const exportRouter = router({
     }),
 
   /**
+   * Generate CSV export of campaign table data.
+   * Accepts pre-filtered campaign data from the client and returns CSV string.
+   */
+  campaignsCsv: protectedProcedure
+    .input(z.object({
+      campaigns: z.array(z.object({
+        name: z.string(),
+        status: z.string(),
+        platform: z.string(),
+        source: z.string(),
+        objective: z.string().nullable().optional(),
+        dailyBudget: z.number().nullable().optional(),
+        spend: z.number().nullable().optional(),
+        impressions: z.number().nullable().optional(),
+        clicks: z.number().nullable().optional(),
+        ctr: z.number().nullable().optional(),
+        reach: z.number().nullable().optional(),
+        cpc: z.number().nullable().optional(),
+        cpm: z.number().nullable().optional(),
+        conversions: z.number().nullable().optional(),
+      })),
+      datePreset: z.string().default("last_30d"),
+    }))
+    .mutation(async ({ input }) => {
+      const header = [
+        "Campaign Name", "Status", "Platform", "Source", "Objective",
+        "Daily Budget", "Spend", "Impressions", "Clicks", "CTR (%)",
+        "Reach", "CPC", "CPM", "Conversions",
+      ].join(",");
+
+      const dataRows = input.campaigns.map((c) =>
+        [
+          `"${c.name.replace(/"/g, '""')}"`,
+          c.status,
+          c.platform,
+          c.source,
+          c.objective ?? "",
+          c.dailyBudget?.toFixed(2) ?? "",
+          c.spend?.toFixed(2) ?? "",
+          c.impressions?.toLocaleString() ?? "",
+          c.clicks?.toLocaleString() ?? "",
+          c.ctr?.toFixed(2) ?? "",
+          c.reach?.toLocaleString() ?? "",
+          c.cpc?.toFixed(2) ?? "",
+          c.cpm?.toFixed(2) ?? "",
+          c.conversions?.toLocaleString() ?? "",
+        ].join(",")
+      );
+
+      // Totals row
+      const totals = input.campaigns.reduce(
+        (acc, c) => ({
+          spend: acc.spend + (c.spend ?? 0),
+          impressions: acc.impressions + (c.impressions ?? 0),
+          clicks: acc.clicks + (c.clicks ?? 0),
+          reach: acc.reach + (c.reach ?? 0),
+          conversions: acc.conversions + (c.conversions ?? 0),
+        }),
+        { spend: 0, impressions: 0, clicks: 0, reach: 0, conversions: 0 }
+      );
+      const avgCtr = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100).toFixed(2) : "0.00";
+      const avgCpc = totals.clicks > 0 ? (totals.spend / totals.clicks).toFixed(2) : "0.00";
+      const avgCpm = totals.impressions > 0 ? (totals.spend / totals.impressions * 1000).toFixed(2) : "0.00";
+
+      const totalRow = [
+        `"TOTAL (${input.campaigns.length} campaigns)"`,
+        "", "", "", "", "",
+        totals.spend.toFixed(2),
+        totals.impressions.toLocaleString(),
+        totals.clicks.toLocaleString(),
+        avgCtr,
+        totals.reach.toLocaleString(),
+        avgCpc,
+        avgCpm,
+        totals.conversions.toLocaleString(),
+      ].join(",");
+
+      const csv = [header, ...dataRows, "", totalRow].join("\n");
+      return { csv, filename: `dashfields-campaigns-${input.datePreset}-${Date.now()}.csv` };
+    }),
+
+  /**
    * Get a quick summary of what will be exported (row count, platforms, date range).
    */
   preview: protectedProcedure

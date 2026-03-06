@@ -287,7 +287,32 @@ export const apiKeys = pgTable("api_keys", {
   updatedAt:  timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── Campaign Notes ──────────────────────────────────────────────────────────
+export const campaignNotes = pgTable("campaign_notes", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  campaignKey:  varchar("campaign_key", { length: 256 }).notNull(), // Meta campaign ID or local campaign ID
+  content:      text("content").notNull(),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [uniqueIndex("campaign_notes_user_campaign_idx").on(t.userId, t.campaignKey)]);
+
+// ─── Campaign Tags ───────────────────────────────────────────────────────────
+export const campaignTags = pgTable("campaign_tags", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:  integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  campaignKey:  varchar("campaign_key", { length: 256 }).notNull(), // Meta campaign ID or local campaign ID
+  tag:          varchar("tag", { length: 64 }).notNull(),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+});
+
 // ─── Types ────────────────────────────────────────────────────────────────────
+export type CampaignNote       = typeof campaignNotes.$inferSelect;
+export type InsertCampaignNote = typeof campaignNotes.$inferInsert;
+export type CampaignTag        = typeof campaignTags.$inferSelect;
+export type InsertCampaignTag  = typeof campaignTags.$inferInsert;
 export type User           = typeof users.$inferSelect;
 export type InsertUser     = typeof users.$inferInsert;
 export type SocialAccount  = typeof socialAccounts.$inferSelect;

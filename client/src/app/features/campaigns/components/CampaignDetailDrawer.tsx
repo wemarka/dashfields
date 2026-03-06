@@ -4,7 +4,7 @@
 // - Breakdown tabs (by age, gender, region, device) - placeholder for future API
 // - Quick Actions (change status, edit budget, clone)
 // - Notes/Tags for campaign organization
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   Sheet,
   SheetContent,
@@ -156,45 +156,74 @@ function InlineBudgetEditor({
   );
 }
 
-// ─── Breakdown Placeholder ────────────────────────────────────────────────────
-function BreakdownSection({ type }: { type: "age" | "gender" | "region" | "device" }) {
+// ─── Breakdown Colors ────────────────────────────────────────────────────────
+const BREAKDOWN_COLORS = [
+  "bg-blue-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500",
+  "bg-rose-500", "bg-cyan-500", "bg-pink-500", "bg-indigo-500",
+  "bg-teal-500", "bg-orange-500", "bg-slate-400",
+];
+
+// ─── Breakdown Section (Real API Data) ───────────────────────────────────────
+function BreakdownSection({
+  type,
+  campaignId,
+  datePreset,
+  workspaceId,
+  enabled,
+  fmtMoney,
+}: {
+  type: "age" | "gender" | "region" | "device";
+  campaignId: string;
+  datePreset: string;
+  workspaceId?: number;
+  enabled: boolean;
+  fmtMoney: (n: number) => string;
+}) {
   const config = {
-    age: { icon: Users, label: "Age Breakdown", description: "Performance breakdown by age group" },
-    gender: { icon: Users, label: "Gender Breakdown", description: "Performance breakdown by gender" },
-    region: { icon: MapPin, label: "Region Breakdown", description: "Performance breakdown by region/country" },
-    device: { icon: Monitor, label: "Device Breakdown", description: "Performance breakdown by device type" },
+    age:    { icon: Users,   label: "Age Breakdown",    apiBreakdown: "age" as const },
+    gender: { icon: Users,   label: "Gender Breakdown",  apiBreakdown: "gender" as const },
+    region: { icon: MapPin,  label: "Region Breakdown",  apiBreakdown: "country" as const },
+    device: { icon: Monitor, label: "Device Breakdown",  apiBreakdown: "impression_device" as const },
   };
-  const { icon: Icon, label, description } = config[type];
+  const { icon: Icon, label, apiBreakdown } = config[type];
 
-  // Simulated breakdown data for visual demonstration
-  const mockData: Record<string, Array<{ label: string; pct: number; color: string }>> = {
-    age: [
-      { label: "18-24", pct: 22, color: "bg-blue-500" },
-      { label: "25-34", pct: 38, color: "bg-violet-500" },
-      { label: "35-44", pct: 24, color: "bg-emerald-500" },
-      { label: "45-54", pct: 11, color: "bg-amber-500" },
-      { label: "55+",   pct: 5,  color: "bg-rose-500" },
-    ],
-    gender: [
-      { label: "Male",    pct: 54, color: "bg-blue-500" },
-      { label: "Female",  pct: 42, color: "bg-pink-500" },
-      { label: "Unknown", pct: 4,  color: "bg-slate-400" },
-    ],
-    region: [
-      { label: "United States", pct: 35, color: "bg-blue-500" },
-      { label: "United Kingdom", pct: 18, color: "bg-violet-500" },
-      { label: "Germany",       pct: 14, color: "bg-emerald-500" },
-      { label: "France",        pct: 11, color: "bg-amber-500" },
-      { label: "Other",         pct: 22, color: "bg-slate-400" },
-    ],
-    device: [
-      { label: "Mobile",  pct: 68, color: "bg-blue-500" },
-      { label: "Desktop", pct: 26, color: "bg-violet-500" },
-      { label: "Tablet",  pct: 6,  color: "bg-emerald-500" },
-    ],
-  };
+  const { data: rawData, isLoading, isError } = trpc.meta.campaignBreakdown.useQuery(
+    { campaignId, breakdown: apiBreakdown, datePreset: datePreset as any, workspaceId },
+    { enabled }
+  );
 
-  const data = mockData[type] ?? [];
+  // Aggregate by label (API may return multiple rows per label for different dates)
+  const aggregated = useMemo(() => {
+    if (!rawData || rawData.length === 0) return [];
+    const map = new Map<string, { impressions: number; clicks: number; spend: number; reach: number }>();
+    for (const row of rawData) {
+      const existing = map.get(row.label) ?? { impressions: 0, clicks: 0, spend: 0, reach: 0 };
+      existing.impressions += row.impressions;
+      existing.clicks += row.clicks;
+      existing.spend += row.spend;
+      existing.reach += row.reach;
+      map.set(row.label, existing);
+    }
+    const entries = Array.from(map.entries()).map(([lbl, m]) => ({ label: lbl, ...m }));
+    entries.sort((a, b) => b.impressions - a.impressions);
+    return entries;
+  }, [rawData]);
+
+  const totalImpressions = aggregated.reduce((s, r) => s + r.impressions, 0);
+  const hasData = aggregated.length > 0 && totalImpressions > 0;
+
+  // Build display rows with percentage
+  const displayRows = useMemo(() => {
+    if (!hasData) return [];
+    return aggregated.map((row, i) => ({
+      label: row.label,
+      pct: totalImpressions > 0 ? Math.round((row.impressions / totalImpressions) * 100) : 0,
+      impressions: row.impressions,
+      clicks: row.clicks,
+      spend: row.spend,
+      color: BREAKDOWN_COLORS[i % BREAKDOWN_COLORS.length],
+    }));
+  }, [aggregated, hasData, totalImpressions]);
 
   return (
     <div className="space-y-3">
@@ -202,23 +231,48 @@ function BreakdownSection({ type }: { type: "age" | "gender" | "region" | "devic
         <Icon className="w-4 h-4 text-muted-foreground" />
         <span className="text-sm font-medium text-foreground">{label}</span>
       </div>
-      <div className="space-y-2">
-        {data.map((item) => (
-          <div key={item.label} className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground w-28 truncate">{item.label}</span>
-            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${item.color} transition-all duration-500`}
-                style={{ width: `${item.pct}%` }}
-              />
-            </div>
-            <span className="text-xs font-mono text-muted-foreground w-10 text-right">{item.pct}%</span>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center h-24">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : !hasData ? (
+        <div className="text-xs text-muted-foreground text-center py-6">
+          No breakdown data available for this period.
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {displayRows.map((item) => (
+              <div key={item.label} className="group">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-28 truncate" title={item.label}>
+                    {item.label}
+                  </span>
+                  <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${item.color} transition-all duration-500`}
+                      style={{ width: `${Math.max(item.pct, 1)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground w-10 text-right">
+                    {item.pct}%
+                  </span>
+                </div>
+                {/* Hover detail row */}
+                <div className="hidden group-hover:flex items-center gap-4 mt-1 ml-[7.5rem] text-[10px] text-muted-foreground">
+                  <span>Impressions: {item.impressions.toLocaleString()}</span>
+                  <span>Clicks: {item.clicks.toLocaleString()}</span>
+                  <span>Spend: {fmtMoney(item.spend)}</span>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <p className="text-[10px] text-muted-foreground/60 italic mt-2">
-        * Breakdown data is estimated. Connect platform API for exact figures.
-      </p>
+          <p className="text-[10px] text-muted-foreground/60 mt-2">
+            Based on {totalImpressions.toLocaleString()} total impressions
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -228,12 +282,13 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [activeTab, setActiveTab] = useState<DetailTab>("performance");
   const [notes, setNotes] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const { fmt: fmtCurrencyHook } = useCurrency();
   const { activeWorkspace } = useWorkspace();
   const utils = trpc.useUtils();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Data queries ────────────────────────────────────────────────────────
   const { data: daily, isLoading } = trpc.meta.campaignDailyInsights.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id }
@@ -246,6 +301,72 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
   const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
 
+  // ── Notes & Tags (persistent) ──────────────────────────────────────────
+  const campaignKey = campaign?.id ?? "";
+
+  const { data: savedNote } = trpc.campaigns.getNote.useQuery(
+    { campaignKey },
+    { enabled: open && !!campaignKey }
+  );
+
+  const { data: savedTags = [] } = trpc.campaigns.getTags.useQuery(
+    { campaignKey },
+    { enabled: open && !!campaignKey }
+  );
+
+  // Sync notes from server when campaign changes
+  useEffect(() => {
+    if (savedNote !== undefined) {
+      setNotes(savedNote.content);
+    }
+  }, [savedNote]);
+
+  const saveNoteMutation = trpc.campaigns.saveNote.useMutation({
+    onError: () => toast.error("Failed to save note"),
+  });
+
+  const addTagMutation = trpc.campaigns.addTag.useMutation({
+    onSuccess: () => {
+      utils.campaigns.getTags.invalidate({ campaignKey });
+    },
+    onError: () => toast.error("Failed to add tag"),
+  });
+
+  const removeTagMutation = trpc.campaigns.removeTag.useMutation({
+    onSuccess: () => {
+      utils.campaigns.getTags.invalidate({ campaignKey });
+    },
+    onError: () => toast.error("Failed to remove tag"),
+  });
+
+  // Auto-save notes with debounce
+  const handleNotesChange = useCallback((value: string) => {
+    setNotes(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (campaignKey) {
+        saveNoteMutation.mutate({
+          campaignKey,
+          content: value,
+          workspaceId: activeWorkspace?.id,
+        });
+      }
+    }, 1000);
+  }, [campaignKey, activeWorkspace?.id, saveNoteMutation]);
+
+  // Save notes on blur immediately
+  const handleNotesBlur = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (campaignKey && notes !== (savedNote?.content ?? "")) {
+      saveNoteMutation.mutate({
+        campaignKey,
+        content: notes,
+        workspaceId: activeWorkspace?.id,
+      });
+    }
+  }, [campaignKey, notes, savedNote, activeWorkspace?.id, saveNoteMutation]);
+
+  // ── Mutations ───────────────────────────────────────────────────────────
   const toggleMetaStatus = trpc.meta.toggleCampaignStatus.useMutation({
     onSuccess: () => {
       utils.meta.campaigns.invalidate();
@@ -277,14 +398,18 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
   const handleAddTag = () => {
     const t = tagInput.trim();
-    if (t && !tags.includes(t)) {
-      setTags(prev => [...prev, t]);
+    if (t && campaignKey) {
+      addTagMutation.mutate({
+        campaignKey,
+        tag: t,
+        workspaceId: activeWorkspace?.id,
+      });
       setTagInput("");
     }
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(prev => prev.filter(t => t !== tag));
+  const handleRemoveTag = (tagId: number) => {
+    removeTagMutation.mutate({ tagId });
   };
 
   return (
@@ -535,16 +660,16 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
           <TabsContent value="breakdown" className="p-6 space-y-6 mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="rounded-xl border border-border bg-card p-4">
-                <BreakdownSection type="age" />
+                <BreakdownSection type="age" campaignId={campaign?.id ?? ""} datePreset={datePreset} workspaceId={activeWorkspace?.id} enabled={open && !!campaign?.id && activeTab === "breakdown"} fmtMoney={fmtCurrency} />
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
-                <BreakdownSection type="gender" />
+                <BreakdownSection type="gender" campaignId={campaign?.id ?? ""} datePreset={datePreset} workspaceId={activeWorkspace?.id} enabled={open && !!campaign?.id && activeTab === "breakdown"} fmtMoney={fmtCurrency} />
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
-                <BreakdownSection type="region" />
+                <BreakdownSection type="region" campaignId={campaign?.id ?? ""} datePreset={datePreset} workspaceId={activeWorkspace?.id} enabled={open && !!campaign?.id && activeTab === "breakdown"} fmtMoney={fmtCurrency} />
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
-                <BreakdownSection type="device" />
+                <BreakdownSection type="device" campaignId={campaign?.id ?? ""} datePreset={datePreset} workspaceId={activeWorkspace?.id} enabled={open && !!campaign?.id && activeTab === "breakdown"} fmtMoney={fmtCurrency} />
               </div>
             </div>
           </TabsContent>
@@ -558,14 +683,14 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 <span className="text-sm font-medium text-foreground">Tags</span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-3">
-                {tags.length === 0 && (
+                {savedTags.length === 0 && (
                   <span className="text-xs text-muted-foreground">No tags yet. Add one below.</span>
                 )}
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs gap-1 pl-2 pr-1">
-                    {tag}
+                {savedTags.map((t) => (
+                  <Badge key={t.id} variant="secondary" className="text-xs gap-1 pl-2 pr-1">
+                    {t.tag}
                     <button
-                      onClick={() => handleRemoveTag(tag)}
+                      onClick={() => handleRemoveTag(t.id)}
                       className="rounded-full p-0.5 hover:bg-foreground/10"
                     >
                       <X className="w-2.5 h-2.5" />
@@ -597,12 +722,13 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
               </div>
               <textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => handleNotesChange(e.target.value)}
+                onBlur={handleNotesBlur}
                 placeholder="Add notes about this campaign..."
                 className="w-full h-32 px-3 py-2 text-sm border border-input rounded-lg bg-transparent outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground resize-none"
               />
               <p className="text-[10px] text-muted-foreground mt-1.5">
-                Notes are stored locally in this session. Persistent storage coming soon.
+                {saveNoteMutation.isPending ? "Saving..." : "Notes are auto-saved to your account."}
               </p>
             </div>
           </TabsContent>

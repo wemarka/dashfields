@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE campaign_notes (\n\tid serial PRIMARY KEY NOT NULL,\n\tuser_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n\tworkspace_id integer REFERENCES workspaces(id) ON DELETE CASCADE,\n\tcampaign_key varchar(256) NOT NULL,\n\tcontent text NOT NULL,\n\tcreated_at timestamp DEFAULT now() NOT NULL,\n\tupdated_at timestamp DEFAULT now() NOT NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE campaign_notes (\n\tid serial PRIMARY KEY NOT NULL,\n\tuser_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n\tworkspace_id integer REFERENCES workspaces(id) ON DELETE CASCADE,\n\tcampaign_key varchar(256) NOT NULL,\n\tcontent text NOT NULL,\n\tcreated_at timestamp DEFAULT now() NOT NULL,\n\tupdated_at timestamp DEFAULT now() NOT NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1725
+}

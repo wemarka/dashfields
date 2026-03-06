@@ -1,7 +1,7 @@
 // Campaigns.tsx — Unified, Platform-Agnostic Campaign Management
 // A single professional view for ALL campaigns across all platforms.
 import { useState, useMemo, useCallback } from "react";
-import { Plus, RefreshCw, GitCompare, Link2, Download } from "lucide-react";
+import { Plus, RefreshCw, GitCompare, Link2, Download, FileDown } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -275,6 +275,49 @@ export default function Campaigns() {
 
   const isLoading = localLoading || (isMetaConnected && (metaLoading || insightsLoading));
 
+  // ── Export CSV ─────────────────────────────────────────────────────────────
+  const exportCsv = trpc.export.campaignsCsv.useMutation({
+    onSuccess: (result) => {
+      const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${filteredCampaigns.length} campaigns to CSV`);
+    },
+    onError: () => toast.error("Failed to export CSV"),
+  });
+
+  const handleExportCsv = useCallback(() => {
+    if (filteredCampaigns.length === 0) {
+      toast.error("No campaigns to export");
+      return;
+    }
+    exportCsv.mutate({
+      campaigns: filteredCampaigns.map(c => ({
+        name: c.name,
+        status: c.status,
+        platform: c.platform,
+        source: c.source,
+        objective: c.objective ?? null,
+        dailyBudget: c.dailyBudget ?? null,
+        spend: c.spend ?? null,
+        impressions: c.impressions ?? null,
+        clicks: c.clicks ?? null,
+        ctr: c.ctr ?? null,
+        reach: c.reach ?? null,
+        cpc: c.cpc ?? null,
+        cpm: c.cpm ?? null,
+        conversions: c.conversions ?? null,
+      })),
+      datePreset,
+    });
+  }, [filteredCampaigns, datePreset, exportCsv]);
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
@@ -298,6 +341,16 @@ export default function Campaigns() {
                 Refresh
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCsv}
+              disabled={exportCsv.isPending || filteredCampaigns.length === 0}
+              className="gap-1.5"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              {exportCsv.isPending ? "Exporting..." : "Export CSV"}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShowCompare(true)} className="gap-1.5">
               <GitCompare className="w-3.5 h-3.5" />
               {t("campaigns.compare")}

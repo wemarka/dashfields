@@ -1,0 +1,9 @@
+{
+  "query": "CREATE UNIQUE INDEX campaign_notes_user_campaign_idx ON campaign_notes (user_id, campaign_key);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE UNIQUE INDEX campaign_notes_user_campaign_idx ON campaign_notes (user_id, campaign_key);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1841
+}

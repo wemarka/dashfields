@@ -1896,3 +1896,25 @@
 - [x] Support comparing more than 2 campaigns (up to 4)
 - [x] Radar chart for visual comparison
 - [x] Export comparison as image (placeholder)
+
+## 🔄 Phase — Campaign Enhancements Part 2
+
+### Enhancement 1: Real Meta Breakdown Data
+- [x] Add getCampaignBreakdown function in meta service (age, gender, region, device)
+- [x] Add meta.campaignBreakdown tRPC endpoint
+- [x] Integrate real breakdown data into CampaignDetailDrawer breakdown tabs
+- [x] Fallback to "No data available" message when API returns empty
+
+### Enhancement 2: CSV/PDF Export for Campaign Table
+- [x] Add campaigns.exportCsv tRPC endpoint (server-side CSV generation)
+- [x] Add Export button in Campaigns page header
+- [x] Support exporting with applied filters
+- [x] Download CSV file in browser
+
+### Enhancement 3: Persistent Notes & Tags
+- [x] Create campaign_notes table in Supabase
+- [x] Create campaign_tags table in Supabase
+- [x] Add server/routers for notes CRUD (create, list, delete)
+- [x] Add server/routers for tags CRUD (add, list, remove)
+- [x] Connect CampaignDetailDrawer notes/tags UI to database
+- [x] Auto-save notes on blur/debounce (1s debounce + blur save)
