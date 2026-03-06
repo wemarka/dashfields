@@ -1918,3 +1918,23 @@
 - [x] Add server/routers for tags CRUD (add, list, remove)
 - [x] Connect CampaignDetailDrawer notes/tags UI to database
 - [x] Auto-save notes on blur/debounce (1s debounce + blur save)
+
+## 🔄 Phase — Campaign Enhancements Round 3
+
+### Enhancement 1: Filter Campaigns by Tags
+- [x] Add getAllUserTags endpoint to return all unique tags for the user
+- [x] Add tag filter option in CampaignFilters component
+- [x] Filter campaigns client-side by selected tags
+- [x] Show tag filter chips in active filters bar
+
+### Enhancement 2: Single Campaign PDF Report
+- [x] Add server endpoint to generate HTML report for a campaign (campaignReport)
+- [x] Include campaign summary, KPIs, daily performance chart (SVG bars)
+- [x] Add "Download Report" button in CampaignDetailDrawer + open in new tab
+- [x] Server generates HTML report, user prints to PDF via Ctrl+P
+
+### Enhancement 3: Budget Overspend Notifications
+- [x] Use 80% threshold constant in cron job (configurable)
+- [x] Check campaign spend vs budget in existing cron job (real Meta API + local)
+- [x] Send in-app notification + push notification via notifyOwner when threshold exceeded
+- [x] Check both Meta API campaigns and local campaigns with budgets

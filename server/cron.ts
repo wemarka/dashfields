@@ -307,53 +307,136 @@ export async function runCronJob(): Promise<{
     errors.push(`Auto-publish: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // ── 2. Check budget thresholds ────────────────────────────────────────────
-  const PLATFORM_SEEDS: Record<string, number> = {
-    facebook: 11, instagram: 22, tiktok: 33, twitter: 44,
-    linkedin: 55, youtube: 66, snapchat: 77, pinterest: 88,
-  };
-  const DEFAULT_BUDGETS: Record<string, { daily: number; monthly: number }> = {
-    facebook: { daily: 500, monthly: 15000 },
-    instagram: { daily: 300, monthly: 9000 },
-    tiktok: { daily: 200, monthly: 6000 },
-    twitter: { daily: 150, monthly: 4500 },
-    linkedin: { daily: 400, monthly: 12000 },
-    youtube: { daily: 250, monthly: 7500 },
-    snapchat: { daily: 100, monthly: 3000 },
-    pinterest: { daily: 80, monthly: 2400 },
-  };
-
+  // ── 2. Check campaign budget thresholds (real Meta API data) ────────────────
   let budgetAlertsChecked = 0;
+  const BUDGET_ALERT_THRESHOLD = 80; // percentage
 
   try {
-    const overBudgetPlatforms: string[] = [];
+    // Get all active Meta ad accounts
+    const { data: metaAccounts } = await sb
+      .from("social_accounts")
+      .select("id, user_id, platform_account_id, access_token, name")
+      .eq("platform", "facebook")
+      .eq("is_active", true)
+      .not("access_token", "is", null)
+      .not("platform_account_id", "is", null);
 
-    for (const [platform, seed] of Object.entries(PLATFORM_SEEDS)) {
-      const rng = (n: number) => Math.abs(Math.sin(seed * n));
-      const budget = DEFAULT_BUDGETS[platform];
-      const dailySpend = Math.round(budget.daily * (0.4 + rng(1) * 0.7));
-      const dailyPercent = Math.round((dailySpend / budget.daily) * 100);
+    for (const acc of (metaAccounts ?? []) as Record<string, unknown>[]) {
+      try {
+        const token = acc.access_token as string;
+        const adAccountId = acc.platform_account_id as string;
+        const userId = acc.user_id as number;
 
-      budgetAlertsChecked++;
+        if (!token || !adAccountId) continue;
 
-      if (dailyPercent >= 80) {
-        overBudgetPlatforms.push(
-          `${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${dailyPercent}% of daily budget`
+        // Fetch campaigns with their daily budgets
+        const { getMetaCampaigns, getCampaignInsights } = await import("./services/integrations/meta");
+        const campaigns = await getMetaCampaigns(adAccountId, token, 100);
+        const activeCampaigns = campaigns.filter(c => 
+          c.effective_status === "ACTIVE" && c.daily_budget
         );
+
+        if (activeCampaigns.length === 0) continue;
+
+        // Fetch today's insights for active campaigns
+        const insights = await getCampaignInsights(adAccountId, token, "today", 100);
+        const insightMap = new Map<string, { spend: number }>(
+          insights.map(i => [i.campaign_id ?? "", { spend: parseFloat(i.spend ?? "0") }])
+        );
+
+        const overBudgetCampaigns: string[] = [];
+
+        for (const campaign of activeCampaigns) {
+          budgetAlertsChecked++;
+          const dailyBudget = parseFloat(campaign.daily_budget ?? "0") / 100; // Meta stores in cents
+          if (dailyBudget <= 0) continue;
+
+          const insight = insightMap.get(campaign.id);
+          const todaySpend = insight?.spend ?? 0;
+          const spendPercent = Math.round((todaySpend / dailyBudget) * 100);
+
+          if (spendPercent >= BUDGET_ALERT_THRESHOLD) {
+            overBudgetCampaigns.push(
+              `${campaign.name}: $${todaySpend.toFixed(2)} / $${dailyBudget.toFixed(2)} (${spendPercent}%)`
+            );
+          }
+        }
+
+        if (overBudgetCampaigns.length > 0) {
+          // Create in-app notification
+          await sb.from("notifications").insert({
+            user_id: userId,
+            title: `Budget Alert: ${overBudgetCampaigns.length} campaign(s) at ${BUDGET_ALERT_THRESHOLD}%+`,
+            message: [
+              `The following campaigns have reached ${BUDGET_ALERT_THRESHOLD}% or more of their daily budget:`,
+              "",
+              ...overBudgetCampaigns.map(c => `- ${c}`),
+              "",
+              "Review your campaigns to manage spending.",
+            ].join("\n"),
+            type: "warning",
+            read: false,
+          } as Record<string, unknown>);
+
+          // Also notify owner via push
+          await notifyOwner({
+            title: `Budget Alert: ${overBudgetCampaigns.length} campaign(s) at ${BUDGET_ALERT_THRESHOLD}%+`,
+            content: [
+              `Account: ${acc.name ?? adAccountId}`,
+              `The following campaigns have reached ${BUDGET_ALERT_THRESHOLD}% or more of their daily budget:`,
+              "",
+              ...overBudgetCampaigns.map(c => `- ${c}`),
+              "",
+              "Log in to Dashfields to review your budget settings.",
+            ].join("\n"),
+          });
+
+          console.log(`[Cron] Budget alert: ${overBudgetCampaigns.length} campaigns over ${BUDGET_ALERT_THRESHOLD}% for account ${acc.name}`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        errors.push(`Budget check (${acc.name}): ${msg}`);
+        console.error(`[Cron] Budget check error for ${acc.name}:`, msg);
       }
     }
 
-    if (overBudgetPlatforms.length > 0) {
-      await notifyOwner({
-        title: `⚠️ Budget Alert: ${overBudgetPlatforms.length} platform(s) at 80%+`,
-        content: [
-          "The following platforms have reached 80% or more of their daily budget:",
-          "",
-          ...overBudgetPlatforms.map((p) => `• ${p}`),
-          "",
-          "Log in to Dashfields to review your budget settings.",
-        ].join("\n"),
-      });
+    // Also check local campaigns with budgets
+    try {
+      const { data: localCampaigns } = await sb
+        .from("campaigns")
+        .select("id, user_id, name, budget, budget_type")
+        .eq("status", "active")
+        .not("budget", "is", null);
+
+      for (const lc of (localCampaigns ?? []) as Record<string, unknown>[]) {
+        budgetAlertsChecked++;
+        const budget = Number(lc.budget ?? 0);
+        if (budget <= 0) continue;
+
+        const today = now.toISOString().split("T")[0];
+        const { data: todayMetrics } = await sb
+          .from("campaign_metrics")
+          .select("spend")
+          .eq("campaign_id", lc.id as number)
+          .gte("date", today)
+          .lte("date", today + "T23:59:59");
+
+        const todaySpend = (todayMetrics ?? []).reduce((s, m) => s + Number(m.spend ?? 0), 0);
+        const spendPercent = Math.round((todaySpend / budget) * 100);
+
+        if (spendPercent >= BUDGET_ALERT_THRESHOLD) {
+          await sb.from("notifications").insert({
+            user_id: lc.user_id,
+            title: `Budget Alert: ${lc.name}`,
+            message: `Campaign "${lc.name}" has spent $${todaySpend.toFixed(2)} of $${budget.toFixed(2)} daily budget (${spendPercent}%).`,
+            type: "warning",
+            read: false,
+          } as Record<string, unknown>);
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`Local budget check: ${msg}`);
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

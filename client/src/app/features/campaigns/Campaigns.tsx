@@ -39,10 +39,19 @@ export default function Campaigns() {
   const [showBuilder, setShowBuilder] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [statusTogglePending, setStatusTogglePending] = useState<string | null>(null);
+  const [tagFilter, setTagFilter] = useState("all");
 
   // ── Data fetching ──────────────────────────────────────────────────────────
   const { data: localCampaigns = [], isLoading: localLoading } =
     trpc.campaigns.list.useQuery({ workspaceId: activeWorkspace?.id });
+
+  // Tags data for filtering
+  const { data: allTags = [] } = trpc.campaigns.allTags.useQuery(
+    { workspaceId: activeWorkspace?.id },
+  );
+  const { data: tagMap = {} } = trpc.campaigns.tagMap.useQuery(
+    { workspaceId: activeWorkspace?.id },
+  );
 
   const { data: accounts = [] } =
     trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
@@ -177,9 +186,14 @@ export default function Campaigns() {
         if (platformFilter === "local" && c.source !== "local") return false;
         if (platformFilter !== "local" && c.platform !== platformFilter) return false;
       }
+      // Tag filter: check if campaign has the selected tag
+      if (tagFilter !== "all") {
+        const campaignTags = tagMap[c.id] ?? [];
+        if (!campaignTags.includes(tagFilter)) return false;
+      }
       return true;
     });
-  }, [unifiedCampaigns, search, statusFilter, platformFilter]);
+  }, [unifiedCampaigns, search, statusFilter, platformFilter, tagFilter, tagMap]);
 
   // ── KPI aggregation ────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
@@ -207,6 +221,7 @@ export default function Campaigns() {
     statusFilter !== "all",
     platformFilter !== "all",
     datePreset !== "last_30d",
+    tagFilter !== "all",
   ].filter(Boolean).length;
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -255,6 +270,7 @@ export default function Campaigns() {
     setPlatformFilter("all");
     setDatePreset("last_30d");
     setCustomDateRange(undefined);
+    setTagFilter("all");
   }, []);
 
   const handleBulkAction = useCallback((action: "pause" | "activate" | "delete", ids: string[]) => {
@@ -412,6 +428,9 @@ export default function Campaigns() {
           onClearFilters={handleClearFilters}
           customDateRange={customDateRange}
           onCustomDateRangeChange={setCustomDateRange}
+          tagFilter={tagFilter}
+          onTagFilterChange={setTagFilter}
+          availableTags={allTags}
         />
 
         {/* Unified Campaign Table */}

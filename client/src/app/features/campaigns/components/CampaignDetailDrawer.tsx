@@ -22,7 +22,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/core/components/ui/t
 import {
   Loader2, TrendingUp, MousePointerClick, DollarSign, Eye,
   Play, Pause, Pencil, Copy, ExternalLink, Tag, MessageSquare,
-  Users, MapPin, Monitor, Calendar, Check, X,
+  Users, MapPin, Monitor, Calendar, Check, X, FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
@@ -384,6 +384,48 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     onError: (err) => toast.error("Failed to update budget", { description: err.message }),
   });
 
+  // ── Export campaign report ─────────────────────────────────────────────
+  const exportReport = trpc.export.campaignReport.useMutation({
+    onSuccess: (result) => {
+      const blob = new Blob([result.html], { type: "text/html;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      toast.success("Report opened in new tab. Use Ctrl+P to save as PDF.");
+    },
+    onError: () => toast.error("Failed to generate report"),
+  });
+
+  const handleDownloadReport = useCallback(() => {
+    if (!campaign) return;
+    exportReport.mutate({
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      status: campaign.status,
+      objective: campaign.objective,
+      platform: "facebook",
+      source: "api",
+      dailyBudget: campaign.dailyBudget ?? null,
+      lifetimeBudget: campaign.lifetimeBudget ?? null,
+      spend: campaignInsight ? Number(campaignInsight.spend) : null,
+      impressions: campaignInsight ? Number(campaignInsight.impressions) : null,
+      clicks: campaignInsight ? Number(campaignInsight.clicks) : null,
+      ctr: campaignInsight ? Number(campaignInsight.ctr) : null,
+      reach: campaignInsight ? Number(campaignInsight.reach) : null,
+      cpc: campaignInsight ? Number(campaignInsight.cpc) : null,
+      cpm: campaignInsight ? Number(campaignInsight.cpm) : null,
+      dailyData: (daily ?? []).map(d => ({
+        date: d.date ?? "",
+        spend: Number(d.spend ?? 0),
+        impressions: Number(d.impressions ?? 0),
+        clicks: Number(d.clicks ?? 0),
+        reach: Number(d.reach ?? 0),
+      })),
+      notes: notes || undefined,
+      tags: savedTags.map(t => t.tag),
+      datePreset,
+    });
+  }, [campaign, campaignInsight, daily, notes, savedTags, datePreset, exportReport]);
+
   const fmt = (n: number) =>
     n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` :
     n >= 1_000     ? `${(n / 1_000).toFixed(1)}K` :
@@ -485,11 +527,25 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs gap-1.5 ml-auto"
+              className="h-7 text-xs gap-1.5"
               onClick={() => toast.info("Clone feature coming soon")}
             >
               <Copy className="w-3 h-3" />
               Clone
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1.5 ml-auto"
+              onClick={handleDownloadReport}
+              disabled={exportReport.isPending}
+            >
+              {exportReport.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <FileDown className="w-3 h-3" />
+              )}
+              {exportReport.isPending ? "Generating..." : "Download Report"}
             </Button>
           </div>
 

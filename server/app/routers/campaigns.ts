@@ -255,6 +255,46 @@ export const campaignsRouter = router({
       return { success: true };
     }),
 
+  /** Get all unique tags for the current user (for filter dropdown) */
+  allTags: protectedProcedure
+    .input(z.object({ workspaceId: z.number().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("campaign_tags")
+        .select("tag")
+        .eq("user_id", ctx.user.id);
+      if (input?.workspaceId) {
+        query = query.eq("workspace_id", input.workspaceId);
+      }
+      const { data } = await query;
+      // Deduplicate
+      const unique = Array.from(new Set((data ?? []).map(t => t.tag as string)));
+      return unique.sort();
+    }),
+
+  /** Get campaign_key -> tags[] mapping for all campaigns (for client-side tag filtering) */
+  tagMap: protectedProcedure
+    .input(z.object({ workspaceId: z.number().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("campaign_tags")
+        .select("campaign_key, tag")
+        .eq("user_id", ctx.user.id);
+      if (input?.workspaceId) {
+        query = query.eq("workspace_id", input.workspaceId);
+      }
+      const { data } = await query;
+      const map: Record<string, string[]> = {};
+      for (const row of (data ?? [])) {
+        const key = row.campaign_key as string;
+        if (!map[key]) map[key] = [];
+        map[key].push(row.tag as string);
+      }
+      return map;
+    }),
+
   /** Remove a tag from a campaign */
   removeTag: protectedProcedure
     .input(z.object({ tagId: z.number() }))

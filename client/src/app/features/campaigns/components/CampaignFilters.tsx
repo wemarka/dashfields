@@ -40,6 +40,10 @@ interface CampaignFiltersProps {
   // Custom date range
   customDateRange?: DateRange;
   onCustomDateRangeChange?: (range: DateRange | undefined) => void;
+  // Tag filter
+  tagFilter: string;
+  onTagFilterChange: (v: string) => void;
+  availableTags: string[];
 }
 
 const STATUS_OPTIONS = [
@@ -81,6 +85,8 @@ export function CampaignFilters({
   onClearFilters,
   customDateRange,
   onCustomDateRangeChange,
+  tagFilter, onTagFilterChange,
+  availableTags,
 }: CampaignFiltersProps) {
   const { t } = useTranslation();
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -131,8 +137,16 @@ export function CampaignFilters({
       });
     }
 
+    if (tagFilter !== "all") {
+      chips.push({
+        key: "tag",
+        label: `Tag: ${tagFilter}`,
+        onRemove: () => onTagFilterChange("all"),
+      });
+    }
+
     return chips;
-  }, [search, statusFilter, platformFilter, datePreset, customDateRange, onSearchChange, onStatusFilterChange, onPlatformFilterChange, onDatePresetChange, onCustomDateRangeChange]);
+  }, [search, statusFilter, platformFilter, datePreset, customDateRange, tagFilter, onSearchChange, onStatusFilterChange, onPlatformFilterChange, onDatePresetChange, onCustomDateRangeChange, onTagFilterChange]);
 
   // Format date range display
   const dateDisplayLabel = useMemo(() => {
@@ -212,6 +226,26 @@ export function CampaignFilters({
             </SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Tag filter */}
+        {availableTags.length > 0 && (
+          <Select value={tagFilter} onValueChange={onTagFilterChange}>
+            <SelectTrigger className="h-9 w-[140px] text-xs">
+              <SelectValue placeholder="Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-xs">All Tags</SelectItem>
+              {availableTags.map((tag) => (
+                <SelectItem key={tag} value={tag} className="text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+                    {tag}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         {/* Date Range Picker */}
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
