@@ -3,6 +3,11 @@
 
 const META_GRAPH_BASE = "https://graph.facebook.com/v19.0";
 
+/** Ensure ad account ID has the required act_ prefix */
+function ensureActPrefix(id: string): string {
+  return id.startsWith("act_") ? id : `act_${id}`;
+}
+
 export interface MetaInsight {
   campaign_id?: string;
   campaign_name?: string;
@@ -88,7 +93,7 @@ export async function getMetaCampaigns(
   limit = 25
 ): Promise<MetaCampaign[]> {
   const data = await metaGet<{ data: MetaCampaign[] }>(
-    `${adAccountId}/campaigns`,
+    `${ensureActPrefix(adAccountId)}/campaigns`,
     accessToken,
     {
       fields: "id,name,status,effective_status,objective,daily_budget,lifetime_budget,start_time,stop_time,created_time",
@@ -105,7 +110,7 @@ export async function getAccountInsights(
   datePreset = "last_30d"
 ): Promise<MetaInsight[]> {
   const data = await metaGet<{ data: MetaInsight[] }>(
-    `${adAccountId}/insights`,
+    `${ensureActPrefix(adAccountId)}/insights`,
     accessToken,
     {
       fields: "impressions,reach,clicks,spend,ctr,cpc,cpm,frequency,actions",
@@ -123,7 +128,7 @@ export async function getCampaignInsights(
   limit = 25
 ): Promise<MetaInsight[]> {
   const data = await metaGet<{ data: MetaInsight[] }>(
-    `${adAccountId}/insights`,
+    `${ensureActPrefix(adAccountId)}/insights`,
     accessToken,
     {
       level: "campaign",
@@ -149,7 +154,7 @@ export async function createMetaCampaign(
     stopTime?: string;
   }
 ): Promise<{ id: string; name: string }> {
-  const url = new URL(`${META_GRAPH_BASE}/${adAccountId}/campaigns`);
+  const url = new URL(`${META_GRAPH_BASE}/${ensureActPrefix(adAccountId)}/campaigns`);
   url.searchParams.set("access_token", accessToken);
   const body = new URLSearchParams();
   body.set("name", params.name);

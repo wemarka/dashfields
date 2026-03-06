@@ -61,7 +61,7 @@ export const schedulerRouter = router({
       // 2. Fetch current insights
       let metrics: MetricValues;
       try {
-        const rawArr = await getAccountInsights(account.access_token, account.platform_account_id, input.datePreset);
+        const rawArr = await getAccountInsights(account.platform_account_id, account.access_token, input.datePreset);
         const raw = rawArr[0];
         if (!raw) return { triggered: 0, skipped: true, reason: "No insights data for this period" };
         metrics = {
