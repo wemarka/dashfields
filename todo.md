@@ -2078,3 +2078,24 @@
 - [x] Ad Sets / Creatives / Heatmap tabs auto-filter by selected campaign
 - [x] Add visual indicator in Overview showing which campaign is selected
 - [x] Allow clicking the same campaign again to deselect
+
+## ✅ Phase 64 — Revert to Drawer-Centric Campaigns Page
+
+### Phase 64A — Revert Campaigns.tsx
+- [x] Remove page-level tabs (Overview, Ad Sets, Creatives, Heatmap) from Campaigns.tsx
+- [x] Restore original Campaigns.tsx with just the campaign table + KPI cards + filters
+- [x] Clicking a campaign row opens the Drawer (not filter toggle)
+- [x] Remove campaignFilter state and related banners
+
+### Phase 64B — Build World-Class CampaignDetailDrawer
+- [x] Redesign CampaignDetailDrawer with professional global-standard UI
+- [x] Integrate Ad Sets tab with full table, budget pacing, expandable details
+- [x] Integrate Creatives tab with grid, filter/sort, A/B compare, platform previews
+- [x] Integrate Heatmap tab inside the drawer
+- [x] Keep existing tabs: Performance, Breakdown, Notes & Tags (6 tabs total)
+- [x] Add smooth transitions and polished micro-interactions
+
+### Phase 64C — Cleanup
+- [x] Standalone pages kept as fallback routes
+- [x] Navigation updated
+- [x] All TypeScript compiles (0 errors), 34 new tests + 124 existing tests passing
