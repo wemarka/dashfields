@@ -176,22 +176,15 @@ function MarketingRouter() {
 }
 
 // ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
-
-// ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
 // DashboardLayout is the single shared wrapper for ALL authenticated app routes.
-// Auth/public routes (login, register, landing) are rendered OUTSIDE the layout.
+// Auth/public routes (login, register) are rendered OUTSIDE the layout.
+// The root "/" redirects to "/dashboard" since this is the app subdomain.
 function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        {/* ── Public / Landing routes (NO DashboardLayout) ──────────────── */}
-        <Route path="/"                     component={LandingPage} />
-        <Route path="/privacy"              component={PrivacyPage} />
-        <Route path="/terms"                component={TermsPage} />
-        <Route path="/demo"                 component={DemoPage} />
-        <Route path="/changelog"            component={ChangelogPage} />
-        <Route path="/blog/:slug"           component={BlogPage} />
-        <Route path="/blog"                 component={BlogPage} />
+        {/* ── Root: redirect to dashboard on app domain ─────────────────── */}
+        <Route path="/"                     component={() => <Redirect to="/dashboard" />} />
         {/* ── Auth routes (NO DashboardLayout) ──────────────────────────── */}
         <Route path="/login"                component={LoginPage} />
         <Route path="/register"             component={RegisterPage} />

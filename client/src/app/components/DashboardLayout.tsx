@@ -507,20 +507,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // ── Unauthenticated — auto-redirect to /login ────────────────────────────────
-  if (!loading && !isAuthenticated) {
-    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-      const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-      window.location.href = `/login?returnTo=${returnTo}`;
-    }
-    return (
-      <div className="app-bg flex h-screen items-center justify-center">
-        <div className="glass rounded-2xl p-8 flex flex-col items-center gap-4 animate-fade-in">
-          <div className="w-10 h-10 rounded-xl bg-brand/10 animate-pulse" />
-          <p className="text-sm text-muted-foreground">{t("auth.loading")}</p>
-        </div>
-      </div>
-    );
+  // ── Unauthenticated — redirect to /login using Wouter (no full page reload) ────────
+  if (!isAuthenticated) {
+    const returnTo = encodeURIComponent(location + (typeof window !== "undefined" ? window.location.search : ""));
+    setLocation(`/login?returnTo=${returnTo}`);
+    return null;
   }
 
   // ── Layout ───────────────────────────────────────────────────────────────
