@@ -1822,3 +1822,17 @@
 - [x] Update MetaCampaignTable to show account name under campaign name
 - [x] Write meta-multi-account.test.ts (16 tests: ensureActPrefix, token filtering, campaign aggregation, query strategy)
 - [x] All 426 tests passing, 0 TypeScript errors
+
+## 🎨 Campaigns Page Redesign — World-Class Platform-Agnostic Design
+- [x] Remove all Meta-specific branding/colors from Campaigns page
+- [x] Design unified campaign card/table that works for ALL platforms
+- [x] Platform-agnostic KPI cards (no Meta-specific styling)
+- [x] Unified campaign table with platform column (icon + name)
+- [x] Remove separate "Meta Campaigns" vs "Local Campaigns" tables — merge into one
+- [x] Professional filter bar (search, status, platform, date range)
+- [x] Modern empty state design
+- [ ] Campaign detail drawer redesign (platform-agnostic)
+- [x] Responsive design for mobile/tablet
+- [ ] Establish design system tokens for reuse across all pages
+- [x] Write unified-campaigns.test.ts (35 tests: data transformation, filtering, KPI aggregation, sorting, edge cases)
+- [x] All 461 tests passing, 0 TypeScript errors
