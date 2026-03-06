@@ -323,6 +323,33 @@ async function metaGetPages(token: string) {
 }
 
 // ─── Register all OAuth routes ─────────────────────────────────────────────────
+/**
+ * Return a minimal HTML page that sends a postMessage to the opener window
+ * and then closes itself. This avoids loading the full React app in the popup
+ * (which would trigger DashboardLayout auth checks and redirect to /login).
+ */
+function buildOAuthResultHtml(result: { success: boolean; platform: string; summary?: string; error?: string; name?: string; accounts?: number }, fallbackUrl: string): string {
+  const payload = JSON.stringify({ type: "oauth-complete", ...result });
+  return [
+    '<!DOCTYPE html><html><head><title>Connecting...</title></head><body>',
+    '<script>',
+    'try {',
+    '  var data = ' + payload + ';',
+    '  if (window.opener) {',
+    '    window.opener.postMessage(data, "*");',
+    '    setTimeout(function() { window.close(); }, 300);',
+    '  } else {',
+    '    window.location.href = ' + JSON.stringify(fallbackUrl) + ';',
+    '  }',
+    '} catch(e) {',
+    '  window.location.href = ' + JSON.stringify(fallbackUrl) + ';',
+    '}',
+    '</script>',
+    '<p style="font-family:system-ui;text-align:center;margin-top:40vh;color:#666">Completing connection...</p>',
+    '</body></html>',
+  ].join('\n');
+}
+
 export function registerPlatformOAuthRoutes(app: Express) {
 
   // ── Initiate OAuth ────────────────────────────────────────────────────────────
@@ -346,7 +373,8 @@ export function registerPlatformOAuthRoutes(app: Express) {
       : (process.env[`${platform.toUpperCase()}_CLIENT_ID`] ?? "");
 
     if (!clientId) {
-      return res.redirect(`${origin}${returnPath}?oauth_error=not_configured&platform=${platform}`);
+      const fallbackUrl = `${origin}${returnPath}?oauth_error=not_configured&platform=${platform}`;
+      return res.send(buildOAuthResultHtml({ success: false, platform, error: "not_configured" }, fallbackUrl));
     }
 
     const redirectUri = `${origin}/api/oauth/${platform}/callback`;
@@ -390,12 +418,14 @@ export function registerPlatformOAuthRoutes(app: Express) {
     const workspaceId = stateEntry?.data.workspaceId ? Number(stateEntry.data.workspaceId) : null;
 
     if (error || !code) {
-      return res.redirect(`${origin}${returnPath}?oauth_error=${encodeURIComponent(error || "no_code")}&platform=${platform}`);
+      const fallbackUrl = `${origin}${returnPath}?oauth_error=${encodeURIComponent(error || "no_code")}&platform=${platform}`;
+      return res.send(buildOAuthResultHtml({ success: false, platform, error: error || "no_code" }, fallbackUrl));
     }
 
     const config = OAUTH_CONFIGS[platform];
     if (!config) {
-      return res.redirect(`${origin}${returnPath}?oauth_error=unsupported&platform=${platform}`);
+      const fallbackUrl = `${origin}${returnPath}?oauth_error=unsupported&platform=${platform}`;
+      return res.send(buildOAuthResultHtml({ success: false, platform, error: "unsupported" }, fallbackUrl));
     }
 
     // Resolve user ID — try multiple strategies
@@ -416,7 +446,8 @@ export function registerPlatformOAuthRoutes(app: Express) {
     }
 
     if (!userId) {
-      return res.redirect(`${origin}${returnPath}?oauth_error=not_authenticated&platform=${platform}`);
+      const fallbackUrl = `${origin}${returnPath}?oauth_error=not_authenticated&platform=${platform}`;
+      return res.send(buildOAuthResultHtml({ success: false, platform, error: "not_authenticated" }, fallbackUrl));
     }
 
     try {
@@ -479,7 +510,8 @@ export function registerPlatformOAuthRoutes(app: Express) {
         }
 
         const summary = [fbCount > 0 ? `${fbCount} Facebook` : "", igCount > 0 ? `${igCount} Instagram` : ""].filter(Boolean).join(", ");
-        return res.redirect(`${origin}${returnPath}?oauth_success=true&platform=meta&accounts=${fbCount + igCount}&summary=${encodeURIComponent(summary)}`);
+        const fallbackUrl = `${origin}${returnPath}?oauth_success=true&platform=meta&accounts=${fbCount + igCount}&summary=${encodeURIComponent(summary)}`;
+        return res.send(buildOAuthResultHtml({ success: true, platform: "meta", summary, accounts: fbCount + igCount }, fallbackUrl));
       }
 
       // ── Generic platforms ─────────────────────────────────────────────────────
@@ -487,7 +519,8 @@ export function registerPlatformOAuthRoutes(app: Express) {
       const clientSecret = process.env[`${platform.toUpperCase()}_CLIENT_SECRET`] ?? "";
 
       if (!clientId || !clientSecret) {
-        return res.redirect(`${origin}${returnPath}?oauth_error=not_configured&platform=${platform}`);
+        const fallbackUrl = `${origin}${returnPath}?oauth_error=not_configured&platform=${platform}`;
+        return res.send(buildOAuthResultHtml({ success: false, platform, error: "not_configured" }, fallbackUrl));
       }
 
       const redirectUri = `${origin}/api/oauth/${platform}/callback`;
@@ -529,12 +562,15 @@ export function registerPlatformOAuthRoutes(app: Express) {
         metadata:          { connectedAt: new Date().toISOString() },
       });
 
-      return res.redirect(`${origin}${returnPath}?oauth_success=true&platform=${platform}&name=${encodeURIComponent(userInfo?.name ?? "")}`);
+      const displayName = userInfo?.name ?? "";
+      const fallbackUrl = `${origin}${returnPath}?oauth_success=true&platform=${platform}&name=${encodeURIComponent(displayName)}`;
+      return res.send(buildOAuthResultHtml({ success: true, platform, name: displayName }, fallbackUrl));
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[OAuth] ${platform} callback error:`, msg);
-      return res.redirect(`${origin}${returnPath}?oauth_error=${encodeURIComponent(msg)}&platform=${platform}`);
+      const fallbackUrl = `${origin}${returnPath}?oauth_error=${encodeURIComponent(msg)}&platform=${platform}`;
+      return res.send(buildOAuthResultHtml({ success: false, platform, error: msg }, fallbackUrl));
     }
   });
 }
