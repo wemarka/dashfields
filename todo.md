@@ -2025,3 +2025,23 @@
 - [x] bulkPauseAds tRPC mutation in meta router
 - [x] Confirmation dialog before bulk pause
 - [x] Success/error toast with count of affected ads
+
+## ✅ Phase 61 — Budget Pacing + A/B Compare + Ad Set Scheduling + Tabs Fix
+
+### Bug Fix — Tabs Blue Outline
+- [x] Remove browser default focus outline on Tab buttons (use custom focus-visible ring instead)
+
+### Phase 61A — Ad Set Budget Pacing
+- [x] Add budget pacing progress bar in AdSetsPage rows
+- [x] Show daily/total spend vs budget with % indicator
+- [x] Warning badge when pacing > 80%
+
+### Phase 61B — Creative A/B Comparison
+- [x] Add "Compare" button on CreativeCard (visible when 2 cards selected)
+- [x] CreativeCompareDrawer component — side-by-side metrics with bar chart
+- [x] Key metrics: CTR, CPC, CPM, Impressions, Spend, Clicks
+
+### Phase 61C — Ad Set Scheduling (Best Time)
+- [x] "Best Time" button in AdSetsPage row actions
+- [x] Derive best hours from CreativeHeatmap data per ad set
+- [x] Show recommended schedule modal with top 3 time slots

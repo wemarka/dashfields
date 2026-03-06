@@ -25,6 +25,7 @@ import {
   Eye,
   MousePointerClick,
   ArrowUpDown,
+  Clock,
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { Button } from "@/core/components/ui/button";
@@ -40,6 +41,7 @@ import {
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useCurrency } from "@/shared/hooks/useCurrency";
+import { AdSetScheduleModal } from "./AdSetScheduleModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type StatusFilter = "all" | "active" | "paused" | "archived";
@@ -263,6 +265,7 @@ export default function AdSetsPage() {
   const [sortField, setSortField]     = useState<SortField>("spend");
   const [sortDir, setSortDir]         = useState<SortDir>("desc");
   const [expandedId, setExpandedId]   = useState<string | null>(null);
+  const [scheduleAdSet, setScheduleAdSet] = useState<AdSetRow | null>(null);
 
   const { data: rawAdSets = [], isLoading, refetch } = trpc.meta.allAdSets.useQuery({
     datePreset,
@@ -330,6 +333,7 @@ export default function AdSetsPage() {
   );
 
   return (
+    <>
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -478,12 +482,33 @@ export default function AdSetsPage() {
                       <p className="text-xs text-muted-foreground truncate">{adset.campaignName}</p>
                     </div>
 
-                    {/* Budget */}
-                    <div className="self-center text-right">
+                    {/* Budget + Pacing */}
+                    <div className="self-center">
                       {budget != null ? (
-                        <span className="text-sm font-medium text-foreground">
-                          {fmtMoney(budget)}<span className="text-xs text-muted-foreground">{budgetLabel}</span>
-                        </span>
+                        <>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-muted-foreground">{fmtMoney(budget)}{budgetLabel}</span>
+                            {adset.insights && (() => {
+                              const pct = Math.min((adset.insights.spend / budget) * 100, 100);
+                              return (
+                                <span className={`text-xs font-medium ${pct >= 90 ? 'text-red-400' : pct >= 80 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                  {pct.toFixed(0)}%
+                                </span>
+                              );
+                            })()}
+                          </div>
+                          {adset.insights && (() => {
+                            const pct = Math.min((adset.insights.spend / budget) * 100, 100);
+                            return (
+                              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all ${pct >= 90 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            );
+                          })()}
+                        </>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
@@ -517,8 +542,15 @@ export default function AdSetsPage() {
                       </span>
                     </div>
 
-                    {/* Expand toggle */}
-                    <div className="self-center flex justify-center">
+                    {/* Actions: Schedule + Expand */}
+                    <div className="self-center flex items-center justify-center gap-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setScheduleAdSet(adset); }}
+                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        title="View best schedule times"
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                      </button>
                       {isExpanded
                         ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
                         : <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -542,5 +574,15 @@ export default function AdSetsPage() {
         )}
       </div>
     </div>
+
+    {/* Schedule Modal */}
+    {scheduleAdSet && (
+      <AdSetScheduleModal
+        adSet={scheduleAdSet}
+        heatmapData={[]}
+        onClose={() => setScheduleAdSet(null)}
+      />
+    )}
+    </>
   );
 }

@@ -30,6 +30,7 @@ import {
   CheckSquare,
   Square,
   X,
+  BarChart2,
 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { Button } from "@/core/components/ui/button";
@@ -51,6 +52,7 @@ import {
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { CreativeHeatmap } from "./CreativeHeatmap";
+import { CreativeCompareDrawer } from "./CreativeCompareDrawer";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -152,6 +154,7 @@ function CreativeCard({
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: (id: string) => void;
+  compareMode?: boolean;
 }) {
   const fmt = (n: number) =>
     n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M`
@@ -319,6 +322,9 @@ export default function AdCreativesPage() {
   const [activeTab, setActiveTab] = useState<"creatives" | "heatmap">("creatives");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkMode, setBulkMode] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [showCompare, setShowCompare] = useState(false);
 
   // Fetch all ads
   const { data: ads = [], isLoading, refetch } = trpc.meta.allAds.useQuery({
@@ -410,6 +416,20 @@ export default function AdCreativesPage() {
     setSelectedIds(new Set(fatiguedIds));
   };
 
+  const toggleCompareSelect = (id: string) => {
+    setCompareIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 2) {
+        next.add(id);
+      } else {
+        toast.error("You can only compare 2 creatives at a time");
+      }
+      return next;
+    });
+  };
+
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDir(d => d === "desc" ? "asc" : "desc");
@@ -420,6 +440,7 @@ export default function AdCreativesPage() {
   };
 
   return (
+    <>
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-border/50">
@@ -455,12 +476,21 @@ export default function AdCreativesPage() {
                 variant={bulkMode ? "secondary" : "outline"}
                 size="sm"
                 className="h-8 text-xs gap-1.5"
-                onClick={() => { setBulkMode(m => !m); setSelectedIds(new Set()); }}
+                onClick={() => { setBulkMode(m => !m); setSelectedIds(new Set()); if (compareMode) { setCompareMode(false); setCompareIds(new Set()); } }}
               >
                 <CheckSquare className="w-3.5 h-3.5" />
                 {bulkMode ? "Cancel" : "Bulk Select"}
               </Button>
             )}
+            <Button
+              variant={compareMode ? "secondary" : "outline"}
+              size="sm"
+              className="h-8 text-xs gap-1.5"
+              onClick={() => { setCompareMode(m => !m); setCompareIds(new Set()); if (bulkMode) { setBulkMode(false); setSelectedIds(new Set()); } }}
+            >
+              <BarChart2 className="w-3.5 h-3.5" />
+              {compareMode ? "Cancel Compare" : "A/B Compare"}
+            </Button>
           </div>
         </div>
 
@@ -497,6 +527,37 @@ export default function AdCreativesPage() {
               >
                 <PauseCircle className="w-3.5 h-3.5" />
                 {bulkPause.isPending ? "Pausing..." : `Pause ${selectedIds.size > 0 ? selectedIds.size : ""} Selected`}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Compare action bar */}
+        {compareMode && (
+          <div className="flex items-center gap-3 mt-3 p-2.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
+            <BarChart2 className="w-4 h-4 text-violet-400 flex-shrink-0" />
+            <span className="text-xs text-muted-foreground">
+              Select <span className="font-medium text-violet-400">{compareIds.size}/2</span> creatives to compare
+            </span>
+            {compareIds.size > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setCompareIds(new Set())}
+              >
+                Clear
+              </Button>
+            )}
+            <div className="ml-auto">
+              <Button
+                size="sm"
+                className="h-7 text-xs gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                disabled={compareIds.size !== 2}
+                onClick={() => setShowCompare(true)}
+              >
+                <BarChart2 className="w-3.5 h-3.5" />
+                Compare Now
               </Button>
             </div>
           </div>
@@ -645,9 +706,10 @@ export default function AdCreativesPage() {
                   ad={ad}
                   isBest={ad.id === bestAdId}
                   onViewCampaign={handleViewCampaign}
-                  selectable={bulkMode}
-                  selected={selectedIds.has(ad.id)}
-                  onToggleSelect={toggleSelect}
+                  selectable={bulkMode || compareMode}
+                  selected={bulkMode ? selectedIds.has(ad.id) : compareIds.has(ad.id)}
+                  onToggleSelect={bulkMode ? toggleSelect : toggleCompareSelect}
+                  compareMode={compareMode}
                 />
               ))}
             </div>
@@ -656,5 +718,21 @@ export default function AdCreativesPage() {
         )}
       </div>
     </div>
+
+    {/* A/B Compare Drawer */}
+    {showCompare && compareIds.size === 2 && (() => {
+      const [idA, idB] = Array.from(compareIds);
+      const adA = (ads as AdCreative[]).find(a => a.id === idA);
+      const adB = (ads as AdCreative[]).find(a => a.id === idB);
+      if (!adA || !adB) return null;
+      return (
+        <CreativeCompareDrawer
+          adA={adA as any}
+          adB={adB as any}
+          onClose={() => setShowCompare(false)}
+        />
+      );
+    })()}
+    </>
   );
 }
