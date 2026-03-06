@@ -3,6 +3,7 @@ import type { User } from "../../drizzle/schema";
 import { getSupabase } from "../supabase";
 import { upsertUserBySupabaseUid } from "../app/db/users";
 import { getUserWorkspaces, createWorkspace, generateSlug } from "../app/db/workspaces";
+import { sdk } from "./sdk";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -12,15 +13,12 @@ export type TrpcContext = {
 
 /**
  * Decode a JWT payload without verifying the signature.
- * We trust Supabase to sign valid tokens; we only need the `sub` (user ID)
- * and `exp` to verify the token is not expired before calling admin.getUserById.
  */
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
     const payload = parts[1];
-    // Base64url → Base64 → JSON
     const padded = payload.replace(/-/g, "+").replace(/_/g, "/");
     const json = Buffer.from(padded, "base64").toString("utf8");
     return JSON.parse(json) as Record<string, unknown>;
@@ -30,37 +28,25 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 }
 
 /**
- * Authenticate via Supabase Bearer JWT.
- * 1. Decode the JWT to extract `sub` (Supabase UID) and `exp`.
- * 2. Reject expired tokens immediately (no network call).
- * 3. Call admin.getUserById to verify the user still exists in Supabase Auth.
- * 4. Upsert into our public.users table and return the local User record.
- *
- * NOTE: sb.auth.getUser(token) fails with "Auth session missing!" when using
- * a service_role client because it tries to set a session internally.
- * admin.getUserById is the correct approach for server-side token verification.
+ * Strategy 1: Authenticate via Supabase Bearer JWT.
  */
 async function authenticateSupabaseJwt(authHeader: string): Promise<User | null> {
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
   if (!token) return null;
 
   try {
-    // 1. Decode payload
     const payload = decodeJwtPayload(token);
     if (!payload) return null;
 
     const sub = payload.sub as string | undefined;
     const exp = payload.exp as number | undefined;
-
     if (!sub) return null;
 
-    // 2. Check expiry (exp is seconds since epoch)
     if (exp && exp < Math.floor(Date.now() / 1000)) {
       console.warn("[Auth] JWT expired for sub:", sub);
       return null;
     }
 
-    // 3. Verify user exists in Supabase Auth via admin API
     const sb = getSupabase();
     const { data, error } = await sb.auth.admin.getUserById(sub);
     if (error || !data?.user) {
@@ -78,7 +64,6 @@ async function authenticateSupabaseJwt(authHeader: string): Promise<User | null>
     const loginMethod =
       supabaseUser.app_metadata?.provider === "google" ? "google" : "email";
 
-    // 4. Upsert into local users table
     const user = await upsertUserBySupabaseUid({
       supabaseUid: supabaseUser.id,
       email,
@@ -105,7 +90,23 @@ async function authenticateSupabaseJwt(authHeader: string): Promise<User | null>
 
     return user;
   } catch (err) {
-    console.warn("[Auth] JWT verification failed:", String(err));
+    console.warn("[Auth] Supabase JWT verification failed:", String(err));
+    return null;
+  }
+}
+
+/**
+ * Strategy 2: Authenticate via Manus OAuth session cookie.
+ * Falls back to this when no Supabase Bearer token is present.
+ */
+async function authenticateManusOAuthCookie(
+  req: CreateExpressContextOptions["req"]
+): Promise<User | null> {
+  try {
+    const user = await sdk.authenticateRequest(req);
+    return user;
+  } catch {
+    // Cookie missing or invalid — not authenticated via Manus OAuth
     return null;
   }
 }
@@ -117,8 +118,15 @@ export async function createContext(
 
   try {
     const authHeader = opts.req.headers.authorization ?? "";
+
+    // Strategy 1: Supabase Bearer JWT (preferred)
     if (authHeader.toLowerCase().startsWith("bearer ")) {
       user = await authenticateSupabaseJwt(authHeader);
+    }
+
+    // Strategy 2: Manus OAuth session cookie (fallback for legacy users)
+    if (!user) {
+      user = await authenticateManusOAuthCookie(opts.req);
     }
   } catch {
     // Authentication is optional for public procedures.
