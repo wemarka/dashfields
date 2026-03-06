@@ -1836,3 +1836,6 @@
 - [ ] Establish design system tokens for reuse across all pages
 - [x] Write unified-campaigns.test.ts (35 tests: data transformation, filtering, KPI aggregation, sorting, edge cases)
 - [x] All 461 tests passing, 0 TypeScript errors
+
+## 🐛 Fix: Campaigns page limit exceeds backend max (50)
+- [x] Fix meta.campaigns and meta.campaignInsights queries sending limit:100 instead of max 50

@@ -54,14 +54,14 @@ export default function Campaigns() {
 
   const { data: metaCampaigns = [], isLoading: metaLoading, refetch: refetchMeta } =
     trpc.meta.campaigns.useQuery(
-      { limit: 100, workspaceId: activeWorkspace?.id },
+      { limit: 50, workspaceId: activeWorkspace?.id },
       { enabled: isMetaConnected }
     );
 
   const { data: metaInsights = [], isLoading: insightsLoading, refetch: refetchInsights } =
     trpc.meta.campaignInsights.useQuery(
       {
-        datePreset, limit: 100,
+        datePreset, limit: 50,
         ...(activeAccountId ? { accountId: activeAccountId } : {}),
         workspaceId: activeWorkspace?.id,
       },
