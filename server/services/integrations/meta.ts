@@ -356,6 +356,219 @@ export async function getCampaignBreakdown(
   return data.data ?? [];
 }
 
+// ─── Ad Sets ─────────────────────────────────────────────────────────────────
+export interface MetaAdSet {
+  id: string;
+  name: string;
+  status: string;
+  effective_status: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  bid_amount?: string;
+  billing_event?: string;
+  optimization_goal?: string;
+  targeting?: {
+    age_min?: number;
+    age_max?: number;
+    genders?: number[];
+    geo_locations?: {
+      countries?: string[];
+      cities?: Array<{ key: string; name: string }>;
+    };
+    device_platforms?: string[];
+    publisher_platforms?: string[];
+    facebook_positions?: string[];
+    instagram_positions?: string[];
+    [key: string]: unknown;
+  };
+  start_time?: string;
+  end_time?: string;
+  created_time?: string;
+}
+
+/** Get ad sets for a campaign */
+export async function getCampaignAdSets(
+  campaignId: string,
+  accessToken: string,
+  limit = 25
+): Promise<MetaAdSet[]> {
+  const data = await metaGet<{ data: MetaAdSet[] }>(
+    `${campaignId}/adsets`,
+    accessToken,
+    {
+      fields: "id,name,status,effective_status,daily_budget,lifetime_budget,bid_amount,billing_event,optimization_goal,targeting,start_time,end_time,created_time",
+      limit: String(limit),
+    }
+  );
+  return data.data ?? [];
+}
+
+/** Get insights for ad sets of a campaign */
+export async function getAdSetInsights(
+  campaignId: string,
+  accessToken: string,
+  datePreset = "last_30d"
+): Promise<MetaInsight[]> {
+  const data = await metaGet<{ data: MetaInsight[] }>(
+    `${campaignId}/insights`,
+    accessToken,
+    {
+      level: "adset",
+      fields: "adset_id,adset_name,impressions,reach,clicks,spend,ctr,cpc,cpm",
+      date_preset: datePreset,
+    }
+  );
+  return data.data ?? [];
+}
+
+// ─── Ads & Ad Creatives ──────────────────────────────────────────────────────
+export interface MetaAd {
+  id: string;
+  name: string;
+  status: string;
+  effective_status: string;
+  creative?: {
+    id: string;
+    name?: string;
+    title?: string;
+    body?: string;
+    image_url?: string;
+    image_hash?: string;
+    video_id?: string;
+    thumbnail_url?: string;
+    object_story_spec?: {
+      page_id?: string;
+      link_data?: {
+        message?: string;
+        link?: string;
+        caption?: string;
+        description?: string;
+        image_hash?: string;
+        picture?: string;
+        call_to_action?: { type: string; value?: { link?: string } };
+        child_attachments?: Array<{
+          link?: string;
+          image_hash?: string;
+          picture?: string;
+          name?: string;
+          description?: string;
+          video_id?: string;
+        }>;
+      };
+      video_data?: {
+        video_id?: string;
+        image_url?: string;
+        image_hash?: string;
+        title?: string;
+        message?: string;
+        call_to_action?: { type: string; value?: { link?: string } };
+      };
+      photo_data?: {
+        image_hash?: string;
+        url?: string;
+        caption?: string;
+      };
+    };
+    effective_object_story_id?: string;
+    asset_feed_spec?: {
+      images?: Array<{ hash?: string; url?: string }>;
+      videos?: Array<{ video_id?: string; thumbnail_url?: string }>;
+      bodies?: Array<{ text?: string }>;
+      titles?: Array<{ text?: string }>;
+      descriptions?: Array<{ text?: string }>;
+      call_to_action_types?: string[];
+      link_urls?: Array<{ website_url?: string }>;
+    };
+  };
+  adset_id?: string;
+  created_time?: string;
+}
+
+export interface MetaAdCreativeDetail {
+  id: string;
+  name?: string;
+  title?: string;
+  body?: string;
+  image_url?: string;
+  thumbnail_url?: string;
+  video_id?: string;
+  object_story_spec?: NonNullable<MetaAd["creative"]>["object_story_spec"];
+  effective_object_story_id?: string;
+  asset_feed_spec?: NonNullable<MetaAd["creative"]>["asset_feed_spec"];
+}
+
+/** Get ads for a campaign with creative details */
+export async function getCampaignAds(
+  campaignId: string,
+  accessToken: string,
+  limit = 50
+): Promise<MetaAd[]> {
+  const data = await metaGet<{ data: MetaAd[] }>(
+    `${campaignId}/ads`,
+    accessToken,
+    {
+      fields: "id,name,status,effective_status,adset_id,created_time,creative{id,name,title,body,image_url,thumbnail_url,video_id,object_story_spec,effective_object_story_id,asset_feed_spec}",
+      limit: String(limit),
+    }
+  );
+  return data.data ?? [];
+}
+
+/** Get ad insights for a campaign */
+export async function getAdInsights(
+  campaignId: string,
+  accessToken: string,
+  datePreset = "last_30d"
+): Promise<MetaInsight[]> {
+  const data = await metaGet<{ data: (MetaInsight & { ad_id?: string; ad_name?: string })[] }>(
+    `${campaignId}/insights`,
+    accessToken,
+    {
+      level: "ad",
+      fields: "ad_id,ad_name,impressions,reach,clicks,spend,ctr,cpc,cpm",
+      date_preset: datePreset,
+    }
+  );
+  return data.data ?? [];
+}
+
+/** Get ad creative image/video preview URLs */
+export async function getAdCreativePreviews(
+  creativeId: string,
+  accessToken: string,
+  adFormat: string = "DESKTOP_FEED_STANDARD"
+): Promise<string[]> {
+  try {
+    const data = await metaGet<{ data: Array<{ body?: string }> }>(
+      `${creativeId}/previews`,
+      accessToken,
+      { ad_format: adFormat }
+    );
+    return (data.data ?? []).map(p => p.body ?? "").filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/** Get image URL from image hash */
+export async function getAdImage(
+  adAccountId: string,
+  accessToken: string,
+  imageHash: string
+): Promise<string | null> {
+  try {
+    const data = await metaGet<{ data: Array<{ url?: string; url_128?: string; permalink_url?: string }> }>(
+      `${ensureActPrefix(adAccountId)}/adimages`,
+      accessToken,
+      { hashes: JSON.stringify([imageHash]) }
+    );
+    const img = data.data?.[0];
+    return img?.url ?? img?.permalink_url ?? img?.url_128 ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Get daily time-series insights for a campaign */
 export async function getCampaignDailyInsights(
   campaignId: string,

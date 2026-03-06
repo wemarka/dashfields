@@ -17,6 +17,10 @@ import {
   createMetaCampaign,
   updateMetaCampaignStatus,
   updateMetaCampaignBudget,
+  getCampaignAdSets,
+  getAdSetInsights,
+  getCampaignAds,
+  getAdInsights,
 } from "../../services/integrations/meta";
 
 // ─── Helper: get stored Meta access token for a user ─────────────────────────
@@ -686,6 +690,194 @@ export const metaRouter = router({
           };
         });
       } catch {
+        return [];
+      }
+    }),
+
+  /** Get ad sets for a campaign */
+  campaignAdSets: protectedProcedure
+    .input(z.object({
+      campaignId:  z.string(),
+      datePreset:  z.string().default("last_30d"),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return { adSets: [], insights: [] };
+      try {
+        const [adSets, insights] = await Promise.all([
+          getCampaignAdSets(input.campaignId, conn.token),
+          getAdSetInsights(input.campaignId, conn.token, input.datePreset),
+        ]);
+        return {
+          adSets: adSets.map(s => ({
+            id: s.id,
+            name: s.name,
+            status: s.effective_status ?? s.status,
+            dailyBudget: s.daily_budget ? Number(s.daily_budget) / 100 : null,
+            lifetimeBudget: s.lifetime_budget ? Number(s.lifetime_budget) / 100 : null,
+            bidAmount: s.bid_amount ? Number(s.bid_amount) / 100 : null,
+            billingEvent: s.billing_event ?? null,
+            optimizationGoal: s.optimization_goal ?? null,
+            targeting: s.targeting ? {
+              ageMin: s.targeting.age_min ?? null,
+              ageMax: s.targeting.age_max ?? null,
+              genders: s.targeting.genders ?? [],
+              countries: s.targeting.geo_locations?.countries ?? [],
+              cities: (s.targeting.geo_locations?.cities ?? []).map(c => c.name),
+              devicePlatforms: s.targeting.device_platforms ?? [],
+              publisherPlatforms: s.targeting.publisher_platforms ?? [],
+              facebookPositions: s.targeting.facebook_positions ?? [],
+              instagramPositions: s.targeting.instagram_positions ?? [],
+            } : null,
+            startTime: s.start_time ?? null,
+            endTime: s.end_time ?? null,
+          })),
+          insights: insights.map(i => ({
+            adsetId: i.adset_id ?? "",
+            adsetName: i.adset_name ?? "",
+            impressions: Number(i.impressions ?? 0),
+            reach: Number(i.reach ?? 0),
+            clicks: Number(i.clicks ?? 0),
+            spend: Number(i.spend ?? 0),
+            ctr: Number(i.ctr ?? 0),
+            cpc: Number(i.cpc ?? 0),
+            cpm: Number(i.cpm ?? 0),
+          })),
+        };
+      } catch (err) {
+        console.error("[Meta] campaignAdSets error:", err);
+        return { adSets: [], insights: [] };
+      }
+    }),
+
+  /** Get ads and creatives for a campaign */
+  campaignAds: protectedProcedure
+    .input(z.object({
+      campaignId:  z.string(),
+      datePreset:  z.string().default("last_30d"),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return [];
+      try {
+        const [ads, insights] = await Promise.all([
+          getCampaignAds(input.campaignId, conn.token),
+          getAdInsights(input.campaignId, conn.token, input.datePreset),
+        ]);
+        const insightMap = new Map(
+          insights.map(i => [
+            (i as unknown as Record<string, string>).ad_id ?? "",
+            {
+              impressions: Number(i.impressions ?? 0),
+              reach: Number(i.reach ?? 0),
+              clicks: Number(i.clicks ?? 0),
+              spend: Number(i.spend ?? 0),
+              ctr: Number(i.ctr ?? 0),
+              cpc: Number(i.cpc ?? 0),
+              cpm: Number(i.cpm ?? 0),
+            },
+          ])
+        );
+
+        return ads.map(ad => {
+          const c = ad.creative;
+          const oss = c?.object_story_spec;
+          const afs = c?.asset_feed_spec;
+
+          // Determine creative type
+          let creativeType: "image" | "video" | "carousel" | "dynamic" | "unknown" = "unknown";
+          if (afs && ((afs.images?.length ?? 0) > 1 || (afs.videos?.length ?? 0) > 0)) {
+            creativeType = "dynamic";
+          } else if (oss?.link_data?.child_attachments?.length) {
+            creativeType = "carousel";
+          } else if (oss?.video_data || c?.video_id) {
+            creativeType = "video";
+          } else if (oss?.photo_data || oss?.link_data?.picture || c?.image_url) {
+            creativeType = "image";
+          }
+
+          // Extract media
+          let imageUrl = c?.image_url ?? c?.thumbnail_url ?? null;
+          let videoId = c?.video_id ?? null;
+          let message = "";
+          let headline = c?.title ?? "";
+          let description = c?.body ?? "";
+          let ctaType = "";
+          let ctaLink = "";
+          const carouselCards: Array<{ imageUrl?: string; headline?: string; description?: string; link?: string; videoId?: string }> = [];
+
+          if (oss?.link_data) {
+            message = oss.link_data.message ?? message;
+            headline = headline || (oss.link_data.caption ?? "");
+            description = description || (oss.link_data.description ?? "");
+            imageUrl = imageUrl ?? oss.link_data.picture ?? null;
+            ctaType = oss.link_data.call_to_action?.type ?? "";
+            ctaLink = oss.link_data.call_to_action?.value?.link ?? oss.link_data.link ?? "";
+
+            if (oss.link_data.child_attachments) {
+              for (const child of oss.link_data.child_attachments) {
+                carouselCards.push({
+                  imageUrl: child.picture ?? undefined,
+                  headline: child.name ?? undefined,
+                  description: child.description ?? undefined,
+                  link: child.link ?? undefined,
+                  videoId: child.video_id ?? undefined,
+                });
+              }
+            }
+          }
+
+          if (oss?.video_data) {
+            message = oss.video_data.message ?? message;
+            headline = headline || (oss.video_data.title ?? "");
+            imageUrl = imageUrl ?? oss.video_data.image_url ?? null;
+            videoId = videoId ?? oss.video_data.video_id ?? null;
+            ctaType = ctaType || (oss.video_data.call_to_action?.type ?? "");
+            ctaLink = ctaLink || (oss.video_data.call_to_action?.value?.link ?? "");
+          }
+
+          if (oss?.photo_data) {
+            message = oss.photo_data.caption ?? message;
+            imageUrl = imageUrl ?? oss.photo_data.url ?? null;
+          }
+
+          // Dynamic creative (asset feed)
+          const dynamicAssets = afs ? {
+            images: (afs.images ?? []).map(img => img.url ?? "").filter(Boolean),
+            videos: (afs.videos ?? []).map(v => ({ videoId: v.video_id ?? "", thumbnail: v.thumbnail_url ?? "" })),
+            bodies: (afs.bodies ?? []).map(b => b.text ?? ""),
+            titles: (afs.titles ?? []).map(t => t.text ?? ""),
+            descriptions: (afs.descriptions ?? []).map(d => d.text ?? ""),
+            ctaTypes: afs.call_to_action_types ?? [],
+            linkUrls: (afs.link_urls ?? []).map(l => l.website_url ?? ""),
+          } : null;
+
+          return {
+            id: ad.id,
+            name: ad.name,
+            status: ad.effective_status ?? ad.status,
+            adsetId: ad.adset_id ?? null,
+            creativeId: c?.id ?? null,
+            creativeType,
+            imageUrl,
+            videoId,
+            thumbnailUrl: c?.thumbnail_url ?? imageUrl,
+            message,
+            headline,
+            description,
+            ctaType,
+            ctaLink,
+            carouselCards,
+            dynamicAssets,
+            insights: insightMap.get(ad.id) ?? null,
+          };
+        });
+      } catch (err) {
+        console.error("[Meta] campaignAds error:", err);
         return [];
       }
     }),

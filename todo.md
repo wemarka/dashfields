@@ -1938,3 +1938,27 @@
 - [x] Check campaign spend vs budget in existing cron job (real Meta API + local)
 - [x] Send in-app notification + push notification via notifyOwner when threshold exceeded
 - [x] Check both Meta API campaigns and local campaigns with budgets
+
+## 🔄 Phase — Ad Sets & Ad Creatives
+
+### Feature 1: Ad Sets Tab
+- [x] Add getAdSets Meta API function (fetch ad sets for a campaign)
+- [x] Add getAdSetInsights Meta API function (fetch insights per ad set)
+- [x] Add tRPC endpoints for ad sets listing and insights
+- [x] Build Ad Sets tab UI in Campaign Detail Drawer (expandable cards with KPIs)
+- [x] Show ad set status, budget, targeting summary, and performance metrics
+
+### Feature 2: Ad Creatives Tab with Platform Previews
+- [x] Add getAds Meta API function (fetch ads for a campaign)
+- [x] Add getAdCreatives Meta API function (fetch creative details with thumbnails/videos)
+- [x] Add tRPC endpoints for ads and creatives
+- [x] Build Ad Creatives tab UI in Campaign Detail Drawer
+- [x] Platform-specific preview: Facebook feed post preview
+- [x] Platform-specific preview: Facebook story preview
+- [x] Platform-specific preview: Instagram feed post preview
+- [x] Platform-specific preview: Instagram story/reel preview
+- [x] Platform-specific preview: Carousel preview with horizontal scroll
+- [x] Video preview with play button overlay
+- [x] CTA button rendering with proper labels
+- [x] Show creative performance metrics (impressions, clicks, CTR, spend)
+- [x] Creative type detection (image, video, carousel, dynamic)

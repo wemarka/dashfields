@@ -23,6 +23,8 @@ import {
   Loader2, TrendingUp, MousePointerClick, DollarSign, Eye,
   Play, Pause, Pencil, Copy, ExternalLink, Tag, MessageSquare,
   Users, MapPin, Monitor, Calendar, Check, X, FileDown,
+  Layers, Image, Video, LayoutGrid, Target, Globe, Smartphone,
+  Facebook, Instagram, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
@@ -46,7 +48,7 @@ interface Props {
 }
 
 type DatePreset = "last_7d" | "last_14d" | "last_30d" | "last_90d";
-type DetailTab = "performance" | "breakdown" | "notes";
+type DetailTab = "performance" | "adsets" | "creatives" | "breakdown" | "notes";
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({
@@ -277,6 +279,538 @@ function BreakdownSection({
   );
 }
 
+// ─── Ad Set Card ────────────────────────────────────────────────────────────
+interface AdSetInfo {
+  id: string;
+  name: string;
+  status: string;
+  dailyBudget: number | null;
+  lifetimeBudget: number | null;
+  bidAmount: number | null;
+  billingEvent: string | null;
+  optimizationGoal: string | null;
+  targeting: {
+    ageMin: number | null;
+    ageMax: number | null;
+    genders: number[];
+    countries: string[];
+    cities: string[];
+    devicePlatforms: string[];
+    publisherPlatforms: string[];
+    facebookPositions: string[];
+    instagramPositions: string[];
+  } | null;
+  startTime: string | null;
+  endTime: string | null;
+}
+
+interface AdSetInsightInfo {
+  adsetId: string;
+  adsetName: string;
+  impressions: number;
+  reach: number;
+  clicks: number;
+  spend: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+}
+
+function AdSetCard({
+  adset,
+  insight,
+  fmt,
+  fmtCurrency,
+  fmtPct,
+}: {
+  adset: AdSetInfo;
+  insight?: AdSetInsightInfo;
+  fmt: (n: number) => string;
+  fmtCurrency: (n: number) => string;
+  fmtPct: (n: number) => string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const statusCfg = STATUS_CONFIG[adset.status?.toLowerCase()] ?? STATUS_CONFIG.draft;
+
+  const genderLabels = (adset.targeting?.genders ?? []).map(g =>
+    g === 1 ? "Male" : g === 2 ? "Female" : "All"
+  );
+
+  const platforms = adset.targeting?.publisherPlatforms ?? [];
+  const positions = [
+    ...(adset.targeting?.facebookPositions ?? []),
+    ...(adset.targeting?.instagramPositions ?? []),
+  ];
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden transition-all">
+      {/* Header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground truncate">{adset.name}</span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${statusCfg.bg} ${statusCfg.text}`}>
+              <span className={`w-1 h-1 rounded-full ${statusCfg.dot}`} />
+              {statusCfg.label}
+            </span>
+            {adset.dailyBudget != null && (
+              <span className="text-[10px] text-muted-foreground">{fmtCurrency(adset.dailyBudget)}/day</span>
+            )}
+            {adset.lifetimeBudget != null && (
+              <span className="text-[10px] text-muted-foreground">{fmtCurrency(adset.lifetimeBudget)} lifetime</span>
+            )}
+          </div>
+        </div>
+        {insight && (
+          <div className="flex items-center gap-4 text-right">
+            <div>
+              <p className="text-xs text-muted-foreground">Spend</p>
+              <p className="text-sm font-semibold text-foreground">{fmtCurrency(insight.spend)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Clicks</p>
+              <p className="text-sm font-semibold text-foreground">{fmt(insight.clicks)}</p>
+            </div>
+          </div>
+        )}
+        {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+
+      {/* Expanded Details */}
+      {expanded && (
+        <div className="border-t border-border p-4 space-y-4">
+          {/* Performance Metrics */}
+          {insight && (
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: "Impressions", value: fmt(insight.impressions) },
+                { label: "Reach", value: fmt(insight.reach) },
+                { label: "CTR", value: fmtPct(insight.ctr) },
+                { label: "CPC", value: fmtCurrency(insight.cpc) },
+              ].map(m => (
+                <div key={m.label} className="text-center">
+                  <p className="text-[10px] text-muted-foreground">{m.label}</p>
+                  <p className="text-sm font-semibold text-foreground">{m.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Targeting */}
+          {adset.targeting && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5" /> Targeting
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {adset.targeting.ageMin != null && adset.targeting.ageMax != null && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    Age: {adset.targeting.ageMin}–{adset.targeting.ageMax}
+                  </Badge>
+                )}
+                {genderLabels.length > 0 && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {genderLabels.join(", ")}
+                  </Badge>
+                )}
+                {adset.targeting.countries.map(c => (
+                  <Badge key={c} variant="secondary" className="text-[10px]">
+                    <Globe className="w-2.5 h-2.5 mr-0.5" /> {c}
+                  </Badge>
+                ))}
+                {adset.targeting.cities.map(c => (
+                  <Badge key={c} variant="secondary" className="text-[10px]">
+                    <MapPin className="w-2.5 h-2.5 mr-0.5" /> {c}
+                  </Badge>
+                ))}
+                {platforms.map(p => (
+                  <Badge key={p} variant="secondary" className="text-[10px] capitalize">
+                    {p}
+                  </Badge>
+                ))}
+                {positions.map(p => (
+                  <Badge key={p} variant="outline" className="text-[10px] capitalize">
+                    {p.replace(/_/g, " ")}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Optimization */}
+          {(adset.optimizationGoal || adset.billingEvent) && (
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              {adset.optimizationGoal && (
+                <span>Optimization: <span className="text-foreground font-medium capitalize">{adset.optimizationGoal.replace(/_/g, " ").toLowerCase()}</span></span>
+              )}
+              {adset.billingEvent && (
+                <span>Billing: <span className="text-foreground font-medium capitalize">{adset.billingEvent.replace(/_/g, " ").toLowerCase()}</span></span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Ad Creative Card with Platform Preview ─────────────────────────────────
+interface AdInfo {
+  id: string;
+  name: string;
+  status: string;
+  adsetId: string | null;
+  creativeId: string | null;
+  creativeType: "image" | "video" | "carousel" | "dynamic" | "unknown";
+  imageUrl: string | null;
+  videoId: string | null;
+  thumbnailUrl: string | null;
+  message: string;
+  headline: string;
+  description: string;
+  ctaType: string;
+  ctaLink: string;
+  carouselCards: Array<{ imageUrl?: string; headline?: string; description?: string; link?: string; videoId?: string }>;
+  dynamicAssets: {
+    images: string[];
+    videos: Array<{ videoId: string; thumbnail: string }>;
+    bodies: string[];
+    titles: string[];
+    descriptions: string[];
+    ctaTypes: string[];
+    linkUrls: string[];
+  } | null;
+  insights: {
+    impressions: number;
+    reach: number;
+    clicks: number;
+    spend: number;
+    ctr: number;
+    cpc: number;
+    cpm: number;
+  } | null;
+}
+
+const CTA_LABELS: Record<string, string> = {
+  LEARN_MORE: "Learn More",
+  SHOP_NOW: "Shop Now",
+  SIGN_UP: "Sign Up",
+  BOOK_NOW: "Book Now",
+  CONTACT_US: "Contact Us",
+  DOWNLOAD: "Download",
+  GET_OFFER: "Get Offer",
+  GET_QUOTE: "Get Quote",
+  SUBSCRIBE: "Subscribe",
+  WATCH_MORE: "Watch More",
+  APPLY_NOW: "Apply Now",
+  BUY_NOW: "Buy Now",
+  ORDER_NOW: "Order Now",
+  SEND_MESSAGE: "Send Message",
+  WHATSAPP_MESSAGE: "WhatsApp",
+};
+
+const CREATIVE_TYPE_ICONS: Record<string, React.ElementType> = {
+  image: Image,
+  video: Video,
+  carousel: LayoutGrid,
+  dynamic: LayoutGrid,
+  unknown: Image,
+};
+
+const CREATIVE_TYPE_LABELS: Record<string, string> = {
+  image: "Image",
+  video: "Video",
+  carousel: "Carousel",
+  dynamic: "Dynamic",
+  unknown: "Ad",
+};
+
+// Platform-specific preview frame
+function PlatformPreviewFrame({
+  children,
+  platform,
+  placement,
+}: {
+  children: React.ReactNode;
+  platform: "facebook" | "instagram" | "audience_network" | "messenger" | "unknown";
+  placement: "feed" | "story" | "reel" | "right_column" | "unknown";
+}) {
+  const platformIcon = platform === "facebook" ? Facebook : platform === "instagram" ? Instagram : Globe;
+  const PlatformIcon = platformIcon;
+  const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
+  const placementLabel = placement === "feed" ? "Feed" : placement === "story" ? "Story" : placement === "reel" ? "Reel" : placement === "right_column" ? "Right Column" : "";
+
+  const isStoryOrReel = placement === "story" || placement === "reel";
+
+  return (
+    <div className={`rounded-xl border border-border bg-card overflow-hidden ${
+      isStoryOrReel ? "max-w-[280px]" : "w-full"
+    }`}>
+      {/* Platform Header */}
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
+        <PlatformIcon className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-medium text-muted-foreground">
+          {platformLabel} {placementLabel && `· ${placementLabel}`}
+        </span>
+      </div>
+      {/* Preview Content */}
+      <div className={isStoryOrReel ? "aspect-[9/16] relative" : ""}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Facebook/Instagram Feed Post Preview
+function FeedPostPreview({
+  ad,
+  platform,
+}: {
+  ad: AdInfo;
+  platform: "facebook" | "instagram";
+}) {
+  const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+
+  return (
+    <PlatformPreviewFrame platform={platform} placement="feed">
+      <div className="p-3">
+        {/* Post text */}
+        {ad.message && (
+          <p className="text-xs text-foreground mb-2 line-clamp-3">{ad.message}</p>
+        )}
+
+        {/* Media */}
+        {ad.creativeType === "carousel" && ad.carouselCards.length > 0 ? (
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            {ad.carouselCards.map((card, i) => (
+              <div key={i} className="flex-shrink-0 w-[200px] rounded-lg overflow-hidden border border-border">
+                {card.imageUrl ? (
+                  <img src={card.imageUrl} alt={card.headline ?? ""} className="w-full h-[200px] object-cover" />
+                ) : (
+                  <div className="w-full h-[200px] bg-muted flex items-center justify-center">
+                    <Image className="w-8 h-8 text-muted-foreground/30" />
+                  </div>
+                )}
+                {(card.headline || card.description) && (
+                  <div className="p-2">
+                    {card.headline && <p className="text-[11px] font-medium text-foreground truncate">{card.headline}</p>}
+                    {card.description && <p className="text-[10px] text-muted-foreground truncate">{card.description}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : ad.imageUrl ? (
+          <div className="rounded-lg overflow-hidden border border-border">
+            <img src={ad.imageUrl} alt={ad.headline} className="w-full aspect-square object-cover" />
+          </div>
+        ) : ad.thumbnailUrl ? (
+          <div className="rounded-lg overflow-hidden border border-border relative">
+            <img src={ad.thumbnailUrl} alt={ad.headline} className="w-full aspect-video object-cover" />
+            {ad.creativeType === "video" && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                  <Play className="w-5 h-5 text-foreground ml-0.5" />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-border bg-muted aspect-video flex items-center justify-center">
+            <Image className="w-10 h-10 text-muted-foreground/30" />
+          </div>
+        )}
+
+        {/* Headline & CTA */}
+        {(ad.headline || ctaLabel) && (
+          <div className="flex items-center justify-between mt-2 gap-2">
+            <div className="flex-1 min-w-0">
+              {ad.headline && <p className="text-xs font-semibold text-foreground truncate">{ad.headline}</p>}
+              {ad.description && <p className="text-[10px] text-muted-foreground truncate">{ad.description}</p>}
+            </div>
+            {ctaLabel && (
+              <span className="flex-shrink-0 text-[10px] font-medium px-3 py-1.5 rounded-md bg-primary/10 text-primary">
+                {ctaLabel}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </PlatformPreviewFrame>
+  );
+}
+
+// Story/Reel Preview
+function StoryReelPreview({
+  ad,
+  platform,
+  placement,
+}: {
+  ad: AdInfo;
+  platform: "facebook" | "instagram";
+  placement: "story" | "reel";
+}) {
+  const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const bgImage = ad.imageUrl ?? ad.thumbnailUrl;
+
+  return (
+    <PlatformPreviewFrame platform={platform} placement={placement}>
+      <div className="relative w-full h-full min-h-[400px]">
+        {bgImage ? (
+          <img src={bgImage} alt={ad.headline} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-muted to-muted-foreground/20 flex items-center justify-center">
+            {ad.creativeType === "video" ? (
+              <Video className="w-12 h-12 text-muted-foreground/40" />
+            ) : (
+              <Image className="w-12 h-12 text-muted-foreground/40" />
+            )}
+          </div>
+        )}
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+        {/* Bottom CTA */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
+          {ad.message && (
+            <p className="text-[11px] text-white line-clamp-2 drop-shadow-sm">{ad.message}</p>
+          )}
+          {ctaLabel && (
+            <div className="flex justify-center">
+              <span className="text-[10px] font-medium px-6 py-2 rounded-full bg-white text-black">
+                {ctaLabel}
+              </span>
+            </div>
+          )}
+        </div>
+        {/* Video play indicator */}
+        {ad.creativeType === "video" && bgImage && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
+              <Play className="w-5 h-5 text-black ml-0.5" />
+            </div>
+          </div>
+        )}
+      </div>
+    </PlatformPreviewFrame>
+  );
+}
+
+// Detect best preview placement from ad data
+function detectPlacements(ad: AdInfo): Array<{ platform: "facebook" | "instagram"; placement: "feed" | "story" | "reel" }> {
+  // Default: show a feed preview
+  const placements: Array<{ platform: "facebook" | "instagram"; placement: "feed" | "story" | "reel" }> = [];
+  // Always show at least a Facebook feed preview
+  placements.push({ platform: "facebook", placement: "feed" });
+  // If it looks like a story/reel (vertical), add that too
+  placements.push({ platform: "instagram", placement: "story" });
+  return placements;
+}
+
+function AdCreativeCard({
+  ad,
+  fmt,
+  fmtCurrency,
+  fmtPct,
+}: {
+  ad: AdInfo;
+  fmt: (n: number) => string;
+  fmtCurrency: (n: number) => string;
+  fmtPct: (n: number) => string;
+}) {
+  const [showPreviews, setShowPreviews] = useState(false);
+  const TypeIcon = CREATIVE_TYPE_ICONS[ad.creativeType] ?? Image;
+  const typeLabel = CREATIVE_TYPE_LABELS[ad.creativeType] ?? "Ad";
+  const statusCfg = STATUS_CONFIG[ad.status?.toLowerCase()] ?? STATUS_CONFIG.draft;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* Header */}
+      <div className="flex items-start gap-3 p-4">
+        {/* Thumbnail */}
+        <div className="w-16 h-16 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-muted">
+          {ad.thumbnailUrl || ad.imageUrl ? (
+            <img
+              src={ad.thumbnailUrl ?? ad.imageUrl ?? ""}
+              alt={ad.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <TypeIcon className="w-6 h-6 text-muted-foreground/40" />
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">{ad.name}</p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${statusCfg.bg} ${statusCfg.text}`}>
+              <span className={`w-1 h-1 rounded-full ${statusCfg.dot}`} />
+              {statusCfg.label}
+            </span>
+            <Badge variant="outline" className="text-[10px] gap-1">
+              <TypeIcon className="w-2.5 h-2.5" />
+              {typeLabel}
+            </Badge>
+          </div>
+          {/* Performance mini stats */}
+          {ad.insights && (
+            <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+              <span>Imp: <span className="text-foreground font-medium">{fmt(ad.insights.impressions)}</span></span>
+              <span>Clicks: <span className="text-foreground font-medium">{fmt(ad.insights.clicks)}</span></span>
+              <span>CTR: <span className="text-foreground font-medium">{fmtPct(ad.insights.ctr)}</span></span>
+              <span>Spend: <span className="text-foreground font-medium">{fmtCurrency(ad.insights.spend)}</span></span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Preview Toggle */}
+      <div className="border-t border-border">
+        <button
+          onClick={() => setShowPreviews(!showPreviews)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          {showPreviews ? "Hide Preview" : "Show Platform Preview"}
+          {showPreviews ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </button>
+      </div>
+
+      {/* Platform Previews */}
+      {showPreviews && (
+        <div className="border-t border-border p-4">
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {/* Facebook Feed */}
+            <div className="flex-shrink-0 w-[320px]">
+              <FeedPostPreview ad={ad} platform="facebook" />
+            </div>
+            {/* Instagram Feed */}
+            <div className="flex-shrink-0 w-[320px]">
+              <FeedPostPreview ad={ad} platform="instagram" />
+            </div>
+            {/* Instagram Story */}
+            <div className="flex-shrink-0">
+              <StoryReelPreview ad={ad} platform="instagram" placement="story" />
+            </div>
+            {/* Instagram Reel */}
+            <div className="flex-shrink-0">
+              <StoryReelPreview ad={ad} platform="instagram" placement="reel" />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Drawer ──────────────────────────────────────────────────────────────
 export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
@@ -300,6 +834,18 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   );
 
   const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
+
+  // ── Ad Sets data ──────────────────────────────────────────────────────
+  const { data: adSetsData, isLoading: adSetsLoading } = trpc.meta.campaignAdSets.useQuery(
+    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
+    { enabled: open && !!campaign?.id && activeTab === "adsets" }
+  );
+
+  // ── Ad Creatives data ─────────────────────────────────────────────────
+  const { data: adsData, isLoading: adsLoading } = trpc.meta.campaignAds.useQuery(
+    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
+    { enabled: open && !!campaign?.id && activeTab === "creatives" }
+  );
 
   // ── Notes & Tags (persistent) ──────────────────────────────────────────
   const campaignKey = campaign?.id ?? "";
@@ -568,6 +1114,12 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
               <TabsTrigger value="performance" className="text-xs h-10 px-0 pb-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
                 Performance
               </TabsTrigger>
+              <TabsTrigger value="adsets" className="text-xs h-10 px-0 pb-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                Ad Sets
+              </TabsTrigger>
+              <TabsTrigger value="creatives" className="text-xs h-10 px-0 pb-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                Creatives
+              </TabsTrigger>
               <TabsTrigger value="breakdown" className="text-xs h-10 px-0 pb-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
                 Breakdown
               </TabsTrigger>
@@ -710,6 +1262,62 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Ad Sets Tab */}
+          <TabsContent value="adsets" className="p-6 space-y-4 mt-0">
+            {adSetsLoading ? (
+              <div className="flex items-center justify-center h-48">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : !adSetsData?.adSets?.length ? (
+              <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                <Layers className="w-10 h-10 mb-3 opacity-40" />
+                <p className="text-sm">No ad sets found for this campaign.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {adSetsData.adSets.map(adset => {
+                  const insight = adSetsData.insights.find(i => i.adsetId === adset.id);
+                  return (
+                    <AdSetCard
+                      key={adset.id}
+                      adset={adset}
+                      insight={insight}
+                      fmt={fmt}
+                      fmtCurrency={fmtCurrency}
+                      fmtPct={fmtPct}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Ad Creatives Tab */}
+          <TabsContent value="creatives" className="p-6 space-y-4 mt-0">
+            {adsLoading ? (
+              <div className="flex items-center justify-center h-48">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : !adsData?.length ? (
+              <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                <Image className="w-10 h-10 mb-3 opacity-40" />
+                <p className="text-sm">No ad creatives found for this campaign.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {adsData.map(ad => (
+                  <AdCreativeCard
+                    key={ad.id}
+                    ad={ad}
+                    fmt={fmt}
+                    fmtCurrency={fmtCurrency}
+                    fmtPct={fmtPct}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Breakdown Tab */}
