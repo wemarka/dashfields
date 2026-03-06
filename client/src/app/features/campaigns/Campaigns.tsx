@@ -432,6 +432,20 @@ export default function Campaigns() {
   // ── Page tab ───────────────────────────────────────────────────────────────
   const [pageTab, setPageTab] = useState<PageTab>("overview");
 
+  // ── Campaign filter (cross-tab) ────────────────────────────────────────────
+  // When set, Ad Sets / Creatives / Heatmap only show data for this campaign
+  const [campaignFilter, setCampaignFilter] = useState<{ id: string; name: string } | null>(null);
+
+  const handleFilterByAdSets = useCallback((c: UnifiedCampaign) => {
+    setCampaignFilter({ id: c.id, name: c.name });
+    setPageTab("adsets");
+  }, []);
+
+  const handleFilterByCreatives = useCallback((c: UnifiedCampaign) => {
+    setCampaignFilter({ id: c.id, name: c.name });
+    setPageTab("creatives");
+  }, []);
+
   // ── Overview state ─────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -488,25 +502,27 @@ export default function Campaigns() {
       { enabled: isMetaConnected }
     );
 
-  // ── Ad Sets data ───────────────────────────────────────────────────────────
+  // ── Ad Sets data ───────────────────────────────────────────────────────────────
   const { data: rawAdSets = [], isLoading: adSetsLoading, refetch: refetchAdSets } =
     trpc.meta.allAdSets.useQuery({
       datePreset: adsetDatePreset,
       accountId: activeAccountId ?? undefined,
       workspaceId: activeWorkspace?.id ?? undefined,
       limit: 25,
+      campaignId: campaignFilter?.id ?? undefined,
     }, { enabled: pageTab === "adsets" });
 
-  // ── Creatives data ─────────────────────────────────────────────────────────
+  // ── Creatives data ───────────────────────────────────────────────────────────────
   const { data: ads = [], isLoading: adsLoading, refetch: refetchAds } =
     trpc.meta.allAds.useQuery({
       datePreset: creativeDatePreset,
       accountId: activeAccountId ?? undefined,
       workspaceId: activeWorkspace?.id,
       limit: 50,
+      campaignId: campaignFilter?.id ?? undefined,
     }, { enabled: pageTab === "creatives" || pageTab === "heatmap" });
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
+  // ── Mutations ───────────────────────────────────────────────────────────────
   const updateLocalStatus = trpc.campaigns.updateStatus.useMutation({
     onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Status updated"); },
     onError: () => toast.error("Failed to update status"),
@@ -926,6 +942,8 @@ export default function Campaigns() {
               onRowClick={handleRowClick} onStatusToggle={handleStatusToggle}
               onDelete={handleDelete} onClone={handleClone}
               onBulkAction={handleBulkAction} statusTogglePending={statusTogglePending}
+              onFilterByAdSets={handleFilterByAdSets}
+              onFilterByCreatives={handleFilterByCreatives}
             />
           </>
         )}
@@ -935,6 +953,20 @@ export default function Campaigns() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {pageTab === "adsets" && (
           <div className="space-y-5">
+            {/* Campaign Filter Banner */}
+            {campaignFilter && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm">
+                <Target className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-muted-foreground">Filtering by campaign:</span>
+                <span className="font-medium text-foreground truncate">{campaignFilter.name}</span>
+                <button
+                  onClick={() => setCampaignFilter(null)}
+                  className="ml-auto shrink-0 rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-primary" />
+                </button>
+              </div>
+            )}
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <AdSetKpiCard icon={DollarSign}        label="Total Spend"       value={fmtMoney(adSetTotals.spend)}       color="bg-violet-500" />
@@ -1130,6 +1162,20 @@ export default function Campaigns() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {pageTab === "creatives" && (
           <div className="space-y-4">
+            {/* Campaign Filter Banner */}
+            {campaignFilter && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm">
+                <Target className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-muted-foreground">Filtering by campaign:</span>
+                <span className="font-medium text-foreground truncate">{campaignFilter.name}</span>
+                <button
+                  onClick={() => setCampaignFilter(null)}
+                  className="ml-auto shrink-0 rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-primary" />
+                </button>
+              </div>
+            )}
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <p className="text-sm text-muted-foreground">
@@ -1326,7 +1372,23 @@ export default function Campaigns() {
         {/* HEATMAP TAB                                                        */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         {pageTab === "heatmap" && (
-          <CreativeHeatmap ads={ads as any[]} isLoading={adsLoading} />
+          <div className="space-y-4">
+            {/* Campaign Filter Banner */}
+            {campaignFilter && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm">
+                <Target className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-muted-foreground">Filtering by campaign:</span>
+                <span className="font-medium text-foreground truncate">{campaignFilter.name}</span>
+                <button
+                  onClick={() => setCampaignFilter(null)}
+                  className="ml-auto shrink-0 rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-primary" />
+                </button>
+              </div>
+            )}
+            <CreativeHeatmap ads={ads as any[]} isLoading={adsLoading} />
+          </div>
         )}
       </div>
 

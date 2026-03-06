@@ -926,6 +926,7 @@ export const metaRouter = router({
       accountId:   z.number().optional(),
       workspaceId: z.number().int().positive().optional(),
       limit:       z.number().min(1).max(100).default(50),
+      campaignId:  z.string().optional(), // filter to a specific campaign
     }))
     .query(async ({ ctx, input }) => {
       const allConns = input.accountId
@@ -937,10 +938,15 @@ export const metaRouter = router({
         const allCampaigns = await Promise.allSettled(
           allConns.map((conn, i) => getMetaCampaigns(conn!.adAccountId, conn!.token, input.limit).then(cs => cs.map(c => ({ ...c, _connIdx: i }))))
         );
-        const campaigns = allCampaigns
+        let campaigns = allCampaigns
           .filter((r): r is PromiseFulfilledResult<(MetaCampaign & { _connIdx: number })[]> => r.status === "fulfilled")
           .flatMap(r => r.value);
         if (!campaigns.length) return [];
+        // If campaignId filter provided, only fetch ads for that campaign
+        if (input.campaignId) {
+          campaigns = campaigns.filter(c => c.id === input.campaignId);
+          if (!campaigns.length) return [];
+        }
         // Get ads for first 10 campaigns to avoid rate limiting
         const campaignSlice = campaigns.slice(0, 10);
         const adsResults = await Promise.allSettled(
@@ -1009,6 +1015,7 @@ export const metaRouter = router({
       accountId:   z.number().optional(),
       workspaceId: z.number().int().positive().optional(),
       limit:       z.number().min(1).max(50).default(25),
+      campaignId:  z.string().optional(), // filter to a specific campaign
     }))
     .query(async ({ ctx, input }) => {
       const allConns = input.accountId
@@ -1023,10 +1030,16 @@ export const metaRouter = router({
               .then(cs => cs.map(c => ({ ...c, _connIdx: i })))
           )
         );
-        const campaigns = allCampaigns
+        let campaigns = allCampaigns
           .filter((r): r is PromiseFulfilledResult<(MetaCampaign & { _connIdx: number })[]> => r.status === "fulfilled")
           .flatMap(r => r.value);
         if (!campaigns.length) return [];
+
+        // If campaignId filter provided, only fetch ad sets for that campaign
+        if (input.campaignId) {
+          campaigns = campaigns.filter(c => c.id === input.campaignId);
+          if (!campaigns.length) return [];
+        }
 
         // Get ad sets for first 10 campaigns to avoid rate limiting
         const campaignSlice = campaigns.slice(0, 10);

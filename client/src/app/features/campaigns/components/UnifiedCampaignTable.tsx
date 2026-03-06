@@ -7,11 +7,12 @@
 // - Row expansion for quick details
 // - Sortable columns + Pagination
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { Fragment } from "react";
 import {
   ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal, Play, Pause,
   ExternalLink, Copy, Trash2, Eye, Loader2, ChevronLeft, ChevronRight,
   Megaphone, ChevronDown, ChevronUp, Settings2, Check, X,
-  Pencil, Square, CheckSquare, MinusSquare,
+  Pencil, Square, CheckSquare, MinusSquare, Layers, LayoutGrid,
 } from "lucide-react";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { PLATFORMS } from "@shared/platforms";
@@ -69,6 +70,8 @@ interface UnifiedCampaignTableProps {
   onBulkAction?: (action: "pause" | "activate" | "delete", ids: string[]) => void;
   statusTogglePending?: string | null;
   pageSize?: number;
+  onFilterByAdSets?: (campaign: UnifiedCampaign) => void;
+  onFilterByCreatives?: (campaign: UnifiedCampaign) => void;
 }
 
 type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "cpc" | "cpm";
@@ -336,10 +339,10 @@ function BulkActionBar({
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function UnifiedCampaignTable({
+function UnifiedCampaignTableInner({
   campaigns, loading, onRowClick,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
-  statusTogglePending,
+  onFilterByAdSets, onFilterByCreatives,  statusTogglePending,
   pageSize = 20,
 }: UnifiedCampaignTableProps) {
   const { fmt: fmtMoney } = useCurrency();
@@ -681,10 +684,20 @@ export function UnifiedCampaignTable({
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem onClick={() => onRowClick(c)} className="text-xs gap-2">
                             <Eye className="w-3.5 h-3.5" /> View Details
                           </DropdownMenuItem>
+                          {c.source === "api" && onFilterByAdSets && (
+                            <DropdownMenuItem onClick={() => onFilterByAdSets(c)} className="text-xs gap-2">
+                              <Layers className="w-3.5 h-3.5" /> View Ad Sets
+                            </DropdownMenuItem>
+                          )}
+                          {c.source === "api" && onFilterByCreatives && (
+                            <DropdownMenuItem onClick={() => onFilterByCreatives(c)} className="text-xs gap-2">
+                              <LayoutGrid className="w-3.5 h-3.5" /> View Creatives
+                            </DropdownMenuItem>
+                          )}
                           {c.source === "local" && onClone && (
                             <DropdownMenuItem onClick={() => onClone(c)} className="text-xs gap-2">
                               <Copy className="w-3.5 h-3.5" /> Clone
@@ -783,5 +796,5 @@ export function UnifiedCampaignTable({
   );
 }
 
-// Need Fragment import
-import { Fragment } from "react";
+
+export const UnifiedCampaignTable = UnifiedCampaignTableInner;
