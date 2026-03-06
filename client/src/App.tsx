@@ -73,39 +73,12 @@ import NotFound from "./app/features/shared/NotFound";
 import DashboardLayout from "./app/components/DashboardLayout";
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
-const Campaigns         = lazy(() => import("./app/features/campaigns/Campaigns"));
-const Analytics         = lazy(() => import("./app/features/analytics/Analytics"));
-const Settings          = lazy(() => import("./app/features/settings/Settings"));
-const Connections       = lazy(() => import("./app/features/connections/Connections"));
 const Alerts            = lazy(() => import("./app/features/alerts/Alerts"));
-const Reports           = lazy(() => import("./app/features/reports/Reports"));
-const Audience          = lazy(() => import("./app/features/audience/Audience"));
-const PostAnalytics     = lazy(() => import("./app/features/post-analytics/PostAnalytics"));
-const PeriodComparison  = lazy(() => import("./app/features/analytics/PeriodComparison"));
-const AIContent          = lazy(() => import("./app/features/ai/AIContent"));
-const SentimentDashboard = lazy(() => import("./app/features/sentiment/SentimentDashboard"));
-const AdsAnalyzer       = lazy(() => import("./app/features/ads-analyzer/AdsAnalyzer"));
-const ContentCalendar   = lazy(() => import("./app/features/publishing/ContentCalendar"));
 const Notifications     = lazy(() => import("./app/features/notifications/Notifications"));
 const Profile           = lazy(() => import("./app/features/settings/Profile"));
-const HashtagAnalytics  = lazy(() => import("./app/features/insights/HashtagAnalytics"));
-const Competitors       = lazy(() => import("./app/features/competitors/Competitors"));
-const AdvancedAnalytics = lazy(() => import("./app/features/analytics/AdvancedAnalytics"));
-const ABTesting         = lazy(() => import("./app/features/ab-testing/ABTesting"));
-const AudienceOverlap   = lazy(() => import("./app/features/audience/AudienceOverlap"));
-const CustomDashboards  = lazy(() => import("./app/features/custom-dashboards/CustomDashboards"));
-const Insights          = lazy(() => import("./app/features/insights/Insights"));
-const Publishing        = lazy(() => import("./app/features/publishing/Publishing"));
-const WorkspaceSettings = lazy(() => import("./app/features/settings/WorkspaceSettings"));
 const AcceptInvite      = lazy(() => import("./app/features/workspace/AcceptInvite"));
-const BillingPage       = lazy(() => import("./app/features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
 const PerformanceMonitor = lazy(() => import("./app/features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
-const BrandKit           = lazy(() => import("./app/features/brand/BrandKit"));
-const TeamPage           = lazy(() => import("./app/features/team/TeamPage"));
-const AIInsightsHub      = lazy(() => import("./app/features/ai/AIInsightsHub"));
-const SavedAudiences     = lazy(() => import("./app/features/audience/SavedAudiences"));
 const PerformanceGoals   = lazy(() => import("./app/features/analytics/PerformanceGoals"));
-const ContentTemplates   = lazy(() => import("./app/features/content/ContentTemplates"));
 // ─── Standalone sub-pages (Accordion Sidebar architecture) ──────────────────
 // Ads
 const CampaignsPage    = lazy(() => import("./app/pages/ads/CampaignsPage"));
@@ -128,9 +101,7 @@ const SettingsBillingPage = lazy(() => import("./app/pages/settings/BillingPage"
 const LandingPage        = lazy(() => import("./website/pages/LandingPage"));
 const PrivacyPage        = lazy(() => import("./website/pages/PrivacyPage"));
 const TermsPage          = lazy(() => import("./website/pages/TermsPage"));
-const DemoPage           = lazy(() => import("./website/pages/DemoPage"));
 const ChangelogPage      = lazy(() => import("./website/pages/ChangelogPage"));
-const BlogPage           = lazy(() => import("./website/pages/BlogPage"));
 // ─── Auth pages (Supabase Auth) ───────────────────────────────────────────────
 const LoginPage          = lazy(() => import("./app/features/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("./app/features/auth/RegisterPage"));

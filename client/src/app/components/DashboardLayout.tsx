@@ -1,11 +1,8 @@
-// DashboardLayout.tsx
-// Main app shell — Accordion Sidebar:
-//  • 4 collapsible sections: Ads, Content, Analytics
-//  • Dashboard as single link at top
-//  • Settings as direct link pinned at bottom (not collapsible)
-//  • Navigation config driven by src/config/navigation.ts
+/**
+ * DashboardLayout.tsx — Main app shell with accordion sidebar.
+ * Sub-components live in ./layout-parts/ for maintainability.
+ */
 import { useAuth } from "@/shared/hooks/useAuth";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
 import { trpc } from "@/core/lib/trpc";
@@ -14,17 +11,12 @@ import { GlobalSearch } from "@/app/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
 import { changeLanguage } from "@/core/i18n";
 import { UpgradeModal } from "@/app/features/billing/UpgradeModal";
-import { PLAN_LIMITS, type WorkspacePlan } from "@shared/planLimits";
+import type { WorkspacePlan } from "@shared/planLimits";
 import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsModal } from "@/app/components/KeyboardShortcutsModal";
 import {
   ChevronLeft, ChevronRight,
-  LogOut, Sparkles, Settings,
-  Globe2, User,
-  Sun, Moon, ChevronDown, ChevronRight as ChevronRightSm, Check, PlusCircle,
-  X,
-  Facebook, Instagram, Linkedin, Twitter, Youtube, Building2,
-  CreditCard,
+  Sun, Moon, ChevronDown, PlusCircle, Globe2,
 } from "lucide-react";
 import { navSections } from "@/config/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -32,411 +24,18 @@ import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
 
-// ─── Dark Mode Hook ───────────────────────────────────────────────────────────
-function useDarkMode() {
-  const [dark, setDark] = useState<boolean>(() => {
-    const saved = localStorage.getItem("dashfields-theme");
-    if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
-  useEffect(() => {
-    const root = document.documentElement;
-    if (dark) {
-      root.classList.add("dark");
-      localStorage.setItem("dashfields-theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("dashfields-theme", "light");
-    }
-  }, [dark]);
-  return { dark, toggle: () => setDark((d) => !d) };
-}
+import {
+  useDarkMode, PLATFORM_ICONS,
+  WorkspaceSwitcherModal, AccountSwitcherModal, ProfileDropdown,
+} from "./layout-parts";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type SocialAccount = {
-  id: number;
-  platform: string;
-  name: string | null;
-  username: string | null;
-  account_type: string | null;
-  is_active: boolean | null;
-  profile_picture: string | null;
-};
-
-type NavItem = { icon: React.ElementType; labelKey: string; path: string; iconAnimation?: string };
-type NavGroup = { labelKey: string | null; items: NavItem[] };
-
-// ─── Platform helpers ─────────────────────────────────────────────────────────
-const PLATFORM_ICONS: Record<string, React.ElementType> = {
-  facebook: Facebook, instagram: Instagram, linkedin: Linkedin,
-  twitter: Twitter, youtube: Youtube,
-};
-const PLATFORM_COLORS: Record<string, string> = {
-  facebook: "text-blue-500", instagram: "text-pink-500",
-  linkedin: "text-blue-600", twitter: "text-sky-400",
-  youtube: "text-red-500",
-};
 function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: string; className?: string }) {
   const Icon = PLATFORM_ICONS[platform] ?? Globe2;
-  const color = PLATFORM_COLORS[platform] ?? "text-muted-foreground";
-  return <Icon className={`${className} ${color}`} />;
+  return <Icon className={className} />;
 }
 
-// useActiveAccount is now provided by ActiveAccountContext
-
-/// ─── Nav Structure — driven by navigation.ts config ────────────────────────
-// Settings item pinned at sidebar bottom (not collapsible)
-
-// ─── Workspace Switcher Modal ───────────────────────────────────────────────
-import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
-function WorkspaceSwitcherModal({
-  workspaces, active, onSelect, onClose,
-}: {
-  workspaces: WorkspaceItem[];
-  active: WorkspaceItem | null;
-  onSelect: (id: number) => void;
-  onClose: () => void;
-}) {
-  const [, setLocation] = useLocation();
-  return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass-strong rounded-2xl w-full max-w-sm mx-4 mb-4 md:mb-0 p-4 shadow-2xl animate-blur-in">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Switch Workspace</h3>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-foreground/8 transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-        {workspaces.length === 0 ? (
-          <div className="py-6 text-center">
-            <Building2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No workspaces yet</p>
-          </div>
-        ) : (
-          <div className="space-y-1 max-h-72 overflow-y-auto">
-            {workspaces.map(ws => (
-              <button
-                key={ws.id}
-                onClick={() => onSelect(ws.id)}
-                className={[
-                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors",
-                  active?.id === ws.id ? "bg-brand/10 border border-brand/20" : "hover:bg-foreground/5",
-                ].join(" ")}
-              >
-                <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0 overflow-hidden">
-                  {ws.logo_url ? (
-                    <img src={ws.logo_url} alt={ws.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold text-brand uppercase leading-none">
-                      {ws.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{ws.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate capitalize">{ws.plan} · {ws.role}</p>
-                </div>
-                {active?.id === ws.id && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
-              </button>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => { setLocation("/workspace-settings"); onClose(); }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            Workspace Settings
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Account Switcher Modal ───────────────────────────────────────────────────
-function AccountSwitcherModal({
-  accounts, active, onSelect, onClose,
-}: {
-  accounts: SocialAccount[];
-  active: SocialAccount | null;
-  onSelect: (id: number) => void;
-  onClose: () => void;
-}) {
-  const { t } = useTranslation();
-  const [, setLocation] = useLocation();
-
-  const grouped = accounts.reduce<Record<string, SocialAccount[]>>((acc, a) => {
-    if (!acc[a.platform]) acc[a.platform] = [];
-    acc[a.platform].push(a);
-    return acc;
-  }, {});
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass-strong rounded-2xl w-full max-w-sm mx-4 mb-4 md:mb-0 p-4 shadow-2xl animate-blur-in">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">{t("topbar.switchAccount")}</h3>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-foreground/8 transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-
-        {accounts.length === 0 ? (
-          <div className="py-6 text-center">
-            <Globe2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">{t("topbar.noAccounts")}</p>
-          </div>
-        ) : (
-          <div className="space-y-3 max-h-72 overflow-y-auto">
-            {Object.entries(grouped).map(([platform, accs]) => (
-              <div key={platform}>
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-1 mb-1.5 flex items-center gap-1.5">
-                  <PlatformIcon platform={platform} className="w-3 h-3" />
-                  {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                </p>
-                {accs.map(acc => (
-                  <button
-                    key={acc.id}
-                    onClick={() => { onSelect(acc.id); onClose(); }}
-                    className={[
-                      "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors",
-                      active?.id === acc.id ? "bg-brand/10 border border-brand/20" : "hover:bg-foreground/5",
-                    ].join(" ")}
-                  >
-                    <Avatar className="w-7 h-7 shrink-0">
-                      {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
-                      <AvatarFallback className="text-[10px] bg-brand/10 text-brand font-semibold">
-                        {(acc.name ?? acc.username ?? platform).charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{acc.name ?? acc.username ?? platform}</p>
-                      {acc.account_type && <p className="text-[10px] text-muted-foreground truncate">{acc.account_type}</p>}
-                    </div>
-                    {active?.id === acc.id && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          onClick={() => { setLocation("/connections"); onClose(); }}
-          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-        >
-          <PlusCircle className="w-3.5 h-3.5" />
-          {t("topbar.connectAccount")}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Profile Dropdown ─────────────────────────────────────────────────────────
-function ProfileDropdown({
-  user,
-  onLogout,
-  workspaces,
-  activeWorkspace,
-  onSelectWorkspace,
-  onNewWorkspace,
-}: {
-  user: { name?: string; email?: string };
-  onLogout: () => void;
-  workspaces: WorkspaceItem[];
-  activeWorkspace: WorkspaceItem | null;
-  onSelectWorkspace: (id: number) => void;
-  onNewWorkspace: () => void;
-}) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [, setLocation] = useLocation();
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const initials = user?.name
-    ? user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()
-    : "U";
-
-  return (
-    <div className="relative" ref={ref}>
-      {/* Trigger button */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className={[
-          "flex items-center gap-1.5 p-1 rounded-xl transition-all duration-200",
-          open ? "bg-foreground/8" : "hover:bg-foreground/5",
-        ].join(" ")}
-      >
-        {/* Avatar with workspace badge */}
-        <div className="relative">
-          <Avatar className="w-8 h-8">
-            <AvatarFallback className="text-[12px] bg-brand/10 text-brand font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          {/* Workspace badge */}
-          {activeWorkspace && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-sm bg-background border border-border/60 flex items-center justify-center overflow-hidden shadow-sm">
-              {activeWorkspace.logo_url ? (
-                <img src={activeWorkspace.logo_url} alt={activeWorkspace.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-[7px] font-black text-brand uppercase leading-none">
-                  {activeWorkspace.name.charAt(0)}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-        <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {/* Dropdown panel */}
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-72 glass-strong rounded-2xl shadow-2xl border border-border/40 z-50 overflow-hidden animate-blur-in">
-
-          {/* ── User info header ── */}
-          <div className="px-4 py-3.5 flex items-center gap-3 border-b border-border/30">
-            <Avatar className="w-9 h-9 shrink-0">
-              <AvatarFallback className="text-sm bg-brand/10 text-brand font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{user?.name ?? "User"}</p>
-              {user?.email && (
-                <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
-              )}
-            </div>
-          </div>
-
-          {/* ── Workspace section ── */}
-          <div className="px-2 pt-2 pb-1">
-            <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-2 mb-1.5">
-              Workspaces
-            </p>
-            <div className="space-y-0.5 max-h-48 overflow-y-auto">
-              {workspaces.length === 0 ? (
-                <div className="py-3 text-center">
-                  <p className="text-xs text-muted-foreground">No workspaces yet</p>
-                </div>
-              ) : (
-                workspaces.map(ws => {
-                  const isActive = activeWorkspace?.id === ws.id;
-                  const planCfg = PLAN_LIMITS[ws.plan as WorkspacePlan];
-                  return (
-                    <button
-                      key={ws.id}
-                      onClick={() => { onSelectWorkspace(ws.id); setOpen(false); }}
-                      className={[
-                        "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all duration-150",
-                        isActive
-                          ? "bg-brand/8 border border-brand/15"
-                          : "hover:bg-foreground/5",
-                      ].join(" ")}
-                    >
-                      {/* Workspace logo */}
-                      <div className={[
-                        "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden",
-                        isActive ? "bg-brand/15" : "bg-foreground/8",
-                      ].join(" ")}>
-                        {ws.logo_url ? (
-                          <img src={ws.logo_url} alt={ws.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className={`text-[11px] font-black uppercase leading-none ${isActive ? "text-brand" : "text-foreground/60"}`}>
-                            {ws.name.charAt(0)}
-                          </span>
-                        )}
-                      </div>
-                      {/* Name + plan */}
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-xs font-medium truncate ${isActive ? "text-foreground" : "text-foreground/80"}`}>
-                          {ws.name}
-                        </p>
-                        {planCfg && (
-                          <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${planCfg.badge.color}`}>
-                            {planCfg.badge.label}
-                          </span>
-                        )}
-                      </div>
-                      {/* Active check */}
-                      {isActive && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-            {/* New workspace button */}
-            <button
-              onClick={() => { onNewWorkspace(); setOpen(false); }}
-              className="mt-1 w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors border border-dashed border-border/40 hover:border-border/70"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              New workspace
-            </button>
-          </div>
-
-          {/* ── Divider ── */}
-          <div className="border-t border-border/30 mx-2" />
-
-          {/* ── Actions ── */}
-          <div className="px-2 py-1.5 space-y-0.5">
-            <button
-              onClick={() => { setLocation("/profile"); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
-            >
-              <User className="w-3.5 h-3.5 text-muted-foreground" />
-              {t("topbar.viewProfile")}
-            </button>
-            <button
-              onClick={() => { setLocation("/settings/workspace"); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
-            >
-              <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
-              Workspace &amp; Team
-            </button>
-            <button
-              onClick={() => { setLocation("/settings/billing"); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground"
-            >
-              <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
-              {t("topbar.billing", "Billing & Plans")}
-            </button>
-          </div>
-
-          {/* ── Sign out ── */}
-          <div className="border-t border-border/30 mx-2 mb-1" />
-          <div className="px-2 pb-2">
-            <button
-              onClick={() => { onLogout(); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm text-destructive hover:bg-destructive/8 transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              {t("topbar.signOut")}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Main Layout ──────────────────────────────────────────────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
-  // Accordion open state — auto-open the section that matches current location
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     navSections.forEach(s => s.items.forEach(item => {
@@ -450,19 +49,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [location, setLocation] = useLocation();
   const { loading, user, isAuthenticated, signOut } = useAuth();
 
-  // ── Redirect unauthenticated users — must be in useEffect, not render ────
   useEffect(() => {
     if (loading) return;
     if (isAuthenticated) return;
     const returnTo = encodeURIComponent(location + window.location.search);
     setLocation(`/login?returnTo=${returnTo}`);
   }, [loading, isAuthenticated, location, setLocation]);
+
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
-  // ── Current page label from nav ──────────────────────────────────────────────
-  // Include all sub-items + settings sub-pages for breadcrumb matching
+  // Current page label from nav
   const settingsSubItems = [
     { labelKey: "nav.integrations", path: "/settings/integrations" },
     { labelKey: "nav.workspace",    path: "/settings/workspace" },
@@ -493,28 +91,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
-  const handleLogout = async () => {
-    await signOut();
-  };
+  const handleLogout = async () => { await signOut(); };
 
   const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
 
-  // Auto-refresh ad account profile pictures if they look like user profile pics
+  // Auto-refresh ad account profile pictures
   const utils = trpc.useUtils();
   const refreshPictures = trpc.meta.refreshAccountPictures.useMutation({
-    onSuccess: (res) => {
-      if (res.updated > 0) {
-        // Invalidate social.list to reload accounts with new pictures
-        utils.social.list.invalidate();
-      }
-    },
+    onSuccess: (res) => { if (res.updated > 0) utils.social.list.invalidate(); },
   });
   const picturesRefreshedRef = useRef(false);
   useEffect(() => {
     if (picturesRefreshedRef.current) return;
     if (!accounts || accounts.length === 0) return;
-    // Check if any facebook account has a profile pic that looks like a user profile pic
-    // (contains "profilepic/?asid=" which is the user's personal FB profile picture)
     const needsRefresh = accounts.some(
       a => a.platform === "facebook" && a.profile_picture?.includes("profilepic/?asid=")
     );
@@ -524,11 +113,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [accounts]);
 
-  const handleLangToggle = () => {
-    changeLanguage(i18n.language === "ar" ? "en" : "ar");
-  };
+  const handleLangToggle = () => { changeLanguage(i18n.language === "ar" ? "en" : "ar"); };
 
-  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="app-bg flex h-screen items-center justify-center">
@@ -540,12 +126,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // ── Unauthenticated — show nothing while redirect effect fires ─────────
-  if (!loading && !isAuthenticated) {
-    return null;
-  }
+  if (!loading && !isAuthenticated) return null;
 
-  // ── Layout ───────────────────────────────────────────────────────────────
   return (
     <div className={`app-bg flex h-screen overflow-hidden ${isRTL ? "flex-row-reverse" : ""}`}>
 
@@ -560,17 +142,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onClick={() => setLocation("/dashboard")}
         >
           {collapsed ? (
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_3bd5ad8c.svg"
-              alt="Dashfields"
-              className="w-8 h-8"
-            />
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_3bd5ad8c.svg" alt="Dashfields" className="w-8 h-8" />
           ) : (
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_61e255da.svg"
-              alt="Dashfields"
-              className="h-7 w-auto"
-            />
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_61e255da.svg" alt="Dashfields" className="h-7 w-auto" />
           )}
         </div>
 
@@ -582,25 +156,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             const isOpen = openSections[item.path] ?? false;
 
             if (!hasChildren) {
-              // Single link (Dashboard)
               const isActive = item.path === "/dashboard"
                 ? location === "/dashboard" || location === "/"
                 : location.startsWith(item.path);
               return (
-                <button
-                  key={item.path}
-                  onClick={() => setLocation(item.path)}
+                <button key={item.path} onClick={() => setLocation(item.path)}
                   title={collapsed ? t(item.labelKey) : undefined}
                   className={[
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                     "transition-all duration-200 group relative",
                     isRTL ? "flex-row-reverse text-right" : "text-left",
-                    isActive
-                      ? "bg-brand/10 text-brand shadow-sm"
-                      : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                    isActive ? "bg-brand/10 text-brand shadow-sm" : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
                     collapsed ? "justify-center" : "",
-                  ].join(" ")}
-                >
+                  ].join(" ")}>
                   {isActive && !collapsed && (
                     <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
                   )}
@@ -610,59 +178,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               );
             }
 
-            // Collapsible accordion section
             return (
               <div key={item.path}>
-                {/* Section header button */}
-                <button
-                  onClick={() => collapsed ? setLocation(item.subItems![0].path) : toggleSection(item.path)}
+                <button onClick={() => collapsed ? setLocation(item.subItems![0].path) : toggleSection(item.path)}
                   title={collapsed ? t(item.labelKey) : undefined}
                   className={[
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                     "transition-all duration-200 group relative",
                     isRTL ? "flex-row-reverse text-right" : "text-left",
-                    isSectionActive
-                      ? "text-foreground"
-                      : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                    isSectionActive ? "text-foreground" : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
                     collapsed ? "justify-center" : "",
-                  ].join(" ")}
-                >
+                  ].join(" ")}>
                   <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isSectionActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
                   {!collapsed && (
                     <>
                       <span className="truncate flex-1">{t(item.labelKey)}</span>
-                      <ChevronDown
-                        className={[
-                          "w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0",
-                          isOpen ? "rotate-180" : "",
-                        ].join(" ")}
-                      />
+                      <ChevronDown className={["w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0", isOpen ? "rotate-180" : ""].join(" ")} />
                     </>
                   )}
                 </button>
-
-                {/* Sub-items */}
                 {!collapsed && (
-                  <div
-                    className="overflow-hidden transition-all duration-200 ease-out"
-                    style={{ maxHeight: isOpen ? `${(item.subItems?.length ?? 0) * 44}px` : "0px" }}
-                  >
+                  <div className="overflow-hidden transition-all duration-200 ease-out"
+                    style={{ maxHeight: isOpen ? `${(item.subItems?.length ?? 0) * 44}px` : "0px" }}>
                     <div className="ml-3 pl-3 border-l border-border/40 space-y-0.5 py-0.5">
                       {item.subItems!.map(sub => {
                         const isSubActive = location.startsWith(sub.path);
                         return (
-                          <button
-                            key={sub.path}
-                            onClick={() => setLocation(sub.path)}
+                          <button key={sub.path} onClick={() => setLocation(sub.path)}
                             className={[
                               "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium",
                               "transition-all duration-150",
                               isRTL ? "flex-row-reverse text-right" : "text-left",
-                              isSubActive
-                                ? "bg-brand/10 text-brand"
-                                : "text-foreground/50 hover:text-foreground hover:bg-foreground/5",
-                            ].join(" ")}
-                          >
+                              isSubActive ? "bg-brand/10 text-brand" : "text-foreground/50 hover:text-foreground hover:bg-foreground/5",
+                            ].join(" ")}>
                             <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-brand" : "text-foreground/35"].join(" ")} />
                             <span className="truncate">{t(sub.labelKey)}</span>
                             {isSubActive && <span className="ml-auto w-1 h-1 rounded-full bg-brand shrink-0" />}
@@ -683,19 +231,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {(() => {
             const isActive = location.startsWith("/settings/integrations");
             return (
-              <button
-                onClick={() => setLocation("/settings/integrations")}
+              <button onClick={() => setLocation("/settings/integrations")}
                 title={collapsed ? t("nav.integrations") : undefined}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                   "transition-all duration-200 group relative",
                   isRTL ? "flex-row-reverse text-right" : "text-left",
-                  isActive
-                    ? "bg-brand/10 text-brand shadow-sm"
-                    : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+                  isActive ? "bg-brand/10 text-brand shadow-sm" : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
                   collapsed ? "justify-center" : "",
-                ].join(" ")}
-              >
+                ].join(" ")}>
                 {isActive && !collapsed && (
                   <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
                 )}
@@ -709,41 +253,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })()}
         </div>
 
-        {/* Workspace Switcher moved to Topbar */}
-
-        {/* Collapse Toggle — inside sidebar, bottom of nav area */}
-        <button
-          onClick={() => setCollapsed(c => !c)}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={[
-            "mx-2 mb-2 flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium",
+        {/* Collapse Toggle */}
+        <button onClick={() => setCollapsed(c => !c)} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={["mx-2 mb-2 flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium",
             "transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5",
             collapsed ? "justify-center" : "",
-          ].join(" ")}
-        >
-          {(isRTL ? !collapsed : collapsed)
-            ? <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-            : <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-          }
+          ].join(" ")}>
+          {(isRTL ? !collapsed : collapsed) ? <ChevronRight className="w-3.5 h-3.5 shrink-0" /> : <ChevronLeft className="w-3.5 h-3.5 shrink-0" />}
           {!collapsed && <span className="truncate">Collapse</span>}
         </button>
       </aside>
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
-        {/* Top bar */}
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
           {/* Left: search + Account Switcher Pill */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <GlobalSearch />
-            {/* ── Account Switcher Pill ─────────────────────────────────── */}
-            <button
-              onClick={() => setShowAccountSwitcher(true)}
-              className={[
-                "flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
+            <button onClick={() => setShowAccountSwitcher(true)}
+              className={["flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
                 isRTL ? "flex-row-reverse" : "",
-              ].join(" ")}
-            >
+              ].join(" ")}>
               {activeAccount ? (
                 <>
                   <div className="relative shrink-0">
@@ -764,9 +294,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <p className="text-[10px] text-muted-foreground/60 truncate leading-tight flex items-center gap-1">
                       <span>{activeAccount.platform.charAt(0).toUpperCase() + activeAccount.platform.slice(1)}</span>
                       {accounts.length > 1 && (
-                        <span className="px-1 py-0 rounded-full bg-brand/10 text-brand text-[9px] font-semibold">
-                          {accounts.length}
-                        </span>
+                        <span className="px-1 py-0 rounded-full bg-brand/10 text-brand text-[9px] font-semibold">{accounts.length}</span>
                       )}
                     </p>
                   </div>
@@ -793,30 +321,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
           {/* Right: controls */}
           <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
-            {/* Language toggle */}
-            <button
-              onClick={handleLangToggle}
+            <button onClick={handleLangToggle}
               title={i18n.language === "ar" ? "Switch to English" : "التحويل للعربية"}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors font-medium text-xs"
-            >
-              <span className="text-[11px] font-semibold">
-                {i18n.language === "ar" ? "EN" : "ع"}
-              </span>
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors font-medium text-xs">
+              <span className="text-[11px] font-semibold">{i18n.language === "ar" ? "EN" : "ع"}</span>
             </button>
-
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleDark}
-              title={dark ? t("topbar.switchLight") : t("topbar.switchDark")}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-            >
+            <button onClick={toggleDark} title={dark ? t("topbar.switchLight") : t("topbar.switchDark")}
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors">
               {dark ? <Sun className="w-4 h-4 icon-spin" /> : <Moon className="w-4 h-4 icon-bounce" />}
             </button>
-
-            {/* Notifications */}
             <NotificationBell />
-
-            {/* Profile Dropdown */}
             <ProfileDropdown
               user={{ name: user?.name ?? undefined, email: user?.email ?? undefined }}
               onLogout={handleLogout}
@@ -827,42 +341,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           </div>
         </div>
-
-        {/* Page content */}
-        <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">{children}</div>
       </main>
 
-      {/* ── Mobile Bottom Nav ──────────────────────────────────────────────── */}
       <MobileBottomNav />
 
-      {/* ── Workspace Switcher Modal ──────────────────────────────────────── */}
       {showWorkspaceSwitcher && (
-        <WorkspaceSwitcherModal
-          workspaces={workspaces}
-          active={activeWorkspace}
+        <WorkspaceSwitcherModal workspaces={workspaces} active={activeWorkspace}
           onSelect={(id) => { setActiveWorkspace(id); setShowWorkspaceSwitcher(false); }}
-          onClose={() => setShowWorkspaceSwitcher(false)}
-        />
+          onClose={() => setShowWorkspaceSwitcher(false)} />
       )}
-            {/* ── Account Switcher Modal ───────────────────────────────────── */}
       {showAccountSwitcher && (
-        <AccountSwitcherModal
-          accounts={accounts}
-          active={activeAccount}
-          onSelect={setActiveAccount}
-          onClose={() => setShowAccountSwitcher(false)}
-        />
+        <AccountSwitcherModal accounts={accounts} active={activeAccount}
+          onSelect={setActiveAccount} onClose={() => setShowAccountSwitcher(false)} />
       )}
-      {/* ── Upgrade Modal ────────────────────────────────────────────────────────────── */}
-      <UpgradeModal
-        open={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"}
-        reason={upgradeReason}
-      />
-      {/* ── Keyboard Shortcuts Modal ─────────────────────────────────────────────────── */}
+      <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)}
+        currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"} reason={upgradeReason} />
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   );

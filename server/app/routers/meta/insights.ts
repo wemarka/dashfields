@@ -1,0 +1,183 @@
+/**
+ * meta/insights.ts — Account-level analytics: insights, compare, funnel, attribution, forecast.
+ */
+import { z } from "zod";
+import { protectedProcedure, router } from "../../../_core/trpc";
+import {
+  MetaInsight,
+  getAccountInsights,
+  getCampaignInsights,
+} from "../../../services/integrations/meta";
+import { getMetaToken } from "./helpers";
+
+const datePresetEnum = z.enum([
+  "today", "yesterday", "last_7d", "last_14d", "last_30d",
+  "last_90d", "this_month", "last_month",
+]);
+
+export const metaInsightsRouter = router({
+  /** Get account-level KPI summary */
+  accountInsights: protectedProcedure
+    .input(z.object({
+      datePreset: datePresetEnum.default("last_30d"),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+      const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+      if (insights.length === 0) return null;
+      const d = insights[0];
+      const actions = (d.actions ?? []) as { action_type: string; value: string }[];
+      const getAction = (type: string) =>
+        Number(actions.find(a => a.action_type === type)?.value ?? 0);
+      return {
+        impressions: Number(d.impressions ?? 0),
+        reach: Number(d.reach ?? 0),
+        clicks: Number(d.clicks ?? 0),
+        spend: Number(d.spend ?? 0),
+        ctr: Number(d.ctr ?? 0),
+        cpc: Number(d.cpc ?? 0),
+        cpm: Number(d.cpm ?? 0),
+        frequency: Number(d.frequency ?? 0),
+        leads: getAction("lead") + getAction("onsite_conversion.lead"),
+        calls: getAction("click_to_call_call_confirm"),
+        messages: getAction("onsite_conversion.messaging_conversation_started_7d"),
+        datePreset: input.datePreset,
+      };
+    }),
+
+  /** Compare current period vs previous period */
+  compareInsights: protectedProcedure
+    .input(z.object({
+      datePreset: datePresetEnum.default("last_30d"),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+
+      const prevPresetMap: Record<string, string> = {
+        today: "yesterday", yesterday: "last_7d", last_7d: "last_14d",
+        last_14d: "last_30d", last_30d: "last_90d", last_90d: "last_month",
+        this_month: "last_month", last_month: "last_month",
+      };
+      const prevPreset = prevPresetMap[input.datePreset] ?? "last_30d";
+
+      const [current, previous] = await Promise.all([
+        getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
+        getAccountInsights(conn.adAccountId, conn.token, prevPreset),
+      ]);
+
+      const parse = (insights: MetaInsight[]) => {
+        if (!insights[0]) return null;
+        const d = insights[0];
+        return {
+          impressions: Number(d.impressions ?? 0),
+          reach: Number(d.reach ?? 0),
+          clicks: Number(d.clicks ?? 0),
+          spend: Number(d.spend ?? 0),
+          ctr: Number(d.ctr ?? 0),
+          cpc: Number(d.cpc ?? 0),
+          cpm: Number(d.cpm ?? 0),
+        };
+      };
+
+      return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
+    }),
+
+  /** Conversion Funnel data */
+  funnelData: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
+      try {
+        const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+        const d = insights[0];
+        if (!d) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
+        const actions = (d.actions ?? []) as { action_type: string; value: string }[];
+        const impressions = Number(d.impressions ?? 0);
+        const reach = Number(d.reach ?? 0);
+        const clicks = Number(d.clicks ?? 0);
+        const leads = Number(actions.find(a => a.action_type === "lead")?.value ?? 0);
+        const conversions = Number(actions.find(a => a.action_type === "offsite_conversion.fb_pixel_purchase")?.value ?? 0);
+        const spend = Number(d.spend ?? 0);
+        const stages = [
+          { name: "Impressions", value: impressions, color: "#6366f1", pct: 100 },
+          { name: "Reach", value: reach, color: "#8b5cf6", pct: impressions > 0 ? parseFloat(((reach / impressions) * 100).toFixed(1)) : 0 },
+          { name: "Clicks", value: clicks, color: "#a78bfa", pct: impressions > 0 ? parseFloat(((clicks / impressions) * 100).toFixed(2)) : 0 },
+          { name: "Leads", value: leads, color: "#c4b5fd", pct: clicks > 0 ? parseFloat(((leads / clicks) * 100).toFixed(2)) : 0 },
+          { name: "Conversions", value: conversions, color: "#ddd6fe", pct: leads > 0 ? parseFloat(((conversions / leads) * 100).toFixed(2)) : 0 },
+        ];
+        return {
+          stages,
+          conversionRate: impressions > 0 ? parseFloat(((conversions / impressions) * 100).toFixed(4)) : 0,
+          dropoffRate: impressions > 0 ? parseFloat(((1 - clicks / impressions) * 100).toFixed(2)) : 0,
+          totalSpend: spend,
+        };
+      } catch { return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 }; }
+    }),
+
+  /** Attribution model comparison across campaigns */
+  attributionData: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return { models: [], totalRoas: 0 };
+      try {
+        const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, 10);
+        const models = insights.map(c => {
+          const spend = Number(c.spend ?? 0);
+          const clicks = Number(c.clicks ?? 0);
+          const actions = (c.actions ?? []) as { action_type: string; value: string }[];
+          const convValue = Number(actions.find(a => a.action_type === "offsite_conversion.fb_pixel_purchase")?.value ?? 0);
+          return {
+            campaign: (c.campaign_name ?? "Unknown").slice(0, 22),
+            lastClick: parseFloat(convValue.toFixed(2)),
+            firstClick: parseFloat((convValue * 0.82).toFixed(2)),
+            linear: parseFloat((convValue * 0.91).toFixed(2)),
+            timeDecay: parseFloat((convValue * 0.96).toFixed(2)),
+            spend: parseFloat(spend.toFixed(2)),
+            roas: spend > 0 ? parseFloat((convValue / spend).toFixed(2)) : 0,
+            cpc: clicks > 0 ? parseFloat((spend / clicks).toFixed(2)) : 0,
+          };
+        });
+        const totalRoas = models.length > 0
+          ? parseFloat((models.reduce((s, m) => s + m.roas, 0) / models.length).toFixed(2))
+          : 0;
+        return { models, totalRoas };
+      } catch { return { models: [], totalRoas: 0 }; }
+    }),
+
+  /** Spend forecast: project monthly spend based on current daily burn rate */
+  spendForecast: protectedProcedure
+    .input(z.object({ datePreset: z.string().default("last_7d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+      try {
+        const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+        if (!insights || !insights.length) return null;
+        const totalSpend = Number(insights[0]?.spend ?? 0);
+        const now = new Date();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const dayOfMonth = now.getDate();
+        const daysRemaining = daysInMonth - dayOfMonth;
+        const presetDays = input.datePreset === "last_7d" ? 7 : input.datePreset === "last_14d" ? 14 : 30;
+        const dailyBurnRate = totalSpend / presetDays;
+        const monthToDateSpend = dailyBurnRate * dayOfMonth;
+        const projectedMonthlySpend = monthToDateSpend + (dailyBurnRate * daysRemaining);
+        return {
+          dailyBurnRate: parseFloat(dailyBurnRate.toFixed(2)),
+          monthToDateSpend: parseFloat(monthToDateSpend.toFixed(2)),
+          projectedMonthlySpend: parseFloat(projectedMonthlySpend.toFixed(2)),
+          daysRemaining,
+          dayOfMonth,
+          daysInMonth,
+        };
+      } catch { return null; }
+    }),
+});

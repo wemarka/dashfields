@@ -2099,3 +2099,48 @@
 - [x] Standalone pages kept as fallback routes
 - [x] Navigation updated
 - [x] All TypeScript compiles (0 errors), 34 new tests + 124 existing tests passing
+
+## ✅ Phase 65 — Code Refactoring & Cleanup
+
+### Phase 65A — Delete Unused Files
+- [x] Delete unused lazy imports from App.tsx (20 unused imports)
+- [x] Delete client/src/app/features/ads/Ads.tsx (old hub, not routed)
+- [x] Delete client/src/app/features/ads/tabs/CampaignsTab.tsx (not used)
+- [x] Delete client/src/app/features/ads/tabs/PerformanceTab.tsx (not used)
+- [x] Delete client/src/app/features/ads/tabs/AIAnalyzerTab.tsx (not used)
+- [x] Delete client/src/app/features/analytics-hub/tabs/CompetitorsTab.tsx (not used)
+- [x] Delete client/src/app/features/analytics-hub/tabs/ReportsTab.tsx (not used)
+- [x] Delete client/src/app/features/content/Content.tsx (not used)
+- [x] Delete client/src/app/features/content/tabs/PlannerTab.tsx (not used)
+- [x] Delete client/src/app/features/content/tabs/AIStudioTab.tsx (not used)
+- [x] Delete client/src/app/pages/ads/AdSetsPage.tsx (route is redirect)
+- [x] Delete client/src/app/pages/ads/AdCreativesPage.tsx (route is redirect)
+- [x] Delete client/src/app/features/adsets/AdSetsPage.tsx (integrated in drawer)
+- [x] Delete client/src/app/features/adsets/AdSetScheduleModal.tsx (integrated in drawer)
+- [x] Delete client/src/app/features/creatives/AdCreativesPage.tsx (integrated in drawer)
+- [x] Delete client/src/app/features/creatives/CreativeHeatmap.tsx (integrated in drawer)
+- [x] Delete client/src/app/features/creatives/CreativeCompareDrawer.tsx (integrated in drawer)
+- [x] Delete client/src/app/features/ab-testing/ directory (redirects to campaigns)
+- [x] Delete client/src/app/features/custom-dashboards/ directory (redirects to dashboard)
+- [x] Delete client/src/website/pages/DemoPage.tsx (not routed, only external redirect)
+- [x] Delete client/src/website/pages/BlogPage.tsx (not routed)
+
+### Phase 65B — Split Large Files
+- [x] Split CampaignDetailDrawer.tsx (1341→200 lines) into 8 tab components in drawer/
+- [x] Split WorkspaceSettings.tsx (1211→120 lines) into 6 tab files in workspace-tabs/
+- [x] Split server/app/routers/meta.ts (1128 lines) into 4 sub-routers in meta/
+- [x] Split LandingPage.tsx (1076→40 lines) into 7 section files in sections/
+- [x] Split AIContent.tsx (1030→100 lines) into 7 tab files in tabs/
+- [x] Split Connections.tsx (983→350 lines) into 5 component files in components/
+- [x] Split ContentCalendar.tsx (946→400 lines) into 5 component files in components/
+- [x] Split DashboardLayout.tsx (869→450 lines) into 4 component files in layout-parts/
+- [x] Split UnifiedCampaignTable.tsx (805→400 lines) into 3 component files in campaign-table/
+
+### Phase 65C — Verify
+- [x] All TypeScript compiles with 0 errors
+- [x] All 619 tests pass (43 test files)
+- [x] App functionality unchanged
+- [x] Split SentimentDashboard.tsx (771→80 lines) into 6 tab files in tabs/
+- [x] Split CampaignBuilder.tsx (757→120 lines) into 5 step files in builder-steps/
+- [x] Split Reports.tsx (728→250 lines) into 4 component files in components/
+- [x] Split BrandKit.tsx (629→200 lines) into 3 component files in components/

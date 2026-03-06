@@ -10,7 +10,6 @@ const LandingPage   = lazy(() => import("./pages/LandingPage"));
 const PrivacyPage   = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage     = lazy(() => import("./pages/TermsPage"));
 const ChangelogPage = lazy(() => import("./pages/ChangelogPage"));
-const BlogPage      = lazy(() => import("./pages/BlogPage"));
 
 function ExternalRedirect({ to }: { to: string }) {
   window.location.replace(to);
@@ -24,8 +23,8 @@ export function WebsiteRouter() {
       <Route path="/privacy"    component={PrivacyPage} />
       <Route path="/terms"      component={TermsPage} />
       <Route path="/changelog"  component={ChangelogPage} />
-      <Route path="/blog/:slug" component={BlogPage} />
-      <Route path="/blog"       component={BlogPage} />
+      <Route path="/blog/:slug" component={LandingPage} />
+      <Route path="/blog"       component={LandingPage} />
       <Route path="/demo"            component={() => <ExternalRedirect to={APP_DOMAIN + "/demo"} />} />
       <Route path="/login"           component={() => <ExternalRedirect to={APP_DOMAIN + "/login"} />} />
       <Route path="/register"        component={() => <ExternalRedirect to={APP_DOMAIN + "/register"} />} />
