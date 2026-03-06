@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type WorkspacePlan = "free" | "pro" | "agency" | "enterprise";
@@ -70,7 +71,9 @@ const LS_KEY = "dashfields_active_workspace_id";
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useSupabaseAuth();
   const { data, isLoading, refetch } = trpc.workspaces.list.useQuery(undefined, {
+    enabled: isAuthenticated,
     staleTime: 60_000,
   });
 

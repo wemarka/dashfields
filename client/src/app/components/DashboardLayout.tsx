@@ -449,6 +449,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const toggleSection = (path: string) => setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   const [location, setLocation] = useLocation();
   const { loading, user, isAuthenticated, signOut } = useAuth();
+
+  // ── Redirect unauthenticated users — must be in useEffect, not render ────
+  useEffect(() => {
+    if (loading) return;
+    if (isAuthenticated) return;
+    const returnTo = encodeURIComponent(location + window.location.search);
+    setLocation(`/login?returnTo=${returnTo}`);
+  }, [loading, isAuthenticated, location, setLocation]);
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
@@ -507,10 +515,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // ── Unauthenticated — redirect to /login using Wouter (no full page reload) ────────
-  if (!isAuthenticated) {
-    const returnTo = encodeURIComponent(location + (typeof window !== "undefined" ? window.location.search : ""));
-    setLocation(`/login?returnTo=${returnTo}`);
+  // ── Unauthenticated — show nothing while redirect effect fires ─────────
+  if (!loading && !isAuthenticated) {
     return null;
   }
 

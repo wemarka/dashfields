@@ -5,6 +5,7 @@
  */
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { trpc } from "@/core/lib/trpc";
+import { useSupabaseAuth } from "@/core/contexts/SupabaseAuthContext";
 
 export type SocialAccount = {
   id: number;
@@ -34,12 +35,15 @@ const ActiveAccountContext = createContext<ActiveAccountContextType>({
 });
 
 export function ActiveAccountProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useSupabaseAuth();
   const [activeId, setActiveId] = useState<number | null>(() => {
     const saved = localStorage.getItem("dashfields-active-account");
     return saved ? parseInt(saved, 10) : null;
   });
 
-  const { data: rawAccounts = [], isLoading } = trpc.social.list.useQuery();
+  const { data: rawAccounts = [], isLoading } = trpc.social.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const accounts = rawAccounts as SocialAccount[];
 
   // Auto-select first account if none selected

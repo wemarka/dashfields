@@ -13,15 +13,24 @@ import { SupabaseAuthProvider } from "@/core/contexts/SupabaseAuthContext";
 
 const queryClient = new QueryClient();
 
-const redirectToLoginIfUnauthorized = (error: unknown) => {
+const redirectToLoginIfUnauthorized = async (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
   if (!isUnauthorized) return;
   const currentPath = window.location.pathname;
-  if (currentPath !== "/login" && !currentPath.startsWith("/auth/")) {
-    window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+  if (currentPath === "/login" || currentPath.startsWith("/auth/")) return;
+  // Only redirect if there is genuinely no Supabase session
+  // (avoids false redirects during session initialization)
+  if (supabase) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return; // session exists — 401 is transient, don't redirect
+    } catch {
+      // ignore
+    }
   }
+  window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
 };
 
 queryClient.getQueryCache().subscribe(event => {
