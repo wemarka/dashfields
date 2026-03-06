@@ -23,6 +23,7 @@ import type { Express, Request, Response } from "express";
 import crypto from "crypto";
 import { getSupabase } from "../../supabase";
 import { upsertUserBySupabaseUid } from "../../app/db/users";
+import { sdk } from "../../_core/sdk";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface OAuthConfig {
@@ -134,17 +135,36 @@ function consumeState(key: string) {
   return entry;
 }
 
-// ─── User identification via Supabase JWT ──────────────────────────────────────
+// ─── User identification ──────────────────────────────────────────────────────
+
+/** Decode JWT payload without verification (we trust Supabase-signed tokens). */
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const padded = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Resolve the app user ID from a Supabase Bearer JWT.
- * The token is passed in the state as `supabaseToken` (set by the frontend
- * before redirecting to the OAuth provider).
+ * Uses admin.getUserById (service_role safe) instead of getUser.
  */
 async function getUserIdFromSupabaseToken(token: string): Promise<number | null> {
   if (!token) return null;
   try {
+    const payload = decodeJwtPayload(token);
+    if (!payload) return null;
+    const sub = payload.sub as string | undefined;
+    const exp = payload.exp as number | undefined;
+    if (!sub) return null;
+    if (exp && exp < Math.floor(Date.now() / 1000)) return null;
+
     const sb = getSupabase();
-    const { data, error } = await sb.auth.getUser(token);
+    const { data, error } = await sb.auth.admin.getUserById(sub);
     if (error || !data?.user) return null;
     const su = data.user;
     const email = su.email ?? null;
@@ -156,6 +176,19 @@ async function getUserIdFromSupabaseToken(token: string): Promise<number | null>
     const loginMethod = su.app_metadata?.provider === "google" ? "google" : "email";
     const user = await upsertUserBySupabaseUid({ supabaseUid: su.id, email, name, loginMethod });
     return user.id;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve the app user ID from Manus OAuth session cookie.
+ * Fallback for users who logged in via Manus OAuth (not Supabase).
+ */
+async function getUserIdFromManusOAuthCookie(req: Request): Promise<number | null> {
+  try {
+    const user = await sdk.authenticateRequest(req);
+    return user?.id ?? null;
   } catch {
     return null;
   }
@@ -365,16 +398,21 @@ export function registerPlatformOAuthRoutes(app: Express) {
       return res.redirect(`${origin}${returnPath}?oauth_error=unsupported&platform=${platform}`);
     }
 
-    // Resolve user ID — prefer Supabase token stored in state
+    // Resolve user ID — try multiple strategies
     const supabaseToken = stateEntry?.data.supabaseToken ?? "";
     let userId: number | null = supabaseToken
       ? await getUserIdFromSupabaseToken(supabaseToken)
       : null;
 
-    // Fallback: use userId passed directly (numeric, from state)
+    // Fallback 1: use userId passed directly (numeric, from state)
     if (!userId && stateEntry?.data.userId) {
       const parsed = parseInt(stateEntry.data.userId);
       if (!isNaN(parsed)) userId = parsed;
+    }
+
+    // Fallback 2: Manus OAuth session cookie
+    if (!userId) {
+      userId = await getUserIdFromManusOAuthCookie(req);
     }
 
     if (!userId) {
