@@ -565,49 +565,76 @@ export const metaRouter = router({
       } catch { return null; }
     }),
 
-  /** Refresh profile pictures for all connected Meta ad accounts.
-   * Fetches the promoted Page picture for each ad account and updates the DB. */
+  /** Refresh profile pictures, names, and status for all connected Meta ad accounts.
+   * Fetches real data from Meta Graph API and updates the DB. */
   refreshAccountPictures: protectedProcedure
     .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
-      // Get all facebook accounts for this user
+      // Get all facebook accounts for this user (including inactive to update status)
       let query = sb
         .from("social_accounts")
         .select("id, platform_account_id, access_token, metadata")
         .eq("user_id", ctx.user.id)
-        .eq("platform", "facebook")
-        .eq("is_active", true);
+        .eq("platform", "facebook");
       if (input?.workspaceId != null) {
         query = query.eq("workspace_id", input.workspaceId);
       }
-      const { data: accounts } = await query;
-      if (!accounts || accounts.length === 0) return { updated: 0 };
+      const { data: dbAccounts } = await query;
+      if (!dbAccounts || dbAccounts.length === 0) return { updated: 0 };
 
-      // Fetch the user's personal FB profile picture (same for all ad accounts)
+      const firstToken = dbAccounts.find(a => a.access_token)?.access_token;
+      if (!firstToken) return { updated: 0 };
+
+      // Fetch the user's personal FB profile picture
       let userProfilePicUrl: string | null = null;
-      const firstToken = accounts.find(a => a.access_token)?.access_token;
-      if (firstToken) {
-        try {
-          const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=picture.width(200).height(200)&access_token=${firstToken}`);
-          const meJson = await meRes.json() as { picture?: { data?: { url?: string } } };
-          userProfilePicUrl = meJson.picture?.data?.url ?? null;
-        } catch { /* ignore */ }
+      try {
+        const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=picture.width(200).height(200)&access_token=${firstToken}`);
+        const meJson = await meRes.json() as { picture?: { data?: { url?: string } } };
+        userProfilePicUrl = meJson.picture?.data?.url ?? null;
+      } catch { /* ignore */ }
+
+      // Fetch all ad accounts from Meta API to get real names and statuses
+      let metaAdAccounts: Array<{ id: string; name: string; account_status: number; currency?: string }> = [];
+      try {
+        const adRes = await fetch(`https://graph.facebook.com/v19.0/me/adaccounts?fields=id,name,account_status,currency&limit=50&access_token=${firstToken}`);
+        const adJson = await adRes.json() as { data?: Array<{ id: string; name: string; account_status: number; currency?: string }> };
+        metaAdAccounts = adJson.data ?? [];
+      } catch { /* ignore */ }
+
+      // Build a lookup map: platformAccountId -> Meta API data
+      const metaMap = new Map<string, { name: string; status: number; currency?: string }>();
+      for (const ma of metaAdAccounts) {
+        metaMap.set(ma.id.replace("act_", ""), { name: ma.name, status: ma.account_status, currency: ma.currency });
       }
 
       let updated = 0;
-      for (const acct of accounts) {
+      for (const acct of dbAccounts) {
         if (!acct.access_token || !acct.platform_account_id) continue;
-        const pictureUrl = await getAdAccountPicture(acct.platform_account_id, acct.access_token);
+        const metaInfo = metaMap.get(acct.platform_account_id);
         const existingMeta = (acct.metadata ?? {}) as Record<string, unknown>;
         const updatedMeta = { ...existingMeta };
-        if (userProfilePicUrl) {
-          updatedMeta.userProfilePicture = userProfilePicUrl;
+        if (userProfilePicUrl) updatedMeta.userProfilePicture = userProfilePicUrl;
+        if (metaInfo) {
+          updatedMeta.accountStatus = metaInfo.status;
+          if (metaInfo.currency) updatedMeta.currency = metaInfo.currency;
         }
+
+        // Determine if account should be active (status 1 = active)
+        const isActive = metaInfo ? metaInfo.status === 1 : true;
+
+        const pictureUrl = isActive ? await getAdAccountPicture(acct.platform_account_id, acct.access_token) : null;
+
         const updatePayload: Record<string, unknown> = {
           metadata: updatedMeta,
+          is_active: isActive,
           updated_at: new Date().toISOString(),
         };
+        // Update name from Meta API (real ad account name)
+        if (metaInfo?.name) {
+          updatePayload.name = metaInfo.name;
+          updatePayload.username = metaInfo.name;
+        }
         if (pictureUrl) {
           updatePayload.profile_picture = pictureUrl;
         }

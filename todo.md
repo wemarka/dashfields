@@ -1854,3 +1854,7 @@
 - [x] Connected Facebook account (parent) should keep user's personal profile picture
 - [x] Ad Accounts should show their business/page profile picture
 - [x] refreshAccountPictures saves userProfilePicture in metadata + updates ad account page pictures
+
+## 🐛 Fix: Ad account names showing personal name + inactive accounts displayed
+- [x] Fix: Ad accounts show "Abdulrhman Al-HosaRy" instead of actual ad account name (e.g. "i Lang Center")
+- [x] Fix: Inactive/disabled ad accounts should not be shown in Connections page

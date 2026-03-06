@@ -476,19 +476,43 @@ export function registerPlatformOAuthRoutes(app: Express) {
 
         let fbCount = 0, igCount = 0;
 
-        for (const account of adAccounts) {
+        // Filter: only save active ad accounts (account_status === 1)
+        const activeAdAccounts = adAccounts.filter((a: any) => a.account_status === 1 || a.account_status === undefined);
+
+        for (const account of activeAdAccounts) {
           await upsertAccount({
             userId, workspaceId,
             platform: "facebook",
             platformAccountId: account.id.replace("act_", ""),
-            name: account.name,
-            username: metaUser.name,
+            name: account.name ?? metaUser.name,
+            username: account.name ?? metaUser.name,
             accessToken: longToken,
             profilePicture: metaUser.picture?.data?.url ?? null,
             accountType: "ad_account",
-            metadata: { currency: account.currency, metaUserId: metaUser.id, userProfilePicture: metaUser.picture?.data?.url ?? null },
+            metadata: { currency: account.currency, accountStatus: (account as any).account_status, metaUserId: metaUser.id, userProfilePicture: metaUser.picture?.data?.url ?? null },
           });
           fbCount++;
+        }
+
+        // Mark previously-saved accounts that are no longer active as inactive
+        const activeIds = activeAdAccounts.map((a: any) => a.id.replace("act_", ""));
+        if (activeIds.length > 0) {
+          const { getSupabase: getSb } = await import("../../supabase.js");
+          const sb = getSb();
+          const { data: existing } = await sb
+            .from("social_accounts")
+            .select("id, platform_account_id")
+            .eq("user_id", userId)
+            .eq("platform", "facebook")
+            .eq("account_type", "ad_account")
+            .eq("is_active", true);
+          if (existing) {
+            for (const ex of existing) {
+              if (!activeIds.includes(ex.platform_account_id)) {
+                await sb.from("social_accounts").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", ex.id);
+              }
+            }
+          }
         }
 
         for (const page of pages) {
