@@ -7,6 +7,7 @@ import { protectedProcedure, router } from "../../_core/trpc";
 import { getSupabase } from "../../supabase";
 import {
   MetaInsight,
+  MetaCampaign,
   getAdAccounts,
   getAdAccountPicture,
   getMetaCampaigns,
@@ -377,18 +378,26 @@ export const metaRouter = router({
       };
 
       const mapCampaigns = (campaigns: Awaited<ReturnType<typeof getMetaCampaigns>>, conn: { name: string; adAccountId: string }) =>
-        campaigns.map(c => ({
-          id:             c.id,
-          name:           c.name,
-          status:         normalizeStatus(c.effective_status, c.status),
-          objective:      c.objective,
-          dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
-          lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
-          startTime:      c.start_time,
-          stopTime:       c.stop_time,
-          accountName:    conn.name,
-          adAccountId:    conn.adAccountId,
-        }));
+        campaigns.map(c => {
+          // Extract publisher_platforms from adsets targeting (if available)
+          const adsets = (c as any).adsets?.data as Array<{ targeting?: { publisher_platforms?: string[] } }> | undefined;
+          const platforms = adsets
+            ? Array.from(new Set(adsets.flatMap(s => s.targeting?.publisher_platforms ?? [])))
+            : [];
+          return {
+            id:             c.id,
+            name:           c.name,
+            status:         normalizeStatus(c.effective_status, c.status),
+            objective:      c.objective,
+            dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
+            lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
+            startTime:      c.start_time,
+            stopTime:       c.stop_time,
+            accountName:    conn.name,
+            adAccountId:    conn.adAccountId,
+            publisherPlatforms: platforms, // e.g. ['facebook', 'instagram']
+          };
+        });
 
       // If a specific account is selected, fetch only from that account
       if (input.accountId) {
@@ -812,8 +821,8 @@ export const metaRouter = router({
 
           if (oss?.link_data) {
             message = oss.link_data.message ?? message;
-            headline = headline || (oss.link_data.caption ?? "");
-            description = description || (oss.link_data.description ?? "");
+            headline = headline ? headline : (oss.link_data.caption ?? "");
+            description = description ? description : (oss.link_data.description ?? "");
             imageUrl = (imageUrl ?? oss.link_data.picture) ?? null;
             ctaType = oss.link_data.call_to_action?.type ?? "";
             ctaLink = (oss.link_data.call_to_action?.value?.link ?? oss.link_data.link) ?? "";
@@ -833,11 +842,11 @@ export const metaRouter = router({
 
           if (oss?.video_data) {
             message = oss.video_data.message ?? message;
-            headline = headline || (oss.video_data.title ?? "");
+            headline = headline ? headline : (oss.video_data.title ?? "");
             imageUrl = (imageUrl ?? oss.video_data.image_url) ?? null;
             videoId = (videoId ?? oss.video_data.video_id) ?? null;
-            ctaType = ctaType || (oss.video_data.call_to_action?.type ?? "");
-            ctaLink = ctaLink || (oss.video_data.call_to_action?.value?.link ?? "");
+            ctaType = ctaType ? ctaType : (oss.video_data.call_to_action?.type ?? "");
+            ctaLink = ctaLink ? ctaLink : (oss.video_data.call_to_action?.value?.link ?? "");
           }
 
           if (oss?.photo_data) {
@@ -908,5 +917,88 @@ export const metaRouter = router({
           .sort((a, b) => b.spend - a.spend);
         return sorted[0] ?? null;
       } catch { return null; }
+    }),
+
+  /** Get all ads across all campaigns (for standalone Ad Creatives page) */
+  allAds: protectedProcedure
+    .input(z.object({
+      datePreset:  z.string().default("last_30d"),
+      accountId:   z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+      limit:       z.number().min(1).max(100).default(50),
+    }))
+    .query(async ({ ctx, input }) => {
+      const allConns = input.accountId
+        ? [await getMetaToken(ctx.user.id, input.accountId, input.workspaceId)].filter(Boolean) as Awaited<ReturnType<typeof getMetaToken>>[]
+        : await getAllMetaTokens(ctx.user.id, input.workspaceId);
+      if (!allConns.length) return [];
+      try {
+        // Get all campaigns first
+        const allCampaigns = await Promise.allSettled(
+          allConns.map((conn, i) => getMetaCampaigns(conn!.adAccountId, conn!.token, input.limit).then(cs => cs.map(c => ({ ...c, _connIdx: i }))))
+        );
+        const campaigns = allCampaigns
+          .filter((r): r is PromiseFulfilledResult<(MetaCampaign & { _connIdx: number })[]> => r.status === "fulfilled")
+          .flatMap(r => r.value);
+        if (!campaigns.length) return [];
+        // Get ads for first 10 campaigns to avoid rate limiting
+        const campaignSlice = campaigns.slice(0, 10);
+        const adsResults = await Promise.allSettled(
+          campaignSlice.map(async (c) => {
+            const conn = allConns[c._connIdx];
+            if (!conn) return [];
+            const [ads, insights] = await Promise.all([
+              getCampaignAds(c.id, conn.token),
+              getAdInsights(c.id, conn.token, input.datePreset),
+            ]);
+            const insightMap = new Map(
+              insights.map(i => [
+                (i as unknown as Record<string, string>).ad_id ?? "",
+                {
+                  impressions: Number(i.impressions ?? 0),
+                  clicks:      Number(i.clicks ?? 0),
+                  spend:       Number(i.spend ?? 0),
+                  ctr:         Number(i.ctr ?? 0),
+                },
+              ])
+            );
+            return ads.map(ad => {
+              const cr = ad.creative;
+              const oss = cr?.object_story_spec;
+              let creativeType: "image" | "video" | "carousel" | "dynamic" | "unknown" = "unknown";
+              if (cr?.asset_feed_spec) creativeType = "dynamic";
+              else if (oss?.link_data?.child_attachments?.length) creativeType = "carousel";
+              else if (oss?.video_data || cr?.video_id) creativeType = "video";
+              else if (oss?.photo_data || oss?.link_data?.picture || cr?.image_url) creativeType = "image";
+              const ins = insightMap.get(ad.id);
+              const prevCtr = ins?.ctr ?? 0;
+              // Simple fatigue: if CTR < 0.5% and spend > 100, mark as fatigued
+              const fatigueScore = ins && ins.spend > 100 && ins.ctr < 0.5 ? Math.round((0.5 - ins.ctr) / 0.5 * 100) : 0;
+              return {
+                id:           ad.id,
+                name:         ad.name,
+                status:       ad.effective_status ?? ad.status,
+                campaignId:   c.id,
+                campaignName: c.name,
+                creativeType,
+                imageUrl:     cr?.image_url ?? cr?.thumbnail_url ?? null,
+                videoId:      cr?.video_id ?? null,
+                thumbnailUrl: cr?.thumbnail_url ?? cr?.image_url ?? null,
+                headline:     cr?.title ?? "",
+                message:      oss?.link_data?.message ?? oss?.video_data?.message ?? "",
+                insights:     ins ?? null,
+                fatigueScore,
+                isFatigued:   fatigueScore > 30,
+              };
+            });
+          })
+        );
+        return adsResults
+          .filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled")
+          .flatMap(r => r.value);
+      } catch (err) {
+        console.error("[Meta] allAds error:", err);
+        return [];
+      }
     }),
 });

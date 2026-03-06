@@ -38,6 +38,9 @@ export interface MetaCampaign {
   start_time?: string;
   stop_time?: string;
   created_time?: string;
+  // Publisher platforms (e.g. ['facebook', 'instagram', 'audience_network', 'messenger'])
+  // Fetched from the targeting spec of the campaign's ad sets
+  publisher_platforms?: string[];
 }
 
 export interface MetaAdAccount {
@@ -140,7 +143,7 @@ export async function getMetaCampaigns(
     `${ensureActPrefix(adAccountId)}/campaigns`,
     accessToken,
     {
-      fields: "id,name,status,effective_status,objective,daily_budget,lifetime_budget,start_time,stop_time,created_time",
+      fields: "id,name,status,effective_status,objective,daily_budget,lifetime_budget,start_time,stop_time,created_time,adsets{targeting{publisher_platforms}}",
       limit: String(limit),
     }
   );

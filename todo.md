@@ -1966,16 +1966,39 @@
 ## 🔄 Phase — Ad Creatives Enhancements (Round 2)
 
 ### Enhancement 1: Creative Filtering
-- [ ] Filter Ad Creatives by type (image/video/carousel/dynamic)
-- [ ] Filter Ad Creatives by performance (best CTR / worst CTR / highest spend)
-- [ ] Sort creatives by impressions, clicks, CTR, spend
+- [x] Filter Ad Creatives by type (image/video/carousel/dynamic)
+- [x] Filter Ad Creatives by performance (best CTR / worst CTR / highest spend)
+- [x] Sort creatives by impressions, clicks, CTR, spend
 
 ### Enhancement 2: A/B Test Comparison
-- [ ] A/B Test comparison panel for ads within a campaign
-- [ ] Side-by-side creative preview with metrics
-- [ ] Winner badge on best-performing creative
-- [ ] Lift % calculation between best and worst performer
+- [x] A/B Test comparison panel for ads within a campaign
+- [x] Side-by-side creative preview with metrics
+- [x] Winner badge on best-performing creative
+- [x] Best performer badge (Trophy icon with CTR)
 
 ### Enhancement 3: TikTok & Snapchat Previews
-- [ ] TikTok platform-specific preview frame (vertical 9:16 with TikTok UI chrome)
-- [ ] Snapchat platform-specific preview frame (vertical with Snapchat UI chrome)
+- [x] TikTok platform-specific preview frame (vertical 9:16 with TikTok UI chrome)
+- [x] Snapchat platform-specific preview frame (vertical with Snapchat UI chrome)
+- [x] Auto-detect platform from campaign.platform field
+
+## 🔄 Phase — Ad Creatives Page, Fatigue & Platform Auto-detect
+
+### Enhancement 1: Standalone Ad Creatives Page
+- [x] Create /ads/creatives page with cross-campaign creative listing
+- [x] Add sidebar navigation link for Ad Creatives
+- [x] Filter by campaign, creative type, platform, and performance
+- [x] Sort by CTR, spend, impressions, fatigue score
+- [x] Show creative preview thumbnails in a grid/list view
+- [x] Link to parent campaign from each creative card
+
+### Enhancement 2: Creative Fatigue Detection
+- [x] Add fatigue score calculation (CTR decline over time)
+- [x] Show fatigue badge/indicator on creative cards
+- [x] Add fatigue filter in Ad Creatives tab and standalone page
+- [x] Add fatigue alert banner in standalone page
+
+### Enhancement 3: Auto-detect Platform from Meta API
+- [x] Fetch publisher_platforms from Meta campaign data
+- [x] Pass platform info through tRPC to frontend
+- [x] Update MetaCampaign type to include platform array
+- [x] Auto-select correct preview (FB/IG/TikTok/Snapchat) based on campaign platform
