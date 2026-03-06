@@ -24,7 +24,8 @@ import {
   Play, Pause, Pencil, Copy, ExternalLink, Tag, MessageSquare,
   Users, MapPin, Monitor, Calendar, Check, X, FileDown,
   Layers, Image, Video, LayoutGrid, Target, Globe, Smartphone,
-  Facebook, Instagram, ChevronDown, ChevronUp,
+  Facebook, Instagram, ChevronDown, ChevronUp, Filter, Trophy,
+  ArrowUpDown, BarChart2, SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
@@ -39,6 +40,7 @@ interface MetaCampaign {
   objective?: string;
   dailyBudget?: number | null;
   lifetimeBudget?: number | null;
+  platform?: string | null; // e.g. 'facebook', 'instagram', 'tiktok', 'snapchat'
 }
 
 interface Props {
@@ -49,6 +51,8 @@ interface Props {
 
 type DatePreset = "last_7d" | "last_14d" | "last_30d" | "last_90d";
 type DetailTab = "performance" | "adsets" | "creatives" | "breakdown" | "notes";
+type CreativeFilter = "all" | "image" | "video" | "carousel" | "dynamic";
+type CreativeSort = "default" | "ctr_desc" | "ctr_asc" | "spend_desc" | "impressions_desc";
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({
@@ -536,25 +540,37 @@ function PlatformPreviewFrame({
   children,
   platform,
   placement,
+  brandColor,
 }: {
   children: React.ReactNode;
-  platform: "facebook" | "instagram" | "audience_network" | "messenger" | "unknown";
+  platform: "facebook" | "instagram" | "tiktok" | "snapchat" | "audience_network" | "messenger" | "unknown";
   placement: "feed" | "story" | "reel" | "right_column" | "unknown";
+  brandColor?: string;
 }) {
   const platformIcon = platform === "facebook" ? Facebook : platform === "instagram" ? Instagram : Globe;
   const PlatformIcon = platformIcon;
-  const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
+  const platformLabel = platform === "tiktok" ? "TikTok" : platform === "snapchat" ? "Snapchat" : platform.charAt(0).toUpperCase() + platform.slice(1);
   const placementLabel = placement === "feed" ? "Feed" : placement === "story" ? "Story" : placement === "reel" ? "Reel" : placement === "right_column" ? "Right Column" : "";
 
-  const isStoryOrReel = placement === "story" || placement === "reel";
+  const isStoryOrReel = placement === "story" || placement === "reel" || platform === "tiktok" || platform === "snapchat";
 
   return (
     <div className={`rounded-xl border border-border bg-card overflow-hidden ${
       isStoryOrReel ? "max-w-[280px]" : "w-full"
     }`}>
       {/* Platform Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
-        <PlatformIcon className="w-3.5 h-3.5 text-muted-foreground" />
+      <div className={`flex items-center gap-2 px-3 py-2 border-b border-border ${brandColor ?? "bg-muted/30"}`}>
+        {platform === "tiktok" ? (
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
+          </svg>
+        ) : platform === "snapchat" ? (
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.166 2c.93 0 4.04.26 5.52 3.6.49 1.1.37 2.96.28 4.43l-.01.17c.2.1.46.16.76.16.42 0 .85-.13 1.12-.34.12-.1.26-.14.4-.14.27 0 .55.17.55.44 0 .63-1.02.97-1.42 1.1-.06.02-.13.04-.2.07-.3.1-.62.28-.72.6-.06.2.01.42.21.65.02.02 1.87 2.1 4.37 2.54.24.04.4.26.36.5-.03.2-.16.36-.34.42-.65.2-1.37.35-2.14.44-.1.01-.18.1-.21.2-.07.24-.12.5-.17.77-.05.27-.26.45-.5.45-.1 0-.21-.03-.32-.09-.47-.24-1.03-.37-1.62-.37-.35 0-.7.05-1.04.14-.66.2-1.25.62-1.87 1.07-.97.7-1.96 1.42-3.35 1.42-1.4 0-2.38-.72-3.35-1.42-.62-.45-1.21-.87-1.87-1.07-.34-.1-.69-.14-1.04-.14-.6 0-1.15.13-1.62.37-.11.06-.22.09-.32.09-.24 0-.45-.18-.5-.45-.05-.27-.1-.53-.17-.77-.03-.1-.11-.19-.21-.2-.77-.09-1.49-.24-2.14-.44-.18-.06-.31-.22-.34-.42-.04-.24.12-.46.36-.5 2.5-.44 4.35-2.52 4.37-2.54.2-.23.27-.45.21-.65-.1-.32-.42-.5-.72-.6-.07-.03-.14-.05-.2-.07-.4-.13-1.42-.47-1.42-1.1 0-.27.28-.44.55-.44.14 0 .28.04.4.14.27.21.7.34 1.12.34.3 0 .56-.06.76-.16l-.01-.17c-.09-1.47-.21-3.33.28-4.43C8.126 2.26 11.236 2 12.166 2z"/>
+          </svg>
+        ) : (
+          <PlatformIcon className="w-3.5 h-3.5 text-muted-foreground" />
+        )}
         <span className="text-[10px] font-medium text-muted-foreground">
           {platformLabel} {placementLabel && `· ${placementLabel}`}
         </span>
@@ -564,6 +580,116 @@ function PlatformPreviewFrame({
         {children}
       </div>
     </div>
+  );
+}
+
+// TikTok Video Preview
+function TikTokPreview({ ad }: { ad: AdInfo }) {
+  const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const bgImage = ad.imageUrl ?? ad.thumbnailUrl;
+
+  return (
+    <PlatformPreviewFrame platform="tiktok" placement="story" brandColor="bg-black">
+      <div className="relative w-full h-full min-h-[400px] bg-black">
+        {bgImage ? (
+          <img src={bgImage} alt={ad.headline} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-zinc-800 flex items-center justify-center">
+            <Video className="w-14 h-14 text-white/20" />
+          </div>
+        )}
+        {/* TikTok UI Chrome */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Right side actions */}
+          <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <span className="text-white text-[10px] font-medium">12.4K</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <span className="text-white text-[10px] font-medium">847</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 mt-2">
+            <div className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
+            <span className="text-white text-[10px] font-medium">Share</span>
+          </div>
+        </div>
+        {/* Bottom info */}
+        <div className="absolute bottom-0 left-0 right-12 p-3">
+          <p className="text-white text-[11px] font-semibold mb-1 drop-shadow">@sponsored</p>
+          {ad.message && <p className="text-white text-[10px] line-clamp-2 drop-shadow">{ad.message}</p>}
+          {ctaLabel && (
+            <div className="mt-2">
+              <span className="text-[10px] font-semibold px-4 py-1.5 rounded-sm bg-[#FE2C55] text-white">
+                {ctaLabel}
+              </span>
+            </div>
+          )}
+        </div>
+        {/* Play button */}
+        {ad.creativeType === "video" && bgImage && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Play className="w-5 h-5 text-white ml-0.5" />
+            </div>
+          </div>
+        )}
+        </div>
+      </div>
+    </PlatformPreviewFrame>
+  );
+}
+
+// Snapchat Preview
+function SnapchatPreview({ ad }: { ad: AdInfo }) {
+  const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const bgImage = ad.imageUrl ?? ad.thumbnailUrl;
+
+  return (
+    <PlatformPreviewFrame platform="snapchat" placement="story" brandColor="bg-[#FFFC00]">
+      <div className="relative w-full h-full min-h-[400px] bg-black">
+        {bgImage ? (
+          <img src={bgImage} alt={ad.headline} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-yellow-400 to-yellow-600 flex items-center justify-center">
+            <svg className="w-16 h-16 text-white/60" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.166 2c.93 0 4.04.26 5.52 3.6.49 1.1.37 2.96.28 4.43l-.01.17c.2.1.46.16.76.16.42 0 .85-.13 1.12-.34.12-.1.26-.14.4-.14.27 0 .55.17.55.44 0 .63-1.02.97-1.42 1.1-.06.02-.13.04-.2.07-.3.1-.62.28-.72.6-.06.2.01.42.21.65.02.02 1.87 2.1 4.37 2.54.24.04.4.26.36.5-.03.2-.16.36-.34.42-.65.2-1.37.35-2.14.44-.1.01-.18.1-.21.2-.07.24-.12.5-.17.77-.05.27-.26.45-.5.45-.1 0-.21-.03-.32-.09-.47-.24-1.03-.37-1.62-.37-.35 0-.7.05-1.04.14-.66.2-1.25.62-1.87 1.07-.97.7-1.96 1.42-3.35 1.42-1.4 0-2.38-.72-3.35-1.42-.62-.45-1.21-.87-1.87-1.07-.34-.1-.69-.14-1.04-.14-.6 0-1.15.13-1.62.37-.11.06-.22.09-.32.09-.24 0-.45-.18-.5-.45-.05-.27-.1-.53-.17-.77-.03-.1-.11-.19-.21-.2-.77-.09-1.49-.24-2.14-.44-.18-.06-.31-.22-.34-.42-.04-.24.12-.46.36-.5 2.5-.44 4.35-2.52 4.37-2.54.2-.23.27-.45.21-.65-.1-.32-.42-.5-.72-.6-.07-.03-.14-.05-.2-.07-.4-.13-1.42-.47-1.42-1.1 0-.27.28-.44.55-.44.14 0 .28.04.4.14.27.21.7.34 1.12.34.3 0 .56-.06.76-.16l-.01-.17c-.09-1.47-.21-3.33.28-4.43C8.126 2.26 11.236 2 12.166 2z"/>
+            </svg>
+          </div>
+        )}
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+        {/* Snapchat chrome */}
+        <div className="absolute top-3 left-0 right-0 flex justify-center">
+          <span className="text-white text-[10px] font-medium bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full">Sponsored</span>
+        </div>
+        {/* Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          {ad.message && <p className="text-white text-[10px] line-clamp-2 drop-shadow mb-2">{ad.message}</p>}
+          {ctaLabel && (
+            <div className="flex items-center justify-center gap-1">
+              <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              <span className="text-white text-[10px] font-bold">{ctaLabel}</span>
+            </div>
+          )}
+        </div>
+        {/* Play button */}
+        {ad.creativeType === "video" && bgImage && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Play className="w-5 h-5 text-white ml-0.5" />
+            </div>
+          </div>
+        )}
+      </div>
+    </PlatformPreviewFrame>
   );
 }
 
@@ -717,11 +843,17 @@ function AdCreativeCard({
   fmt,
   fmtCurrency,
   fmtPct,
+  showTikTok = false,
+  showSnapchat = false,
+  isBestPerformer = false,
 }: {
   ad: AdInfo;
   fmt: (n: number) => string;
   fmtCurrency: (n: number) => string;
   fmtPct: (n: number) => string;
+  showTikTok?: boolean;
+  showSnapchat?: boolean;
+  isBestPerformer?: boolean;
 }) {
   const [showPreviews, setShowPreviews] = useState(false);
   const TypeIcon = CREATIVE_TYPE_ICONS[ad.creativeType] ?? Image;
@@ -788,22 +920,39 @@ function AdCreativeCard({
       {showPreviews && (
         <div className="border-t border-border p-4">
           <div className="flex gap-4 overflow-x-auto pb-2">
-            {/* Facebook Feed */}
-            <div className="flex-shrink-0 w-[320px]">
-              <FeedPostPreview ad={ad} platform="facebook" />
-            </div>
-            {/* Instagram Feed */}
-            <div className="flex-shrink-0 w-[320px]">
-              <FeedPostPreview ad={ad} platform="instagram" />
-            </div>
-            {/* Instagram Story */}
-            <div className="flex-shrink-0">
-              <StoryReelPreview ad={ad} platform="instagram" placement="story" />
-            </div>
-            {/* Instagram Reel */}
-            <div className="flex-shrink-0">
-              <StoryReelPreview ad={ad} platform="instagram" placement="reel" />
-            </div>
+            {/* Show TikTok or Snapchat if campaign is on those platforms */}
+            {showTikTok ? (
+              <>
+                <div className="flex-shrink-0">
+                  <TikTokPreview ad={ad} />
+                </div>
+              </>
+            ) : showSnapchat ? (
+              <>
+                <div className="flex-shrink-0">
+                  <SnapchatPreview ad={ad} />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Facebook Feed */}
+                <div className="flex-shrink-0 w-[320px]">
+                  <FeedPostPreview ad={ad} platform="facebook" />
+                </div>
+                {/* Instagram Feed */}
+                <div className="flex-shrink-0 w-[320px]">
+                  <FeedPostPreview ad={ad} platform="instagram" />
+                </div>
+                {/* Instagram Story */}
+                <div className="flex-shrink-0">
+                  <StoryReelPreview ad={ad} platform="instagram" placement="story" />
+                </div>
+                {/* Instagram Reel */}
+                <div className="flex-shrink-0">
+                  <StoryReelPreview ad={ad} platform="instagram" placement="reel" />
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -817,6 +966,10 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>("performance");
   const [notes, setNotes] = useState("");
   const [tagInput, setTagInput] = useState("");
+  const [creativeFilter, setCreativeFilter] = useState<CreativeFilter>("all");
+  const [creativeSort, setCreativeSort] = useState<CreativeSort>("default");
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedAds, setSelectedAds] = useState<string[]>([]);
   const { fmt: fmtCurrencyHook } = useCurrency();
   const { activeWorkspace } = useWorkspace();
   const utils = trpc.useUtils();
@@ -1305,19 +1458,187 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 <Image className="w-10 h-10 mb-3 opacity-40" />
                 <p className="text-sm">No ad creatives found for this campaign.</p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {adsData.map(ad => (
-                  <AdCreativeCard
-                    key={ad.id}
-                    ad={ad}
-                    fmt={fmt}
-                    fmtCurrency={fmtCurrency}
-                    fmtPct={fmtPct}
-                  />
-                ))}
-              </div>
-            )}
+            ) : (() => {
+              // Filter
+              const filtered = adsData.filter(ad =>
+                creativeFilter === "all" || ad.creativeType === creativeFilter
+              );
+              // Sort
+              const sorted = [...filtered].sort((a, b) => {
+                if (creativeSort === "ctr_desc") return (b.insights?.ctr ?? 0) - (a.insights?.ctr ?? 0);
+                if (creativeSort === "ctr_asc") return (a.insights?.ctr ?? 0) - (b.insights?.ctr ?? 0);
+                if (creativeSort === "spend_desc") return (b.insights?.spend ?? 0) - (a.insights?.spend ?? 0);
+                if (creativeSort === "impressions_desc") return (b.insights?.impressions ?? 0) - (a.insights?.impressions ?? 0);
+                return 0;
+              });
+              // Best performer
+              const bestCtr = adsData.reduce((best, ad) =>
+                (ad.insights?.ctr ?? 0) > (best.insights?.ctr ?? 0) ? ad : best, adsData[0]
+              );
+
+              return (
+                <div className="space-y-4">
+                  {/* Filter & Sort Bar */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+                      {(["all", "image", "video", "carousel", "dynamic"] as CreativeFilter[]).map(f => (
+                        <button
+                          key={f}
+                          onClick={() => setCreativeFilter(f)}
+                          className={`px-2.5 py-1 text-[10px] font-medium rounded-md transition-colors capitalize ${
+                            creativeFilter === f
+                              ? "bg-background text-foreground shadow-sm"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {f === "all" ? `All (${adsData.length})` : f}
+                        </button>
+                      ))}
+                    </div>
+                    <select
+                      value={creativeSort}
+                      onChange={e => setCreativeSort(e.target.value as CreativeSort)}
+                      className="h-8 px-2 text-[10px] border border-input rounded-lg bg-background text-foreground outline-none cursor-pointer"
+                    >
+                      <option value="default">Default order</option>
+                      <option value="ctr_desc">Best CTR first</option>
+                      <option value="ctr_asc">Worst CTR first</option>
+                      <option value="spend_desc">Highest spend first</option>
+                      <option value="impressions_desc">Most impressions first</option>
+                    </select>
+                    <button
+                      onClick={() => { setCompareMode(!compareMode); setSelectedAds([]); }}
+                      className={`flex items-center gap-1.5 h-8 px-3 text-[10px] font-medium rounded-lg border transition-colors ${
+                        compareMode
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-input text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <BarChart2 className="w-3 h-3" />
+                      {compareMode ? "Exit Compare" : "A/B Compare"}
+                    </button>
+                  </div>
+
+                  {/* Compare Mode Instructions */}
+                  {compareMode && (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-foreground">
+                      <p className="font-medium mb-1">A/B Comparison Mode</p>
+                      <p className="text-muted-foreground">Select 2 ads to compare side-by-side. {selectedAds.length}/2 selected.</p>
+                    </div>
+                  )}
+
+                  {/* A/B Comparison Panel */}
+                  {compareMode && selectedAds.length === 2 && (() => {
+                    const adA = adsData.find(a => a.id === selectedAds[0]);
+                    const adB = adsData.find(a => a.id === selectedAds[1]);
+                    if (!adA || !adB) return null;
+                    const metrics = [
+                      { label: "Impressions", a: adA.insights?.impressions ?? 0, b: adB.insights?.impressions ?? 0, fmt: fmt },
+                      { label: "Clicks", a: adA.insights?.clicks ?? 0, b: adB.insights?.clicks ?? 0, fmt: fmt },
+                      { label: "CTR", a: adA.insights?.ctr ?? 0, b: adB.insights?.ctr ?? 0, fmt: fmtPct },
+                      { label: "Spend", a: adA.insights?.spend ?? 0, b: adB.insights?.spend ?? 0, fmt: fmtCurrency },
+                      { label: "CPC", a: adA.insights?.cpc ?? 0, b: adB.insights?.cpc ?? 0, fmt: fmtCurrency },
+                      { label: "CPM", a: adA.insights?.cpm ?? 0, b: adB.insights?.cpm ?? 0, fmt: fmtCurrency },
+                    ];
+                    return (
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+                          <BarChart2 className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-semibold text-foreground">A/B Comparison</span>
+                        </div>
+                        {/* Ad thumbnails */}
+                        <div className="grid grid-cols-2 divide-x divide-border">
+                          {[adA, adB].map((ad, idx) => (
+                            <div key={ad.id} className="p-3 flex items-center gap-2">
+                              <div className="w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-muted">
+                                {ad.thumbnailUrl || ad.imageUrl ? (
+                                  <img src={ad.thumbnailUrl ?? ad.imageUrl ?? ""} alt={ad.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Image className="w-4 h-4 text-muted-foreground/40" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-semibold text-foreground">{idx === 0 ? "Ad A" : "Ad B"}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{ad.name}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Metrics comparison */}
+                        <div className="divide-y divide-border">
+                          {metrics.map(m => {
+                            const aWins = m.a > m.b;
+                            const bWins = m.b > m.a;
+                            // For CPC/CPM, lower is better
+                            const lowerBetter = m.label === "CPC" || m.label === "CPM" || m.label === "Spend";
+                            const aIsBetter = lowerBetter ? m.a < m.b : m.a > m.b;
+                            const bIsBetter = lowerBetter ? m.b < m.a : m.b > m.a;
+                            return (
+                              <div key={m.label} className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-2">
+                                <div className={`text-right ${aIsBetter ? "text-emerald-500 font-semibold" : "text-muted-foreground"}`}>
+                                  <span className="text-xs">{m.fmt(m.a)}</span>
+                                  {aIsBetter && <Trophy className="w-3 h-3 inline ml-1" />}
+                                </div>
+                                <div className="px-3 text-[10px] text-muted-foreground text-center">{m.label}</div>
+                                <div className={`text-left ${bIsBetter ? "text-emerald-500 font-semibold" : "text-muted-foreground"}`}>
+                                  {bIsBetter && <Trophy className="w-3 h-3 inline mr-1" />}
+                                  <span className="text-xs">{m.fmt(m.b)}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Best Performer Badge */}
+                  {!compareMode && bestCtr?.insights && bestCtr.insights.ctr > 0 && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                      <span className="text-xs text-amber-600 dark:text-amber-400">
+                        Best performer: <span className="font-semibold">{bestCtr.name}</span> with {fmtPct(bestCtr.insights.ctr)} CTR
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Ad Cards */}
+                  {sorted.map(ad => (
+                    <div key={ad.id} className={compareMode ? "relative" : ""}>
+                      {compareMode && (
+                        <button
+                          onClick={() => {
+                            setSelectedAds(prev =>
+                              prev.includes(ad.id)
+                                ? prev.filter(id => id !== ad.id)
+                                : prev.length < 2 ? [...prev, ad.id] : prev
+                            );
+                          }}
+                          className={`absolute top-3 right-3 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                            selectedAds.includes(ad.id)
+                              ? "bg-primary border-primary text-primary-foreground"
+                              : "bg-background border-border hover:border-primary"
+                          }`}
+                        >
+                          {selectedAds.includes(ad.id) && <Check className="w-3 h-3" />}
+                        </button>
+                      )}
+                      <AdCreativeCard
+                        ad={ad}
+                        fmt={fmt}
+                        fmtCurrency={fmtCurrency}
+                        fmtPct={fmtPct}
+                        showTikTok={campaign?.platform === "tiktok"}
+                        showSnapchat={campaign?.platform === "snapchat"}
+                        isBestPerformer={!compareMode && ad.id === bestCtr?.id && (bestCtr?.insights?.ctr ?? 0) > 0}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </TabsContent>
 
           {/* Breakdown Tab */}

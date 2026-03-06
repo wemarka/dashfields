@@ -1962,3 +1962,20 @@
 - [x] CTA button rendering with proper labels
 - [x] Show creative performance metrics (impressions, clicks, CTR, spend)
 - [x] Creative type detection (image, video, carousel, dynamic)
+
+## 🔄 Phase — Ad Creatives Enhancements (Round 2)
+
+### Enhancement 1: Creative Filtering
+- [ ] Filter Ad Creatives by type (image/video/carousel/dynamic)
+- [ ] Filter Ad Creatives by performance (best CTR / worst CTR / highest spend)
+- [ ] Sort creatives by impressions, clicks, CTR, spend
+
+### Enhancement 2: A/B Test Comparison
+- [ ] A/B Test comparison panel for ads within a campaign
+- [ ] Side-by-side creative preview with metrics
+- [ ] Winner badge on best-performing creative
+- [ ] Lift % calculation between best and worst performer
+
+### Enhancement 3: TikTok & Snapchat Previews
+- [ ] TikTok platform-specific preview frame (vertical 9:16 with TikTok UI chrome)
+- [ ] Snapchat platform-specific preview frame (vertical with Snapchat UI chrome)

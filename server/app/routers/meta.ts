@@ -814,9 +814,9 @@ export const metaRouter = router({
             message = oss.link_data.message ?? message;
             headline = headline || (oss.link_data.caption ?? "");
             description = description || (oss.link_data.description ?? "");
-            imageUrl = imageUrl ?? oss.link_data.picture ?? null;
+            imageUrl = (imageUrl ?? oss.link_data.picture) ?? null;
             ctaType = oss.link_data.call_to_action?.type ?? "";
-            ctaLink = oss.link_data.call_to_action?.value?.link ?? oss.link_data.link ?? "";
+            ctaLink = (oss.link_data.call_to_action?.value?.link ?? oss.link_data.link) ?? "";
 
             if (oss.link_data.child_attachments) {
               for (const child of oss.link_data.child_attachments) {
@@ -834,15 +834,15 @@ export const metaRouter = router({
           if (oss?.video_data) {
             message = oss.video_data.message ?? message;
             headline = headline || (oss.video_data.title ?? "");
-            imageUrl = imageUrl ?? oss.video_data.image_url ?? null;
-            videoId = videoId ?? oss.video_data.video_id ?? null;
+            imageUrl = (imageUrl ?? oss.video_data.image_url) ?? null;
+            videoId = (videoId ?? oss.video_data.video_id) ?? null;
             ctaType = ctaType || (oss.video_data.call_to_action?.type ?? "");
             ctaLink = ctaLink || (oss.video_data.call_to_action?.value?.link ?? "");
           }
 
           if (oss?.photo_data) {
             message = oss.photo_data.caption ?? message;
-            imageUrl = imageUrl ?? oss.photo_data.url ?? null;
+            imageUrl = (imageUrl ?? oss.photo_data.url) ?? null;
           }
 
           // Dynamic creative (asset feed)
