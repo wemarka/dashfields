@@ -1839,3 +1839,8 @@
 
 ## 🐛 Fix: Campaigns page limit exceeds backend max (50)
 - [x] Fix meta.campaigns and meta.campaignInsights queries sending limit:100 instead of max 50
+
+## 🐛 Fix: Campaigns showing all accounts + wrong status
+- [x] Fix: Show only campaigns from the SELECTED ad account, not all accounts
+- [x] Fix: Campaign status must match real Meta API status (effective_status field)
+- [x] Ensure 100% real data from Meta API - no fake/cached statuses

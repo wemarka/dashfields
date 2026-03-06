@@ -350,28 +350,64 @@ export const metaRouter = router({
       }));
     }),
 
-  /** Get campaigns list from ALL connected Meta ad accounts */
+  /** Get campaigns list — filters by selected account, or fetches from all if none selected */
   campaigns: protectedProcedure
-    .input(z.object({ limit: z.number().min(1).max(50).default(20), workspaceId: z.number().int().positive().optional() }))
+    .input(z.object({
+      limit: z.number().min(1).max(50).default(20),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
     .query(async ({ ctx, input }) => {
+      // Helper to normalize effective_status to a clean status string
+      const normalizeStatus = (effectiveStatus: string | undefined, rawStatus: string): string => {
+        const es = (effectiveStatus ?? rawStatus).toUpperCase();
+        // Meta effective_status values: ACTIVE, PAUSED, DELETED, ARCHIVED,
+        // CAMPAIGN_PAUSED, ADSET_PAUSED, IN_PROCESS, WITH_ISSUES, DISAPPROVED
+        if (es === "ACTIVE") return "ACTIVE";
+        if (es === "PAUSED" || es === "CAMPAIGN_PAUSED" || es === "ADSET_PAUSED") return "PAUSED";
+        if (es === "DELETED" || es === "ARCHIVED") return "ARCHIVED";
+        if (es === "IN_PROCESS" || es === "WITH_ISSUES") return "IN_PROCESS";
+        return es; // Return as-is for any unknown status
+      };
+
+      const mapCampaigns = (campaigns: Awaited<ReturnType<typeof getMetaCampaigns>>, conn: { name: string; adAccountId: string }) =>
+        campaigns.map(c => ({
+          id:             c.id,
+          name:           c.name,
+          status:         normalizeStatus(c.effective_status, c.status),
+          objective:      c.objective,
+          dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
+          lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
+          startTime:      c.start_time,
+          stopTime:       c.stop_time,
+          accountName:    conn.name,
+          adAccountId:    conn.adAccountId,
+        }));
+
+      // If a specific account is selected, fetch only from that account
+      if (input.accountId) {
+        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+        if (!conn) return [];
+        // Find account name from the social_accounts table
+        const sb = getSupabase();
+        const { data: acctData } = await sb
+          .from("social_accounts")
+          .select("name")
+          .eq("id", input.accountId)
+          .limit(1);
+        const accountName = acctData?.[0]?.name ?? "";
+        const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
+        return mapCampaigns(campaigns, { name: accountName, adAccountId: conn.adAccountId });
+      }
+
+      // No specific account — fetch from ALL connected accounts
       const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
       if (allConns.length === 0) return [];
 
       const results = await Promise.allSettled(
         allConns.map(async (conn) => {
           const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
-          return campaigns.map(c => ({
-            id:             c.id,
-            name:           c.name,
-            status:         c.effective_status ?? c.status,
-            objective:      c.objective,
-            dailyBudget:    c.daily_budget    ? Number(c.daily_budget)    / 100 : null,
-            lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,
-            startTime:      c.start_time,
-            stopTime:       c.stop_time,
-            accountName:    conn.name,
-            adAccountId:    conn.adAccountId,
-          }));
+          return mapCampaigns(campaigns, conn);
         })
       );
 
