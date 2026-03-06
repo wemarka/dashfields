@@ -86,6 +86,37 @@ export async function getAdAccounts(accessToken: string): Promise<MetaAdAccount[
   return data.data ?? [];
 }
 
+/** Get the profile picture URL for an ad account.
+ * For ad accounts, we fetch the associated Facebook Page picture.
+ * Falls back to the ad account's own picture endpoint. */
+export async function getAdAccountPicture(
+  adAccountId: string,
+  accessToken: string
+): Promise<string | null> {
+  try {
+    // Try to get the ad account's promoted pages (the Facebook Page linked to the ad account)
+    const pagesData = await metaGet<{ data: Array<{ id: string; name: string; picture?: { data?: { url?: string } } }> }>(
+      `${ensureActPrefix(adAccountId)}/promote_pages`,
+      accessToken,
+      { fields: "id,name,picture{url}", limit: "1" }
+    );
+    const pageUrl = pagesData.data?.[0]?.picture?.data?.url;
+    if (pageUrl) return pageUrl;
+
+    // Fallback: try the ad account picture endpoint directly
+    const picData = await metaGet<{ data?: { url?: string } }>(
+      `${ensureActPrefix(adAccountId)}/picture`,
+      accessToken,
+      { redirect: "false" }
+    );
+    if (picData.data?.url) return picData.data.url;
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /** Get campaigns for an ad account */
 export async function getMetaCampaigns(
   adAccountId: string,

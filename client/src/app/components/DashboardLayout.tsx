@@ -499,6 +499,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
 
+  // Auto-refresh ad account profile pictures if they look like user profile pics
+  const utils = trpc.useUtils();
+  const refreshPictures = trpc.meta.refreshAccountPictures.useMutation({
+    onSuccess: (res) => {
+      if (res.updated > 0) {
+        // Invalidate social.list to reload accounts with new pictures
+        utils.social.list.invalidate();
+      }
+    },
+  });
+  const picturesRefreshedRef = useRef(false);
+  useEffect(() => {
+    if (picturesRefreshedRef.current) return;
+    if (!accounts || accounts.length === 0) return;
+    // Check if any facebook account has a profile pic that looks like a user profile pic
+    // (contains "profilepic/?asid=" which is the user's personal FB profile picture)
+    const needsRefresh = accounts.some(
+      a => a.platform === "facebook" && a.profile_picture?.includes("profilepic/?asid=")
+    );
+    if (needsRefresh) {
+      picturesRefreshedRef.current = true;
+      refreshPictures.mutate({});
+    }
+  }, [accounts]);
+
   const handleLangToggle = () => {
     changeLanguage(i18n.language === "ar" ? "en" : "ar");
   };

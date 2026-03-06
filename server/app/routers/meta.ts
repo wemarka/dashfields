@@ -8,6 +8,7 @@ import { getSupabase } from "../../supabase";
 import {
   MetaInsight,
   getAdAccounts,
+  getAdAccountPicture,
   getMetaCampaigns,
   getAccountInsights,
   getCampaignInsights,
@@ -562,6 +563,40 @@ export const metaRouter = router({
           daysInMonth,
         };
       } catch { return null; }
+    }),
+
+  /** Refresh profile pictures for all connected Meta ad accounts.
+   * Fetches the promoted Page picture for each ad account and updates the DB. */
+  refreshAccountPictures: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      // Get all facebook accounts for this user
+      let query = sb
+        .from("social_accounts")
+        .select("id, platform_account_id, access_token")
+        .eq("user_id", ctx.user.id)
+        .eq("platform", "facebook")
+        .eq("is_active", true);
+      if (input?.workspaceId != null) {
+        query = query.eq("workspace_id", input.workspaceId);
+      }
+      const { data: accounts } = await query;
+      if (!accounts || accounts.length === 0) return { updated: 0 };
+
+      let updated = 0;
+      for (const acct of accounts) {
+        if (!acct.access_token || !acct.platform_account_id) continue;
+        const pictureUrl = await getAdAccountPicture(acct.platform_account_id, acct.access_token);
+        if (pictureUrl) {
+          await sb
+            .from("social_accounts")
+            .update({ profile_picture: pictureUrl, updated_at: new Date().toISOString() })
+            .eq("id", acct.id);
+          updated++;
+        }
+      }
+      return { updated };
     }),
 
   /** Get top performing campaign by spend */

@@ -1844,3 +1844,8 @@
 - [x] Fix: Show only campaigns from the SELECTED ad account, not all accounts
 - [x] Fix: Campaign status must match real Meta API status (effective_status field)
 - [x] Ensure 100% real data from Meta API - no fake/cached statuses
+
+## 🔧 Fix: Ad account images should show Page picture, not user profile picture
+- [x] Fetch Facebook Page picture from Meta Graph API for each ad account
+- [x] Store page picture URL in social_accounts table (profile_picture field)
+- [x] Update frontend account selector to display the correct page picture
