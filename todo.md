@@ -2369,3 +2369,7 @@
 - [x] إضافة App Settings إلى Profile Menu في الـ Topbar كـ Dialog/Modal
 - [x] إنشاء IntegrationsModal.tsx يعرض محتوى صفحة Connections داخل Dialog
 - [x] إنشاء AppSettingsModal.tsx يعرض محتوى صفحة Settings داخل Dialog
+
+## ✅ Phase 89 — Sidebar Cleanup & Tooltips
+- [x] إزالة قسم Integrations المثبت في أسفل الـ Sidebar (الوصول له الآن عبر Profile Menu)
+- [x] إضافة Tooltip لكل أيقونة في الـ Sidebar عند الطي (Dashboard, Ads, Content, Analytics)
