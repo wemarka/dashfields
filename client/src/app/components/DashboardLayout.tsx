@@ -344,7 +344,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Bottom icon row: Settings + Help + Install */}
         <div className="px-3 pb-3 shrink-0">
           <div className="h-px bg-border/30 mb-2" />
-          <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className={`flex gap-1 ${collapsed ? "flex-col items-center" : (isRTL ? "flex-row-reverse items-center" : "flex-row items-center")}`}>
             {/* Settings */}
             <Tooltip>
               <TooltipTrigger asChild>
