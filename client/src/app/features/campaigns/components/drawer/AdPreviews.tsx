@@ -11,11 +11,124 @@
  * Usage:
  *   <AdPreview ad={adInfo} placement="fb_feed" pageName="My Brand" pageAvatarUrl="..." />
  */
-import { useState } from "react";
-import { Play, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
+import { useState, useRef, useCallback } from "react";
+import { Play, Pause, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
   ThumbsUp, Share2, Globe, ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import type { AdInfo } from "./types";
 import { CTA_LABELS } from "./types";
+
+// ─── Video URL Helper ─────────────────────────────────────────────────────────
+/**
+ * Attempts to build a playable video URL from the ad's videoId or thumbnailUrl.
+ * Meta video IDs can be played via the Graph API embed URL.
+ * If a direct video URL is stored in thumbnailUrl (e.g. .mp4), it is used directly.
+ */
+function resolveVideoUrl(ad: AdInfo): string | null {
+  // If thumbnailUrl is actually a video URL (mp4, webm, mov)
+  if (ad.thumbnailUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.thumbnailUrl)) {
+    return ad.thumbnailUrl;
+  }
+  // If imageUrl is a video URL
+  if (ad.imageUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.imageUrl)) {
+    return ad.imageUrl;
+  }
+  // Meta video embed via videoId
+  if (ad.videoId) {
+    return `https://www.facebook.com/video/embed?video_id=${ad.videoId}`;
+  }
+  return null;
+}
+
+// ─── Inline Video Player ──────────────────────────────────────────────────────
+/**
+ * AdVideoPlayer — renders a native <video> for direct URLs or an <iframe>
+ * for Meta embed URLs. Provides play/pause and mute controls.
+ */
+function AdVideoPlayer({
+  videoUrl,
+  posterUrl,
+  className = "",
+}: {
+  videoUrl: string;
+  posterUrl?: string | null;
+  className?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  const isEmbed = videoUrl.includes("facebook.com/video/embed");
+
+  const togglePlay = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  }, []);
+
+  const toggleMute = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  }, []);
+
+  if (isEmbed) {
+    // Meta video embed — no JS controls possible, show iframe
+    return (
+      <iframe
+        src={videoUrl}
+        className={`absolute inset-0 w-full h-full border-0 ${className}`}
+        allow="autoplay; encrypted-media"
+        allowFullScreen
+        title="Ad Video"
+      />
+    );
+  }
+
+  return (
+    <div className={`absolute inset-0 ${className}`} onClick={togglePlay}>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        poster={posterUrl ?? undefined}
+        muted={muted}
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      />
+      {/* Play/Pause overlay — visible when paused */}
+      {!playing && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/30 transition-opacity hover:bg-black/60">
+            <Play className="w-6 h-6 text-white ml-0.5" />
+          </div>
+        </div>
+      )}
+      {/* Pause icon — briefly visible when playing and hovered */}
+      {playing && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+          <div className="w-10 h-10 rounded-full bg-black/30 flex items-center justify-center">
+            <Pause className="w-5 h-5 text-white" />
+          </div>
+        </div>
+      )}
+      {/* Mute toggle */}
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-3 right-3 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center border border-white/20 z-10"
+      >
+        {muted
+          ? <VolumeX className="w-3.5 h-3.5 text-white" />
+          : <Volume2 className="w-3.5 h-3.5 text-white" />
+        }
+      </button>
+    </div>
+  );
+}
 
 // ─── Placement Types ─────────────────────────────────────────────────────────
 export type AdPlacement =
@@ -297,6 +410,7 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
   pageAvatarUrl?: string | null;
 }) {
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
+  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
@@ -304,18 +418,20 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
       className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
       style={{ aspectRatio: "9/16" }}
     >
-      {/* Background */}
-      {bgSrc ? (
+      {/* Background: video or image */}
+      {videoUrl ? (
+        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+      ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700" />
       )}
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+      {/* Dark overlay (only on non-video or when video is paused) */}
+      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />}
 
       {/* Progress bar */}
-      <div className="absolute top-2 left-2 right-2 flex gap-0.5">
+      <div className="absolute top-2 left-2 right-2 flex gap-0.5 z-10">
         <div className="flex-1 h-0.5 rounded-full bg-white/40">
           <div className="h-full w-2/3 rounded-full bg-white" />
         </div>
@@ -324,7 +440,7 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
       </div>
 
       {/* Header */}
-      <div className="absolute top-5 left-3 right-3 flex items-center justify-between">
+      <div className="absolute top-5 left-3 right-3 flex items-center justify-between z-10">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full border-2 border-white overflow-hidden">
             <PageAvatar url={pageAvatarUrl} name={pageName} size={28} />
@@ -339,17 +455,8 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
         </div>
       </div>
 
-      {/* Video play button */}
-      {ad.creativeType === "video" && bgSrc && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-            <Play className="w-5 h-5 text-white ml-0.5" />
-          </div>
-        </div>
-      )}
-
       {/* Bottom CTA */}
-      <div className="absolute bottom-4 left-3 right-3 space-y-2">
+      <div className="absolute bottom-4 left-3 right-3 space-y-2 z-10">
         {ad.message && (
           <p className="text-[10px] text-white text-center line-clamp-2 drop-shadow">{ad.message}</p>
         )}
@@ -364,7 +471,7 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
       </div>
 
       {/* IG badge */}
-      <div className="absolute top-5 right-3">
+      <div className="absolute top-5 right-3 z-10">
         <IgLogo size={14} />
       </div>
     </div>
@@ -377,8 +484,8 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
   pageName: string;
   pageAvatarUrl?: string | null;
 }) {
-  const [muted, setMuted] = useState(true);
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
+  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
@@ -386,23 +493,18 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
       style={{ aspectRatio: "9/16" }}
     >
-      {/* Background */}
-      {bgSrc ? (
+      {/* Background: video or image */}
+      {videoUrl ? (
+        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+      ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-700" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
-
-      {/* Play button */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-14 h-14 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center border border-white/20">
-          <Play className="w-6 h-6 text-white ml-0.5" />
-        </div>
-      </div>
+      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
       {/* Right actions */}
-      <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4">
+      <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4 z-10">
         <div className="flex flex-col items-center gap-0.5">
           <Heart className="w-5 h-5 text-white" />
           <span className="text-[8px] text-white">12K</span>
@@ -415,16 +517,10 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
           <Send className="w-5 h-5 text-white" />
           <span className="text-[8px] text-white">Share</span>
         </div>
-        <button onClick={() => setMuted(!muted)} className="mt-1">
-          {muted
-            ? <VolumeX className="w-4 h-4 text-white" />
-            : <Volume2 className="w-4 h-4 text-white" />
-          }
-        </button>
       </div>
 
       {/* Bottom info */}
-      <div className="absolute bottom-4 left-3 right-12">
+      <div className="absolute bottom-4 left-3 right-12 z-10">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-7 h-7 rounded-full border-2 border-white overflow-hidden">
             <PageAvatar url={pageAvatarUrl} name={pageName} size={28} />
@@ -458,6 +554,7 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
   pageAvatarUrl?: string | null;
 }) {
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
+  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
@@ -465,22 +562,25 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
       className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
       style={{ aspectRatio: "9/16" }}
     >
-      {bgSrc ? (
+      {/* Background: video or image */}
+      {videoUrl ? (
+        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+      ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-700" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
+      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />}
 
       {/* Progress */}
-      <div className="absolute top-2 left-2 right-2">
+      <div className="absolute top-2 left-2 right-2 z-10">
         <div className="h-0.5 rounded-full bg-white/40">
           <div className="h-full w-1/2 rounded-full bg-white" />
         </div>
       </div>
 
       {/* Header */}
-      <div className="absolute top-5 left-3 right-3 flex items-center gap-2">
+      <div className="absolute top-5 left-3 right-3 flex items-center gap-2 z-10">
         <div className="w-8 h-8 rounded-full border-2 border-[#1877F2] overflow-hidden">
           <PageAvatar url={pageAvatarUrl} name={pageName} size={32} />
         </div>
@@ -490,17 +590,8 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
         </div>
       </div>
 
-      {/* Video play */}
-      {ad.creativeType === "video" && bgSrc && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-            <Play className="w-5 h-5 text-white ml-0.5" />
-          </div>
-        </div>
-      )}
-
       {/* Bottom */}
-      <div className="absolute bottom-4 left-3 right-3 space-y-2">
+      <div className="absolute bottom-4 left-3 right-3 space-y-2 z-10">
         {ad.message && (
           <p className="text-[10px] text-white text-center line-clamp-2">{ad.message}</p>
         )}

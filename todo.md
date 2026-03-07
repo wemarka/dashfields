@@ -2247,3 +2247,21 @@
 - [x] Pass pageName and pageAvatarUrl from campaign to CreativesTab
 - [x] conversions field added to AdInfo insights type
 - [x] pageName, pageAvatarUrl, accountName fields added to MetaCampaign type
+
+## 🎬 Phase 73 — Video Playback in Ad Previews
+- [ ] Add VideoPlayer component inside AdPreviews.tsx (play/pause, mute/unmute, progress bar)
+- [ ] Wire video into InstagramReelPreview using ad.videoId or thumbnailUrl
+- [ ] Wire video into InstagramStoryPreview using ad.videoId or thumbnailUrl
+- [ ] Wire video into FacebookStoryPreview using ad.videoId or thumbnailUrl
+- [ ] Show thumbnail as poster when video is not playing
+- [ ] Add video type detection in AdInfo (isVideo field or format detection)
+
+## ✅ Phase 73 — Video Playback in Ad Previews
+- [x] Add AdVideoPlayer component supporting native <video> for direct URLs and <iframe> for Meta embeds
+- [x] resolveVideoUrl helper: detect direct .mp4/.webm URLs or build Meta embed URL from videoId
+- [x] Wire video playback into Instagram Story preview
+- [x] Wire video playback into Instagram Reels preview
+- [x] Wire video playback into Facebook Story preview
+- [x] Play/Pause overlay with hover-to-pause when playing
+- [x] Mute/unmute button in bottom-right corner of video
+- [x] Ensure all UI elements (progress bar, header, CTA) are z-10 above the video layer
