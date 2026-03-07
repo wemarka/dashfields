@@ -83,96 +83,59 @@ export function BillingPage() {
         <section>
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Subscription</p>
 
-          {/* Current plan card */}
-          <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/50 mb-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${PLAN_ICON_BG[currentPlan]}`}>
-              <PlanIcon className={`w-5 h-5 ${PLAN_ICON_COLOR[currentPlan]}`} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-bold text-gray-900">{planConfig.name} Plan</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200 flex items-center gap-0.5">
-                  <Check className="w-2.5 h-2.5" /> Active
-                </span>
+          {/* Current plan — single clean card */}
+          <div className="p-5 rounded-xl border border-gray-100 bg-gray-50/40">
+            {/* Top row: plan info + actions */}
+            <div className="flex items-center gap-4">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${PLAN_ICON_BG[currentPlan]}`}>
+                <PlanIcon className={`w-5 h-5 ${PLAN_ICON_COLOR[currentPlan]}`} />
               </div>
-              <p className="text-[12px] text-gray-400 mt-0.5">
-                {planConfig.price.monthly === 0
-                  ? "Free — no credit card required"
-                  : `$${planConfig.price.monthly}/month · renews automatically`}
-              </p>
-            </div>
-            {isOwner && nextPlan && (
-              <button
-                onClick={() => handleUpgrade(nextPlan)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
-                style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}
-              >
-                Upgrade <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Available plans */}
-          <div className="space-y-1.5">
-            {PLAN_ORDER.filter(p => p !== currentPlan).map(plan => {
-              const config = PLAN_LIMITS[plan];
-              const Icon = PLAN_ICONS[plan];
-              const isUpgrade = PLAN_ORDER.indexOf(plan) > PLAN_ORDER.indexOf(currentPlan);
-              const isPopular = plan === "pro";
-              return (
-                <div
-                  key={plan}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${PLAN_ICON_BG[plan]}`}>
-                    <Icon className={`w-4 h-4 ${PLAN_ICON_COLOR[plan]}`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-semibold text-gray-800">{config.name}</span>
-                      {isPopular && (
-                        <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-600 border border-blue-200">
-                          <Star className="w-2.5 h-2.5 fill-current" /> Popular
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-gray-400 truncate">{config.features.slice(0, 2).join(" · ")}</p>
-                  </div>
-                  <span className="text-[13px] font-bold text-gray-700 shrink-0">
-                    {config.price.monthly === 0 ? "Free" : `$${config.price.monthly}/mo`}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-bold text-gray-900">{planConfig.name}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200 flex items-center gap-0.5">
+                    <Check className="w-2.5 h-2.5" /> Active
                   </span>
-                  {isOwner && (
+                </div>
+                <p className="text-[12px] text-gray-400 mt-0.5">
+                  {planConfig.price.monthly === 0
+                    ? "Free — no credit card required"
+                    : `$${planConfig.price.monthly}/month · renews automatically`}
+                </p>
+              </div>
+              {isOwner && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => toast.info("Plan management coming soon.")}
+                    className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold border border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
+                  >
+                    Manage
+                  </button>
+                  {nextPlan && (
                     <button
-                      onClick={() => handleUpgrade(plan)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all shrink-0 ${
-                        isUpgrade
-                          ? "bg-blue-500 text-white hover:bg-blue-600"
-                          : "border border-gray-200 text-gray-500 hover:bg-gray-100"
-                      }`}
+                      onClick={() => handleUpgrade(nextPlan)}
+                      className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                      style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}
                     >
-                      {isUpgrade ? "Upgrade" : "Downgrade"} <ArrowRight className="w-3 h-3" />
+                      Upgrade
                     </button>
                   )}
                 </div>
-              );
-            })}
+              )}
+            </div>
 
-            {/* Enterprise */}
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-100 hover:border-amber-200 hover:bg-amber-50/30 transition-all">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-50">
-                <Crown className="w-4 h-4 text-amber-500" />
+            {/* Plan features */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                {planConfig.features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
+                      <Check className="w-2.5 h-2.5 text-green-500" />
+                    </div>
+                    <span className="text-[12px] text-gray-600">{feature}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-[13px] font-semibold text-gray-800">Enterprise</span>
-                <p className="text-[11px] text-gray-400 truncate">Custom limits · Dedicated support · SLA</p>
-              </div>
-              <span className="text-[13px] font-bold text-gray-700 shrink-0">Custom</span>
-              <button
-                onClick={() => toast.info("Contact us at sales@dashfields.com for Enterprise pricing.")}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-amber-200 text-amber-600 hover:bg-amber-50 transition-all shrink-0"
-              >
-                Contact <ArrowRight className="w-3 h-3" />
-              </button>
             </div>
           </div>
         </section>
