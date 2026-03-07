@@ -19,6 +19,7 @@ import { KeyboardShortcutsModal } from "@/app/components/KeyboardShortcutsModal"
 import {
   ChevronLeft, ChevronRight,
   Sun, Moon, ChevronDown, PlusCircle, Globe2,
+  // ChevronLeft kept for sidebar collapse button
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/core/components/ui/tooltip";
 import { navSections } from "@/config/navigation";
@@ -29,7 +30,7 @@ import { useLocation } from "wouter";
 
 import {
   useDarkMode, PLATFORM_ICONS,
-  WorkspaceSwitcherModal, AccountSwitcherModal, ProfileDropdown,
+  WorkspaceSwitcherModal, AccountSwitcherModal,
 } from "./layout-parts";
 
 function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: string; className?: string }) {
@@ -109,8 +110,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
-
-  const handleLogout = async () => { await signOut(); };
 
   const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
 
@@ -446,15 +445,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {dark ? <Sun className="w-4 h-4 icon-spin" /> : <Moon className="w-4 h-4 icon-bounce" />}
             </button>
             <NotificationBell />
-            <ProfileDropdown
-              user={{ name: user?.name ?? undefined, email: user?.email ?? undefined }}
-              onLogout={handleLogout}
-              workspaces={workspaces}
-              activeWorkspace={activeWorkspace}
-              onSelectWorkspace={(id) => setActiveWorkspace(id)}
-              onNewWorkspace={() => setShowWorkspaceSwitcher(true)}
-              onOpenAppSettings={() => openSettings("account")}
-            />
+
           </div>
         </div>
         <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">{children}</div>

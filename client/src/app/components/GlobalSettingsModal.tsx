@@ -2,9 +2,9 @@
  * GlobalSettingsModal — Wide landscape two-pane settings modal.
  * Layout: w-full max-w-5xl min-h-[650px] flex flex-row
  * Left sidebar: fixed w-64, subtle bg-gray-50, border-r
- * Right content: flex-1 bg-white p-8, FLAT design (no nested cards)
+ * Right content: flex-1 bg-background p-8, FLAT design (no nested cards)
  *
- * Tabs: Account · Settings · Billing · Connections · Integrations · Brand Kit
+ * Tabs: Account · Workspace & Team · Settings · Billing · Connections · Integrations
  */
 import { useState, useEffect, lazy, Suspense } from "react";
 import {
@@ -20,12 +20,14 @@ import {
   CreditCard,
   Link2,
   Plug,
-  Palette,
   HelpCircle,
   ExternalLink,
   ChevronRight,
+  Building2,
+  LogOut,
 } from "lucide-react";
 import { useDarkMode } from "@/app/components/layout-parts";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { toast } from "sonner";
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
@@ -37,9 +39,10 @@ const ProfileContent     = lazy(() => import("@/app/features/settings/Profile"))
 const SettingsContent    = lazy(() => import("@/app/features/settings/Settings"));
 const BillingContent     = lazy(() => import("@/app/features/billing/BillingPage").then(m => ({ default: m.BillingPage })));
 const ConnectionsContent = lazy(() => import("@/app/features/connections/Connections"));
+const WorkspaceContent   = lazy(() => import("@/app/features/settings/WorkspaceSettings"));
 
 // ─── Tab definitions ──────────────────────────────────────────────────────────
-type TabId = "account" | "settings" | "billing" | "connections" | "integrations" | "brand-kit";
+type TabId = "account" | "workspace" | "settings" | "billing" | "connections" | "integrations";
 
 interface TabDef {
   id: TabId;
@@ -55,6 +58,13 @@ const TABS: TabDef[] = [
     label: "Account",
     icon: User,
     description: "Manage your profile, avatar, and preferences",
+    available: true,
+  },
+  {
+    id: "workspace",
+    label: "Workspace & Team",
+    icon: Building2,
+    description: "Workspace settings, members, and brand profile",
     available: true,
   },
   {
@@ -85,13 +95,6 @@ const TABS: TabDef[] = [
     description: "Platform integrations and API connections",
     available: true,
   },
-  {
-    id: "brand-kit",
-    label: "Brand Kit",
-    icon: Palette,
-    description: "Brand colors, fonts, and assets",
-    available: false,
-  },
 ];
 
 // ─── Tab content loader ───────────────────────────────────────────────────────
@@ -105,11 +108,11 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
   return (
     <Suspense fallback={fallback}>
       {activeTab === "account"      && <ProfileContent />}
+      {activeTab === "workspace"    && <WorkspaceContent />}
       {activeTab === "settings"     && <SettingsContent />}
       {activeTab === "billing"      && <BillingContent />}
       {activeTab === "connections"  && <ConnectionsContent />}
       {activeTab === "integrations" && <IntegrationsPlaceholder />}
-      {activeTab === "brand-kit"    && <ComingSoonPlaceholder label="Brand Kit" />}
     </Suspense>
   );
 }
@@ -156,18 +159,6 @@ function IntegrationsPlaceholder() {
   );
 }
 
-function ComingSoonPlaceholder({ label }: { label: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full py-24 text-center px-8">
-      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
-        <Palette className="w-7 h-7 text-muted-foreground" />
-      </div>
-      <h3 className="text-lg font-semibold text-foreground mb-1">{label}</h3>
-      <p className="text-sm text-muted-foreground">Coming soon — this feature is under development.</p>
-    </div>
-  );
-}
-
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 interface GlobalSettingsModalProps {
   open: boolean;
@@ -182,12 +173,18 @@ export function GlobalSettingsModal({
   initialTab = "account",
 }: GlobalSettingsModalProps) {
   const { dark } = useDarkMode();
+  const { signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
   // Sync initialTab when modal opens
   useEffect(() => {
     if (open) setActiveTab(initialTab);
   }, [open, initialTab]);
+
+  const handleSignOut = async () => {
+    onOpenChange(false);
+    await signOut();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -205,7 +202,7 @@ export function GlobalSettingsModal({
       >
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">
-          Manage your account, settings, billing, and integrations.
+          Manage your account, workspace, settings, billing, and integrations.
         </DialogDescription>
 
         {/* ── Two-pane flex container ── */}
@@ -271,8 +268,8 @@ export function GlobalSettingsModal({
               })}
             </nav>
 
-            {/* Get Help */}
-            <div className="px-3 py-3 border-t border-border/10 shrink-0">
+            {/* Bottom: Get Help + Sign Out */}
+            <div className="px-3 py-3 border-t border-border/10 shrink-0 space-y-0.5">
               <button
                 onClick={() => toast.info("Help center coming soon")}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/70 dark:hover:bg-background/60 transition-all text-left"
@@ -281,12 +278,21 @@ export function GlobalSettingsModal({
                 <span>Get help</span>
                 <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
               </button>
+
+              {/* Sign Out */}
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/8 transition-all text-left"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>Sign out</span>
+              </button>
             </div>
           </aside>
 
           {/* ────────────────────────────────────────────────────────────────
               RIGHT CONTENT AREA
-              - flex-1 bg-white (or bg-background in dark mode)
+              - flex-1 bg-background (dark mode compatible)
               - FLAT design: NO nested cards, NO borders around sub-sections
               - Section title: text-2xl font-semibold
               - Sub-sections: h3 text-lg font-medium + <hr> separators
