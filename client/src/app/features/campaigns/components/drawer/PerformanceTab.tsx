@@ -4,7 +4,7 @@
  * Features:
  *  - Sparkline mini-charts inside each KPI card
  *  - Trend indicator (up/down/neutral) with color coding
- *  - Performance Score card
+ *  - vs. previous period comparison badges in KPI cards
  *  - Dual-axis area chart with smooth gradients
  *  - Metric toggle (Impressions / Clicks / Spend)
  */
@@ -41,6 +41,7 @@ interface InsightData {
 
 interface PerformanceTabProps {
   campaignInsight: InsightData | undefined;
+  prevPeriodInsight: InsightData | null;
   daily: DailyPoint[] | undefined;
   isLoading: boolean;
   fmtCurrency: (n: number) => string;
@@ -65,7 +66,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-// --- Trend Indicator ---------------------------------------------------------
+// --- Trend Indicator (sparkline-based) ---------------------------------------
 function TrendIndicator({ pct }: { pct: number }) {
   if (Math.abs(pct) < 1) {
     return (
@@ -83,9 +84,40 @@ function TrendIndicator({ pct }: { pct: number }) {
   );
 }
 
-// --- Enhanced KPI Card with Sparkline ----------------------------------------
+// --- vs Previous Period Badge ------------------------------------------------
+function VsPrevBadge({ current, prev, fmt }: { current: number; prev: number | null; fmt?: (n: number) => string }) {
+  if (prev === null || prev === undefined || prev === 0) return null;
+  const pct = ((current - prev) / prev) * 100;
+  const isUp = pct > 0;
+  const isNeutral = Math.abs(pct) < 1;
+  const prevLabel = fmt ? fmt(prev) : fmtNum(prev);
+  return (
+    <div className="flex items-center gap-1 mt-1">
+      <span className={`flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+        isNeutral
+          ? "bg-muted text-muted-foreground"
+          : isUp
+            ? "bg-emerald-500/10 text-emerald-600"
+            : "bg-red-500/10 text-red-500"
+      }`}>
+        {isNeutral ? (
+          <Minus className="w-2.5 h-2.5" />
+        ) : isUp ? (
+          <TrendingUp className="w-2.5 h-2.5" />
+        ) : (
+          <TrendingDown className="w-2.5 h-2.5" />
+        )}
+        {isNeutral ? "Stable" : `${isUp ? "+" : ""}${pct.toFixed(1)}%`}
+      </span>
+      <span className="text-[9px] text-muted-foreground/60">vs {prevLabel} prev</span>
+    </div>
+  );
+}
+
+// --- Enhanced KPI Card with Sparkline + vs prev ------------------------------
 function SparklineKpiCard({
   icon: Icon, label, value, sub, color, bgColor, sparkData, sparkColor, trend,
+  currentVal, prevVal, fmtPrevVal,
 }: {
   icon: React.ElementType;
   label: string;
@@ -96,6 +128,9 @@ function SparklineKpiCard({
   sparkData?: number[];
   sparkColor?: string;
   trend?: number;
+  currentVal?: number;
+  prevVal?: number | null;
+  fmtPrevVal?: (n: number) => string;
 }) {
   return (
     <div className={`rounded-xl border border-border bg-card p-3.5 overflow-hidden relative`}>
@@ -115,6 +150,11 @@ function SparklineKpiCard({
       <p className="text-lg font-bold text-foreground leading-tight">{value}</p>
       {sub && <p className="text-[11px] text-muted-foreground mt-0.5">{sub}</p>}
 
+      {/* vs previous period */}
+      {currentVal !== undefined && prevVal !== undefined && (
+        <VsPrevBadge current={currentVal} prev={prevVal} fmt={fmtPrevVal} />
+      )}
+
       {sparkData && sparkData.length >= 2 && (
         <Sparkline data={sparkData} color={sparkColor ?? "#6366f1"} />
       )}
@@ -132,7 +172,7 @@ const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
 ];
 
 // --- Main Component ---
-export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency }: PerformanceTabProps) {
+export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLoading, fmtCurrency }: PerformanceTabProps) {
   const [activeMetrics, setActiveMetrics] = useState<Set<ChartMetric>>(
     () => new Set<ChartMetric>(["impressions", "clicks", "spend"])
   );
@@ -172,6 +212,8 @@ export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency 
               color="text-blue-500" bgColor="bg-blue-500/10"
               sparkData={sparkImpressions} sparkColor="#3b82f6"
               trend={trendOf(sparkImpressions)}
+              currentVal={campaignInsight.impressions}
+              prevVal={prevPeriodInsight?.impressions ?? null}
             />
             <SparklineKpiCard
               icon={MousePointerClick} label="Clicks"
@@ -180,6 +222,8 @@ export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency 
               color="text-emerald-500" bgColor="bg-emerald-500/10"
               sparkData={sparkClicks} sparkColor="#10b981"
               trend={trendOf(sparkClicks)}
+              currentVal={campaignInsight.clicks}
+              prevVal={prevPeriodInsight?.clicks ?? null}
             />
             <SparklineKpiCard
               icon={DollarSign} label="Spend"
@@ -188,12 +232,18 @@ export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency 
               color="text-violet-500" bgColor="bg-violet-500/10"
               sparkData={sparkSpend} sparkColor="#8b5cf6"
               trend={trendOf(sparkSpend)}
+              currentVal={campaignInsight.spend}
+              prevVal={prevPeriodInsight?.spend ?? null}
+              fmtPrevVal={fmtCurrency}
             />
             <SparklineKpiCard
               icon={Target} label="CPM"
               value={fmtCurrency(campaignInsight.cpm)}
               sub="Cost per 1,000 impressions"
               color="text-amber-500" bgColor="bg-amber-500/10"
+              currentVal={campaignInsight.cpm}
+              prevVal={prevPeriodInsight?.cpm ?? null}
+              fmtPrevVal={fmtCurrency}
             />
           </div>
         </>

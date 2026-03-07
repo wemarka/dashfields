@@ -2295,3 +2295,11 @@
 - [x] Archived campaigns show "Archived" badge instead of toggle
 - [x] Rollback on error with toast notification
 - [x] Invalidate cache after status change
+
+## ✅ Phase 77 — Three UX Improvements
+- [x] Manual Refresh button in Status Bar (clears cache + refetches immediately)
+- [x] Add server-side cache-clear procedure (clearCampaignCache tRPC mutation)
+- [x] Breakdown Tab: Donut Charts for Age, Gender, Platform, Region distribution
+- [x] Breakdown Tab: fetch real breakdown data from Meta API (age, gender, country, impression_device)
+- [x] KPI Cards: vs previous period comparison (% change vs prior date range)
+- [x] Fetch previous period data using campaignPreviousPeriodInsights procedure

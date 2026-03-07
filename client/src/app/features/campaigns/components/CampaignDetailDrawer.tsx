@@ -17,7 +17,7 @@
  */
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader } from "@/core/components/ui/sheet";
-import { Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp } from "lucide-react";
+import { Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -50,12 +50,15 @@ interface ContentStatusBarProps {
   daily: unknown;
   adSetsData: unknown;
   adsData: unknown;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }
 
 function ContentStatusBar({
   activeTab, datePreset,
   isFetchingDaily, isFetchingAdSets, isFetchingAds,
   daily, adSetsData, adsData,
+  onRefresh, isRefreshing,
 }: ContentStatusBarProps) {
   const dataMap: Record<string, { data: unknown; fetching: boolean }> = {
     performance: { data: daily,      fetching: isFetchingDaily },
@@ -65,7 +68,7 @@ function ContentStatusBar({
   };
   const current = dataMap[activeTab];
   const label = useLastUpdated(current?.data);
-  const isFetching = current?.fetching ?? false;
+  const isFetching = (current?.fetching ?? false) || isRefreshing;
 
   const presetLabel = datePreset
     .replace("last_", "Last ")
@@ -89,17 +92,29 @@ function ContentStatusBar({
         </svg>
         <span className="text-[10px] font-medium text-muted-foreground capitalize">{presetLabel}</span>
       </div>
-      {isFetching ? (
-        <span className="flex items-center gap-1 text-[10px] text-primary">
-          <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
-            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-          </svg>
-          Updating...
-        </span>
-      ) : label ? (
-        <span className="text-[10px] text-muted-foreground/60">{label}</span>
-      ) : null}
+      <div className="flex items-center gap-2">
+        {isFetching ? (
+          <span className="flex items-center gap-1 text-[10px] text-primary">
+            <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            Updating...
+          </span>
+        ) : label ? (
+          <span className="text-[10px] text-muted-foreground/60">{label}</span>
+        ) : null}
+        {/* Manual Refresh Button */}
+        <button
+          onClick={onRefresh}
+          disabled={isFetching}
+          title="Clear cache and refresh data"
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40 disabled:cursor-wait"
+        >
+          <RefreshCw className={`w-2.5 h-2.5 ${isFetching ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      </div>
     </div>
   );
 }
@@ -184,7 +199,13 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
       }
     );
 
-  // ── Notes & Tags ──────────────────────────────────────────────────────
+  // ── Previous Period Insights (for vs-period comparison) ───────────────────
+  const { data: prevPeriodInsight } = trpc.meta.campaignPreviousPeriodInsights.useQuery(
+    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
+    { enabled: open && !!campaign?.id && activeTab === "performance" }
+  );
+
+  // ── Notes & Tags ─────────────────────────────────────────────────────
   const campaignKey = campaign?.id ?? "";
 
   const { data: savedNote } = trpc.campaigns.getNote.useQuery(
@@ -222,6 +243,22 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     onSuccess: () => { utils.meta.campaigns.invalidate(); toast.success("Budget updated"); },
     onError: (err) => toast.error("Failed to update budget", { description: err.message }),
   });
+  const clearCache = trpc.meta.clearCampaignCache.useMutation({
+    onSuccess: () => {
+      // Invalidate all related queries to force a fresh fetch
+      utils.meta.campaignInsights.invalidate();
+      utils.meta.campaignDailyInsights.invalidate();
+      utils.meta.campaignAdSets.invalidate();
+      utils.meta.campaignAds.invalidate();
+      toast.success("Cache cleared — fetching fresh data");
+    },
+    onError: () => toast.error("Failed to clear cache"),
+  });
+
+  const handleRefresh = useCallback(() => {
+    if (!campaign?.id) return;
+    clearCache.mutate({ campaignId: campaign.id, workspaceId: activeWorkspace?.id });
+  }, [campaign?.id, activeWorkspace?.id, clearCache]);
   const exportReport = trpc.export.campaignReport.useMutation({
     onSuccess: (result) => {
       const blob = new Blob([result.html], { type: "text/html;charset=utf-8;" });
@@ -388,7 +425,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
           {/* ── Right: Content Area ──────────────────────────────────── */}
           <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Status bar: date preset + last updated */}
+            {/* Status bar: date preset + last updated + refresh */}
             <ContentStatusBar
               activeTab={activeTab}
               datePreset={datePreset}
@@ -398,6 +435,8 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
               daily={daily}
               adSetsData={adSetsData}
               adsData={adsData}
+              onRefresh={handleRefresh}
+              isRefreshing={clearCache.isPending}
             />
 
             {/* Scrollable content */}
@@ -408,6 +447,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 <TabRefreshOverlay isFetching={isFetchingDaily} hasData={!!daily?.length}>
                   <PerformanceTab
                     campaignInsight={campaignInsight}
+                    prevPeriodInsight={prevPeriodInsight ?? null}
                     daily={daily}
                     isLoading={isLoading}
                     fmtCurrency={fmtCurrency}

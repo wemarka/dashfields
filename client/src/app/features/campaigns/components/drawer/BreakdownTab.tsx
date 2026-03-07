@@ -1,17 +1,38 @@
 /**
  * drawer/BreakdownTab.tsx — Age, gender, region, device breakdown sections.
+ * Each section shows a Donut Chart (Recharts PieChart) + a legend table.
  */
 import { useMemo } from "react";
 import { Loader2, Users, MapPin, Monitor } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
-import { fmtNum } from "./types";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-// ─── Breakdown Colors ───────────────────────────────────────────────────────
-const BREAKDOWN_COLORS = [
-  "bg-blue-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500",
-  "bg-rose-500", "bg-cyan-500", "bg-pink-500", "bg-indigo-500",
-  "bg-teal-500", "bg-orange-500", "bg-slate-400",
+// ─── Donut Colors ────────────────────────────────────────────────────────────
+const DONUT_COLORS = [
+  "#3b82f6", // blue-500
+  "#8b5cf6", // violet-500
+  "#10b981", // emerald-500
+  "#f59e0b", // amber-500
+  "#ef4444", // red-500
+  "#06b6d4", // cyan-500
+  "#ec4899", // pink-500
+  "#6366f1", // indigo-500
+  "#14b8a6", // teal-500
+  "#f97316", // orange-500
+  "#94a3b8", // slate-400
 ];
+
+// ─── Custom Tooltip ──────────────────────────────────────────────────────────
+function DonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { pct: number } }> }) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0];
+  return (
+    <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+      <p className="font-semibold text-foreground">{item.name}</p>
+      <p className="text-muted-foreground">{item.payload.pct}% · {item.value.toLocaleString()} impressions</p>
+    </div>
+  );
+}
 
 // ─── Breakdown Section ──────────────────────────────────────────────────────
 function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, fmtMoney }: {
@@ -20,15 +41,15 @@ function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, 
   fmtMoney: (n: number) => string;
 }) {
   const config = {
-    age:    { icon: Users,   label: "Age Breakdown",    apiBreakdown: "age" as const },
-    gender: { icon: Users,   label: "Gender Breakdown",  apiBreakdown: "gender" as const },
-    region: { icon: MapPin,  label: "Region Breakdown",  apiBreakdown: "country" as const },
-    device: { icon: Monitor, label: "Device Breakdown",  apiBreakdown: "impression_device" as const },
+    age:    { icon: Users,   label: "Age Distribution",    apiBreakdown: "age" as const },
+    gender: { icon: Users,   label: "Gender Distribution",  apiBreakdown: "gender" as const },
+    region: { icon: MapPin,  label: "Top Regions",          apiBreakdown: "country" as const },
+    device: { icon: Monitor, label: "Device Distribution",  apiBreakdown: "impression_device" as const },
   };
   const { icon: Icon, label, apiBreakdown } = config[type];
 
   const { data: rawData, isLoading } = trpc.meta.campaignBreakdown.useQuery(
-    { campaignId, breakdown: apiBreakdown, datePreset: datePreset as any, workspaceId },
+    { campaignId, breakdown: apiBreakdown, datePreset: datePreset as "last_7d" | "last_14d" | "last_30d" | "last_90d" | "today" | "yesterday" | "this_month" | "last_month", workspaceId },
     { enabled }
   );
 
@@ -51,48 +72,119 @@ function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, 
   const totalImpressions = aggregated.reduce((s, r) => s + r.impressions, 0);
   const hasData = aggregated.length > 0 && totalImpressions > 0;
 
+  // For region/device, show top 6 + "Other"
   const displayRows = useMemo(() => {
     if (!hasData) return [];
-    return aggregated.map((row, i) => ({
+    const maxRows = type === "age" || type === "gender" ? aggregated.length : 6;
+    const top = aggregated.slice(0, maxRows);
+    const rest = aggregated.slice(maxRows);
+    const rows = top.map((row, i) => ({
       label: row.label,
       pct: totalImpressions > 0 ? Math.round((row.impressions / totalImpressions) * 100) : 0,
-      impressions: row.impressions, clicks: row.clicks, spend: row.spend,
-      color: BREAKDOWN_COLORS[i % BREAKDOWN_COLORS.length],
+      impressions: row.impressions,
+      clicks: row.clicks,
+      spend: row.spend,
+      color: DONUT_COLORS[i % DONUT_COLORS.length],
     }));
-  }, [aggregated, hasData, totalImpressions]);
+    if (rest.length > 0) {
+      const otherImpressions = rest.reduce((s, r) => s + r.impressions, 0);
+      const otherClicks = rest.reduce((s, r) => s + r.clicks, 0);
+      const otherSpend = rest.reduce((s, r) => s + r.spend, 0);
+      rows.push({
+        label: `Other (${rest.length})`,
+        pct: totalImpressions > 0 ? Math.round((otherImpressions / totalImpressions) * 100) : 0,
+        impressions: otherImpressions,
+        clicks: otherClicks,
+        spend: otherSpend,
+        color: DONUT_COLORS[maxRows % DONUT_COLORS.length],
+      });
+    }
+    return rows;
+  }, [aggregated, hasData, totalImpressions, type]);
+
+  const pieData = displayRows.map(r => ({ name: r.label, value: r.impressions, pct: r.pct }));
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-2">
+      {/* Section header */}
+      <div className="flex items-center gap-2">
         <Icon className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm font-medium text-foreground">{label}</span>
+        <span className="text-sm font-semibold text-foreground">{label}</span>
       </div>
+
       {isLoading ? (
-        <div className="flex items-center justify-center h-24"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+        <div className="flex items-center justify-center h-32">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
       ) : !hasData ? (
-        <div className="text-xs text-muted-foreground text-center py-6">No breakdown data available for this period.</div>
+        <div className="text-xs text-muted-foreground text-center py-8">
+          No breakdown data available for this period.
+        </div>
       ) : (
-        <>
-          <div className="space-y-2">
+        <div className="flex items-center gap-4">
+          {/* Donut Chart */}
+          <div className="shrink-0 w-28 h-28">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={28}
+                  outerRadius={52}
+                  paddingAngle={2}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {pieData.map((_, i) => (
+                    <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<DonutTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Legend */}
+          <div className="flex-1 space-y-1.5 min-w-0">
             {displayRows.map((item) => (
-              <div key={item.label} className="group">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground w-28 truncate" title={item.label}>{item.label}</span>
-                  <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${item.color} transition-all duration-500`} style={{ width: `${Math.max(item.pct, 1)}%` }} />
-                  </div>
-                  <span className="text-xs font-mono text-muted-foreground w-10 text-right">{item.pct}%</span>
-                </div>
-                <div className="hidden group-hover:flex items-center gap-4 mt-1 ml-[7.5rem] text-[10px] text-muted-foreground">
-                  <span>Impressions: {item.impressions.toLocaleString()}</span>
-                  <span>Clicks: {item.clicks.toLocaleString()}</span>
-                  <span>Spend: {fmtMoney(item.spend)}</span>
-                </div>
+              <div key={item.label} className="flex items-center gap-2 group">
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-[11px] text-muted-foreground truncate flex-1" title={item.label}>
+                  {item.label}
+                </span>
+                <span className="text-[11px] font-semibold text-foreground shrink-0">
+                  {item.pct}%
+                </span>
               </div>
             ))}
+            <p className="text-[9px] text-muted-foreground/50 pt-1">
+              {totalImpressions.toLocaleString()} impressions total
+            </p>
           </div>
-          <p className="text-[10px] text-muted-foreground/60 mt-2">Based on {totalImpressions.toLocaleString()} total impressions</p>
-        </>
+        </div>
+      )}
+
+      {/* Hover detail table */}
+      {hasData && (
+        <div className="mt-2 space-y-1">
+          {displayRows.map((item) => (
+            <div key={item.label} className="flex items-center justify-between text-[10px] text-muted-foreground hover:text-foreground transition-colors py-0.5 px-1 rounded hover:bg-muted/40">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="truncate max-w-[100px]">{item.label}</span>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span>{item.impressions.toLocaleString()} imp</span>
+                <span>{item.clicks.toLocaleString()} clicks</span>
+                <span className="font-medium">{fmtMoney(item.spend)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -109,8 +201,8 @@ interface BreakdownTabProps {
 
 export function BreakdownTab({ campaignId, datePreset, workspaceId, enabled, fmtCurrency }: BreakdownTabProps) {
   return (
-    <div className="p-5 space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div className="p-5 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-card p-4">
           <BreakdownSection type="age" campaignId={campaignId} datePreset={datePreset} workspaceId={workspaceId} enabled={enabled} fmtMoney={fmtCurrency} />
         </div>

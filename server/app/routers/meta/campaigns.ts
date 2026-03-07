@@ -527,6 +527,74 @@ export const metaCampaignsRouter = router({
       }
     }),
 
+  /**
+   * Get campaign insights for the previous period (for vs-period comparison).
+   * Maps datePreset to its equivalent previous period using time_range.
+   */
+  campaignPreviousPeriodInsights: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      datePreset: datePresetEnum.default("last_30d"),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
+      if (!conn) return null;
+      try {
+        // Compute previous period date range
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const daysMap: Record<string, number> = {
+          today: 1, yesterday: 1, last_7d: 7, last_14d: 14,
+          last_30d: 30, last_90d: 90, this_month: today.getDate(),
+          last_month: 30,
+        };
+        const days = daysMap[input.datePreset] ?? 30;
+        const prevEnd = new Date(today);
+        prevEnd.setDate(prevEnd.getDate() - days);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - days);
+        const fmt = (d: Date) => d.toISOString().slice(0, 10);
+        const timeRange = JSON.stringify({ since: fmt(prevStart), until: fmt(prevEnd) });
+
+        const url = new URL(`https://graph.facebook.com/v19.0/${input.campaignId}/insights`);
+        url.searchParams.set("access_token", conn.token);
+        url.searchParams.set("fields", "impressions,reach,clicks,spend,ctr,cpc,cpm");
+        url.searchParams.set("time_range", timeRange);
+        const res = await fetch(url.toString());
+        const json = await res.json() as { data?: Array<Record<string, string>>; error?: { message: string } };
+        if (json.error || !json.data?.length) return null;
+        const d = json.data[0];
+        return {
+          impressions: Number(d.impressions ?? 0),
+          reach: Number(d.reach ?? 0),
+          clicks: Number(d.clicks ?? 0),
+          spend: Number(d.spend ?? 0),
+          ctr: Number(d.ctr ?? 0),
+          cpc: Number(d.cpc ?? 0),
+          cpm: Number(d.cpm ?? 0),
+        };
+      } catch { return null; }
+    }),
+
+  /** Clear server-side Meta API cache for a specific campaign (manual refresh) */
+  clearCampaignCache: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.campaignId) {
+        // Clear all cache keys that include this campaignId
+        metaCache.invalidatePrefix(`adSets:${ctx.user.id}:${input.campaignId}`);
+        metaCache.invalidatePrefix(`campaignAds:${ctx.user.id}:${input.campaignId}`);
+        metaCache.invalidatePrefix(`dailyInsights:${ctx.user.id}:${input.campaignId}`);
+      }
+      // Always clear campaign insights list
+      metaCache.invalidatePrefix(`campaignInsights:${ctx.user.id}`);
+      return { cleared: true };
+    }),
+
   /** Bulk pause ads by ID */
   bulkPauseAds: protectedProcedure
     .input(z.object({
