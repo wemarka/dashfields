@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import {
   Loader2, TrendingUp, TrendingDown, Minus,
-  MousePointerClick, DollarSign, Eye, Target, Zap,
+  MousePointerClick, DollarSign, Eye, Target,
 } from "lucide-react";
 import { fmtNum, fmtPct } from "./types";
 
@@ -122,46 +122,7 @@ function SparklineKpiCard({
   );
 }
 
-// ─── Performance Score Card ───────────────────────────────────────────────────
-function PerformanceScoreCard({ insight }: { insight: InsightData }) {
-  // Simple composite score
-  let score = 50;
-  if (insight.ctr >= 3) score += 20;
-  else if (insight.ctr >= 1) score += 10;
-  if (insight.cpc < 0.5) score += 15;
-  else if (insight.cpc < 1) score += 7;
-  else if (insight.cpc > 2) score -= 10;
-  if (insight.impressions > 50000) score += 15;
-  else if (insight.impressions > 10000) score += 7;
-  score = Math.min(100, Math.max(0, score));
-
-  const label = score >= 70 ? "Excellent" : score >= 45 ? "Average" : "Needs Work";
-  const barColor = score >= 70 ? "bg-emerald-500" : score >= 45 ? "bg-amber-500" : "bg-red-500";
-  const textColor = score >= 70 ? "text-emerald-500" : score >= 45 ? "text-amber-500" : "text-red-500";
-
-  return (
-    <div className="rounded-xl border border-border bg-card p-3.5">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg p-1.5 bg-violet-500/10">
-            <Zap className="h-3.5 w-3.5 text-violet-500" />
-          </div>
-          <span className="text-[11px] text-muted-foreground font-medium">Performance Score</span>
-        </div>
-        <span className={`text-sm font-bold ${textColor}`}>{score}/100</span>
-      </div>
-      <div className="h-2 rounded-full bg-border overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${barColor}`}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-      <p className={`text-[11px] font-medium mt-1.5 ${textColor}`}>{label}</p>
-    </div>
-  );
-}
-
-// ─── Chart Metric Toggle ─────────────────────────────────────────────────────
+// ─── Chart Metric Toggle────────────────────────────────────────────
 type ChartMetric = "impressions" | "clicks" | "spend";
 
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
@@ -235,9 +196,6 @@ export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency 
               color="text-amber-500" bgColor="bg-amber-500/10"
             />
           </div>
-
-          {/* Performance Score */}
-          <PerformanceScoreCard insight={campaignInsight} />
         </>
       ) : (
         <div className="grid grid-cols-2 gap-3">

@@ -29,7 +29,7 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 
 import {
   PerformanceTab, AdSetsTab, CreativesTab, HeatmapTab, BreakdownTab, NotesTab,
-  TabStatusBar, TabRefreshOverlay,
+  TabRefreshOverlay, useLastUpdated,
 } from "./drawer";
 import { DrawerHeader } from "./drawer/DrawerHeader";
 import type { MetaCampaign, DatePreset, DetailTab, CreativeFilter, CreativeSort } from "./drawer";
@@ -43,6 +43,67 @@ const TABS: { value: DetailTab; label: string; icon: React.ElementType }[] = [
   { value: "breakdown",   label: "Breakdown",   icon: PieChart },
   { value: "notes",       label: "Notes",       icon: StickyNote },
 ];
+
+// ─── InlineTabStatus ─────────────────────────────────────────────────────────
+// Compact right-side status shown in the tab bar row
+interface InlineTabStatusProps {
+  activeTab: DetailTab;
+  datePreset: string;
+  isFetchingDaily: boolean;
+  isFetchingAdSets: boolean;
+  isFetchingAds: boolean;
+  daily: unknown;
+  adSetsData: unknown;
+  adsData: unknown;
+}
+
+function InlineTabStatus({
+  activeTab, datePreset,
+  isFetchingDaily, isFetchingAdSets, isFetchingAds,
+  daily, adSetsData, adsData,
+}: InlineTabStatusProps) {
+  // Pick the right data source and fetching state for the active tab
+  const dataMap: Record<string, { data: unknown; fetching: boolean }> = {
+    performance: { data: daily, fetching: isFetchingDaily },
+    adsets:      { data: adSetsData, fetching: isFetchingAdSets },
+    creatives:   { data: adsData, fetching: isFetchingAds },
+    heatmap:     { data: adsData, fetching: isFetchingAds },
+  };
+  const current = dataMap[activeTab];
+  const label = useLastUpdated(current?.data);
+  const isFetching = current?.fetching ?? false;
+
+  // Format the date preset into a readable label
+  const presetLabel = datePreset
+    .replace("last_", "")
+    .replace("d", " days")
+    .replace("_", " ")
+    .replace("today", "Today")
+    .replace("yesterday", "Yesterday")
+    .replace("this month", "This Month")
+    .replace("last month", "Last Month");
+
+  return (
+    <div className="flex items-center gap-2 pr-3 shrink-0">
+      {/* Date range badge */}
+      <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full whitespace-nowrap">
+        {presetLabel}
+      </span>
+      {/* Fetching / last updated */}
+      {isFetching ? (
+        <span className="flex items-center gap-1 text-[10px] text-primary whitespace-nowrap">
+          <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+          Updating
+        </span>
+      ) : label ? (
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{label}</span>
+      ) : null}
+    </div>
+  );
+}
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 interface Props {
@@ -295,11 +356,11 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
           onValueChange={handleTabChange}
           className="flex flex-col flex-1 overflow-hidden"
         >
-          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0">
-            <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 w-full justify-start overflow-x-auto scrollbar-none">
+          {/* Inline status row: tabs on left, date info on right */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0 flex items-center">
+            <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 flex-1 justify-start overflow-x-auto scrollbar-none">
               {TABS.map(tab => {
                 const Icon = tab.icon;
-                // Show a small dot indicator for prefetched/loaded tabs
                 const isLoaded = tab.value === "adsets"
                   ? !!adSetsData
                   : (tab.value === "creatives" || tab.value === "heatmap")
@@ -324,7 +385,6 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {tab.label}
-                    {/* Green dot when data is prefetched and ready */}
                     {isLoaded && tab.value !== activeTab && (
                       <span className="absolute top-2 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     )}
@@ -332,6 +392,17 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 );
               })}
             </TabsList>
+            {/* Inline status: date preset + last updated */}
+            <InlineTabStatus
+              activeTab={activeTab}
+              datePreset={datePreset}
+              isFetchingDaily={isFetchingDaily || isFetchingInsights}
+              isFetchingAdSets={isFetchingAdSets}
+              isFetchingAds={isFetchingAds}
+              daily={daily}
+              adSetsData={adSetsData}
+              adsData={adsData}
+            />
           </div>
 
           {/* ── Scrollable Tab Content ──────────────────────────────── */}
@@ -339,11 +410,6 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
             {/* ═══ Performance Tab ═══ */}
             <TabsContent value="performance" className="mt-0">
-              <TabStatusBar
-                data={daily}
-                isFetching={isFetchingDaily || isFetchingInsights}
-                datePreset={datePreset}
-              />
               <TabRefreshOverlay isFetching={isFetchingDaily} hasData={!!daily?.length}>
                 <PerformanceTab
                   campaignInsight={campaignInsight}
@@ -356,11 +422,6 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
             {/* ═══ Ad Sets Tab ═══ */}
             <TabsContent value="adsets" className="mt-0">
-              <TabStatusBar
-                data={adSetsData}
-                isFetching={isFetchingAdSets}
-                datePreset={datePreset}
-              />
               <TabRefreshOverlay isFetching={isFetchingAdSets} hasData={!!adSetsData?.adSets?.length}>
                 <AdSetsTab
                   adSetsData={adSetsData}
@@ -372,11 +433,6 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
             {/* ═══ Creatives Tab ═══ */}
             <TabsContent value="creatives" className="mt-0">
-              <TabStatusBar
-                data={adsData}
-                isFetching={isFetchingAds}
-                datePreset={datePreset}
-              />
               <TabRefreshOverlay isFetching={isFetchingAds} hasData={!!adsData?.length}>
                 <CreativesTab
                   adsData={adsData}
@@ -398,11 +454,6 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
             {/* ═══ Heatmap Tab ═══ */}
             <TabsContent value="heatmap" className="mt-0">
-              <TabStatusBar
-                data={adsData}
-                isFetching={isFetchingAds}
-                datePreset={datePreset}
-              />
               <TabRefreshOverlay isFetching={isFetchingAds} hasData={!!adsData?.length}>
                 <HeatmapTab
                   ads={(adsData ?? []).map(ad => ({

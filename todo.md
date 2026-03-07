@@ -2201,3 +2201,7 @@
 - [x] Skeleton overlay on date preset change for Ad Sets, Creatives, Heatmap tabs
 - [x] Last-updated timestamp display per tab (shows when data was last fetched)
 - [x] Background prefetch of Ad Sets and Creatives data on drawer open
+
+## 🎨 Phase 68 — Tab Bar & Performance Score Cleanup
+- [x] Move status bar (date range + Updated X ago) inline with the tab bar row (right side) to save vertical space
+- [x] Remove standalone Performance Score card from PerformanceTab (keep Health Score in drawer header corner only)
