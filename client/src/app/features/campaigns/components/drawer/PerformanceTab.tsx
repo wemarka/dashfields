@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { fmtNum, fmtPct } from "./types";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// --- Types ───────────────────────────────────────────────────────────────────
 interface DailyPoint {
   date?: string;
   spend?: number;
@@ -46,7 +46,7 @@ interface PerformanceTabProps {
   fmtCurrency: (n: number) => string;
 }
 
-// ─── Sparkline ───────────────────────────────────────────────────────────────
+// --- Sparkline ───────────────────────────────────────────────────────────────
 function Sparkline({ data, color }: { data: number[]; color: string }) {
   if (!data || data.length < 2) return null;
   const points = data.map((v, i) => ({ v, i }));
@@ -65,7 +65,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-// ─── Trend Indicator ─────────────────────────────────────────────────────────
+// --- Trend Indicator ─────────────────────────────────────────────────────────
 function TrendIndicator({ pct }: { pct: number }) {
   if (Math.abs(pct) < 1) {
     return (
@@ -83,7 +83,7 @@ function TrendIndicator({ pct }: { pct: number }) {
   );
 }
 
-// ─── Enhanced KPI Card with Sparkline ────────────────────────────────────────
+// --- Enhanced KPI Card with Sparkline ────────────────────────────────────────
 function SparklineKpiCard({
   icon: Icon, label, value, sub, color, bgColor, sparkData, sparkColor, trend,
 }: {
@@ -122,7 +122,7 @@ function SparklineKpiCard({
   );
 }
 
-// ─── Chart Metric Toggle────────────────────────────────────────────
+// --- Chart Metric Toggle ---
 type ChartMetric = "impressions" | "clicks" | "spend";
 
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
@@ -131,7 +131,7 @@ const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
   { key: "spend",       label: "Spend",       color: "#8b5cf6" },
 ];
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// --- Main Component ───────────────────────────────────────────────────────────
 export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency }: PerformanceTabProps) {
   const [activeMetrics, setActiveMetrics] = useState<Set<ChartMetric>>(
     () => new Set<ChartMetric>(["impressions", "clicks", "spend"])

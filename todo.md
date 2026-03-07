@@ -2208,3 +2208,11 @@
 
 ## 🎨 Phase 69 — Tab Bar Layout Fix
 - [x] Move status info (date preset + last updated) to a clean slim sub-bar below the tabs row, not inline with tabs
+
+## 🎨 Phase 70 — CampaignDetailDrawer Vertical Side Tabs Redesign
+- [x] Widen the Sheet to sm:max-w-4xl for more content space
+- [x] Replace horizontal TabsList with a vertical left sidebar nav (icons + labels)
+- [x] Content area takes the remaining right space with its own scroll
+- [x] Status sub-bar (date + last updated) moves to content area top
+- [x] Active tab highlighted with left border accent in sidebar
+- [x] Prefetch green dot shown in sidebar nav items
