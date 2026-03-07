@@ -217,17 +217,9 @@ export function DrawerHeader({
 
         {/* Campaign info */}
         <div className="flex-1 min-w-0">
-          {/* Name row: title + score side by side */}
-          <div className="flex items-center gap-2.5">
-            <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground flex-1 min-w-0">
-              {campaign?.name ?? "Campaign"}
-            </SheetTitle>
-            {insight && (
-              <div className="shrink-0">
-                <HealthScoreCircle score={healthScore} />
-              </div>
-            )}
-          </div>
+          <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground">
+            {campaign?.name ?? "Campaign"}
+          </SheetTitle>
           <SheetDescription asChild>
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               {campaign?.status && <StatusBadge status={campaign.status} />}
@@ -246,21 +238,23 @@ export function DrawerHeader({
         </div>
       </div>
 
-      {/* ── Row 2: KPI Pills ── */}
+      {/* ── Row 2: KPI Pills + Health Score ── */}
       {insight && (
-        <div className="px-5 pb-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
-            {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
-            {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
-            {insight.impressions > 0 && (
-              <KpiPill
-                label="Impressions"
-                value={insight.impressions >= 1000
-                  ? `${(insight.impressions / 1000).toFixed(1)}K`
-                  : String(insight.impressions)}
-              />
-            )}
+        <div className="px-5 pb-3 flex items-center gap-1.5 flex-wrap">
+          {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
+          {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
+          {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
+          {insight.impressions > 0 && (
+            <KpiPill
+              label="Impressions"
+              value={insight.impressions >= 1000
+                ? `${(insight.impressions / 1000).toFixed(1)}K`
+                : String(insight.impressions)}
+            />
+          )}
+          {/* Health Score — compact pill, end of KPI row */}
+          <div className="ml-auto shrink-0">
+            <HealthScoreCircle score={healthScore} />
           </div>
         </div>
       )}
