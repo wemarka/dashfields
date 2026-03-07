@@ -197,7 +197,7 @@ export function GlobalSettingsModal({
        */}
       <DialogContent
         showCloseButton={true}
-        className="w-full max-w-5xl p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden"
+        className="w-full max-w-5xl !p-0 !gap-0 !grid-cols-none !flex !flex-row rounded-2xl border border-border/50 shadow-2xl overflow-hidden"
         style={{ minHeight: 650, maxHeight: "90vh" }}
       >
         <DialogTitle className="sr-only">Settings</DialogTitle>
@@ -207,7 +207,7 @@ export function GlobalSettingsModal({
 
         {/* ── Two-pane flex container ── */}
         <div
-          className="flex flex-row w-full overflow-hidden"
+          className="flex flex-row w-full overflow-hidden flex-1"
           style={{ minHeight: 650, maxHeight: "90vh" }}
         >
           {/* ────────────────────────────────────────────────────────────────
