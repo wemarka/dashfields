@@ -139,22 +139,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Logo + Collapse Button */}
         <div className={`flex items-center h-14 border-b border-border/30 shrink-0 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}>
-          {/* Logo: full when expanded, icon when collapsed */}
+          {/* Logo: icon when collapsed, full logo when expanded */}
           <div
             onClick={() => setLocation("/dashboard")}
-            className="cursor-pointer select-none flex items-center gap-2 min-w-0"
+            className="cursor-pointer select-none flex items-center min-w-0"
           >
             {collapsed ? (
+              /* Icon only — black SVG, inverted in dark mode */
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
                 alt="Dashfields"
                 className="w-7 h-7 shrink-0"
+                style={{ filter: dark ? 'invert(1)' : 'none' }}
               />
             ) : (
+              /* Full logo (icon + text) — black SVG, inverted in dark mode */
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_e604f8ac.svg"
                 alt="Dashfields"
-                className={`h-6 w-auto shrink-0 ${dark ? 'invert' : ''}`}
+                className="h-6 w-auto shrink-0"
+                style={{ filter: dark ? 'invert(1)' : 'none' }}
               />
             )}
           </div>
