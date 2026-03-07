@@ -2340,3 +2340,8 @@
 - [x] Generated apple-touch-icon.png (180x180) in client/public
 - [x] Generated favicon-32x32.png and favicon-16x16.png in client/public
 - [x] Updated index.html with proper favicon link tags (ico, png 32x32, png 16x16, apple-touch-icon)
+
+## ✅ Phase 84 — Full-Height Flush Sidebar
+- [x] Removed margin (m-3) and border-radius (rounded-2xl) from sidebar
+- [x] Added border-r border-white/8 for clean edge separation
+- [x] Sidebar now spans full height flush to the left edge of the page
