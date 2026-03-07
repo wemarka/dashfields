@@ -2423,3 +2423,8 @@
 ## 🔄 Manage Connections in Avatar Dropdown
 - [x] Add "Manage Connections" button in Account Avatar Dropdown footer (above Connect Account)
 - [x] Clicking it closes the dropdown and opens Settings Modal on the Connections tab
+
+## 🔄 Sign Out Icon in Sidebar Bottom
+- [x] Add Sign Out icon at the very bottom of Sidebar, separated by a divider from the other icons
+- [x] When collapsed: Sign Out appears last (below Tools/Install/Settings/Help), separated visually
+- [x] Clicking Sign Out triggers the signOut function

@@ -344,7 +344,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Bottom icon row: Settings + Help + Install */}
+        {/* Bottom icon row: Tools + Install + Settings + Help + Sign Out */}
         <div className="px-3 pb-3 shrink-0">
           <div className="h-px bg-border/30 mb-2" />
           <div className={`flex gap-1 ${collapsed ? "flex-col items-center" : (isRTL ? "flex-row-reverse items-center" : "flex-row items-center")}`}>
@@ -404,6 +404,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               </TooltipTrigger>
               <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>Help & Support</TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* Sign Out — separated */}
+          <div className={`mt-1.5 ${collapsed ? "flex flex-col items-center" : ""}`}>
+            <div className="h-px bg-border/30 mb-1.5" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => signOut()}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-red-400/60 hover:text-red-500 hover:bg-red-500/8 transition-colors"
+                >
+                  <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>Sign Out</TooltipContent>
             </Tooltip>
           </div>
         </div>
