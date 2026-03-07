@@ -2398,3 +2398,10 @@
 - [x] الـ Integrations يكون هو الـ active item افتراضياً
 - [x] باقي العناصر تُظهر "Coming Soon" toast عند الضغط
 - [x] إضافة DialogDescription لإصلاح تحذير accessibility
+
+## ✅ Phase 94 — Global Settings Modal (Manus-style)
+- [x] إنشاء GlobalSettingsModal مع sidebar nav + content area (two-pane layout)
+- [x] Tabs: Account, Settings, Billing, Connections, Integrations, Brand Kit
+- [x] ربط كل tab بالمحتوى الموجود (Profile, Settings, BillingPage, Connections, Integrations)
+- [x] استبدال AppSettingsModal بـ GlobalSettingsModal الموحّد
+- [x] تحديث DashboardLayout لفتح GlobalSettingsModal مع tab محدد

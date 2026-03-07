@@ -4,7 +4,7 @@
  */
 import { useAuth } from "@/shared/hooks/useAuth";
 import { IntegrationsModal } from "@/app/components/IntegrationsModal";
-import { AppSettingsModal } from "@/app/components/AppSettingsModal";
+import { GlobalSettingsModal, type SettingsTabId } from "@/app/components/GlobalSettingsModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
 import { trpc } from "@/core/lib/trpc";
@@ -96,7 +96,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
-  const [showAppSettings, setShowAppSettings] = useState(false);
+  const [showGlobalSettings, setShowGlobalSettings] = useState(false);
+  const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>("account");
+  const openSettings = (tab: SettingsTabId = "account") => { setSettingsInitialTab(tab); setShowGlobalSettings(true); };
 
   useKeyboardShortcuts({
     onNewPost: () => setLocation("/calendar"),
@@ -451,7 +453,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               activeWorkspace={activeWorkspace}
               onSelectWorkspace={(id) => setActiveWorkspace(id)}
               onNewWorkspace={() => setShowWorkspaceSwitcher(true)}
-              onOpenAppSettings={() => setShowAppSettings(true)}
+              onOpenAppSettings={() => openSettings("account")}
             />
           </div>
         </div>
@@ -473,7 +475,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"} reason={upgradeReason} />
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <IntegrationsModal open={showIntegrations} onOpenChange={setShowIntegrations} />
-      <AppSettingsModal open={showAppSettings} onOpenChange={setShowAppSettings} />
+      <GlobalSettingsModal open={showGlobalSettings} onOpenChange={setShowGlobalSettings} initialTab={settingsInitialTab} />
     </div>
   );
 }
