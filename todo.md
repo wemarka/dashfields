@@ -2345,3 +2345,12 @@
 - [x] Removed margin (m-3) and border-radius (rounded-2xl) from sidebar
 - [x] Added border-r border-white/8 for clean edge separation
 - [x] Sidebar now spans full height flush to the left edge of the page
+
+## ✅ Phase 85 — Sidebar Simplification & Branding Fix
+- [x] Redesign Sidebar to be minimal/clean matching app design spirit
+- [x] Move Collapse button inside the Sidebar (not in header)
+- [x] Fix logo/icon visibility across the entire app (login, header, sidebar)
+- [x] Remove Collapse button from top header bar
+- [x] Fixed full logo CDN URL (was 403, now uses correct URL)
+- [x] Added dark mode invert filter for full logo (black SVG becomes white in dark mode)
+- [x] Sidebar shows full logo (icon+text) when expanded, icon only when collapsed

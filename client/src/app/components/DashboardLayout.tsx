@@ -134,17 +134,52 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out overflow-hidden relative border-r border-white/8 shadow-none"
-        style={{ width: collapsed ? 64 : 228, boxShadow: 'none' }}
+        className="hidden md:flex flex-col shrink-0 transition-all duration-300 ease-out overflow-hidden relative border-r border-border/30"
+        style={{ width: collapsed ? 60 : 220, background: 'var(--sidebar-bg, hsl(var(--background)))', boxShadow: 'none' }}
       >
-        {/* Logo — icon only */}
-        <div className="flex items-center justify-center h-14 border-b border-white/8 shrink-0">
-          <img
-            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
-            alt="Dashfields"
+        {/* Logo + Collapse Button */}
+        <div className={`flex items-center h-14 border-b border-border/30 shrink-0 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+          {/* Logo: full when expanded, icon when collapsed */}
+          <div
             onClick={() => setLocation("/dashboard")}
-            className="w-7 h-7 cursor-pointer select-none"
-          />
+            className="cursor-pointer select-none flex items-center gap-2 min-w-0"
+          >
+            {collapsed ? (
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
+                alt="Dashfields"
+                className="w-7 h-7 shrink-0"
+              />
+            ) : (
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_e604f8ac.svg"
+                alt="Dashfields"
+                className={`h-6 w-auto shrink-0 ${dark ? 'invert' : ''}`}
+              />
+            )}
+          </div>
+          {/* Collapse button — only visible when expanded */}
+          {!collapsed && (
+            <button
+              onClick={() => setCollapsed(true)}
+              title="Close sidebar"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-foreground/8 transition-all duration-200 shrink-0"
+            >
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+            </button>
+          )}
+          {/* Open button — only visible when collapsed */}
+          {collapsed && (
+            <button
+              onClick={() => setCollapsed(false)}
+              title="Open sidebar"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              aria-label="Open sidebar"
+            />
+          )}
         </div>
 
         {/* Nav Groups — Accordion Pattern */}
@@ -258,25 +293,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: sidebar toggle (ChatGPT style) + search + Account Switcher Pill */}
+          {/* Left: search + Account Switcher Pill */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-            {/* Sidebar toggle — ChatGPT style */}
-            <div className="relative group/sidebar-toggle">
-              <button
-                onClick={() => setCollapsed(c => !c)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/8 transition-all duration-200"
-              >
-                {/* Sidebar icon — two-panel rectangle */}
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-              </button>
-              {/* Tooltip */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 rounded-md bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 group-hover/sidebar-toggle:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
-                {collapsed ? "Open sidebar" : "Close sidebar"}
-              </div>
-            </div>
             <GlobalSearch />
             <button onClick={() => setShowAccountSwitcher(true)}
               className={["flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
