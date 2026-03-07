@@ -137,34 +137,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out m-3 rounded-2xl overflow-hidden relative"
         style={{ width: collapsed ? 64 : 228 }}
       >
-        {/* Logo — icon only; collapse toggle fades in on hover */}
-        <div
-          className="relative flex items-center justify-center h-14 border-b border-white/8 shrink-0"
-          onMouseEnter={() => setLogoHovered(true)}
-          onMouseLeave={() => setLogoHovered(false)}
-        >
-          {/* Icon — always visible, click to go home */}
+        {/* Logo — icon only */}
+        <div className="flex items-center justify-center h-14 border-b border-white/8 shrink-0">
           <img
             src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
             alt="Dashfields"
             onClick={() => setLocation("/dashboard")}
-            className={`w-7 h-7 cursor-pointer transition-all duration-200 select-none ${
-              logoHovered ? "opacity-0 scale-90" : "opacity-100 scale-100"
-            }`}
+            className="w-7 h-7 cursor-pointer select-none"
           />
-          {/* Collapse button — fades in on hover */}
-          <button
-            onClick={() => setCollapsed(c => !c)}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`absolute inset-0 flex items-center justify-center rounded-xl mx-2 transition-all duration-200 hover:bg-foreground/8 ${
-              logoHovered ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
-            }`}
-          >
-            {(isRTL ? !collapsed : collapsed)
-              ? <ChevronRight className="w-4 h-4 text-foreground/60" />
-              : <ChevronLeft className="w-4 h-4 text-foreground/60" />
-            }
-          </button>
         </div>
 
         {/* Nav Groups — Accordion Pattern */}
@@ -278,8 +258,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: search + Account Switcher Pill */}
+          {/* Left: sidebar toggle (ChatGPT style) + search + Account Switcher Pill */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+            {/* Sidebar toggle — ChatGPT style */}
+            <div className="relative group/sidebar-toggle">
+              <button
+                onClick={() => setCollapsed(c => !c)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/8 transition-all duration-200"
+              >
+                {/* Sidebar icon — two-panel rectangle */}
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              </button>
+              {/* Tooltip */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 rounded-md bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 group-hover/sidebar-toggle:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                {collapsed ? "Open sidebar" : "Close sidebar"}
+              </div>
+            </div>
             <GlobalSearch />
             <button onClick={() => setShowAccountSwitcher(true)}
               className={["flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",

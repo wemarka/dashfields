@@ -2326,3 +2326,10 @@
 - [x] Sidebar: always shows icon only (no text) in logo area
 - [x] Sidebar: Collapse button hidden, fades in on hover over logo area with scale animation
 - [x] Search changed to icon-only button (w-8 h-8 with Search icon)
+
+## ✅ Phase 82 — Sidebar Collapse Button (ChatGPT Style)
+- [x] Replaced hover-reveal collapse with a fixed sidebar toggle icon button in header (like ChatGPT)
+- [x] SVG two-panel rectangle icon matching ChatGPT design
+- [x] Tooltip "Open sidebar" / "Close sidebar" appears on hover
+- [x] Button always visible in top-left of header, before Search icon
+- [x] Logo area simplified to icon-only (no hover state needed)
