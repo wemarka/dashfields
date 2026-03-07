@@ -435,17 +435,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
           {/* Right: controls */}
           <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
-            <button onClick={handleLangToggle}
-              title={i18n.language === "ar" ? "Switch to English" : "التحويل للعربية"}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors font-medium text-xs">
-              <span className="text-[11px] font-semibold">{i18n.language === "ar" ? "EN" : "ع"}</span>
-            </button>
-            <button onClick={toggleDark} title={dark ? t("topbar.switchLight") : t("topbar.switchDark")}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors">
-              {dark ? <Sun className="w-4 h-4 icon-spin" /> : <Moon className="w-4 h-4 icon-bounce" />}
-            </button>
             <NotificationBell />
-
           </div>
         </div>
         <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">{children}</div>
