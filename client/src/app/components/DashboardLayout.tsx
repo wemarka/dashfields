@@ -36,6 +36,13 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleCollapse = (val: boolean) => {
+    setIsAnimating(true);
+    setCollapsed(val);
+    setTimeout(() => setIsAnimating(false), 300);
+  };
   const [logoHovered, setLogoHovered] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -134,60 +141,69 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex flex-col shrink-0 transition-all duration-300 ease-out overflow-hidden relative border-r border-border/30"
-        style={{ width: collapsed ? 60 : 220, background: 'var(--sidebar-bg, hsl(var(--background)))', boxShadow: 'none' }}
+        className="hidden md:flex flex-col shrink-0 overflow-hidden relative border-r border-border/30"
+        style={{
+          width: collapsed ? 60 : 220,
+          transition: 'width 280ms cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'var(--sidebar-bg, hsl(var(--background)))',
+          boxShadow: 'none'
+        }}
       >
         {/* Logo + Collapse Button */}
-        <div className={`flex items-center h-14 border-b border-border/30 shrink-0 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}>
-          {/* Logo: icon when collapsed, full logo when expanded */}
+        <div className="flex items-center h-14 border-b border-border/30 shrink-0 px-3 justify-between">
+          {/* Logo area — always takes same space, content crossfades */}
           <div
             onClick={() => setLocation("/dashboard")}
-            className="cursor-pointer select-none flex items-center min-w-0"
+            className="cursor-pointer select-none flex items-center min-w-0 flex-1 overflow-hidden"
           >
-            {collapsed ? (
-              /* Icon only — use dark/light PNG versions */
-              <img
-                src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
-                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
-                }
-                alt="Dashfields"
-                className="w-7 h-7 shrink-0 object-contain"
-              />
-            ) : (
-              /* Full logo (icon + text) — use dark/light PNG versions */
-              <img
-                src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white_b639bec7.png"
-                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
-                }
-                alt="Dashfields"
-                className="h-6 w-auto shrink-0 object-contain"
-              />
-            )}
-          </div>
-          {/* Collapse button — only visible when expanded */}
-          {!collapsed && (
-            <button
-              onClick={() => setCollapsed(true)}
-              title="Close sidebar"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-foreground/8 transition-all duration-200 shrink-0"
-            >
-              <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
-              </svg>
-            </button>
-          )}
-          {/* Open button — only visible when collapsed */}
-          {collapsed && (
-            <button
-              onClick={() => setCollapsed(false)}
-              title="Open sidebar"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              aria-label="Open sidebar"
+            {/* Icon — always visible, fades out when expanded */}
+            <img
+              src={dark
+                ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
+                : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
+              }
+              alt=""
+              aria-hidden="true"
+              className="w-7 h-7 shrink-0 object-contain"
+              style={{
+                opacity: collapsed ? 1 : 0,
+                transform: collapsed ? 'scale(1)' : 'scale(0.8)',
+                transition: 'opacity 200ms ease, transform 200ms ease',
+                position: collapsed ? 'relative' : 'absolute',
+                pointerEvents: 'none',
+              }}
             />
-          )}
+            {/* Full logo — fades in when expanded */}
+            <img
+              src={dark
+                ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white_b639bec7.png"
+                : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
+              }
+              alt="Dashfields"
+              className="h-6 w-auto shrink-0 object-contain"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                transform: collapsed ? 'translateX(-8px)' : 'translateX(0)',
+                transition: 'opacity 220ms ease, transform 220ms ease',
+                position: collapsed ? 'absolute' : 'relative',
+                pointerEvents: collapsed ? 'none' : 'auto',
+              }}
+            />
+          </div>
+          {/* Collapse/Expand toggle button — always visible, icon rotates */}
+          <button
+            onClick={() => handleCollapse(!collapsed)}
+            title={collapsed ? 'Open sidebar' : 'Close sidebar'}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-foreground/8 transition-all duration-200 shrink-0"
+          >
+            <svg
+              width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"
+              style={{ transform: collapsed ? (isRTL ? 'scaleX(-1)' : 'scaleX(1)') : (isRTL ? 'scaleX(1)' : 'scaleX(-1)'), transition: 'transform 280ms cubic-bezier(0.4,0,0.2,1)' }}
+            >
+              <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
+            </svg>
+          </button>
         </div>
 
         {/* Nav Groups — Accordion Pattern */}
@@ -215,7 +231,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-brand`} />
                   )}
                   <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
-                  {!collapsed && <span className="truncate flex-1">{t(item.labelKey)}</span>}
+                  {!collapsed && (
+                    <span
+                      className="truncate flex-1"
+                      style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
+                    >{t(item.labelKey)}</span>
+                  )}
                 </button>
               );
             }
@@ -234,8 +255,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-200", isSectionActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
                   {!collapsed && (
                     <>
-                      <span className="truncate flex-1">{t(item.labelKey)}</span>
-                      <ChevronDown className={["w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0", isOpen ? "rotate-180" : ""].join(" ")} />
+                      <span
+                        className="truncate flex-1"
+                        style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
+                      >{t(item.labelKey)}</span>
+                      <ChevronDown
+                        className={["w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0", isOpen ? "rotate-180" : ""].join(" ")}
+                        style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
+                      />
                     </>
                   )}
                 </button>
@@ -289,7 +316,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
-                {!collapsed && <span className="truncate flex-1">{t("nav.integrations")}</span>}
+                {!collapsed && (
+                  <span
+                    className="truncate flex-1"
+                    style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
+                  >{t("nav.integrations")}</span>
+                )}
               </button>
             );
           })()}

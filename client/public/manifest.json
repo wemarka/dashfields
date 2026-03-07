@@ -1,0 +1,21 @@
+{
+  "name": "Dashfields",
+  "short_name": "Dashfields",
+  "description": "AI-Powered Social Media Management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/favicon-192_c02b24a8.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/favicon-512_380e245a.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

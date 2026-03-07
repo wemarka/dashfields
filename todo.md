@@ -2354,3 +2354,7 @@
 - [x] Fixed full logo CDN URL (was 403, now uses correct URL)
 - [x] Added dark mode invert filter for full logo (black SVG becomes white in dark mode)
 - [x] Sidebar shows full logo (icon+text) when expanded, icon only when collapsed
+
+## ✅ Phase 86 — Favicon & Sidebar Animation
+- [x] إضافة Favicon من أيقونة التطبيق (favicon.ico + PNG 180/192/512 + manifest.json)
+- [x] تحسين Sidebar collapse animation بـ smooth transition (280ms cubic-bezier + crossfade logo + text opacity)
