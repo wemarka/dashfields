@@ -2373,3 +2373,6 @@
 ## ✅ Phase 89 — Sidebar Cleanup & Tooltips
 - [x] إزالة قسم Integrations المثبت في أسفل الـ Sidebar (الوصول له الآن عبر Profile Menu)
 - [x] إضافة Tooltip لكل أيقونة في الـ Sidebar عند الطي (Dashboard, Ads, Content, Analytics)
+
+## ✅ Phase 90 — Integrations في Sidebar Bottom
+- [x] إعادة زر Integrations إلى أسفل الـ Sidebar (يفتح modal عند النقر + Tooltip عند الطي)
