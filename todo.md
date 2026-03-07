@@ -2205,3 +2205,6 @@
 ## 🎨 Phase 68 — Tab Bar & Performance Score Cleanup
 - [x] Move status bar (date range + Updated X ago) inline with the tab bar row (right side) to save vertical space
 - [x] Remove standalone Performance Score card from PerformanceTab (keep Health Score in drawer header corner only)
+
+## 🎨 Phase 69 — Tab Bar Layout Fix
+- [x] Move status info (date preset + last updated) to a clean slim sub-bar below the tabs row, not inline with tabs

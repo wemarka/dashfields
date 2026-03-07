@@ -83,23 +83,32 @@ function InlineTabStatus({
     .replace("this month", "This Month")
     .replace("last month", "Last Month");
 
+  // Only show for data-driven tabs
+  if (!current) return null;
+
   return (
-    <div className="flex items-center gap-2 pr-3 shrink-0">
-      {/* Date range badge */}
-      <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full whitespace-nowrap">
-        {presetLabel}
-      </span>
-      {/* Fetching / last updated */}
+    <div className="flex items-center justify-between px-4 py-1 bg-muted/30 border-t border-border/50">
+      {/* Left: date range */}
+      <div className="flex items-center gap-1.5">
+        <svg className="w-3 h-3 text-muted-foreground/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <span className="text-[10px] font-medium text-muted-foreground">{presetLabel}</span>
+      </div>
+      {/* Right: fetching state or last updated */}
       {isFetching ? (
-        <span className="flex items-center gap-1 text-[10px] text-primary whitespace-nowrap">
+        <span className="flex items-center gap-1 text-[10px] text-primary">
           <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
             <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
           </svg>
-          Updating
+          Updating...
         </span>
       ) : label ? (
-        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{label}</span>
+        <span className="text-[10px] text-muted-foreground/70">{label}</span>
       ) : null}
     </div>
   );
@@ -356,9 +365,10 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
           onValueChange={handleTabChange}
           className="flex flex-col flex-1 overflow-hidden"
         >
-          {/* Inline status row: tabs on left, date info on right */}
-          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0 flex items-center">
-            <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 flex-1 justify-start overflow-x-auto scrollbar-none">
+          {/* Sticky Tab Bar + Status Sub-bar */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0">
+            {/* Row 1: Tabs */}
+            <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 w-full justify-start overflow-x-auto scrollbar-none">
               {TABS.map(tab => {
                 const Icon = tab.icon;
                 const isLoaded = tab.value === "adsets"
@@ -392,7 +402,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                 );
               })}
             </TabsList>
-            {/* Inline status: date preset + last updated */}
+            {/* Row 2: Slim status sub-bar */}
             <InlineTabStatus
               activeTab={activeTab}
               datePreset={datePreset}
