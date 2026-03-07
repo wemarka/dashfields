@@ -2313,3 +2313,9 @@
 - [x] Remove HealthScoreCircle component and replace with OpportunityScore
 - [x] Create OpportunityScore component with animated arc/ring and score reveal animation (count-up + spring arc)
 - [x] Place OpportunityScore at end of KPI Pills row (ml-auto) in DrawerHeader
+
+## ✅ Phase 80 — Opportunity Score Column in Campaigns Table
+- [x] Add mini-badge OpportunityBadge inline in Campaign name cell
+- [x] computeOpportunityScore function added to UnifiedCampaignTable
+- [x] Colored dot + score number (green/amber/red) with Tooltip on hover
+- [x] Badge only shows when campaign has actual metrics (impressions > 0 or ctr > 0)

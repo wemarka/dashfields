@@ -32,6 +32,42 @@ import {
 // Re-export types for consumers
 export type { UnifiedCampaign, UnifiedCampaignTableProps };
 
+// ─── Opportunity Score ───────────────────────────────────────────────────────
+function computeOpportunityScore(c: UnifiedCampaign): number {
+  const ctr = c.ctr ?? 0;
+  const cpc = c.cpc ?? 0;
+  const impressions = c.impressions ?? 0;
+  let score = 50;
+  if (ctr >= 3) score += 20;
+  else if (ctr >= 1) score += 10;
+  else score -= 10;
+  if (cpc > 0 && cpc < 0.5) score += 15;
+  else if (cpc > 0 && cpc < 1) score += 7;
+  else if (cpc > 2) score -= 10;
+  if (impressions > 50000) score += 15;
+  else if (impressions > 10000) score += 7;
+  return Math.min(100, Math.max(0, score));
+}
+
+function OpportunityBadge({ score }: { score: number }) {
+  const cfg = score >= 70
+    ? { bg: "bg-emerald-500/15", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", label: "H" }
+    : score >= 45
+    ? { bg: "bg-amber-500/15",   text: "text-amber-600 dark:text-amber-400",   dot: "bg-amber-500",   label: "M" }
+    : { bg: "bg-red-500/15",     text: "text-red-600 dark:text-red-400",       dot: "bg-red-500",     label: "L" };
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md ${cfg.bg} shrink-0 cursor-default`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shrink-0`} />
+          <span className={`text-[10px] font-bold tabular-nums ${cfg.text}`}>{score}</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">Opportunity Score — {score >= 70 ? "High" : score >= 45 ? "Medium" : "Low"}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function UnifiedCampaignTableInner({
   campaigns, loading, onRowClick, onOpenDrawer, selectedCampaignId,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
@@ -150,15 +186,19 @@ function UnifiedCampaignTableInner({
     const isToggling = statusTogglePending === c.id;
 
     switch (col.key) {
-      case "name":
+      case "name": {
+        const oppScore = computeOpportunityScore(c);
+        const hasMetrics = (c.impressions ?? 0) > 0 || (c.ctr ?? 0) > 0;
         return (
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground truncate leading-tight">{c.name}</p>
               {c.objective && <p className="text-[10px] text-muted-foreground truncate mt-0.5">{c.objective}</p>}
             </div>
+            {hasMetrics && <OpportunityBadge score={oppScore} />}
           </div>
         );
+      }
       case "status":
         return (
           <div className="flex items-center gap-1.5">
