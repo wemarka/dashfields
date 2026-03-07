@@ -2419,3 +2419,7 @@
 - [x] Clicking Avatar opens an inline Dropdown (not a modal) with account list
 - [x] Dropdown shows: active account avatar + name + platform badge, list of all accounts grouped by platform, Connect Account button at bottom
 - [x] Selecting an account sets it as active and closes the dropdown
+
+## 🔄 Manage Connections in Avatar Dropdown
+- [x] Add "Manage Connections" button in Account Avatar Dropdown footer (above Connect Account)
+- [x] Clicking it closes the dropdown and opens Settings Modal on the Connections tab

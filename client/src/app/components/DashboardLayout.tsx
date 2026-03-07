@@ -545,8 +545,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                   )}
 
-                  {/* Connect Account footer */}
-                  <div className="px-3 py-2.5 border-t border-border/30">
+                  {/* Footer actions */}
+                  <div className="px-3 py-2.5 border-t border-border/30 space-y-1.5">
+                    {/* Manage Connections */}
+                    <button
+                      onClick={() => { setShowAccountDropdown(false); openSettings("connections"); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      Manage Connections
+                    </button>
+                    {/* Connect new account */}
                     <button
                       onClick={() => { setShowAccountDropdown(false); setLocation("/connections"); }}
                       className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
