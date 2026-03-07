@@ -517,14 +517,14 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
               ) : (
                 /* Platform list */
                 <>
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-border/20 shrink-0">
+                  {/* Header — Manus-style */}
+                  <div className="flex items-start justify-between px-6 pt-6 pb-4 shrink-0">
                     <div>
-                      <h2 className="text-sm font-semibold text-foreground">
+                      <h2 className="text-xl font-semibold text-foreground">
                         {SIDEBAR_NAV.find(n => n.id === activeNav)?.label ?? "Integrations"}
                       </h2>
                       {totalAccounts > 0 && (
-                        <p className="text-xs text-muted-foreground mt-0.5">{totalAccounts} account{totalAccounts > 1 ? "s" : ""} connected</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{totalAccounts} account{totalAccounts > 1 ? "s" : ""} connected</p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -554,7 +554,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                       </div>
                     ) : (
-                      <div className="px-2 py-2">
+                      <div className="divide-y divide-border/20">
                         {PLATFORM_GROUPS.map((group) => {
                           const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
                           const isConnected = groupAccounts.length > 0;
@@ -564,38 +564,31 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                             <button
                               key={group.id}
                               onClick={() => setSelectedGroup(group)}
-                              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted/50 transition-all text-left group border-b border-border/10 last:border-0"
+                              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-muted/40 transition-colors text-left group"
                             >
-                              {/* Icon */}
+                              {/* Square icon */}
                               <div className="shrink-0">{group.logo}</div>
 
-                              {/* Name */}
-                              <div className="w-32 shrink-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-semibold text-foreground">{group.name}</span>
+                              {/* Stacked title + description */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="text-[15px] font-semibold text-foreground">{group.name}</span>
                                   {isConnected && !hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                                      <CheckCircle2 className="w-2.5 h-2.5" /> {groupAccounts.length}
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                      <CheckCircle2 className="w-2.5 h-2.5" /> {groupAccounts.length} connected
                                     </span>
                                   )}
                                   {hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 whitespace-nowrap">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
                                       <AlertTriangle className="w-2.5 h-2.5" /> Expired
                                     </span>
                                   )}
                                 </div>
+                                <p className="text-sm text-muted-foreground">{group.description}</p>
                               </div>
 
-                              {/* Description */}
-                              <p className="flex-1 text-sm text-muted-foreground truncate">{group.description}</p>
-
-                              {/* Action */}
-                              <div className="shrink-0 flex items-center gap-2">
-                                {!isConnected && (
-                                  <span className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Connect</span>
-                                )}
-                                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-all group-hover:translate-x-0.5" />
-                              </div>
+                              {/* Chevron */}
+                              <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground/80 group-hover:translate-x-0.5 transition-all" />
                             </button>
                           );
                         })}
