@@ -1,23 +1,21 @@
 /**
- * IntegrationsModal — Redesigned connections hub with platform grouping.
- * - Meta group: Facebook + Instagram (single OAuth flow)
- * - Google group: YouTube
- * - Individual platforms: TikTok, X, LinkedIn, Snapchat, Pinterest
- * - Vertical sidebar layout for platform navigation
+ * IntegrationsModal — Manus-style layout.
+ * Left: Dashfields logo + nav menu
+ * Right: Platform list (rows with chevron) or detail view
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Dialog, DialogContent } from "@/core/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/core/components/ui/dialog";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { useTheme } from "@/core/contexts/ThemeContext";
 import { toast } from "sonner";
 import { getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
-import { useTranslation } from "react-i18next";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import {
   X, CheckCircle2, AlertTriangle, Clock, Shield, Key,
   RefreshCw, Unlink, Link2, Loader2, Activity, ChevronRight,
-  Zap, Globe, Lock,
+  ArrowLeft, Globe, Zap, Lock,
 } from "lucide-react";
 import { Checkbox } from "@/core/components/ui/checkbox";
 import { ManualConnectModal } from "@/app/features/connections/components/ManualConnectModal";
@@ -28,46 +26,37 @@ interface PlatformGroup {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
-  color: string;
-  bgColor: string;
-  textColor: string;
+  logo: React.ReactNode;
   platforms: PlatformId[];
   oauthPath?: string;
   connectionType: "oauth" | "api_key";
-  badge?: string;
 }
 
 const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "meta",
     name: "Meta",
-    description: "Facebook Pages, Instagram Business, Ads Manager",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
+    description: "Facebook Pages, Instagram Business & Ads Manager",
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#1877F2"/>
+        <path d="M20 8C13.373 8 8 13.373 8 20c0 5.99 4.388 10.954 10.125 11.854V23.47h-3.047V20h3.047v-2.644c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953H23.83c-1.491 0-1.956.925-1.956 1.874V20h3.328l-.532 3.469h-2.796v8.385C27.613 30.954 32 25.99 32 20c0-6.627-5.373-12-12-12z" fill="white"/>
       </svg>
     ),
-    color: "from-[#1877F2] to-[#E1306C]",
-    bgColor: "bg-gradient-to-br from-[#1877F2]/10 to-[#E1306C]/10",
-    textColor: "text-[#1877F2]",
     platforms: ["facebook", "instagram"],
     oauthPath: "/api/oauth/meta/init",
     connectionType: "oauth",
-    badge: "Ads + Social",
   },
   {
     id: "tiktok",
     name: "TikTok",
     description: "Short-form video content and TikTok Ads",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.73a8.19 8.19 0 004.79 1.52V6.8a4.85 4.85 0 01-1.02-.11z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#010101"/>
+        <path d="M26.59 13.69a6.83 6.83 0 01-5.27-5.94V7h-4.83v18.73a4.05 4.05 0 01-4.04 3.5 4.05 4.05 0 01-4.04-4.04 4.05 4.05 0 014.04-4.04c.39 0 .76.06 1.11.15v-4.98a9.05 9.05 0 00-1.11-.07 9.1 9.1 0 00-9.1 9.1 9.1 9.1 0 009.1 9.1 9.1 9.1 0 009.09-9.1V14.98a11.46 11.46 0 006.7 2.13V12.3a6.79 6.79 0 01-1.65-.61z" fill="white"/>
       </svg>
     ),
-    color: "from-[#010101] to-[#69C9D0]",
-    bgColor: "bg-[#010101]/8 dark:bg-white/8",
-    textColor: "text-[#010101] dark:text-white",
     platforms: ["tiktok"],
     oauthPath: "/api/oauth/tiktok/init",
     connectionType: "oauth",
@@ -76,14 +65,12 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "twitter",
     name: "X (Twitter)",
     description: "Tweets, Spaces, and X Ads",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#000000"/>
+        <path d="M22.244 18.69l7.254-8.44h-1.718l-6.298 7.325-5.03-7.325H10l7.608 11.074L10 29.75h1.718l6.655-7.738 5.316 7.738H30l-7.756-11.06zm-2.356 2.74l-.771-1.103-6.138-8.778h2.641l4.952 7.082.771 1.103 6.437 9.202h-2.641l-5.251-7.506z" fill="white"/>
       </svg>
     ),
-    color: "from-[#000000] to-[#333333]",
-    bgColor: "bg-[#000000]/8 dark:bg-white/8",
-    textColor: "text-[#000000] dark:text-white",
     platforms: ["twitter"],
     oauthPath: "/api/oauth/twitter/init",
     connectionType: "oauth",
@@ -92,14 +79,12 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "linkedin",
     name: "LinkedIn",
     description: "Company pages, posts, and LinkedIn Ads",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#0A66C2"/>
+        <path d="M13.337 16.5H10v13.5h3.337V16.5zM11.668 15a1.932 1.932 0 110-3.864 1.932 1.932 0 010 3.864zM30 30h-3.33v-6.57c0-1.568-.028-3.582-2.183-3.582-2.186 0-2.52 1.706-2.52 3.469V30H18.64V16.5h3.198v1.845h.046c.445-.843 1.532-1.732 3.153-1.732 3.374 0 3.996 2.22 3.996 5.108V30H30z" fill="white"/>
       </svg>
     ),
-    color: "from-[#0A66C2] to-[#0077B5]",
-    bgColor: "bg-[#0A66C2]/10",
-    textColor: "text-[#0A66C2]",
     platforms: ["linkedin"],
     oauthPath: "/api/oauth/linkedin/init",
     connectionType: "oauth",
@@ -108,14 +93,12 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "youtube",
     name: "YouTube",
     description: "Channel analytics, videos, and YouTube Ads",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#FF0000"/>
+        <path d="M31.7 14.26a3.02 3.02 0 00-2.12-2.14C27.5 11.5 20 11.5 20 11.5s-7.5 0-9.58.62a3.02 3.02 0 00-2.12 2.14C7.7 16.35 7.7 20 7.7 20s0 3.65.6 5.74a3.02 3.02 0 002.12 2.14C12.5 28.5 20 28.5 20 28.5s7.5 0 9.58-.62a3.02 3.02 0 002.12-2.14c.6-2.09.6-5.74.6-5.74s0-3.65-.6-5.74zM17.55 23.57V16.43L23.82 20l-6.27 3.57z" fill="white"/>
       </svg>
     ),
-    color: "from-[#FF0000] to-[#CC0000]",
-    bgColor: "bg-[#FF0000]/10",
-    textColor: "text-[#FF0000]",
     platforms: ["youtube"],
     oauthPath: "/api/oauth/youtube/init",
     connectionType: "oauth",
@@ -124,14 +107,12 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "snapchat",
     name: "Snapchat",
     description: "Snap Ads and audience analytics",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#FFFC00"/>
+        <path d="M20 8c-1.386 0-5.086.386-6.902 4.35-.617 1.39-.47 3.756-.348 5.65l.003.07c.014.21.026.402.035.595-.088.052-.237.105-.468.105-.35-.019-.768-.14-1.204-.35-.192-.103-.401-.122-.54-.122-.213 0-.419.034-.594.105-.524.174-.856.559-.856.977.018.524.455.978 1.414 1.362.104.034.244.088.401.139.524.157 1.328.42 1.554.944.105.261.071.611-.14 1.012l-.017.017c-.07.158-1.78 4.054-5.588 4.683-.297.052-.507.315-.49.594 0 .087.017.174.052.261.28.664 1.485 1.153 3.67 1.483.069.105.14.437.192.664.034.209.087.42.156.645.088.315.315.472.647.472h.035c.157 0 .365-.036.627-.087.42-.087.892-.157 1.485-.157.35 0 .698.018 1.065.087.7.122 1.31.541 2.01 1.031.994.699 2.13 1.502 3.843 1.502.07 0 .14-.017.21-.017h.174c1.712 0 2.83-.787 3.824-1.502.699-.49 1.293-.909 1.993-1.031.367-.053.733-.087 1.082-.087.628 0 1.117.104 1.484.174.245.05.455.086.628.086.436 0 .61-.261.68-.49.07-.223.104-.454.157-.661.052-.21.122-.576.192-.664 2.237-.26 3.44-.75 3.72-1.43.036-.073.06-.174.064-.261.017-.284-.192-.542-.49-.594-3.808-.63-5.517-4.525-5.588-4.683l-.018-.034c-.21-.402-.261-.751-.14-1.012.227-.506 1.03-.769 1.554-.944.14-.034.28-.087.402-.139 1.29-.507 1.466-1.084 1.396-1.484-.105-.558-.786-.926-1.362-.926-.17 0-.314.034-.447.087-.49.226-.92.35-1.214.35-.273 0-.448-.07-.542-.122l-.053-.664c-.115-1.896-.263-4.258.358-5.64C25.086 8.386 21.386 8 20 8z" fill="#1A1A1A"/>
       </svg>
     ),
-    color: "from-[#FFFC00] to-[#FFD700]",
-    bgColor: "bg-[#FFFC00]/20",
-    textColor: "text-[#B8A800]",
     platforms: ["snapchat"],
     connectionType: "api_key",
   },
@@ -139,108 +120,53 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "pinterest",
     name: "Pinterest",
     description: "Pins, boards, and Pinterest Ads",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+    logo: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+        <rect width="40" height="40" rx="10" fill="#E60023"/>
+        <path d="M20 8C13.373 8 8 13.373 8 20c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C18.57 31.812 19.263 32 20 32c6.627 0 12-5.373 12-12S26.627 8 20 8z" fill="white"/>
       </svg>
     ),
-    color: "from-[#E60023] to-[#C00020]",
-    bgColor: "bg-[#E60023]/10",
-    textColor: "text-[#E60023]",
     platforms: ["pinterest"],
     connectionType: "api_key",
   },
 ];
 
-// ─── Token Expiry Badge ───────────────────────────────────────────────────────
-function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
+// ─── Left Sidebar Nav ─────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { id: "connections", label: "Connections", icon: Globe },
+  { id: "health", label: "Health Check", icon: Activity },
+];
+
+// ─── Token Badge ──────────────────────────────────────────────────────────────
+function TokenBadge({ expiresAt }: { expiresAt?: string | null }) {
   if (!expiresAt) return (
-    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
-      <CheckCircle2 className="w-2.5 h-2.5" /> Active
+    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+      <CheckCircle2 className="w-3 h-3" /> Active
     </span>
   );
-  const exp = new Date(expiresAt);
-  const daysLeft = Math.ceil((exp.getTime() - Date.now()) / 86400000);
+  const daysLeft = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000);
   if (daysLeft <= 0) return (
-    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-medium">
-      <AlertTriangle className="w-2.5 h-2.5" /> Expired
+    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-medium">
+      <AlertTriangle className="w-3 h-3" /> Expired
     </span>
   );
   if (daysLeft <= 7) return (
-    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
-      <Clock className="w-2.5 h-2.5" /> {daysLeft}d left
+    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+      <Clock className="w-3 h-3" /> {daysLeft}d left
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
-      <CheckCircle2 className="w-2.5 h-2.5" /> Active
+    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+      <CheckCircle2 className="w-3 h-3" /> Active
     </span>
   );
 }
 
-// ─── Account Row ─────────────────────────────────────────────────────────────
-function AccountRow({
-  acc, platformId, isSelected, onToggleSelect, onDisconnect, isDisconnecting,
-}: {
-  acc: ConnectedAccount;
-  platformId: PlatformId;
-  isSelected: boolean;
-  onToggleSelect: (id: number) => void;
-  onDisconnect: (id: number) => void;
-  isDisconnecting: boolean;
-}) {
-  const platform = getPlatform(platformId);
-  return (
-    <div className={[
-      "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 group/row",
-      isSelected ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/40",
-    ].join(" ")}>
-      <Checkbox
-        checked={isSelected}
-        onCheckedChange={() => onToggleSelect(acc.id)}
-        className="shrink-0"
-      />
-      <div className="relative shrink-0">
-        {acc.profilePicture ? (
-          <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-9 h-9 rounded-full object-cover" />
-        ) : (
-          <div className={"w-9 h-9 rounded-full flex items-center justify-center " + platform.bgLight}>
-            <PlatformIcon platform={platformId} className={"w-4 h-4 " + platform.textColor} />
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground truncate">{acc.name ?? acc.username ?? "Account"}</p>
-        <p className="text-xs text-muted-foreground truncate">
-          {acc.username ? `@${acc.username}` : `ID: ${acc.platformAccountId}`}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <TokenExpiryBadge expiresAt={acc.tokenExpiresAt} />
-        <button
-          onClick={() => onDisconnect(acc.id)}
-          disabled={isDisconnecting}
-          className="opacity-0 group-hover/row:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-          title="Disconnect"
-        >
-          <Unlink className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Platform Detail Panel ────────────────────────────────────────────────────
-function PlatformDetailPanel({
-  group,
-  accountsByPlatform,
-  selectedIds,
-  onToggleSelect,
-  onToggleSelectAll,
-  onDisconnect,
-  isDisconnecting,
-  workspaceId,
-  onManualConnect,
+// ─── Platform Detail View ─────────────────────────────────────────────────────
+function PlatformDetail({
+  group, accountsByPlatform, selectedIds,
+  onToggleSelect, onToggleSelectAll, onDisconnect, isDisconnecting,
+  workspaceId, onManualConnect, onBack,
 }: {
   group: PlatformGroup;
   accountsByPlatform: Record<string, ConnectedAccount[]>;
@@ -250,204 +176,185 @@ function PlatformDetailPanel({
   onDisconnect: (id: number) => void;
   isDisconnecting: boolean;
   workspaceId?: number;
-  onManualConnect: (platformId: PlatformId) => void;
+  onManualConnect: (pid: PlatformId) => void;
+  onBack: () => void;
 }) {
   const allGroupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
   const isConnected = allGroupAccounts.length > 0;
   const hasExpired = allGroupAccounts.some(a => a.tokenExpiresAt && new Date(a.tokenExpiresAt) < new Date());
 
-  const handleOAuthConnect = (platformId?: PlatformId) => {
-    const oauthPath = platformId
+  const handleOAuth = (platformId?: PlatformId) => {
+    const path = platformId
       ? getPlatform(platformId).oauthInitPath ?? `/api/oauth/${platformId}/init`
       : group.oauthPath ?? `/api/oauth/${group.platforms[0]}/init`;
     const origin = window.location.origin;
-    const returnPath = "/connections";
-    const wsId = workspaceId ?? "";
-    const url = `${origin}${oauthPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}${wsId ? `&workspaceId=${wsId}` : ""}`;
+    const url = `${origin}${path}?origin=${encodeURIComponent(origin)}&returnPath=/connections${workspaceId ? `&workspaceId=${workspaceId}` : ""}`;
     const popup = window.open(url, `oauth_${group.id}`, "width=600,height=700,scrollbars=yes,resizable=yes");
     if (!popup || popup.closed) window.location.href = url;
     else {
       const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-          window.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: group.id } }));
-        }
+        if (popup.closed) { clearInterval(timer); window.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: group.id } })); }
       }, 500);
     }
   };
 
-  const handleConnect = (platformId?: PlatformId) => {
-    const pid = platformId ?? group.platforms[0];
-    if (group.connectionType === "oauth") handleOAuthConnect(platformId);
-    else onManualConnect(pid);
+  const handleConnect = (pid?: PlatformId) => {
+    if (group.connectionType === "oauth") handleOAuth(pid);
+    else onManualConnect(pid ?? group.platforms[0]);
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {/* Panel header */}
-      <div className="px-7 py-6 border-b border-border/30">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* Group icon */}
-            <div className={[
-              "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-              group.bgColor,
-            ].join(" ")}>
-              <span className={group.textColor}>{group.icon}</span>
-            </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg font-bold text-foreground">{group.name}</h2>
-                {group.badge && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                    {group.badge}
-                  </span>
-                )}
-                {isConnected && !hasExpired && (
-                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <CheckCircle2 className="w-2.5 h-2.5" /> Connected
-                  </span>
-                )}
-                {hasExpired && (
-                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">
-                    <AlertTriangle className="w-2.5 h-2.5" /> Token Expired
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
-            </div>
+    <div className="flex flex-col h-full">
+      {/* Detail header */}
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-border/20">
+        <button
+          onClick={onBack}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="shrink-0">{group.logo}</div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-foreground">{group.name}</h3>
+            {isConnected && !hasExpired && (
+              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <CheckCircle2 className="w-2.5 h-2.5" /> Connected
+              </span>
+            )}
+            {hasExpired && (
+              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">
+                <AlertTriangle className="w-2.5 h-2.5" /> Expired
+              </span>
+            )}
           </div>
-
-          {/* Connect / Refresh button */}
-          {isConnected ? (
-            <button
-              onClick={() => handleConnect()}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Reconnect
-            </button>
-          ) : (
-            <button
-              onClick={() => handleConnect()}
-              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm hover:shadow-md active:scale-95"
-            >
-              {group.connectionType === "oauth" ? <Shield className="w-3.5 h-3.5" /> : <Key className="w-3.5 h-3.5" />}
-              {group.connectionType === "oauth" ? "Connect with OAuth" : "Add API Token"}
-            </button>
-          )}
+          <p className="text-xs text-muted-foreground truncate">{group.description}</p>
         </div>
-
-        {/* Sub-platform chips (for Meta: Facebook + Instagram) */}
-        {group.platforms.length > 1 && (
-          <div className="flex flex-wrap gap-2 mt-5">
-            {group.platforms.map(pid => {
-              const p = getPlatform(pid);
-              const accs = accountsByPlatform[pid] ?? [];
-              const connected = accs.length > 0;
-              return (
-                <div key={pid} className={[
-                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all",
-                  connected
-                    ? "border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
-                    : "border-border/40 bg-muted/30 text-muted-foreground",
-                ].join(" ")}>
-                  <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
-                  {p.name}
-                  {connected && <span className="ml-1 text-[10px] opacity-70">· {accs.length}</span>}
-                  {!connected && (
-                    <button
-                      onClick={() => handleConnect(pid)}
-                      className="ml-1 text-[10px] text-primary hover:underline"
-                    >
-                      Connect
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        {isConnected ? (
+          <button
+            onClick={() => handleConnect()}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Reconnect
+          </button>
+        ) : (
+          <button
+            onClick={() => handleConnect()}
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-all"
+          >
+            {group.connectionType === "oauth" ? <Shield className="w-3.5 h-3.5" /> : <Key className="w-3.5 h-3.5" />}
+            {group.connectionType === "oauth" ? "Connect" : "Add Token"}
+          </button>
         )}
       </div>
 
-      {/* Accounts list */}
-      <div className="px-6 py-5 space-y-6">
-        {group.platforms.map(pid => {
-          const accs = accountsByPlatform[pid] ?? [];
-          if (accs.length === 0) return null;
-          const p = getPlatform(pid);
-          const allSelected = accs.every(a => selectedIds.has(a.id));
-          const someSelected = accs.some(a => selectedIds.has(a.id)) && !allSelected;
-
-          return (
-            <div key={pid}>
-              {/* Sub-platform header (only show if group has multiple platforms) */}
-              {group.platforms.length > 1 && (
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <PlatformIcon platform={pid} className={"w-3.5 h-3.5 " + p.textColor} />
-                  <span className="text-xs font-semibold text-foreground">{p.name}</span>
-                  <span className="text-[11px] text-muted-foreground">· {accs.length} account{accs.length > 1 ? "s" : ""}</span>
-                  {accs.length > 1 && (
-                    <button
-                      onClick={() => onToggleSelectAll(accs)}
-                      className="ml-auto text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {allSelected ? "Deselect all" : "Select all"}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Accounts */}
-              <div className="space-y-1.5">
-                {accs.map(acc => (
-                  <AccountRow
-                    key={acc.id}
-                    acc={acc}
-                    platformId={pid}
-                    isSelected={selectedIds.has(acc.id)}
-                    onToggleSelect={onToggleSelect}
-                    onDisconnect={onDisconnect}
-                    isDisconnecting={isDisconnecting}
-                  />
-                ))}
+      {/* Sub-platform chips for Meta */}
+      {group.platforms.length > 1 && (
+        <div className="flex gap-2 px-6 py-3 border-b border-border/20">
+          {group.platforms.map(pid => {
+            const p = getPlatform(pid);
+            const accs = accountsByPlatform[pid] ?? [];
+            const connected = accs.length > 0;
+            return (
+              <div key={pid} className={[
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium",
+                connected
+                  ? "border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
+                  : "border-border/40 bg-muted/30 text-muted-foreground",
+              ].join(" ")}>
+                <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
+                {p.name}
+                {connected && <span className="opacity-60">· {accs.length}</span>}
+                {!connected && (
+                  <button onClick={() => handleConnect(pid)} className="ml-1 text-primary hover:underline">
+                    Connect
+                  </button>
+                )}
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              {/* Add another account */}
-              <button
-                onClick={() => handleConnect(pid)}
-                className="mt-2 ml-1 flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
-              >
-                <Link2 className="w-3 h-3" />
-                Add another {p.name} account
-              </button>
-            </div>
-          );
-        })}
-
-        {/* Empty state */}
-        {allGroupAccounts.length === 0 && (
-          <div className="py-10 flex flex-col items-center text-center">
-            <div className={["w-16 h-16 rounded-2xl flex items-center justify-center mb-4", group.bgColor].join(" ")}>
-              <span className={group.textColor}>{group.icon}</span>
-            </div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">No {group.name} accounts connected</h3>
-            <p className="text-xs text-muted-foreground max-w-xs mb-5">
-              {group.description}. Connect to start tracking analytics and managing campaigns.
-            </p>
+      {/* Accounts */}
+      <div className="flex-1 overflow-y-auto">
+        {allGroupAccounts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full py-16 px-8 text-center">
+            <div className="mb-4 opacity-60">{group.logo}</div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">No {group.name} accounts connected</h4>
+            <p className="text-xs text-muted-foreground mb-6 max-w-xs">{group.description}</p>
             <button
               onClick={() => handleConnect()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm hover:shadow-md active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all"
             >
               {group.connectionType === "oauth" ? <Shield className="w-4 h-4" /> : <Key className="w-4 h-4" />}
               {group.connectionType === "oauth" ? `Connect ${group.name}` : `Add ${group.name} Token`}
             </button>
             {group.connectionType === "oauth" && (
               <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                Secure OAuth 2.0 — no password required
+                <Lock className="w-3 h-3" /> Secure OAuth 2.0 — no password required
               </p>
             )}
+          </div>
+        ) : (
+          <div className="px-6 py-4 space-y-6">
+            {group.platforms.map(pid => {
+              const accs = accountsByPlatform[pid] ?? [];
+              if (accs.length === 0) return null;
+              const p = getPlatform(pid);
+              const allSel = accs.every(a => selectedIds.has(a.id));
+              return (
+                <div key={pid}>
+                  {group.platforms.length > 1 && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <PlatformIcon platform={pid} className={"w-3.5 h-3.5 " + p.textColor} />
+                      <span className="text-xs font-semibold text-foreground">{p.name}</span>
+                      <span className="text-xs text-muted-foreground">· {accs.length} account{accs.length > 1 ? "s" : ""}</span>
+                      {accs.length > 1 && (
+                        <button onClick={() => onToggleSelectAll(accs)} className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors">
+                          {allSel ? "Deselect all" : "Select all"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {accs.map(acc => {
+                      const isSel = selectedIds.has(acc.id);
+                      return (
+                        <div key={acc.id} className={["flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group/row", isSel ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/40"].join(" ")}>
+                          <Checkbox checked={isSel} onCheckedChange={() => onToggleSelect(acc.id)} className="shrink-0" />
+                          {acc.profilePicture ? (
+                            <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className={"w-9 h-9 rounded-full flex items-center justify-center shrink-0 " + p.bgLight}>
+                              <PlatformIcon platform={pid} className={"w-4 h-4 " + p.textColor} />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{acc.name ?? acc.username ?? "Account"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{acc.username ? `@${acc.username}` : `ID: ${acc.platformAccountId}`}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <TokenBadge expiresAt={acc.tokenExpiresAt} />
+                            <button
+                              onClick={() => onDisconnect(acc.id)}
+                              disabled={isDisconnecting}
+                              className="opacity-0 group-hover/row:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                              title="Disconnect"
+                            >
+                              <Unlink className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button onClick={() => handleConnect(pid)} className="mt-2 flex items-center gap-1.5 text-xs text-primary hover:underline transition-colors ml-1">
+                    <Link2 className="w-3 h-3" /> Add another {p.name} account
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -464,70 +371,50 @@ interface IntegrationsModalProps {
 export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps) {
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
-  const { i18n } = useTranslation();
-  const [selectedGroupId, setSelectedGroupId] = useState("meta");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const [activeNav, setActiveNav] = useState("connections");
+  const [selectedGroup, setSelectedGroup] = useState<PlatformGroup | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [manualPlatform, setManualPlatform] = useState<PlatformId | null>(null);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) { setSelectedGroup(null); setSelectedIds(new Set()); setActiveNav("connections"); }
+  }, [open]);
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery(
     { workspaceId: activeWorkspace?.id },
     { enabled: open }
   );
 
-  // ── Selection helpers ──
-  const toggleSelect = useCallback((id: number) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const toggleSelectAll = useCallback((accs: ConnectedAccount[]) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      const allSelected = accs.every(a => next.has(a.id));
-      if (allSelected) accs.forEach(a => next.delete(a.id));
-      else accs.forEach(a => next.add(a.id));
-      return next;
-    });
-  }, []);
-
-  // ── OAuth event listeners ──
+  // OAuth event listeners
   useEffect(() => {
     if (!open) return;
-    const handleOAuthComplete = (e: Event) => {
+    const handleOAuth = (e: Event) => {
       utils.social.list.invalidate();
-      const detail = (e as CustomEvent).detail;
-      if (detail?.success !== false) toast.success("Account connected successfully!");
+      if ((e as CustomEvent).detail?.success !== false) toast.success("Account connected successfully!");
     };
-    const handleMessage = (e: MessageEvent) => {
+    const handleMsg = (e: MessageEvent) => {
       if (e.data?.type === "oauth-complete") {
         utils.social.list.invalidate();
-        if (e.data.success) {
-          const summary = e.data.summary ? decodeURIComponent(e.data.summary) : null;
-          toast.success(summary ? `Connected: ${summary}` : "Account connected successfully!");
-        } else if (e.data.error) {
-          toast.error(`Connection failed: ${e.data.error}`);
-        }
+        if (e.data.success) toast.success(e.data.summary ? `Connected: ${decodeURIComponent(e.data.summary)}` : "Account connected!");
+        else if (e.data.error) toast.error(`Connection failed: ${e.data.error}`);
       }
     };
-    window.addEventListener("oauth-complete", handleOAuthComplete);
-    window.addEventListener("message", handleMessage);
-    return () => {
-      window.removeEventListener("oauth-complete", handleOAuthComplete);
-      window.removeEventListener("message", handleMessage);
-    };
+    window.addEventListener("oauth-complete", handleOAuth);
+    window.addEventListener("message", handleMsg);
+    return () => { window.removeEventListener("oauth-complete", handleOAuth); window.removeEventListener("message", handleMsg); };
   }, [open, utils]);
 
-  // ── Mutations ──
+  // Mutations
   const healthCheck = trpc.social.healthCheck.useMutation({
     onSuccess: (res) => {
       utils.social.list.invalidate();
-      const ok = res.filter(r => r.valid).length;
-      const bad = res.filter(r => !r.valid).length;
-      if (bad > 0) toast.warning(`Health check: ${ok} OK, ${bad} need re-authentication`);
-      else toast.success(`All ${ok} connection${ok !== 1 ? "s" : ""} are healthy!`);
+      const ok = res.filter(r => r.valid).length, bad = res.filter(r => !r.valid).length;
+      if (bad > 0) toast.warning(`${ok} OK, ${bad} need re-authentication`);
+      else toast.success(`All ${ok} connections are healthy!`);
     },
     onError: () => toast.error("Health check failed"),
   });
@@ -546,164 +433,87 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
     onError: (err) => toast.error(err.message),
   });
 
-  // ── Group accounts by platform ──
+  // Selection helpers
+  const toggleSelect = useCallback((id: number) => {
+    setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }, []);
+  const toggleSelectAll = useCallback((accs: ConnectedAccount[]) => {
+    setSelectedIds(prev => {
+      const n = new Set(prev);
+      accs.every(a => n.has(a.id)) ? accs.forEach(a => n.delete(a.id)) : accs.forEach(a => n.add(a.id));
+      return n;
+    });
+  }, []);
+
+  // Group accounts by platform
   const accountsByPlatform = useMemo(() => {
-    const grouped: Record<string, ConnectedAccount[]> = {};
+    const g: Record<string, ConnectedAccount[]> = {};
     accounts.forEach(acc => {
-      const pid = acc.platform;
-      if (!grouped[pid]) grouped[pid] = [];
-      const metadata = acc.metadata as Record<string, unknown> | null;
-      grouped[pid].push({
+      if (!g[acc.platform]) g[acc.platform] = [];
+      const meta = acc.metadata as Record<string, unknown> | null;
+      g[acc.platform].push({
         id: acc.id, platform: acc.platform,
         name: acc.name ?? acc.username, username: acc.username,
         platformAccountId: acc.platform_account_id ?? String(acc.id),
         isActive: acc.is_active,
         profilePicture: acc.profile_picture ?? null,
-        userProfilePicture: (metadata?.userProfilePicture as string) ?? null,
+        userProfilePicture: (meta?.userProfilePicture as string) ?? null,
         accountType: acc.account_type ?? null,
         tokenExpiresAt: acc.token_expires_at ?? null,
         updatedAt: acc.updated_at,
       });
     });
-    return grouped;
+    return g;
   }, [accounts]);
 
   const totalAccounts = accounts.length;
-  const connectedGroups = PLATFORM_GROUPS.filter(g =>
-    g.platforms.some(pid => (accountsByPlatform[pid] ?? []).length > 0)
-  ).length;
   const expiredCount = accounts.filter(a => a.token_expires_at && new Date(a.token_expires_at) < new Date()).length;
 
-  const selectedGroup = PLATFORM_GROUPS.find(g => g.id === selectedGroupId) ?? PLATFORM_GROUPS[0];
+  const logoFull = isDark
+    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white-cropped_9f9de9c4.png"
+    : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-cropped_e5f165fe.png";
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl w-full max-h-[88vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
-          {/* ── Modal Header ── */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Globe className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-sm font-bold text-foreground">Integrations</h2>
-                <p className="text-[11px] text-muted-foreground">
-                  {isLoading ? "Loading..." : `${connectedGroups} platform${connectedGroups !== 1 ? "s" : ""} · ${totalAccounts} account${totalAccounts !== 1 ? "s" : ""}`}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {totalAccounts > 0 && (
-                <button
-                  onClick={() => healthCheck.mutate()}
-                  disabled={healthCheck.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                >
-                  {healthCheck.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Activity className="w-3.5 h-3.5" />}
-                  Health Check
-                </button>
-              )}
-              {selectedIds.size > 0 && (
-                <button
-                  onClick={() => bulkDisconnectMutation.mutate({ ids: Array.from(selectedIds) })}
-                  disabled={bulkDisconnectMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium hover:bg-red-500/20 transition-all"
-                >
-                  {bulkDisconnectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlink className="w-3.5 h-3.5" />}
-                  Disconnect {selectedIds.size}
-                </button>
-              )}
-              <button
-                onClick={() => onOpenChange(false)}
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <DialogContent className="max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl">
+          <DialogTitle className="sr-only">Integrations</DialogTitle>
 
-          {/* ── Body: Sidebar + Detail ── */}
           <div className="flex flex-1 overflow-hidden">
-            {/* Left sidebar: platform list */}
-            <div className="w-64 shrink-0 border-r border-border/30 overflow-y-auto py-3 bg-muted/20">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <div className="space-y-1 px-2">
-                  {PLATFORM_GROUPS.map(group => {
-                    const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
-                    const isGroupConnected = groupAccounts.length > 0;
-                    const hasGroupExpired = groupAccounts.some(a => a.tokenExpiresAt && new Date(a.tokenExpiresAt) < new Date());
-                    const isActive = selectedGroupId === group.id;
+            {/* ── Left Sidebar ── */}
+            <div className="w-56 shrink-0 flex flex-col border-r border-border/20 bg-muted/20">
+              {/* Logo */}
+              <div className="px-5 py-5 border-b border-border/20">
+                <img src={logoFull} alt="Dashfields" className="h-6 w-auto object-contain" />
+              </div>
 
-                    return (
-                      <button
-                        key={group.id}
-                        onClick={() => setSelectedGroupId(group.id)}
-                        className={[
-                          "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150",
-                          isActive
-                            ? "bg-background shadow-sm border border-border/40"
-                            : "hover:bg-background/60",
-                        ].join(" ")}
-                      >
-                        {/* Platform icon */}
-                        <div className={[
-                          "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all",
-                          isActive ? group.bgColor : "bg-muted/60",
-                        ].join(" ")}>
-                          <span className={isActive ? group.textColor : "text-muted-foreground"}>
-                            {group.icon}
-                          </span>
-                        </div>
+              {/* Nav */}
+              <nav className="flex-1 px-3 py-3 space-y-0.5">
+                {NAV_ITEMS.map(item => {
+                  const Icon = item.icon;
+                  const isActive = activeNav === item.id && !selectedGroup;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { setActiveNav(item.id); setSelectedGroup(null); }}
+                      className={[
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left",
+                        isActive
+                          ? "bg-background shadow-sm font-medium text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-background/60",
+                      ].join(" ")}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </nav>
 
-                        <div className="flex-1 min-w-0">
-                          <p className={[
-                            "text-sm font-semibold truncate",
-                            isActive ? "text-foreground" : "text-muted-foreground",
-                          ].join(" ")}>
-                            {group.name}
-                          </p>
-                          {isGroupConnected && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {groupAccounts.length} account{groupAccounts.length !== 1 ? "s" : ""}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Status indicator */}
-                        <div className="shrink-0">
-                          {isGroupConnected ? (
-                            hasGroupExpired ? (
-                              <div className="w-2 h-2 rounded-full bg-red-500" />
-                            ) : (
-                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            )
-                          ) : (
-                            isActive && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Stats at bottom */}
-              {!isLoading && totalAccounts > 0 && (
-                <div className="mt-4 mx-2 px-4 py-4 rounded-xl bg-background border border-border/30">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-3 h-3 text-emerald-500" />
-                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Summary</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Platforms</span>
-                      <span className="font-semibold text-foreground">{connectedGroups}</span>
-                    </div>
+              {/* Stats */}
+              {totalAccounts > 0 && (
+                <div className="px-4 py-4 border-t border-border/20">
+                  <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Accounts</span>
                       <span className="font-semibold text-foreground">{totalAccounts}</span>
@@ -719,18 +529,140 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
               )}
             </div>
 
-            {/* Right: detail panel */}
-            <PlatformDetailPanel
-              group={selectedGroup}
-              accountsByPlatform={accountsByPlatform}
-              selectedIds={selectedIds}
-              onToggleSelect={toggleSelect}
-              onToggleSelectAll={toggleSelectAll}
-              onDisconnect={(id) => disconnectMutation.mutate({ id })}
-              isDisconnecting={disconnectMutation.isPending}
-              workspaceId={activeWorkspace?.id}
-              onManualConnect={(pid) => setManualPlatform(pid)}
-            />
+            {/* ── Right Content ── */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {selectedGroup ? (
+                /* Detail view */
+                <PlatformDetail
+                  group={selectedGroup}
+                  accountsByPlatform={accountsByPlatform}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelect}
+                  onToggleSelectAll={toggleSelectAll}
+                  onDisconnect={(id) => disconnectMutation.mutate({ id })}
+                  isDisconnecting={disconnectMutation.isPending}
+                  workspaceId={activeWorkspace?.id}
+                  onManualConnect={(pid) => setManualPlatform(pid)}
+                  onBack={() => setSelectedGroup(null)}
+                />
+              ) : activeNav === "connections" ? (
+                /* Platform list */
+                <>
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-border/20">
+                    <h2 className="text-base font-semibold text-foreground">Connections</h2>
+                    <div className="flex items-center gap-2">
+                      {selectedIds.size > 0 && (
+                        <button
+                          onClick={() => bulkDisconnectMutation.mutate({ ids: Array.from(selectedIds) })}
+                          disabled={bulkDisconnectMutation.isPending}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium hover:bg-red-500/20 transition-all"
+                        >
+                          {bulkDisconnectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlink className="w-3.5 h-3.5" />}
+                          Disconnect {selectedIds.size}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onOpenChange(false)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto">
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-16">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border/20">
+                        {PLATFORM_GROUPS.map(group => {
+                          const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
+                          const isConnected = groupAccounts.length > 0;
+                          const hasExpired = groupAccounts.some(a => a.tokenExpiresAt && new Date(a.tokenExpiresAt) < new Date());
+
+                          return (
+                            <button
+                              key={group.id}
+                              onClick={() => setSelectedGroup(group)}
+                              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-all text-left group"
+                            >
+                              <div className="shrink-0">{group.logo}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="text-sm font-semibold text-foreground">{group.name}</span>
+                                  {isConnected && !hasExpired && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
+                                      <CheckCircle2 className="w-2.5 h-2.5" />
+                                      {groupAccounts.length} connected
+                                    </span>
+                                  )}
+                                  {hasExpired && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">
+                                      <AlertTriangle className="w-2.5 h-2.5" /> Expired
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground truncate">{group.description}</p>
+                              </div>
+                              <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Add connections footer */}
+                    {!isLoading && (
+                      <div className="px-6 py-4 border-t border-border/20">
+                        <button
+                          onClick={() => healthCheck.mutate()}
+                          disabled={healthCheck.isPending}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                        >
+                          {healthCheck.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                          Run Health Check
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* Health view */
+                <>
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-border/20">
+                    <h2 className="text-base font-semibold text-foreground">Health Check</h2>
+                    <button
+                      onClick={() => onOpenChange(false)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-center py-16 px-8 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                      <Activity className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground mb-1">Check all connections</h3>
+                    <p className="text-xs text-muted-foreground mb-6 max-w-xs">
+                      Verify that all your connected accounts are active and tokens are valid.
+                    </p>
+                    <button
+                      onClick={() => healthCheck.mutate()}
+                      disabled={healthCheck.isPending || totalAccounts === 0}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40"
+                    >
+                      {healthCheck.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+                      {healthCheck.isPending ? "Checking..." : "Run Health Check"}
+                    </button>
+                    {totalAccounts === 0 && (
+                      <p className="text-xs text-muted-foreground mt-3">Connect accounts first to run a health check.</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
