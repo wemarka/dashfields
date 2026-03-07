@@ -2390,3 +2390,11 @@
 - [x] عرض حسابات Meta (Facebook + Instagram) في نفس البطاقة
 - [x] تحسين UX: أزرار Connect أوضح، حالات loading أفضل
 - [x] إزالة Info banner المزدحم واستبداله بتصميم أنظف مع summary stats
+
+## ✅ Phase 93 — Add Fixed Sidebar to Integrations Modal
+- [x] إضافة sidebar ثابت على اليسار مع: Account, Settings, Billing, Brand Kit, Connectors, Integrations
+- [x] إضافة Get Help في أسفل الـ sidebar
+- [x] حذف Run Health Check من الـ footer
+- [x] الـ Integrations يكون هو الـ active item افتراضياً
+- [x] باقي العناصر تُظهر "Coming Soon" toast عند الضغط
+- [x] إضافة DialogDescription لإصلاح تحذير accessibility

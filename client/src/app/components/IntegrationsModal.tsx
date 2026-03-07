@@ -1,25 +1,50 @@
 /**
- * IntegrationsModal — Clean single-column list layout.
- * Header: Title + close button
- * Body: Platform rows — Icon | Title + Description | Action (Connect / Manage →)
- * Detail view: Back + account list for a selected platform group
+ * IntegrationsModal — Manus-style modal with fixed sidebar + platform list.
+ * Sidebar: Account, Settings, Billing, Brand Kit, Connectors, Integrations (active) + Get Help
+ * Content: Clean platform rows — Icon | Title + Description | Chevron
+ * Detail view: Back + account list for selected platform group
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/core/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/core/components/ui/dialog";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
+import { useDarkMode } from "@/app/components/layout-parts";
 import {
   X, CheckCircle2, AlertTriangle, Clock,
   RefreshCw, Unlink, Link2, Loader2, ChevronRight,
-  ArrowLeft, Shield, Key, Lock, Zap,
+  ArrowLeft, Shield, Key, Lock,
+  User, Settings, CreditCard, Palette, Plug, Globe, HelpCircle, ExternalLink,
 } from "lucide-react";
 import { Checkbox } from "@/core/components/ui/checkbox";
 import { ManualConnectModal } from "@/app/features/connections/components/ManualConnectModal";
 import type { ConnectedAccount } from "@/app/features/connections/components/types";
+
+// ─── Logo CDN URLs ────────────────────────────────────────────────────────────
+const LOGO_DARK  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white-cropped_9f9de9c4.png";
+const LOGO_LIGHT = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-cropped_e5f165fe.png";
+
+// ─── Sidebar Nav Config ───────────────────────────────────────────────────────
+type NavId = "account" | "settings" | "billing" | "brand-kit" | "connectors" | "integrations";
+
+interface SidebarNavItem {
+  id: NavId;
+  label: string;
+  icon: React.ElementType;
+  active?: boolean;
+}
+
+const SIDEBAR_NAV: SidebarNavItem[] = [
+  { id: "account",      label: "Account",    icon: User },
+  { id: "settings",     label: "Settings",   icon: Settings },
+  { id: "billing",      label: "Billing",    icon: CreditCard },
+  { id: "brand-kit",    label: "Brand Kit",  icon: Palette },
+  { id: "connectors",   label: "Connectors", icon: Plug },
+  { id: "integrations", label: "Integrations", icon: Globe },
+];
 
 // ─── Platform Group Config ────────────────────────────────────────────────────
 interface PlatformGroup {
@@ -28,7 +53,6 @@ interface PlatformGroup {
   description: string;
   logo: React.ReactNode;
   platforms: PlatformId[];
-  oauthPath?: string;
   connectionType: "oauth" | "api_key";
 }
 
@@ -36,7 +60,7 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "meta",
     name: "Meta",
-    description: "Manage Facebook Pages, Instagram Business, and Ads Manager",
+    description: "Facebook Pages, Instagram Business, and Ads Manager",
     logo: (
       <svg viewBox="0 0 40 40" className="w-9 h-9" fill="none">
         <rect width="40" height="40" rx="10" fill="#1877F2" />
@@ -44,7 +68,6 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
       </svg>
     ),
     platforms: ["facebook", "instagram"],
-    oauthPath: "/api/oauth/meta/init",
     connectionType: "oauth",
   },
   {
@@ -58,7 +81,6 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
       </svg>
     ),
     platforms: ["tiktok"],
-    oauthPath: "/api/oauth/tiktok/init",
     connectionType: "oauth",
   },
   {
@@ -72,7 +94,6 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
       </svg>
     ),
     platforms: ["twitter"],
-    oauthPath: "/api/oauth/twitter/init",
     connectionType: "oauth",
   },
   {
@@ -86,7 +107,6 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
       </svg>
     ),
     platforms: ["linkedin"],
-    oauthPath: "/api/oauth/linkedin/init",
     connectionType: "oauth",
   },
   {
@@ -100,7 +120,6 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
       </svg>
     ),
     platforms: ["youtube"],
-    oauthPath: "/api/oauth/youtube/init",
     connectionType: "oauth",
   },
   {
@@ -131,7 +150,7 @@ const PLATFORM_GROUPS: PlatformGroup[] = [
   },
 ];
 
-// ─── Token Status Badge ───────────────────────────────────────────────────────
+// ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ expiresAt }: { expiresAt?: string | null }) {
   if (!expiresAt) return (
     <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -156,7 +175,7 @@ function StatusBadge({ expiresAt }: { expiresAt?: string | null }) {
   );
 }
 
-// ─── Detail View (accounts for a selected platform group) ────────────────────
+// ─── Platform Detail View ─────────────────────────────────────────────────────
 function PlatformDetail({
   group, accountsByPlatform, selectedIds,
   onToggleSelect, onToggleSelectAll, onDisconnect, isDisconnecting,
@@ -183,7 +202,8 @@ function PlatformDetail({
       return;
     }
     const pid = platformId ?? group.platforms[0];
-    const path = getPlatform(pid).oauthInitPath ?? `/api/oauth/${pid}/init`;
+    const p = getPlatform(pid);
+    const path = p.oauthInitPath ?? `/api/oauth/${pid}/init`;
     const origin = window.location.origin;
     const url = `${origin}${path}?origin=${encodeURIComponent(origin)}&returnPath=/connections${workspaceId ? `&workspaceId=${workspaceId}` : ""}`;
     const popup = window.open(url, `oauth_${group.id}`, "width=600,height=700,scrollbars=yes,resizable=yes");
@@ -196,19 +216,16 @@ function PlatformDetail({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-border/20 shrink-0">
-        <button
-          onClick={onBack}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-        >
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border/20 shrink-0">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="shrink-0">{group.logo}</div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-foreground">{group.name}</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-semibold text-foreground">{group.name}</h3>
             {isConnected && !hasExpired && (
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-2.5 h-2.5" /> Connected
@@ -220,54 +237,41 @@ function PlatformDetail({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">{group.description}</p>
+          <p className="text-xs text-muted-foreground truncate">{group.description}</p>
         </div>
         {isConnected && (
-          <button
-            onClick={() => handleConnect()}
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-          >
+          <button onClick={() => handleConnect()} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
             <RefreshCw className="w-3.5 h-3.5" /> Reconnect
           </button>
         )}
       </div>
 
-      {/* Sub-platform chips (Meta only) */}
+      {/* Sub-platform chips (Meta) */}
       {group.platforms.length > 1 && (
-        <div className="flex gap-2 px-6 py-3 border-b border-border/10 bg-muted/10">
+        <div className="flex gap-2 px-5 py-3 border-b border-border/10 bg-muted/10 flex-wrap">
           {group.platforms.map(pid => {
             const p = getPlatform(pid);
             const accs = accountsByPlatform[pid] ?? [];
             return (
-              <div key={pid} className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium",
-                accs.length > 0
-                  ? "border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
-                  : "border-border/40 bg-muted/30 text-muted-foreground",
-              ].join(" ")}>
+              <div key={pid} className={["flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium", accs.length > 0 ? "border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400" : "border-border/40 bg-muted/30 text-muted-foreground"].join(" ")}>
                 <PlatformIcon platform={pid} className={"w-3.5 h-3.5 " + p.textColor} />
                 {p.name}
                 {accs.length > 0 && <span className="opacity-60">· {accs.length}</span>}
-                {accs.length === 0 && (
-                  <button onClick={() => handleConnect(pid)} className="ml-1 text-primary hover:underline">Connect</button>
-                )}
+                {accs.length === 0 && <button onClick={() => handleConnect(pid)} className="ml-1 text-primary hover:underline">Connect</button>}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Accounts list */}
+      {/* Accounts */}
       <div className="flex-1 overflow-y-auto">
         {allGroupAccounts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-16 px-8 text-center">
+          <div className="flex flex-col items-center justify-center h-full py-12 px-8 text-center">
             <div className="mb-4 opacity-50">{group.logo}</div>
             <h4 className="text-sm font-semibold text-foreground mb-1">No {group.name} accounts connected</h4>
-            <p className="text-xs text-muted-foreground mb-6 max-w-xs">{group.description}</p>
-            <button
-              onClick={() => handleConnect()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all"
-            >
+            <p className="text-xs text-muted-foreground mb-5 max-w-xs">{group.description}</p>
+            <button onClick={() => handleConnect()} className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all">
               {group.connectionType === "oauth" ? <Shield className="w-4 h-4" /> : <Key className="w-4 h-4" />}
               {group.connectionType === "oauth" ? `Connect ${group.name}` : `Add ${group.name} Token`}
             </button>
@@ -278,7 +282,7 @@ function PlatformDetail({
             )}
           </div>
         ) : (
-          <div className="px-6 py-4 space-y-6">
+          <div className="px-5 py-4 space-y-5">
             {group.platforms.map(pid => {
               const accs = accountsByPlatform[pid] ?? [];
               if (accs.length === 0) return null;
@@ -290,7 +294,7 @@ function PlatformDetail({
                     <div className="flex items-center gap-2 mb-3">
                       <PlatformIcon platform={pid} className={"w-3.5 h-3.5 " + p.textColor} />
                       <span className="text-xs font-semibold text-foreground">{p.name}</span>
-                      <span className="text-xs text-muted-foreground">· {accs.length} account{accs.length > 1 ? "s" : ""}</span>
+                      <span className="text-xs text-muted-foreground">· {accs.length}</span>
                       {accs.length > 1 && (
                         <button onClick={() => onToggleSelectAll(accs)} className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors">
                           {allSel ? "Deselect all" : "Select all"}
@@ -305,9 +309,9 @@ function PlatformDetail({
                         <div key={acc.id} className={["flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group/row", isSel ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/40"].join(" ")}>
                           <Checkbox checked={isSel} onCheckedChange={() => onToggleSelect(acc.id)} className="shrink-0" />
                           {acc.profilePicture ? (
-                            <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                            <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-8 h-8 rounded-full object-cover shrink-0" />
                           ) : (
-                            <div className={"w-9 h-9 rounded-full flex items-center justify-center shrink-0 " + p.bgLight}>
+                            <div className={"w-8 h-8 rounded-full flex items-center justify-center shrink-0 " + p.bgLight}>
                               <PlatformIcon platform={pid} className={"w-4 h-4 " + p.textColor} />
                             </div>
                           )}
@@ -317,12 +321,7 @@ function PlatformDetail({
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <StatusBadge expiresAt={acc.tokenExpiresAt} />
-                            <button
-                              onClick={() => onDisconnect(acc.id)}
-                              disabled={isDisconnecting}
-                              className="opacity-0 group-hover/row:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-                              title="Disconnect"
-                            >
+                            <button onClick={() => onDisconnect(acc.id)} disabled={isDisconnecting} className="opacity-0 group-hover/row:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all" title="Disconnect">
                               <Unlink className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -352,14 +351,16 @@ interface IntegrationsModalProps {
 export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps) {
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
+  const { dark } = useDarkMode();
 
+  const [activeNav, setActiveNav] = useState<NavId>("integrations");
   const [selectedGroup, setSelectedGroup] = useState<PlatformGroup | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [manualPlatform, setManualPlatform] = useState<PlatformId | null>(null);
 
   // Reset on open
   useEffect(() => {
-    if (open) { setSelectedGroup(null); setSelectedIds(new Set()); }
+    if (open) { setActiveNav("integrations"); setSelectedGroup(null); setSelectedIds(new Set()); }
   }, [open]);
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery(
@@ -384,16 +385,6 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
   }, [open, utils]);
 
   // Mutations
-  const healthCheck = trpc.social.healthCheck.useMutation({
-    onSuccess: (res) => {
-      utils.social.list.invalidate();
-      const ok = res.filter(r => r.valid).length, bad = res.filter(r => !r.valid).length;
-      if (bad > 0) toast.warning(`${ok} OK, ${bad} need re-authentication`);
-      else toast.success(`All ${ok} connections are healthy!`);
-    },
-    onError: () => toast.error("Health check failed"),
-  });
-
   const disconnectMutation = trpc.social.disconnect.useMutation({
     onSuccess: () => { toast.success("Account disconnected"); utils.social.list.invalidate(); },
     onError: (err) => toast.error(err.message),
@@ -442,129 +433,172 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
 
   const totalAccounts = accounts.length;
 
+  const handleNavClick = (id: NavId) => {
+    if (id === "integrations") {
+      setActiveNav(id);
+      setSelectedGroup(null);
+    } else {
+      toast.info(`${SIDEBAR_NAV.find(n => n.id === id)?.label} — Coming soon`);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg w-full p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
+        <DialogContent className="max-w-3xl w-full p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[85vh]">
           <DialogTitle className="sr-only">Integrations</DialogTitle>
+          <DialogDescription className="sr-only">Manage your social media platform connections and integrations.</DialogDescription>
 
-          {selectedGroup ? (
-            /* ── Detail view ── */
-            <div className="max-h-[80vh] overflow-hidden flex flex-col">
-              <PlatformDetail
-                group={selectedGroup}
-                accountsByPlatform={accountsByPlatform}
-                selectedIds={selectedIds}
-                onToggleSelect={toggleSelect}
-                onToggleSelectAll={toggleSelectAll}
-                onDisconnect={(id) => disconnectMutation.mutate({ id })}
-                isDisconnecting={disconnectMutation.isPending}
-                workspaceId={activeWorkspace?.id}
-                onManualConnect={(pid) => setManualPlatform(pid)}
-                onBack={() => setSelectedGroup(null)}
-              />
-            </div>
-          ) : (
-            /* ── Platform list ── */
-            <div className="flex flex-col max-h-[80vh]">
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-border/20">
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">Integrations</h2>
-                  {totalAccounts > 0 && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{totalAccounts} account{totalAccounts > 1 ? "s" : ""} connected</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {selectedIds.size > 0 && (
+          <div className="flex h-full overflow-hidden" style={{ minHeight: 520, maxHeight: "85vh" }}>
+
+            {/* ── Fixed Sidebar ── */}
+            <div className="w-52 shrink-0 flex flex-col border-r border-border/20 bg-muted/20 overflow-hidden">
+              {/* Logo */}
+              <div className="px-5 py-5 border-b border-border/10">
+                <img
+                  src={dark ? LOGO_DARK : LOGO_LIGHT}
+                  alt="Dashfields"
+                  className="h-6 w-auto object-contain"
+                />
+              </div>
+
+              {/* Nav items */}
+              <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+                {SIDEBAR_NAV.map(item => {
+                  const Icon = item.icon;
+                  const isActive = activeNav === item.id;
+                  return (
                     <button
-                      onClick={() => bulkDisconnectMutation.mutate({ ids: Array.from(selectedIds) })}
-                      disabled={bulkDisconnectMutation.isPending}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium hover:bg-red-500/20 transition-all"
+                      key={item.id}
+                      onClick={() => handleNavClick(item.id)}
+                      className={[
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left",
+                        isActive
+                          ? "bg-background shadow-sm font-medium text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-background/60",
+                      ].join(" ")}
                     >
-                      {bulkDisconnectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlink className="w-3.5 h-3.5" />}
-                      Disconnect {selectedIds.size}
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{item.label}</span>
                     </button>
-                  )}
-                  <button
-                    onClick={() => onOpenChange(false)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+                  );
+                })}
+              </nav>
 
-              {/* List */}
-              <div className="flex-1 overflow-y-auto">
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-16">
-                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
-                  <div className="px-2 py-2">
-                    {PLATFORM_GROUPS.map((group) => {
-                      const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
-                      const isConnected = groupAccounts.length > 0;
-                      const hasExpired = groupAccounts.some(a => a.tokenExpiresAt && new Date(a.tokenExpiresAt) < new Date());
-
-                      return (
-                        <button
-                          key={group.id}
-                          onClick={() => setSelectedGroup(group)}
-                          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted/50 transition-all text-left group"
-                        >
-                          {/* Logo */}
-                          <div className="shrink-0">{group.logo}</div>
-
-                          {/* Text */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-sm font-semibold text-foreground leading-tight">{group.name}</span>
-                              {isConnected && !hasExpired && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                                  <CheckCircle2 className="w-2.5 h-2.5" />
-                                  {groupAccounts.length}
-                                </span>
-                              )}
-                              {hasExpired && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
-                                  <AlertTriangle className="w-2.5 h-2.5" /> Expired
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-snug">{group.description}</p>
-                          </div>
-
-                          {/* Action */}
-                          <div className="shrink-0 flex items-center gap-2">
-                            {!isConnected && (
-                              <span className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                                Connect
-                              </span>
-                            )}
-                            <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-all group-hover:translate-x-0.5" />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 border-t border-border/20">
+              {/* Get Help at bottom */}
+              <div className="px-3 py-3 border-t border-border/10">
                 <button
-                  onClick={() => healthCheck.mutate()}
-                  disabled={healthCheck.isPending || totalAccounts === 0}
-                  className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+                  onClick={() => toast.info("Help center coming soon")}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-background/60 transition-all text-left"
                 >
-                  {healthCheck.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                  Run Health Check
+                  <HelpCircle className="w-4 h-4 shrink-0" />
+                  <span>Get help</span>
+                  <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
                 </button>
               </div>
             </div>
-          )}
+
+            {/* ── Right Content ── */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {selectedGroup ? (
+                /* Detail view */
+                <PlatformDetail
+                  group={selectedGroup}
+                  accountsByPlatform={accountsByPlatform}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelect}
+                  onToggleSelectAll={toggleSelectAll}
+                  onDisconnect={(id) => disconnectMutation.mutate({ id })}
+                  isDisconnecting={disconnectMutation.isPending}
+                  workspaceId={activeWorkspace?.id}
+                  onManualConnect={(pid) => setManualPlatform(pid)}
+                  onBack={() => setSelectedGroup(null)}
+                />
+              ) : (
+                /* Platform list */
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-border/20 shrink-0">
+                    <div>
+                      <h2 className="text-sm font-semibold text-foreground">
+                        {SIDEBAR_NAV.find(n => n.id === activeNav)?.label ?? "Integrations"}
+                      </h2>
+                      {totalAccounts > 0 && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{totalAccounts} account{totalAccounts > 1 ? "s" : ""} connected</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {selectedIds.size > 0 && (
+                        <button
+                          onClick={() => bulkDisconnectMutation.mutate({ ids: Array.from(selectedIds) })}
+                          disabled={bulkDisconnectMutation.isPending}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium hover:bg-red-500/20 transition-all"
+                        >
+                          {bulkDisconnectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlink className="w-3.5 h-3.5" />}
+                          Disconnect {selectedIds.size}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onOpenChange(false)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Platform rows */}
+                  <div className="flex-1 overflow-y-auto">
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-16">
+                        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <div className="px-2 py-2">
+                        {PLATFORM_GROUPS.map((group) => {
+                          const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
+                          const isConnected = groupAccounts.length > 0;
+                          const hasExpired = groupAccounts.some(a => a.tokenExpiresAt && new Date(a.tokenExpiresAt) < new Date());
+
+                          return (
+                            <button
+                              key={group.id}
+                              onClick={() => setSelectedGroup(group)}
+                              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted/50 transition-all text-left group"
+                            >
+                              <div className="shrink-0">{group.logo}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                  <span className="text-sm font-semibold text-foreground">{group.name}</span>
+                                  {isConnected && !hasExpired && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                      <CheckCircle2 className="w-2.5 h-2.5" /> {groupAccounts.length}
+                                    </span>
+                                  )}
+                                  {hasExpired && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+                                      <AlertTriangle className="w-2.5 h-2.5" /> Expired
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-snug">{group.description}</p>
+                              </div>
+                              <div className="shrink-0 flex items-center gap-2">
+                                {!isConnected && (
+                                  <span className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">Connect</span>
+                                )}
+                                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-all group-hover:translate-x-0.5" />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
