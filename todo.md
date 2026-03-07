@@ -2333,3 +2333,10 @@
 - [x] Tooltip "Open sidebar" / "Close sidebar" appears on hover
 - [x] Button always visible in top-left of header, before Search icon
 - [x] Logo area simplified to icon-only (no hover state needed)
+
+## ✅ Phase 83 — Favicon Update
+- [x] Convert Dashfields icon SVG to PNG (16, 32, 48, 64, 180, 192, 512px)
+- [x] Generated favicon.ico (multi-size: 16, 32, 48) in client/public
+- [x] Generated apple-touch-icon.png (180x180) in client/public
+- [x] Generated favicon-32x32.png and favicon-16x16.png in client/public
+- [x] Updated index.html with proper favicon link tags (ico, png 32x32, png 16x16, apple-touch-icon)
