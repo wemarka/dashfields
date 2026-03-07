@@ -3,6 +3,8 @@
  * Sub-components live in ./layout-parts/ for maintainability.
  */
 import { useAuth } from "@/shared/hooks/useAuth";
+import { IntegrationsModal } from "@/app/components/IntegrationsModal";
+import { AppSettingsModal } from "@/app/components/AppSettingsModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
 import { trpc } from "@/core/lib/trpc";
@@ -88,6 +90,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showIntegrations, setShowIntegrations] = useState(false);
+  const [showAppSettings, setShowAppSettings] = useState(false);
 
   useKeyboardShortcuts({
     onNewPost: () => setLocation("/calendar"),
@@ -323,9 +327,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="px-2 pb-3 shrink-0">
           <div className="h-px bg-border/30 mx-1 mb-2" />
           {(() => {
-            const isActive = location.startsWith("/settings/integrations");
+            const isActive = showIntegrations;
             return (
-              <button onClick={() => setLocation("/settings/integrations")}
+              <button onClick={() => setShowIntegrations(true)}
                 title={collapsed ? t("nav.integrations") : undefined}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
@@ -429,6 +433,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               activeWorkspace={activeWorkspace}
               onSelectWorkspace={(id) => setActiveWorkspace(id)}
               onNewWorkspace={() => setShowWorkspaceSwitcher(true)}
+              onOpenAppSettings={() => setShowAppSettings(true)}
             />
           </div>
         </div>
@@ -449,6 +454,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)}
         currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"} reason={upgradeReason} />
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      <IntegrationsModal open={showIntegrations} onOpenChange={setShowIntegrations} />
+      <AppSettingsModal open={showAppSettings} onOpenChange={setShowAppSettings} />
     </div>
   );
 }

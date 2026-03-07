@@ -6,13 +6,13 @@ import { Avatar, AvatarFallback } from "@/core/components/ui/avatar";
 import { useTranslation } from "react-i18next";
 import { PLAN_LIMITS, type WorkspacePlan } from "@shared/planLimits";
 import {
-  LogOut, User, ChevronDown, Check, PlusCircle, Building2, CreditCard,
+  LogOut, User, ChevronDown, Check, PlusCircle, Building2, CreditCard, Settings2,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
 
 export function ProfileDropdown({
-  user, onLogout, workspaces, activeWorkspace, onSelectWorkspace, onNewWorkspace,
+  user, onLogout, workspaces, activeWorkspace, onSelectWorkspace, onNewWorkspace, onOpenAppSettings,
 }: {
   user: { name?: string; email?: string };
   onLogout: () => void;
@@ -20,6 +20,7 @@ export function ProfileDropdown({
   activeWorkspace: WorkspaceItem | null;
   onSelectWorkspace: (id: number) => void;
   onNewWorkspace: () => void;
+  onOpenAppSettings?: () => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -130,6 +131,12 @@ export function ProfileDropdown({
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground">
               <CreditCard className="w-3.5 h-3.5 text-muted-foreground" /> {t("topbar.billing", "Billing & Plans")}
             </button>
+            {onOpenAppSettings && (
+              <button onClick={() => { onOpenAppSettings(); setOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm hover:bg-foreground/5 transition-colors text-foreground/80 hover:text-foreground">
+                <Settings2 className="w-3.5 h-3.5 text-muted-foreground" /> App Settings
+              </button>
+            )}
           </div>
 
           <div className="border-t border-border/30 mx-2 mb-1" />

@@ -2363,3 +2363,9 @@
 - [x] تكبير الشعار الكامل (h-7 بدلاً من h-6) ليكون أوضح عند التوسع
 - [x] إخفاء زر Collapse عند طي الـ Sidebar (لا يظهر في الوضع المطوي)
 - [x] إظهار زر Expand عند hover على أيقونة الشعار (مع crossfade animation)
+
+## ✅ Phase 88 — Integrations Modal & App Settings in Profile Menu
+- [x] تحويل Integrations من صفحة مستقلة إلى Dialog/Modal عند النقر في الـ Sidebar
+- [x] إضافة App Settings إلى Profile Menu في الـ Topbar كـ Dialog/Modal
+- [x] إنشاء IntegrationsModal.tsx يعرض محتوى صفحة Connections داخل Dialog
+- [x] إنشاء AppSettingsModal.tsx يعرض محتوى صفحة Settings داخل Dialog
