@@ -239,17 +239,17 @@ export function BillingPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Modal header */}
-      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <h2 className="text-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>Billing Dashboard</h2>
-        <p className="text-[13px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Manage your subscription and credits</p>
+      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
+        <h2 className="text-[17px] font-semibold text-gray-900">Billing Dashboard</h2>
+        <p className="text-[13px] mt-0.5 text-gray-400">Manage your subscription and credits</p>
       </div>
       <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
       {/* Billing toggle */}
       <div className="flex items-center justify-end">
-        <div className="flex items-center gap-3 rounded-xl p-1" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="flex items-center gap-3 rounded-xl p-1 bg-gray-100 border border-gray-200">
           <span
             className="text-[12px] px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
-            style={{ backgroundColor: billing === "monthly" ? "rgba(255,255,255,0.1)" : "transparent", color: billing === "monthly" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }}
+            style={{ backgroundColor: billing === "monthly" ? "#fff" : "transparent", color: billing === "monthly" ? "#111827" : "#9ca3af", boxShadow: billing === "monthly" ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}
             onClick={() => setBilling("monthly")}
           >Monthly</span>
           <Switch
@@ -258,9 +258,9 @@ export function BillingPage() {
           />
           <span
             className="text-[12px] px-3 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5"
-            style={{ backgroundColor: billing === "annual" ? "rgba(255,255,255,0.1)" : "transparent", color: billing === "annual" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }}
+            style={{ backgroundColor: billing === "annual" ? "#fff" : "transparent", color: billing === "annual" ? "#111827" : "#9ca3af", boxShadow: billing === "annual" ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}
             onClick={() => setBilling("annual")}
-          >Annual <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "#10b981" }}>Save 20%</span></span>
+          >Annual <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600">Save 20%</span></span>
         </div>
       </div>
 

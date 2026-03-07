@@ -1,11 +1,11 @@
 /**
- * GlobalSettingsModal — Custom portal overlay matching Manus settings design.
+ * GlobalSettingsModal — Light theme custom portal overlay.
  *
- * Layout (reference images):
- *   - Dark overlay backdrop
- *   - Rounded modal: ~920px wide, ~600px tall
- *   - LEFT sidebar: ~220px, dark bg (#1a1a1a), logo at top, nav items, "Get help" at bottom
- *   - RIGHT content: flex-1, slightly lighter dark bg, title at top, scrollable content
+ * Layout:
+ *   - Light overlay backdrop (rgba(0,0,0,0.4))
+ *   - Rounded modal: ~920px wide, ~620px tall
+ *   - LEFT sidebar: ~220px, light gray bg (#f5f5f7), logo at top, nav items, "Get help" + Sign out at bottom
+ *   - RIGHT content: flex-1, white bg (#ffffff), title at top, scrollable content
  *   - X close button top-right
  *
  * NO shadcn Dialog used — pure custom portal for full layout control.
@@ -39,19 +39,19 @@ const WorkspaceContent   = lazy(() => import("@/app/features/settings/WorkspaceS
 type TabId = "account" | "workspace" | "settings" | "billing" | "connections" | "integrations";
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: "account",      label: "Account",           icon: User },
-  { id: "workspace",    label: "Workspace & Team",  icon: Building2 },
-  { id: "settings",     label: "Settings",          icon: Settings2 },
-  { id: "billing",      label: "Billing",           icon: CreditCard },
-  { id: "connections",  label: "Connections",       icon: Link2 },
-  { id: "integrations", label: "Integrations",      icon: Plug },
+  { id: "account",      label: "Account",          icon: User },
+  { id: "workspace",    label: "Workspace & Team", icon: Building2 },
+  { id: "settings",     label: "Settings",         icon: Settings2 },
+  { id: "billing",      label: "Billing",          icon: CreditCard },
+  { id: "connections",  label: "Connections",      icon: Link2 },
+  { id: "integrations", label: "Integrations",     icon: Plug },
 ];
 
 // ─── Tab content ──────────────────────────────────────────────────────────────
 function TabContent({ activeTab }: { activeTab: TabId }) {
   const fallback = (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-5 h-5 animate-spin opacity-40" />
+      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
     </div>
   );
 
@@ -70,27 +70,31 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
 // ─── Integrations tab content ─────────────────────────────────────────────────
 function IntegrationsContent() {
   const integrations = [
-    { name: "Meta Ads Manager",  desc: "Automate ads insights and optimization",        color: "#0866FF", letter: "M" },
-    { name: "TikTok Ads",        desc: "Manage TikTok campaigns and analytics",         color: "#010101", letter: "T" },
-    { name: "Google Ads",        desc: "Track and optimize Google advertising spend",   color: "#4285F4", letter: "G" },
-    { name: "LinkedIn Ads",      desc: "Run and analyze LinkedIn ad campaigns",         color: "#0077B5", letter: "L" },
-    { name: "Snapchat Ads",      desc: "Manage Snap campaigns and audience insights",   color: "#FFFC00", letter: "S" },
-    { name: "Pinterest Ads",     desc: "Track pins, boards, and Pinterest campaigns",   color: "#E60023", letter: "P" },
+    { name: "Meta Ads Manager",  desc: "Automate ads insights and optimization to save hours and maximize profits", color: "#0866FF", letter: "M" },
+    { name: "TikTok Ads",        desc: "Manage TikTok campaigns and analytics",                                    color: "#010101", letter: "T" },
+    { name: "Google Ads",        desc: "Track and optimize Google advertising spend",                              color: "#4285F4", letter: "G" },
+    { name: "LinkedIn Ads",      desc: "Run and analyze LinkedIn ad campaigns",                                    color: "#0077B5", letter: "L" },
+    { name: "Snapchat Ads",      desc: "Manage Snap campaigns and audience insights",                              color: "#FFFC00", letter: "S" },
+    { name: "Pinterest Ads",     desc: "Track pins, boards, and Pinterest campaigns",                              color: "#E60023", letter: "P" },
   ];
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-7 pt-6 pb-4 border-b border-white/8">
-        <h2 className="text-[17px] font-semibold text-white">Integrations</h2>
-        <p className="text-[13px] text-white/40 mt-0.5">Build workflows across your favorite apps</p>
+      {/* Header */}
+      <div className="px-7 pt-6 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
+        <h2 className="text-[17px] font-semibold text-gray-900">Integrations</h2>
+        <p className="text-[13px] text-gray-400 mt-0.5">Build workflows across your favorite apps</p>
       </div>
-      <div className="flex-1 overflow-y-auto px-7 py-4">
+      <div className="flex-1 overflow-y-auto px-7 py-5">
         <div className="grid grid-cols-2 gap-3">
           {integrations.map((item) => (
             <button
               key={item.name}
               onClick={() => toast.info("Use the Connections tab to manage platform accounts")}
-              className="flex items-start gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/8 border border-white/8 hover:border-white/15 transition-all text-left group"
+              className="flex items-start gap-3 p-4 rounded-xl border text-left group transition-all hover:shadow-sm"
+              style={{ backgroundColor: "#fafafa", border: "1px solid #ebebeb" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f5f5f5"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#ddd"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fafafa"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#ebebeb"; }}
             >
               <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold"
@@ -99,9 +103,9 @@ function IntegrationsContent() {
                 {item.letter}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-white/90">{item.name}</p>
-                <p className="text-[12px] text-white/40 mt-0.5 leading-snug">{item.desc}</p>
-                <p className="text-[12px] text-white/50 mt-2 group-hover:text-white/70 transition-colors">Go to configure &gt;</p>
+                <p className="text-[13px] font-semibold text-gray-800">{item.name}</p>
+                <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{item.desc}</p>
+                <p className="text-[12px] text-blue-500 mt-2 group-hover:text-blue-600 transition-colors">Go to configure &gt;</p>
               </div>
             </button>
           ))}
@@ -136,7 +140,6 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
   useEffect(() => {
     if (!open) return;
     document.addEventListener("keydown", handleKeyDown);
-    // Prevent body scroll
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -158,21 +161,21 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
   const modal = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
       onClick={handleBackdropClick}
     >
       {/*
-       * MODAL CONTAINER
-       * Matches reference: ~920px wide, ~600px tall, dark rounded box
-       * flex flex-row — sidebar on left, content on right
+       * MODAL CONTAINER — Light theme
+       * ~920px wide, ~620px tall, white rounded box with subtle shadow
        */}
       <div
         ref={modalRef}
-        className="relative flex flex-row rounded-2xl overflow-hidden shadow-2xl"
+        className="relative flex flex-row rounded-2xl overflow-hidden"
         style={{
           width: "min(920px, calc(100vw - 32px))",
-          height: "min(620px, calc(100vh - 48px))",
-          backgroundColor: "#1c1c1e",
+          height: "min(640px, calc(100vh - 48px))",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -180,35 +183,33 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
         <button
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
-          style={{ color: "rgba(255,255,255,0.4)" }}
-          onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
+          style={{ color: "#9ca3af" }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "#374151"; (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "#9ca3af"; (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* ────────────────────────────────────────────────────────────────
-            LEFT SIDEBAR
-            Reference: ~220px, dark bg, logo at top, nav list, get help at bottom
+            LEFT SIDEBAR — Light gray
+            Reference: ~220px, light gray bg, logo at top, nav list, get help + sign out at bottom
         ──────────────────────────────────────────────────────────────── */}
         <aside
           className="flex flex-col shrink-0 overflow-hidden"
           style={{
             width: 220,
-            backgroundColor: "#161618",
-            borderRight: "1px solid rgba(255,255,255,0.07)",
+            backgroundColor: "#f7f7f8",
+            borderRight: "1px solid #ebebeb",
           }}
         >
-          {/* Logo / Brand */}
+          {/* Logo */}
           <div className="px-5 py-5 shrink-0">
-            <div className="flex items-center gap-2.5">
-              {/* Dashfields icon mark */}
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white-cropped_9f9de9c4.png"
-                alt="Dashfields"
-                className="h-5 w-auto object-contain"
-              />
-            </div>
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white-cropped_9f9de9c4.png"
+              alt="Dashfields"
+              className="h-5 w-auto object-contain"
+              style={{ filter: "invert(1) brightness(0)" }}
+            />
           </div>
 
           {/* Nav items */}
@@ -222,20 +223,20 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
                   onClick={() => setActiveTab(tab.id)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all mb-0.5"
                   style={{
-                    backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
-                    color: isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.5)",
+                    backgroundColor: isActive ? "#e8e8ea" : "transparent",
+                    color: isActive ? "#111827" : "#6b7280",
                     fontWeight: isActive ? 500 : 400,
                   }}
                   onMouseEnter={e => {
                     if (!isActive) {
-                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.05)";
-                      (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.8)";
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#ededef";
+                      (e.currentTarget as HTMLButtonElement).style.color = "#374151";
                     }
                   }}
                   onMouseLeave={e => {
                     if (!isActive) {
                       (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                      (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.5)";
+                      (e.currentTarget as HTMLButtonElement).style.color = "#6b7280";
                     }
                   }}
                 >
@@ -247,19 +248,13 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
           </nav>
 
           {/* Bottom: Get help + Sign out */}
-          <div className="px-2 py-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="px-2 py-3 shrink-0" style={{ borderTop: "1px solid #ebebeb" }}>
             <button
               onClick={() => toast.info("Help center coming soon")}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all mb-0.5"
-              style={{ color: "rgba(255,255,255,0.4)" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.05)";
-                (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.7)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.4)";
-              }}
+              style={{ color: "#6b7280" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#ededef"; (e.currentTarget as HTMLButtonElement).style.color = "#374151"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#6b7280"; }}
             >
               <HelpCircle className="w-4 h-4 shrink-0" />
               <span className="flex-1">Get help</span>
@@ -269,15 +264,9 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
             <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all"
-              style={{ color: "rgba(239,68,68,0.8)" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(239,68,68,0.1)";
-                (e.currentTarget as HTMLButtonElement).style.color = "rgba(239,68,68,1)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                (e.currentTarget as HTMLButtonElement).style.color = "rgba(239,68,68,0.8)";
-              }}
+              style={{ color: "#ef4444" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fef2f2"; (e.currentTarget as HTMLButtonElement).style.color = "#dc2626"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#ef4444"; }}
             >
               <LogOut className="w-4 h-4 shrink-0" />
               <span>Sign out</span>
@@ -286,14 +275,12 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
         </aside>
 
         {/* ────────────────────────────────────────────────────────────────
-            RIGHT CONTENT AREA
-            Reference: flex-1, slightly lighter dark, title at top, scrollable
+            RIGHT CONTENT AREA — White
         ──────────────────────────────────────────────────────────────── */}
         <div
           className="flex-1 flex flex-col overflow-hidden"
-          style={{ backgroundColor: "#1c1c1e" }}
+          style={{ backgroundColor: "#ffffff" }}
         >
-          {/* Tab content — each tab component handles its own header + scroll */}
           <div className="flex-1 overflow-y-auto">
             <TabContent activeTab={activeTab} />
           </div>

@@ -230,9 +230,9 @@ export default function Connections() {
     <>
       <div className="flex flex-col h-full">
       {/* Modal header */}
-      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <h2 className="text-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>Connections</h2>
-        <p className="text-[13px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Connect your social media accounts to unlock analytics and campaign management.</p>
+      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
+        <h2 className="text-[17px] font-semibold text-gray-900">Connections</h2>
+        <p className="text-[13px] mt-0.5 text-gray-400">Connect your social media accounts to unlock analytics and campaign management.</p>
       </div>
       <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5 animate-fade-in">
         {/* Header */}
