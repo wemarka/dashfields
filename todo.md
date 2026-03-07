@@ -2196,3 +2196,8 @@
 - [x] Fix: `handleTabChange` marks each tab as visited when first opened, then queries remain enabled so datePreset changes always trigger a refetch
 - [x] Fix: Reset `visitedTabs` when a new campaign is opened (via `prevCampaignId` ref) to avoid stale data from previous campaign
 - [x] Same fix applied to Creatives/Heatmap queries
+
+## 🔄 Phase 67 — UX Improvements: Skeleton, Timestamps, Prefetch
+- [x] Skeleton overlay on date preset change for Ad Sets, Creatives, Heatmap tabs
+- [x] Last-updated timestamp display per tab (shows when data was last fetched)
+- [x] Background prefetch of Ad Sets and Creatives data on drawer open

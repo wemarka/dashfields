@@ -9,12 +9,10 @@
  *   5. Breakdown — age, gender, region, device
  *   6. Notes & Tags — persistent notes and tags
  *
- * Design:
- *   - Gradient header reflecting campaign status
- *   - Health Score circular indicator
- *   - Budget progress bar
- *   - Sticky tab bar
- *   - Smooth transitions
+ * UX improvements:
+ *   - Background prefetch of Ad Sets + Creatives 1s after drawer opens
+ *   - Skeleton refresh overlay while re-fetching on date change
+ *   - "Last updated X ago" status bar per data-driven tab
  */
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
@@ -22,7 +20,7 @@ import {
 } from "@/core/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/core/components/ui/tabs";
 import {
-  BarChart2, Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp,
+  Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
@@ -31,6 +29,7 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 
 import {
   PerformanceTab, AdSetsTab, CreativesTab, HeatmapTab, BreakdownTab, NotesTab,
+  TabStatusBar, TabRefreshOverlay,
 } from "./drawer";
 import { DrawerHeader } from "./drawer/DrawerHeader";
 import type { MetaCampaign, DatePreset, DetailTab, CreativeFilter, CreativeSort } from "./drawer";
@@ -71,22 +70,11 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
   const fmtCurrency = (n: number) => fmtCurrencyHook(n);
 
-  // ── Data Queries ──────────────────────────────────────────────────────
-  const { data: daily, isLoading } = trpc.meta.campaignDailyInsights.useQuery(
-    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id }
-  );
-
-  const { data: insights } = trpc.meta.campaignInsights.useQuery(
-    { datePreset, limit: 50, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id }
-  );
-  const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
-
-  // Track which tabs have been visited so we only fetch when needed
+  // ── Visited Tabs Tracking ──────────────────────────────────────────────
+  // Tracks which tabs have been opened so queries remain enabled after first visit
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set<string>(["performance"]));
 
-  // Reset visited tabs when campaign changes (new campaign opened)
+  // Reset visited tabs when a new campaign is opened
   const prevCampaignId = useRef<string | null>(null);
   useEffect(() => {
     if (campaign?.id && campaign.id !== prevCampaignId.current) {
@@ -96,23 +84,57 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     }
   }, [campaign?.id]);
 
-  // Mark tab as visited when user switches to it
-  const handleTabChange = (tab: string) => {
+  // Mark tab as visited on first open
+  const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab as DetailTab);
     setVisitedTabs(prev => { const next = new Set(prev); next.add(tab); return next; });
-  };
+  }, []);
 
-  const { data: adSetsData, isLoading: adSetsLoading } = trpc.meta.campaignAdSets.useQuery(
+  // ── Background Prefetch ────────────────────────────────────────────────
+  // After drawer opens, prefetch Ad Sets and Creatives in the background
+  // so switching to those tabs feels instant.
+  const [prefetchEnabled, setPrefetchEnabled] = useState(false);
+  useEffect(() => {
+    if (!open || !campaign?.id) {
+      setPrefetchEnabled(false);
+      return;
+    }
+    // Delay 1s so the Performance tab data loads first
+    const timer = setTimeout(() => setPrefetchEnabled(true), 1000);
+    return () => clearTimeout(timer);
+  }, [open, campaign?.id]);
+
+  // ── Data Queries ──────────────────────────────────────────────────────
+  const { data: daily, isLoading, isFetching: isFetchingDaily } = trpc.meta.campaignDailyInsights.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id && visitedTabs.has("adsets") }
+    { enabled: open && !!campaign?.id }
   );
 
-  const { data: adsData, isLoading: adsLoading } = trpc.meta.campaignAds.useQuery(
-    { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id && (visitedTabs.has("creatives") || visitedTabs.has("heatmap")) }
+  const { data: insights, isFetching: isFetchingInsights } = trpc.meta.campaignInsights.useQuery(
+    { datePreset, limit: 50, workspaceId: activeWorkspace?.id },
+    { enabled: open && !!campaign?.id }
   );
+  const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
 
-  // Notes & Tags
+  // Ad Sets: enabled when visited OR prefetch is ready
+  const { data: adSetsData, isLoading: adSetsLoading, isFetching: isFetchingAdSets } =
+    trpc.meta.campaignAdSets.useQuery(
+      { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
+      { enabled: open && !!campaign?.id && (visitedTabs.has("adsets") || prefetchEnabled) }
+    );
+
+  // Ads: enabled when visited OR prefetch is ready
+  const { data: adsData, isLoading: adsLoading, isFetching: isFetchingAds } =
+    trpc.meta.campaignAds.useQuery(
+      { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
+      {
+        enabled: open && !!campaign?.id && (
+          visitedTabs.has("creatives") || visitedTabs.has("heatmap") || prefetchEnabled
+        ),
+      }
+    );
+
+  // ── Notes & Tags ──────────────────────────────────────────────────────
   const campaignKey = campaign?.id ?? "";
   const { data: savedNote } = trpc.campaigns.getNote.useQuery(
     { campaignKey }, { enabled: open && !!campaignKey }
@@ -277,12 +299,18 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 w-full justify-start overflow-x-auto scrollbar-none">
               {TABS.map(tab => {
                 const Icon = tab.icon;
+                // Show a small dot indicator for prefetched/loaded tabs
+                const isLoaded = tab.value === "adsets"
+                  ? !!adSetsData
+                  : (tab.value === "creatives" || tab.value === "heatmap")
+                    ? !!adsData
+                    : false;
                 return (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
                     className="
-                      flex items-center gap-1.5 text-xs h-10 px-3 pb-0
+                      relative flex items-center gap-1.5 text-xs h-10 px-3 pb-0
                       rounded-none border-b-2 border-transparent
                       data-[state=active]:border-primary
                       data-[state=active]:bg-transparent
@@ -296,6 +324,10 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {tab.label}
+                    {/* Green dot when data is prefetched and ready */}
+                    {isLoaded && tab.value !== activeTab && (
+                      <span className="absolute top-2 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    )}
                   </TabsTrigger>
                 );
               })}
@@ -304,58 +336,87 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
           {/* ── Scrollable Tab Content ──────────────────────────────── */}
           <div className="flex-1 overflow-y-auto">
+
             {/* ═══ Performance Tab ═══ */}
             <TabsContent value="performance" className="mt-0">
-              <PerformanceTab
-                campaignInsight={campaignInsight}
-                daily={daily}
-                isLoading={isLoading}
-                fmtCurrency={fmtCurrency}
+              <TabStatusBar
+                data={daily}
+                isFetching={isFetchingDaily || isFetchingInsights}
+                datePreset={datePreset}
               />
+              <TabRefreshOverlay isFetching={isFetchingDaily} hasData={!!daily?.length}>
+                <PerformanceTab
+                  campaignInsight={campaignInsight}
+                  daily={daily}
+                  isLoading={isLoading}
+                  fmtCurrency={fmtCurrency}
+                />
+              </TabRefreshOverlay>
             </TabsContent>
 
             {/* ═══ Ad Sets Tab ═══ */}
             <TabsContent value="adsets" className="mt-0">
-              <AdSetsTab
-                adSetsData={adSetsData}
-                isLoading={adSetsLoading}
-                fmtCurrency={fmtCurrency}
+              <TabStatusBar
+                data={adSetsData}
+                isFetching={isFetchingAdSets}
+                datePreset={datePreset}
               />
+              <TabRefreshOverlay isFetching={isFetchingAdSets} hasData={!!adSetsData?.adSets?.length}>
+                <AdSetsTab
+                  adSetsData={adSetsData}
+                  isLoading={adSetsLoading}
+                  fmtCurrency={fmtCurrency}
+                />
+              </TabRefreshOverlay>
             </TabsContent>
 
             {/* ═══ Creatives Tab ═══ */}
             <TabsContent value="creatives" className="mt-0">
-              <CreativesTab
-                adsData={adsData}
-                isLoading={adsLoading}
-                fmtCurrency={fmtCurrency}
-                creativeFilter={creativeFilter}
-                setCreativeFilter={setCreativeFilter}
-                creativeSort={creativeSort}
-                setCreativeSort={setCreativeSort}
-                compareMode={compareMode}
-                setCompareMode={setCompareMode}
-                selectedAds={selectedAds}
-                setSelectedAds={setSelectedAds}
-                sortedAds={sortedAds}
-                bestCtr={bestCtr}
+              <TabStatusBar
+                data={adsData}
+                isFetching={isFetchingAds}
+                datePreset={datePreset}
               />
+              <TabRefreshOverlay isFetching={isFetchingAds} hasData={!!adsData?.length}>
+                <CreativesTab
+                  adsData={adsData}
+                  isLoading={adsLoading}
+                  fmtCurrency={fmtCurrency}
+                  creativeFilter={creativeFilter}
+                  setCreativeFilter={setCreativeFilter}
+                  creativeSort={creativeSort}
+                  setCreativeSort={setCreativeSort}
+                  compareMode={compareMode}
+                  setCompareMode={setCompareMode}
+                  selectedAds={selectedAds}
+                  setSelectedAds={setSelectedAds}
+                  sortedAds={sortedAds}
+                  bestCtr={bestCtr}
+                />
+              </TabRefreshOverlay>
             </TabsContent>
 
             {/* ═══ Heatmap Tab ═══ */}
             <TabsContent value="heatmap" className="mt-0">
-              <HeatmapTab
-                ads={(adsData ?? []).map(ad => ({
-                  insights: ad.insights ? {
-                    impressions: ad.insights.impressions,
-                    ctr: ad.insights.ctr,
-                    spend: ad.insights.spend,
-                    clicks: ad.insights.clicks,
-                  } : null,
-                  status: ad.status,
-                }))}
-                isLoading={adsLoading}
+              <TabStatusBar
+                data={adsData}
+                isFetching={isFetchingAds}
+                datePreset={datePreset}
               />
+              <TabRefreshOverlay isFetching={isFetchingAds} hasData={!!adsData?.length}>
+                <HeatmapTab
+                  ads={(adsData ?? []).map(ad => ({
+                    insights: ad.insights ? {
+                      impressions: ad.insights.impressions,
+                      ctr: ad.insights.ctr,
+                      spend: ad.insights.spend,
+                      clicks: ad.insights.clicks,
+                    } : null,
+                    status: ad.status,
+                  }))}
+                  isLoading={adsLoading}
+                />
+              </TabRefreshOverlay>
             </TabsContent>
 
             {/* ═══ Breakdown Tab ═══ */}
