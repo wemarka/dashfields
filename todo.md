@@ -2265,3 +2265,12 @@
 - [x] Play/Pause overlay with hover-to-pause when playing
 - [x] Mute/unmute button in bottom-right corner of video
 - [x] Ensure all UI elements (progress bar, header, CTA) are z-10 above the video layer
+
+## 🎨 Phase 74 — Creatives Tab Simplification
+- [x] Remove summary stats bar (Creatives count, Total Spend, Avg CTR, Fatigued)
+- [x] Remove creative type filter tabs (All, Image, Video, Carousel, Dynamic)
+- [x] Remove sort dropdown
+- [x] Remove per-card metrics row (Impressions, CTR, Spend)
+- [x] Keep: Best Performer banner + creative card with Preview Ad
+- [x] Keep: A/B Compare mode
+- [x] Layout: Best Performer card on top, then list of creatives with Preview Ad toggle
