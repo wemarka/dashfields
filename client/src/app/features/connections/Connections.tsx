@@ -228,7 +228,13 @@ export default function Connections() {
 
   return (
     <>
-      <div className="px-8 py-6 space-y-6 animate-fade-in">
+      <div className="flex flex-col h-full">
+      {/* Modal header */}
+      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <h2 className="text-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>Connections</h2>
+        <p className="text-[13px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Connect your social media accounts to unlock analytics and campaign management.</p>
+      </div>
+      <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5 animate-fade-in">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -373,6 +379,7 @@ export default function Connections() {
             </div>
           </div>
         )}
+      </div>
       </div>
 
       <BulkActionBar

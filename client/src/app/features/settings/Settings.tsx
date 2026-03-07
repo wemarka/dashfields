@@ -1,23 +1,61 @@
 /**
- * Settings.tsx — App settings tab with FLAT design.
- * No nested cards/borders. Uses typography hierarchy + <hr> separators.
- * Sections: Appearance · Language · Notifications · API Keys · Data · Danger Zone
+ * Settings.tsx — Settings tab inside the dark Settings Modal.
+ * Matches Manus reference: dark bg, General section (Language + Appearance),
+ * Communication preferences with toggles, Manage Cookies at bottom.
  */
-import { useAuth } from "@/shared/hooks/useAuth";
-import { trpc } from "@/core/lib/trpc";
 import { useState, useEffect } from "react";
+import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
-import {
-  Sun, Moon, Monitor, Save, Key, Download, Type, Loader2, Trash2,
-} from "lucide-react";
 import { useTheme } from "@/core/contexts/ThemeContext";
-import { useTranslation } from "react-i18next";
-import { ApiKeysSection, DangerZone, LanguageSelector } from "./components";
 import { Switch } from "@/core/components/ui/switch";
+import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
+import { ApiKeysSection } from "./components";
+
+// ─── Theme preview thumbnails ─────────────────────────────────────────────────
+function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
+  if (mode === "light") return (
+    <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#f5f5f5" }}>
+      <div className="flex h-full">
+        <div className="w-8 h-full" style={{ backgroundColor: "#e0e0e0" }} />
+        <div className="flex-1 p-1.5 space-y-1">
+          <div className="h-2 rounded" style={{ backgroundColor: "#d0d0d0", width: "60%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#e0e0e0", width: "80%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#e0e0e0", width: "50%" }} />
+        </div>
+      </div>
+    </div>
+  );
+  if (mode === "dark") return (
+    <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#1a1a1a" }}>
+      <div className="flex h-full">
+        <div className="w-8 h-full" style={{ backgroundColor: "#111" }} />
+        <div className="flex-1 p-1.5 space-y-1">
+          <div className="h-2 rounded" style={{ backgroundColor: "#333", width: "60%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "80%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "50%" }} />
+        </div>
+      </div>
+    </div>
+  );
+  // system
+  return (
+    <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#2a2a2a" }}>
+      <div className="flex h-full">
+        <div className="w-8 h-full" style={{ background: "linear-gradient(to bottom, #111 50%, #e0e0e0 50%)" }} />
+        <div className="flex-1 p-1.5 space-y-1">
+          <div className="h-2 rounded" style={{ background: "linear-gradient(to right, #333 50%, #d0d0d0 50%)", width: "60%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "80%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "50%" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState("en");
 
   const { data: settings } = trpc.settings.get.useQuery();
   const updateMutation = trpc.settings.update.useMutation({
@@ -25,184 +63,151 @@ export default function Settings() {
     onError: (e) => toast.error("Failed: " + e.message),
   });
 
-  const [emailNotif, setEmailNotif] = useState(true);
-  const [pushNotif, setPushNotif]   = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(false);
+  const [emailNotif, setEmailNotif]     = useState(true);
+  const [pushNotif, setPushNotif]       = useState(false);
 
   useEffect(() => {
     if (settings) {
       setEmailNotif(settings.email_notifications ?? true);
-      setPushNotif(settings.push_notifications ?? true);
-      setWeeklyReport(settings.weekly_report ?? false);
+      setPushNotif(settings.push_notifications ?? false);
+      if (settings.language) setLanguage(settings.language);
     }
   }, [settings]);
 
-  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
-  const fontSizeOptions = [
-    { value: "sm" as const, label: "Small",   size: "text-xs" },
-    { value: "md" as const, label: "Default", size: "text-sm" },
-    { value: "lg" as const, label: "Large",   size: "text-base" },
-  ];
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (fontSize === "sm") root.style.fontSize = "14px";
-    else if (fontSize === "lg") root.style.fontSize = "17px";
-    else root.style.fontSize = "16px";
-  }, [fontSize]);
-
-  const themeOptions = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark",  label: "Dark",  icon: Moon },
-    { value: "system",label: "System",icon: Monitor },
-  ] as const;
-
-  const saveNotifications = () => {
-    updateMutation.mutate({ emailNotifications: emailNotif, pushNotifications: pushNotif, weeklyReport });
+  const handleThemeSelect = (mode: "light" | "dark" | "system") => {
+    if (mode !== theme) toggleTheme?.();
   };
 
-  const exportDataMutation = trpc.settings.exportData?.useMutation?.({
-    onSuccess: (data: unknown) => {
-      const blob = new Blob([JSON.stringify(data ?? {}, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `dashfields-export-${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Data exported successfully");
-    },
-    onError: (e: { message: string }) => toast.error("Export failed: " + e.message),
-  });
+  const themeOptions: { value: "light" | "dark" | "system"; label: string }[] = [
+    { value: "light",  label: "Light" },
+    { value: "dark",   label: "Dark" },
+    { value: "system", label: "Follow System" },
+  ];
 
   return (
-    <div className="px-8 py-6 space-y-0">
-
-      {/* ── Section title ── */}
-      <h2 className="text-2xl font-semibold text-foreground mb-6">Settings</h2>
-
-      {/* ── Sub-section: Appearance ── */}
-      <h3 className="text-lg font-medium text-foreground mb-4">Appearance</h3>
-
-      <div className="mb-4">
-        <p className="text-xs font-medium text-muted-foreground mb-3">Theme</p>
-        <div className="flex gap-2">
-          {themeOptions.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => { if (opt.value !== theme) toggleTheme?.(); }}
-              className={[
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all",
-                theme === opt.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
-              ].join(" ")}
-            >
-              <opt.icon className="w-4 h-4" />
-              {opt.label}
-            </button>
-          ))}
-        </div>
+    <div className="flex flex-col h-full">
+      {/* ── Header ── */}
+      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <h2 className="text-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>Settings</h2>
       </div>
 
-      <div className="mb-6">
-        <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1">
-          <Type className="w-3 h-3" /> Font Size
-        </p>
-        <div className="flex gap-2">
-          {fontSizeOptions.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFontSize(f.value)}
-              className={[
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium border transition-all",
-                f.size,
-                fontSize === f.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/40",
-              ].join(" ")}
-            >
-              Aa — {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* ── Scrollable body ── */}
+      <div className="flex-1 overflow-y-auto">
 
-      <hr className="my-6 border-gray-100 dark:border-border/30" />
+        {/* General section */}
+        <div className="px-7 py-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>General</p>
 
-      {/* ── Sub-section: Language ── */}
-      <h3 className="text-lg font-medium text-foreground mb-4">Language</h3>
-      <div className="mb-6">
-        <LanguageSelector />
-      </div>
-
-      <hr className="my-6 border-gray-100 dark:border-border/30" />
-
-      {/* ── Sub-section: Notifications ── */}
-      <h3 className="text-lg font-medium text-foreground mb-4">Notifications</h3>
-
-      <div className="space-y-4 mb-4">
-        {[
-          { label: "Email notifications",       desc: "Receive alerts and updates via email",              value: emailNotif,   set: setEmailNotif },
-          { label: "Push notifications",         desc: "In-app alerts for campaigns and budgets",           value: pushNotif,    set: setPushNotif },
-          { label: "Weekly performance report",  desc: "Receive a weekly summary of all platforms",         value: weeklyReport, set: setWeeklyReport },
-        ].map((n) => (
-          <div key={n.label} className="flex items-center justify-between py-1">
-            <div>
-              <p className="text-sm font-medium text-foreground">{n.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{n.desc}</p>
-            </div>
-            <Switch checked={n.value} onCheckedChange={n.set} />
+          {/* Language */}
+          <div className="mb-5">
+            <p className="text-[13px] font-semibold mb-2" style={{ color: "rgba(255,255,255,0.85)" }}>Language</p>
+            <Select value={language} onValueChange={(v) => { setLanguage(v); updateMutation.mutate({ language: v }); }}>
+              <SelectTrigger className="w-40 h-9 text-[13px] bg-white/8 border-white/10 text-white/80">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="ar">Arabic (العربية)</SelectItem>
+                <SelectItem value="fr">French</SelectItem>
+                <SelectItem value="de">German</SelectItem>
+                <SelectItem value="es">Spanish</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        ))}
-      </div>
 
-      <div className="mb-6">
-        <button
-          onClick={saveNotifications}
-          disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          {/* Appearance */}
+          <div>
+            <p className="text-[13px] font-semibold mb-3" style={{ color: "rgba(255,255,255,0.85)" }}>Appearance</p>
+            <div className="flex gap-3">
+              {themeOptions.map((opt) => {
+                const isActive = theme === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleThemeSelect(opt.value)}
+                    className="flex flex-col items-center gap-2 transition-all"
+                    style={{ width: 96 }}
+                  >
+                    <div
+                      className="w-full rounded-xl overflow-hidden transition-all"
+                      style={{
+                        border: isActive ? "2px solid #3b82f6" : "2px solid rgba(255,255,255,0.1)",
+                        padding: 2,
+                      }}
+                    >
+                      <ThemePreview mode={opt.value} />
+                    </div>
+                    <span
+                      className="text-[12px] font-medium"
+                      style={{ color: isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }}
+                    >
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Communication preferences */}
+        <div className="px-7 py-5" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>Communication preferences</p>
+
+          <div className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>Receive product updates</p>
+                <p className="text-[12px] mt-0.5 leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  Receive early access to feature releases and success stories to optimize your workflow.
+                </p>
+              </div>
+              <Switch
+                checked={emailNotif}
+                onCheckedChange={(v) => { setEmailNotif(v); updateMutation.mutate({ emailNotifications: v }); }}
+                className="shrink-0 mt-0.5"
+              />
+            </div>
+
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>Email me when my queued task starts</p>
+                <p className="text-[12px] mt-0.5 leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  When enabled, we'll send you a timely email once your task finishes queuing and begins processing.
+                </p>
+              </div>
+              <Switch
+                checked={pushNotif}
+                onCheckedChange={(v) => { setPushNotif(v); updateMutation.mutate({ pushNotifications: v }); }}
+                className="shrink-0 mt-0.5"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* API Keys */}
+        <div className="px-7 py-5" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>API Keys</p>
+          <ApiKeysSection />
+        </div>
+
+        {/* Manage Cookies */}
+        <div
+          className="px-7 py-4 flex items-center justify-between"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
         >
-          {updateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-          {updateMutation.isPending ? "Saving..." : "Save Notifications"}
-        </button>
-      </div>
+          <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.6)" }}>Manage Cookies</span>
+          <button
+            onClick={() => toast.info("Cookie preferences coming soon")}
+            className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
+            style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.12)" }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)")}
+          >
+            Manage
+          </button>
+        </div>
 
-      <hr className="my-6 border-gray-100 dark:border-border/30" />
-
-      {/* ── Sub-section: API Keys ── */}
-      <h3 className="text-lg font-medium text-foreground mb-4">API Keys</h3>
-      <div className="mb-6">
-        <ApiKeysSection />
-      </div>
-
-      <hr className="my-6 border-gray-100 dark:border-border/30" />
-
-      {/* ── Sub-section: Data Export ── */}
-      <h3 className="text-lg font-medium text-foreground mb-1">Data Export</h3>
-      <p className="text-sm text-muted-foreground mb-4">Download all your account data as a JSON file.</p>
-      <div className="mb-6">
-        <button
-          onClick={() => exportDataMutation?.mutate?.()}
-          disabled={exportDataMutation?.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
-        >
-          {exportDataMutation?.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-          Export My Data
-        </button>
-      </div>
-
-      <hr className="my-6 border-gray-100 dark:border-border/30" />
-
-      {/* ── Sub-section: Danger Zone ── */}
-      <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-1 flex items-center gap-2">
-        <Trash2 className="w-4 h-4" /> Danger Zone
-      </h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        Permanently delete your account and all associated data. This action cannot be undone.
-      </p>
-      <div className="pb-8">
-        <DangerZone />
       </div>
     </div>
   );

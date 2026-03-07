@@ -237,40 +237,33 @@ export function BillingPage() {
   };
 
   return (
-    <div className="px-8 py-6 space-y-8">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Billing & Plans</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage your subscription and monitor resource usage.
-          </p>
-        </div>
-        <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-1 border border-border/50">
-          <Label
-            htmlFor="billing-toggle"
-            className={`text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${billing === "monthly" ? "bg-background shadow-sm font-medium" : "text-muted-foreground"}`}
+    <div className="flex flex-col h-full">
+      {/* Modal header */}
+      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <h2 className="text-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>Billing Dashboard</h2>
+        <p className="text-[13px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Manage your subscription and credits</p>
+      </div>
+      <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
+      {/* Billing toggle */}
+      <div className="flex items-center justify-end">
+        <div className="flex items-center gap-3 rounded-xl p-1" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <span
+            className="text-[12px] px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+            style={{ backgroundColor: billing === "monthly" ? "rgba(255,255,255,0.1)" : "transparent", color: billing === "monthly" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }}
             onClick={() => setBilling("monthly")}
-          >
-            Monthly
-          </Label>
+          >Monthly</span>
           <Switch
-            id="billing-toggle"
             checked={billing === "annual"}
             onCheckedChange={(v) => setBilling(v ? "annual" : "monthly")}
           />
-          <Label
-            htmlFor="billing-toggle"
-            className={`text-sm px-3 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 ${billing === "annual" ? "bg-background shadow-sm font-medium" : "text-muted-foreground"}`}
+          <span
+            className="text-[12px] px-3 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5"
+            style={{ backgroundColor: billing === "annual" ? "rgba(255,255,255,0.1)" : "transparent", color: billing === "annual" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }}
             onClick={() => setBilling("annual")}
-          >
-            Annual
-            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-[10px] px-1.5 py-0">
-              Save 20%
-            </Badge>
-          </Label>
+          >Annual <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(16,185,129,0.2)", color: "#10b981" }}>Save 20%</span></span>
         </div>
       </div>
+
 
       {/* Current Plan Summary */}
       <Card className="border-brand/20 bg-gradient-to-r from-brand/5 to-brand/0">
@@ -457,6 +450,7 @@ export function BillingPage() {
         currentPlan={currentPlan}
         reason={`Upgrade to ${PLAN_LIMITS[upgradeToPlan]?.name} to unlock more features.`}
       />
+      </div>
     </div>
   );
 }
