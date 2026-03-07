@@ -445,7 +445,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl w-full p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[85vh]">
+        <DialogContent className="max-w-[900px] w-full p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden max-h-[85vh]">
           <DialogTitle className="sr-only">Integrations</DialogTitle>
           <DialogDescription className="sr-only">Manage your social media platform connections and integrations.</DialogDescription>
 
@@ -564,28 +564,35 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                             <button
                               key={group.id}
                               onClick={() => setSelectedGroup(group)}
-                              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted/50 transition-all text-left group"
+                              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-muted/50 transition-all text-left group border-b border-border/10 last:border-0"
                             >
+                              {/* Icon */}
                               <div className="shrink-0">{group.logo}</div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+
+                              {/* Name */}
+                              <div className="w-32 shrink-0">
+                                <div className="flex items-center gap-2">
                                   <span className="text-sm font-semibold text-foreground">{group.name}</span>
                                   {isConnected && !hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                                       <CheckCircle2 className="w-2.5 h-2.5" /> {groupAccounts.length}
                                     </span>
                                   )}
                                   {hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 whitespace-nowrap">
                                       <AlertTriangle className="w-2.5 h-2.5" /> Expired
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground leading-snug">{group.description}</p>
                               </div>
+
+                              {/* Description */}
+                              <p className="flex-1 text-sm text-muted-foreground truncate">{group.description}</p>
+
+                              {/* Action */}
                               <div className="shrink-0 flex items-center gap-2">
                                 {!isConnected && (
-                                  <span className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">Connect</span>
+                                  <span className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Connect</span>
                                 )}
                                 <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-all group-hover:translate-x-0.5" />
                               </div>
