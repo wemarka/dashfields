@@ -165,7 +165,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
                   }
                   alt="Dashfields"
-                  className="h-7 w-auto shrink-0 object-contain"
+                  className="h-9 w-auto shrink-0 object-contain"
                   style={{
                     opacity: isAnimating ? 0 : 1,
                     transition: 'opacity 180ms ease',
