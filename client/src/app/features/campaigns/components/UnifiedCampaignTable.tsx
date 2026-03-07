@@ -50,65 +50,46 @@ function computeOpportunityScore(c: UnifiedCampaign): number {
 }
 
 function OpportunityBadge({ score }: { score: number }) {
-  // Semicircle gauge: arc from 180° to 0° (left to right)
-  // SVG viewBox: 0 0 40 24, center at (20,20), radius=16
-  const r = 16;
-  const cx = 20;
-  const cy = 20;
-  // Arc length for a semicircle
-  const arcLen = Math.PI * r; // π * r
-  const filled = (score / 100) * arcLen;
-  // Color
+  // Full circle gauge — score 0-100 fills the ring
+  const r = 14;
+  const cx = 18;
+  const cy = 18;
+  const circ = 2 * Math.PI * r;
+  const filled = (score / 100) * circ;
   const color = score >= 70 ? "#10b981" : score >= 45 ? "#f59e0b" : "#ef4444";
   const textColor = score >= 70 ? "text-emerald-500" : score >= 45 ? "text-amber-500" : "text-red-500";
   const label = score >= 70 ? "High" : score >= 45 ? "Medium" : "Low";
-  // Needle angle: -90° (left) to +90° (right), mapped from 0–100
-  const needleAngle = -90 + (score / 100) * 180;
-  const needleRad = (needleAngle * Math.PI) / 180;
-  const needleLen = 11;
-  const nx = cx + needleLen * Math.cos(needleRad);
-  const ny = cy + needleLen * Math.sin(needleRad);
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex flex-col items-center shrink-0 cursor-default select-none" style={{ width: 40 }}>
-          <svg viewBox="0 0 40 22" width={40} height={22} overflow="visible">
-            {/* Track arc */}
-            <path
-              d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+        <div className="relative shrink-0 cursor-default select-none" style={{ width: 36, height: 36 }}>
+          <svg width={36} height={36} viewBox="0 0 36 36" className="-rotate-90">
+            {/* Track */}
+            <circle
+              cx={cx} cy={cy} r={r}
               fill="none"
               stroke="hsl(var(--border))"
-              strokeWidth="3.5"
-              strokeLinecap="round"
+              strokeWidth="3"
             />
-            {/* Filled arc */}
-            <path
-              d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            {/* Progress */}
+            <circle
+              cx={cx} cy={cy} r={r}
               fill="none"
               stroke={color}
-              strokeWidth="3.5"
+              strokeWidth="3"
               strokeLinecap="round"
-              strokeDasharray={`${filled} ${arcLen}`}
+              strokeDasharray={`${filled} ${circ}`}
               style={{
-                transition: "stroke-dasharray 0.7s cubic-bezier(0.34,1.56,0.64,1)",
-                filter: `drop-shadow(0 0 3px ${color}66)`,
+                transition: "stroke-dasharray 0.8s cubic-bezier(0.34,1.56,0.64,1)",
+                filter: `drop-shadow(0 0 3px ${color}88)`,
               }}
             />
-            {/* Needle */}
-            <line
-              x1={cx} y1={cy}
-              x2={nx} y2={ny}
-              stroke={color}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              style={{ transition: "x2 0.7s cubic-bezier(0.34,1.56,0.64,1), y2 0.7s cubic-bezier(0.34,1.56,0.64,1)" }}
-            />
-            {/* Center dot */}
-            <circle cx={cx} cy={cy} r="2" fill={color} />
           </svg>
-          {/* Score number */}
-          <span className={`text-[9px] font-extrabold tabular-nums leading-none -mt-0.5 ${textColor}`}>{score}</span>
+          {/* Score number centered */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`text-[10px] font-extrabold tabular-nums ${textColor}`}>{score}</span>
+          </div>
         </div>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">Opportunity Score — {label}</TooltipContent>
