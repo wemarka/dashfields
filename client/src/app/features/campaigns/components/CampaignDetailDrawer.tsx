@@ -443,6 +443,8 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
                     setSelectedAds={setSelectedAds}
                     sortedAds={sortedAds}
                     bestCtr={bestCtr}
+                    pageName={campaign?.pageName ?? campaign?.accountName ?? campaign?.name ?? "Your Page"}
+                    pageAvatarUrl={campaign?.pageAvatarUrl ?? null}
                   />
                 </TabRefreshOverlay>
               )}

@@ -11,6 +11,9 @@ export interface MetaCampaign {
   dailyBudget?: number | null;
   lifetimeBudget?: number | null;
   platform?: string | null;
+  accountName?: string | null;
+  pageName?: string | null;
+  pageAvatarUrl?: string | null;
 }
 
 export interface DrawerProps {
@@ -59,7 +62,7 @@ export interface AdInfo {
   } | null;
   insights: {
     impressions: number; reach: number; clicks: number; spend: number;
-    ctr: number; cpc: number; cpm: number;
+    ctr: number; cpc: number; cpm: number; conversions?: number;
   } | null;
 }
 

@@ -131,7 +131,7 @@ const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
   { key: "spend",       label: "Spend",       color: "#8b5cf6" },
 ];
 
-// --- Main Component ───────────────────────────────────────────────────────────
+// --- Main Component ---
 export function PerformanceTab({ campaignInsight, daily, isLoading, fmtCurrency }: PerformanceTabProps) {
   const [activeMetrics, setActiveMetrics] = useState<Set<ChartMetric>>(
     () => new Set<ChartMetric>(["impressions", "clicks", "spend"])

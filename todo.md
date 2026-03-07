@@ -2224,3 +2224,26 @@
 - [x] Better action buttons layout (Pause/Resume, Budget, Clone, Report)
 - [x] Cleaner Health Score positioning
 - [x] Date preset selector more compact and professional
+
+## 🎨 Phase 72 — Creatives Tab Platform-Native Preview Redesign
+- [ ] Build Facebook Post preview mockup (profile pic, page name, Sponsored, image/video, caption, CTA button)
+- [ ] Build Instagram Feed preview mockup (IG header, square/portrait image, like/comment/share bar, caption)
+- [ ] Build Instagram Story preview mockup (full-screen 9:16 with swipe-up CTA)
+- [ ] Build Carousel preview mockup (horizontal scroll cards with navigation arrows)
+- [ ] Build Reels/Video preview mockup (vertical 9:16 video frame with controls)
+- [ ] Auto-detect format from ad data (creativeType + publisherPlatforms + instagramPositions)
+- [ ] Rewrite CreativesTab with platform-native preview as primary view
+- [ ] Add toggle between Preview mode and Metrics mode
+- [ ] Add platform filter (Facebook / Instagram / All)
+
+## ✅ Phase 72 — Creatives Tab Platform-Native Previews
+- [x] AdPreviews.tsx — platform-native preview components (Facebook Feed, Instagram Feed, Instagram Story, Carousel, Reels, Facebook Story)
+- [x] Placement selector per creative card (switches between preview formats)
+- [x] Expand/collapse preview panel per ad card
+- [x] Performance metrics panel alongside preview (CTR, Impressions, Spend, CPC, CPM)
+- [x] Creative fatigue indicator with warning message
+- [x] A/B comparison panel with metric bars
+- [x] Ranking badges (#1 gold, #2 silver, #3 bronze) based on CTR
+- [x] Pass pageName and pageAvatarUrl from campaign to CreativesTab
+- [x] conversions field added to AdInfo insights type
+- [x] pageName, pageAvatarUrl, accountName fields added to MetaCampaign type
