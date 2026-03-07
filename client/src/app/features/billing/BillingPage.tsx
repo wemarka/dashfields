@@ -1,12 +1,12 @@
 /**
  * BillingPage.tsx — Billing tab inside Settings Modal.
- * Flat design: Current Plan · Resource Usage · Compare Plans
+ * Sections: Subscription · Payment Methods · Recent Invoices · Cancel Subscription
  */
 import { useState } from "react";
 import {
-  Zap, Building2, Sparkles, Crown, TrendingUp, Users,
-  Link2, Megaphone, FileText, ArrowRight, Check, Star,
-  ChevronRight,
+  Zap, Building2, Sparkles, Crown, ArrowRight, Check,
+  CreditCard, Receipt, AlertTriangle, ChevronRight,
+  Plus, Trash2, Star,
 } from "lucide-react";
 import { PLAN_LIMITS, type WorkspacePlan } from "@shared/planLimits";
 import { trpc } from "@/core/lib/trpc";
@@ -24,69 +24,45 @@ const PLAN_ICON_COLOR: Record<WorkspacePlan, string> = {
 const PLAN_ICON_BG: Record<WorkspacePlan, string> = {
   free: "bg-gray-100", pro: "bg-blue-50", agency: "bg-purple-50", enterprise: "bg-amber-50",
 };
-const PLAN_BADGE: Record<WorkspacePlan, string> = {
-  free: "bg-gray-100 text-gray-500",
-  pro: "bg-blue-50 text-blue-600 border border-blue-200",
-  agency: "bg-purple-50 text-purple-600 border border-purple-200",
-  enterprise: "bg-amber-50 text-amber-600 border border-amber-200",
-};
 const PLAN_ORDER: WorkspacePlan[] = ["free", "pro", "agency"];
 
-// ─── Usage Bar ────────────────────────────────────────────────────────────────
-function UsageBar({
-  label, icon: Icon, current, limit, color,
-}: {
-  label: string; icon: React.ElementType;
-  current: number; limit: number; color: string;
-}) {
-  const isUnlimited = limit === Infinity;
-  const pct = isUnlimited ? 0 : Math.min(100, Math.round((current / limit) * 100));
-  const isDanger = pct >= 95;
-  const isWarning = pct >= 80;
+// Mock payment methods (replace with real Stripe data when available)
+const MOCK_PAYMENT_METHODS = [
+  { id: "pm_1", brand: "Visa", last4: "4242", expMonth: 12, expYear: 2027, isDefault: true },
+  { id: "pm_2", brand: "Mastercard", last4: "5555", expMonth: 8, expYear: 2026, isDefault: false },
+];
 
+// Mock invoices (replace with real Stripe data when available)
+const MOCK_INVOICES = [
+  { id: "inv_1", date: "Mar 1, 2026", description: "Pro Plan · Monthly", amount: "$29.00", status: "Paid" },
+  { id: "inv_2", date: "Feb 1, 2026", description: "Pro Plan · Monthly", amount: "$29.00", status: "Paid" },
+  { id: "inv_3", date: "Jan 1, 2026", description: "Pro Plan · Monthly", amount: "$29.00", status: "Paid" },
+  { id: "inv_4", date: "Dec 1, 2025", description: "Pro Plan · Monthly", amount: "$29.00", status: "Paid" },
+  { id: "inv_5", date: "Nov 1, 2025", description: "Pro Plan · Monthly", amount: "$29.00", status: "Paid" },
+];
+
+function CardBrandIcon({ brand }: { brand: string }) {
+  const colors: Record<string, string> = {
+    Visa: "bg-blue-600", Mastercard: "bg-red-500", Amex: "bg-green-600",
+  };
   return (
-    <div className="flex items-center gap-4">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${color.replace("text-", "bg-").replace("-500", "-50").replace("-400", "-50")}`}>
-        <Icon className={`w-4 h-4 ${color}`} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[13px] font-medium text-gray-700">{label}</span>
-          <span className={`text-[12px] font-semibold ${isDanger ? "text-red-500" : isWarning ? "text-amber-500" : "text-gray-400"}`}>
-            {isUnlimited ? `${current} / ∞` : `${current} / ${limit}`}
-          </span>
-        </div>
-        <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-          {isUnlimited ? (
-            <div className="h-full w-full rounded-full bg-green-200" />
-          ) : (
-            <div
-              className={`h-full rounded-full transition-all ${isDanger ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-blue-400"}`}
-              style={{ width: `${pct}%` }}
-            />
-          )}
-        </div>
-      </div>
+    <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-gray-500"}`}>
+      {brand.slice(0, 4).toUpperCase()}
     </div>
   );
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export function BillingPage() {
-  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeToPlan, setUpgradeToPlan] = useState<WorkspacePlan>("pro");
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const { activeWorkspace, isOwner } = useWorkspace();
-
-  const usageQuery = trpc.workspaces.getUsage.useQuery(
-    { workspaceId: activeWorkspace?.id ?? 0 },
-    { enabled: !!activeWorkspace?.id, staleTime: 30_000 }
-  );
 
   const currentPlan = (activeWorkspace?.plan ?? "free") as WorkspacePlan;
   const planConfig = PLAN_LIMITS[currentPlan];
-  const usage = usageQuery.data;
   const PlanIcon = PLAN_ICONS[currentPlan];
+  const nextPlan = currentPlan === "free" ? "pro" : currentPlan === "pro" ? "agency" : null;
 
   const handleUpgrade = (plan: WorkspacePlan) => {
     setUpgradeToPlan(plan);
@@ -97,210 +73,265 @@ export function BillingPage() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Billing Dashboard</h2>
-        <p className="text-[13px] mt-0.5 text-gray-400">Manage your subscription and usage</p>
+        <h2 className="text-[17px] font-semibold text-gray-900">Billing</h2>
+        <p className="text-[13px] mt-0.5 text-gray-400">Manage your subscription, payment methods, and invoices</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-7 py-6 space-y-0">
+      <div className="flex-1 overflow-y-auto px-7 py-6 space-y-8">
 
-        {/* ① Current Plan ─────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${PLAN_ICON_BG[currentPlan]}`}>
-              <PlanIcon className={`w-6 h-6 ${PLAN_ICON_COLOR[currentPlan]}`} />
+        {/* ① SUBSCRIPTION ─────────────────────────────────────────────────── */}
+        <section>
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Subscription</p>
+
+          {/* Current plan card */}
+          <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/50 mb-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${PLAN_ICON_BG[currentPlan]}`}>
+              <PlanIcon className={`w-5 h-5 ${PLAN_ICON_COLOR[currentPlan]}`} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-[16px] font-bold text-gray-900">{planConfig.name} Plan</h3>
-                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${PLAN_BADGE[currentPlan]}`}>
-                  {planConfig.badge.label}
+                <span className="text-[14px] font-bold text-gray-900">{planConfig.name} Plan</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200 flex items-center gap-0.5">
+                  <Check className="w-2.5 h-2.5" /> Active
                 </span>
               </div>
-              <p className="text-[13px] text-gray-400 mt-0.5">
+              <p className="text-[12px] text-gray-400 mt-0.5">
                 {planConfig.price.monthly === 0
-                  ? "Free forever"
-                  : `$${billing === "annual" ? planConfig.price.annual : planConfig.price.monthly}/month${billing === "annual" ? " · billed annually" : ""}`}
+                  ? "Free — no credit card required"
+                  : `$${planConfig.price.monthly}/month · renews automatically`}
               </p>
             </div>
+            {isOwner && nextPlan && (
+              <button
+                onClick={() => handleUpgrade(nextPlan)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
+                style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}
+              >
+                Upgrade <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Billing toggle */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-100">
-            <button
-              onClick={() => setBilling("monthly")}
-              className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all"
-              style={{
-                backgroundColor: billing === "monthly" ? "#fff" : "transparent",
-                color: billing === "monthly" ? "#111827" : "#9ca3af",
-                boxShadow: billing === "monthly" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              }}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBilling("annual")}
-              className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all flex items-center gap-1"
-              style={{
-                backgroundColor: billing === "annual" ? "#fff" : "transparent",
-                color: billing === "annual" ? "#111827" : "#9ca3af",
-                boxShadow: billing === "annual" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              }}
-            >
-              Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600 font-semibold">-20%</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Upgrade CTA (not on top plans) */}
-        {currentPlan !== "agency" && currentPlan !== "enterprise" && isOwner && (
-          <button
-            onClick={() => handleUpgrade(currentPlan === "free" ? "pro" : "agency")}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-6 text-white transition-opacity hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}
-          >
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-[13px] font-semibold">
-                Upgrade to {currentPlan === "free" ? "Pro" : "Agency"} — unlock more features
-              </span>
-            </div>
-            <ChevronRight className="w-4 h-4 opacity-80" />
-          </button>
-        )}
-
-        <hr className="border-gray-100 mb-6" />
-
-        {/* ② Resource Usage ───────────────────────────────────────────────── */}
-        <div className="mb-6">
-          <h3 className="text-[15px] font-semibold text-gray-900 mb-1">Resource Usage</h3>
-          <p className="text-[13px] text-gray-400 mb-4">Your current usage across all plan limits.</p>
-
-          {usageQuery.isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center gap-4 animate-pulse">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100" />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex justify-between">
-                      <div className="h-3 bg-gray-100 rounded w-28" />
-                      <div className="h-3 bg-gray-100 rounded w-16" />
-                    </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <UsageBar label="Social Accounts" icon={Link2} current={usage?.socialAccounts ?? 0} limit={planConfig.maxSocialAccounts} color="text-blue-500" />
-              <UsageBar label="Team Members"    icon={Users} current={usage?.teamMembers ?? 0}    limit={planConfig.maxTeamMembers}    color="text-purple-500" />
-              <UsageBar label="Campaigns"       icon={Megaphone} current={usage?.campaigns ?? 0}  limit={Infinity}                     color="text-green-500" />
-              <UsageBar label="Posts"           icon={FileText} current={usage?.posts ?? 0}        limit={Infinity}                     color="text-amber-500" />
-            </div>
-          )}
-        </div>
-
-        <hr className="border-gray-100 mb-6" />
-
-        {/* ③ Compare Plans ────────────────────────────────────────────────── */}
-        <div>
-          <h3 className="text-[15px] font-semibold text-gray-900 mb-1">Compare Plans</h3>
-          <p className="text-[13px] text-gray-400 mb-4">Choose the plan that fits your needs.</p>
-
-          <div className="space-y-2">
-            {PLAN_ORDER.map((plan) => {
+          {/* Available plans */}
+          <div className="space-y-1.5">
+            {PLAN_ORDER.filter(p => p !== currentPlan).map(plan => {
               const config = PLAN_LIMITS[plan];
-              const isCurrent = plan === currentPlan;
-              const isUpgrade = PLAN_ORDER.indexOf(plan) > PLAN_ORDER.indexOf(currentPlan);
               const Icon = PLAN_ICONS[plan];
-              const price = billing === "annual" ? config.price.annual : config.price.monthly;
+              const isUpgrade = PLAN_ORDER.indexOf(plan) > PLAN_ORDER.indexOf(currentPlan);
               const isPopular = plan === "pro";
-
               return (
                 <div
                   key={plan}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all ${
-                    isCurrent
-                      ? "border-blue-200 bg-blue-50/50"
-                      : "border-gray-100 hover:border-gray-200 hover:bg-gray-50/50"
-                  }`}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
                 >
-                  {/* Icon */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${PLAN_ICON_BG[plan]}`}>
-                    <Icon className={`w-5 h-5 ${PLAN_ICON_COLOR[plan]}`} />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${PLAN_ICON_BG[plan]}`}>
+                    <Icon className={`w-4 h-4 ${PLAN_ICON_COLOR[plan]}`} />
                   </div>
-
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold text-gray-800">{config.name}</span>
-                      {isPopular && !isCurrent && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-semibold text-gray-800">{config.name}</span>
+                      {isPopular && (
                         <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-600 border border-blue-200">
                           <Star className="w-2.5 h-2.5 fill-current" /> Popular
                         </span>
                       )}
-                      {isCurrent && (
-                        <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200">
-                          <Check className="w-2.5 h-2.5" /> Current
-                        </span>
-                      )}
                     </div>
-                    <p className="text-[12px] text-gray-400 mt-0.5 truncate">
-                      {config.features.slice(0, 2).join(" · ")}
-                    </p>
+                    <p className="text-[11px] text-gray-400 truncate">{config.features.slice(0, 2).join(" · ")}</p>
                   </div>
-
-                  {/* Price */}
-                  <div className="text-right shrink-0">
-                    <p className="text-[15px] font-bold text-gray-800">
-                      {price === 0 ? "Free" : `$${price}`}
-                    </p>
-                    {price > 0 && (
-                      <p className="text-[11px] text-gray-400">/mo</p>
-                    )}
-                  </div>
-
-                  {/* CTA */}
-                  {!isCurrent && isOwner && (
+                  <span className="text-[13px] font-bold text-gray-700 shrink-0">
+                    {config.price.monthly === 0 ? "Free" : `$${config.price.monthly}/mo`}
+                  </span>
+                  {isOwner && (
                     <button
                       onClick={() => handleUpgrade(plan)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shrink-0 ${
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all shrink-0 ${
                         isUpgrade
                           ? "bg-blue-500 text-white hover:bg-blue-600"
                           : "border border-gray-200 text-gray-500 hover:bg-gray-100"
                       }`}
                     >
-                      {isUpgrade ? "Upgrade" : "Downgrade"}
-                      <ArrowRight className="w-3 h-3" />
+                      {isUpgrade ? "Upgrade" : "Downgrade"} <ArrowRight className="w-3 h-3" />
                     </button>
                   )}
                 </div>
               );
             })}
 
-            {/* Enterprise row */}
-            <div className="flex items-center gap-4 px-4 py-3.5 rounded-xl border border-amber-100 hover:border-amber-200 hover:bg-amber-50/30 transition-all">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-amber-50">
-                <Crown className="w-5 h-5 text-amber-500" />
+            {/* Enterprise */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-100 hover:border-amber-200 hover:bg-amber-50/30 transition-all">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-50">
+                <Crown className="w-4 h-4 text-amber-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-[14px] font-semibold text-gray-800">Enterprise</span>
-                <p className="text-[12px] text-gray-400 mt-0.5 truncate">Custom integrations · Dedicated support · SLA guarantee</p>
+                <span className="text-[13px] font-semibold text-gray-800">Enterprise</span>
+                <p className="text-[11px] text-gray-400 truncate">Custom limits · Dedicated support · SLA</p>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-[13px] font-bold text-gray-800">Custom</p>
-              </div>
+              <span className="text-[13px] font-bold text-gray-700 shrink-0">Custom</span>
               <button
                 onClick={() => toast.info("Contact us at sales@dashfields.com for Enterprise pricing.")}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold border border-amber-200 text-amber-600 hover:bg-amber-50 transition-all shrink-0"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-amber-200 text-amber-600 hover:bg-amber-50 transition-all shrink-0"
               >
-                Contact Sales
-                <ArrowRight className="w-3 h-3" />
+                Contact <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           </div>
-        </div>
+        </section>
+
+        <hr className="border-gray-100" />
+
+        {/* ② PAYMENT METHODS ──────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Payment Methods</p>
+            {isOwner && (
+              <button
+                onClick={() => toast.info("Payment method management coming soon.")}
+                className="flex items-center gap-1 text-[12px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add card
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {MOCK_PAYMENT_METHODS.map(pm => (
+              <div key={pm.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100">
+                <CardBrandIcon brand={pm.brand} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-gray-800">
+                      {pm.brand} ···· {pm.last4}
+                    </span>
+                    {pm.isDefault && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-500">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-gray-400">Expires {pm.expMonth}/{pm.expYear}</p>
+                </div>
+                {isOwner && !pm.isDefault && (
+                  <button
+                    onClick={() => toast.info("Remove card coming soon.")}
+                    className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {isOwner && (
+                  <button
+                    onClick={() => toast.info("Manage payment methods coming soon.")}
+                    className="p-1.5 rounded-lg text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-all"
+                  >
+                    <CreditCard className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <hr className="border-gray-100" />
+
+        {/* ③ RECENT INVOICES ──────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Recent Invoices</p>
+            <button
+              onClick={() => toast.info("Full invoice history coming soon.")}
+              className="text-[12px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
+            >
+              View all →
+            </button>
+          </div>
+
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
+            <span>Description</span>
+            <span className="text-right">Date</span>
+            <span className="text-right">Amount</span>
+            <span className="text-right">Status</span>
+          </div>
+
+          <div className="space-y-0.5">
+            {MOCK_INVOICES.map((inv, i) => (
+              <div
+                key={inv.id}
+                className={`grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer ${
+                  i < MOCK_INVOICES.length - 1 ? "border-b border-gray-50" : ""
+                }`}
+                onClick={() => toast.info("Invoice download coming soon.")}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                    <Receipt className="w-3.5 h-3.5 text-gray-400" />
+                  </div>
+                  <span className="text-[13px] text-gray-700 truncate">{inv.description}</span>
+                </div>
+                <span className="text-[12px] text-gray-400 text-right whitespace-nowrap">{inv.date}</span>
+                <span className="text-[13px] font-semibold text-gray-800 text-right">{inv.amount}</span>
+                <span className="flex items-center justify-end">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                    {inv.status}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <hr className="border-gray-100" />
+
+        {/* ④ CANCEL SUBSCRIPTION ──────────────────────────────────────────── */}
+        {currentPlan !== "free" && isOwner && (
+          <section>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Cancel Subscription</p>
+
+            {!showCancelConfirm ? (
+              <div className="flex items-start gap-4 p-4 rounded-xl border border-red-100 bg-red-50/30">
+                <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-gray-800">Cancel your {planConfig.name} plan</p>
+                  <p className="text-[12px] text-gray-400 mt-0.5">
+                    Your subscription will remain active until the end of the current billing period. After that, your workspace will revert to the Free plan.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="px-3.5 py-2 rounded-lg text-[12px] font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all shrink-0"
+                >
+                  Cancel plan
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-red-200 bg-red-50/50">
+                <p className="text-[14px] font-semibold text-gray-900 mb-1">Are you sure?</p>
+                <p className="text-[12px] text-gray-500 mb-4">
+                  This will cancel your {planConfig.name} subscription. You'll keep access until the end of your billing period.
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      toast.error("Subscription cancellation coming soon. Please contact support.");
+                      setShowCancelConfirm(false);
+                    }}
+                    className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-red-500 text-white hover:bg-red-600 transition-all"
+                  >
+                    Yes, cancel subscription
+                  </button>
+                  <button
+                    onClick={() => setShowCancelConfirm(false)}
+                    className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
+                  >
+                    Keep subscription
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
       </div>
 
