@@ -2144,3 +2144,9 @@
 - [x] Split CampaignBuilder.tsx (757→120 lines) into 5 step files in builder-steps/
 - [x] Split Reports.tsx (728→250 lines) into 4 component files in components/
 - [x] Split BrandKit.tsx (629→200 lines) into 3 component files in components/
+
+## ✅ Bug Fix — /ads/campaigns JSON Parse Error
+- [x] Root cause: Meta API rate limit (`User request limit reached`) caused unhandled server error
+- [x] Fix: Added graceful rate limit handling in `server/services/integrations/meta.ts` (returns empty data instead of throwing)
+- [x] Covers error codes: 17, 80000, 80003 + message-based detection
+- [x] All 619 tests pass, 0 TypeScript errors

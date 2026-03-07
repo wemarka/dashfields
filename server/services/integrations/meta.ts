@@ -74,6 +74,18 @@ async function metaGet<T>(
       console.warn(`[Meta API] Graceful fallback for path=${path}: ${msg}`);
       return { data: [] } as unknown as T;
     }
+    // Rate limit errors — return empty data gracefully to prevent UI crashes.
+    // Meta rate limit error codes: 17 (user limit), 80000, 80003 (app limit)
+    const isRateLimit =
+      code === 17 || code === 80000 || code === 80003 ||
+      msg.includes("User request limit") ||
+      msg.includes("rate limit") ||
+      msg.includes("too many calls") ||
+      msg.includes("Application request limit");
+    if (isRateLimit) {
+      console.warn(`[Meta API] Rate limit hit for path=${path}: ${msg}`);
+      return { data: [] } as unknown as T;
+    }
     throw new Error(msg);
   }
   return json as T;
