@@ -546,7 +546,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
 
                   {/* Footer actions */}
-                  <div className="px-3 py-2.5 border-t border-border/30 space-y-1.5">
+                  <div className="px-3 py-2.5 border-t border-border/30">
                     {/* Manage Connections */}
                     <button
                       onClick={() => { setShowAccountDropdown(false); openSettings("connections"); }}
@@ -557,14 +557,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                       </svg>
                       Manage Connections
-                    </button>
-                    {/* Connect new account */}
-                    <button
-                      onClick={() => { setShowAccountDropdown(false); setLocation("/connections"); }}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5" />
-                      {t("topbar.connectAccount")}
                     </button>
                   </div>
                 </div>
