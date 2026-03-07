@@ -16,7 +16,7 @@
 import { useState } from "react";
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
 import { Button } from "@/core/components/ui/button";
-import { Loader2, Play, Pause, Copy, FileDown, Activity } from "lucide-react";
+import { Loader2, Copy, FileDown, Activity } from "lucide-react";
 import { StatusBadge, InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
@@ -275,21 +275,34 @@ export function DrawerHeader({
       {/* ── Row 3: Quick Actions ── */}
       <div className="px-5 py-2.5 flex items-center gap-1.5 flex-wrap">
         {canToggle && (
-          <Button
-            variant={isActive ? "outline" : "default"}
-            size="sm"
-            className="h-7 text-xs gap-1.5 font-medium"
-            onClick={onToggleStatus}
-            disabled={isTogglingStatus}
-          >
-            {isTogglingStatus
-              ? <Loader2 className="w-3 h-3 animate-spin" />
-              : isActive
-                ? <Pause className="w-3 h-3" />
-                : <Play className="w-3 h-3" />
-            }
-            {isActive ? "Pause" : "Activate"}
-          </Button>
+          <div className="flex items-center gap-2.5">
+            {/* Switch Toggle */}
+            <button
+              role="switch"
+              aria-checked={isActive}
+              onClick={onToggleStatus}
+              disabled={isTogglingStatus}
+              title={isActive ? "Click to pause campaign" : "Click to activate campaign"}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60 ${
+                isActive
+                  ? "bg-emerald-500 hover:bg-emerald-600"
+                  : "bg-slate-300 hover:bg-slate-400 dark:bg-slate-600 dark:hover:bg-slate-500"
+              }`}
+            >
+              <span
+                className={`pointer-events-none relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+                  isActive ? "translate-x-4" : "translate-x-0"
+                }`}
+              >
+                {isTogglingStatus && <Loader2 className="w-2.5 h-2.5 text-slate-400 animate-spin" />}
+              </span>
+            </button>
+            <span className={`text-xs font-semibold ${
+              isActive ? "text-emerald-600" : "text-slate-400"
+            }`}>
+              {isTogglingStatus ? "Updating..." : isActive ? "Active" : "Paused"}
+            </span>
+          </div>
         )}
 
         {campaign?.dailyBudget != null && (

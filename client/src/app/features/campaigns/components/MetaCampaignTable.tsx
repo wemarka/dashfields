@@ -1,7 +1,7 @@
 // MetaCampaignTable.tsx
 // Table for displaying Meta Ads campaigns with insights.
 // Supports status toggle and direct link to Meta Ads Manager.
-import { Link2, LayoutGrid, ExternalLink, Play, Pause, Loader2 } from "lucide-react";
+import { Link2, LayoutGrid, ExternalLink, Loader2 } from "lucide-react";
 import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
 import { Link } from "wouter";
 import { trpc } from "@/core/lib/trpc";
@@ -60,44 +60,67 @@ interface MetaCampaignTableProps {
 }
 
 function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggled: () => void }) {
+  const isActive = campaign.status === "ACTIVE" || campaign.status === "active";
+  const isArchived = ["ARCHIVED", "DELETED"].includes(campaign.status);
+  const [optimisticActive, setOptimisticActive] = useState(isActive);
   const [pending, setPending] = useState(false);
+
   const toggleMutation = trpc.meta.toggleCampaignStatus.useMutation({
-    onSuccess: () => { onToggled(); toast.success("Campaign status updated"); },
-    onError: (err) => toast.error("Failed to update status", { description: err.message }),
+    onSuccess: () => {
+      onToggled();
+      toast.success(optimisticActive ? "Campaign paused" : "Campaign activated");
+    },
+    onError: (err) => {
+      setOptimisticActive(isActive); // rollback on error
+      toast.error("Failed to update status", { description: err.message });
+    },
     onSettled: () => setPending(false),
   });
 
-  const isActive = campaign.status === "ACTIVE" || campaign.status === "active";
-  const isArchived = ["ARCHIVED", "DELETED"].includes(campaign.status);
+  if (isArchived) return (
+    <span className="text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">Archived</span>
+  );
 
-  if (isArchived) return null;
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (pending) return;
+    const newActive = !optimisticActive;
+    setOptimisticActive(newActive);
+    setPending(true);
+    toggleMutation.mutate({
+      campaignId: campaign.id,
+      status: newActive ? "ACTIVE" : "PAUSED",
+    });
+  };
 
   return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        if (pending) return;
-        setPending(true);
-        toggleMutation.mutate({
-          campaignId: campaign.id,
-          status: isActive ? "PAUSED" : "ACTIVE",
-        });
-      }}
-      title={isActive ? "Pause campaign" : "Activate campaign"}
-      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110 ${
-        isActive
-          ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
-          : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-      }`}
-    >
-      {pending ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-      ) : isActive ? (
-        <Pause className="w-3.5 h-3.5" />
-      ) : (
-        <Play className="w-3.5 h-3.5" />
-      )}
-    </button>
+    <div className="flex items-center gap-2">
+      <button
+        role="switch"
+        aria-checked={optimisticActive}
+        onClick={handleToggle}
+        title={optimisticActive ? "Click to pause" : "Click to activate"}
+        disabled={pending}
+        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60 ${
+          optimisticActive
+            ? "bg-emerald-500 hover:bg-emerald-600"
+            : "bg-slate-300 hover:bg-slate-400 dark:bg-slate-600 dark:hover:bg-slate-500"
+        }`}
+      >
+        <span
+          className={`pointer-events-none relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+            optimisticActive ? "translate-x-4" : "translate-x-0"
+          }`}
+        >
+          {pending && <Loader2 className="w-2.5 h-2.5 text-slate-400 animate-spin" />}
+        </span>
+      </button>
+      <span className={`text-[10px] font-medium ${
+        optimisticActive ? "text-emerald-600" : "text-slate-400"
+      }`}>
+        {optimisticActive ? "On" : "Off"}
+      </span>
+    </div>
   );
 }
 

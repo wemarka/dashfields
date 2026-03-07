@@ -2286,3 +2286,12 @@
 - [x] Applied 3-minute cache to campaignInsights (list) procedure
 - [x] Cache key includes: userId + campaignId + datePreset + workspaceId
 - [x] Root cause of Ad Sets not showing: Meta API rate limit — fixed with caching
+
+## ✅ Phase 76 — Campaign On/Off Toggle Switch
+- [x] Add On/Off toggle switch to each campaign row in the campaigns table
+- [x] Optimistic update: switch state changes immediately before API response
+- [x] Call updateCampaignStatus Meta API on toggle (ACTIVE / PAUSED)
+- [x] Replace Pause/Activate button in DrawerHeader with Switch toggle
+- [x] Archived campaigns show "Archived" badge instead of toggle
+- [x] Rollback on error with toast notification
+- [x] Invalidate cache after status change
