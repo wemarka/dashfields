@@ -2412,3 +2412,10 @@
 - [x] استبدال زر Integrations في الـ Sidebar بأيقونة Settings
 - [x] إزالة import وstate الخاصة بـ IntegrationsModal من DashboardLayout
 - [x] إعادة تشغيل الـ dev server لتنظيف Vite cache
+
+## 🔄 Account Switcher Avatar Dropdown
+- [x] Remove Account Switcher Pill from Topbar left section
+- [x] Add Avatar Icon on the right side of Topbar (next to NotificationBell)
+- [x] Clicking Avatar opens an inline Dropdown (not a modal) with account list
+- [x] Dropdown shows: active account avatar + name + platform badge, list of all accounts grouped by platform, Connect Account button at bottom
+- [x] Selecting an account sets it as active and closes the dropdown

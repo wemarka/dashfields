@@ -89,6 +89,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
 
   const [showAccountSwitcher, setShowAccountSwitcher] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const accountDropdownRef = useRef<HTMLDivElement>(null);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
@@ -97,6 +99,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>("account");
   const openSettings = (tab: SettingsTabId = "account") => { setSettingsInitialTab(tab); setShowGlobalSettings(true); };
+
+  // Close account dropdown on outside click
+  useEffect(() => {
+    if (!showAccountDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target as Node)) {
+        setShowAccountDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showAccountDropdown]);
 
   useKeyboardShortcuts({
     onNewPost: () => setLocation("/calendar"),
@@ -400,49 +414,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
         <div className={`flex items-center justify-between px-6 py-2.5 border-b border-border/40 shrink-0 ${isRTL ? "flex-row-reverse" : ""}`}>
-          {/* Left: search + Account Switcher Pill */}
+          {/* Left: search */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <GlobalSearch />
-            <button onClick={() => setShowAccountSwitcher(true)}
-              className={["flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:border-brand/40 hover:bg-foreground/5 transition-all duration-200 group max-w-[200px] shrink-0 shadow-sm",
-                isRTL ? "flex-row-reverse" : "",
-              ].join(" ")}>
-              {activeAccount ? (
-                <>
-                  <div className="relative shrink-0">
-                    <Avatar className="w-6 h-6">
-                      {activeAccount.profile_picture && <AvatarImage src={activeAccount.profile_picture} />}
-                      <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-bold">
-                        {(activeAccount.name ?? activeAccount.platform).charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/40 flex items-center justify-center">
-                      <PlatformIcon platform={activeAccount.platform} className="w-2 h-2" />
-                    </div>
-                  </div>
-                  <div className={`flex-1 min-w-0 ${isRTL ? "text-right" : ""}`}>
-                    <p className="text-[11px] font-semibold truncate leading-tight text-foreground">
-                      {activeAccount.name ?? activeAccount.username ?? activeAccount.platform}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/60 truncate leading-tight flex items-center gap-1">
-                      <span>{activeAccount.platform.charAt(0).toUpperCase() + activeAccount.platform.slice(1)}</span>
-                      {accounts.length > 1 && (
-                        <span className="px-1 py-0 rounded-full bg-brand/10 text-brand text-[9px] font-semibold">{accounts.length}</span>
-                      )}
-                    </p>
-                  </div>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0 group-hover:text-brand/60 transition-colors" />
-                </>
-              ) : (
-                <>
-                  <div className="w-6 h-6 rounded-full border-2 border-dashed border-border/50 flex items-center justify-center shrink-0">
-                    <PlusCircle className="w-3 h-3 text-muted-foreground/50" />
-                  </div>
-                  <span className="text-[11px] text-muted-foreground/60 truncate">{t("topbar.connectAccount")}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                </>
-              )}
-            </button>
           </div>
           {/* Center: Page Title Breadcrumb */}
           {currentNavItem && (
@@ -452,9 +426,138 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-foreground/80 font-medium text-xs">{t(currentNavItem.labelKey)}</span>
             </div>
           )}
-          {/* Right: controls */}
-          <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
+          {/* Right: NotificationBell + Account Avatar Dropdown */}
+          <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
             <NotificationBell />
+            {/* Account Avatar Dropdown */}
+            <div className="relative" ref={accountDropdownRef}>
+              <button
+                onClick={() => setShowAccountDropdown(v => !v)}
+                className="flex items-center gap-1.5 rounded-xl hover:bg-foreground/5 transition-colors p-1 group"
+              >
+                {activeAccount ? (
+                  <div className="relative">
+                    <Avatar className="w-8 h-8">
+                      {activeAccount.profile_picture && <AvatarImage src={activeAccount.profile_picture} />}
+                      <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-bold">
+                        {(activeAccount.name ?? activeAccount.platform).charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-background border border-border/40 flex items-center justify-center">
+                      <PlatformIcon platform={activeAccount.platform} className="w-2 h-2" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-full border-2 border-dashed border-border/50 flex items-center justify-center">
+                    <PlusCircle className="w-4 h-4 text-muted-foreground/50" />
+                  </div>
+                )}
+                <ChevronDown className={`w-3 h-3 text-muted-foreground/40 group-hover:text-foreground/60 transition-all ${showAccountDropdown ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Dropdown Panel */}
+              {showAccountDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-background border border-border/50 rounded-2xl shadow-xl z-50 overflow-hidden">
+                  {/* Active account header */}
+                  {activeAccount && (
+                    <div className="px-4 py-3 border-b border-border/30 bg-foreground/[0.02]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="relative shrink-0">
+                          <Avatar className="w-9 h-9">
+                            {activeAccount.profile_picture && <AvatarImage src={activeAccount.profile_picture} />}
+                            <AvatarFallback className="text-[12px] bg-brand/10 text-brand font-bold">
+                              {(activeAccount.name ?? activeAccount.platform).charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-border/40 flex items-center justify-center">
+                            <PlatformIcon platform={activeAccount.platform} className="w-2.5 h-2.5" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-semibold truncate text-foreground">
+                            {activeAccount.name ?? activeAccount.username ?? activeAccount.platform}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/60 truncate capitalize">
+                            {activeAccount.platform}{activeAccount.account_type ? ` · ${activeAccount.account_type}` : ""}
+                          </p>
+                        </div>
+                        {accounts.length > 1 && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-brand/10 text-brand text-[10px] font-semibold shrink-0">{accounts.length}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Accounts list grouped by platform */}
+                  {accounts.length > 0 && (
+                    <div className="py-1.5 max-h-60 overflow-y-auto">
+                      {(() => {
+                        const grouped = accounts.reduce<Record<string, typeof accounts>>((acc, a) => {
+                          if (!acc[a.platform]) acc[a.platform] = [];
+                          acc[a.platform].push(a);
+                          return acc;
+                        }, {});
+                        return Object.entries(grouped).map(([platform, accs]) => (
+                          <div key={platform}>
+                            <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                              <PlatformIcon platform={platform} className="w-2.5 h-2.5" />
+                              {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                            </p>
+                            {accs.map(acc => (
+                              <button
+                                key={acc.id}
+                                onClick={() => { setActiveAccount(acc.id); setShowAccountDropdown(false); }}
+                                className={[
+                                  "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
+                                  activeAccount?.id === acc.id
+                                    ? "bg-brand/8 text-brand"
+                                    : "hover:bg-foreground/5 text-foreground",
+                                ].join(" ")}
+                              >
+                                <Avatar className="w-6 h-6 shrink-0">
+                                  {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
+                                  <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
+                                    {(acc.name ?? acc.username ?? platform).charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? platform}</p>
+                                  {acc.account_type && <p className="text-[10px] text-muted-foreground/50 truncate">{acc.account_type}</p>}
+                                </div>
+                                {activeAccount?.id === acc.id && (
+                                  <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  )}
+
+                  {/* No accounts state */}
+                  {accounts.length === 0 && (
+                    <div className="py-6 text-center">
+                      <Globe2 className="w-7 h-7 text-muted-foreground/30 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">{t("topbar.noAccounts")}</p>
+                    </div>
+                  )}
+
+                  {/* Connect Account footer */}
+                  <div className="px-3 py-2.5 border-t border-border/30">
+                    <button
+                      onClick={() => { setShowAccountDropdown(false); setLocation("/connections"); }}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      {t("topbar.connectAccount")}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto animate-fade-in pb-16 md:pb-0">{children}</div>
