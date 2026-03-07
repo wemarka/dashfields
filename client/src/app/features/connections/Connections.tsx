@@ -1,6 +1,7 @@
 /**
- * Connections.tsx — Multi-platform social media connections hub.
- * Sub-components live in ./components/ for maintainability.
+ * Connections.tsx — Clean vertical list layout matching the Manus reference design.
+ * Each platform row: icon + name + description + status badge + chevron.
+ * "Add connectors" button at the bottom.
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { trpc } from "@/core/lib/trpc";
@@ -8,60 +9,269 @@ import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { toast } from "sonner";
 import { PLATFORMS, getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
-import { useTranslation } from "react-i18next";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
-import { PlatformCardSkeleton } from "@/core/components/ui/skeleton-cards";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
-import { Loader2, Globe, Zap, AlertTriangle, Info, Activity } from "lucide-react";
+import { Loader2, ChevronRight, Plus, CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { ManualConnectModal } from "./components";
+import type { ConnectedAccount } from "./components/types";
 
-import {
-  ManualConnectModal, PlatformCard, BulkActionBar,
-  type ConnectedAccount,
-} from "./components";
+// ─── Platform Row ─────────────────────────────────────────────────────────────
+interface PlatformRowProps {
+  platformId: PlatformId;
+  connectedAccounts: ConnectedAccount[];
+  onConnect: () => void;
+  onDisconnect: (id: number) => void;
+  isDisconnecting: boolean;
+  workspaceId?: number;
+  onClick: () => void;
+}
 
+function PlatformRow({
+  platformId, connectedAccounts, onConnect, onDisconnect,
+  isDisconnecting, workspaceId, onClick,
+}: PlatformRowProps) {
+  const platform    = getPlatform(platformId);
+  const isConnected = connectedAccounts.length > 0;
+  const hasExpired  = connectedAccounts.some((a) => {
+    if (!a.tokenExpiresAt) return false;
+    return new Date(a.tokenExpiresAt) < new Date();
+  });
+
+  const handleOAuthConnect = () => {
+    const origin     = window.location.origin;
+    const returnPath = "/connections";
+    const initPath   = platform.oauthInitPath ?? `/api/oauth/${platformId}/init`;
+    const wsId       = workspaceId ?? "";
+    const oauthUrl   = `${origin}${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}${wsId ? `&workspaceId=${wsId}` : ""}`;
+    const popup = window.open(oauthUrl, `oauth_${platformId}`, "width=600,height=700,scrollbars=yes,resizable=yes");
+    if (!popup || popup.closed || typeof popup.closed === "undefined") {
+      window.location.href = oauthUrl;
+      return;
+    }
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        window.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: platformId } }));
+      }
+    }, 500);
+  };
+
+  const handleConnect = () => {
+    if (platform.connectionType === "oauth") handleOAuthConnect();
+    else onConnect();
+  };
+
+  return (
+    <div
+      className="flex items-center gap-4 px-6 py-4 cursor-pointer transition-colors hover:bg-gray-50 group"
+      style={{ borderBottom: "1px solid #f3f4f6" }}
+      onClick={onClick}
+    >
+      {/* Platform icon */}
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
+        style={{ background: getPlatformBg(platformId) }}
+      >
+        <PlatformIcon platform={platformId} className="w-5 h-5 text-white" />
+      </div>
+
+      {/* Name + description */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[14px] font-semibold text-gray-900">{platform.name}</span>
+          {isConnected && !hasExpired && (
+            <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              {connectedAccounts.length > 1 ? `${connectedAccounts.length} accounts` : "Connected"}
+            </span>
+          )}
+          {isConnected && hasExpired && (
+            <span className="flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+              <AlertTriangle className="w-3 h-3" />
+              Expired
+            </span>
+          )}
+        </div>
+        <p className="text-[12px] text-gray-400 mt-0.5 truncate">{platform.description}</p>
+      </div>
+
+      {/* Chevron */}
+      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
+    </div>
+  );
+}
+
+// ─── Platform Detail Panel ────────────────────────────────────────────────────
+interface PlatformDetailProps {
+  platformId: PlatformId;
+  connectedAccounts: ConnectedAccount[];
+  onConnect: () => void;
+  onDisconnect: (id: number) => void;
+  isDisconnecting: boolean;
+  workspaceId?: number;
+  onBack: () => void;
+}
+
+function PlatformDetail({
+  platformId, connectedAccounts, onConnect, onDisconnect,
+  isDisconnecting, workspaceId, onBack,
+}: PlatformDetailProps) {
+  const platform    = getPlatform(platformId);
+  const isConnected = connectedAccounts.length > 0;
+
+  const handleOAuthConnect = () => {
+    const origin     = window.location.origin;
+    const returnPath = "/connections";
+    const initPath   = platform.oauthInitPath ?? `/api/oauth/${platformId}/init`;
+    const wsId       = workspaceId ?? "";
+    const oauthUrl   = `${origin}${initPath}?origin=${encodeURIComponent(origin)}&returnPath=${encodeURIComponent(returnPath)}${wsId ? `&workspaceId=${wsId}` : ""}`;
+    const popup = window.open(oauthUrl, `oauth_${platformId}`, "width=600,height=700,scrollbars=yes,resizable=yes");
+    if (!popup || popup.closed || typeof popup.closed === "undefined") {
+      window.location.href = oauthUrl;
+      return;
+    }
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        window.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: platformId } }));
+      }
+    }, 500);
+  };
+
+  const handleConnect = () => {
+    if (platform.connectionType === "oauth") handleOAuthConnect();
+    else onConnect();
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="px-6 pt-5 pb-4 flex items-center gap-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
+        <button
+          onClick={onBack}
+          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
+        >
+          <ChevronRight className="w-4 h-4 rotate-180" />
+        </button>
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: getPlatformBg(platformId) }}
+        >
+          <PlatformIcon platform={platformId} className="w-4.5 h-4.5 text-white" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-[15px] font-semibold text-gray-900">{platform.name}</h3>
+          <p className="text-[12px] text-gray-400">{platform.description}</p>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+        {/* Connected accounts */}
+        {isConnected && (
+          <div className="mb-5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Connected Accounts</p>
+            <div className="space-y-2">
+              {connectedAccounts.map((acc) => {
+                const isExpired = acc.tokenExpiresAt && new Date(acc.tokenExpiresAt) < new Date();
+                return (
+                  <div
+                    key={acc.id}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100"
+                  >
+                    {acc.profilePicture ? (
+                      <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-[12px] font-bold">
+                        {(acc.name ?? platform.name).charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-gray-800 truncate">{acc.name ?? acc.username ?? "Account"}</p>
+                      {acc.username && acc.username !== acc.name && (
+                        <p className="text-[11px] text-gray-400 truncate">@{acc.username}</p>
+                      )}
+                    </div>
+                    {isExpired ? (
+                      <span className="text-[11px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Expired</span>
+                    ) : (
+                      <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Active</span>
+                    )}
+                    <button
+                      onClick={() => onDisconnect(acc.id)}
+                      disabled={isDisconnecting}
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                      title="Disconnect"
+                    >
+                      {isDisconnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Connect button */}
+        <button
+          onClick={handleConnect}
+          className="w-full py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+          style={{ background: getPlatformBg(platformId), color: "#fff" }}
+        >
+          {isConnected ? `+ Add Another ${platform.name} Account` : `Connect ${platform.name}`}
+        </button>
+
+        {/* Features */}
+        <div className="mt-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Features</p>
+          <div className="flex flex-wrap gap-2">
+            {platform.features.map((f) => (
+              <span key={f} className="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium capitalize">
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Docs link */}
+        {platform.docsUrl && (
+          <a
+            href={platform.docsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex items-center gap-2 text-[12px] text-blue-500 hover:text-blue-700 transition-colors"
+          >
+            View documentation
+            <ChevronRight className="w-3.5 h-3.5" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getPlatformBg(platformId: PlatformId): string {
+  const map: Record<PlatformId, string> = {
+    facebook:  "#1877F2",
+    instagram: "linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)",
+    tiktok:    "#010101",
+    twitter:   "#000000",
+    linkedin:  "#0A66C2",
+    youtube:   "#FF0000",
+    snapchat:  "#FFFC00",
+    pinterest: "#E60023",
+  };
+  return map[platformId] ?? "#6b7280";
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Connections() {
-  usePageTitle("Connections");
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
-  const { t } = useTranslation();
-  const [manualPlatform, setManualPlatform] = useState<PlatformId | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [manualPlatform, setManualPlatform]   = useState<PlatformId | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformId | null>(null);
 
   const { data: accounts = [], isLoading } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
-
-  // ── Selection helpers ──
-  const toggleSelect = useCallback((id: number) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const toggleSelectAll = useCallback((platformAccounts: ConnectedAccount[]) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      const allSelected = platformAccounts.every(a => next.has(a.id));
-      if (allSelected) platformAccounts.forEach(a => next.delete(a.id));
-      else platformAccounts.forEach(a => next.add(a.id));
-      return next;
-    });
-  }, []);
-
-  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
-
-  // Clear stale selections when accounts change
-  const accountIdKey = useMemo(() => accounts.map(a => a.id).sort().join(','), [accounts]);
-  useEffect(() => {
-    setSelectedIds(prev => {
-      if (prev.size === 0) return prev;
-      const accountIds = new Set(accounts.map(a => a.id));
-      const next = new Set<number>();
-      prev.forEach(id => { if (accountIds.has(id)) next.add(id); });
-      if (next.size === prev.size) return prev;
-      return next;
-    });
-  }, [accountIdKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── OAuth event listeners ──
   useEffect(() => {
@@ -94,11 +304,9 @@ export default function Connections() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isPopup = window.opener && window.opener !== window;
-
     const metaConnected = params.get("meta_connected");
     const metaError     = params.get("meta_error");
     const summary       = params.get("summary");
-
     if (metaConnected) {
       const msg = summary ? `Connected: ${decodeURIComponent(summary)}` : "Accounts connected successfully!";
       if (isPopup) {
@@ -106,8 +314,7 @@ export default function Connections() {
           window.opener.dispatchEvent(new CustomEvent("oauth-complete", { detail: { platform: "meta", success: true } }));
           window.opener.postMessage({ type: "oauth-complete", platform: "meta", success: true, summary }, "*");
         } catch { /* cross-origin safety */ }
-        window.close();
-        return;
+        window.close(); return;
       }
       toast.success(msg);
       utils.social.list.invalidate();
@@ -120,26 +327,22 @@ export default function Connections() {
         : `Meta connection failed: ${decodeURIComponent(metaError)}`;
       if (isPopup) {
         try { window.opener.postMessage({ type: "oauth-complete", platform: "meta", success: false, error: metaError }, "*"); } catch { /* */ }
-        window.close();
-        return;
+        window.close(); return;
       }
       toast.error(errMsg);
       window.history.replaceState({}, "", window.location.pathname);
       return;
     }
-
     const oauthSuccess = params.get("oauth_success");
     const oauthError   = params.get("oauth_error");
     const platform     = params.get("platform");
     const name         = params.get("name");
-
     if (oauthSuccess && platform) {
       const platformName = getPlatform(platform).name;
       const displayName  = name ? ` (${decodeURIComponent(name)})` : "";
       if (isPopup) {
         try { window.opener.postMessage({ type: "oauth-complete", platform, success: true, name }, "*"); } catch { /* */ }
-        window.close();
-        return;
+        window.close(); return;
       }
       toast.success(`${platformName}${displayName} connected successfully!`);
       utils.social.list.invalidate();
@@ -147,55 +350,26 @@ export default function Connections() {
     } else if (oauthError && platform) {
       if (isPopup) {
         try { window.opener.postMessage({ type: "oauth-complete", platform, success: false, error: oauthError }, "*"); } catch { /* */ }
-        window.close();
-        return;
+        window.close(); return;
       }
       const platformCfg  = getPlatform(platform);
-      const platformName = platformCfg.name;
       if (oauthError === "not_configured") {
-        const keyName = platform.toUpperCase();
         toast.error(
-          `${platformName} OAuth not configured. Add ${keyName}_CLIENT_ID and ${keyName}_CLIENT_SECRET in Settings → Secrets.`,
-          { duration: 10000, action: platformCfg.docsUrl ? { label: "View Docs", onClick: () => window.open(platformCfg.docsUrl, "_blank") } : undefined }
+          `${platformCfg.name} OAuth not configured. Add ${platform.toUpperCase()}_CLIENT_ID and ${platform.toUpperCase()}_CLIENT_SECRET in Settings → Secrets.`,
+          { duration: 10000 }
         );
       } else {
-        toast.error(`${platformName} connection failed: ${decodeURIComponent(oauthError)}`, { duration: 8000 });
+        toast.error(`${platformCfg.name} connection failed: ${decodeURIComponent(oauthError)}`, { duration: 8000 });
       }
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Mutations ──
-  const healthCheck = trpc.social.healthCheck.useMutation({
-    onSuccess: (res) => {
-      utils.social.list.invalidate();
-      const ok  = res.filter((r) => r.valid).length;
-      const bad = res.filter((r) => !r.valid).length;
-      if (bad > 0) toast.warning(`Health check: ${ok} OK, ${bad} need re-authentication`);
-      else toast.success(`All ${ok} connection${ok !== 1 ? "s" : ""} are healthy!`);
-    },
-    onError: () => toast.error(t("common.error")),
-  });
-
   const disconnectMutation = trpc.social.disconnect.useMutation({
     onSuccess: () => { toast.success("Account disconnected"); utils.social.list.invalidate(); },
     onError: (err) => toast.error(err.message),
   });
-
-  const bulkDisconnectMutation = trpc.social.bulkDisconnect.useMutation({
-    onSuccess: (res) => {
-      toast.success(`${res.deleted} account${res.deleted > 1 ? "s" : ""} disconnected`);
-      clearSelection();
-      utils.social.list.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const handleBulkDisconnect = useCallback(() => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
-    bulkDisconnectMutation.mutate({ ids });
-  }, [selectedIds, bulkDisconnectMutation]);
 
   // ── Group accounts by platform ──
   const accountsByPlatform = useMemo(() => {
@@ -219,175 +393,77 @@ export default function Connections() {
     return grouped;
   }, [accounts]);
 
-  const totalConnected    = accounts.length;
-  const connectedPlatforms = Object.keys(accountsByPlatform).length;
-  const expiredCount      = accounts.filter((a) => {
-    const exp = a.token_expires_at;
-    return exp && new Date(exp) < new Date();
-  }).length;
+  // ── If a platform is selected, show detail panel ──
+  if (selectedPlatform) {
+    return (
+      <>
+        <PlatformDetail
+          platformId={selectedPlatform}
+          connectedAccounts={accountsByPlatform[selectedPlatform] ?? []}
+          onConnect={() => {
+            const p = getPlatform(selectedPlatform);
+            if (p.connectionType !== "oauth") setManualPlatform(selectedPlatform);
+          }}
+          onDisconnect={(id) => disconnectMutation.mutate({ id })}
+          isDisconnecting={disconnectMutation.isPending}
+          workspaceId={activeWorkspace?.id}
+          onBack={() => setSelectedPlatform(null)}
+        />
+        {manualPlatform && (
+          <ManualConnectModal
+            platformId={manualPlatform}
+            onClose={() => setManualPlatform(null)}
+            onConnected={() => utils.social.list.invalidate()}
+          />
+        )}
+      </>
+    );
+  }
 
+  // ── Main list view ──
   return (
     <>
       <div className="flex flex-col h-full">
-      {/* Modal header */}
-      <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Connections</h2>
-        <p className="text-[13px] mt-0.5 text-gray-400">Connect your social media accounts to unlock analytics and campaign management.</p>
-      </div>
-      <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5 animate-fade-in">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="page-header">{t("connections.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Connect your social media accounts to unlock analytics, publishing, and campaign management.
-            </p>
-          </div>
-          {totalConnected > 0 && (
-            <div className="flex items-center gap-4 shrink-0">
-              <button onClick={() => healthCheck.mutate()} disabled={healthCheck.isPending}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-background hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all">
-                {healthCheck.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Activity className="w-3.5 h-3.5" />}
-                {t("connections.healthCheck", "Health Check")}
-              </button>
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{connectedPlatforms}</p>
-                  <p className="text-xs text-muted-foreground">Platforms</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{totalConnected}</p>
-                  <p className="text-xs text-muted-foreground">Accounts</p>
-                </div>
-                {expiredCount > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-red-500">{expiredCount}</p>
-                    <p className="text-xs text-muted-foreground">Expired</p>
-                  </div>
-                )}
-              </div>
+        {/* Modal header */}
+        <div className="px-6 pt-6 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
+          <h2 className="text-[17px] font-semibold text-gray-900">Connections</h2>
+        </div>
+
+        {/* Platform list */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="px-6 py-8 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
+            </div>
+          ) : (
+            <div>
+              {PLATFORMS.map((p) => (
+                <PlatformRow
+                  key={p.id}
+                  platformId={p.id}
+                  connectedAccounts={accountsByPlatform[p.id] ?? []}
+                  onConnect={() => setManualPlatform(p.id)}
+                  onDisconnect={(id) => disconnectMutation.mutate({ id })}
+                  isDisconnecting={disconnectMutation.isPending}
+                  workspaceId={activeWorkspace?.id}
+                  onClick={() => setSelectedPlatform(p.id)}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        {/* Info banner */}
-        <div className="rounded-2xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex items-start gap-3">
-          <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300">Secure OAuth 2.0 Connections</p>
-            <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-0.5">
-              Facebook, Instagram, Twitter/X, TikTok, LinkedIn, and YouTube use OAuth 2.0 - no password sharing.
-              Snapchat and Pinterest use API access tokens. Credentials are stored securely and never shared.
-            </p>
-          </div>
+        {/* Add connectors footer */}
+        <div className="px-6 py-4" style={{ borderTop: "1px solid #f0f0f0" }}>
+          <button
+            onClick={() => toast.info("More connectors coming soon")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add connectors
+          </button>
         </div>
-
-        {/* Expired tokens warning */}
-        {expiredCount > 0 && (
-          <div className="rounded-2xl border border-red-200/60 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-            <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs font-semibold text-red-800 dark:text-red-300">
-                {expiredCount} account{expiredCount > 1 ? "s" : ""} need re-authentication
-              </p>
-              <p className="text-xs text-red-700/80 dark:text-red-400/80 mt-0.5">
-                Click "Refresh" on the expired accounts below to reconnect and restore access.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {totalConnected === 0 && !isLoading && (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-              <Globe className="w-7 h-7 text-muted-foreground/50" />
-            </div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">No accounts connected yet</h3>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              Connect your social media accounts below to start tracking analytics and publishing content.
-            </p>
-          </div>
-        )}
-
-        {/* Connected platforms summary chips */}
-        {totalConnected > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {Object.keys(accountsByPlatform).map((pid) => {
-              const p = getPlatform(pid);
-              return (
-                <div key={pid} className={"flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium " + p.bgLight + " " + p.textColor}>
-                  <PlatformIcon platform={pid} className="w-3.5 h-3.5" />
-                  {p.name}
-                  <span className="opacity-60">· {accountsByPlatform[pid].length}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Platform grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => <PlatformCardSkeleton key={i} />)}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {connectedPlatforms > 0 && (
-              <div>
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5 text-emerald-500" />
-                  Connected ({connectedPlatforms})
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PLATFORMS.filter((p) => accountsByPlatform[p.id]).map((p) => (
-                    <PlatformCard
-                      key={`connected-${p.id}`} platformId={p.id}
-                      connectedAccounts={accountsByPlatform[p.id] ?? []}
-                      onConnect={() => { if (p.connectionType !== "oauth") setManualPlatform(p.id); }}
-                      onDisconnect={(id) => disconnectMutation.mutate({ id })}
-                      isDisconnecting={disconnectMutation.isPending}
-                      workspaceId={activeWorkspace?.id}
-                      selectedIds={selectedIds}
-                      onToggleSelect={toggleSelect}
-                      onToggleSelectAll={toggleSelectAll}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5" />
-                Available Platforms ({PLATFORMS.filter((p) => !accountsByPlatform[p.id]).length})
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PLATFORMS.filter((p) => !accountsByPlatform[p.id]).map((p) => (
-                  <PlatformCard
-                    key={`available-${p.id}`} platformId={p.id}
-                    connectedAccounts={[]}
-                    onConnect={() => { if (p.connectionType !== "oauth") setManualPlatform(p.id); }}
-                    onDisconnect={() => {}} isDisconnecting={false}
-                    workspaceId={activeWorkspace?.id}
-                    selectedIds={selectedIds}
-                    onToggleSelect={toggleSelect}
-                    onToggleSelectAll={toggleSelectAll}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-      </div>
-
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        onClearSelection={clearSelection}
-        onBulkDisconnect={handleBulkDisconnect}
-        isDisconnecting={bulkDisconnectMutation.isPending}
-      />
 
       {manualPlatform && (
         <ManualConnectModal
