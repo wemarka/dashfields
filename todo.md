@@ -2383,3 +2383,10 @@
 - [x] إصلاح useEffect في DashboardLayout: إزالة location من dependency array
 - [x] استخدام wouter navigate بدلاً من window.location.href في main.tsx
 - [x] التأكد من أن جميع الصفحات تُحمَّل بدون full page reload (SPA behavior)
+
+## ✅ Phase 92 — Redesign Integrations Modal (Global + Meta Grouping)
+- [x] دمج Facebook + Instagram تحت منصة Meta واحدة
+- [x] تصميم جديد: sidebar layout عمودي للمنصات + محتوى على اليمين
+- [x] عرض حسابات Meta (Facebook + Instagram) في نفس البطاقة
+- [x] تحسين UX: أزرار Connect أوضح، حالات loading أفضل
+- [x] إزالة Info banner المزدحم واستبداله بتصميم أنظف مع summary stats
