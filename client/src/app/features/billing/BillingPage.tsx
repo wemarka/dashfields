@@ -237,7 +237,7 @@ export function BillingPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 max-w-6xl mx-auto">
+    <div className="px-8 py-6 space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

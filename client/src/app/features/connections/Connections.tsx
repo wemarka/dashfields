@@ -228,7 +228,7 @@ export default function Connections() {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto p-6 space-y-6 animate-fade-in">
+      <div className="px-8 py-6 space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>

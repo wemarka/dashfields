@@ -1,7 +1,8 @@
 /**
- * GlobalSettingsModal — Manus-style two-pane settings modal.
- * Left: fixed sidebar with logo + nav items.
- * Right: content area that renders the active tab's component.
+ * GlobalSettingsModal — Wide landscape two-pane settings modal.
+ * Layout: w-full max-w-5xl min-h-[650px] flex flex-row
+ * Left sidebar: fixed w-64, subtle bg-gray-50, border-r
+ * Right content: flex-1 bg-white p-8, FLAT design (no nested cards)
  *
  * Tabs: Account · Settings · Billing · Connections · Integrations · Brand Kit
  */
@@ -12,7 +13,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/core/components/ui/dialog";
-import { Loader2, User, Settings2, CreditCard, Link2, Plug, Palette, HelpCircle, ExternalLink, ChevronRight } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Settings2,
+  CreditCard,
+  Link2,
+  Plug,
+  Palette,
+  HelpCircle,
+  ExternalLink,
+  ChevronRight,
+} from "lucide-react";
 import { useDarkMode } from "@/app/components/layout-parts";
 import { toast } from "sonner";
 
@@ -102,43 +114,51 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
   );
 }
 
-// ─── Integrations placeholder (inline list, no nested modal) ─────────────────
+// ─── Integrations placeholder ─────────────────────────────────────────────────
 function IntegrationsPlaceholder() {
   return (
-    <div className="p-6 space-y-2">
-      <h2 className="text-xl font-semibold text-foreground mb-1">Integrations</h2>
-      <p className="text-sm text-muted-foreground mb-6">Connect external platforms and services to Dashfields.</p>
-      {[
-        { name: "Meta (Facebook & Instagram)", desc: "Facebook Pages, Instagram Business, and Ads Manager", color: "bg-blue-500" },
-        { name: "TikTok", desc: "Publish short-form videos and manage TikTok Ads campaigns", color: "bg-black dark:bg-white/10" },
-        { name: "X (Twitter)", desc: "Post tweets, manage Spaces, and run X Ads", color: "bg-black dark:bg-white/10" },
-        { name: "LinkedIn", desc: "Manage company pages, publish posts, and run LinkedIn Ads", color: "bg-[#0077B5]" },
-        { name: "YouTube", desc: "Track channel analytics, manage videos, and run YouTube Ads", color: "bg-red-600" },
-        { name: "Snapchat", desc: "Run Snap Ads and analyze audience insights", color: "bg-yellow-400" },
-        { name: "Pinterest", desc: "Manage pins, boards, and run Pinterest Ads", color: "bg-red-500" },
-      ].map((item) => (
-        <button
-          key={item.name}
-          onClick={() => toast.info("Use the Connections tab to manage platform accounts")}
-          className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-muted/40 transition-colors text-left group border-b border-border/20 last:border-0"
-        >
-          <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center shrink-0`}>
-            <Plug className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-semibold text-foreground">{item.name}</p>
-            <p className="text-sm text-muted-foreground">{item.desc}</p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground/80 group-hover:translate-x-0.5 transition-all" />
-        </button>
-      ))}
+    <div className="px-8 py-6">
+      <h2 className="text-2xl font-semibold text-foreground mb-1">Integrations</h2>
+      <p className="text-sm text-muted-foreground mb-6">
+        Connect external platforms and services to Dashfields.
+      </p>
+
+      <hr className="my-6 border-gray-100 dark:border-border/30" />
+
+      <h3 className="text-lg font-medium text-foreground mb-4">Available Platforms</h3>
+      <div className="space-y-1">
+        {[
+          { name: "Meta (Facebook & Instagram)", desc: "Facebook Pages, Instagram Business, and Ads Manager", color: "bg-blue-500" },
+          { name: "TikTok", desc: "Publish short-form videos and manage TikTok Ads campaigns", color: "bg-black dark:bg-white/10" },
+          { name: "X (Twitter)", desc: "Post tweets, manage Spaces, and run X Ads", color: "bg-black dark:bg-white/10" },
+          { name: "LinkedIn", desc: "Manage company pages, publish posts, and run LinkedIn Ads", color: "bg-[#0077B5]" },
+          { name: "YouTube", desc: "Track channel analytics, manage videos, and run YouTube Ads", color: "bg-red-600" },
+          { name: "Snapchat", desc: "Run Snap Ads and analyze audience insights", color: "bg-yellow-400" },
+          { name: "Pinterest", desc: "Manage pins, boards, and run Pinterest Ads", color: "bg-red-500" },
+        ].map((item) => (
+          <button
+            key={item.name}
+            onClick={() => toast.info("Use the Connections tab to manage platform accounts")}
+            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-muted/40 transition-colors text-left group"
+          >
+            <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center shrink-0`}>
+              <Plug className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">{item.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground/80 group-hover:translate-x-0.5 transition-all" />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
 function ComingSoonPlaceholder({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full py-24 text-center">
+    <div className="flex flex-col items-center justify-center h-full py-24 text-center px-8">
       <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
         <Palette className="w-7 h-7 text-muted-foreground" />
       </div>
@@ -156,7 +176,11 @@ interface GlobalSettingsModalProps {
   initialTab?: TabId;
 }
 
-export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account" }: GlobalSettingsModalProps) {
+export function GlobalSettingsModal({
+  open,
+  onOpenChange,
+  initialTab = "account",
+}: GlobalSettingsModalProps) {
   const { dark } = useDarkMode();
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
@@ -165,21 +189,37 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
     if (open) setActiveTab(initialTab);
   }, [open, initialTab]);
 
-  const activeTabDef = TABS.find(t => t.id === activeTab)!;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {/*
+       * WIDE LANDSCAPE MODAL
+       * - w-full max-w-5xl  → genuinely wide (960px)
+       * - min-h-[650px]     → tall enough for content
+       * - p-0 gap-0         → no default padding/gap from DialogContent
+       * - flex flex-row     → sidebar | content side-by-side
+       */}
       <DialogContent
-        className="max-w-[960px] w-full p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden"
-        style={{ minHeight: 560, maxHeight: "88vh" }}
+        showCloseButton={true}
+        className="w-full max-w-5xl p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl overflow-hidden"
+        style={{ minHeight: 650, maxHeight: "90vh" }}
       >
         <DialogTitle className="sr-only">Settings</DialogTitle>
-        <DialogDescription className="sr-only">Manage your account, settings, billing, and integrations.</DialogDescription>
+        <DialogDescription className="sr-only">
+          Manage your account, settings, billing, and integrations.
+        </DialogDescription>
 
-        <div className="flex h-full overflow-hidden" style={{ minHeight: 560, maxHeight: "88vh" }}>
-
-          {/* ── Left Sidebar ── */}
-          <aside className="w-56 shrink-0 flex flex-col border-r border-border/20 bg-muted/20 overflow-hidden">
+        {/* ── Two-pane flex container ── */}
+        <div
+          className="flex flex-row w-full overflow-hidden"
+          style={{ minHeight: 650, maxHeight: "90vh" }}
+        >
+          {/* ────────────────────────────────────────────────────────────────
+              LEFT SIDEBAR
+              - Fixed width: w-64
+              - Subtle background: bg-gray-50 / dark:bg-muted/20
+              - Single right border: border-r border-border/20
+          ──────────────────────────────────────────────────────────────── */}
+          <aside className="w-64 shrink-0 flex flex-col border-r border-border/20 bg-gray-50 dark:bg-muted/20 overflow-hidden">
             {/* Logo */}
             <div className="px-5 py-5 border-b border-border/10 shrink-0">
               <img
@@ -189,7 +229,7 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
               />
             </div>
 
-            {/* Nav */}
+            {/* Navigation */}
             <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
@@ -205,14 +245,21 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
                       setActiveTab(tab.id);
                     }}
                     className={[
-                      "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left",
+                      "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all text-left",
                       isActive
-                        ? "bg-background shadow-sm font-semibold text-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/60",
+                        ? "bg-white dark:bg-background shadow-sm font-semibold text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/70 dark:hover:bg-background/60",
                       !tab.available && "opacity-50 cursor-not-allowed",
-                    ].filter(Boolean).join(" ")}
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                   >
-                    <Icon className={["w-4 h-4 shrink-0", isActive ? "text-primary" : ""].join(" ")} />
+                    <Icon
+                      className={[
+                        "w-4 h-4 shrink-0",
+                        isActive ? "text-primary" : "",
+                      ].join(" ")}
+                    />
                     <span className="truncate">{tab.label}</span>
                     {!tab.available && (
                       <span className="ml-auto text-[10px] font-medium text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded-full">
@@ -228,7 +275,7 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
             <div className="px-3 py-3 border-t border-border/10 shrink-0">
               <button
                 onClick={() => toast.info("Help center coming soon")}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-background/60 transition-all text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/70 dark:hover:bg-background/60 transition-all text-left"
               >
                 <HelpCircle className="w-4 h-4 shrink-0" />
                 <span>Get help</span>
@@ -237,16 +284,15 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
             </div>
           </aside>
 
-          {/* ── Right Content ── */}
+          {/* ────────────────────────────────────────────────────────────────
+              RIGHT CONTENT AREA
+              - flex-1 bg-white (or bg-background in dark mode)
+              - FLAT design: NO nested cards, NO borders around sub-sections
+              - Section title: text-2xl font-semibold
+              - Sub-sections: h3 text-lg font-medium + <hr> separators
+          ──────────────────────────────────────────────────────────────── */}
           <div className="flex-1 flex flex-col overflow-hidden bg-background">
-            {/* Content header */}
-            <div className="px-8 pt-7 pb-0 shrink-0">
-              <h2 className="text-xl font-semibold text-foreground">{activeTabDef.label}</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">{activeTabDef.description}</p>
-              <div className="mt-5 border-b border-border/20" />
-            </div>
-
-            {/* Scrollable content */}
+            {/* Scrollable content — the tab components handle their own padding */}
             <div className="flex-1 overflow-y-auto">
               <TabContent activeTab={activeTab} />
             </div>
