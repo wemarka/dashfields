@@ -43,7 +43,6 @@ import { DemoBanner } from "./app/components/DemoBanner";
   "/analytics/competitors",
   "/analytics/reports",
   // Settings
-  "/settings/integrations",
   "/settings/workspace",
   "/settings/billing",
   // Other app pages
@@ -94,7 +93,7 @@ const PaidOrganicPage  = lazy(() => import("./app/pages/analytics/PaidOrganicPag
 const CompetitorsPage  = lazy(() => import("./app/pages/analytics/CompetitorsPage"));
 const ReportsPage      = lazy(() => import("./app/pages/analytics/ReportsPage"));
 // Settings
-const IntegrationsPage  = lazy(() => import("./app/pages/settings/IntegrationsPage"));
+// IntegrationsPage removed — now shown as Coming Soon inside Settings Modal
 const WorkspaceTeamPage = lazy(() => import("./app/pages/settings/WorkspaceTeamPage"));
 const SettingsBillingPage = lazy(() => import("./app/pages/settings/BillingPage"));
 /// ─── Website pages (dashfields.com — public marketing site) ─────────────────────
@@ -206,8 +205,7 @@ function AppRouter() {
               <Route path="/analytics/competitors"  component={CompetitorsPage} />
               <Route path="/analytics/reports"      component={ReportsPage} />
               {/* ── Settings sub-pages ─────────────────────────────────────── */}
-              <Route path="/settings"               component={() => <Redirect to="/settings/integrations" />} />
-              <Route path="/settings/integrations"  component={IntegrationsPage} />
+              <Route path="/settings"               component={() => <Redirect to="/dashboard" />} />
               <Route path="/settings/workspace"     component={WorkspaceTeamPage} />
               <Route path="/settings/billing"       component={SettingsBillingPage} />
               {/* ── Standalone app routes ──────────────────────────────────── */}
@@ -237,7 +235,7 @@ function AppRouter() {
               <Route path="/reports"                component={() => <Redirect to="/analytics/reports" />} />
               <Route path="/advanced-analytics"     component={() => <Redirect to="/analytics/paid-organic" />} />
               <Route path="/compare"                component={() => <Redirect to="/analytics/paid-organic" />} />
-              <Route path="/connections"            component={() => <Redirect to="/settings/integrations" />} />
+              <Route path="/connections"            component={() => <Redirect to="/dashboard" />} />
               <Route path="/workspace-settings"     component={() => <Redirect to="/settings/workspace" />} />
               <Route path="/team"                   component={() => <Redirect to="/settings/workspace" />} />
               <Route path="/billing"                component={() => <Redirect to="/settings/billing" />} />

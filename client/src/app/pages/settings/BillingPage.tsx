@@ -1,2 +1,3 @@
 // BillingPage — standalone page at /settings/billing
-export { default } from "@/app/features/settings-hub/tabs/BillingTab";
+import { BillingPage as BillingPageComponent } from "@/app/features/billing/BillingPage";
+export default BillingPageComponent;

@@ -69,47 +69,20 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
 
 // ─── Integrations tab content ─────────────────────────────────────────────────
 function IntegrationsContent() {
-  const integrations = [
-    { name: "Meta Ads Manager",  desc: "Automate ads insights and optimization to save hours and maximize profits", color: "#0866FF", letter: "M" },
-    { name: "TikTok Ads",        desc: "Manage TikTok campaigns and analytics",                                    color: "#010101", letter: "T" },
-    { name: "Google Ads",        desc: "Track and optimize Google advertising spend",                              color: "#4285F4", letter: "G" },
-    { name: "LinkedIn Ads",      desc: "Run and analyze LinkedIn ad campaigns",                                    color: "#0077B5", letter: "L" },
-    { name: "Snapchat Ads",      desc: "Manage Snap campaigns and audience insights",                              color: "#FFFC00", letter: "S" },
-    { name: "Pinterest Ads",     desc: "Track pins, boards, and Pinterest campaigns",                              color: "#E60023", letter: "P" },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-7 pt-6 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
         <h2 className="text-[17px] font-semibold text-gray-900">Integrations</h2>
-        <p className="text-[13px] text-gray-400 mt-0.5">Build workflows across your favorite apps</p>
       </div>
-      <div className="flex-1 overflow-y-auto px-7 py-5">
-        <div className="grid grid-cols-2 gap-3">
-          {integrations.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => toast.info("Use the Connections tab to manage platform accounts")}
-              className="flex items-start gap-3 p-4 rounded-xl border text-left group transition-all hover:shadow-sm"
-              style={{ backgroundColor: "#fafafa", border: "1px solid #ebebeb" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f5f5f5"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#ddd"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fafafa"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#ebebeb"; }}
-            >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold"
-                style={{ backgroundColor: item.color, color: item.color === "#FFFC00" ? "#000" : "#fff" }}
-              >
-                {item.letter}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-gray-800">{item.name}</p>
-                <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{item.desc}</p>
-                <p className="text-[12px] text-blue-500 mt-2 group-hover:text-blue-600 transition-colors">Go to configure &gt;</p>
-              </div>
-            </button>
-          ))}
+      <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+          <Plug className="w-6 h-6 text-gray-400" />
         </div>
+        <h3 className="text-[15px] font-semibold text-gray-800 mb-1">Coming Soon</h3>
+        <p className="text-[13px] text-gray-400 max-w-[220px] leading-relaxed">
+          Integrations with your favorite apps are on the way.
+        </p>
       </div>
     </div>
   );
