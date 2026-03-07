@@ -2307,4 +2307,4 @@
 ## ✅ Phase 78 — DrawerHeader Cleanup
 - [x] Remove Daily Budget progress bar (BudgetBar) from DrawerHeader Row 2
 - [x] Keep InlineBudgetEditor in Row 3 (Quick Actions)
-- [x] Move Health Score circle to left side next to platform logo
+- [x] Move Health Score circle inline after campaign name (right side of title row)

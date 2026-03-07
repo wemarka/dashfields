@@ -208,25 +208,26 @@ export function DrawerHeader({
   return (
     <div className="border-b border-border bg-background">
 
-      {/* ── Row 1: Platform + Title + Health Score (left) ── */}
+      {/* ── Row 1: Platform + Campaign Info + Health Score inline ── */}
       <div className="px-5 pt-4 pb-3 flex items-start gap-3">
         {/* Platform logo */}
         <div className="mt-0.5 shrink-0">
           <PlatformLogo platform={campaign?.platform} size={28} />
         </div>
 
-        {/* Health Score — left side, next to campaign info */}
-        {insight && (
-          <div className="mt-0.5 shrink-0">
-            <HealthScoreCircle score={healthScore} />
-          </div>
-        )}
-
         {/* Campaign info */}
         <div className="flex-1 min-w-0">
-          <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground">
-            {campaign?.name ?? "Campaign"}
-          </SheetTitle>
+          {/* Name row: title + score side by side */}
+          <div className="flex items-center gap-2.5">
+            <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground flex-1 min-w-0">
+              {campaign?.name ?? "Campaign"}
+            </SheetTitle>
+            {insight && (
+              <div className="shrink-0">
+                <HealthScoreCircle score={healthScore} />
+              </div>
+            )}
+          </div>
           <SheetDescription asChild>
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               {campaign?.status && <StatusBadge status={campaign.status} />}
