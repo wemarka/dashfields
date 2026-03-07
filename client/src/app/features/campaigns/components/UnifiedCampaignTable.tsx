@@ -82,7 +82,6 @@ function OpportunityBadge({ score }: { score: number }) {
               strokeDasharray={`${filled} ${circ}`}
               style={{
                 transition: "stroke-dasharray 0.8s cubic-bezier(0.34,1.56,0.64,1)",
-                filter: `drop-shadow(0 0 3px ${color}88)`,
               }}
             />
           </svg>
