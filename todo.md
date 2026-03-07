@@ -2405,3 +2405,10 @@
 - [x] ربط كل tab بالمحتوى الموجود (Profile, Settings, BillingPage, Connections, Integrations)
 - [x] استبدال AppSettingsModal بـ GlobalSettingsModal الموحّد
 - [x] تحديث DashboardLayout لفتح GlobalSettingsModal مع tab محدد
+
+## ✅ Phase 95 — Cleanup & Sidebar Settings Button
+- [x] حذف AppSettingsModal.tsx (استُبدل بـ GlobalSettingsModal)
+- [x] حذف IntegrationsModal.tsx (مدمج داخل GlobalSettingsModal)
+- [x] استبدال زر Integrations في الـ Sidebar بأيقونة Settings
+- [x] إزالة import وstate الخاصة بـ IntegrationsModal من DashboardLayout
+- [x] إعادة تشغيل الـ dev server لتنظيف Vite cache

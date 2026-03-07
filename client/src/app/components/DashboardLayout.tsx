@@ -3,7 +3,7 @@
  * Sub-components live in ./layout-parts/ for maintainability.
  */
 import { useAuth } from "@/shared/hooks/useAuth";
-import { IntegrationsModal } from "@/app/components/IntegrationsModal";
+
 import { GlobalSettingsModal, type SettingsTabId } from "@/app/components/GlobalSettingsModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { MobileBottomNav } from "@/app/components/MobileBottomNav";
@@ -95,7 +95,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [showIntegrations, setShowIntegrations] = useState(false);
+
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>("account");
   const openSettings = (tab: SettingsTabId = "account") => { setSettingsInitialTab(tab); setShowGlobalSettings(true); };
@@ -342,12 +342,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Integrations pinned at bottom */}
+        {/* Settings pinned at bottom */}
         <div className="px-2 pb-3 shrink-0">
           <div className="h-px bg-border/30 mx-1 mb-2" />
           {(() => {
-            const intBtn = (
-              <button onClick={() => setShowIntegrations(true)}
+            const settingsBtn = (
+              <button onClick={() => openSettings("account")}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                   "transition-all duration-200 group relative",
@@ -356,23 +356,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   collapsed ? "justify-center" : "",
                 ].join(" ")}>
                 <svg className="w-[18px] h-[18px] shrink-0 transition-all duration-200 text-foreground/40 group-hover:text-foreground/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
                 {!collapsed && (
                   <span
                     className="truncate flex-1"
                     style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
-                  >{t("nav.integrations")}</span>
+                  >{t("nav.settings", "Settings")}</span>
                 )}
               </button>
             );
             return collapsed ? (
               <Tooltip>
-                <TooltipTrigger asChild>{intBtn}</TooltipTrigger>
-                <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t("nav.integrations")}</TooltipContent>
+                <TooltipTrigger asChild>{settingsBtn}</TooltipTrigger>
+                <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t("nav.settings", "Settings")}</TooltipContent>
               </Tooltip>
-            ) : intBtn;
+            ) : settingsBtn;
           })()}
         </div>
 
@@ -474,7 +474,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)}
         currentPlan={(activeWorkspace?.plan as WorkspacePlan) ?? "free"} reason={upgradeReason} />
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
-      <IntegrationsModal open={showIntegrations} onOpenChange={setShowIntegrations} />
+
       <GlobalSettingsModal open={showGlobalSettings} onOpenChange={setShowGlobalSettings} initialTab={settingsInitialTab} />
     </div>
   );
