@@ -40,13 +40,10 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
 
   const handleCollapse = (val: boolean) => {
-    setIsAnimating(true);
     setCollapsed(val);
-    setTimeout(() => setIsAnimating(false), 300);
   };
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -176,10 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }
                   alt="Dashfields"
                   className="h-8 w-auto shrink-0 object-contain"
-                  style={{
-                    opacity: isAnimating ? 0 : 1,
-                    transition: 'opacity 180ms ease',
-                  }}
+  
                 />
               </div>
               {/* Collapse button — visible when expanded */}
@@ -215,7 +209,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 style={{
                   opacity: logoAreaHovered ? 0 : 1,
                   transform: logoAreaHovered ? 'scale(0.85)' : 'scale(1)',
-                  transition: 'opacity 180ms ease, transform 180ms ease',
                 }}
               />
               {/* Expand button — appears on hover */}
@@ -226,7 +219,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 style={{
                   opacity: logoAreaHovered ? 1 : 0,
                   transform: logoAreaHovered ? 'scale(1)' : 'scale(0.85)',
-                  transition: 'opacity 180ms ease, transform 180ms ease',
                   pointerEvents: logoAreaHovered ? 'auto' : 'none',
                 }}
               >
@@ -268,7 +260,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {!collapsed && (
                     <span
                       className="truncate flex-1"
-                      style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
                     >{t(item.labelKey)}</span>
                   )}
                 </button>
@@ -295,11 +286,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <>
                       <span
                         className="truncate flex-1"
-                        style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
                       >{t(item.labelKey)}</span>
                       <ChevronDown
-                        className={["w-3.5 h-3.5 text-foreground/30 transition-transform duration-200 shrink-0", isOpen ? "rotate-180" : ""].join(" ")}
-                        style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
+                        className={["w-3.5 h-3.5 text-foreground/30 shrink-0", isOpen ? "rotate-180" : ""].join(" ")}
                       />
                     </>
                   )}
