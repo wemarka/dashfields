@@ -476,15 +476,15 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl">
+        <DialogContent className="max-w-5xl w-full max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border/50 shadow-2xl">
           <DialogTitle className="sr-only">Integrations</DialogTitle>
 
           <div className="flex flex-1 overflow-hidden">
             {/* ── Left Sidebar ── */}
-            <div className="w-56 shrink-0 flex flex-col border-r border-border/20 bg-muted/20">
+            <div className="w-64 shrink-0 flex flex-col border-r border-border/20 bg-muted/20">
               {/* Logo */}
               <div className="px-5 py-5 border-b border-border/20">
-                <img src={logoFull} alt="Dashfields" className="h-6 w-auto object-contain" />
+                <img src={logoFull} alt="Dashfields" className="h-7 w-auto object-contain" />
               </div>
 
               {/* Nav */}
@@ -497,7 +497,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                       key={item.id}
                       onClick={() => { setActiveNav(item.id); setSelectedGroup(null); }}
                       className={[
-                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left",
+                        "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all text-left",
                         isActive
                           ? "bg-background shadow-sm font-medium text-foreground"
                           : "text-muted-foreground hover:text-foreground hover:bg-background/60",
@@ -586,27 +586,27 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                             <button
                               key={group.id}
                               onClick={() => setSelectedGroup(group)}
-                              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-all text-left group"
+                              className="w-full flex items-center gap-4 px-6 py-5 hover:bg-muted/30 transition-all text-left group"
                             >
                               <div className="shrink-0">{group.logo}</div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="text-sm font-semibold text-foreground">{group.name}</span>
                                   {isConnected && !hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
-                                      <CheckCircle2 className="w-2.5 h-2.5" />
+                                    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
+                                      <CheckCircle2 className="w-3 h-3" />
                                       {groupAccounts.length} connected
                                     </span>
                                   )}
                                   {hasExpired && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">
-                                      <AlertTriangle className="w-2.5 h-2.5" /> Expired
+                                    <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-semibold">
+                                      <AlertTriangle className="w-3 h-3" /> Expired
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground truncate">{group.description}</p>
+                                <p className="text-xs text-muted-foreground">{group.description}</p>
                               </div>
-                              <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
+                              <ChevronRight className="w-5 h-5 text-muted-foreground/30 group-hover:text-muted-foreground/70 transition-colors shrink-0" />
                             </button>
                           );
                         })}
