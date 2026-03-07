@@ -2150,3 +2150,42 @@
 - [x] Fix: Added graceful rate limit handling in `server/services/integrations/meta.ts` (returns empty data instead of throwing)
 - [x] Covers error codes: 17, 80000, 80003 + message-based detection
 - [x] All 619 tests pass, 0 TypeScript errors
+
+## 🔄 Phase 66 — CampaignDetailDrawer World-Class Redesign
+
+### Phase 66A — Header Enhancement
+- [ ] Gradient header background reflecting campaign status (green=active, gray=paused)
+- [ ] Health Score circular indicator (0-100) in header
+- [ ] Budget Progress Bar showing daily spend vs budget
+- [ ] Sticky header that stays visible while scrolling tabs
+- [ ] Improved Quick Actions (Pause/Resume with confirmation, inline budget edit)
+
+### Phase 66B — Performance Tab Enhancement
+- [ ] Sparkline mini-charts inside each KPI card
+- [ ] Trend indicators (↑↓ arrows) with % change vs previous period
+- [ ] Improved chart with Conversions metric + better area fill + rich tooltips
+- [ ] Performance Score bar (green/yellow/red) auto-evaluating campaign health
+
+### Phase 66C — Ad Sets Tab Enhancement
+- [ ] Budget Pacing visual progress bar per Ad Set (daily spend vs budget)
+- [ ] Colored status chips with icons (Active, Paused, Learning)
+- [ ] Inline budget editing without modal
+
+### Phase 66D — Creatives Tab Enhancement
+- [ ] Platform Preview Mockups (Facebook Feed, Instagram Feed, Stories)
+- [ ] Performance Ranking badges (🥇🥈🥉) sorted by performance
+- [ ] Integrated A/B Compare side-by-side within the tab
+
+### Phase 66E — General Design Improvements
+- [ ] Smooth tab transition animations
+- [ ] Consistent spacing, typography, and color system
+- [ ] All files split into small organized modules (< 200 lines each)
+- [ ] 0 TypeScript errors, all tests pass
+
+## ✅ Phase 66 — CampaignDetailDrawer World-Class Redesign (Complete)
+- [x] DrawerHeader: gradient background reflecting campaign status, health score circle (0-100), budget progress bar, quick actions (Pause/Activate/Budget/Clone/Report), date preset selector with live indicator
+- [x] PerformanceTab: sparkline mini-charts inside KPI cards, trend indicators (up/down/stable), metric toggle for chart (Impressions/Clicks/Spend), performance score card with bar
+- [x] AdSetsTab: budget pacing bar with color-coded states, inline budget editing, summary bar (total spend, avg CTR, active count), improved status chips, targeting details
+- [x] CreativesTab: performance ranking badges (#1/#2/#3 by CTR), creative fatigue indicator (CTR < 0.5%), creatives summary bar, improved A/B comparison panel
+- [x] Main drawer: new DrawerHeader component, sticky tab bar with icons, scrollable content area, flex layout
+- [x] 619/619 tests passing, 0 TypeScript errors

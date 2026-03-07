@@ -2,21 +2,27 @@
  * CampaignDetailDrawer — Orchestrator that composes all drawer tab sub-components.
  *
  * Tabs:
- *   1. Performance — KPIs + daily chart
- *   2. Ad Sets — expandable ad set cards with targeting & metrics
- *   3. Creatives — ad creative grid with platform previews, filter/sort, A/B compare
+ *   1. Performance — KPIs + sparklines + daily chart
+ *   2. Ad Sets — expandable ad set cards with budget pacing & targeting
+ *   3. Creatives — ad creative grid with platform previews, ranking, A/B compare
  *   4. Heatmap — 7×24 performance heatmap
  *   5. Breakdown — age, gender, region, device
  *   6. Notes & Tags — persistent notes and tags
+ *
+ * Design:
+ *   - Gradient header reflecting campaign status
+ *   - Health Score circular indicator
+ *   - Budget progress bar
+ *   - Sticky tab bar
+ *   - Smooth transitions
  */
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+  Sheet, SheetContent, SheetHeader,
 } from "@/core/components/ui/sheet";
-import { Button } from "@/core/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/core/components/ui/tabs";
 import {
-  Loader2, Play, Pause, DollarSign, Copy, FileDown,
+  BarChart2, Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
@@ -24,12 +30,22 @@ import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
 import {
-  StatusBadge, InlineBudgetEditor,
   PerformanceTab, AdSetsTab, CreativesTab, HeatmapTab, BreakdownTab, NotesTab,
 } from "./drawer";
+import { DrawerHeader } from "./drawer/DrawerHeader";
 import type { MetaCampaign, DatePreset, DetailTab, CreativeFilter, CreativeSort } from "./drawer";
 
-// ─── Props ──────────────────────────────────────────────────────────────────
+// ─── Tab Config ──────────────────────────────────────────────────────────────
+const TABS: { value: DetailTab; label: string; icon: React.ElementType }[] = [
+  { value: "performance", label: "Performance", icon: TrendingUp },
+  { value: "adsets",      label: "Ad Sets",     icon: Layers },
+  { value: "creatives",   label: "Creatives",   icon: Image },
+  { value: "heatmap",     label: "Heatmap",     icon: Grid2x2 },
+  { value: "breakdown",   label: "Breakdown",   icon: PieChart },
+  { value: "notes",       label: "Notes",       icon: StickyNote },
+];
+
+// ─── Props ───────────────────────────────────────────────────────────────────
 interface Props {
   campaign: MetaCampaign | null;
   open: boolean;
@@ -55,7 +71,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
   const fmtCurrency = (n: number) => fmtCurrencyHook(n);
 
-  // ── Data queries ──────────────────────────────────────────────────────
+  // ── Data Queries ──────────────────────────────────────────────────────
   const { data: daily, isLoading } = trpc.meta.campaignDailyInsights.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id }
@@ -67,13 +83,11 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   );
   const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
 
-  // Ad Sets
   const { data: adSetsData, isLoading: adSetsLoading } = trpc.meta.campaignAdSets.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id && activeTab === "adsets" }
   );
 
-  // Ad Creatives
   const { data: adsData, isLoading: adsLoading } = trpc.meta.campaignAds.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
     { enabled: open && !!campaign?.id && (activeTab === "creatives" || activeTab === "heatmap") }
@@ -119,17 +133,21 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     }
   }, [campaignKey, notes, savedNote, activeWorkspace?.id, saveNoteMutation]);
 
-  // Mutations
+  // ── Mutations ─────────────────────────────────────────────────────────
   const toggleMetaStatus = trpc.meta.toggleCampaignStatus.useMutation({
-    onSuccess: () => { utils.meta.campaigns.invalidate(); utils.meta.campaignInsights.invalidate(); toast.success("Campaign status updated"); },
+    onSuccess: () => {
+      utils.meta.campaigns.invalidate();
+      utils.meta.campaignInsights.invalidate();
+      toast.success("Campaign status updated");
+    },
     onError: (err) => toast.error("Failed to update status", { description: err.message }),
   });
+
   const updateBudget = trpc.meta.updateCampaignBudget.useMutation({
     onSuccess: () => { utils.meta.campaigns.invalidate(); toast.success("Budget updated"); },
     onError: (err) => toast.error("Failed to update budget", { description: err.message }),
   });
 
-  // Export
   const exportReport = trpc.export.campaignReport.useMutation({
     onSuccess: (result) => {
       const blob = new Blob([result.html], { type: "text/html;charset=utf-8;" });
@@ -162,13 +180,12 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     });
   }, [campaign, campaignInsight, daily, notes, savedTags, datePreset, exportReport]);
 
-  const isActive = campaign?.status?.toLowerCase() === "active";
-  const isPaused = campaign?.status?.toLowerCase() === "paused";
-  const canToggle = isActive || isPaused;
-
   const handleAddTag = () => {
     const t = tagInput.trim();
-    if (t && campaignKey) { addTagMutation.mutate({ campaignKey, tag: t, workspaceId: activeWorkspace?.id }); setTagInput(""); }
+    if (t && campaignKey) {
+      addTagMutation.mutate({ campaignKey, tag: t, workspaceId: activeWorkspace?.id });
+      setTagInput("");
+    }
   };
   const handleRemoveTag = (tagId: number) => removeTagMutation.mutate({ tagId });
 
@@ -197,161 +214,157 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     <Sheet open={open} onOpenChange={v => !v && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto border-l border-border bg-background p-0"
+        className="w-full sm:max-w-2xl flex flex-col overflow-hidden border-l border-border bg-background p-0"
       >
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <SheetHeader className="p-5 pb-4 border-b border-border">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <SheetTitle className="text-lg font-bold truncate">{campaign?.name ?? "Campaign"}</SheetTitle>
-              <SheetDescription className="mt-1.5 flex items-center gap-2 flex-wrap">
-                {campaign?.status && <StatusBadge status={campaign.status} />}
-                {campaign?.objective && (
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">{campaign.objective.replace(/_/g, " ")}</span>
-                )}
-              </SheetDescription>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            {canToggle && (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5"
-                onClick={() => { if (campaign) toggleMetaStatus.mutate({ campaignId: campaign.id, status: isActive ? "PAUSED" : "ACTIVE" }); }}
-                disabled={toggleMetaStatus.isPending}
-              >
-                {toggleMetaStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : isActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                {isActive ? "Pause" : "Activate"}
-              </Button>
-            )}
-            {campaign?.dailyBudget != null && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <DollarSign className="w-3 h-3" /> Budget:
-                <InlineBudgetEditor
-                  value={campaign.dailyBudget}
-                  onSave={(v) => { if (campaign) updateBudget.mutate({ campaignId: campaign.id, dailyBudget: v }); }}
-                  fmtMoney={fmtCurrencyHook}
-                />
-                /day
-              </div>
-            )}
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5" onClick={() => toast.info("Clone feature coming soon")}>
-              <Copy className="w-3 h-3" /> Clone
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 ml-auto"
-              onClick={handleDownloadReport} disabled={exportReport.isPending}
-            >
-              {exportReport.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileDown className="w-3 h-3" />}
-              {exportReport.isPending ? "Generating..." : "Report"}
-            </Button>
-          </div>
-
-          {/* Date Preset */}
-          <Tabs value={datePreset} onValueChange={v => setDatePreset(v as DatePreset)} className="mt-3">
-            <TabsList className="h-8">
-              {(["last_7d", "last_14d", "last_30d", "last_90d"] as DatePreset[]).map(p => (
-                <TabsTrigger key={p} value={p} className="text-xs h-6 px-3">{p.replace("last_", "").replace("d", "D")}</TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        {/* ── Enhanced Header ─────────────────────────────────────────── */}
+        <SheetHeader className="p-0 shrink-0">
+          <DrawerHeader
+            campaign={campaign}
+            datePreset={datePreset}
+            onDatePresetChange={setDatePreset}
+            insight={campaignInsight ? {
+              ctr: campaignInsight.ctr,
+              cpc: campaignInsight.cpc,
+              cpm: campaignInsight.cpm,
+              spend: campaignInsight.spend,
+              impressions: campaignInsight.impressions,
+            } : null}
+            isTogglingStatus={toggleMetaStatus.isPending}
+            isExporting={exportReport.isPending}
+            onToggleStatus={() => {
+              if (!campaign) return;
+              const isActive = campaign.status?.toLowerCase() === "active";
+              toggleMetaStatus.mutate({
+                campaignId: campaign.id,
+                status: isActive ? "PAUSED" : "ACTIVE",
+              });
+            }}
+            onClone={() => toast.info("Clone feature coming soon")}
+            onExport={handleDownloadReport}
+            onBudgetSave={(v) => {
+              if (campaign) updateBudget.mutate({ campaignId: campaign.id, dailyBudget: v });
+            }}
+            fmtCurrency={fmtCurrency}
+          />
         </SheetHeader>
 
-        {/* ── Content Tabs ───────────────────────────────────────────── */}
-        <Tabs value={activeTab} onValueChange={v => setActiveTab(v as DetailTab)} className="flex-1">
-          <div className="border-b border-border px-5 overflow-x-auto">
-            <TabsList className="h-10 bg-transparent p-0 gap-1">
-              {([
-                { value: "performance", label: "Performance" },
-                { value: "adsets", label: "Ad Sets" },
-                { value: "creatives", label: "Creatives" },
-                { value: "heatmap", label: "Heatmap" },
-                { value: "breakdown", label: "Breakdown" },
-                { value: "notes", label: "Notes" },
-              ] as { value: DetailTab; label: string }[]).map(tab => (
-                <TabsTrigger
-                  key={tab.value} value={tab.value}
-                  className="text-xs h-10 px-3 pb-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none whitespace-nowrap"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
+        {/* ── Sticky Tab Bar ──────────────────────────────────────────── */}
+        <Tabs
+          value={activeTab}
+          onValueChange={v => setActiveTab(v as DetailTab)}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0">
+            <TabsList className="h-10 bg-transparent p-0 px-2 gap-0 w-full justify-start overflow-x-auto scrollbar-none">
+              {TABS.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="
+                      flex items-center gap-1.5 text-xs h-10 px-3 pb-0
+                      rounded-none border-b-2 border-transparent
+                      data-[state=active]:border-primary
+                      data-[state=active]:bg-transparent
+                      data-[state=active]:shadow-none
+                      data-[state=active]:text-foreground
+                      text-muted-foreground
+                      hover:text-foreground
+                      whitespace-nowrap
+                      transition-colors
+                    "
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {tab.label}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </div>
 
-          {/* ═══ Performance Tab ═══ */}
-          <TabsContent value="performance" className="mt-0">
-            <PerformanceTab
-              campaignInsight={campaignInsight}
-              daily={daily}
-              isLoading={isLoading}
-              fmtCurrency={fmtCurrency}
-            />
-          </TabsContent>
+          {/* ── Scrollable Tab Content ──────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto">
+            {/* ═══ Performance Tab ═══ */}
+            <TabsContent value="performance" className="mt-0">
+              <PerformanceTab
+                campaignInsight={campaignInsight}
+                daily={daily}
+                isLoading={isLoading}
+                fmtCurrency={fmtCurrency}
+              />
+            </TabsContent>
 
-          {/* ═══ Ad Sets Tab ═══ */}
-          <TabsContent value="adsets" className="mt-0">
-            <AdSetsTab
-              adSetsData={adSetsData}
-              isLoading={adSetsLoading}
-              fmtCurrency={fmtCurrency}
-            />
-          </TabsContent>
+            {/* ═══ Ad Sets Tab ═══ */}
+            <TabsContent value="adsets" className="mt-0">
+              <AdSetsTab
+                adSetsData={adSetsData}
+                isLoading={adSetsLoading}
+                fmtCurrency={fmtCurrency}
+              />
+            </TabsContent>
 
-          {/* ═══ Creatives Tab ═══ */}
-          <TabsContent value="creatives" className="mt-0">
-            <CreativesTab
-              adsData={adsData}
-              isLoading={adsLoading}
-              fmtCurrency={fmtCurrency}
-              creativeFilter={creativeFilter}
-              setCreativeFilter={setCreativeFilter}
-              creativeSort={creativeSort}
-              setCreativeSort={setCreativeSort}
-              compareMode={compareMode}
-              setCompareMode={setCompareMode}
-              selectedAds={selectedAds}
-              setSelectedAds={setSelectedAds}
-              sortedAds={sortedAds}
-              bestCtr={bestCtr}
-            />
-          </TabsContent>
+            {/* ═══ Creatives Tab ═══ */}
+            <TabsContent value="creatives" className="mt-0">
+              <CreativesTab
+                adsData={adsData}
+                isLoading={adsLoading}
+                fmtCurrency={fmtCurrency}
+                creativeFilter={creativeFilter}
+                setCreativeFilter={setCreativeFilter}
+                creativeSort={creativeSort}
+                setCreativeSort={setCreativeSort}
+                compareMode={compareMode}
+                setCompareMode={setCompareMode}
+                selectedAds={selectedAds}
+                setSelectedAds={setSelectedAds}
+                sortedAds={sortedAds}
+                bestCtr={bestCtr}
+              />
+            </TabsContent>
 
-          {/* ═══ Heatmap Tab ═══ */}
-          <TabsContent value="heatmap" className="mt-0">
-            <HeatmapTab
-              ads={(adsData ?? []).map(ad => ({
-                insights: ad.insights ? { impressions: ad.insights.impressions, ctr: ad.insights.ctr, spend: ad.insights.spend, clicks: ad.insights.clicks } : null,
-                status: ad.status,
-              }))}
-              isLoading={adsLoading}
-            />
-          </TabsContent>
+            {/* ═══ Heatmap Tab ═══ */}
+            <TabsContent value="heatmap" className="mt-0">
+              <HeatmapTab
+                ads={(adsData ?? []).map(ad => ({
+                  insights: ad.insights ? {
+                    impressions: ad.insights.impressions,
+                    ctr: ad.insights.ctr,
+                    spend: ad.insights.spend,
+                    clicks: ad.insights.clicks,
+                  } : null,
+                  status: ad.status,
+                }))}
+                isLoading={adsLoading}
+              />
+            </TabsContent>
 
-          {/* ═══ Breakdown Tab ═══ */}
-          <TabsContent value="breakdown" className="mt-0">
-            <BreakdownTab
-              campaignId={campaign?.id ?? ""}
-              datePreset={datePreset}
-              workspaceId={activeWorkspace?.id}
-              enabled={open && !!campaign?.id && activeTab === "breakdown"}
-              fmtCurrency={fmtCurrency}
-            />
-          </TabsContent>
+            {/* ═══ Breakdown Tab ═══ */}
+            <TabsContent value="breakdown" className="mt-0">
+              <BreakdownTab
+                campaignId={campaign?.id ?? ""}
+                datePreset={datePreset}
+                workspaceId={activeWorkspace?.id}
+                enabled={open && !!campaign?.id && activeTab === "breakdown"}
+                fmtCurrency={fmtCurrency}
+              />
+            </TabsContent>
 
-          {/* ═══ Notes & Tags Tab ═══ */}
-          <TabsContent value="notes" className="mt-0">
-            <NotesTab
-              notes={notes}
-              onNotesChange={handleNotesChange}
-              onNotesBlur={handleNotesBlur}
-              isSaving={saveNoteMutation.isPending}
-              tagInput={tagInput}
-              onTagInputChange={setTagInput}
-              onAddTag={handleAddTag}
-              onRemoveTag={handleRemoveTag}
-              savedTags={savedTags}
-            />
-          </TabsContent>
+            {/* ═══ Notes & Tags Tab ═══ */}
+            <TabsContent value="notes" className="mt-0">
+              <NotesTab
+                notes={notes}
+                onNotesChange={handleNotesChange}
+                onNotesBlur={handleNotesBlur}
+                isSaving={saveNoteMutation.isPending}
+                tagInput={tagInput}
+                onTagInputChange={setTagInput}
+                onAddTag={handleAddTag}
+                onRemoveTag={handleRemoveTag}
+                savedTags={savedTags}
+              />
+            </TabsContent>
+          </div>
         </Tabs>
       </SheetContent>
     </Sheet>

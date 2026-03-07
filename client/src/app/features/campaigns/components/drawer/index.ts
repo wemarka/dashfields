@@ -1,6 +1,7 @@
 /**
  * drawer/index.ts — Barrel export for all drawer sub-components.
  */
+export { DrawerHeader } from "./DrawerHeader";
 export { PerformanceTab } from "./PerformanceTab";
 export { AdSetsTab } from "./AdSetsTab";
 export { CreativesTab } from "./CreativesTab";
