@@ -134,8 +134,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out overflow-hidden relative border-r border-white/8"
-        style={{ width: collapsed ? 64 : 228 }}
+        className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out overflow-hidden relative border-r border-white/8 shadow-none"
+        style={{ width: collapsed ? 64 : 228, boxShadow: 'none' }}
       >
         {/* Logo — icon only */}
         <div className="flex items-center justify-center h-14 border-b border-white/8 shrink-0">
