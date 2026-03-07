@@ -37,13 +37,13 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [logoAreaHovered, setLogoAreaHovered] = useState(false);
 
   const handleCollapse = (val: boolean) => {
     setIsAnimating(true);
     setCollapsed(val);
     setTimeout(() => setIsAnimating(false), 300);
   };
-  const [logoHovered, setLogoHovered] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     navSections.forEach(s => s.items.forEach(item => {
@@ -151,59 +151,84 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Logo + Collapse Button */}
         <div className="flex items-center h-14 border-b border-border/30 shrink-0 px-3 justify-between">
-          {/* Logo area — always takes same space, content crossfades */}
-          <div
-            onClick={() => setLocation("/dashboard")}
-            className="cursor-pointer select-none flex items-center min-w-0 flex-1 overflow-hidden"
-          >
-            {/* Icon — always visible, fades out when expanded */}
-            <img
-              src={dark
-                ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
-                : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
-              }
-              alt=""
-              aria-hidden="true"
-              className="w-7 h-7 shrink-0 object-contain"
-              style={{
-                opacity: collapsed ? 1 : 0,
-                transform: collapsed ? 'scale(1)' : 'scale(0.8)',
-                transition: 'opacity 200ms ease, transform 200ms ease',
-                position: collapsed ? 'relative' : 'absolute',
-                pointerEvents: 'none',
-              }}
-            />
-            {/* Full logo — fades in when expanded */}
-            <img
-              src={dark
-                ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white_b639bec7.png"
-                : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
-              }
-              alt="Dashfields"
-              className="h-6 w-auto shrink-0 object-contain"
-              style={{
-                opacity: collapsed ? 0 : 1,
-                transform: collapsed ? 'translateX(-8px)' : 'translateX(0)',
-                transition: 'opacity 220ms ease, transform 220ms ease',
-                position: collapsed ? 'absolute' : 'relative',
-                pointerEvents: collapsed ? 'none' : 'auto',
-              }}
-            />
-          </div>
-          {/* Collapse/Expand toggle button — always visible, icon rotates */}
-          <button
-            onClick={() => handleCollapse(!collapsed)}
-            title={collapsed ? 'Open sidebar' : 'Close sidebar'}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-foreground/8 transition-all duration-200 shrink-0"
-          >
-            <svg
-              width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"
-              style={{ transform: collapsed ? (isRTL ? 'scaleX(-1)' : 'scaleX(1)') : (isRTL ? 'scaleX(1)' : 'scaleX(-1)'), transition: 'transform 280ms cubic-bezier(0.4,0,0.2,1)' }}
+
+          {/* ── EXPANDED STATE: full logo + collapse button ── */}
+          {!collapsed && (
+            <>
+              <div
+                onClick={() => setLocation("/dashboard")}
+                className="cursor-pointer select-none flex items-center min-w-0 flex-1 overflow-hidden"
+              >
+                <img
+                  src={dark
+                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white_b639bec7.png"
+                    : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
+                  }
+                  alt="Dashfields"
+                  className="h-7 w-auto shrink-0 object-contain"
+                  style={{
+                    opacity: isAnimating ? 0 : 1,
+                    transition: 'opacity 180ms ease',
+                  }}
+                />
+              </div>
+              {/* Collapse button — visible when expanded */}
+              <button
+                onClick={() => handleCollapse(true)}
+                title="Close sidebar"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-foreground/8 transition-all duration-200 shrink-0 ml-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* ── COLLAPSED STATE: icon only, hover reveals expand button ── */}
+          {collapsed && (
+            <div
+              className="relative flex items-center justify-center w-full"
+              onMouseEnter={() => setLogoAreaHovered(true)}
+              onMouseLeave={() => setLogoAreaHovered(false)}
             >
-              <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-          </button>
+              {/* App icon — fades out on hover */}
+              <img
+                src={dark
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
+                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
+                }
+                alt="Dashfields"
+                onClick={() => setLocation("/dashboard")}
+                className="w-8 h-8 object-contain cursor-pointer"
+                style={{
+                  opacity: logoAreaHovered ? 0 : 1,
+                  transform: logoAreaHovered ? 'scale(0.85)' : 'scale(1)',
+                  transition: 'opacity 180ms ease, transform 180ms ease',
+                }}
+              />
+              {/* Expand button — appears on hover */}
+              <button
+                onClick={() => handleCollapse(false)}
+                title="Open sidebar"
+                className="absolute inset-0 flex items-center justify-center rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-foreground/8 transition-all duration-200"
+                style={{
+                  opacity: logoAreaHovered ? 1 : 0,
+                  transform: logoAreaHovered ? 'scale(1)' : 'scale(0.85)',
+                  transition: 'opacity 180ms ease, transform 180ms ease',
+                  pointerEvents: logoAreaHovered ? 'auto' : 'none',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  style={{ transform: isRTL ? 'scaleX(-1)' : 'scaleX(1)' }}
+                >
+                  <rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                  <line x1="6" y1="1" x2="6" y2="17" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Nav Groups — Accordion Pattern */}

@@ -2358,3 +2358,8 @@
 ## ✅ Phase 86 — Favicon & Sidebar Animation
 - [x] إضافة Favicon من أيقونة التطبيق (favicon.ico + PNG 180/192/512 + manifest.json)
 - [x] تحسين Sidebar collapse animation بـ smooth transition (280ms cubic-bezier + crossfade logo + text opacity)
+
+## ✅ Phase 87 — Sidebar Logo & Collapse UX
+- [x] تكبير الشعار الكامل (h-7 بدلاً من h-6) ليكون أوضح عند التوسع
+- [x] إخفاء زر Collapse عند طي الـ Sidebar (لا يظهر في الوضع المطوي)
+- [x] إظهار زر Expand عند hover على أيقونة الشعار (مع crossfade animation)
