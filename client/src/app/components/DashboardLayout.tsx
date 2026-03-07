@@ -60,12 +60,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [location, setLocation] = useLocation();
   const { loading, user, isAuthenticated, signOut } = useAuth();
 
+  // Auth redirect: read window.location directly so this effect only fires when
+  // auth state changes, NOT on every navigation (avoids re-render on route change).
   useEffect(() => {
     if (loading) return;
     if (isAuthenticated) return;
-    const returnTo = encodeURIComponent(location + window.location.search);
+    const currentPath = window.location.pathname + window.location.search;
+    const returnTo = encodeURIComponent(currentPath);
     setLocation(`/login?returnTo=${returnTo}`);
-  }, [loading, isAuthenticated, location, setLocation]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, isAuthenticated]);
 
   const { dark, toggle: toggleDark } = useDarkMode();
   const { t, i18n } = useTranslation();

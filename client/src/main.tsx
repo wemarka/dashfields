@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
+import { navigate as wouterNavigate } from "wouter/use-browser-location";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
@@ -30,7 +31,8 @@ const redirectToLoginIfUnauthorized = async (error: unknown) => {
       // ignore
     }
   }
-  window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+  // Use wouter's navigate for SPA routing (avoids full page reload)
+  wouterNavigate(`/login?returnTo=${encodeURIComponent(currentPath)}`);
 };
 
 queryClient.getQueryCache().subscribe(event => {

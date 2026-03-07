@@ -146,12 +146,28 @@ function MarketingRouter() {
   );
 }
 
+// ─── Content loading fallback (inside layout — sidebar stays stable) ───────────
+// This is used ONLY for the page content area, NOT the full screen.
+// The sidebar and topbar remain mounted during page transitions.
+function ContentLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[300px]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs text-muted-foreground">Loading...</span>
+      </div>
+    </div>
+  );
+}
+
 // ─── App Router (app.dashfields.com / localhost / dev) ───────────────────────
 // DashboardLayout is the single shared wrapper for ALL authenticated app routes.
 // Auth/public routes (login, register) are rendered OUTSIDE the layout.
 // The root "/" redirects to "/dashboard" since this is the app subdomain.
 function AppRouter() {
   return (
+    // Suspense here only covers auth pages (lazy-loaded) — NOT the dashboard layout.
+    // Dashboard routes have their own inner Suspense so the sidebar stays stable.
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* ── Root: redirect to dashboard on app domain ─────────────────── */}
@@ -165,6 +181,9 @@ function AppRouter() {
         {/* ── All app routes — single shared DashboardLayout ────────────── */}
         <Route>
           <DashboardLayout>
+            {/* Inner Suspense: only the page content area shows a loader.
+                The sidebar/topbar remain mounted — no full-screen flash. */}
+            <Suspense fallback={<ContentLoader />}>
             <Switch>
               {/* ── Core ──────────────────────────────────────────────────── */}
               <Route path="/dashboard"              component={Home} />
@@ -228,6 +247,7 @@ function AppRouter() {
               <Route path="/404"                    component={NotFound} />
               <Route                                component={NotFound} />
             </Switch>
+            </Suspense>
           </DashboardLayout>
         </Route>
       </Switch>

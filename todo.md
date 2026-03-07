@@ -2376,3 +2376,10 @@
 
 ## ✅ Phase 90 — Integrations في Sidebar Bottom
 - [x] إعادة زر Integrations إلى أسفل الـ Sidebar (يفتح modal عند النقر + Tooltip عند الطي)
+
+## ✅ Phase 91 — Fix Full Page Reload on Sidebar Navigation
+- [x] تشخيص سبب إعادة تحميل الصفحة الكاملة: Suspense يلف DashboardLayout بالكامل
+- [x] نقل Suspense boundary ليكون داخل DashboardLayout فقط (يحيط بمحتوى الصفحات لا بالـ Sidebar)
+- [x] إصلاح useEffect في DashboardLayout: إزالة location من dependency array
+- [x] استخدام wouter navigate بدلاً من window.location.href في main.tsx
+- [x] التأكد من أن جميع الصفحات تُحمَّل بدون full page reload (SPA behavior)
