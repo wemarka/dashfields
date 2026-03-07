@@ -10,7 +10,7 @@ import { Input } from "@/core/components/ui/input";
 import { Label } from "@/core/components/ui/label";
 import { Mail, Loader2, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_e604f8ac.svg";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png";
 
 export default function ForgotPasswordPage() {
   const [, setLocation] = useLocation();

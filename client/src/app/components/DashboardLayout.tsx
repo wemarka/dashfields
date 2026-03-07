@@ -145,20 +145,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className="cursor-pointer select-none flex items-center min-w-0"
           >
             {collapsed ? (
-              /* Icon only — black SVG, inverted in dark mode */
+              /* Icon only — use dark/light PNG versions */
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
+                src={dark
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
+                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
+                }
                 alt="Dashfields"
-                className="w-7 h-7 shrink-0"
-                style={{ filter: dark ? 'invert(1)' : 'none' }}
+                className="w-7 h-7 shrink-0 object-contain"
               />
             ) : (
-              /* Full logo (icon + text) — black SVG, inverted in dark mode */
+              /* Full logo (icon + text) — use dark/light PNG versions */
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_e604f8ac.svg"
+                src={dark
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white_b639bec7.png"
+                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png"
+                }
                 alt="Dashfields"
-                className="h-6 w-auto shrink-0"
-                style={{ filter: dark ? 'invert(1)' : 'none' }}
+                className="h-6 w-auto shrink-0 object-contain"
               />
             )}
           </div>
