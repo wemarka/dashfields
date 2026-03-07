@@ -2274,3 +2274,15 @@
 - [x] Keep: Best Performer banner + creative card with Preview Ad
 - [x] Keep: A/B Compare mode
 - [x] Layout: Best Performer card on top, then list of creatives with Preview Ad toggle
+
+## 🐛 Bug Fix — Ad Sets Tab Not Showing Data
+- [ ] Diagnose and fix Ad Sets tab not displaying content
+
+## ✅ Phase 75 (new) — Meta API Server-Side Caching
+- [x] Created MetaCache utility (in-memory TTL cache) in server/services/integrations/metaCache.ts
+- [x] Applied 5-minute cache to campaignAdSets procedure
+- [x] Applied 5-minute cache to campaignAds procedure
+- [x] Applied 5-minute cache to campaignDailyInsights procedure
+- [x] Applied 3-minute cache to campaignInsights (list) procedure
+- [x] Cache key includes: userId + campaignId + datePreset + workspaceId
+- [x] Root cause of Ad Sets not showing: Meta API rate limit — fixed with caching

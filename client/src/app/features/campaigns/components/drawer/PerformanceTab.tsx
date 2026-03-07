@@ -1,5 +1,5 @@
 /**
- * drawer/PerformanceTab.tsx — Enhanced KPI cards with sparklines + daily chart.
+ * drawer/PerformanceTab.tsx -- Enhanced KPI cards with sparklines + daily chart.
  *
  * Features:
  *  - Sparkline mini-charts inside each KPI card
@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { fmtNum, fmtPct } from "./types";
 
-// --- Types ───────────────────────────────────────────────────────────────────
+// --- Types -------------------------------------------------------------------
 interface DailyPoint {
   date?: string;
   spend?: number;
@@ -46,7 +46,7 @@ interface PerformanceTabProps {
   fmtCurrency: (n: number) => string;
 }
 
-// --- Sparkline ───────────────────────────────────────────────────────────────
+// --- Sparkline ---------------------------------------------------------------
 function Sparkline({ data, color }: { data: number[]; color: string }) {
   if (!data || data.length < 2) return null;
   const points = data.map((v, i) => ({ v, i }));
@@ -65,7 +65,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-// --- Trend Indicator ─────────────────────────────────────────────────────────
+// --- Trend Indicator ---------------------------------------------------------
 function TrendIndicator({ pct }: { pct: number }) {
   if (Math.abs(pct) < 1) {
     return (
@@ -83,7 +83,7 @@ function TrendIndicator({ pct }: { pct: number }) {
   );
 }
 
-// --- Enhanced KPI Card with Sparkline ────────────────────────────────────────
+// --- Enhanced KPI Card with Sparkline ----------------------------------------
 function SparklineKpiCard({
   icon: Icon, label, value, sub, color, bgColor, sparkData, sparkColor, trend,
 }: {

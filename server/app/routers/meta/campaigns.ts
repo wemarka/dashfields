@@ -19,6 +19,7 @@ import {
   getAdInsights,
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
+import { metaCache, CACHE_TTL } from "../../../services/integrations/metaCache";
 
 const datePresetEnum = z.enum([
   "today", "yesterday", "last_7d", "last_14d", "last_30d",
@@ -35,21 +36,11 @@ export const metaCampaignsRouter = router({
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      if (input.accountId) {
-        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-        if (!conn) return [];
-        const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
-        return insights.map(d => ({
-          campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
-          impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
-          clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
-          ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
-        }));
-      }
-      const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
-      if (allConns.length === 0) return [];
-      const results = await Promise.allSettled(
-        allConns.map(async conn => {
+      const cacheKey = metaCache.key("campaignInsights", ctx.user.id, input.accountId, input.datePreset, input.limit, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_INSIGHTS, async () => {
+        if (input.accountId) {
+          const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+          if (!conn) return [];
           const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
           return insights.map(d => ({
             campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
@@ -57,9 +48,22 @@ export const metaCampaignsRouter = router({
             clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
           }));
-        }),
-      );
-      return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        }
+        const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
+        if (allConns.length === 0) return [];
+        const results = await Promise.allSettled(
+          allConns.map(async conn => {
+            const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
+            return insights.map(d => ({
+              campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
+              impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
+              clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
+              ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
+            }));
+          }),
+        );
+        return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+      });
     }),
 
   /** Get daily breakdown for a specific campaign */
@@ -70,15 +74,18 @@ export const metaCampaignsRouter = router({
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
-      if (!conn) return [];
-      const daily = await getCampaignDailyInsights(input.campaignId, conn.token, input.datePreset);
-      return daily.map(d => ({
-        date: d.date_start ?? "", impressions: Number(d.impressions ?? 0),
-        clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
-        ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
-        reach: Number(d.reach ?? 0),
-      }));
+      const cacheKey = metaCache.key("dailyInsights", ctx.user.id, input.campaignId, input.datePreset, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, CACHE_TTL.DAILY_INSIGHTS, async () => {
+        const conn = await getMetaToken(ctx.user.id, undefined, input.workspaceId);
+        if (!conn) return [];
+        const daily = await getCampaignDailyInsights(input.campaignId, conn.token, input.datePreset);
+        return daily.map(d => ({
+          date: d.date_start ?? "", impressions: Number(d.impressions ?? 0),
+          clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
+          ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
+          reach: Number(d.reach ?? 0),
+        }));
+      });
     }),
 
   /** Get campaigns list */
@@ -212,14 +219,16 @@ export const metaCampaignsRouter = router({
       accountId: z.number().optional(), workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return { adSets: [], insights: [] };
-      try {
-        const [adSets, insights] = await Promise.all([
-          getCampaignAdSets(input.campaignId, conn.token),
-          getAdSetInsights(input.campaignId, conn.token, input.datePreset),
-        ]);
-        return {
+      const cacheKey = metaCache.key("adSets", ctx.user.id, input.campaignId, input.datePreset, input.accountId, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_AD_SETS, async () => {
+        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+        if (!conn) return { adSets: [], insights: [] };
+        try {
+          const [adSets, insights] = await Promise.all([
+            getCampaignAdSets(input.campaignId, conn.token),
+            getAdSetInsights(input.campaignId, conn.token, input.datePreset),
+          ]);
+          return {
           adSets: adSets.map(s => ({
             id: s.id, name: s.name, status: s.effective_status ?? s.status,
             dailyBudget: s.daily_budget ? Number(s.daily_budget) / 100 : null,
@@ -246,10 +255,11 @@ export const metaCampaignsRouter = router({
             ctr: Number(i.ctr ?? 0), cpc: Number(i.cpc ?? 0), cpm: Number(i.cpm ?? 0),
           })),
         };
-      } catch (err) {
-        console.error("[Meta] campaignAdSets error:", err);
-        return { adSets: [], insights: [] };
-      }
+        } catch (err) {
+          console.error("[Meta] campaignAdSets error:", err);
+          return { adSets: [], insights: [] };
+        }
+      });
     }),
 
   /** Get ads and creatives for a campaign */
@@ -259,9 +269,11 @@ export const metaCampaignsRouter = router({
       accountId: z.number().optional(), workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return [];
-      try {
+      const cacheKey = metaCache.key("campaignAds", ctx.user.id, input.campaignId, input.datePreset, input.accountId, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_ADS, async () => {
+        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+        if (!conn) return [];
+        try {
         const [ads, insights] = await Promise.all([
           getCampaignAds(input.campaignId, conn.token),
           getAdInsights(input.campaignId, conn.token, input.datePreset),
@@ -346,10 +358,11 @@ export const metaCampaignsRouter = router({
             insights: insightMap.get(ad.id) ?? null,
           };
         });
-      } catch (err) {
-        console.error("[Meta] campaignAds error:", err);
-        return [];
-      }
+        } catch (err) {
+          console.error("[Meta] campaignAds error:", err);
+          return [];
+        }
+      });
     }),
 
   /** Get top performing campaign by spend */
