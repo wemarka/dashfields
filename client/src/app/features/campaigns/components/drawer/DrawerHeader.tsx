@@ -1,119 +1,176 @@
 /**
- * drawer/DrawerHeader.tsx — World-class campaign drawer header.
+ * drawer/DrawerHeader.tsx — Professional campaign drawer header.
  *
- * Features:
- *  - Gradient background reflecting campaign status
- *  - Health Score circular indicator (0–100)
- *  - Budget Progress Bar (daily spend vs budget)
- *  - Quick Actions: Pause/Resume, Inline Budget Edit, Clone, Report
- *  - Date preset selector
+ * Layout:
+ *  ┌─────────────────────────────────────────────────────────────┐
+ *  │  [Platform Logo]  Campaign Name              [Health Score] │
+ *  │  Status • Objective                                         │
+ *  ├─────────────────────────────────────────────────────────────┤
+ *  │  Spend ████░░░░  $447 / $15  ·  CTR 2.7%  ·  CPC $0.06    │
+ *  ├─────────────────────────────────────────────────────────────┤
+ *  │  [Pause]  [Budget $15/day]  [Clone]          [Report]  [X] │
+ *  ├─────────────────────────────────────────────────────────────┤
+ *  │  7D  14D  [30D]  90D                          ● Live        │
+ *  └─────────────────────────────────────────────────────────────┘
  */
 import { useState } from "react";
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
 import { Button } from "@/core/components/ui/button";
-import {
-  Loader2, Play, Pause, Copy, FileDown,
-  DollarSign, TrendingUp, Activity,
-} from "lucide-react";
+import { Loader2, Play, Pause, Copy, FileDown, Activity } from "lucide-react";
 import { StatusBadge, InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
-// ─── Health Score Helpers ────────────────────────────────────────────────────
+// ─── Platform Logos (inline SVG for zero-dependency) ────────────────────────
+function FacebookLogo({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx="6" fill="#1877F2" />
+      <path
+        d="M16.5 8H14.5C13.948 8 13.5 8.448 13.5 9V11H16.5L16 14H13.5V22H10.5V14H8.5V11H10.5V9C10.5 6.791 12.291 5 14.5 5H16.5V8Z"
+        fill="white"
+      />
+    </svg>
+  );
+}
+
+function InstagramLogo({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#FFDC80" />
+          <stop offset="25%" stopColor="#FCAF45" />
+          <stop offset="50%" stopColor="#F77737" />
+          <stop offset="75%" stopColor="#E1306C" />
+          <stop offset="100%" stopColor="#833AB4" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#ig-grad)" />
+      <rect x="7" y="7" width="10" height="10" rx="3" stroke="white" strokeWidth="1.5" fill="none" />
+      <circle cx="12" cy="12" r="2.5" stroke="white" strokeWidth="1.5" fill="none" />
+      <circle cx="16.5" cy="7.5" r="1" fill="white" />
+    </svg>
+  );
+}
+
+function MetaLogo({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect width="24" height="24" rx="6" fill="#0082FB" />
+      <path
+        d="M4 14.5C4 16.433 5.12 18 6.5 18C7.5 18 8.2 17.4 9 16.2L11 13L9 9.8C8.2 8.6 7.5 8 6.5 8C5.12 8 4 9.567 4 11.5V14.5Z"
+        fill="white"
+      />
+      <path
+        d="M12 13L14 16.2C14.8 17.4 15.5 18 16.5 18C17.88 18 19 16.433 19 14.5V11.5C19 9.567 17.88 8 16.5 8C15.5 8 14.8 8.6 14 9.8L12 13Z"
+        fill="white"
+        opacity="0.8"
+      />
+    </svg>
+  );
+}
+
+function PlatformLogo({ platform, size = 20 }: { platform?: string | null; size?: number }) {
+  const p = (platform ?? "").toLowerCase();
+  if (p.includes("instagram")) return <InstagramLogo size={size} />;
+  if (p.includes("meta") || p.includes("all")) return <MetaLogo size={size} />;
+  // Default: Facebook
+  return <FacebookLogo size={size} />;
+}
+
+// ─── Health Score ────────────────────────────────────────────────────────────
 function computeHealthScore(insight?: {
   ctr: number; cpc: number; cpm: number; spend: number; impressions: number;
 } | null): number {
   if (!insight) return 0;
   let score = 50;
-  // CTR: >3% = great, 1-3% = ok, <1% = poor
   if (insight.ctr >= 3) score += 20;
   else if (insight.ctr >= 1) score += 10;
   else score -= 10;
-  // CPC: <0.5 = great, <1 = ok, >2 = poor
   if (insight.cpc < 0.5) score += 15;
   else if (insight.cpc < 1) score += 7;
   else if (insight.cpc > 2) score -= 10;
-  // Impressions: >50K = great
   if (insight.impressions > 50000) score += 15;
   else if (insight.impressions > 10000) score += 7;
   return Math.min(100, Math.max(0, score));
 }
 
 function getHealthColor(score: number) {
-  if (score >= 70) return { stroke: "#10b981", text: "text-emerald-500", label: "Excellent" };
-  if (score >= 45) return { stroke: "#f59e0b", text: "text-amber-500", label: "Average" };
-  return { stroke: "#ef4444", text: "text-red-500", label: "Needs Work" };
+  if (score >= 70) return { stroke: "#10b981", text: "text-emerald-500", label: "Excellent", bg: "bg-emerald-500/10" };
+  if (score >= 45) return { stroke: "#f59e0b", text: "text-amber-500",   label: "Average",   bg: "bg-amber-500/10" };
+  return             { stroke: "#ef4444",  text: "text-red-500",     label: "Needs Work", bg: "bg-red-500/10" };
 }
 
-// ─── Health Score Circle ─────────────────────────────────────────────────────
 function HealthScoreCircle({ score }: { score: number }) {
   const { stroke, text, label } = getHealthColor(score);
-  const r = 22;
+  const r = 18;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
 
   return (
     <div className="flex flex-col items-center gap-0.5 shrink-0">
-      <div className="relative w-14 h-14">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 56 56">
-          <circle cx="28" cy="28" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
+      <div className="relative w-11 h-11">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="3.5" />
           <circle
-            cx="28" cy="28" r={r} fill="none"
-            stroke={stroke} strokeWidth="4"
+            cx="22" cy="22" r={r} fill="none"
+            stroke={stroke} strokeWidth="3.5"
             strokeDasharray={`${dash} ${circ}`}
             strokeLinecap="round"
             style={{ transition: "stroke-dasharray 0.8s ease" }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-sm font-bold ${text}`}>{score}</span>
+          <span className={`text-xs font-bold ${text}`}>{score}</span>
         </div>
       </div>
-      <span className={`text-[10px] font-medium ${text}`}>{label}</span>
+      <span className={`text-[9px] font-semibold ${text} uppercase tracking-wide`}>{label}</span>
     </div>
   );
 }
 
-// ─── Budget Progress Bar ─────────────────────────────────────────────────────
-function BudgetProgressBar({ budget, spend, fmtCurrency }: {
+// ─── KPI Pill ────────────────────────────────────────────────────────────────
+function KpiPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/50 border border-border/40">
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-semibold text-foreground">{value}</span>
+    </div>
+  );
+}
+
+// ─── Budget Bar ──────────────────────────────────────────────────────────────
+function BudgetBar({ budget, spend, fmtCurrency }: {
   budget: number; spend: number; fmtCurrency: (n: number) => string;
 }) {
   const pct = budget > 0 ? Math.min(100, (spend / budget) * 100) : 0;
   const isOver = pct >= 90;
-  const isMid = pct >= 60;
+  const isMid  = pct >= 60;
+  const barColor = isOver ? "bg-red-500" : isMid ? "bg-amber-500" : "bg-emerald-500";
+  const textColor = isOver ? "text-red-500" : isMid ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400";
 
   return (
-    <div className="mt-3 space-y-1.5">
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="text-muted-foreground flex items-center gap-1">
-          <DollarSign className="w-3 h-3" /> Daily Budget
-        </span>
-        <span className={`font-medium ${isOver ? "text-red-500" : isMid ? "text-amber-500" : "text-foreground"}`}>
-          {fmtCurrency(spend)} / {fmtCurrency(budget)}
-        </span>
-      </div>
-      <div className="h-1.5 rounded-full bg-border overflow-hidden">
+    <div className="flex items-center gap-3">
+      {/* Label */}
+      <span className="text-[10px] text-muted-foreground shrink-0">Daily Budget</span>
+      {/* Bar */}
+      <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${isOver ? "bg-red-500" : isMid ? "bg-amber-500" : "bg-emerald-500"}`}
+          className={`h-full rounded-full transition-all duration-700 ${barColor}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-[10px] text-muted-foreground">{pct.toFixed(0)}% of daily budget used</p>
+      {/* Values */}
+      <span className={`text-[11px] font-medium shrink-0 ${textColor}`}>
+        {fmtCurrency(spend)} <span className="text-muted-foreground font-normal">/ {fmtCurrency(budget)}</span>
+      </span>
     </div>
   );
 }
 
-// ─── Status Gradient Config ──────────────────────────────────────────────────
-function getStatusGradient(status: string) {
-  const s = status?.toLowerCase();
-  if (s === "active")   return "from-emerald-500/8 via-transparent to-transparent";
-  if (s === "paused")   return "from-amber-500/8 via-transparent to-transparent";
-  if (s === "ended")    return "from-slate-500/8 via-transparent to-transparent";
-  return "from-primary/5 via-transparent to-transparent";
-}
-
-// ─── Date Preset Selector ────────────────────────────────────────────────────
+// ─── Date Presets ────────────────────────────────────────────────────────────
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
-  { value: "last_7d", label: "7D" },
+  { value: "last_7d",  label: "7D" },
   { value: "last_14d", label: "14D" },
   { value: "last_30d", label: "30D" },
   { value: "last_90d", label: "90D" },
@@ -134,58 +191,94 @@ interface DrawerHeaderProps {
   fmtCurrency: (n: number) => string;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// DRAWER HEADER
-// ═════════════════════════════════════════════════════════════════════════════
+// ─── Main Component ───────────────────────────────────────────────────────────
 export function DrawerHeader({
   campaign, datePreset, onDatePresetChange,
   insight, isTogglingStatus, isExporting,
   onToggleStatus, onClone, onExport, onBudgetSave, fmtCurrency,
 }: DrawerHeaderProps) {
-  const isActive = campaign?.status?.toLowerCase() === "active";
-  const isPaused = campaign?.status?.toLowerCase() === "paused";
+  const isActive  = campaign?.status?.toLowerCase() === "active";
+  const isPaused  = campaign?.status?.toLowerCase() === "paused";
   const canToggle = isActive || isPaused;
   const healthScore = computeHealthScore(insight);
-  const gradient = getStatusGradient(campaign?.status ?? "");
+
+  const fmtPct = (n: number) => `${n.toFixed(2)}%`;
+  const fmtMoney = (n: number) => fmtCurrency(n);
 
   return (
-    <div className={`bg-gradient-to-br ${gradient} border-b border-border`}>
-      {/* ── Top row: title + health score ── */}
-      <div className="px-5 pt-5 pb-0 flex items-start gap-4">
+    <div className="border-b border-border bg-background">
+
+      {/* ── Row 1: Platform + Title + Health Score ── */}
+      <div className="px-5 pt-4 pb-3 flex items-start gap-3">
+        {/* Platform logo */}
+        <div className="mt-0.5 shrink-0">
+          <PlatformLogo platform={campaign?.platform} size={28} />
+        </div>
+
+        {/* Campaign info */}
         <div className="flex-1 min-w-0">
-          <SheetTitle className="text-base font-bold truncate leading-tight">
+          <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground">
             {campaign?.name ?? "Campaign"}
           </SheetTitle>
-          <SheetDescription className="mt-2 flex items-center gap-2 flex-wrap">
-            {campaign?.status && <StatusBadge status={campaign.status} />}
-            {campaign?.objective && (
-              <span className="text-[11px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md font-medium tracking-wide uppercase">
-                {campaign.objective.replace(/_/g, " ")}
-              </span>
-            )}
+          <SheetDescription asChild>
+            <div className="mt-1 flex items-center gap-2 flex-wrap">
+              {campaign?.status && <StatusBadge status={campaign.status} />}
+              {campaign?.objective && (
+                <span className="text-[10px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded font-medium tracking-wider uppercase">
+                  {campaign.objective.replace(/_/g, " ")}
+                </span>
+              )}
+              {campaign?.platform && (
+                <span className="text-[10px] text-muted-foreground/70 capitalize">
+                  {campaign.platform}
+                </span>
+              )}
+            </div>
           </SheetDescription>
-
-          {/* Budget progress bar */}
-          {campaign?.dailyBudget != null && insight?.spend != null && (
-            <BudgetProgressBar
-              budget={campaign.dailyBudget}
-              spend={insight.spend}
-              fmtCurrency={fmtCurrency}
-            />
-          )}
         </div>
 
         {/* Health Score */}
         {insight && <HealthScoreCircle score={healthScore} />}
       </div>
 
-      {/* ── Quick Actions ── */}
-      <div className="px-5 pt-3 pb-0 flex items-center gap-2 flex-wrap">
+      {/* ── Row 2: Budget Bar + KPI Pills ── */}
+      {(campaign?.dailyBudget != null || insight) && (
+        <div className="px-5 pb-3 space-y-2">
+          {campaign?.dailyBudget != null && insight?.spend != null && (
+            <BudgetBar
+              budget={campaign.dailyBudget}
+              spend={insight.spend}
+              fmtCurrency={fmtCurrency}
+            />
+          )}
+          {insight && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
+              {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
+              {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
+              {insight.impressions > 0 && (
+                <KpiPill
+                  label="Impressions"
+                  value={insight.impressions >= 1000
+                    ? `${(insight.impressions / 1000).toFixed(1)}K`
+                    : String(insight.impressions)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Divider ── */}
+      <div className="mx-5 border-t border-border/50" />
+
+      {/* ── Row 3: Quick Actions ── */}
+      <div className="px-5 py-2.5 flex items-center gap-1.5 flex-wrap">
         {canToggle && (
           <Button
             variant={isActive ? "outline" : "default"}
             size="sm"
-            className="h-7 text-xs gap-1.5"
+            className="h-7 text-xs gap-1.5 font-medium"
             onClick={onToggleStatus}
             disabled={isTogglingStatus}
           >
@@ -200,15 +293,14 @@ export function DrawerHeader({
         )}
 
         {campaign?.dailyBudget != null && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
-            <Activity className="w-3 h-3" />
-            <span>Budget:</span>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/40 px-2.5 py-1 rounded-md border border-border/50 h-7">
+            <Activity className="w-3 h-3 shrink-0" />
             <InlineBudgetEditor
               value={campaign.dailyBudget}
               onSave={onBudgetSave}
               fmtMoney={fmtCurrency}
             />
-            <span className="text-muted-foreground">/day</span>
+            <span className="text-muted-foreground/60">/day</span>
           </div>
         )}
 
@@ -220,9 +312,11 @@ export function DrawerHeader({
           <Copy className="w-3 h-3" /> Clone
         </Button>
 
+        <div className="flex-1" />
+
         <Button
           variant="outline" size="sm"
-          className="h-7 text-xs gap-1.5 ml-auto"
+          className="h-7 text-xs gap-1.5"
           onClick={onExport}
           disabled={isExporting}
         >
@@ -234,30 +328,34 @@ export function DrawerHeader({
         </Button>
       </div>
 
-      {/* ── Date Preset Selector ── */}
-      <div className="px-5 pt-3 pb-4 flex items-center gap-1">
+      {/* ── Divider ── */}
+      <div className="mx-5 border-t border-border/50" />
+
+      {/* ── Row 4: Date Preset ── */}
+      <div className="px-5 py-2 flex items-center gap-1">
         {DATE_PRESETS.map(p => (
           <button
             key={p.value}
             onClick={() => onDatePresetChange(p.value)}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-150 ${
+            className={[
+              "px-3 py-1 text-xs font-medium rounded-md transition-all duration-150",
               datePreset === p.value
                 ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-            }`}
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            ].join(" ")}
           >
             {p.label}
           </button>
         ))}
 
-        {/* Live indicator */}
         {isActive && (
-          <div className="ml-auto flex items-center gap-1.5 text-[11px] text-emerald-500">
+          <div className="ml-auto flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Live
           </div>
         )}
       </div>
+
     </div>
   );
 }

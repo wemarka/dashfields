@@ -2216,3 +2216,11 @@
 - [x] Status sub-bar (date + last updated) moves to content area top
 - [x] Active tab highlighted with left border accent in sidebar
 - [x] Prefetch green dot shown in sidebar nav items
+
+## 🎨 Phase 71 — DrawerHeader Professional Redesign
+- [x] Redesign DrawerHeader: cleaner layout with platform logo (Facebook/Meta/Instagram), better visual hierarchy
+- [x] Add platform logo badge next to campaign name
+- [x] Improve budget section: cleaner spend vs budget display
+- [x] Better action buttons layout (Pause/Resume, Budget, Clone, Report)
+- [x] Cleaner Health Score positioning
+- [x] Date preset selector more compact and professional
