@@ -36,6 +36,7 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [logoHovered, setLogoHovered] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     navSections.forEach(s => s.items.forEach(item => {
@@ -136,16 +137,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className="hidden md:flex glass-strong flex-col shrink-0 transition-all duration-300 ease-out m-3 rounded-2xl overflow-hidden relative"
         style={{ width: collapsed ? 64 : 228 }}
       >
-        {/* Logo */}
+        {/* Logo — icon only; collapse toggle fades in on hover */}
         <div
-          className={`flex items-center px-4 h-14 border-b border-white/8 shrink-0 cursor-pointer ${collapsed ? "justify-center" : ""}`}
-          onClick={() => setLocation("/dashboard")}
+          className="relative flex items-center justify-center h-14 border-b border-white/8 shrink-0"
+          onMouseEnter={() => setLogoHovered(true)}
+          onMouseLeave={() => setLogoHovered(false)}
         >
-          {collapsed ? (
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_3bd5ad8c.svg" alt="Dashfields" className="w-8 h-8" />
-          ) : (
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_61e255da.svg" alt="Dashfields" className="h-7 w-auto" />
-          )}
+          {/* Icon — always visible, click to go home */}
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_e917f7bf.svg"
+            alt="Dashfields"
+            onClick={() => setLocation("/dashboard")}
+            className={`w-7 h-7 cursor-pointer transition-all duration-200 select-none ${
+              logoHovered ? "opacity-0 scale-90" : "opacity-100 scale-100"
+            }`}
+          />
+          {/* Collapse button — fades in on hover */}
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className={`absolute inset-0 flex items-center justify-center rounded-xl mx-2 transition-all duration-200 hover:bg-foreground/8 ${
+              logoHovered ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
+            }`}
+          >
+            {(isRTL ? !collapsed : collapsed)
+              ? <ChevronRight className="w-4 h-4 text-foreground/60" />
+              : <ChevronLeft className="w-4 h-4 text-foreground/60" />
+            }
+          </button>
         </div>
 
         {/* Nav Groups — Accordion Pattern */}
@@ -253,15 +272,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })()}
         </div>
 
-        {/* Collapse Toggle */}
-        <button onClick={() => setCollapsed(c => !c)} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={["mx-2 mb-2 flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium",
-            "transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5",
-            collapsed ? "justify-center" : "",
-          ].join(" ")}>
-          {(isRTL ? !collapsed : collapsed) ? <ChevronRight className="w-3.5 h-3.5 shrink-0" /> : <ChevronLeft className="w-3.5 h-3.5 shrink-0" />}
-          {!collapsed && <span className="truncate">Collapse</span>}
-        </button>
+        {/* Collapse Toggle moved to logo hover area */}
       </aside>
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}

@@ -2319,3 +2319,10 @@
 - [x] computeOpportunityScore function added to UnifiedCampaignTable
 - [x] Colored dot + score number (green/amber/red) with Tooltip on hover
 - [x] Badge only shows when campaign has actual metrics (impressions > 0 or ctr > 0)
+
+## ✅ Phase 81 — Branding & Sidebar Redesign
+- [x] Upload Dashfields icon SVG and full logo SVG to CDN
+- [x] Apply new full logo in all auth pages and website sections
+- [x] Sidebar: always shows icon only (no text) in logo area
+- [x] Sidebar: Collapse button hidden, fades in on hover over logo area with scale animation
+- [x] Search changed to icon-only button (w-8 h-8 with Search icon)

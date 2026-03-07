@@ -168,16 +168,13 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Trigger button in header */}
+      {/* Trigger button in header — icon only */}
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground/5 hover:bg-foreground/10 text-muted-foreground text-sm transition-colors border border-border/50"
+        title="Search (Ctrl+K)"
+        className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground/5 hover:bg-foreground/10 text-muted-foreground transition-colors border border-border/50"
       >
-        <Search className="w-3.5 h-3.5" />
-        <span className="text-xs">Search...</span>
-        <kbd className="ml-2 flex items-center gap-0.5 text-[10px] font-mono bg-background border border-border rounded px-1 py-0.5">
-          <Command className="w-2.5 h-2.5" />K
-        </kbd>
+        <Search className="w-4 h-4" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
