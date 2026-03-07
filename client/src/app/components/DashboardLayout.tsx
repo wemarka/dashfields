@@ -348,30 +348,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             const settingsBtn = (
               <button onClick={() => openSettings("account")}
                 className={[
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
+                  "w-full flex items-center justify-center px-3 py-2.5 rounded-xl",
                   "transition-all duration-200 group relative",
-                  isRTL ? "flex-row-reverse text-right" : "text-left",
                   "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
-                  collapsed ? "justify-center" : "",
                 ].join(" ")}>
                 <svg className="w-[18px] h-[18px] shrink-0 transition-all duration-200 text-foreground/40 group-hover:text-foreground/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3" />
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
-                {!collapsed && (
-                  <span
-                    className="truncate flex-1"
-                    style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 150ms ease' }}
-                  >{t("nav.settings", "Settings")}</span>
-                )}
               </button>
             );
-            return collapsed ? (
+            return (
               <Tooltip>
                 <TooltipTrigger asChild>{settingsBtn}</TooltipTrigger>
                 <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t("nav.settings", "Settings")}</TooltipContent>
               </Tooltip>
-            ) : settingsBtn;
+            );
           })()}
         </div>
 
