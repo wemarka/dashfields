@@ -192,7 +192,7 @@ function AccountRow({
   const platform = getPlatform(platformId);
   return (
     <div className={[
-      "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-150 group/row",
+      "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 group/row",
       isSelected ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/40",
     ].join(" ")}>
       <Checkbox
@@ -202,16 +202,16 @@ function AccountRow({
       />
       <div className="relative shrink-0">
         {acc.profilePicture ? (
-          <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-8 h-8 rounded-full object-cover" />
+          <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-9 h-9 rounded-full object-cover" />
         ) : (
-          <div className={"w-8 h-8 rounded-full flex items-center justify-center " + platform.bgLight}>
+          <div className={"w-9 h-9 rounded-full flex items-center justify-center " + platform.bgLight}>
             <PlatformIcon platform={platformId} className={"w-4 h-4 " + platform.textColor} />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-foreground truncate">{acc.name ?? acc.username ?? "Account"}</p>
-        <p className="text-[11px] text-muted-foreground truncate">
+        <p className="text-sm font-semibold text-foreground truncate">{acc.name ?? acc.username ?? "Account"}</p>
+        <p className="text-xs text-muted-foreground truncate">
           {acc.username ? `@${acc.username}` : `ID: ${acc.platformAccountId}`}
         </p>
       </div>
@@ -285,19 +285,19 @@ function PlatformDetailPanel({
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Panel header */}
-      <div className="px-6 py-5 border-b border-border/30">
+      <div className="px-7 py-6 border-b border-border/30">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {/* Group icon */}
             <div className={[
-              "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+              "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
               group.bgColor,
             ].join(" ")}>
               <span className={group.textColor}>{group.icon}</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-foreground">{group.name}</h2>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg font-bold text-foreground">{group.name}</h2>
                 {group.badge && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                     {group.badge}
@@ -314,7 +314,7 @@ function PlatformDetailPanel({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{group.description}</p>
+              <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
             </div>
           </div>
 
@@ -340,7 +340,7 @@ function PlatformDetailPanel({
 
         {/* Sub-platform chips (for Meta: Facebook + Instagram) */}
         {group.platforms.length > 1 && (
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-5">
             {group.platforms.map(pid => {
               const p = getPlatform(pid);
               const accs = accountsByPlatform[pid] ?? [];
@@ -371,7 +371,7 @@ function PlatformDetailPanel({
       </div>
 
       {/* Accounts list */}
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-6 py-5 space-y-6">
         {group.platforms.map(pid => {
           const accs = accountsByPlatform[pid] ?? [];
           if (accs.length === 0) return null;
@@ -383,7 +383,7 @@ function PlatformDetailPanel({
             <div key={pid}>
               {/* Sub-platform header (only show if group has multiple platforms) */}
               {group.platforms.length > 1 && (
-                <div className="flex items-center gap-2 mb-2 px-1">
+                <div className="flex items-center gap-2 mb-3 px-1">
                   <PlatformIcon platform={pid} className={"w-3.5 h-3.5 " + p.textColor} />
                   <span className="text-xs font-semibold text-foreground">{p.name}</span>
                   <span className="text-[11px] text-muted-foreground">· {accs.length} account{accs.length > 1 ? "s" : ""}</span>
@@ -399,7 +399,7 @@ function PlatformDetailPanel({
               )}
 
               {/* Accounts */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {accs.map(acc => (
                   <AccountRow
                     key={acc.id}
@@ -579,7 +579,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
+        <DialogContent className="max-w-5xl w-full max-h-[88vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
           {/* ── Modal Header ── */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 shrink-0">
             <div className="flex items-center gap-3">
@@ -626,13 +626,13 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
           {/* ── Body: Sidebar + Detail ── */}
           <div className="flex flex-1 overflow-hidden">
             {/* Left sidebar: platform list */}
-            <div className="w-52 shrink-0 border-r border-border/30 overflow-y-auto py-2 bg-muted/20">
+            <div className="w-64 shrink-0 border-r border-border/30 overflow-y-auto py-3 bg-muted/20">
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                <div className="space-y-0.5 px-2">
+                <div className="space-y-1 px-2">
                   {PLATFORM_GROUPS.map(group => {
                     const groupAccounts = group.platforms.flatMap(pid => accountsByPlatform[pid] ?? []);
                     const isGroupConnected = groupAccounts.length > 0;
@@ -644,7 +644,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                         key={group.id}
                         onClick={() => setSelectedGroupId(group.id)}
                         className={[
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150",
+                          "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150",
                           isActive
                             ? "bg-background shadow-sm border border-border/40"
                             : "hover:bg-background/60",
@@ -652,7 +652,7 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
                       >
                         {/* Platform icon */}
                         <div className={[
-                          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
+                          "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all",
                           isActive ? group.bgColor : "bg-muted/60",
                         ].join(" ")}>
                           <span className={isActive ? group.textColor : "text-muted-foreground"}>
@@ -662,13 +662,13 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
 
                         <div className="flex-1 min-w-0">
                           <p className={[
-                            "text-xs font-semibold truncate",
+                            "text-sm font-semibold truncate",
                             isActive ? "text-foreground" : "text-muted-foreground",
                           ].join(" ")}>
                             {group.name}
                           </p>
                           {isGroupConnected && (
-                            <p className="text-[10px] text-muted-foreground truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                               {groupAccounts.length} account{groupAccounts.length !== 1 ? "s" : ""}
                             </p>
                           )}
@@ -694,22 +694,22 @@ export function IntegrationsModal({ open, onOpenChange }: IntegrationsModalProps
 
               {/* Stats at bottom */}
               {!isLoading && totalAccounts > 0 && (
-                <div className="mt-4 mx-2 px-3 py-3 rounded-xl bg-background border border-border/30">
+                <div className="mt-4 mx-2 px-4 py-4 rounded-xl bg-background border border-border/30">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="w-3 h-3 text-emerald-500" />
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Summary</span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px]">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Platforms</span>
                       <span className="font-semibold text-foreground">{connectedGroups}</span>
                     </div>
-                    <div className="flex justify-between text-[11px]">
+                    <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Accounts</span>
                       <span className="font-semibold text-foreground">{totalAccounts}</span>
                     </div>
                     {expiredCount > 0 && (
-                      <div className="flex justify-between text-[11px]">
+                      <div className="flex justify-between text-xs">
                         <span className="text-red-500">Expired</span>
                         <span className="font-semibold text-red-500">{expiredCount}</span>
                       </div>
