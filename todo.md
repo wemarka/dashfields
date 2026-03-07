@@ -2189,3 +2189,10 @@
 - [x] CreativesTab: performance ranking badges (#1/#2/#3 by CTR), creative fatigue indicator (CTR < 0.5%), creatives summary bar, improved A/B comparison panel
 - [x] Main drawer: new DrawerHeader component, sticky tab bar with icons, scrollable content area, flex layout
 - [x] 619/619 tests passing, 0 TypeScript errors
+
+## 🐛 Bug Fix — Ad Sets Tab Not Refreshing on Date Change
+- [x] Root cause: `enabled` condition used `activeTab === "adsets"` so when datePreset changed while on another tab, the query was disabled and never re-ran
+- [x] Fix: Replaced `activeTab` condition with `visitedTabs` Set — tracks which tabs have been opened
+- [x] Fix: `handleTabChange` marks each tab as visited when first opened, then queries remain enabled so datePreset changes always trigger a refetch
+- [x] Fix: Reset `visitedTabs` when a new campaign is opened (via `prevCampaignId` ref) to avoid stale data from previous campaign
+- [x] Same fix applied to Creatives/Heatmap queries

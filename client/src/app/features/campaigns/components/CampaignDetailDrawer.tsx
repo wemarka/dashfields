@@ -83,14 +83,33 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   );
   const campaignInsight = insights?.find(i => i.campaignId === campaign?.id);
 
+  // Track which tabs have been visited so we only fetch when needed
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set<string>(["performance"]));
+
+  // Reset visited tabs when campaign changes (new campaign opened)
+  const prevCampaignId = useRef<string | null>(null);
+  useEffect(() => {
+    if (campaign?.id && campaign.id !== prevCampaignId.current) {
+      prevCampaignId.current = campaign.id;
+      setVisitedTabs(new Set<string>(["performance"]));
+      setActiveTab("performance");
+    }
+  }, [campaign?.id]);
+
+  // Mark tab as visited when user switches to it
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as DetailTab);
+    setVisitedTabs(prev => { const next = new Set(prev); next.add(tab); return next; });
+  };
+
   const { data: adSetsData, isLoading: adSetsLoading } = trpc.meta.campaignAdSets.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id && activeTab === "adsets" }
+    { enabled: open && !!campaign?.id && visitedTabs.has("adsets") }
   );
 
   const { data: adsData, isLoading: adsLoading } = trpc.meta.campaignAds.useQuery(
     { campaignId: campaign?.id ?? "", datePreset, workspaceId: activeWorkspace?.id },
-    { enabled: open && !!campaign?.id && (activeTab === "creatives" || activeTab === "heatmap") }
+    { enabled: open && !!campaign?.id && (visitedTabs.has("creatives") || visitedTabs.has("heatmap")) }
   );
 
   // Notes & Tags
@@ -251,7 +270,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
         {/* ── Sticky Tab Bar ──────────────────────────────────────────── */}
         <Tabs
           value={activeTab}
-          onValueChange={v => setActiveTab(v as DetailTab)}
+          onValueChange={handleTabChange}
           className="flex flex-col flex-1 overflow-hidden"
         >
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border shrink-0">
