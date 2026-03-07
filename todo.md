@@ -2308,3 +2308,8 @@
 - [x] Remove Daily Budget progress bar (BudgetBar) from DrawerHeader Row 2
 - [x] Keep InlineBudgetEditor in Row 3 (Quick Actions)
 - [x] Move Health Score circle inline after campaign name (right side of title row)
+
+## ✅ Phase 79 — Opportunity Score
+- [x] Remove HealthScoreCircle component and replace with OpportunityScore
+- [x] Create OpportunityScore component with animated arc/ring and score reveal animation (count-up + spring arc)
+- [x] Place OpportunityScore at end of KPI Pills row (ml-auto) in DrawerHeader

@@ -13,7 +13,7 @@
  *  │  7D  14D  [30D]  90D                          ● Live        │
  *  └─────────────────────────────────────────────────────────────┘
  */
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
 import { Button } from "@/core/components/ui/button";
 import { Loader2, Copy, FileDown, Activity } from "lucide-react";
@@ -78,8 +78,8 @@ function PlatformLogo({ platform, size = 20 }: { platform?: string | null; size?
   return <FacebookLogo size={size} />;
 }
 
-// ─── Health Score ────────────────────────────────────────────────────────────
-function computeHealthScore(insight?: {
+// ─── Opportunity Score ───────────────────────────────────────────────────────
+function computeOpportunityScore(insight?: {
   ctr: number; cpc: number; cpm: number; spend: number; impressions: number;
 } | null): number {
   if (!insight) return 0;
@@ -95,36 +95,78 @@ function computeHealthScore(insight?: {
   return Math.min(100, Math.max(0, score));
 }
 
-function getHealthColor(score: number) {
-  if (score >= 70) return { stroke: "#10b981", text: "text-emerald-500", label: "Excellent", bg: "bg-emerald-500/10" };
-  if (score >= 45) return { stroke: "#f59e0b", text: "text-amber-500",   label: "Average",   bg: "bg-amber-500/10" };
-  return             { stroke: "#ef4444",  text: "text-red-500",     label: "Needs Work", bg: "bg-red-500/10" };
+function getScoreConfig(score: number) {
+  if (score >= 70) return { stroke: "#10b981", glow: "rgba(16,185,129,0.3)", text: "text-emerald-500", label: "High", gradient: ["#10b981", "#34d399"] };
+  if (score >= 45) return { stroke: "#f59e0b", glow: "rgba(245,158,11,0.3)",  text: "text-amber-500",   label: "Medium", gradient: ["#f59e0b", "#fbbf24"] };
+  return             { stroke: "#ef4444",  glow: "rgba(239,68,68,0.3)",   text: "text-red-500",     label: "Low",    gradient: ["#ef4444", "#f87171"] };
 }
 
-function HealthScoreCircle({ score }: { score: number }) {
-  const { stroke, text, label } = getHealthColor(score);
-  const r = 18;
+function OpportunityScore({ score }: { score: number }) {
+  const [displayed, setDisplayed] = useState(0);
+  const [animated, setAnimated] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { stroke, glow, text, label, gradient } = getScoreConfig(score);
+  const r = 20;
   const circ = 2 * Math.PI * r;
-  const dash = (score / 100) * circ;
+  const dash = (displayed / 100) * circ;
+
+  // Animate score number counting up
+  useEffect(() => {
+    if (score === 0) return;
+    const timer = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, [score]);
+
+  useEffect(() => {
+    if (!animated) return;
+    let start = 0;
+    const step = Math.ceil(score / 30);
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= score) { setDisplayed(score); clearInterval(interval); }
+      else setDisplayed(start);
+    }, 30);
+    return () => clearInterval(interval);
+  }, [animated, score]);
+
+  const gradId = `opp-grad-${score}`;
 
   return (
-    <div className="flex flex-col items-center gap-0.5 shrink-0">
-      <div className="relative w-11 h-11">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 44 44">
-          <circle cx="22" cy="22" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="3.5" />
+    <div ref={ref} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/50">
+      {/* Arc ring */}
+      <div className="relative w-10 h-10 shrink-0">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+          <defs>
+            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={gradient[0]} />
+              <stop offset="100%" stopColor={gradient[1]} />
+            </linearGradient>
+          </defs>
+          {/* Track */}
+          <circle cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
+          {/* Progress arc */}
           <circle
-            cx="22" cy="22" r={r} fill="none"
-            stroke={stroke} strokeWidth="3.5"
+            cx="24" cy="24" r={r} fill="none"
+            stroke={`url(#${gradId})`}
+            strokeWidth="4"
             strokeDasharray={`${dash} ${circ}`}
             strokeLinecap="round"
-            style={{ transition: "stroke-dasharray 0.8s ease" }}
+            style={{
+              transition: "stroke-dasharray 0.6s cubic-bezier(0.34,1.56,0.64,1)",
+              filter: animated ? `drop-shadow(0 0 4px ${glow})` : "none",
+            }}
           />
         </svg>
+        {/* Score number */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-xs font-bold ${text}`}>{score}</span>
+          <span className={`text-[11px] font-extrabold ${text} tabular-nums`}>{displayed}</span>
         </div>
       </div>
-      <span className={`text-[9px] font-semibold ${text} uppercase tracking-wide`}>{label}</span>
+      {/* Label */}
+      <div className="flex flex-col leading-tight">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Opportunity</span>
+        <span className={`text-xs font-bold ${text}`}>{label}</span>
+      </div>
     </div>
   );
 }
@@ -200,7 +242,7 @@ export function DrawerHeader({
   const isActive  = campaign?.status?.toLowerCase() === "active";
   const isPaused  = campaign?.status?.toLowerCase() === "paused";
   const canToggle = isActive || isPaused;
-  const healthScore = computeHealthScore(insight);
+  const opportunityScore = computeOpportunityScore(insight);
 
   const fmtPct = (n: number) => `${n.toFixed(2)}%`;
   const fmtMoney = (n: number) => fmtCurrency(n);
@@ -252,9 +294,9 @@ export function DrawerHeader({
                 : String(insight.impressions)}
             />
           )}
-          {/* Health Score — compact pill, end of KPI row */}
+          {/* Opportunity Score — end of KPI row */}
           <div className="ml-auto shrink-0">
-            <HealthScoreCircle score={healthScore} />
+            <OpportunityScore score={opportunityScore} />
           </div>
         </div>
       )}
