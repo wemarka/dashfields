@@ -2303,3 +2303,8 @@
 - [x] Breakdown Tab: fetch real breakdown data from Meta API (age, gender, country, impression_device)
 - [x] KPI Cards: vs previous period comparison (% change vs prior date range)
 - [x] Fetch previous period data using campaignPreviousPeriodInsights procedure
+
+## ✅ Phase 78 — DrawerHeader Cleanup
+- [x] Remove Daily Budget progress bar (BudgetBar) from DrawerHeader Row 2
+- [x] Keep InlineBudgetEditor in Row 3 (Quick Actions)
+- [x] Move Health Score circle to left side next to platform logo

@@ -208,12 +208,19 @@ export function DrawerHeader({
   return (
     <div className="border-b border-border bg-background">
 
-      {/* ── Row 1: Platform + Title + Health Score ── */}
+      {/* ── Row 1: Platform + Title + Health Score (left) ── */}
       <div className="px-5 pt-4 pb-3 flex items-start gap-3">
         {/* Platform logo */}
         <div className="mt-0.5 shrink-0">
           <PlatformLogo platform={campaign?.platform} size={28} />
         </div>
+
+        {/* Health Score — left side, next to campaign info */}
+        {insight && (
+          <div className="mt-0.5 shrink-0">
+            <HealthScoreCircle score={healthScore} />
+          </div>
+        )}
 
         {/* Campaign info */}
         <div className="flex-1 min-w-0">
@@ -236,36 +243,24 @@ export function DrawerHeader({
             </div>
           </SheetDescription>
         </div>
-
-        {/* Health Score */}
-        {insight && <HealthScoreCircle score={healthScore} />}
       </div>
 
-      {/* ── Row 2: Budget Bar + KPI Pills ── */}
-      {(campaign?.dailyBudget != null || insight) && (
-        <div className="px-5 pb-3 space-y-2">
-          {campaign?.dailyBudget != null && insight?.spend != null && (
-            <BudgetBar
-              budget={campaign.dailyBudget}
-              spend={insight.spend}
-              fmtCurrency={fmtCurrency}
-            />
-          )}
-          {insight && (
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
-              {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
-              {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
-              {insight.impressions > 0 && (
-                <KpiPill
-                  label="Impressions"
-                  value={insight.impressions >= 1000
-                    ? `${(insight.impressions / 1000).toFixed(1)}K`
-                    : String(insight.impressions)}
-                />
-              )}
-            </div>
-          )}
+      {/* ── Row 2: KPI Pills ── */}
+      {insight && (
+        <div className="px-5 pb-3">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
+            {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
+            {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
+            {insight.impressions > 0 && (
+              <KpiPill
+                label="Impressions"
+                value={insight.impressions >= 1000
+                  ? `${(insight.impressions / 1000).toFixed(1)}K`
+                  : String(insight.impressions)}
+              />
+            )}
+          </div>
         </div>
       )}
 
