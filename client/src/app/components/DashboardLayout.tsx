@@ -583,54 +583,122 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         type AccType = typeof accounts[0];
 
                         // ── Smart grouping helpers ──
-                        /** Normalize a name for fuzzy comparison: lowercase, remove punctuation & extra spaces */
                         const normalizeName = (s: string) =>
                           s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, "").replace(/\s+/g, " ").trim();
-
-                        /** Check if two names are similar (exact or one contains the other) */
                         const namesSimilar = (a: string, b: string) => {
                           const na = normalizeName(a), nb = normalizeName(b);
                           if (!na || !nb) return false;
                           return na === nb || na.includes(nb) || nb.includes(na);
                         };
 
-                        // Separate Meta (FB + IG) from other platforms
                         const metaAccounts = accounts.filter(a => a.platform === "facebook" || a.platform === "instagram");
                         const otherAccounts = accounts.filter(a => a.platform !== "facebook" && a.platform !== "instagram");
 
-                        // ── Build named groups from Meta accounts ──
-                        // Each group has a canonical name + list of accounts
+                        // Build named groups
                         type NamedGroup = { groupName: string; accounts: AccType[] };
                         const groups: NamedGroup[] = [];
                         const assignedIds = new Set<number>();
-
                         for (const acc of metaAccounts) {
                           if (assignedIds.has(acc.id)) continue;
                           const accName = acc.name ?? acc.username ?? "";
-                          // Find all other Meta accounts with similar names
                           const siblings = metaAccounts.filter(other =>
-                            !assignedIds.has(other.id) &&
-                            other.id !== acc.id &&
+                            !assignedIds.has(other.id) && other.id !== acc.id &&
                             namesSimilar(accName, other.name ?? other.username ?? "")
                           );
                           const groupMembers = [acc, ...siblings];
                           groupMembers.forEach(m => assignedIds.add(m.id));
-                          // Use the shortest non-empty name as the group label
                           const groupName = groupMembers
-                            .map(m => m.name ?? m.username ?? "")
-                            .filter(Boolean)
+                            .map(m => m.name ?? m.username ?? "").filter(Boolean)
                             .sort((a, b) => a.length - b.length)[0] ?? accName;
                           groups.push({ groupName, accounts: groupMembers });
                         }
 
-                        // Meta infinity SVG
-                        const MetaLogo = () => (
-                          <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
-                          </svg>
-                        );
+                        // ── Render a merged group row (single row for the whole group) ──
+                        const renderGroupRow = (group: NamedGroup, idx: number) => {
+                          // Pick the best avatar: prefer non-ad-account (page/business) picture
+                          const primaryAcc = group.accounts.find(a => a.account_type !== "ad_account" && a.profile_picture)
+                            ?? group.accounts.find(a => a.profile_picture)
+                            ?? group.accounts[0];
 
-                        // Render helper for a single account row
+                          // Collect unique platforms in this group
+                          const platforms = Array.from(new Set(group.accounts.map(a => a.platform)));
+
+                          // Collect usernames (non-null, unique)
+                          const usernames = Array.from(new Set(
+                            group.accounts.map(a => a.username).filter((u): u is string => !!u)
+                          )).slice(0, 2);
+
+                          // Platform label e.g. "Facebook, Instagram"
+                          const platformLabel = platforms
+                            .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                            .join(", ");
+
+                          // Is any account in this group active?
+                          const isActive = group.accounts.some(a => activeAccount?.id === a.id);
+
+                          // Clicking the group row activates the first non-ad-account, or first account
+                          const handleClick = () => {
+                            const target = group.accounts.find(a => a.account_type !== "ad_account") ?? group.accounts[0];
+                            setActiveAccount(target.id);
+                            setShowAccountDropdown(false);
+                          };
+
+                          return (
+                            <button
+                              key={`group-${idx}`}
+                              onClick={handleClick}
+                              className={[
+                                "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                                isActive ? "bg-brand/8 text-brand" : "hover:bg-foreground/5 text-foreground",
+                              ].join(" ")}
+                            >
+                              {/* Avatar with overlapping platform badges */}
+                              <div className="relative shrink-0 w-9 h-9">
+                                {/* Radio circle indicator */}
+                                <div className={[
+                                  "absolute -left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center",
+                                  isActive ? "border-brand bg-brand" : "border-muted-foreground/30 bg-transparent",
+                                ].join(" ")}>
+                                  {isActive && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                </div>
+                                {/* Main avatar */}
+                                <Avatar className="w-9 h-9">
+                                  {primaryAcc?.profile_picture && <AvatarImage src={primaryAcc.profile_picture} />}
+                                  <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-semibold">
+                                    {(group.groupName).charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {/* Overlapping platform icons at bottom-right */}
+                                <div className="absolute -bottom-0.5 -right-1 flex">
+                                  {platforms.slice(0, 2).map((p, pi) => (
+                                    <div
+                                      key={p}
+                                      className="w-3.5 h-3.5 rounded-full bg-background border border-border/40 flex items-center justify-center"
+                                      style={{ marginLeft: pi > 0 ? "-4px" : "0", zIndex: platforms.length - pi }}
+                                    >
+                                      <PlatformIcon platform={p} className="w-2 h-2" />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Text */}
+                              <div className="flex-1 min-w-0 pl-2">
+                                <p className="text-[12px] font-semibold truncate leading-tight">
+                                  {group.groupName}{usernames.length > 0 ? `, ${usernames[0]}` : ""}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5">{platformLabel}</p>
+                              </div>
+
+                              {/* Active dot */}
+                              {isActive && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+                              )}
+                            </button>
+                          );
+                        };
+
+                        // Render helper for non-Meta single account row
                         const renderAccountRow = (acc: AccType) => (
                           <button
                             key={acc.id}
@@ -641,7 +709,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             ].join(" ")}
                           >
                             <div className="relative shrink-0">
-                              <Avatar className="w-6 h-6">
+                              <Avatar className="w-7 h-7">
                                 {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
                                 <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
                                   {(acc.name ?? acc.username ?? acc.platform).charAt(0).toUpperCase()}
@@ -660,23 +728,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               )}
                             </div>
                             {activeAccount?.id === acc.id && (
-                              <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                              <div className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
                             )}
                           </button>
                         );
 
                         return (
                           <>
-                            {/* ── Meta named groups ── */}
-                            {groups.map((group, idx) => (
-                              <div key={`meta-group-${idx}`}>
-                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  <MetaLogo />
-                                  {group.groupName}
-                                </p>
-                                {group.accounts.map(renderAccountRow)}
-                              </div>
-                            ))}
+                            {/* ── Meta merged group rows ── */}
+                            {groups.map((group, idx) => renderGroupRow(group, idx))}
 
                             {/* ── Other platforms ── */}
                             {(() => {

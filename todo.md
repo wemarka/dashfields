@@ -2509,3 +2509,9 @@
 - [x] Fix Ad Account name: fetch real business name from Meta API (not user personal name)
 - [x] Auto-group Ad Accounts with Pages/Business accounts when names are similar/matching
 - [x] Show grouped accounts under one named section (e.g. "Prima Center" with FB Page + IG + Ad Account)
+
+## 🎨 Account Dropdown - Merged Group Row Design
+- [x] Show each Meta group as a single merged row (not separate rows per account)
+- [x] Overlapping FB + IG platform icons on the avatar
+- [x] Group name + username in title, "Facebook, Instagram" as subtitle
+- [x] Match app design aesthetic (grey/white, clean)
