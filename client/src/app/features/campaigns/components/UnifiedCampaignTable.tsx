@@ -79,6 +79,9 @@ function UnifiedCampaignTableInner({
         case "conversions": cmp = (a.conversions ?? 0) - (b.conversions ?? 0); break;
         case "cpc":         cmp = (a.cpc ?? 0) - (b.cpc ?? 0); break;
         case "cpm":         cmp = (a.cpm ?? 0) - (b.cpm ?? 0); break;
+        case "calls":       cmp = (a.calls ?? 0) - (b.calls ?? 0); break;
+        case "score":       cmp = (a.score ?? 0) - (b.score ?? 0); break;
+        case "stopTime":    cmp = (a.stopTime ?? "").localeCompare(b.stopTime ?? ""); break;
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -199,6 +202,27 @@ function UnifiedCampaignTableInner({
       case "conversions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.conversions)}</span>;
       case "cpc":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
       case "cpm":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
+      case "calls":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
+      case "score": {
+        if (c.score == null) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
+        const s = c.score;
+        const color = s >= 70 ? "#10b981" : s >= 40 ? "#f59e0b" : "#ef4444";
+        const bg    = s >= 70 ? "#ecfdf5" : s >= 40 ? "#fffbeb" : "#fef2f2";
+        return (
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontSize: 11, fontWeight: 700, color, backgroundColor: bg,
+            borderRadius: 6, padding: "2px 7px", fontFamily: "monospace", minWidth: 32 }}>
+            {s}
+          </span>
+        );
+      }
+      case "stopTime": {
+        if (!c.stopTime) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
+        const d = new Date(c.stopTime);
+        const formatted = isNaN(d.getTime()) ? c.stopTime :
+          d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+        return <span style={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>{formatted}</span>;
+      }
       default: return null;
     }
   };

@@ -2608,3 +2608,14 @@
 - [x] Update Reports.tsx to pass activeGroupIds when downloading reports
 - [x] Update ExportReportModal.tsx to pass activeGroupIds when exporting
 - [x] Add vitest tests for accountIds group filtering logic (630 tests passing)
+
+## 📊 Campaigns Table New Columns
+- [x] Add End Date column: show stop_time for ended campaigns
+- [x] Add Score column: display OpportunityScore per campaign (weighted: CTR 40pts + CPC 30pts + Spend 20pts)
+- [x] Add Conv column: real conversions data from Meta API (actions field) — already in Conversions col
+- [x] Add Calls column: real calls data from Meta API (phone_call + click_to_call + messaging actions)
+- [x] Server router already requests actions field from Meta API (getCampaignInsights)
+- [x] Updated UnifiedCampaign type: added calls, score, stopTime fields
+- [x] Updated ALL_COLUMNS: Calls (visible by default), Score (visible by default), End Date (hidden by default)
+- [x] Updated sort logic for calls, score, stopTime
+- [x] Score badge: green ≥70, amber ≥40, red <40

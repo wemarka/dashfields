@@ -191,7 +191,7 @@ export async function getCampaignInsights(
     accessToken,
     {
       level: "campaign",
-      fields: "campaign_id,campaign_name,impressions,reach,clicks,spend,ctr,cpc,cpm",
+      fields: "campaign_id,campaign_name,impressions,reach,clicks,spend,ctr,cpc,cpm,actions",
       date_preset: datePreset,
       limit: String(limit),
     }

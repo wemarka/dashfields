@@ -21,9 +21,12 @@ export interface UnifiedCampaign {
   accountName?: string;
   adAccountId?: string;
   conversions?: number | null;
+  calls?: number | null;
   frequency?: number | null;
   cpc?: number | null;
   cpm?: number | null;
+  score?: number | null;       // OpportunityScore 0-100
+  stopTime?: string | null;    // ISO date string from Meta stop_time
 }
 
 export interface UnifiedCampaignTableProps {
@@ -43,7 +46,7 @@ export interface UnifiedCampaignTableProps {
   onFilterByCreatives?: (campaign: UnifiedCampaign) => void;
 }
 
-export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "cpc" | "cpm";
+export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "calls" | "cpc" | "cpm" | "score" | "stopTime";
 export type SortDir = "asc" | "desc";
 
 export interface ColumnDef {
@@ -68,6 +71,9 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: "conversions", label: "Conv.",       sortKey: "conversions", width: "w-[90px]",      defaultVisible: false, align: "right" },
   { key: "cpc",         label: "CPC",         sortKey: "cpc",         width: "w-[80px]",      defaultVisible: false, align: "right" },
   { key: "cpm",         label: "CPM",         sortKey: "cpm",         width: "w-[80px]",      defaultVisible: false, align: "right" },
+  { key: "calls",       label: "Calls",       sortKey: "calls",       width: "w-[80px]",      defaultVisible: true,  align: "right" },
+  { key: "score",       label: "Score",       sortKey: "score",       width: "w-[80px]",      defaultVisible: true,  align: "right" },
+  { key: "stopTime",    label: "End Date",    sortKey: "stopTime",    width: "w-[110px]",     defaultVisible: false, align: "left" },
 ];
 
 // ─── Status helpers ───────────────────────────────────────────────────────────

@@ -224,10 +224,20 @@ export default function Campaigns() {
         objective: mc.objective ?? undefined,
         dailyBudget: mc.dailyBudget ?? undefined,
         adAccountId: mc.adAccountId ?? undefined,
+        stopTime: (mc as any).stopTime ?? null,
         spend: ins?.spend, impressions: ins?.impressions,
         clicks: ins?.clicks, ctr: ins?.ctr, reach: ins?.reach,
         cpc: ins?.cpc, cpm: ins?.cpm, conversions: ins?.conversions,
-        // tags not applicable for Meta campaigns
+        calls: ins?.calls ?? null,
+        // OpportunityScore: weighted formula from CTR, CPC, Spend
+        score: (() => {
+          if (!ins?.spend && !ins?.impressions) return null;
+          const ctrScore  = Math.min((ins?.ctr ?? 0) / 5 * 40, 40);   // CTR 5%+ → 40pts
+          const cpcScore  = ins?.cpc && ins.cpc > 0 ? Math.min(40 / ins.cpc, 30) : 0; // lower CPC → more pts
+          const spendScore = Math.min((ins?.spend ?? 0) / 1000 * 10, 20); // up to 20pts for spend
+          const raw = Math.round(ctrScore + cpcScore + spendScore);
+          return Math.min(Math.max(raw, 1), 100);
+        })(),
       };
     });
 

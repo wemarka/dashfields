@@ -39,12 +39,24 @@ export const metaCampaignsRouter = router({
     .query(async ({ ctx, input }) => {
       const cacheKey = metaCache.key("campaignInsights", ctx.user.id, input.accountIds ? input.accountIds.join(",") : input.accountId, input.datePreset, input.limit, input.workspaceId);
       return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_INSIGHTS, async () => {
+        // Helper: sum actions by type keywords
+        const sumActions = (actions: Array<{ action_type: string; value: string }> | undefined, keywords: string[]): number => {
+          if (!actions) return 0;
+          return actions
+            .filter(a => keywords.some(k => a.action_type.includes(k)))
+            .reduce((sum, a) => sum + Number(a.value ?? 0), 0);
+        };
+
         const mapInsights = (insights: Awaited<ReturnType<typeof getCampaignInsights>>) =>
           insights.map(d => ({
             campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
             impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
             clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
+            // Conversions: purchase, lead, complete_registration, submit_application
+            conversions: sumActions(d.actions, ["purchase", "lead", "complete_registration", "submit_application", "offsite_conversion"]),
+            // Calls: phone_call, click_to_call, messaging actions
+            calls: sumActions(d.actions, ["phone_call", "click_to_call", "onsite_conversion.messaging_first_reply", "onsite_conversion.total_messaging"]),
           }));
 
         // Group selection: fetch insights from all accounts in the group
