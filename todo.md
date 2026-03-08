@@ -2560,3 +2560,10 @@
 - [x] Add accountIds array param to meta analytics tRPC procedures (insights, compareInsights, etc.)
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
+
+## 🔗 activeGroupIds → Reports Filtering
+- [x] Add accountIds param to reports.generate, reports.generatePdf, reports.sendNow procedures
+- [x] Add accountIds param to export.csv, export.htmlReport, export.preview procedures
+- [x] Update Reports.tsx to pass activeGroupIds when downloading reports
+- [x] Update ExportReportModal.tsx to pass activeGroupIds when exporting
+- [x] Add vitest tests for accountIds group filtering logic (630 tests passing)

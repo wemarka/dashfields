@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { toast } from "sonner";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
@@ -32,10 +33,16 @@ export function ExportReportModal({ onClose }: ExportReportModalProps) {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [exportType, setExportType] = useState<"csv" | "pdf">("csv");
   const { activeWorkspace } = useWorkspace();
+  const { activeGroupIds } = useActiveAccount();
+
+  // Build account filter — prefer group selection over all accounts
+  const accountFilter = activeGroupIds && activeGroupIds.length > 0
+    ? { accountIds: activeGroupIds }
+    : {};
 
   // Preview query
   const { data: preview, isLoading: previewLoading } = trpc.export.preview.useQuery(
-    { datePreset, workspaceId: activeWorkspace?.id },
+    { datePreset, workspaceId: activeWorkspace?.id, ...accountFilter },
     { refetchOnWindowFocus: false }
   );
 
@@ -84,9 +91,9 @@ export function ExportReportModal({ onClose }: ExportReportModalProps) {
   const handleExport = () => {
     const platforms = selectedPlatforms.length > 0 ? selectedPlatforms : undefined;
     if (exportType === "csv") {
-      csvMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id });
+      csvMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id, ...accountFilter });
     } else {
-      htmlMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id });
+      htmlMutation.mutate({ datePreset, platforms, workspaceId: activeWorkspace?.id, ...accountFilter });
     }
   };
 

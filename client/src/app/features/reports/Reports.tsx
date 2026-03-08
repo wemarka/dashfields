@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
+import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
 import { FileText, Plus, Calendar, RefreshCw, CheckCircle2, Zap } from "lucide-react";
@@ -25,7 +26,13 @@ export default function Reports() {
   const [branding, setBranding] = useState<BrandingOptions>(DEFAULT_BRANDING);
   const utils = trpc.useUtils();
   const { activeWorkspace } = useWorkspace();
+  const { activeGroupIds } = useActiveAccount();
   const { t } = useTranslation();
+
+  // Build account filter — prefer group selection over all accounts
+  const accountFilter = activeGroupIds && activeGroupIds.length > 0
+    ? { accountIds: activeGroupIds }
+    : {};
 
   const { data: reports = [], isLoading } = trpc.reports.list.useQuery({ workspaceId: activeWorkspace?.id });
 
@@ -81,10 +88,10 @@ export default function Reports() {
       preparedBy:   branding.preparedBy   || undefined,
     };
     if (report.format === "pdf") {
-      generatePdfMutation.mutate({ id: report.id, name: report.name, platforms: report.platforms, datePreset: report.date_preset as DatePreset, branding: brandingPayload });
+      generatePdfMutation.mutate({ id: report.id, name: report.name, platforms: report.platforms, datePreset: report.date_preset as DatePreset, branding: brandingPayload, ...accountFilter });
     } else {
       const exportFormat = report.format as "csv" | "html";
-      generateMutation.mutate({ id: report.id, name: report.name, platforms: report.platforms, datePreset: report.date_preset as DatePreset, format: exportFormat, branding: exportFormat === "html" ? brandingPayload : undefined });
+      generateMutation.mutate({ id: report.id, name: report.name, platforms: report.platforms, datePreset: report.date_preset as DatePreset, format: exportFormat, branding: exportFormat === "html" ? brandingPayload : undefined, ...accountFilter });
     }
   };
 

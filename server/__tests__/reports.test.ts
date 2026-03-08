@@ -135,3 +135,127 @@ describe("Reports — CSV generation", () => {
     expect(rows[1]).toContain("333.33");
   });
 });
+
+// ── Helpers for accountIds group filtering ────────────────────────────────────
+
+interface MockAccount {
+  id: number;
+  platform: string;
+  name: string;
+}
+
+interface MockCampaign {
+  id: number;
+  social_account_id: number | null;
+  platform: string;
+  name: string;
+}
+
+/**
+ * Simulates the accountIds filtering logic from the reports router:
+ * when accountIds is provided, only campaigns whose social_account_id
+ * is in the accountIds array are included.
+ */
+function filterCampaignsByAccountIds(
+  campaigns: MockCampaign[],
+  accountIds?: number[]
+): MockCampaign[] {
+  if (!accountIds || accountIds.length === 0) return campaigns;
+  return campaigns.filter(c => c.social_account_id !== null && accountIds.includes(c.social_account_id));
+}
+
+/**
+ * Simulates the gatherData accountIds filtering logic from the export router:
+ * when accountIds is provided, only accounts whose id is in the list are used.
+ */
+function filterAccountsByIds(
+  accounts: MockAccount[],
+  accountIds?: number[]
+): MockAccount[] {
+  if (!accountIds || accountIds.length === 0) return accounts;
+  return accounts.filter(a => accountIds.includes(a.id));
+}
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+describe("Reports — accountIds group filtering (reports router)", () => {
+  const campaigns: MockCampaign[] = [
+    { id: 1, social_account_id: 10, platform: "facebook",  name: "FB Campaign A" },
+    { id: 2, social_account_id: 11, platform: "instagram", name: "IG Campaign B" },
+    { id: 3, social_account_id: 12, platform: "facebook",  name: "FB Ad Account Campaign" },
+    { id: 4, social_account_id: null, platform: "tiktok",  name: "TikTok Campaign (no account)" },
+  ];
+
+  it("returns all campaigns when no accountIds provided", () => {
+    const result = filterCampaignsByAccountIds(campaigns, undefined);
+    expect(result).toHaveLength(4);
+  });
+
+  it("returns all campaigns when accountIds is empty array", () => {
+    const result = filterCampaignsByAccountIds(campaigns, []);
+    expect(result).toHaveLength(4);
+  });
+
+  it("filters to only FB+IG accounts in a group", () => {
+    const result = filterCampaignsByAccountIds(campaigns, [10, 11]);
+    expect(result).toHaveLength(2);
+    expect(result.map(c => c.name)).toContain("FB Campaign A");
+    expect(result.map(c => c.name)).toContain("IG Campaign B");
+  });
+
+  it("filters to single account", () => {
+    const result = filterCampaignsByAccountIds(campaigns, [12]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("FB Ad Account Campaign");
+  });
+
+  it("excludes campaigns with null social_account_id even if accountIds is provided", () => {
+    const result = filterCampaignsByAccountIds(campaigns, [10, 11, 12]);
+    expect(result).toHaveLength(3);
+    expect(result.some(c => c.name === "TikTok Campaign (no account)")).toBe(false);
+  });
+
+  it("returns empty array when no campaigns match the accountIds", () => {
+    const result = filterCampaignsByAccountIds(campaigns, [999]);
+    expect(result).toHaveLength(0);
+  });
+});
+
+describe("Reports — accountIds group filtering (export router)", () => {
+  const accounts: MockAccount[] = [
+    { id: 10, platform: "facebook",  name: "Prima Center FB" },
+    { id: 11, platform: "instagram", name: "Prima Center IG" },
+    { id: 12, platform: "facebook",  name: "Prima Center Ad Account" },
+    { id: 20, platform: "tiktok",    name: "Other TikTok Account" },
+  ];
+
+  it("returns all accounts when no accountIds provided", () => {
+    const result = filterAccountsByIds(accounts, undefined);
+    expect(result).toHaveLength(4);
+  });
+
+  it("returns all accounts when accountIds is empty", () => {
+    const result = filterAccountsByIds(accounts, []);
+    expect(result).toHaveLength(4);
+  });
+
+  it("filters to only accounts in the group", () => {
+    const result = filterAccountsByIds(accounts, [10, 11, 12]);
+    expect(result).toHaveLength(3);
+    expect(result.map(a => a.name)).toContain("Prima Center FB");
+    expect(result.map(a => a.name)).toContain("Prima Center IG");
+    expect(result.map(a => a.name)).toContain("Prima Center Ad Account");
+    expect(result.map(a => a.name)).not.toContain("Other TikTok Account");
+  });
+
+  it("filters to single account for individual selection", () => {
+    const result = filterAccountsByIds(accounts, [20]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe("Other TikTok Account");
+  });
+
+  it("returns empty array when accountIds don't match any account", () => {
+    const result = filterAccountsByIds(accounts, [999, 888]);
+    expect(result).toHaveLength(0);
+  });
+});

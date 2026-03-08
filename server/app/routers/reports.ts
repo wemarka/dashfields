@@ -298,15 +298,21 @@ export const reportsRouter = router({
       datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
       format:     z.enum(["csv", "html"]).default("csv"),
       branding:   brandingSchema,
+      accountIds: z.array(z.number()).optional(), // group selection: filter by specific social account IDs
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
       const { since, until } = datePresetToRange(input.datePreset);
 
-      const { data: campaigns } = await sb
+      let campaignsQuery = sb
         .from("campaigns")
         .select("id, name, platform, status, budget, budget_type")
         .eq("user_id", ctx.user.id);
+      // Filter by specific social accounts if group is selected
+      if (input.accountIds && input.accountIds.length > 0) {
+        campaignsQuery = campaignsQuery.in("social_account_id", input.accountIds);
+      }
+      const { data: campaigns } = await campaignsQuery;
 
       const { data: metrics } = await sb
         .from("campaign_metrics")
@@ -363,15 +369,21 @@ export const reportsRouter = router({
       platforms:  z.array(z.string()).default([]),
       datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
       branding:   brandingSchema,
+      accountIds: z.array(z.number()).optional(), // group selection: filter by specific social account IDs
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
       const { since, until } = datePresetToRange(input.datePreset);
 
-      const { data: campaigns } = await sb
+      let campaignsQuery = sb
         .from("campaigns")
         .select("id, name, platform, status, budget, budget_type")
         .eq("user_id", ctx.user.id);
+      // Filter by specific social accounts if group is selected
+      if (input.accountIds && input.accountIds.length > 0) {
+        campaignsQuery = campaignsQuery.in("social_account_id", input.accountIds);
+      }
+      const { data: campaigns } = await campaignsQuery;
 
       const { data: metrics } = await sb
         .from("campaign_metrics")
@@ -449,15 +461,20 @@ export const reportsRouter = router({
       platforms: z.array(z.string()).default([]),
       datePreset: z.enum(["last_7d", "last_14d", "last_30d", "last_90d"]).default("last_30d"),
       branding: brandingSchema,
+      accountIds: z.array(z.number()).optional(), // group selection
     }))
     .mutation(async ({ ctx, input }) => {
       const sb = getSupabase();
       const { since, until } = datePresetToRange(input.datePreset);
 
-      const { data: campaigns } = await sb
+      let campaignsQuery = sb
         .from("campaigns")
         .select("id, name, platform, status, budget")
         .eq("user_id", ctx.user.id);
+      if (input.accountIds && input.accountIds.length > 0) {
+        campaignsQuery = campaignsQuery.in("social_account_id", input.accountIds);
+      }
+      const { data: campaigns } = await campaignsQuery;
 
       const { data: metrics } = await sb
         .from("campaign_metrics")

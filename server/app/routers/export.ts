@@ -134,8 +134,12 @@ async function getDbRow(
 }
 
 // ─── Gather data (real Supabase + Meta API) ───────────────────────────────────
-async function gatherData(userId: number, datePreset: string, workspaceId?: number): Promise<PlatformRow[]> {
-  const accounts = await getUserSocialAccounts(userId, workspaceId);
+async function gatherData(userId: number, datePreset: string, workspaceId?: number, accountIds?: number[]): Promise<PlatformRow[]> {
+  let accounts = await getUserSocialAccounts(userId, workspaceId);
+  // Filter to specific accounts if group is selected
+  if (accountIds && accountIds.length > 0) {
+    accounts = accounts.filter(a => accountIds.includes(a.id));
+  }
   if (accounts.length === 0) return [];
 
   const { since, until } = getDateRange(datePreset);
@@ -334,9 +338,10 @@ export const exportRouter = router({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
       platforms:  z.array(z.string()).optional(),
       workspaceId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection
     }))
     .mutation(async ({ ctx, input }) => {
-      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
+      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId, input.accountIds);
       if (input.platforms && input.platforms.length > 0) {
         rows = rows.filter((r) => input.platforms!.includes(r.platform));
       }
@@ -353,9 +358,10 @@ export const exportRouter = router({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
       platforms:  z.array(z.string()).optional(),
       workspaceId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection
     }))
     .mutation(async ({ ctx, input }) => {
-      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
+      let rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId, input.accountIds);
       if (input.platforms && input.platforms.length > 0) {
         rows = rows.filter((r) => input.platforms!.includes(r.platform));
       }
@@ -641,9 +647,10 @@ export const exportRouter = router({
     .input(z.object({
       datePreset: z.enum(["today", "yesterday", "last_7d", "last_30d", "this_month", "last_month"]).default("last_30d"),
       workspaceId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection
     }))
     .query(async ({ ctx, input }) => {
-      const rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId);
+      const rows = await gatherData(ctx.user.id, input.datePreset, input.workspaceId, input.accountIds);
       return {
         rowCount:    rows.length,
         platforms:   rows.map((r) => r.platform),
