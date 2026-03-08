@@ -15,15 +15,15 @@
 import { useState } from "react";
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
 import { Loader2, Copy, FileDown, Activity } from "lucide-react";
-import { StatusBadge, InlineBudgetEditor } from "./SharedComponents";
+import { InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
 // ─── Platform Logos ───────────────────────────────────────────────────────────
 function FacebookLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect width="24" height="24" rx="6" fill="#1877F2" />
-      <path d="M16.5 8H14.5C13.948 8 13.5 8.448 13.5 9V11H16.5L16 14H13.5V22H10.5V14H8.5V11H10.5V9C10.5 6.791 12.291 5 14.5 5H16.5V8Z" fill="white" />
+      <rect width="24" height="24" rx="5" fill="#E8F0FE" />
+      <path d="M13.5 8H12C11.448 8 11 8.448 11 9V11H13.5L13 14H11V20H8.5V14H7V11H8.5V9C8.5 7.343 9.843 6 11.5 6H13.5V8Z" fill="#1877F2" />
     </svg>
   );
 }
@@ -112,7 +112,6 @@ export function DrawerHeader({
           </SheetTitle>
           <SheetDescription asChild>
             <div className="mt-1 flex items-center gap-2 flex-wrap">
-              {campaign?.status && <StatusBadge status={campaign.status} />}
               {campaign?.objective && (
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                   {campaign.objective.replace(/_/g, " ")}
