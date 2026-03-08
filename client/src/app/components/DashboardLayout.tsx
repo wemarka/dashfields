@@ -405,11 +405,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </TooltipTrigger>
               <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>Help & Support</TooltipContent>
             </Tooltip>
-          </div>
-
-          {/* Sign Out — separated */}
-          <div className={`mt-1.5 ${collapsed ? "flex flex-col items-center" : ""}`}>
-            <div className="h-px bg-border/30 mb-1.5" />
+            {/* Vertical separator (expanded) / Horizontal separator (collapsed) */}
+            {!collapsed && <div className="w-px h-5 bg-border/40 mx-0.5 shrink-0" />}
+            {collapsed && <div className="h-px w-5 bg-border/40 my-0.5 shrink-0" />}
+            {/* Sign Out */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
