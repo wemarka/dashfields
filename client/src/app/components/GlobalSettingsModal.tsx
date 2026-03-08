@@ -22,7 +22,6 @@ import {
   HelpCircle,
   ExternalLink,
   Building2,
-  LogOut,
   X,
 } from "lucide-react";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -96,7 +95,7 @@ interface GlobalSettingsModalProps {
 }
 
 export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account" }: GlobalSettingsModalProps) {
-  const { signOut } = useAuth();
+  useAuth();
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -119,11 +118,6 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
       document.body.style.overflow = "";
     };
   }, [open, handleKeyDown]);
-
-  const handleSignOut = async () => {
-    onOpenChange(false);
-    await signOut();
-  };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onOpenChange(false);
@@ -234,16 +228,7 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
               <ExternalLink className="w-3 h-3 opacity-50" />
             </button>
 
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all"
-              style={{ color: "#ef4444" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#fef2f2"; (e.currentTarget as HTMLButtonElement).style.color = "#dc2626"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#ef4444"; }}
-            >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span>Sign out</span>
-            </button>
+
           </div>
         </aside>
 
