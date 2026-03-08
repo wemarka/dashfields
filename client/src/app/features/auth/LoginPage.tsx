@@ -1,7 +1,7 @@
 /**
  * LoginPage.tsx
- * Supabase Auth — Email/Password + Google OAuth login page
- * Design: Glassmorphism with animated gradient background
+ * Supabase Auth — Email/Password login
+ * Design: Clean white/off-white — matches Settings Dialog palette
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -26,14 +26,10 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get returnTo from query params
   const returnTo = new URLSearchParams(window.location.search).get("returnTo") ?? "/dashboard";
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      setLocation(returnTo);
-    }
+    if (!isLoading && isAuthenticated) setLocation(returnTo);
   }, [isAuthenticated, isLoading, returnTo, setLocation]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -43,11 +39,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const { error: authError } = await signInWithEmail(email, password);
-      if (authError) {
-        setError(getErrorMessage(authError.message));
-        return;
-      }
-      // Invalidate auth cache so trpc.auth.me refetches
+      if (authError) { setError(getErrorMessage(authError.message)); return; }
       await utils.auth.me.invalidate();
       toast.success("Welcome back!");
       setLocation(returnTo);
@@ -65,50 +57,56 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-indigo-900 to-violet-950" />
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-40 w-80 h-80 bg-violet-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-500" />
+    <div className="min-h-screen flex" style={{ backgroundColor: "#f7f7f8" }}>
+      {/* Left panel — branding */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
+        style={{ backgroundColor: "#111827" }}
+      >
+        <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
+        <div>
+          <blockquote className="text-white/80 text-lg leading-relaxed font-light mb-6">
+            "Dashfields brings all your ad accounts into one intelligent workspace — so you can focus on what matters."
+          </blockquote>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
+            <div>
+              <p className="text-white text-sm font-medium">Dashfields Team</p>
+              <p className="text-white/40 text-xs">dashfields.com</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-white/20 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
       </div>
 
-      {/* Glass card */}
-      <div className="relative z-10 w-full max-w-md mx-4">
-        <div
-          className="rounded-2xl border border-white/10 p-8 shadow-2xl"
-          style={{
-            background: "rgba(255,255,255,0.07)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-          }}
-        >
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <img src={LOGO_URL} alt="Dashfields" className="h-9 brightness-0 invert" />
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="flex justify-center mb-8 lg:hidden">
+            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain" style={{ filter: "brightness(0)" }} />
           </div>
 
           {/* Heading */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-1">Welcome back</h1>
-            <p className="text-white/60 text-sm">Sign in to your Dashfields account</p>
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
+            <p className="text-gray-500 text-sm">Sign in to your Dashfields account</p>
           </div>
 
-          {/* Error message */}
+          {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/15 border border-red-500/30 mb-4">
-              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 mb-5">
+              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
 
-          {/* Email/Password form */}
+          {/* Form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-white/80 text-sm">Email</Label>
+              <Label htmlFor="email" className="text-gray-700 text-sm font-medium">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   id="email"
                   type="email"
@@ -117,24 +115,24 @@ export default function LoginPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400/60 focus:ring-blue-400/20 h-11"
+                  className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-white/80 text-sm">Password</Label>
+                <Label htmlFor="password" className="text-gray-700 text-sm font-medium">Password</Label>
                 <button
                   type="button"
                   onClick={() => setLocation("/forgot-password")}
-                  className="text-blue-400 hover:text-blue-300 text-xs transition-colors"
+                  className="text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors"
                 >
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -143,12 +141,12 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-blue-400/60 focus:ring-blue-400/20 h-11"
+                  className="pl-10 pr-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -159,39 +157,31 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={submitting || !email || !password}
-              className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-500/25 transition-all"
+              className="w-full h-11 rounded-xl font-medium"
+              style={{ backgroundColor: "#111827", color: "#fff" }}
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin mr-2" />Signing in...</>
-              ) : (
-                "Sign in"
-              )}
+              ) : "Sign in"}
             </Button>
           </form>
 
           {/* Register link */}
-          <p className="text-center text-white/50 text-sm mt-6">
+          <p className="text-center text-gray-500 text-sm mt-6">
             Don&apos;t have an account?{" "}
             <button
               type="button"
               onClick={() => setLocation("/register")}
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
               Create account
             </button>
           </p>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-white/25 text-xs mt-6">
-          © {new Date().getFullYear()} Dashfields. All rights reserved.
-        </p>
       </div>
     </div>
   );
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getErrorMessage(msg: string): string {
   if (msg.includes("Invalid login credentials")) return "Invalid email or password. Please try again.";

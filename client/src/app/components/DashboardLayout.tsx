@@ -164,12 +164,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex flex-col shrink-0 overflow-hidden relative border-r border-border/30"
+        className="hidden md:flex flex-col shrink-0 overflow-hidden relative"
         style={{
           width: collapsed ? 60 : 220,
           transition: 'width 280ms cubic-bezier(0.4, 0, 0.2, 1)',
           background: 'var(--sidebar-bg, hsl(var(--background)))',
-          boxShadow: 'none'
+          boxShadow: '1px 0 0 #ebebeb, 4px 0 12px rgba(0,0,0,0.04)'
         }}
       >
         {/* Logo + Collapse Button */}

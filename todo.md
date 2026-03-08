@@ -2441,3 +2441,9 @@
 - [x] Update card/popover colors to match Dialog content area
 - [x] Update border colors to match Dialog borders (#ebebeb)
 - [x] Update muted/secondary colors to match Dialog nav items
+
+## 🎨 Comprehensive Design Polish
+- [x] Add subtle shadow on Sidebar to separate from white content area
+- [x] Update Auth pages (Login/Register/ForgotPassword) to use white/off-white palette
+- [x] Update app-bg to pure white globally via CSS utility
+- [x] Card hover shadows updated to match clean palette
