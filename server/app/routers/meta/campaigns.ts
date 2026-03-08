@@ -123,7 +123,8 @@ export const metaCampaignsRouter = router({
         if (es === "ACTIVE") return "ACTIVE";
         if (es === "PAUSED" || es === "CAMPAIGN_PAUSED" || es === "ADSET_PAUSED") return "PAUSED";
         if (es === "DELETED" || es === "ARCHIVED") return "ARCHIVED";
-        if (es === "IN_PROCESS" || es === "WITH_ISSUES") return "IN_PROCESS";
+        if (es === "IN_PROCESS") return "IN_PROCESS";
+        if (es === "WITH_ISSUES") return "WITH_ISSUES";
         return es;
       };
 

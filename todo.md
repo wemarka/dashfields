@@ -2561,6 +2561,14 @@
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
 
+## 🐛 Campaigns Status Fix + Default Active Filter
+- [x] Fix: Meta campaigns showing wrong status (effective_status not used correctly in frontend)
+- [x] Fix: Default status filter should be "active" not "all"
+- [x] Fix: handleClearFilters should reset to "active" not "all"
+- [x] Add status chip in filter bar when active filter is set
+- [x] Add in_process and with_issues to STATUS_CONFIG for correct badge rendering
+- [x] Fix normalizeStatus to return WITH_ISSUES separately from IN_PROCESS
+
 ## 🔗 activeGroupIds → Reports Filtering
 - [x] Add accountIds param to reports.generate, reports.generatePdf, reports.sendNow procedures
 - [x] Add accountIds param to export.csv, export.htmlReport, export.preview procedures

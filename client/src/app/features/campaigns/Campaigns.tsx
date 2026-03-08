@@ -37,7 +37,7 @@ export default function Campaigns() {
 
   // ── State ─────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
@@ -117,8 +117,11 @@ export default function Campaigns() {
     const result: UnifiedCampaign[] = [];
     for (const mc of metaCampaigns) {
       const insight = metaInsights.find((i) => i.campaignId === mc.id);
+      // Use the normalized status from server (already uses effective_status)
+      // Server returns ACTIVE/PAUSED/ARCHIVED/IN_PROCESS — normalize to lowercase
+      const normalizedStatus = (mc.status ?? "unknown").toLowerCase();
       result.push({
-        id: mc.id, name: mc.name, status: mc.status?.toLowerCase() ?? "unknown",
+        id: mc.id, name: mc.name, status: normalizedStatus,
         platform: "facebook", source: "api", objective: mc.objective,
         dailyBudget: mc.dailyBudget, lifetimeBudget: mc.lifetimeBudget,
         spend: insight ? Number(insight.spend) : null,
@@ -181,7 +184,7 @@ export default function Campaigns() {
   const hasAnyConnection = connectedPlatforms.length > 0;
 
   const activeFilterCount = [
-    search !== "", statusFilter !== "all", platformFilter !== "all",
+    search !== "", statusFilter !== "active", platformFilter !== "all",
     datePreset !== "last_30d", tagFilter !== "all",
   ].filter(Boolean).length;
 
@@ -209,7 +212,7 @@ export default function Campaigns() {
     toast.success("Refreshing campaign data...");
   }, [refetchMeta, refetchInsights, utils]);
   const handleClearFilters = useCallback(() => {
-    setSearch(""); setStatusFilter("all"); setPlatformFilter("all");
+    setSearch(""); setStatusFilter("active"); setPlatformFilter("all");
     setDatePreset("last_30d"); setCustomDateRange(undefined); setTagFilter("all");
   }, []);
   const handleBulkAction = useCallback((action: "pause" | "activate" | "delete", ids: string[]) => {

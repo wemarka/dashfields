@@ -103,6 +103,8 @@ export function CampaignFilters({
       });
     }
 
+    // Always show status chip unless it's the default "all" view
+    // We show it for any non-"all" value so user can see/remove the active filter
     if (statusFilter !== "all") {
       const opt = STATUS_OPTIONS.find(s => s.value === statusFilter);
       chips.push({
