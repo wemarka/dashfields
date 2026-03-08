@@ -88,7 +88,8 @@ export function DrawerHeader({
     <div className="border-b border-border/50 bg-white px-4 py-0 shrink-0">
 
       {/* ── Single compact row ── */}
-      <div className="flex items-center gap-2 h-11 overflow-x-auto scrollbar-none">
+      {/* pr-10 reserves space for the Sheet's default close (X) button */}
+      <div className="flex items-center gap-2 h-11 overflow-x-auto scrollbar-none pr-10">
 
         {/* Platform logo */}
         <div className="shrink-0">
