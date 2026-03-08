@@ -2561,6 +2561,14 @@
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
 
+## 🎨 Campaigns Page Redesign — Settings Dialog style
+- [x] Simplify page header (smaller, lighter typography like Settings)
+- [x] Replace heavy KPI cards with a compact inline stats row
+- [x] Simplify filter bar to a single clean row (no chips, lighter inputs)
+- [x] Remove excessive shadows, borders, and visual noise
+- [x] Clean native-style buttons instead of heavy shadcn Button components
+- [x] Compact stats bar with 5 KPIs (Spend, Impressions, Clicks, CTR, Campaign count)
+
 ## 🐛 Campaigns Status: Campaigns showing Active despite being paused in Meta
 - [x] Debug: Log raw effective_status values from Meta API to find root cause
 - [x] Root cause: Meta returns ACTIVE/ACTIVE for old campaigns with past stop_time or exhausted lifetime_budget
