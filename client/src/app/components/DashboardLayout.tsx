@@ -42,15 +42,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
 
   // Close collapsed popover when clicking outside
   useEffect(() => {
     if (!collapsedPopover) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (collapsedPopoverRef.current && !collapsedPopoverRef.current.contains(e.target as Node)) {
-        setCollapsedPopover(null);
-      }
+      const target = e.target as Node;
+      // Don't close if clicking inside the popover
+      if (collapsedPopoverRef.current && collapsedPopoverRef.current.contains(target)) return;
+      // Don't close if clicking inside the sidebar (the trigger button)
+      if (sidebarRef.current && sidebarRef.current.contains(target)) return;
+      setCollapsedPopover(null);
+      setPopoverPos(null);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -178,6 +184,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
+        ref={sidebarRef}
         className="hidden md:flex flex-col shrink-0 overflow-hidden relative"
         style={{
           width: collapsed ? 60 : 220,
@@ -303,7 +310,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             }
 
             const sectionBtn = (
-                <button onClick={() => collapsed ? setCollapsedPopover(collapsedPopover === item.path ? null : item.path) : toggleSection(item.path)}
+                <button onClick={(e) => {
+                  if (collapsed) {
+                    if (collapsedPopover === item.path) {
+                      setCollapsedPopover(null);
+                      setPopoverPos(null);
+                    } else {
+                      const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                      setPopoverPos({ top: rect.top, left: rect.right + 8 });
+                      setCollapsedPopover(item.path);
+                    }
+                  } else {
+                    toggleSection(item.path);
+                  }
+                }}
                   className={[
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                     "transition-all duration-200 group relative",
@@ -332,20 +352,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <TooltipTrigger asChild>{sectionBtn}</TooltipTrigger>
                       <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t(item.labelKey)}</TooltipContent>
                     </Tooltip>
-                    {/* Collapsed submenu popover */}
-                    {collapsedPopover === item.path && (
+                    {/* Collapsed submenu popover — rendered via portal-like fixed positioning */}
+                    {collapsedPopover === item.path && popoverPos && (
                       <div
                         ref={collapsedPopoverRef}
-                        className="absolute top-0 z-50 py-1.5 rounded-xl overflow-hidden"
+                        className="fixed z-[9999] py-1.5 rounded-xl overflow-hidden"
                         style={{
-                          left: isRTL ? 'auto' : '100%',
-                          right: isRTL ? '100%' : 'auto',
-                          marginLeft: isRTL ? 0 : 8,
-                          marginRight: isRTL ? 8 : 0,
+                          top: popoverPos.top,
+                          left: isRTL ? 'auto' : popoverPos.left,
+                          right: isRTL ? `calc(100vw - ${popoverPos.left - 16}px)` : 'auto',
                           background: '#ffffff',
                           border: '1px solid #ebebeb',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                          minWidth: 180,
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                          minWidth: 190,
                         }}
                       >
                         <div className="px-3 py-1.5 mb-0.5">
