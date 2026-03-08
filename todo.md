@@ -2472,3 +2472,10 @@
 ## 🐛 Fix GlobalSearch infinite loop (final)
 - [x] Completely eliminate the useEffect that sets inlineResults state — move to useMemo instead
 - [x] Fix second error from wouter flushSync
+
+## 🔍 Recent Searches in GlobalSearch
+- [x] Save last 5 searches in localStorage (key: dashfields_recent_searches)
+- [x] Show recent searches when input is empty and search is open/expanded
+- [x] Add "X" button to remove individual recent searches
+- [x] Clear all recent searches option
+- [x] Clicking a recent search fills the input and runs the search
