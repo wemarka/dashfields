@@ -513,14 +513,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <GlobalSearch />
           </div>
-          {/* Center: Page Title Breadcrumb */}
-          {currentNavItem && (
-            <div className="hidden md:flex items-center gap-1.5 text-sm">
-              <span className="text-muted-foreground/40 text-xs">Dashfields</span>
-              <span className="text-muted-foreground/40 text-xs">/</span>
-              <span className="text-foreground/80 font-medium text-xs">{t(currentNavItem.labelKey)}</span>
-            </div>
-          )}
+
           {/* Right: NotificationBell + Account Avatar Dropdown */}
           <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
             <NotificationBell />

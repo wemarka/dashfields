@@ -2485,3 +2485,6 @@
 - [x] Show only last 5 recent searches when input is empty
 - [x] Add @ prefix to filter search by scope (e.g. @campaigns, @reports, @pages, @analytics)
 - [x] Show @ scope suggestions when user types @
+
+## 🗑️ Remove Breadcrumb
+- [x] Remove Breadcrumb from Topbar in DashboardLayout
