@@ -33,33 +33,54 @@ export const metaCampaignsRouter = router({
       datePreset: datePresetEnum.default("last_30d"),
       limit: z.number().min(1).max(50).default(20),
       accountId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection: multiple account IDs
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const cacheKey = metaCache.key("campaignInsights", ctx.user.id, input.accountId, input.datePreset, input.limit, input.workspaceId);
+      const cacheKey = metaCache.key("campaignInsights", ctx.user.id, input.accountIds ? input.accountIds.join(",") : input.accountId, input.datePreset, input.limit, input.workspaceId);
       return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_INSIGHTS, async () => {
-        if (input.accountId) {
-          const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-          if (!conn) return [];
-          const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
-          return insights.map(d => ({
+        const mapInsights = (insights: Awaited<ReturnType<typeof getCampaignInsights>>) =>
+          insights.map(d => ({
             campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
             impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
             clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
           }));
+
+        // Group selection: fetch insights from all accounts in the group
+        if (input.accountIds && input.accountIds.length > 0) {
+          const sb = getSupabase();
+          const { data: acctRows } = await sb
+            .from("social_accounts")
+            .select("access_token, platform_account_id, platform")
+            .eq("user_id", ctx.user.id)
+            .in("id", input.accountIds)
+            .eq("is_active", true);
+          const adAccounts = (acctRows ?? []).filter(
+            d => d.access_token && d.platform_account_id && d.platform === "facebook"
+          );
+          if (adAccounts.length === 0) return [];
+          const results = await Promise.allSettled(
+            adAccounts.map(async acct => {
+              const insights = await getCampaignInsights(acct.platform_account_id, acct.access_token, input.datePreset, input.limit);
+              return mapInsights(insights);
+            })
+          );
+          return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        }
+
+        if (input.accountId) {
+          const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+          if (!conn) return [];
+          const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
+          return mapInsights(insights);
         }
         const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
         if (allConns.length === 0) return [];
         const results = await Promise.allSettled(
           allConns.map(async conn => {
             const insights = await getCampaignInsights(conn.adAccountId, conn.token, input.datePreset, input.limit);
-            return insights.map(d => ({
-              campaignId: d.campaign_id ?? "", campaignName: d.campaign_name ?? "Unknown",
-              impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
-              clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
-              ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
-            }));
+            return mapInsights(insights);
           }),
         );
         return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
@@ -93,6 +114,7 @@ export const metaCampaignsRouter = router({
     .input(z.object({
       limit: z.number().min(1).max(50).default(20),
       accountId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection: multiple account IDs
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
@@ -119,6 +141,29 @@ export const metaCampaignsRouter = router({
             publisherPlatforms: platforms,
           };
         });
+
+      // If accountIds array is provided (group selection), fetch from all those accounts
+      if (input.accountIds && input.accountIds.length > 0) {
+        const sb = getSupabase();
+        const { data: acctRows } = await sb
+          .from("social_accounts")
+          .select("id, name, access_token, platform_account_id, platform")
+          .eq("user_id", ctx.user.id)
+          .in("id", input.accountIds)
+          .eq("is_active", true);
+        // Only use facebook/ad_account rows that have tokens
+        const adAccounts = (acctRows ?? []).filter(
+          d => d.access_token && d.platform_account_id && d.platform === "facebook"
+        );
+        if (adAccounts.length === 0) return [];
+        const results = await Promise.allSettled(
+          adAccounts.map(async acct => {
+            const campaigns = await getMetaCampaigns(acct.platform_account_id, acct.access_token, input.limit);
+            return mapCampaigns(campaigns, { name: acct.name ?? "", adAccountId: acct.platform_account_id });
+          })
+        );
+        return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+      }
 
       if (input.accountId) {
         const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);

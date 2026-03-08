@@ -2550,3 +2550,8 @@
 ## 🎨 Sub-account Row Improvements
 - [x] Shrink sub-account rows (smaller avatar, smaller text, less padding)
 - [x] Show checkmark on ALL sub-accounts when their group is selected (not just the clicked one)
+
+## 🔗 activeGroupIds → Campaigns Filtering
+- [x] Update campaigns tRPC query to accept array of accountIds (not just one)
+- [x] Update Campaigns page to pass activeGroupIds when a group is selected
+- [x] Fallback: if no group selected, use single activeAccountId as before

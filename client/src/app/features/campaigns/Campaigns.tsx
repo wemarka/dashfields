@@ -30,7 +30,7 @@ import CreateCampaignModal from "@/app/features/campaigns/components/CreateCampa
 export default function Campaigns() {
   usePageTitle("Campaigns");
   const { t } = useTranslation();
-  const { activeAccountId } = useActiveAccount();
+  const { activeAccountId, activeGroupIds } = useActiveAccount();
   const { activeWorkspace } = useWorkspace();
   const { fmt: fmtCurrencyHook } = useCurrency();
   const utils = trpc.useUtils();
@@ -57,14 +57,20 @@ export default function Campaigns() {
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId: activeWorkspace?.id });
   const isMetaConnected = metaStatus?.connected ?? false;
   const metaDatePreset = datePreset === "custom" ? "last_30d" : datePreset;
+  // Use activeGroupIds (group selection) if available, otherwise fall back to single activeAccountId
+  const metaAccountFilter = activeGroupIds.length > 0
+    ? { accountIds: activeGroupIds }
+    : activeAccountId
+      ? { accountId: activeAccountId }
+      : {};
   const { data: metaCampaigns = [], isLoading: metaLoading, refetch: refetchMeta } =
     trpc.meta.campaigns.useQuery(
-      { limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}), workspaceId: activeWorkspace?.id },
+      { limit: 50, ...metaAccountFilter, workspaceId: activeWorkspace?.id },
       { enabled: isMetaConnected }
     );
   const { data: metaInsights = [], isLoading: insightsLoading, refetch: refetchInsights } =
     trpc.meta.campaignInsights.useQuery(
-      { datePreset: metaDatePreset, limit: 50, ...(activeAccountId ? { accountId: activeAccountId } : {}), workspaceId: activeWorkspace?.id },
+      { datePreset: metaDatePreset, limit: 50, ...metaAccountFilter, workspaceId: activeWorkspace?.id },
       { enabled: isMetaConnected }
     );
 
