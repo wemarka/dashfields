@@ -2434,3 +2434,10 @@
 - [x] Sign Out button sets showSignOutConfirm=true instead of calling signOut directly
 - [x] Render a small confirmation dialog/popover with "Are you sure?" + Cancel + Sign Out buttons
 - [x] Confirming calls signOut(), cancelling closes the dialog
+
+## 🎨 App Theme Redesign — Match Settings Dialog Colors
+- [x] Update light theme background to pure white (#ffffff → oklch equivalent)
+- [x] Update sidebar color to match Dialog sidebar (#f7f7f8 → oklch equivalent)
+- [x] Update card/popover colors to match Dialog content area
+- [x] Update border colors to match Dialog borders (#ebebeb)
+- [x] Update muted/secondary colors to match Dialog nav items

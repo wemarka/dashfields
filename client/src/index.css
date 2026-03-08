@@ -17,31 +17,34 @@
   --radius-full: 9999px;
   --radius: 12px;
 
-  /* ── Light Theme ────────────────────────────────────────────────────────── */
-  --color-background:        oklch(0.975 0.003 250);
-  --color-foreground:        oklch(0.11 0.010 258);
-  --color-card:              oklch(1 0 0 / 0.80);
+  /* ── Light Theme ─── Matches Settings Dialog palette ──────────────────── */
+  /* Background: pure white (#ffffff) */
+  --color-background:        oklch(1 0 0);
+  --color-foreground:        oklch(0.11 0.010 258);   /* #111827 */
+  --color-card:              oklch(1 0 0);
   --color-card-foreground:   oklch(0.11 0.010 258);
-  --color-popover:           oklch(1 0 0 / 0.92);
+  --color-popover:           oklch(1 0 0);
   --color-popover-foreground: oklch(0.11 0.010 258);
   --color-primary:           oklch(0.50 0.22 258);
   --color-primary-foreground: oklch(0.99 0 0);
-  --color-secondary:         oklch(0.94 0.006 258);
+  /* Secondary/muted: #f7f7f8 sidebar tone */
+  --color-secondary:         oklch(0.968 0.002 258);  /* #f7f7f8 */
   --color-secondary-foreground: oklch(0.20 0.012 258);
-  --color-muted:             oklch(0.93 0.005 258);
-  --color-muted-foreground:  oklch(0.50 0.010 258);
-  --color-accent:            oklch(0.91 0.008 258);
+  --color-muted:             oklch(0.968 0.002 258);  /* #f7f7f8 */
+  --color-muted-foreground:  oklch(0.50 0.010 258);   /* #6b7280 */
+  --color-accent:            oklch(0.940 0.003 258);  /* #ededef hover */
   --color-accent-foreground: oklch(0.20 0.012 258);
   --color-destructive:       oklch(0.58 0.22 27);
   --color-destructive-foreground: oklch(0.99 0 0);
-  --color-border:            oklch(0.84 0.007 258 / 0.65);
-  --color-input:             oklch(0.88 0.005 258 / 0.55);
+  /* Border: #ebebeb */
+  --color-border:            oklch(0.924 0.002 258);  /* #ebebeb */
+  --color-input:             oklch(0.924 0.002 258);
   --color-ring:              oklch(0.50 0.22 258 / 0.25);
 
-  /* Sidebar */
-  --color-sidebar:                    oklch(1 0 0 / 0.70);
+  /* Sidebar: #f7f7f8 background, #ebebeb border */
+  --color-sidebar:                    oklch(0.968 0.002 258);  /* #f7f7f8 */
   --color-sidebar-foreground:         oklch(0.15 0.012 258);
-  --color-sidebar-border:             oklch(0.82 0.007 258 / 0.45);
+  --color-sidebar-border:             oklch(0.924 0.002 258);  /* #ebebeb */
   --color-sidebar-accent:             oklch(0.50 0.22 258 / 0.10);
   --color-sidebar-accent-foreground:  oklch(0.50 0.22 258);
   --color-sidebar-primary:            oklch(0.50 0.22 258);
