@@ -118,7 +118,24 @@ export const metaCampaignsRouter = router({
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const normalizeStatus = (effectiveStatus: string | undefined, rawStatus: string): string => {
+      const now = Date.now();
+
+      /**
+       * Determine the true campaign status.
+       * Meta sometimes keeps effective_status=ACTIVE even after a campaign's stop_time
+       * has passed (e.g. boosted posts with a fixed end date, lifetime-budget campaigns
+       * that exhausted their budget long ago). We override to ENDED in that case.
+       */
+      const normalizeStatus = (
+        effectiveStatus: string | undefined,
+        rawStatus: string,
+        stopTime?: string
+      ): string => {
+        // If stop_time is set and is in the past, the campaign has ended regardless of Meta's status
+        if (stopTime) {
+          const stopMs = new Date(stopTime).getTime();
+          if (!isNaN(stopMs) && stopMs < now) return "ENDED";
+        }
         const es = (effectiveStatus ?? rawStatus).toUpperCase();
         if (es === "ACTIVE") return "ACTIVE";
         if (es === "PAUSED" || es === "CAMPAIGN_PAUSED" || es === "ADSET_PAUSED") return "PAUSED";
@@ -133,7 +150,7 @@ export const metaCampaignsRouter = router({
           const adsets = (c as any).adsets?.data as Array<{ targeting?: { publisher_platforms?: string[] } }> | undefined;
           const platforms = adsets ? Array.from(new Set(adsets.flatMap(s => s.targeting?.publisher_platforms ?? []))) : [];
           return {
-            id: c.id, name: c.name, status: normalizeStatus(c.effective_status, c.status),
+            id: c.id, name: c.name, status: normalizeStatus(c.effective_status, c.status, c.stop_time),
             objective: c.objective,
             dailyBudget: c.daily_budget ? Number(c.daily_budget) / 100 : null,
             lifetimeBudget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : null,

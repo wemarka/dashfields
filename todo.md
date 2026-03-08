@@ -2561,6 +2561,13 @@
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
 
+## 🐛 Campaigns Status: Campaigns showing Active despite being paused in Meta
+- [x] Debug: Log raw effective_status values from Meta API to find root cause
+- [x] Root cause: Meta returns ACTIVE/ACTIVE for old campaigns with past stop_time or exhausted lifetime_budget
+- [x] Fix: Add stop_time check — if stop_time is in the past, override status to "ended"
+- [x] Fix: lifetime_budget check deferred (requires extra API call per campaign — not feasible)
+- [x] Remove debug console.log after fix is confirmed
+
 ## 🐛 Campaigns Status Fix + Default Active Filter
 - [x] Fix: Meta campaigns showing wrong status (effective_status not used correctly in frontend)
 - [x] Fix: Default status filter should be "active" not "all"
