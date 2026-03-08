@@ -168,8 +168,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{
           width: collapsed ? 60 : 220,
           transition: 'width 280ms cubic-bezier(0.4, 0, 0.2, 1)',
-          background: 'var(--sidebar-bg, hsl(var(--background)))',
-          boxShadow: '1px 0 0 #ebebeb, 4px 0 12px rgba(0,0,0,0.04)'
+          background: '#f7f7f8',
+          borderRight: '1px solid #ebebeb'
         }}
       >
         {/* Logo + Collapse Button */}

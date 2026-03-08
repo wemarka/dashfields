@@ -2451,3 +2451,7 @@
 ## 🎨 Auth Pages — Reset Password & Callback Redesign
 - [x] Rewrite ResetPasswordPage with split-panel white/dark design
 - [x] Rewrite AuthCallbackPage with clean white/off-white design
+
+## 🎨 Sidebar Style Update
+- [x] Remove shadow from Sidebar
+- [x] Change Sidebar background to light off-white (#f7f7f8)
