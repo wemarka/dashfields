@@ -2488,3 +2488,8 @@
 
 ## 🗑️ Remove Breadcrumb
 - [x] Remove Breadcrumb from Topbar in DashboardLayout
+
+## 🎨 Sidebar Active/Hover Simplification
+- [x] Remove large blue background from active nav items
+- [x] Use simple left border indicator + blue text for active state
+- [x] Simplify hover to subtle grey background only
