@@ -580,34 +580,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {accounts.length > 0 && (
                     <div className="py-1.5 max-h-60 overflow-y-auto">
                       {(() => {
-                        // ── Meta Group: auto-group Facebook + Instagram by matching name ──
+                        // ── Meta Group: ALL Facebook + Instagram accounts grouped together ──
                         type AccType = typeof accounts[0];
-                        const fbAccounts = accounts.filter(a => a.platform === "facebook");
-                        const igAccounts = accounts.filter(a => a.platform === "instagram");
+                        const metaAccounts = accounts.filter(a => a.platform === "facebook" || a.platform === "instagram");
                         const otherAccounts = accounts.filter(a => a.platform !== "facebook" && a.platform !== "instagram");
-
-                        // Build Meta groups: pair FB + IG with same name (case-insensitive)
-                        type MetaGroup = { key: string; name: string; fb: AccType | null; ig: AccType | null };
-                        const metaGroups: MetaGroup[] = [];
-                        const pairedFbIds = new Set<number>();
-                        const pairedIgIds = new Set<number>();
-
-                        fbAccounts.forEach(fb => {
-                          const fbName = (fb.name ?? fb.username ?? "").toLowerCase().trim();
-                          const matchedIg = igAccounts.find(ig => {
-                            const igName = (ig.name ?? ig.username ?? "").toLowerCase().trim();
-                            return igName === fbName && igName !== "";
-                          });
-                          if (matchedIg) {
-                            metaGroups.push({ key: `meta-${fb.id}-${matchedIg.id}`, name: fb.name ?? fb.username ?? "Meta", fb, ig: matchedIg });
-                            pairedFbIds.add(fb.id);
-                            pairedIgIds.add(matchedIg.id);
-                          }
-                        });
-
-                        // Remaining unpaired FB/IG accounts
-                        const unpairedFb = fbAccounts.filter(a => !pairedFbIds.has(a.id));
-                        const unpairedIg = igAccounts.filter(a => !pairedIgIds.has(a.id));
 
                         // Render helper for a single account row
                         const renderAccountRow = (acc: AccType) => (
@@ -642,41 +618,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                         return (
                           <>
-                            {/* ── Meta Groups (paired FB + IG) ── */}
-                            {metaGroups.map(group => (
-                              <div key={group.key}>
-                                {/* Meta group header */}
+                            {/* ── Meta Group (all FB + IG accounts) ── */}
+                            {metaAccounts.length > 0 && (
+                              <div>
                                 <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  {/* Meta logo SVG */}
-                                  <svg viewBox="0 0 40 40" className="w-2.5 h-2.5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 8C13.373 8 8 13.373 8 20s5.373 12 12 12 12-5.373 12-12S26.627 8 20 8zm-3.5 8.5c1.5 0 2.8.8 3.5 2 .7-1.2 2-2 3.5-2 2.2 0 4 2 4 5s-1.8 5-4 5c-1.5 0-2.8-.8-3.5-2-.7 1.2-2 2-3.5 2-2.2 0-4-2-4-5s1.8-5 4-5z" fill="#0866FF"/>
+                                  {/* Meta infinity logo */}
+                                  <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
                                   </svg>
-                                  Meta · {group.name}
+                                  Meta
                                 </p>
-                                {/* FB account */}
-                                {group.fb && renderAccountRow(group.fb)}
-                                {/* IG account */}
-                                {group.ig && renderAccountRow(group.ig)}
-                              </div>
-                            ))}
-
-                            {/* ── Unpaired Facebook accounts ── */}
-                            {unpairedFb.length > 0 && (
-                              <div>
-                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  <PlatformIcon platform="facebook" className="w-2.5 h-2.5" /> Facebook
-                                </p>
-                                {unpairedFb.map(renderAccountRow)}
-                              </div>
-                            )}
-
-                            {/* ── Unpaired Instagram accounts ── */}
-                            {unpairedIg.length > 0 && (
-                              <div>
-                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  <PlatformIcon platform="instagram" className="w-2.5 h-2.5" /> Instagram
-                                </p>
-                                {unpairedIg.map(renderAccountRow)}
+                                {metaAccounts.map(renderAccountRow)}
                               </div>
                             )}
 

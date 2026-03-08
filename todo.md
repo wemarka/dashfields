@@ -2499,3 +2499,8 @@
 - [x] Auto-group Facebook + Instagram accounts under Meta Group when they share the same business name
 - [x] Show Meta logo for grouped accounts
 - [x] Meta Group expands to show individual FB + IG accounts
+
+## 🔄 Meta Group Fix
+- [x] Group ALL Facebook + Instagram accounts together under one "Meta" section (no name matching required)
+- [x] Show Meta logo as section header icon
+- [x] Each account row still shows its own FB/IG platform badge
