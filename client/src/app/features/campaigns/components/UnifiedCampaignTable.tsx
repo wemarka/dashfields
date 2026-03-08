@@ -1,113 +1,56 @@
 /**
- * UnifiedCampaignTable.tsx — Professional unified campaign table.
- * Sub-components live in ./campaign-table/ for maintainability.
+ * UnifiedCampaignTable.tsx — Clean, minimal campaign table.
+ * Settings Dialog style: light dividers, simple rows, no visual noise.
  */
 import { useState, useMemo, useCallback, Fragment } from "react";
 import {
   MoreHorizontal, Play, Pause, ExternalLink, Copy, Trash2, Eye,
-  Loader2, ChevronLeft, ChevronRight, Megaphone, ChevronDown, ChevronUp,
+  Loader2, ChevronLeft, ChevronRight, Megaphone,
   Settings2, Square, CheckSquare, MinusSquare, Layers, LayoutGrid,
 } from "lucide-react";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
-import { Button } from "@/core/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/core/components/ui/table";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuCheckboxItem,
   DropdownMenuLabel,
 } from "@/core/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/core/components/ui/tooltip";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/core/components/ui/empty";
 import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
 import {
   type UnifiedCampaign, type UnifiedCampaignTableProps, type SortKey, type SortDir, type ColumnDef,
   ALL_COLUMNS, fmtNum, fmtPercent, getPlatformName,
-  SortableHeader, StatusBadge, InlineBudgetEditor, ExpandedRow, BulkActionBar,
+  StatusBadge, InlineBudgetEditor, BulkActionBar,
 } from "./campaign-table";
 
 // Re-export types for consumers
 export type { UnifiedCampaign, UnifiedCampaignTableProps };
 
-// ─── Opportunity Score ───────────────────────────────────────────────────────
-function computeOpportunityScore(c: UnifiedCampaign): number {
-  const ctr = c.ctr ?? 0;
-  const cpc = c.cpc ?? 0;
-  const impressions = c.impressions ?? 0;
-  let score = 50;
-  if (ctr >= 3) score += 20;
-  else if (ctr >= 1) score += 10;
-  else score -= 10;
-  if (cpc > 0 && cpc < 0.5) score += 15;
-  else if (cpc > 0 && cpc < 1) score += 7;
-  else if (cpc > 2) score -= 10;
-  if (impressions > 50000) score += 15;
-  else if (impressions > 10000) score += 7;
-  return Math.min(100, Math.max(0, score));
-}
-
-function OpportunityBadge({ score }: { score: number }) {
-  // Full circle gauge — score 0-100 fills the ring
-  const r = 14;
-  const cx = 18;
-  const cy = 18;
-  const circ = 2 * Math.PI * r;
-  const filled = (score / 100) * circ;
-  const color = score >= 70 ? "#10b981" : score >= 45 ? "#f59e0b" : "#ef4444";
-  const textColor = score >= 70 ? "text-emerald-500" : score >= 45 ? "text-amber-500" : "text-red-500";
-  const label = score >= 70 ? "High" : score >= 45 ? "Medium" : "Low";
-
+// ─── Sort icon ────────────────────────────────────────────────────────────────
+function SortIcon({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="relative shrink-0 cursor-default select-none" style={{ width: 36, height: 36 }}>
-          <svg width={36} height={36} viewBox="0 0 36 36" className="-rotate-90">
-            {/* Track */}
-            <circle
-              cx={cx} cy={cy} r={r}
-              fill="none"
-              stroke="hsl(var(--border))"
-              strokeWidth="3"
-            />
-            {/* Progress */}
-            <circle
-              cx={cx} cy={cy} r={r}
-              fill="none"
-              stroke={color}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray={`${filled} ${circ}`}
-              style={{
-                transition: "stroke-dasharray 0.8s cubic-bezier(0.34,1.56,0.64,1)",
-              }}
-            />
-          </svg>
-          {/* Score number centered */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`text-[10px] font-extrabold tabular-nums ${textColor}`}>{score}</span>
-          </div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="text-xs">Opportunity Score — {label}</TooltipContent>
-    </Tooltip>
+    <span className="inline-flex flex-col ml-1 opacity-40" style={{ gap: 1 }}>
+      <span style={{ width: 0, height: 0, borderLeft: "3px solid transparent", borderRight: "3px solid transparent",
+        borderBottom: `3px solid ${active && dir === "asc" ? "#374151" : "#9ca3af"}` }} />
+      <span style={{ width: 0, height: 0, borderLeft: "3px solid transparent", borderRight: "3px solid transparent",
+        borderTop: `3px solid ${active && dir === "desc" ? "#374151" : "#9ca3af"}` }} />
+    </span>
   );
 }
 
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 function UnifiedCampaignTableInner({
   campaigns, loading, onRowClick, onOpenDrawer, selectedCampaignId,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
   onFilterByAdSets, onFilterByCreatives, statusTogglePending,
-  pageSize = 20,
+  pageSize = 25,
 }: UnifiedCampaignTableProps) {
   const { fmt: fmtMoney } = useCurrency();
   const [sortKey, setSortKey] = useState<SortKey>("spend");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [visibleCols, setVisibleCols] = useState<Set<string>>(() =>
     new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key))
   );
@@ -160,9 +103,6 @@ function UnifiedCampaignTableInner({
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
-  const toggleExpand = (id: string) => {
-    setExpandedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  };
   const toggleColumn = (key: string) => {
     setVisibleCols(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; });
   };
@@ -172,23 +112,23 @@ function UnifiedCampaignTableInner({
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-8" />
-              <TableHead className="min-w-[240px]">Campaign</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[120px]">Platform</TableHead>
-              <TableHead className="w-[100px]">Spend</TableHead>
-              <TableHead className="w-[110px]">Impressions</TableHead>
-              <TableHead className="w-[90px]">Clicks</TableHead>
-              <TableHead className="w-[80px]">CTR</TableHead>
-              <TableHead className="w-[50px]" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>{Array.from({ length: 8 }).map((_, i) => <CampaignRowSkeleton key={i} />)}</TableBody>
-        </Table>
+      <div className="overflow-x-auto" style={{ border: "1px solid #f0f0f0", borderRadius: 10 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid #f0f0f0", backgroundColor: "#fafafa" }}>
+              <th style={{ width: 36, padding: "8px 12px" }} />
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Campaign</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Status</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Platform</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Spend</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Impressions</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Clicks</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>CTR</th>
+              <th style={{ width: 40 }} />
+            </tr>
+          </thead>
+          <tbody>{Array.from({ length: 8 }).map((_, i) => <CampaignRowSkeleton key={i} />)}</tbody>
+        </table>
       </div>
     );
   }
@@ -196,13 +136,12 @@ function UnifiedCampaignTableInner({
   // ── Empty state ───────────────────────────────────────────────────────────
   if (campaigns.length === 0) {
     return (
-      <Empty className="border border-border bg-card rounded-xl py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon"><Megaphone className="w-5 h-5" /></EmptyMedia>
-          <EmptyTitle>No campaigns found</EmptyTitle>
-          <EmptyDescription>Try adjusting your filters or create a new campaign to get started.</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <div className="flex flex-col items-center justify-center py-20 gap-2"
+        style={{ border: "1px solid #f0f0f0", borderRadius: 10, backgroundColor: "#fafafa" }}>
+        <Megaphone className="w-8 h-8" style={{ color: "#d1d5db" }} />
+        <p className="text-[13px] font-medium" style={{ color: "#6b7280" }}>No campaigns found</p>
+        <p className="text-[12px]" style={{ color: "#9ca3af" }}>Try adjusting your filters or create a new campaign.</p>
+      </div>
     );
   }
 
@@ -214,19 +153,13 @@ function UnifiedCampaignTableInner({
     const isToggling = statusTogglePending === c.id;
 
     switch (col.key) {
-      case "name": {
-        const oppScore = computeOpportunityScore(c);
-        const hasMetrics = (c.impressions ?? 0) > 0 || (c.ctr ?? 0) > 0;
+      case "name":
         return (
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground truncate leading-tight">{c.name}</p>
-              {c.objective && <p className="text-[10px] text-muted-foreground truncate mt-0.5">{c.objective}</p>}
-            </div>
-            {hasMetrics && <OpportunityBadge score={oppScore} />}
+          <div className="min-w-0">
+            <p className="truncate leading-tight" style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>{c.name}</p>
+            {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#9ca3af" }}>{c.objective}</p>}
           </div>
         );
-      }
       case "status":
         return (
           <div className="flex items-center gap-1.5">
@@ -235,9 +168,13 @@ function UnifiedCampaignTableInner({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button onClick={(e) => { e.stopPropagation(); onStatusToggle(c); }} disabled={isToggling}
-                    className="p-0.5 rounded hover:bg-muted transition-colors disabled:opacity-50">
-                    {isToggling ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> :
-                      isActive ? <Pause className="w-3 h-3 text-amber-500" /> : <Play className="w-3 h-3 text-emerald-500" />}
+                    className="p-0.5 rounded transition-colors disabled:opacity-50"
+                    style={{ color: "#9ca3af" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}>
+                    {isToggling ? <Loader2 className="w-3 h-3 animate-spin" /> :
+                      isActive ? <Pause className="w-3 h-3" style={{ color: "#f59e0b" }} /> :
+                        <Play className="w-3 h-3" style={{ color: "#10b981" }} />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">{isActive ? "Pause campaign" : "Activate campaign"}</TooltipContent>
@@ -247,34 +184,42 @@ function UnifiedCampaignTableInner({
         );
       case "platform":
         return (
-          <div className="flex items-center gap-2">
-            <PlatformIcon platform={c.platform} className="w-4 h-4 shrink-0" />
-            <span className="text-xs text-muted-foreground">{getPlatformName(c.platform)}</span>
+          <div className="flex items-center gap-1.5">
+            <PlatformIcon platform={c.platform} className="w-3.5 h-3.5 shrink-0" />
+            <span style={{ fontSize: 12, color: "#6b7280" }}>{getPlatformName(c.platform)}</span>
           </div>
         );
       case "spend":
         if (onBudgetUpdate && c.source === "local") return <InlineBudgetEditor value={c.spend} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
-        return <span className="text-xs font-mono text-foreground">{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
-      case "impressions": return <span className="text-xs font-mono text-muted-foreground">{fmtNum(c.impressions)}</span>;
-      case "clicks":      return <span className="text-xs font-mono text-muted-foreground">{fmtNum(c.clicks)}</span>;
-      case "ctr":         return <span className="text-xs font-mono text-muted-foreground">{fmtPercent(c.ctr)}</span>;
-      case "reach":       return <span className="text-xs font-mono text-muted-foreground">{fmtNum(c.reach)}</span>;
-      case "conversions": return <span className="text-xs font-mono text-muted-foreground">{fmtNum(c.conversions)}</span>;
-      case "cpc":         return <span className="text-xs font-mono text-muted-foreground">{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
-      case "cpm":         return <span className="text-xs font-mono text-muted-foreground">{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
+        return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#111827" }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
+      case "impressions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.impressions)}</span>;
+      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.clicks)}</span>;
+      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtPercent(c.ctr)}</span>;
+      case "reach":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.reach)}</span>;
+      case "conversions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.conversions)}</span>;
+      case "cpc":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
+      case "cpm":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
       default: return null;
     }
   };
 
   return (
-    <div className="space-y-3 relative">
-      {/* Column visibility toggle */}
-      <div className="flex items-center justify-end">
+    <div style={{ position: "relative" }}>
+      {/* Column toggle */}
+      <div className="flex items-center justify-end mb-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Settings2 className="w-3.5 h-3.5" /> Columns</Button>
+            <button
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] transition-colors"
+              style={{ backgroundColor: "#f3f4f6", color: "#6b7280", border: "none" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+            >
+              <Settings2 className="w-3 h-3" />
+              Columns
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuLabel className="text-xs">Toggle columns</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {ALL_COLUMNS.map((col) => (
@@ -287,70 +232,102 @@ function UnifiedCampaignTableInner({
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-border bg-card overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent bg-muted/30">
-              <TableHead className="w-10 pl-3">
+      <div className="overflow-x-auto" style={{ border: "1px solid #f0f0f0", borderRadius: 10 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid #f0f0f0", backgroundColor: "#fafafa" }}>
+              {/* Checkbox */}
+              <th style={{ width: 36, padding: "9px 12px" }}>
                 <button onClick={toggleSelectAll} className="p-0.5">
-                  {allPageSelected ? <CheckSquare className="w-4 h-4 text-primary" /> :
-                    somePageSelected ? <MinusSquare className="w-4 h-4 text-primary" /> :
-                    <Square className="w-4 h-4 text-muted-foreground" />}
+                  {allPageSelected ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} /> :
+                    somePageSelected ? <MinusSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} /> :
+                    <Square className="w-3.5 h-3.5" style={{ color: "#d1d5db" }} />}
                 </button>
-              </TableHead>
-              <TableHead className="w-8" />
+              </th>
               {visibleColumns.map((col) => (
-                <TableHead key={col.key} className={col.width}>
-                  {col.sortKey ? (
-                    <SortableHeader label={col.label} sortKey={col.sortKey} currentSort={sortKey} currentDir={sortDir} onSort={handleSort} align={col.align} />
-                  ) : (
-                    <span className="text-xs font-medium text-muted-foreground">{col.label}</span>
-                  )}
-                </TableHead>
+                <th
+                  key={col.key}
+                  style={{
+                    padding: "9px 12px",
+                    textAlign: col.align === "right" ? "right" : "left",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#9ca3af",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    whiteSpace: "nowrap",
+                    cursor: col.sortKey ? "pointer" : "default",
+                    userSelect: "none",
+                  }}
+                  onClick={() => col.sortKey && handleSort(col.sortKey as SortKey)}
+                >
+                  {col.label}
+                  {col.sortKey && <SortIcon active={sortKey === col.sortKey} dir={sortDir} />}
+                </th>
               ))}
-              <TableHead className="w-[50px]" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginated.map((c) => {
+              {/* Actions */}
+              <th style={{ width: 40 }} />
+            </tr>
+          </thead>
+          <tbody>
+            {paginated.map((c, idx) => {
               const isSelected = selectedIds.has(c.id);
-              const isExpanded = expandedIds.has(c.id);
               const isCampaignSelected = selectedCampaignId === c.id;
+              const isLast = idx === paginated.length - 1;
               return (
                 <Fragment key={c.id}>
-                  <TableRow
-                    className={`group transition-colors cursor-pointer ${
-                      isCampaignSelected ? "bg-primary/10 border-l-2 border-l-primary" :
-                      isSelected ? "bg-primary/5" : "hover:bg-muted/40"
-                    }`}
+                  <tr
                     onClick={() => onRowClick(c)}
+                    style={{
+                      borderBottom: isLast ? "none" : "1px solid #f9fafb",
+                      backgroundColor: isCampaignSelected ? "#f0f9ff" : isSelected ? "#f9fafb" : "white",
+                      cursor: "pointer",
+                      transition: "background-color 0.1s",
+                    }}
+                    onMouseEnter={e => {
+                      if (!isCampaignSelected && !isSelected)
+                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#f9fafb";
+                    }}
+                    onMouseLeave={e => {
+                      if (!isCampaignSelected && !isSelected)
+                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "white";
+                    }}
                   >
-                    <TableCell className="pl-3" onClick={(e) => e.stopPropagation()}>
+                    {/* Checkbox */}
+                    <td style={{ padding: "10px 12px" }} onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => toggleSelect(c.id)} className="p-0.5">
-                        {isSelected ? <CheckSquare className="w-4 h-4 text-primary" /> :
-                          <Square className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
+                        {isSelected
+                          ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} />
+                          : <Square className="w-3.5 h-3.5" style={{ color: "#e5e7eb" }} />}
                       </button>
-                    </TableCell>
-                    <TableCell className="px-1" onClick={(e) => { e.stopPropagation(); toggleExpand(c.id); }}>
-                      <button className="p-0.5 rounded hover:bg-muted transition-colors">
-                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> :
-                          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
-                      </button>
-                    </TableCell>
+                    </td>
                     {visibleColumns.map((col) => (
-                      <TableCell key={col.key} className={col.align === "right" ? "text-right" : ""}
-                        onClick={col.key === "spend" ? (e) => e.stopPropagation() : undefined}>
+                      <td
+                        key={col.key}
+                        style={{
+                          padding: "10px 12px",
+                          textAlign: col.align === "right" ? "right" : "left",
+                          maxWidth: col.key === "name" ? 320 : undefined,
+                        }}
+                        onClick={col.key === "spend" ? (e) => e.stopPropagation() : undefined}
+                      >
                         {renderCell(col, c)}
-                      </TableCell>
+                      </td>
                     ))}
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    {/* Actions menu */}
+                    <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <button
+                            className="flex items-center justify-center w-6 h-6 rounded transition-colors opacity-0 group-hover:opacity-100"
+                            style={{ color: "#9ca3af" }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                          >
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                          </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end" className="w-44">
                           <DropdownMenuItem onClick={() => onOpenDrawer?.(c)} className="text-xs gap-2"><Eye className="w-3.5 h-3.5" /> View Details</DropdownMenuItem>
                           {c.source === "api" && onFilterByAdSets && (
                             <DropdownMenuItem onClick={() => onFilterByAdSets(c)} className="text-xs gap-2"><Layers className="w-3.5 h-3.5" /> View Ad Sets</DropdownMenuItem>
@@ -374,26 +351,32 @@ function UnifiedCampaignTableInner({
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                  {isExpanded && <ExpandedRow campaign={c} fmtMoney={fmtMoney} />}
+                    </td>
+                  </tr>
                 </Fragment>
               );
             })}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-muted-foreground">
-            Showing {page * pageSize + 1}–{Math.min((page + 1) * pageSize, sorted.length)} of {sorted.length}
+        <div className="flex items-center justify-between mt-3 px-1">
+          <p style={{ fontSize: 12, color: "#9ca3af" }}>
+            {page * pageSize + 1}–{Math.min((page + 1) * pageSize, sorted.length)} of {sorted.length}
           </p>
-          <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => p - 1)}
+              disabled={page === 0}
+              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-30"
+              style={{ backgroundColor: "#f3f4f6", color: "#374151", border: "none" }}
+              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+            >
               <ChevronLeft className="w-3.5 h-3.5" />
-            </Button>
+            </button>
             {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
               let pageNum: number;
               if (totalPages <= 5) pageNum = i;
@@ -401,14 +384,32 @@ function UnifiedCampaignTableInner({
               else if (page > totalPages - 4) pageNum = totalPages - 5 + i;
               else pageNum = page - 2 + i;
               return (
-                <Button key={pageNum} variant={page === pageNum ? "default" : "outline"} size="sm" className="h-7 w-7 p-0 text-xs" onClick={() => setPage(pageNum)}>
+                <button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: page === pageNum ? "#111827" : "#f3f4f6",
+                    color: page === pageNum ? "#ffffff" : "#374151",
+                    fontSize: 12,
+                    fontWeight: page === pageNum ? 600 : 400,
+                    border: "none",
+                  }}
+                >
                   {pageNum + 1}
-                </Button>
+                </button>
               );
             })}
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+            <button
+              onClick={() => setPage(p => p + 1)}
+              disabled={page >= totalPages - 1}
+              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-30"
+              style={{ backgroundColor: "#f3f4f6", color: "#374151", border: "none" }}
+              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+            >
               <ChevronRight className="w-3.5 h-3.5" />
-            </Button>
+            </button>
           </div>
         </div>
       )}
@@ -425,4 +426,6 @@ function UnifiedCampaignTableInner({
   );
 }
 
-export const UnifiedCampaignTable = UnifiedCampaignTableInner;
+export function UnifiedCampaignTable(props: UnifiedCampaignTableProps) {
+  return <UnifiedCampaignTableInner {...props} />;
+}

@@ -2561,6 +2561,17 @@
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
 
+## 🎨 Campaigns Table Simplification
+- [x] Remove OpportunityBadge ring gauge (too heavy visually)
+- [x] Simplify table container: remove rounded-xl border, use simple divider lines
+- [x] Simplify table header: lighter background, smaller text
+- [x] Simplify row hover: lighter, no heavy border-left highlight
+- [x] Remove expand/collapse row feature (simplify)
+- [x] Simplify pagination: cleaner, lighter buttons
+- [x] Simplify column toggle: lighter button
+- [x] Simplify empty state: minimal text only
+- [x] Rewrite as native HTML table (no shadcn Table) for full style control
+
 ## 🎨 Campaigns Page Redesign — Settings Dialog style
 - [x] Simplify page header (smaller, lighter typography like Settings)
 - [x] Replace heavy KPI cards with a compact inline stats row
