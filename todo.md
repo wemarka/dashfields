@@ -2493,3 +2493,9 @@
 - [x] Remove large blue background from active nav items
 - [x] Use simple left border indicator + blue text for active state
 - [x] Simplify hover to subtle grey background only
+
+## 🔄 Account Dropdown Improvements
+- [x] Fix: show activeAccount.name instead of user.name in Avatar Dropdown header
+- [x] Auto-group Facebook + Instagram accounts under Meta Group when they share the same business name
+- [x] Show Meta logo for grouped accounts
+- [x] Meta Group expands to show individual FB + IG accounts

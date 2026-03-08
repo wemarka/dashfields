@@ -580,47 +580,125 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {accounts.length > 0 && (
                     <div className="py-1.5 max-h-60 overflow-y-auto">
                       {(() => {
-                        const grouped = accounts.reduce<Record<string, typeof accounts>>((acc, a) => {
-                          if (!acc[a.platform]) acc[a.platform] = [];
-                          acc[a.platform].push(a);
-                          return acc;
-                        }, {});
-                        return Object.entries(grouped).map(([platform, accs]) => (
-                          <div key={platform}>
-                            <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                              <PlatformIcon platform={platform} className="w-2.5 h-2.5" />
-                              {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                            </p>
-                            {accs.map(acc => (
-                              <button
-                                key={acc.id}
-                                onClick={() => { setActiveAccount(acc.id); setShowAccountDropdown(false); }}
-                                className={[
-                                  "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
-                                  activeAccount?.id === acc.id
-                                    ? "bg-brand/8 text-brand"
-                                    : "hover:bg-foreground/5 text-foreground",
-                                ].join(" ")}
-                              >
-                                <Avatar className="w-6 h-6 shrink-0">
-                                  {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
-                                  <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
-                                    {(acc.name ?? acc.username ?? platform).charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? platform}</p>
-                                  {acc.account_type && <p className="text-[10px] text-muted-foreground/50 truncate">{acc.account_type}</p>}
-                                </div>
-                                {activeAccount?.id === acc.id && (
-                                  <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <polyline points="20 6 9 17 4 12" />
+                        // ── Meta Group: auto-group Facebook + Instagram by matching name ──
+                        type AccType = typeof accounts[0];
+                        const fbAccounts = accounts.filter(a => a.platform === "facebook");
+                        const igAccounts = accounts.filter(a => a.platform === "instagram");
+                        const otherAccounts = accounts.filter(a => a.platform !== "facebook" && a.platform !== "instagram");
+
+                        // Build Meta groups: pair FB + IG with same name (case-insensitive)
+                        type MetaGroup = { key: string; name: string; fb: AccType | null; ig: AccType | null };
+                        const metaGroups: MetaGroup[] = [];
+                        const pairedFbIds = new Set<number>();
+                        const pairedIgIds = new Set<number>();
+
+                        fbAccounts.forEach(fb => {
+                          const fbName = (fb.name ?? fb.username ?? "").toLowerCase().trim();
+                          const matchedIg = igAccounts.find(ig => {
+                            const igName = (ig.name ?? ig.username ?? "").toLowerCase().trim();
+                            return igName === fbName && igName !== "";
+                          });
+                          if (matchedIg) {
+                            metaGroups.push({ key: `meta-${fb.id}-${matchedIg.id}`, name: fb.name ?? fb.username ?? "Meta", fb, ig: matchedIg });
+                            pairedFbIds.add(fb.id);
+                            pairedIgIds.add(matchedIg.id);
+                          }
+                        });
+
+                        // Remaining unpaired FB/IG accounts
+                        const unpairedFb = fbAccounts.filter(a => !pairedFbIds.has(a.id));
+                        const unpairedIg = igAccounts.filter(a => !pairedIgIds.has(a.id));
+
+                        // Render helper for a single account row
+                        const renderAccountRow = (acc: AccType) => (
+                          <button
+                            key={acc.id}
+                            onClick={() => { setActiveAccount(acc.id); setShowAccountDropdown(false); }}
+                            className={[
+                              "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
+                              activeAccount?.id === acc.id ? "bg-brand/8 text-brand" : "hover:bg-foreground/5 text-foreground",
+                            ].join(" ")}
+                          >
+                            <div className="relative shrink-0">
+                              <Avatar className="w-6 h-6">
+                                {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
+                                <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
+                                  {(acc.name ?? acc.username ?? acc.platform).charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/30 flex items-center justify-center">
+                                <PlatformIcon platform={acc.platform} className="w-1.5 h-1.5" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? acc.platform}</p>
+                              {acc.account_type && <p className="text-[10px] text-muted-foreground/50 truncate capitalize">{acc.account_type}</p>}
+                            </div>
+                            {activeAccount?.id === acc.id && (
+                              <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                            )}
+                          </button>
+                        );
+
+                        return (
+                          <>
+                            {/* ── Meta Groups (paired FB + IG) ── */}
+                            {metaGroups.map(group => (
+                              <div key={group.key}>
+                                {/* Meta group header */}
+                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                                  {/* Meta logo SVG */}
+                                  <svg viewBox="0 0 40 40" className="w-2.5 h-2.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 8C13.373 8 8 13.373 8 20s5.373 12 12 12 12-5.373 12-12S26.627 8 20 8zm-3.5 8.5c1.5 0 2.8.8 3.5 2 .7-1.2 2-2 3.5-2 2.2 0 4 2 4 5s-1.8 5-4 5c-1.5 0-2.8-.8-3.5-2-.7 1.2-2 2-3.5 2-2.2 0-4-2-4-5s1.8-5 4-5z" fill="#0866FF"/>
                                   </svg>
-                                )}
-                              </button>
+                                  Meta · {group.name}
+                                </p>
+                                {/* FB account */}
+                                {group.fb && renderAccountRow(group.fb)}
+                                {/* IG account */}
+                                {group.ig && renderAccountRow(group.ig)}
+                              </div>
                             ))}
-                          </div>
-                        ));
+
+                            {/* ── Unpaired Facebook accounts ── */}
+                            {unpairedFb.length > 0 && (
+                              <div>
+                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                                  <PlatformIcon platform="facebook" className="w-2.5 h-2.5" /> Facebook
+                                </p>
+                                {unpairedFb.map(renderAccountRow)}
+                              </div>
+                            )}
+
+                            {/* ── Unpaired Instagram accounts ── */}
+                            {unpairedIg.length > 0 && (
+                              <div>
+                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                                  <PlatformIcon platform="instagram" className="w-2.5 h-2.5" /> Instagram
+                                </p>
+                                {unpairedIg.map(renderAccountRow)}
+                              </div>
+                            )}
+
+                            {/* ── Other platforms ── */}
+                            {(() => {
+                              const otherGrouped = otherAccounts.reduce<Record<string, AccType[]>>((acc, a) => {
+                                if (!acc[a.platform]) acc[a.platform] = [];
+                                acc[a.platform].push(a);
+                                return acc;
+                              }, {});
+                              return Object.entries(otherGrouped).map(([platform, accs]) => (
+                                <div key={platform}>
+                                  <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                                    <PlatformIcon platform={platform} className="w-2.5 h-2.5" />
+                                    {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                                  </p>
+                                  {accs.map(renderAccountRow)}
+                                </div>
+                              ));
+                            })()}
+                          </>
+                        );
                       })()}
                     </div>
                   )}
