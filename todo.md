@@ -2635,3 +2635,11 @@
 - [x] Messages: تصحيح ليستخدم messaging_conversation_started_7d فقط (يطابق Meta Ads Manager)
 - [x] Conversions: تحديث ليستخدم lead_grouped + fb_pixel_purchase + fb_pixel_complete_registration
 - [x] تحقق من عدم التكرار: total_messaging_connection محذوف (superset يسبب double-counting)
+
+## ✅ Three Improvements — Leads Column + Messages Drawer Detail + CSV Export
+- [x] Add `leads` field to server campaignInsights (onsite_conversion.lead_grouped)
+- [x] Add Leads column to UnifiedCampaign type and ALL_COLUMNS (visible by default)
+- [x] Add Leads sort case and cell renderer in UnifiedCampaignTable
+- [x] Add messaging detail section in PerformanceTab (Leads + Conversations Started + Calls with first_reply & replied_7d breakdown)
+- [x] Add messagingFirstReply + messagingReplied7d fields to server campaignInsights
+- [x] Update CSV export to include Leads, Calls, Messages, Score, End Date columns + totals row

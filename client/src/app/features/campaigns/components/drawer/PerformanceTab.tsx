@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import {
   Loader2, TrendingUp, TrendingDown, Minus,
-  MousePointerClick, DollarSign, Eye, Target,
+  MousePointerClick, DollarSign, Eye, Target, MessageCircle, Phone, Users,
 } from "lucide-react";
 import { fmtNum, fmtPct } from "./types";
 
@@ -37,6 +37,11 @@ interface InsightData {
   ctr: number;
   cpc: number;
   cpm: number;
+  leads?: number;
+  calls?: number;
+  messages?: number;
+  messagingFirstReply?: number;
+  messagingReplied7d?: number;
 }
 
 interface PerformanceTabProps {
@@ -283,6 +288,58 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
           {[...Array(5)].map((_, i) => (
             <div key={i} className={`rounded-xl border border-border bg-card p-4 h-24 animate-pulse ${i === 4 ? "col-span-2" : ""}`} />
           ))}
+        </div>
+      )}
+
+      {/* ── Messaging & Calls Detail ── */}
+      {campaignInsight && (
+        (campaignInsight.messages ?? 0) > 0 ||
+        (campaignInsight.calls ?? 0) > 0 ||
+        (campaignInsight.leads ?? 0) > 0
+      ) && (
+        <div className="rounded-xl border border-border bg-card p-4">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Conversions Detail</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {(campaignInsight?.leads ?? 0) > 0 && (
+              <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30 border border-border/40">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Users className="w-3.5 h-3.5 text-violet-500" />
+                  <span>Leads</span>
+                </div>
+                <span className="text-lg font-bold text-foreground">{fmtNum(campaignInsight?.leads ?? 0)}</span>
+                <span className="text-[10px] text-muted-foreground">All lead types (grouped)</span>
+              </div>
+            )}
+            {(campaignInsight?.messages ?? 0) > 0 && (
+              <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30 border border-border/40">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <MessageCircle className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Conversations Started</span>
+                </div>
+                <span className="text-lg font-bold text-foreground">{fmtNum(campaignInsight?.messages ?? 0)}</span>
+                {(campaignInsight?.messagingFirstReply ?? 0) > 0 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    First replies: {fmtNum(campaignInsight?.messagingFirstReply ?? 0)}
+                  </span>
+                )}
+                {(campaignInsight?.messagingReplied7d ?? 0) > 0 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    Replied (7d): {fmtNum(campaignInsight?.messagingReplied7d ?? 0)}
+                  </span>
+                )}
+              </div>
+            )}
+            {(campaignInsight?.calls ?? 0) > 0 && (
+              <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30 border border-border/40">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Phone className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Calls</span>
+                </div>
+                <span className="text-lg font-bold text-foreground">{fmtNum(campaignInsight?.calls ?? 0)}</span>
+                <span className="text-[10px] text-muted-foreground">Click-to-call confirmed</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

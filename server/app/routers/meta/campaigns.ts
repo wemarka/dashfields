@@ -53,13 +53,16 @@ export const metaCampaignsRouter = router({
             impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
             clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
-            // Conversions: use onsite_conversion.lead_grouped (all leads: Messenger + Instant Forms)
-            // plus offsite pixel purchases. Avoid double-counting by using grouped types.
+            // Conversions: all conversions (leads + purchases + registrations)
             conversions: sumActions(d.actions, [
               "onsite_conversion.lead_grouped",
               "offsite_conversion.fb_pixel_purchase",
               "offsite_conversion.fb_pixel_complete_registration",
               "onsite_conversion.purchase",
+            ]),
+            // Leads: all lead types grouped (Messenger leads + Instant Form leads)
+            leads: sumActions(d.actions, [
+              "onsite_conversion.lead_grouped",
             ]),
             // Calls: click-to-call actions (confirmed calls + native calls placed)
             calls: sumActions(d.actions, [
@@ -75,6 +78,9 @@ export const metaCampaignsRouter = router({
             messages: sumActions(d.actions, [
               "onsite_conversion.messaging_conversation_started_7d",
             ]),
+            // Messaging detail breakdown (for Drawer)
+            messagingFirstReply: sumActions(d.actions, ["onsite_conversion.messaging_first_reply"]),
+            messagingReplied7d: sumActions(d.actions, ["onsite_conversion.messaging_conversation_replied_7d"]),
           }));
 
         // Group selection: fetch insights from all accounts in the group

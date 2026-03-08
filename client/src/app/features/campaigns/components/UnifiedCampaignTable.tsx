@@ -77,6 +77,7 @@ function UnifiedCampaignTableInner({
         case "ctr":         cmp = (a.ctr ?? 0) - (b.ctr ?? 0); break;
         case "reach":       cmp = (a.reach ?? 0) - (b.reach ?? 0); break;
         case "conversions": cmp = (a.conversions ?? 0) - (b.conversions ?? 0); break;
+        case "leads":       cmp = (a.leads ?? 0) - (b.leads ?? 0); break;
         case "cpc":         cmp = (a.cpc ?? 0) - (b.cpc ?? 0); break;
         case "cpm":         cmp = (a.cpm ?? 0) - (b.cpm ?? 0); break;
         case "calls":       cmp = (a.calls ?? 0) - (b.calls ?? 0); break;
@@ -203,6 +204,7 @@ function UnifiedCampaignTableInner({
       case "conversions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{fmtNum(c.conversions)}</span>;
       case "cpc":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
       case "cpm":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
+      case "leads":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
       case "calls":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
       case "messages":    return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
       case "score": {

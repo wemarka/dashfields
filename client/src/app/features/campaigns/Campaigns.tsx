@@ -230,6 +230,7 @@ export default function Campaigns() {
         cpc: ins?.cpc, cpm: ins?.cpm, conversions: ins?.conversions,
         calls: ins?.calls ?? null,
         messages: ins?.messages ?? null,
+        leads: ins?.leads ?? null,
         // OpportunityScore — same formula as adsAnalyzer.calcPerformanceScore
         score: (() => {
           if (!ins) return null;
@@ -339,6 +340,11 @@ export default function Campaigns() {
         clicks: c.clicks ?? null, ctr: c.ctr ?? null,
         reach: c.reach ?? null, cpc: c.cpc ?? null, cpm: c.cpm ?? null,
         conversions: c.conversions ?? null,
+        leads: c.leads ?? null,
+        calls: c.calls ?? null,
+        messages: c.messages ?? null,
+        score: c.score ?? null,
+        stopTime: c.stopTime ?? null,
       })),
       datePreset: exportPreset,
     });

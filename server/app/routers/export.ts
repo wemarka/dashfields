@@ -390,6 +390,11 @@ export const exportRouter = router({
         cpc: z.number().nullable().optional(),
         cpm: z.number().nullable().optional(),
         conversions: z.number().nullable().optional(),
+        leads: z.number().nullable().optional(),
+        calls: z.number().nullable().optional(),
+        messages: z.number().nullable().optional(),
+        score: z.number().nullable().optional(),
+        stopTime: z.string().nullable().optional(),
       })),
       datePreset: z.string().default("last_30d"),
     }))
@@ -397,7 +402,7 @@ export const exportRouter = router({
       const header = [
         "Campaign Name", "Status", "Platform", "Source", "Objective",
         "Daily Budget", "Spend", "Impressions", "Clicks", "CTR (%)",
-        "Reach", "CPC", "CPM", "Conversions",
+        "Reach", "CPC", "CPM", "Conversions", "Leads", "Calls", "Messages", "Score", "End Date",
       ].join(",");
 
       const dataRows = input.campaigns.map((c) =>
@@ -416,6 +421,11 @@ export const exportRouter = router({
           c.cpc?.toFixed(2) ?? "",
           c.cpm?.toFixed(2) ?? "",
           c.conversions?.toLocaleString() ?? "",
+          c.leads?.toLocaleString() ?? "",
+          c.calls?.toLocaleString() ?? "",
+          c.messages?.toLocaleString() ?? "",
+          c.score != null ? String(c.score) : "",
+          c.stopTime ?? "",
         ].join(",")
       );
 
@@ -427,8 +437,11 @@ export const exportRouter = router({
           clicks: acc.clicks + (c.clicks ?? 0),
           reach: acc.reach + (c.reach ?? 0),
           conversions: acc.conversions + (c.conversions ?? 0),
+          leads: acc.leads + (c.leads ?? 0),
+          calls: acc.calls + (c.calls ?? 0),
+          messages: acc.messages + (c.messages ?? 0),
         }),
-        { spend: 0, impressions: 0, clicks: 0, reach: 0, conversions: 0 }
+        { spend: 0, impressions: 0, clicks: 0, reach: 0, conversions: 0, leads: 0, calls: 0, messages: 0 }
       );
       const avgCtr = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100).toFixed(2) : "0.00";
       const avgCpc = totals.clicks > 0 ? (totals.spend / totals.clicks).toFixed(2) : "0.00";
@@ -441,10 +454,14 @@ export const exportRouter = router({
         totals.impressions.toLocaleString(),
         totals.clicks.toLocaleString(),
         avgCtr,
-        totals.reach.toLocaleString(),
+        (totals.reach ?? 0).toLocaleString(),
         avgCpc,
         avgCpm,
-        totals.conversions.toLocaleString(),
+        (totals.conversions ?? 0).toLocaleString(),
+        (totals.leads ?? 0).toLocaleString(),
+        (totals.calls ?? 0).toLocaleString(),
+        (totals.messages ?? 0).toLocaleString(),
+        "", "",
       ].join(",");
 
       const csv = [header, ...dataRows, "", totalRow].join("\n");

@@ -21,6 +21,7 @@ export interface UnifiedCampaign {
   accountName?: string;
   adAccountId?: string;
   conversions?: number | null;
+  leads?: number | null;           // Leads only (onsite_conversion.lead_grouped)
   calls?: number | null;
   messages?: number | null;
   frequency?: number | null;
@@ -47,7 +48,7 @@ export interface UnifiedCampaignTableProps {
   onFilterByCreatives?: (campaign: UnifiedCampaign) => void;
 }
 
-export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "calls" | "messages" | "cpc" | "cpm" | "score" | "stopTime";
+export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "leads" | "calls" | "messages" | "cpc" | "cpm" | "score" | "stopTime";
 export type SortDir = "asc" | "desc";
 
 export interface ColumnDef {
@@ -70,6 +71,7 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: "ctr",         label: "CTR",         sortKey: "ctr",         width: "w-[80px]",      defaultVisible: true,  align: "right" },
   { key: "reach",       label: "Reach",       sortKey: "reach",       width: "w-[100px]",     defaultVisible: false, align: "right" },
   { key: "conversions", label: "Conv.",       sortKey: "conversions", width: "w-[90px]",      defaultVisible: false, align: "right" },
+  { key: "leads",       label: "Leads",       sortKey: "leads",       width: "w-[80px]",      defaultVisible: true,  align: "right" },
   { key: "cpc",         label: "CPC",         sortKey: "cpc",         width: "w-[80px]",      defaultVisible: false, align: "right" },
   { key: "cpm",         label: "CPM",         sortKey: "cpm",         width: "w-[80px]",      defaultVisible: false, align: "right" },
   { key: "calls",       label: "Calls",       sortKey: "calls",       width: "w-[80px]",      defaultVisible: true,  align: "right" },
