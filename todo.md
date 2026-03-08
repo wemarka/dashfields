@@ -2546,3 +2546,7 @@
 ## 🔧 Group Matching & Selection Fixes
 - [x] Fix: "i Lang Center" and "ILANG CENTER" should merge (add space-removed comparison)
 - [x] Fix: clicking a group row selects ALL accounts in the group (FB + IG + Ad Account)
+
+## 🎨 Sub-account Row Improvements
+- [x] Shrink sub-account rows (smaller avatar, smaller text, less padding)
+- [x] Show checkmark on ALL sub-accounts when their group is selected (not just the clicked one)

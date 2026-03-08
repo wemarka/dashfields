@@ -273,32 +273,32 @@ function IndividualRow({
   isGroupActive: boolean;
   onClick: () => void;
 }) {
+  // Show checkmark on ALL sub-accounts when the group is active
+  const showCheck = isActive || isGroupActive;
   return (
     <button
       onClick={onClick}
       className={[
-        "w-full flex items-center gap-3 pl-5 pr-3 py-2 text-left transition-colors",
-        isActive
-          ? "bg-brand/8 text-brand"
-          : isGroupActive
-            ? "bg-brand/5 hover:bg-brand/8 text-foreground"
-            : "hover:bg-foreground/5 text-foreground",
+        "w-full flex items-center gap-2 pl-6 pr-3 py-1.5 text-left transition-colors",
+        isGroupActive
+          ? "bg-brand/5 hover:bg-brand/8"
+          : "hover:bg-foreground/5",
       ].join(" ")}
     >
-      <AccountAvatar account={acc} size={32} badgeSize={12} />
+      <AccountAvatar account={acc} size={26} badgeSize={10} />
       <div className="flex-1 min-w-0">
         <p className={[
-          "text-[12px] font-medium truncate leading-tight",
-          isActive ? "text-brand" : "text-foreground",
+          "text-[11px] font-medium truncate leading-tight",
+          isGroupActive ? "text-brand" : "text-foreground/80",
         ].join(" ")}>
           {acc.name ?? acc.username ?? acc.platform}
         </p>
-        <p className="text-[10px] text-muted-foreground/55 truncate mt-0.5">
+        <p className="text-[9.5px] text-muted-foreground/50 truncate">
           {accountTypeLabel(acc.account_type, acc.platform)}
         </p>
       </div>
-      {isActive && (
-        <Check className="w-3.5 h-3.5 shrink-0 text-brand" strokeWidth={3} />
+      {showCheck && (
+        <Check className="w-3 h-3 shrink-0 text-brand" strokeWidth={3} />
       )}
     </button>
   );
