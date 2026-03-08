@@ -2468,3 +2468,7 @@
 
 ## 🐛 Fix GlobalSearch infinite loop
 - [x] Fix Maximum update depth exceeded error in GlobalSearch — stabilize buildResults dependencies
+
+## 🐛 Fix GlobalSearch infinite loop (final)
+- [x] Completely eliminate the useEffect that sets inlineResults state — move to useMemo instead
+- [x] Fix second error from wouter flushSync

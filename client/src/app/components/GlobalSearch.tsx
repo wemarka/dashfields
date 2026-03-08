@@ -54,7 +54,6 @@ export function GlobalSearch() {
   // Inline expand state
   const [expanded, setExpanded] = useState(false);
   const [inlineQuery, setInlineQuery] = useState("");
-  const [inlineResults, setInlineResults] = useState<SearchResult[]>([]);
   const [inlineIdx, setInlineIdx] = useState(0);
   const inlineInputRef = useRef<HTMLInputElement>(null);
   const inlineContainerRef = useRef<HTMLDivElement>(null);
@@ -80,33 +79,42 @@ export function GlobalSearch() {
     { enabled: open || expanded }
   );
 
-  // ── Build results helper (pure function, no useCallback to avoid stale closure issues) ─
-  const buildResults = (q: string, camps: typeof campaigns, reps: typeof reports): SearchResult[] => {
+  // ── Build results — pure useMemo, NO setState, NO useEffect ────────────────────
+  const campaignIds = useMemo(() => campaigns.map((c: {id: number}) => c.id).join(','), [campaigns]);
+  const reportIds = useMemo(() => reports.map((r: {id: number}) => r.id).join(','), [reports]);
+
+  const inlineResults: SearchResult[] = useMemo(() => {
+    if (!expanded) return [];
+    const q = inlineQuery;
     if (!q.trim()) return PAGES.slice(0, 6).map(p => ({ ...p, id: p.path }));
     const lq = q.toLowerCase();
     const matched: SearchResult[] = [];
     PAGES.forEach(p => { if (p.label.toLowerCase().includes(lq)) matched.push({ ...p, id: p.path }); });
-    (camps as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
+    (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
       if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
     });
-    (reps as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
+    (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
       if (r.name.toLowerCase().includes(lq)) matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
     });
     return matched.slice(0, 8);
-  };
-
-  // Update inline results when query or data changes — NO function reference in deps
-  useEffect(() => {
-    if (expanded) {
-      setInlineResults(buildResults(inlineQuery, campaigns, reports));
-      setInlineIdx(0);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inlineQuery, expanded, campaigns, reports]);
-
-  // Dialog results computed inline (no setState, no loop)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const dialogResults: SearchResult[] = useMemo(() => buildResults(query, campaigns, reports), [query, campaigns, reports]);
+  }, [inlineQuery, expanded, campaignIds, reportIds]);
+
+  const dialogResults: SearchResult[] = useMemo(() => {
+    const q = query;
+    if (!q.trim()) return PAGES.slice(0, 6).map(p => ({ ...p, id: p.path }));
+    const lq = q.toLowerCase();
+    const matched: SearchResult[] = [];
+    PAGES.forEach(p => { if (p.label.toLowerCase().includes(lq)) matched.push({ ...p, id: p.path }); });
+    (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
+      if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
+    });
+    (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
+      if (r.name.toLowerCase().includes(lq)) matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
+    });
+    return matched.slice(0, 8);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, campaignIds, reportIds]);
 
   // Keyboard shortcut Cmd+K / Ctrl+K → open Dialog
   useEffect(() => {
@@ -157,7 +165,7 @@ export function GlobalSearch() {
     else if (e.key === "ArrowUp") { e.preventDefault(); setInlineIdx(i => Math.max(i - 1, 0)); }
     else if (e.key === "Enter") {
       e.preventDefault();
-      if (inlineResults[inlineIdx]) { setLocation(inlineResults[inlineIdx].path); setExpanded(false); setInlineQuery(""); }
+      if (inlineResults[inlineIdx]) { const path = inlineResults[inlineIdx].path; setExpanded(false); setInlineQuery(""); setTimeout(() => setLocation(path), 0); }
     } else if (e.key === "Escape") { setExpanded(false); setInlineQuery(""); }
   };
 
@@ -167,7 +175,7 @@ export function GlobalSearch() {
     else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIdx(i => Math.max(i - 1, 0)); }
     else if (e.key === "Enter") {
       e.preventDefault();
-      if (dialogResults[selectedIdx]) { setLocation(dialogResults[selectedIdx].path); setOpen(false); }
+      if (dialogResults[selectedIdx]) { const path = dialogResults[selectedIdx].path; setOpen(false); setTimeout(() => setLocation(path), 0); }
     } else if (e.key === "Escape") { setOpen(false); }
   }, [dialogResults, selectedIdx, setLocation]);
 
@@ -225,7 +233,7 @@ export function GlobalSearch() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { setLocation(item.path); setExpanded(false); setInlineQuery(""); }}
+                  onClick={() => { const path = item.path; setExpanded(false); setInlineQuery(""); setTimeout(() => setLocation(path), 0); }}
                   onMouseEnter={() => setInlineIdx(i)}
                   className={[
                     "w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
@@ -285,7 +293,7 @@ export function GlobalSearch() {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => { setLocation(item.path); setOpen(false); }}
+                        onClick={() => { const path = item.path; setOpen(false); setTimeout(() => setLocation(path), 0); }}
                         onMouseEnter={() => setSelectedIdx(globalIdx)}
                         className={["w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors", isSelected ? "bg-primary/10" : "hover:bg-foreground/5"].join(" ")}
                       >
