@@ -2428,3 +2428,9 @@
 - [x] Add Sign Out icon at the very bottom of Sidebar, separated by a divider from the other icons
 - [x] When collapsed: Sign Out appears last (below Tools/Install/Settings/Help), separated visually
 - [x] Clicking Sign Out triggers the signOut function
+
+## 🔄 Sign Out Confirmation Dialog
+- [x] Add state showSignOutConfirm in DashboardLayout
+- [x] Sign Out button sets showSignOutConfirm=true instead of calling signOut directly
+- [x] Render a small confirmation dialog/popover with "Are you sure?" + Cancel + Sign Out buttons
+- [x] Confirming calls signOut(), cancelling closes the dialog

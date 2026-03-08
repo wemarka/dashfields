@@ -100,6 +100,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>("account");
   const openSettings = (tab: SettingsTabId = "account") => { setSettingsInitialTab(tab); setShowGlobalSettings(true); };
 
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+
   // Close account dropdown on outside click
   useEffect(() => {
     if (!showAccountDropdown) return;
@@ -412,7 +414,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => setShowSignOutConfirm(true)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-red-400/60 hover:text-red-500 hover:bg-red-500/8 transition-colors"
                 >
                   <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -602,6 +604,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
       <GlobalSettingsModal open={showGlobalSettings} onOpenChange={setShowGlobalSettings} initialTab={settingsInitialTab} />
+
+      {/* Sign Out Confirmation Dialog */}
+      {showSignOutConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setShowSignOutConfirm(false)} />
+          <div className="relative bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 flex flex-col items-center gap-4">
+            {/* Icon */}
+            <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </div>
+            {/* Text */}
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">Sign out of Dashfields?</p>
+              <p className="text-xs text-muted-foreground mt-1">You will need to sign in again to access your account.</p>
+            </div>
+            {/* Actions */}
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setShowSignOutConfirm(false)}
+                className="flex-1 py-2 rounded-xl border border-border/60 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setShowSignOutConfirm(false); signOut(); }}
+                className="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
