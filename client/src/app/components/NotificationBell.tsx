@@ -75,10 +75,10 @@ export function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="relative w-8 h-8 rounded-xl flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-colors"
+        className="relative w-8 h-8 rounded-lg flex items-center justify-center text-foreground/40 hover:text-foreground/70 transition-colors"
         title="Notifications"
       >
-        <Bell className={`w-4 h-4 transition-transform ${newBadge ? "scale-125" : ""}`} />
+        <Bell className={`w-[18px] h-[18px] transition-transform ${newBadge ? "scale-125" : ""}`} />
         {unreadCount > 0 && (
           <span
             className={`absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none transition-transform ${newBadge ? "scale-125" : ""}`}
@@ -90,9 +90,9 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 glass-strong rounded-2xl shadow-xl border border-white/20 overflow-hidden z-50 animate-blur-in">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl shadow-lg overflow-hidden z-50" style={{background:'#ffffff',border:'1px solid #ebebeb'}}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#ebebeb]">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-foreground/60" />
               <span className="text-sm font-semibold">Notifications</span>
@@ -122,7 +122,7 @@ export function NotificationBell() {
           </div>
 
           {/* Notification list */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+          <div className="max-h-80 overflow-y-auto divide-y divide-[#f0f0f0]">
             {notifications.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
                 <Bell className="w-6 h-6 mx-auto mb-2 opacity-30" />
@@ -158,7 +158,7 @@ export function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-white/10 flex items-center justify-between">
+            <div className="px-4 py-2.5 border-t border-[#ebebeb] flex items-center justify-between">
               <button
                 onClick={() => { setOpen(false); setLocation("/alerts"); }}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"

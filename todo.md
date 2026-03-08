@@ -2461,3 +2461,7 @@
 - [x] Popover shows section title + all child links
 - [x] Clicking a child link navigates and closes the popover
 - [x] Clicking outside closes the popover
+
+## 🎨 Topbar Search Expand + NotificationBell Simplify
+- [x] Convert Search trigger to expand input animation (icon → input on click, collapse on blur/Escape)
+- [x] Simplify NotificationBell icon — remove background/border, keep icon only like Search
