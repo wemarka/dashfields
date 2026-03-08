@@ -91,49 +91,98 @@ function AccountAvatar({
 }
 
 // ── Name normalization for grouping ──
+// Words to ignore when extracting meaningful tokens
+const STOP_WORDS = new Set([
+  "official", "center", "centre", "business", "page", "account",
+  "media", "digital", "marketing", "agency", "studio", "group",
+  "com", "net", "org", "co", "inc", "llc", "ltd", "the", "and",
+  "مركز", "رسمي", "أعمال", "تسويق",
+]);
+
 function normalizeName(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, "").replace(/\s+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06ff\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
-function namesSimilar(a: string, b: string) {
-  const na = normalizeName(a), nb = normalizeName(b);
+
+/** Extract meaningful tokens (words) from a name, ignoring stop words and short tokens */
+function extractTokens(s: string): string[] {
+  return normalizeName(s).split(" ").filter(t => t.length >= 3 && !STOP_WORDS.has(t));
+}
+
+/** Two names are similar if they share at least one meaningful token, or one contains the other */
+function namesSimilar(a: string, b: string): boolean {
+  const na = normalizeName(a);
+  const nb = normalizeName(b);
   if (!na || !nb) return false;
-  return na === nb || na.includes(nb) || nb.includes(na);
+  // Exact or substring match
+  if (na === nb || na.includes(nb) || nb.includes(na)) return true;
+  // Shared meaningful token
+  const ta = extractTokens(a);
+  const tb = new Set<string>(extractTokens(b));
+  if (ta.length === 0 || tb.size === 0) return false;
+  return ta.some(t => tb.has(t));
 }
 
 type NamedGroup = { groupName: string; accounts: Account[]; primaryAccount: Account };
 
 function buildGroups(metaAccounts: Account[]): NamedGroup[] {
+  // Union-Find style: merge all accounts that share a name similarity
+  const n = metaAccounts.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+
+  function find(i: number): number {
+    if (parent[i] !== i) parent[i] = find(parent[i]);
+    return parent[i];
+  }
+  function union(i: number, j: number) {
+    parent[find(i)] = find(j);
+  }
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const nameA = metaAccounts[i].name ?? metaAccounts[i].username ?? "";
+      const nameB = metaAccounts[j].name ?? metaAccounts[j].username ?? "";
+      if (namesSimilar(nameA, nameB)) union(i, j);
+    }
+  }
+
+  // Collect groups
+  const groupMap = new Map<number, Account[]>();
+  for (let i = 0; i < n; i++) {
+    const root = find(i);
+    if (!groupMap.has(root)) groupMap.set(root, []);
+    groupMap.get(root)!.push(metaAccounts[i]);
+  }
+
   const groups: NamedGroup[] = [];
-  const assignedIds = new Set<number>();
-
-  for (const acc of metaAccounts) {
-    if (assignedIds.has(acc.id)) continue;
-    const accName = acc.name ?? acc.username ?? "";
-    const siblings = metaAccounts.filter(
-      other =>
-        !assignedIds.has(other.id) &&
-        other.id !== acc.id &&
-        namesSimilar(accName, other.name ?? other.username ?? "")
-    );
-    const groupMembers = [acc, ...siblings];
-    groupMembers.forEach(m => assignedIds.add(m.id));
-
-    // Best group name: prefer non-ad-account, shortest name
-    const groupName =
-      groupMembers
-        .map(m => m.name ?? m.username ?? "")
+  Array.from(groupMap.values()).forEach((members: Account[]) => {
+    // Best group name: prefer page/business type, then shortest non-empty name
+    const groupName: string =
+      members
+        .filter((m: Account) => m.account_type !== "ad_account")
+        .map((m: Account) => m.name ?? m.username ?? "")
         .filter(Boolean)
-        .sort((a, b) => a.length - b.length)[0] ?? accName;
+        .sort((a: string, b: string) => a.length - b.length)[0] ??
+      members
+        .map((m: Account) => m.name ?? m.username ?? "")
+        .filter(Boolean)
+        .sort((a: string, b: string) => a.length - b.length)[0] ??
+      "";
 
     // Primary account for avatar: prefer page/business with picture
-    const primaryAccount =
-      groupMembers.find(m => m.account_type !== "ad_account" && m.profile_picture) ??
-      groupMembers.find(m => m.profile_picture) ??
-      groupMembers[0];
+    const primaryAccount: Account =
+      members.find((m: Account) => m.account_type !== "ad_account" && m.profile_picture) ??
+      members.find((m: Account) => m.profile_picture) ??
+      members[0];
 
-    groups.push({ groupName, accounts: groupMembers, primaryAccount });
-  }
-  return groups;
+    groups.push({ groupName, accounts: members, primaryAccount });
+  });
+
+  // Sort groups: active group first, then alphabetically
+  return groups.sort((a, b) => a.groupName.localeCompare(b.groupName));
 }
 
 // ── Account type label ──

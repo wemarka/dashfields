@@ -2537,3 +2537,8 @@
 - [x] Individual account rows: avatar + name + type label + blue checkmark if active
 - [x] All Meta accounts (FB+IG) grouped by business name similarity
 - [x] Future-ready: same pattern for other platforms
+
+## 🔍 Fuzzy Name Matching for Meta Groups
+- [x] Use token-based matching: split names into words, group if they share a significant common word (e.g. "wemarka" matches "wemarka Official" and "wemarka.com")
+- [x] Ignore common words (Center, Official, .com, Business, etc.) when comparing
+- [x] Group all FB+IG accounts that share any meaningful common token
