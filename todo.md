@@ -2504,3 +2504,8 @@
 - [x] Group ALL Facebook + Instagram accounts together under one "Meta" section (no name matching required)
 - [x] Show Meta logo as section header icon
 - [x] Each account row still shows its own FB/IG platform badge
+
+## 🔄 Ad Account Name Fix + Smart Grouping
+- [x] Fix Ad Account name: fetch real business name from Meta API (not user personal name)
+- [x] Auto-group Ad Accounts with Pages/Business accounts when names are similar/matching
+- [x] Show grouped accounts under one named section (e.g. "Prima Center" with FB Page + IG + Ad Account)

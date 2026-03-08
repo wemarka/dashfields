@@ -580,10 +580,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {accounts.length > 0 && (
                     <div className="py-1.5 max-h-60 overflow-y-auto">
                       {(() => {
-                        // ── Meta Group: ALL Facebook + Instagram accounts grouped together ──
                         type AccType = typeof accounts[0];
+
+                        // ── Smart grouping helpers ──
+                        /** Normalize a name for fuzzy comparison: lowercase, remove punctuation & extra spaces */
+                        const normalizeName = (s: string) =>
+                          s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, "").replace(/\s+/g, " ").trim();
+
+                        /** Check if two names are similar (exact or one contains the other) */
+                        const namesSimilar = (a: string, b: string) => {
+                          const na = normalizeName(a), nb = normalizeName(b);
+                          if (!na || !nb) return false;
+                          return na === nb || na.includes(nb) || nb.includes(na);
+                        };
+
+                        // Separate Meta (FB + IG) from other platforms
                         const metaAccounts = accounts.filter(a => a.platform === "facebook" || a.platform === "instagram");
                         const otherAccounts = accounts.filter(a => a.platform !== "facebook" && a.platform !== "instagram");
+
+                        // ── Build named groups from Meta accounts ──
+                        // Each group has a canonical name + list of accounts
+                        type NamedGroup = { groupName: string; accounts: AccType[] };
+                        const groups: NamedGroup[] = [];
+                        const assignedIds = new Set<number>();
+
+                        for (const acc of metaAccounts) {
+                          if (assignedIds.has(acc.id)) continue;
+                          const accName = acc.name ?? acc.username ?? "";
+                          // Find all other Meta accounts with similar names
+                          const siblings = metaAccounts.filter(other =>
+                            !assignedIds.has(other.id) &&
+                            other.id !== acc.id &&
+                            namesSimilar(accName, other.name ?? other.username ?? "")
+                          );
+                          const groupMembers = [acc, ...siblings];
+                          groupMembers.forEach(m => assignedIds.add(m.id));
+                          // Use the shortest non-empty name as the group label
+                          const groupName = groupMembers
+                            .map(m => m.name ?? m.username ?? "")
+                            .filter(Boolean)
+                            .sort((a, b) => a.length - b.length)[0] ?? accName;
+                          groups.push({ groupName, accounts: groupMembers });
+                        }
+
+                        // Meta infinity SVG
+                        const MetaLogo = () => (
+                          <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        );
 
                         // Render helper for a single account row
                         const renderAccountRow = (acc: AccType) => (
@@ -608,7 +653,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? acc.platform}</p>
-                              {acc.account_type && <p className="text-[10px] text-muted-foreground/50 truncate capitalize">{acc.account_type}</p>}
+                              {acc.account_type && (
+                                <p className="text-[10px] text-muted-foreground/50 truncate capitalize">
+                                  {acc.account_type === "ad_account" ? "Ad Account" : acc.account_type}
+                                </p>
+                              )}
                             </div>
                             {activeAccount?.id === acc.id && (
                               <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
@@ -618,19 +667,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                         return (
                           <>
-                            {/* ── Meta Group (all FB + IG accounts) ── */}
-                            {metaAccounts.length > 0 && (
-                              <div>
+                            {/* ── Meta named groups ── */}
+                            {groups.map((group, idx) => (
+                              <div key={`meta-group-${idx}`}>
                                 <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  {/* Meta infinity logo */}
-                                  <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
-                                  </svg>
-                                  Meta
+                                  <MetaLogo />
+                                  {group.groupName}
                                 </p>
-                                {metaAccounts.map(renderAccountRow)}
+                                {group.accounts.map(renderAccountRow)}
                               </div>
-                            )}
+                            ))}
 
                             {/* ── Other platforms ── */}
                             {(() => {

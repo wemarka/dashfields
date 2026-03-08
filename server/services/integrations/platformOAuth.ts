@@ -298,9 +298,9 @@ async function metaExchangeLongLived(shortToken: string): Promise<string> {
 async function metaGetAdAccounts(token: string) {
   const url = new URL(`${META_GRAPH_BASE}/me/adaccounts`);
   url.searchParams.set("access_token", token);
-  url.searchParams.set("fields", "id,name,account_status,currency,timezone_name");
+  url.searchParams.set("fields", "id,name,account_status,currency,timezone_name,business");
   const res  = await fetch(url.toString());
-  const json = await res.json() as { data?: Array<{ id: string; name: string; currency?: string }>; error?: { message?: string } };
+  const json = await res.json() as { data?: Array<{ id: string; name: string; currency?: string; account_status?: number; business?: { id: string; name: string } }>; error?: { message?: string } };
   if (json.error) throw new Error(json.error.message ?? "Failed to fetch ad accounts");
   return json.data ?? [];
 }
@@ -480,16 +480,26 @@ export function registerPlatformOAuthRoutes(app: Express) {
         const activeAdAccounts = adAccounts.filter((a: any) => a.account_status === 1 || a.account_status === undefined);
 
         for (const account of activeAdAccounts) {
+          // Use business name if available, otherwise ad account name
+          // Never fall back to the user's personal name
+          const adAccountName = (account as any).business?.name ?? account.name ?? `Ad Account ${account.id.replace("act_", "")}`;
           await upsertAccount({
             userId, workspaceId,
             platform: "facebook",
             platformAccountId: account.id.replace("act_", ""),
-            name: account.name ?? metaUser.name,
-            username: account.name ?? metaUser.name,
+            name: adAccountName,
+            username: adAccountName,
             accessToken: longToken,
             profilePicture: metaUser.picture?.data?.url ?? null,
             accountType: "ad_account",
-            metadata: { currency: account.currency, accountStatus: (account as any).account_status, metaUserId: metaUser.id, userProfilePicture: metaUser.picture?.data?.url ?? null },
+            metadata: {
+              currency: account.currency,
+              accountStatus: (account as any).account_status,
+              metaUserId: metaUser.id,
+              userProfilePicture: metaUser.picture?.data?.url ?? null,
+              businessId: (account as any).business?.id ?? null,
+              businessName: (account as any).business?.name ?? null,
+            },
           });
           fbCount++;
         }
