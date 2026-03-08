@@ -2515,3 +2515,9 @@
 - [x] Overlapping FB + IG platform icons on the avatar
 - [x] Group name + username in title, "Facebook, Instagram" as subtitle
 - [x] Match app design aesthetic (grey/white, clean)
+
+## 🔗 Linked FB+IG Group Selection
+- [x] Revert dropdown to old separate-row design (each account shown individually)
+- [x] Keep Meta group header with Meta logo
+- [x] Selecting any account in a group activates all accounts in that group (linked selection)
+- [x] All accounts in active group show checkmark/highlight

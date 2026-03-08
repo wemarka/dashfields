@@ -613,130 +613,79 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           groups.push({ groupName, accounts: groupMembers });
                         }
 
-                        // ── Render a merged group row (single row for the whole group) ──
-                        const renderGroupRow = (group: NamedGroup, idx: number) => {
-                          // Pick the best avatar: prefer non-ad-account (page/business) picture
-                          const primaryAcc = group.accounts.find(a => a.account_type !== "ad_account" && a.profile_picture)
-                            ?? group.accounts.find(a => a.profile_picture)
-                            ?? group.accounts[0];
+                        // Build a map: accountId -> groupIndex (for linked highlighting)
+                        const accountGroupMap = new Map<number, number>();
+                        groups.forEach((g, gi) => g.accounts.forEach(a => accountGroupMap.set(a.id, gi)));
 
-                          // Collect unique platforms in this group
-                          const platforms = Array.from(new Set(group.accounts.map(a => a.platform)));
+                        // Active group index (if active account belongs to a Meta group)
+                        const activeGroupIdx = activeAccount ? accountGroupMap.get(activeAccount.id) ?? -1 : -1;
 
-                          // Collect usernames (non-null, unique)
-                          const usernames = Array.from(new Set(
-                            group.accounts.map(a => a.username).filter((u): u is string => !!u)
-                          )).slice(0, 2);
+                        // Meta infinity SVG
+                        const MetaLogo = () => (
+                          <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        );
 
-                          // Platform label e.g. "Facebook, Instagram"
-                          const platformLabel = platforms
-                            .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-                            .join(", ");
+                        // Render individual account row (old design) with linked group highlighting
+                        const renderAccountRow = (acc: AccType, groupIdx = -1) => {
+                          // Account is "active" if it is the selected account OR belongs to the active group
+                          const isGroupActive = groupIdx >= 0 && groupIdx === activeGroupIdx;
+                          const isDirectlyActive = activeAccount?.id === acc.id;
+                          const isActive = isDirectlyActive || isGroupActive;
 
-                          // Is any account in this group active?
-                          const isActive = group.accounts.some(a => activeAccount?.id === a.id);
-
-                          // Clicking the group row activates the first non-ad-account, or first account
                           const handleClick = () => {
-                            const target = group.accounts.find(a => a.account_type !== "ad_account") ?? group.accounts[0];
-                            setActiveAccount(target.id);
+                            setActiveAccount(acc.id);
                             setShowAccountDropdown(false);
                           };
 
                           return (
                             <button
-                              key={`group-${idx}`}
+                              key={acc.id}
                               onClick={handleClick}
                               className={[
-                                "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                                "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
                                 isActive ? "bg-brand/8 text-brand" : "hover:bg-foreground/5 text-foreground",
                               ].join(" ")}
                             >
-                              {/* Avatar with overlapping platform badges */}
-                              <div className="relative shrink-0 w-9 h-9">
-                                {/* Radio circle indicator */}
-                                <div className={[
-                                  "absolute -left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center",
-                                  isActive ? "border-brand bg-brand" : "border-muted-foreground/30 bg-transparent",
-                                ].join(" ")}>
-                                  {isActive && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                </div>
-                                {/* Main avatar */}
-                                <Avatar className="w-9 h-9">
-                                  {primaryAcc?.profile_picture && <AvatarImage src={primaryAcc.profile_picture} />}
-                                  <AvatarFallback className="text-[11px] bg-brand/10 text-brand font-semibold">
-                                    {(group.groupName).charAt(0).toUpperCase()}
+                              <div className="relative shrink-0">
+                                <Avatar className="w-6 h-6">
+                                  {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
+                                  <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
+                                    {(acc.name ?? acc.username ?? acc.platform).charAt(0).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
-                                {/* Overlapping platform icons at bottom-right */}
-                                <div className="absolute -bottom-0.5 -right-1 flex">
-                                  {platforms.slice(0, 2).map((p, pi) => (
-                                    <div
-                                      key={p}
-                                      className="w-3.5 h-3.5 rounded-full bg-background border border-border/40 flex items-center justify-center"
-                                      style={{ marginLeft: pi > 0 ? "-4px" : "0", zIndex: platforms.length - pi }}
-                                    >
-                                      <PlatformIcon platform={p} className="w-2 h-2" />
-                                    </div>
-                                  ))}
+                                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/30 flex items-center justify-center">
+                                  <PlatformIcon platform={acc.platform} className="w-1.5 h-1.5" />
                                 </div>
                               </div>
-
-                              {/* Text */}
-                              <div className="flex-1 min-w-0 pl-2">
-                                <p className="text-[12px] font-semibold truncate leading-tight">
-                                  {group.groupName}{usernames.length > 0 ? `, ${usernames[0]}` : ""}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5">{platformLabel}</p>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? acc.platform}</p>
+                                {acc.account_type && (
+                                  <p className="text-[10px] text-muted-foreground/50 truncate capitalize">
+                                    {acc.account_type === "ad_account" ? "Ad account" : acc.account_type}
+                                  </p>
+                                )}
                               </div>
-
-                              {/* Active dot */}
-                              {isActive && (
-                                <div className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+                              {isDirectlyActive && (
+                                <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
                               )}
                             </button>
                           );
                         };
 
-                        // Render helper for non-Meta single account row
-                        const renderAccountRow = (acc: AccType) => (
-                          <button
-                            key={acc.id}
-                            onClick={() => { setActiveAccount(acc.id); setShowAccountDropdown(false); }}
-                            className={[
-                              "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
-                              activeAccount?.id === acc.id ? "bg-brand/8 text-brand" : "hover:bg-foreground/5 text-foreground",
-                            ].join(" ")}
-                          >
-                            <div className="relative shrink-0">
-                              <Avatar className="w-7 h-7">
-                                {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
-                                <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
-                                  {(acc.name ?? acc.username ?? acc.platform).charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/30 flex items-center justify-center">
-                                <PlatformIcon platform={acc.platform} className="w-1.5 h-1.5" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? acc.platform}</p>
-                              {acc.account_type && (
-                                <p className="text-[10px] text-muted-foreground/50 truncate capitalize">
-                                  {acc.account_type === "ad_account" ? "Ad Account" : acc.account_type}
-                                </p>
-                              )}
-                            </div>
-                            {activeAccount?.id === acc.id && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
-                            )}
-                          </button>
-                        );
-
                         return (
                           <>
-                            {/* ── Meta merged group rows ── */}
-                            {groups.map((group, idx) => renderGroupRow(group, idx))}
+                            {/* ── Meta groups: header + individual rows ── */}
+                            {groups.map((group, gi) => (
+                              <div key={`meta-group-${gi}`}>
+                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
+                                  <MetaLogo />
+                                  {group.groupName}
+                                </p>
+                                {group.accounts.map(acc => renderAccountRow(acc, gi))}
+                              </div>
+                            ))}
 
                             {/* ── Other platforms ── */}
                             {(() => {
@@ -751,7 +700,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <PlatformIcon platform={platform} className="w-2.5 h-2.5" />
                                     {platform.charAt(0).toUpperCase() + platform.slice(1)}
                                   </p>
-                                  {accs.map(renderAccountRow)}
+                                  {accs.map(acc => renderAccountRow(acc))}
                                 </div>
                               ));
                             })()}
