@@ -2555,3 +2555,8 @@
 - [x] Update campaigns tRPC query to accept array of accountIds (not just one)
 - [x] Update Campaigns page to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
+
+## 🔗 activeGroupIds → Analytics Filtering
+- [x] Add accountIds array param to meta analytics tRPC procedures (insights, compareInsights, etc.)
+- [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
+- [x] Fallback: if no group selected, use single activeAccountId as before

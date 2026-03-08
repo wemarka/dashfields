@@ -45,12 +45,19 @@ export default function Analytics() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showExport, setShowExport] = useState(false);
   const { t } = useTranslation();
-  const { activeAccountId } = useActiveAccount();
+  const { activeAccountId, activeGroupIds } = useActiveAccount();
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id;
   const { fmt: fmtMoney } = useCurrency();
 
-  // Multi-platform data — filtered by active account if selected
+  // Build account filter params — prefer group selection over single account
+  const accountFilter = activeGroupIds && activeGroupIds.length > 0
+    ? { accountIds: activeGroupIds }
+    : activeAccountId
+    ? { accountId: activeAccountId }
+    : {};
+
+  // Multi-platform data — filtered by active account/group if selected
   const { data: allInsights = [], isLoading: insightsLoading, refetch } =
     trpc.platforms.allInsights.useQuery({
       datePreset,
@@ -64,11 +71,11 @@ export default function Analytics() {
   const isMetaConnected = metaStatus?.connected ?? false;
   const { data: metaCampaigns = [], isLoading: campaignsLoading } =
     trpc.meta.campaignInsights.useQuery(
-      { datePreset, limit: 20, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
+      { datePreset, limit: 20, ...accountFilter, ...(workspaceId ? { workspaceId } : {}) },
       { enabled: isMetaConnected }
     );
   const { data: compare } = trpc.meta.compareInsights.useQuery(
-    { datePreset, ...(activeAccountId ? { accountId: activeAccountId } : {}), ...(workspaceId ? { workspaceId } : {}) },
+    { datePreset, ...accountFilter, ...(workspaceId ? { workspaceId } : {}) },
     { enabled: isMetaConnected }
   );
 

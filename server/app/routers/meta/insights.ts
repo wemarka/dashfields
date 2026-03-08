@@ -8,7 +8,25 @@ import {
   getAccountInsights,
   getCampaignInsights,
 } from "../../../services/integrations/meta";
-import { getMetaToken } from "./helpers";
+import { getMetaToken, getAllMetaTokens } from "./helpers";
+import { getSupabase } from "../../../supabase";
+
+/** Helper: get Meta tokens for a group of account IDs (filters to facebook ad accounts only) */
+async function getMetaTokensForGroup(
+  userId: number,
+  accountIds: number[],
+): Promise<{ token: string; adAccountId: string }[]> {
+  const sb = getSupabase();
+  const { data } = await sb
+    .from("social_accounts")
+    .select("access_token, platform_account_id, platform")
+    .eq("user_id", userId)
+    .in("id", accountIds)
+    .eq("is_active", true);
+  return (data ?? [])
+    .filter(d => d.access_token && d.platform_account_id && d.platform === "facebook")
+    .map(d => ({ token: d.access_token, adAccountId: d.platform_account_id }));
+}
 
 const datePresetEnum = z.enum([
   "today", "yesterday", "last_7d", "last_14d", "last_30d",
@@ -21,59 +39,13 @@ export const metaInsightsRouter = router({
     .input(z.object({
       datePreset: datePresetEnum.default("last_30d"),
       accountId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(), // group selection
       workspaceId: z.number().int().positive().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return null;
-      const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
-      if (insights.length === 0) return null;
-      const d = insights[0];
-      const actions = (d.actions ?? []) as { action_type: string; value: string }[];
-      const getAction = (type: string) =>
-        Number(actions.find(a => a.action_type === type)?.value ?? 0);
-      return {
-        impressions: Number(d.impressions ?? 0),
-        reach: Number(d.reach ?? 0),
-        clicks: Number(d.clicks ?? 0),
-        spend: Number(d.spend ?? 0),
-        ctr: Number(d.ctr ?? 0),
-        cpc: Number(d.cpc ?? 0),
-        cpm: Number(d.cpm ?? 0),
-        frequency: Number(d.frequency ?? 0),
-        leads: getAction("lead") + getAction("onsite_conversion.lead"),
-        calls: getAction("click_to_call_call_confirm"),
-        messages: getAction("onsite_conversion.messaging_conversation_started_7d"),
-        datePreset: input.datePreset,
-      };
-    }),
-
-  /** Compare current period vs previous period */
-  compareInsights: protectedProcedure
-    .input(z.object({
-      datePreset: datePresetEnum.default("last_30d"),
-      accountId: z.number().optional(),
-      workspaceId: z.number().int().positive().optional(),
-    }))
-    .query(async ({ ctx, input }) => {
-      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return null;
-
-      const prevPresetMap: Record<string, string> = {
-        today: "yesterday", yesterday: "last_7d", last_7d: "last_14d",
-        last_14d: "last_30d", last_30d: "last_90d", last_90d: "last_month",
-        this_month: "last_month", last_month: "last_month",
-      };
-      const prevPreset = prevPresetMap[input.datePreset] ?? "last_30d";
-
-      const [current, previous] = await Promise.all([
-        getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
-        getAccountInsights(conn.adAccountId, conn.token, prevPreset),
-      ]);
-
-      const parse = (insights: MetaInsight[]) => {
-        if (!insights[0]) return null;
-        const d = insights[0];
+      const parseInsight = (d: MetaInsight) => {
+        const actions = (d.actions ?? []) as { action_type: string; value: string }[];
+        const getAction = (type: string) => Number(actions.find(a => a.action_type === type)?.value ?? 0);
         return {
           impressions: Number(d.impressions ?? 0),
           reach: Number(d.reach ?? 0),
@@ -82,15 +54,116 @@ export const metaInsightsRouter = router({
           ctr: Number(d.ctr ?? 0),
           cpc: Number(d.cpc ?? 0),
           cpm: Number(d.cpm ?? 0),
+          frequency: Number(d.frequency ?? 0),
+          leads: getAction("lead") + getAction("onsite_conversion.lead"),
+          calls: getAction("click_to_call_call_confirm"),
+          messages: getAction("onsite_conversion.messaging_conversation_started_7d"),
         };
       };
 
+      // Group selection: aggregate insights across all accounts in the group
+      if (input.accountIds && input.accountIds.length > 0) {
+        const conns = await getMetaTokensForGroup(ctx.user.id, input.accountIds);
+        if (conns.length === 0) return null;
+        const results = await Promise.allSettled(
+          conns.map(conn => getAccountInsights(conn.adAccountId, conn.token, input.datePreset))
+        );
+        const parsed = results
+          .filter((r): r is PromiseFulfilledResult<MetaInsight[]> => r.status === "fulfilled")
+          .flatMap(r => r.value)
+          .filter(d => d)
+          .map(parseInsight);
+        if (parsed.length === 0) return null;
+        const total = parsed.reduce((acc, d) => ({
+          impressions: acc.impressions + d.impressions,
+          reach: acc.reach + d.reach,
+          clicks: acc.clicks + d.clicks,
+          spend: acc.spend + d.spend,
+          ctr: 0, cpc: 0, cpm: 0, frequency: 0,
+          leads: acc.leads + d.leads,
+          calls: acc.calls + d.calls,
+          messages: acc.messages + d.messages,
+        }));
+        // Recalculate derived metrics from totals
+        total.ctr = total.impressions > 0 ? parseFloat(((total.clicks / total.impressions) * 100).toFixed(2)) : 0;
+        total.cpc = total.clicks > 0 ? parseFloat((total.spend / total.clicks).toFixed(2)) : 0;
+        total.cpm = total.impressions > 0 ? parseFloat(((total.spend / total.impressions) * 1000).toFixed(2)) : 0;
+        total.frequency = parsed.reduce((s, d) => s + d.frequency, 0) / parsed.length;
+        return { ...total, datePreset: input.datePreset };
+      }
+
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+      const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+      if (insights.length === 0) return null;
+      return { ...parseInsight(insights[0]), datePreset: input.datePreset };
+    }),
+
+  /** Compare current period vs previous period */
+  compareInsights: protectedProcedure
+    .input(z.object({
+      datePreset: datePresetEnum.default("last_30d"),
+      accountId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const prevPresetMap: Record<string, string> = {
+        today: "yesterday", yesterday: "last_7d", last_7d: "last_14d",
+        last_14d: "last_30d", last_30d: "last_90d", last_90d: "last_month",
+        this_month: "last_month", last_month: "last_month",
+      };
+      const prevPreset = prevPresetMap[input.datePreset] ?? "last_30d";
+
+      const sumInsights = (list: MetaInsight[]) => {
+        if (!list.length) return null;
+        return list.reduce((acc, d) => ({
+          impressions: acc.impressions + Number(d.impressions ?? 0),
+          reach: acc.reach + Number(d.reach ?? 0),
+          clicks: acc.clicks + Number(d.clicks ?? 0),
+          spend: acc.spend + Number(d.spend ?? 0),
+          ctr: 0, cpc: 0, cpm: 0,
+        }), { impressions: 0, reach: 0, clicks: 0, spend: 0, ctr: 0, cpc: 0, cpm: 0 });
+      };
+      const calcDerived = (s: { impressions: number; reach: number; clicks: number; spend: number; ctr: number; cpc: number; cpm: number } | null) => {
+        if (!s) return null;
+        return {
+          ...s,
+          ctr: s.impressions > 0 ? parseFloat(((s.clicks / s.impressions) * 100).toFixed(2)) : 0,
+          cpc: s.clicks > 0 ? parseFloat((s.spend / s.clicks).toFixed(2)) : 0,
+          cpm: s.impressions > 0 ? parseFloat(((s.spend / s.impressions) * 1000).toFixed(2)) : 0,
+        };
+      };
+
+      if (input.accountIds && input.accountIds.length > 0) {
+        const conns = await getMetaTokensForGroup(ctx.user.id, input.accountIds);
+        if (conns.length === 0) return null;
+        const [currResults, prevResults] = await Promise.all([
+          Promise.allSettled(conns.map(c => getAccountInsights(c.adAccountId, c.token, input.datePreset))),
+          Promise.allSettled(conns.map(c => getAccountInsights(c.adAccountId, c.token, prevPreset))),
+        ]);
+        const currInsights = currResults.filter((r): r is PromiseFulfilledResult<MetaInsight[]> => r.status === "fulfilled").flatMap(r => r.value);
+        const prevInsights = prevResults.filter((r): r is PromiseFulfilledResult<MetaInsight[]> => r.status === "fulfilled").flatMap(r => r.value);
+        return { current: calcDerived(sumInsights(currInsights)), previous: calcDerived(sumInsights(prevInsights)), datePreset: input.datePreset, prevPreset };
+      }
+
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+      const [current, previous] = await Promise.all([
+        getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
+        getAccountInsights(conn.adAccountId, conn.token, prevPreset),
+      ]);
+      const parse = (insights: MetaInsight[]) => {
+        if (!insights[0]) return null;
+        const d = insights[0];
+        return { impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0), clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0), ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0) };
+      };
       return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
     }),
 
   /** Conversion Funnel data */
   funnelData: protectedProcedure
-    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), workspaceId: z.number().int().positive().optional() }))
+    .input(z.object({ datePreset: z.string().default("last_30d"), accountId: z.number().optional(), accountIds: z.array(z.number()).optional(), workspaceId: z.number().int().positive().optional() }))
     .query(async ({ ctx, input }) => {
       const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return { stages: [], conversionRate: 0, dropoffRate: 0, totalSpend: 0 };
