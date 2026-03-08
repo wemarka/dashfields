@@ -2447,3 +2447,7 @@
 - [x] Update Auth pages (Login/Register/ForgotPassword) to use white/off-white palette
 - [x] Update app-bg to pure white globally via CSS utility
 - [x] Card hover shadows updated to match clean palette
+
+## 🎨 Auth Pages — Reset Password & Callback Redesign
+- [x] Rewrite ResetPasswordPage with split-panel white/dark design
+- [x] Rewrite AuthCallbackPage with clean white/off-white design
