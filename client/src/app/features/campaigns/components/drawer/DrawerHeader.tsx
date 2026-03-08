@@ -84,13 +84,6 @@ export function DrawerHeader({
   const isPaused  = campaign?.status?.toLowerCase() === "paused";
   const canToggle = isActive || isPaused;
 
-  const fmtNum = (n: number) =>
-    n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M`
-    : n >= 1_000   ? `${(n / 1_000).toFixed(1)}K`
-    : String(n);
-
-  const hasInsight = insight && (insight.ctr > 0 || insight.cpc > 0 || insight.cpm > 0 || insight.impressions > 0 || insight.spend > 0);
-
   return (
     <div className="border-b border-border/50 bg-white px-4 py-0 shrink-0">
 
@@ -114,39 +107,7 @@ export function DrawerHeader({
           </SheetDescription>
         </div>
 
-        {/* KPI stats */}
-        {hasInsight && (
-          <>
-            <Sep />
-            <div className="flex items-center gap-3 shrink-0">
-              {insight!.ctr > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  CTR <span className="font-medium text-foreground">{insight!.ctr.toFixed(2)}%</span>
-                </span>
-              )}
-              {insight!.cpc > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  CPC <span className="font-medium text-foreground">{fmtCurrency(insight!.cpc)}</span>
-                </span>
-              )}
-              {insight!.cpm > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  CPM <span className="font-medium text-foreground">{fmtCurrency(insight!.cpm)}</span>
-                </span>
-              )}
-              {insight!.impressions > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  Impressions <span className="font-medium text-foreground">{fmtNum(insight!.impressions)}</span>
-                </span>
-              )}
-              {insight!.spend > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  Spend <span className="font-medium text-foreground">{fmtCurrency(insight!.spend)}</span>
-                </span>
-              )}
-            </div>
-          </>
-        )}
+
 
         {/* Budget */}
         {campaign?.dailyBudget != null && (

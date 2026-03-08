@@ -201,6 +201,37 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
 
   return (
     <div className="p-5 space-y-4">
+      {/* ── KPI Summary Strip ── */}
+      {campaignInsight && (
+        <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/30 rounded-lg border border-border/40">
+          {campaignInsight.ctr > 0 && (
+            <span className="text-[12px] text-muted-foreground">
+              CTR <span className="font-semibold text-foreground">{fmtPct(campaignInsight.ctr)}</span>
+            </span>
+          )}
+          {campaignInsight.cpc > 0 && (
+            <span className="text-[12px] text-muted-foreground">
+              CPC <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.cpc)}</span>
+            </span>
+          )}
+          {campaignInsight.cpm > 0 && (
+            <span className="text-[12px] text-muted-foreground">
+              CPM <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.cpm)}</span>
+            </span>
+          )}
+          {campaignInsight.impressions > 0 && (
+            <span className="text-[12px] text-muted-foreground">
+              Impressions <span className="font-semibold text-foreground">{fmtNum(campaignInsight.impressions)}</span>
+            </span>
+          )}
+          {campaignInsight.spend > 0 && (
+            <span className="text-[12px] text-muted-foreground">
+              Spend <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.spend)}</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* KPI Grid */}
       {campaignInsight ? (
         <>
