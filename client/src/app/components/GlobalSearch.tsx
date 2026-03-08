@@ -1,7 +1,8 @@
 // GlobalSearch.tsx
-// Topbar search: icon expands to inline input on click, collapses on blur/Escape.
-// Full command-palette Dialog still opens on Cmd+K / Ctrl+K.
-// Recent searches stored in localStorage (dashfields_recent_searches).
+// Inline expand search with:
+// - Recent searches shown when empty (no default pages list)
+// - @ prefix to scope search: @campaigns, @reports, @pages, @analytics
+// - Cmd+K opens full dialog
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/core/lib/trpc";
@@ -12,31 +13,39 @@ import {
   Search, Megaphone, FileText, BarChart3, Settings, CalendarDays,
   Sparkles, Users, Hash, Swords, FlaskConical, Link2, Bell,
   SplitSquareHorizontal, Layers2, TrendingUp, Send, LineChart, BellDot,
-  LayoutDashboard, ArrowRight, X, Clock,
+  LayoutDashboard, ArrowRight, X, Clock, AtSign,
 } from "lucide-react";
 
 // ─── Static nav pages ─────────────────────────────────────────────────────────
 const PAGES = [
-  { label: "Dashboard",          path: "/",                    icon: LayoutDashboard, category: "Navigation" },
-  { label: "Campaigns",          path: "/campaigns",           icon: Megaphone,       category: "Navigation" },
-  { label: "Analytics Overview", path: "/analytics",           icon: BarChart3,       category: "Navigation" },
-  { label: "Audience",           path: "/audience",            icon: Users,           category: "Navigation" },
-  { label: "Post Analytics",     path: "/post-analytics",      icon: TrendingUp,      category: "Navigation" },
-  { label: "Compare Periods",    path: "/compare",             icon: BarChart3,       category: "Navigation" },
-  { label: "Hashtag Analytics",  path: "/hashtags",            icon: Hash,            category: "Navigation" },
-  { label: "Competitors",        path: "/competitors",         icon: Swords,          category: "Navigation" },
-  { label: "Advanced Analytics", path: "/advanced-analytics",  icon: FlaskConical,    category: "Navigation" },
-  { label: "A/B Testing",        path: "/ab-testing",          icon: SplitSquareHorizontal, category: "Navigation" },
-  { label: "Audience Overlap",   path: "/audience-overlap",    icon: Layers2,         category: "Navigation" },
-  { label: "Content Calendar",   path: "/calendar",            icon: CalendarDays,    category: "Navigation" },
-  { label: "AI Studio",          path: "/ai-content",          icon: Sparkles,        category: "Navigation" },
-  { label: "Reports",            path: "/reports",             icon: FileText,        category: "Navigation" },
-  { label: "Publishing",         path: "/publishing",          icon: Send,            category: "Navigation" },
-  { label: "Insights",           path: "/insights",            icon: LineChart,       category: "Navigation" },
-  { label: "Notifications",      path: "/notifications",       icon: BellDot,         category: "Navigation" },
-  { label: "Alerts",             path: "/alerts",              icon: Bell,            category: "Navigation" },
-  { label: "Connections",        path: "/connections",         icon: Link2,           category: "Navigation" },
-  { label: "Settings",           path: "/settings",            icon: Settings,        category: "Navigation" },
+  { label: "Dashboard",          path: "/",                    icon: LayoutDashboard, category: "Pages" },
+  { label: "Campaigns",          path: "/campaigns",           icon: Megaphone,       category: "Pages" },
+  { label: "Analytics Overview", path: "/analytics",           icon: BarChart3,       category: "Pages" },
+  { label: "Audience",           path: "/audience",            icon: Users,           category: "Pages" },
+  { label: "Post Analytics",     path: "/post-analytics",      icon: TrendingUp,      category: "Pages" },
+  { label: "Compare Periods",    path: "/compare",             icon: BarChart3,       category: "Pages" },
+  { label: "Hashtag Analytics",  path: "/hashtags",            icon: Hash,            category: "Pages" },
+  { label: "Competitors",        path: "/competitors",         icon: Swords,          category: "Pages" },
+  { label: "Advanced Analytics", path: "/advanced-analytics",  icon: FlaskConical,    category: "Pages" },
+  { label: "A/B Testing",        path: "/ab-testing",          icon: SplitSquareHorizontal, category: "Pages" },
+  { label: "Audience Overlap",   path: "/audience-overlap",    icon: Layers2,         category: "Pages" },
+  { label: "Content Calendar",   path: "/calendar",            icon: CalendarDays,    category: "Pages" },
+  { label: "AI Studio",          path: "/ai-content",          icon: Sparkles,        category: "Pages" },
+  { label: "Reports",            path: "/reports",             icon: FileText,        category: "Pages" },
+  { label: "Publishing",         path: "/publishing",          icon: Send,            category: "Pages" },
+  { label: "Insights",           path: "/insights",            icon: LineChart,       category: "Pages" },
+  { label: "Notifications",      path: "/notifications",       icon: BellDot,         category: "Pages" },
+  { label: "Alerts",             path: "/alerts",              icon: Bell,            category: "Pages" },
+  { label: "Connections",        path: "/connections",         icon: Link2,           category: "Pages" },
+  { label: "Settings",           path: "/settings",            icon: Settings,        category: "Pages" },
+];
+
+// ─── @ Scope definitions ──────────────────────────────────────────────────────
+const SCOPES = [
+  { key: "pages",     label: "Pages",     icon: LayoutDashboard, description: "Navigate to any page" },
+  { key: "campaigns", label: "Campaigns", icon: Megaphone,       description: "Search your campaigns" },
+  { key: "reports",   label: "Reports",   icon: FileText,        description: "Search your reports" },
+  { key: "analytics", label: "Analytics", icon: BarChart3,       description: "Analytics pages" },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -68,9 +77,15 @@ function removeRecentItem(term: string) {
   localStorage.setItem(RECENT_KEY, JSON.stringify(next));
 }
 
+// ─── Parse @ scope from query ─────────────────────────────────────────────────
+function parseScope(q: string): { scope: string | null; term: string } {
+  const match = q.match(/^@(\w+)\s*(.*)/);
+  if (match) return { scope: match[1].toLowerCase(), term: match[2].trim() };
+  return { scope: null, term: q };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export function GlobalSearch() {
-  // Inline expand state
   const [expanded, setExpanded] = useState(false);
   const [inlineQuery, setInlineQuery] = useState("");
   const [inlineIdx, setInlineIdx] = useState(0);
@@ -88,59 +103,100 @@ export function GlobalSearch() {
   const [, setLocation] = useLocation();
   const { activeWorkspace } = useWorkspace();
 
-  // Fetch campaigns for search
   const { data: campaigns = [] } = trpc.campaigns.list.useQuery(
     { workspaceId: activeWorkspace?.id },
     { enabled: open || expanded }
   );
-
-  // Fetch reports for search
   const { data: reports = [] } = trpc.reports.list.useQuery(
     { workspaceId: activeWorkspace?.id },
     { enabled: open || expanded }
   );
 
-  // ── Stable IDs for memoization (avoid array reference churn) ─────────────────
-  const campaignIds = useMemo(() => campaigns.map((c: {id: number}) => c.id).join(','), [campaigns]);
-  const reportIds = useMemo(() => reports.map((r: {id: number}) => r.id).join(','), [reports]);
+  const campaignIds = useMemo(() => (campaigns as Array<{id: number}>).map(c => c.id).join(','), [campaigns]);
+  const reportIds = useMemo(() => (reports as Array<{id: number}>).map(r => r.id).join(','), [reports]);
 
-  // ── Build results — pure useMemo, NO setState, NO useEffect ──────────────────
+  // ── Build inline results ──────────────────────────────────────────────────
   const inlineResults: SearchResult[] = useMemo(() => {
-    if (!expanded) return [];
-    const q = inlineQuery;
-    if (!q.trim()) return PAGES.slice(0, 6).map(p => ({ ...p, id: p.path }));
-    const lq = q.toLowerCase();
+    if (!expanded || !inlineQuery.trim()) return [];
+    const { scope, term } = parseScope(inlineQuery);
+    const lq = term.toLowerCase();
     const matched: SearchResult[] = [];
-    PAGES.forEach(p => { if (p.label.toLowerCase().includes(lq)) matched.push({ ...p, id: p.path }); });
-    (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
-      if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
-    });
-    (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
-      if (r.name.toLowerCase().includes(lq)) matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
-    });
+
+    // If just "@" with no scope yet, return empty (scope suggestions shown separately)
+    if (inlineQuery.trim() === "@") return [];
+
+    // Scope: pages or no scope
+    if (!scope || scope === "pages" || scope === "analytics") {
+      const filtered = scope === "analytics"
+        ? PAGES.filter(p => p.category === "Pages" && (p.label.toLowerCase().includes("analytic") || p.label.toLowerCase().includes("insight")))
+        : PAGES;
+      filtered.forEach(p => {
+        if (!lq || p.label.toLowerCase().includes(lq))
+          matched.push({ ...p, id: p.path });
+      });
+    }
+
+    // Scope: campaigns or no scope
+    if (!scope || scope === "campaigns") {
+      (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
+        if (!lq || c.name.toLowerCase().includes(lq))
+          matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
+      });
+    }
+
+    // Scope: reports or no scope
+    if (!scope || scope === "reports") {
+      (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
+        if (!lq || r.name.toLowerCase().includes(lq))
+          matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
+      });
+    }
+
     return matched.slice(0, 8);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inlineQuery, expanded, campaignIds, reportIds]);
 
+  // ── Dialog results ────────────────────────────────────────────────────────
   const dialogResults: SearchResult[] = useMemo(() => {
-    const q = query;
-    if (!q.trim()) return PAGES.slice(0, 6).map(p => ({ ...p, id: p.path }));
-    const lq = q.toLowerCase();
+    if (!query.trim()) return [];
+    const { scope, term } = parseScope(query);
+    const lq = term.toLowerCase();
     const matched: SearchResult[] = [];
-    PAGES.forEach(p => { if (p.label.toLowerCase().includes(lq)) matched.push({ ...p, id: p.path }); });
-    (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
-      if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
-    });
-    (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
-      if (r.name.toLowerCase().includes(lq)) matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
-    });
+
+    if (!scope || scope === "pages" || scope === "analytics") {
+      const filtered = scope === "analytics"
+        ? PAGES.filter(p => p.label.toLowerCase().includes("analytic") || p.label.toLowerCase().includes("insight"))
+        : PAGES;
+      filtered.forEach(p => {
+        if (!lq || p.label.toLowerCase().includes(lq))
+          matched.push({ ...p, id: p.path });
+      });
+    }
+    if (!scope || scope === "campaigns") {
+      (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
+        if (!lq || c.name.toLowerCase().includes(lq))
+          matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
+      });
+    }
+    if (!scope || scope === "reports") {
+      (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
+        if (!lq || r.name.toLowerCase().includes(lq))
+          matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
+      });
+    }
     return matched.slice(0, 8);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, campaignIds, reportIds]);
 
-  // Load recent searches when expanded or dialog opens
+  // ── Scope suggestions (when user types "@") ───────────────────────────────
+  const showScopeSuggestions = inlineQuery === "@" || (inlineQuery.startsWith("@") && !inlineQuery.includes(" ") && inlineQuery.length > 1);
+  const scopeSuggestions = showScopeSuggestions
+    ? SCOPES.filter(s => inlineQuery === "@" || s.key.startsWith(inlineQuery.slice(1).toLowerCase()))
+    : [];
+
+  // ── Load recent when expanded ─────────────────────────────────────────────
   useEffect(() => {
-    if (expanded) setRecentSearches(loadRecent());
+    if (expanded) { setRecentSearches(loadRecent()); setInlineIdx(0); }
   }, [expanded]);
 
   useEffect(() => {
@@ -152,7 +208,7 @@ export function GlobalSearch() {
     }
   }, [open]);
 
-  // Close inline on outside click
+  // ── Close inline on outside click ─────────────────────────────────────────
   useEffect(() => {
     if (!expanded) return;
     const handler = (e: MouseEvent) => {
@@ -165,30 +221,42 @@ export function GlobalSearch() {
     return () => document.removeEventListener("mousedown", handler);
   }, [expanded]);
 
-  // Navigate helper — saves recent and navigates
+  // ── Navigate helper ───────────────────────────────────────────────────────
   const navigateTo = useCallback((path: string, term?: string) => {
-    if (term?.trim()) {
+    if (term?.trim() && !term.startsWith("@")) {
       saveRecent(term.trim());
       setRecentSearches(loadRecent());
     }
     setTimeout(() => setLocation(path), 0);
   }, [setLocation]);
 
-  // Inline keyboard navigation
+  // ── Inline keyboard navigation ────────────────────────────────────────────
   const handleInlineKeyDown = (e: React.KeyboardEvent) => {
-    const totalItems = (!inlineQuery && recentSearches.length > 0 ? recentSearches.length : 0) + inlineResults.length;
+    if (showScopeSuggestions) {
+      if (e.key === "ArrowDown") { e.preventDefault(); setInlineIdx(i => Math.min(i + 1, scopeSuggestions.length - 1)); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setInlineIdx(i => Math.max(i - 1, 0)); }
+      else if (e.key === "Enter" && scopeSuggestions[inlineIdx]) {
+        e.preventDefault();
+        setInlineQuery(`@${scopeSuggestions[inlineIdx].key} `);
+        setInlineIdx(0);
+      } else if (e.key === "Escape") { setExpanded(false); setInlineQuery(""); }
+      return;
+    }
+
+    const isEmptyWithRecent = !inlineQuery && recentSearches.length > 0;
+    const totalItems = isEmptyWithRecent ? recentSearches.length : inlineResults.length;
+
     if (e.key === "ArrowDown") { e.preventDefault(); setInlineIdx(i => Math.min(i + 1, totalItems - 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setInlineIdx(i => Math.max(i - 1, 0)); }
     else if (e.key === "Enter") {
       e.preventDefault();
-      // Check if a recent search is selected
-      if (!inlineQuery && recentSearches.length > 0 && inlineIdx < recentSearches.length) {
+      if (isEmptyWithRecent && recentSearches[inlineIdx]) {
         setInlineQuery(recentSearches[inlineIdx]);
+        setInlineIdx(0);
         return;
       }
-      const resultIdx = !inlineQuery && recentSearches.length > 0 ? inlineIdx - recentSearches.length : inlineIdx;
-      if (inlineResults[resultIdx]) {
-        const item = inlineResults[resultIdx];
+      if (inlineResults[inlineIdx]) {
+        const item = inlineResults[inlineIdx];
         setExpanded(false);
         setInlineQuery("");
         navigateTo(item.path, inlineQuery);
@@ -196,28 +264,20 @@ export function GlobalSearch() {
     } else if (e.key === "Escape") { setExpanded(false); setInlineQuery(""); }
   };
 
-  // Dialog keyboard navigation
+  // ── Dialog keyboard navigation ────────────────────────────────────────────
   const handleDialogKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIdx(i => Math.min(i + 1, dialogResults.length - 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIdx(i => Math.max(i - 1, 0)); }
     else if (e.key === "Enter") {
       e.preventDefault();
       if (dialogResults[selectedIdx]) {
-        const path = dialogResults[selectedIdx].path;
         setOpen(false);
-        navigateTo(path, query);
+        navigateTo(dialogResults[selectedIdx].path, query);
       }
     } else if (e.key === "Escape") { setOpen(false); }
-  }, [dialogResults, selectedIdx, setLocation, query, navigateTo]);
+  }, [dialogResults, selectedIdx, query, navigateTo]);
 
-  // Group dialog results by category
-  const grouped = dialogResults.reduce<Record<string, SearchResult[]>>((acc, r) => {
-    if (!acc[r.category]) acc[r.category] = [];
-    acc[r.category].push(r);
-    return acc;
-  }, {});
-
-  // Keyboard shortcut Cmd+K / Ctrl+K → open Dialog
+  // ── Cmd+K shortcut ────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -230,24 +290,35 @@ export function GlobalSearch() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Show inline dropdown when: has results OR has recent searches (when empty)
-  const showInlineDropdown = expanded && (inlineResults.length > 0 || (!inlineQuery && recentSearches.length > 0));
+  // ── Group dialog results ──────────────────────────────────────────────────
+  const grouped = dialogResults.reduce<Record<string, SearchResult[]>>((acc, r) => {
+    if (!acc[r.category]) acc[r.category] = [];
+    acc[r.category].push(r);
+    return acc;
+  }, {});
+
+  // ── Determine what to show in inline dropdown ─────────────────────────────
+  const showRecent = expanded && !inlineQuery && recentSearches.length > 0;
+  const showResults = expanded && inlineQuery.trim() && !showScopeSuggestions && inlineResults.length > 0;
+  const showNoResults = expanded && inlineQuery.trim() && !showScopeSuggestions && inlineResults.length === 0;
+  const showDropdown = showRecent || showResults || showNoResults || (expanded && showScopeSuggestions && scopeSuggestions.length > 0);
+
+  // ── Active scope badge ────────────────────────────────────────────────────
+  const { scope: activeScope } = parseScope(inlineQuery);
 
   return (
     <>
       {/* ── Inline expand search ─────────────────────────────────────────── */}
       <div ref={inlineContainerRef} className="relative flex items-center">
-        {/* Animated container */}
         <div
           className="flex items-center overflow-hidden transition-all duration-200 ease-out"
           style={{
-            width: expanded ? 220 : 32,
+            width: expanded ? 240 : 32,
             background: expanded ? '#f7f7f8' : 'transparent',
             border: expanded ? '1px solid #e5e5e5' : '1px solid transparent',
             borderRadius: 8,
           }}
         >
-          {/* Icon — always visible, acts as trigger when collapsed */}
           <button
             onClick={() => !expanded && setExpanded(true)}
             tabIndex={expanded ? -1 : 0}
@@ -256,28 +327,66 @@ export function GlobalSearch() {
             <Search className="w-[18px] h-[18px]" />
           </button>
 
-          {/* Input — only visible when expanded */}
           {expanded && (
-            <input
-              ref={inlineInputRef}
-              value={inlineQuery}
-              onChange={e => { setInlineQuery(e.target.value); setInlineIdx(0); }}
-              onKeyDown={handleInlineKeyDown}
-              autoFocus
-              placeholder="Search..."
-              className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-foreground/30 pr-2 min-w-0"
-            />
+            <div className="flex items-center flex-1 min-w-0 pr-2">
+              {/* Active scope badge */}
+              {activeScope && (
+                <span className="shrink-0 flex items-center gap-1 text-[11px] font-medium text-blue-600 bg-blue-50 rounded px-1.5 py-0.5 mr-1.5">
+                  <AtSign className="w-2.5 h-2.5" />{activeScope}
+                </span>
+              )}
+              <input
+                ref={inlineInputRef}
+                value={inlineQuery}
+                onChange={e => { setInlineQuery(e.target.value); setInlineIdx(0); }}
+                onKeyDown={handleInlineKeyDown}
+                autoFocus
+                placeholder={activeScope ? `Search in ${activeScope}...` : "Search or type @ to filter..."}
+                className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-foreground/30 min-w-0"
+              />
+            </div>
           )}
         </div>
 
-        {/* Inline results dropdown */}
-        {showInlineDropdown && (
+        {/* Inline dropdown */}
+        {showDropdown && (
           <div
             className="absolute top-full mt-1.5 left-0 rounded-xl overflow-hidden z-50"
-            style={{ width: 280, background: '#ffffff', border: '1px solid #ebebeb', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+            style={{ width: 300, background: '#ffffff', border: '1px solid #ebebeb', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
           >
-            {/* Recent searches — shown when input is empty */}
-            {!inlineQuery && recentSearches.length > 0 && (
+            {/* @ Scope suggestions */}
+            {showScopeSuggestions && scopeSuggestions.length > 0 && (
+              <div>
+                <div className="px-3 pt-2.5 pb-1">
+                  <span className="text-[10px] font-semibold tracking-widest uppercase text-foreground/30 flex items-center gap-1">
+                    <AtSign className="w-3 h-3" /> Filter by scope
+                  </span>
+                </div>
+                {scopeSuggestions.map((s, i) => {
+                  const isSelected = i === inlineIdx;
+                  return (
+                    <button
+                      key={s.key}
+                      onClick={() => { setInlineQuery(`@${s.key} `); setInlineIdx(0); setTimeout(() => inlineInputRef.current?.focus(), 0); }}
+                      onMouseEnter={() => setInlineIdx(i)}
+                      className={["w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors", isSelected ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]"].join(" ")}
+                    >
+                      <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isSelected ? "bg-blue-100" : "bg-foreground/5"}`}>
+                        <s.icon className={`w-3.5 h-3.5 ${isSelected ? "text-blue-600" : "text-foreground/40"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-medium text-foreground/80">@{s.key}</div>
+                        <div className="text-[11px] text-foreground/40">{s.description}</div>
+                      </div>
+                      {isSelected && <ArrowRight className="w-3 h-3 text-foreground/30 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Recent searches */}
+            {showRecent && (
               <div>
                 <div className="flex items-center justify-between px-3 pt-2.5 pb-1">
                   <span className="text-[10px] font-semibold tracking-widest uppercase text-foreground/30 flex items-center gap-1">
@@ -291,10 +400,10 @@ export function GlobalSearch() {
                 {recentSearches.map((term, i) => (
                   <div
                     key={term}
-                    className={["flex items-center gap-2.5 px-3 py-1.5 group cursor-pointer", i === inlineIdx ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]"].join(" ")}
+                    className={["flex items-center gap-2.5 px-3 py-2 group cursor-pointer", i === inlineIdx ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]"].join(" ")}
                     onMouseEnter={() => setInlineIdx(i)}
                   >
-                    <Search className="w-3 h-3 text-foreground/25 shrink-0" />
+                    <Clock className="w-3.5 h-3.5 text-foreground/25 shrink-0" />
                     <button
                       className="flex-1 text-left text-[13px] text-foreground/70 truncate"
                       onClick={() => { setInlineQuery(term); setInlineIdx(0); }}
@@ -311,43 +420,61 @@ export function GlobalSearch() {
                     </button>
                   </div>
                 ))}
-                {inlineResults.length > 0 && <div className="border-t border-[#f0f0f0] my-1" />}
+                <div className="px-3 py-2 border-t border-[#f0f0f0] flex items-center justify-between">
+                  <span className="text-[11px] text-foreground/30">
+                    Type <kbd className="font-mono bg-foreground/5 rounded px-1">@</kbd> to filter by scope
+                  </span>
+                  <span className="text-[11px] text-foreground/30">
+                    <kbd className="font-mono bg-foreground/5 rounded px-1">⌘K</kbd> full search
+                  </span>
+                </div>
               </div>
             )}
 
             {/* Search results */}
-            {inlineResults.map((item, i) => {
-              const idx = (!inlineQuery && recentSearches.length > 0) ? i + recentSearches.length : i;
-              const isSelected = idx === inlineIdx;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    const path = item.path;
-                    setExpanded(false);
-                    setInlineQuery("");
-                    navigateTo(path, inlineQuery);
-                  }}
-                  onMouseEnter={() => setInlineIdx(idx)}
-                  className={[
-                    "w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
-                    isSelected ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]",
-                  ].join(" ")}
-                >
-                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isSelected ? "bg-foreground/10" : "bg-foreground/5"}`}>
-                    <item.icon className="w-3.5 h-3.5 text-foreground/50" />
+            {showResults && (
+              <div>
+                {activeScope && (
+                  <div className="px-3 pt-2.5 pb-1 flex items-center gap-1">
+                    <span className="text-[10px] font-semibold tracking-widest uppercase text-blue-500 flex items-center gap-1">
+                      <AtSign className="w-3 h-3" />{activeScope}
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium text-foreground/80 truncate">{item.label}</div>
-                    {item.sublabel && <div className="text-[11px] text-foreground/40 truncate">{item.sublabel}</div>}
-                  </div>
-                  {isSelected && <ArrowRight className="w-3 h-3 text-foreground/30 shrink-0" />}
-                </button>
-              );
-            })}
-            <div className="px-3 py-1.5 border-t border-[#f0f0f0]">
-              <span className="text-[11px] text-foreground/30">Press <kbd className="font-mono bg-foreground/5 rounded px-1">⌘K</kbd> for full search</span>
-            </div>
+                )}
+                {inlineResults.map((item, i) => {
+                  const isSelected = i === inlineIdx;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { setExpanded(false); setInlineQuery(""); navigateTo(item.path, inlineQuery); }}
+                      onMouseEnter={() => setInlineIdx(i)}
+                      className={["w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors", isSelected ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]"].join(" ")}
+                    >
+                      <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isSelected ? "bg-foreground/10" : "bg-foreground/5"}`}>
+                        <item.icon className="w-3.5 h-3.5 text-foreground/50" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-medium text-foreground/80 truncate">{item.label}</div>
+                        {item.sublabel && <div className="text-[11px] text-foreground/40 truncate">{item.sublabel}</div>}
+                      </div>
+                      {item.badge && <span className="text-[10px] text-foreground/40 shrink-0">{item.badge}</span>}
+                      {isSelected && <ArrowRight className="w-3 h-3 text-foreground/30 shrink-0" />}
+                    </button>
+                  );
+                })}
+                <div className="px-3 py-1.5 border-t border-[#f0f0f0]">
+                  <span className="text-[11px] text-foreground/30">Press <kbd className="font-mono bg-foreground/5 rounded px-1">⌘K</kbd> for full search</span>
+                </div>
+              </div>
+            )}
+
+            {/* No results */}
+            {showNoResults && (
+              <div className="px-3 py-5 text-center">
+                <div className="text-[13px] text-foreground/40">No results for "{inlineQuery}"</div>
+                <div className="text-[11px] text-foreground/25 mt-1">Try <kbd className="font-mono bg-foreground/5 rounded px-1">⌘K</kbd> for full search</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -357,7 +484,6 @@ export function GlobalSearch() {
         <DialogContent className="p-0 max-w-xl overflow-hidden gap-0 top-[20%] translate-y-0 [&>button]:hidden">
           <DialogTitle className="sr-only">Global Search</DialogTitle>
           <DialogDescription className="sr-only">Search across campaigns, reports, alerts, and more</DialogDescription>
-          {/* Search Input */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             <Search className="w-4 h-4 text-muted-foreground shrink-0" />
             <input
@@ -365,7 +491,7 @@ export function GlobalSearch() {
               value={query}
               onChange={e => { setQuery(e.target.value); setSelectedIdx(0); }}
               onKeyDown={handleDialogKeyDown}
-              placeholder="Search pages, campaigns, reports..."
+              placeholder="Search or type @ to filter by scope..."
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
             {query && (
@@ -373,9 +499,8 @@ export function GlobalSearch() {
             )}
           </div>
 
-          {/* Results */}
           <div className="max-h-80 overflow-y-auto py-2">
-            {/* Recent searches in dialog — shown when query is empty */}
+            {/* Recent searches chips */}
             {!query && dialogRecent.length > 0 && (
               <div className="mb-1">
                 <div className="flex items-center justify-between px-4 py-1.5">
@@ -408,44 +533,58 @@ export function GlobalSearch() {
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-border mx-4 mb-1" />
+                <div className="px-4 pb-1">
+                  <div className="text-[11px] text-muted-foreground/50 flex items-center gap-1">
+                    <AtSign className="w-3 h-3" /> Type <kbd className="font-mono bg-muted rounded px-1 mx-0.5">@campaigns</kbd> <kbd className="font-mono bg-muted rounded px-1 mx-0.5">@reports</kbd> <kbd className="font-mono bg-muted rounded px-1 mx-0.5">@pages</kbd> to filter
+                  </div>
+                </div>
+                <div className="border-t border-border mx-4 mt-1" />
               </div>
             )}
 
-            {dialogResults.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">No results for "{query}"</div>
-            ) : (
-              Object.entries(grouped).map(([category, items]) => (
-                <div key={category}>
-                  <div className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/50">{category}</div>
-                  {items.map((item) => {
-                    const globalIdx = dialogResults.findIndex(r => r.id === item.id);
-                    const isSelected = globalIdx === selectedIdx;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => { setOpen(false); navigateTo(item.path, query); }}
-                        onMouseEnter={() => setSelectedIdx(globalIdx)}
-                        className={["w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors", isSelected ? "bg-primary/10" : "hover:bg-foreground/5"].join(" ")}
-                      >
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? "bg-primary/15" : "bg-foreground/8"}`}>
-                          <item.icon className={`w-3.5 h-3.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{item.label}</div>
-                          {item.sublabel && <div className="text-xs text-muted-foreground truncate">{item.sublabel}</div>}
-                        </div>
-                        {item.badge && <Badge variant="outline" className="text-[10px] shrink-0">{item.badge}</Badge>}
-                        {isSelected && <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0" />}
-                      </button>
-                    );
-                  })}
+            {!query && dialogRecent.length === 0 && (
+              <div className="px-4 py-6 text-center">
+                <Search className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                <div className="text-sm text-muted-foreground">Search campaigns, reports, pages...</div>
+                <div className="text-[11px] text-muted-foreground/50 mt-1.5 flex items-center justify-center gap-1">
+                  <AtSign className="w-3 h-3" /> Use <kbd className="font-mono bg-muted rounded px-1 mx-0.5">@campaigns</kbd> or <kbd className="font-mono bg-muted rounded px-1 mx-0.5">@reports</kbd> to filter
                 </div>
-              ))
+              </div>
             )}
+
+            {query && dialogResults.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">No results for "{query}"</div>
+            )}
+
+            {query && dialogResults.length > 0 && Object.entries(grouped).map(([category, items]) => (
+              <div key={category}>
+                <div className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/50">{category}</div>
+                {items.map((item) => {
+                  const globalIdx = dialogResults.findIndex(r => r.id === item.id);
+                  const isSelected = globalIdx === selectedIdx;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { setOpen(false); navigateTo(item.path, query); }}
+                      onMouseEnter={() => setSelectedIdx(globalIdx)}
+                      className={["w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors", isSelected ? "bg-primary/10" : "hover:bg-foreground/5"].join(" ")}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? "bg-primary/15" : "bg-foreground/8"}`}>
+                        <item.icon className={`w-3.5 h-3.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{item.label}</div>
+                        {item.sublabel && <div className="text-xs text-muted-foreground truncate">{item.sublabel}</div>}
+                      </div>
+                      {item.badge && <Badge variant="outline" className="text-[10px] shrink-0">{item.badge}</Badge>}
+                      {isSelected && <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
 
-          {/* Footer */}
           <div className="px-4 py-2 border-t border-border bg-muted/30 flex items-center gap-4 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1"><kbd className="font-mono bg-background border border-border rounded px-1">↑↓</kbd> navigate</span>
             <span className="flex items-center gap-1"><kbd className="font-mono bg-background border border-border rounded px-1">↵</kbd> open</span>

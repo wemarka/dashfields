@@ -2479,3 +2479,9 @@
 - [x] Add "X" button to remove individual recent searches
 - [x] Clear all recent searches option
 - [x] Clicking a recent search fills the input and runs the search
+
+## 🔍 GlobalSearch Improvements
+- [x] Remove default Pages list from inline dropdown (no more Dashboard/Campaigns/etc. shown by default)
+- [x] Show only last 5 recent searches when input is empty
+- [x] Add @ prefix to filter search by scope (e.g. @campaigns, @reports, @pages, @analytics)
+- [x] Show @ scope suggestions when user types @
