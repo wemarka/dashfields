@@ -80,6 +80,7 @@ function UnifiedCampaignTableInner({
         case "cpc":         cmp = (a.cpc ?? 0) - (b.cpc ?? 0); break;
         case "cpm":         cmp = (a.cpm ?? 0) - (b.cpm ?? 0); break;
         case "calls":       cmp = (a.calls ?? 0) - (b.calls ?? 0); break;
+        case "messages":    cmp = (a.messages ?? 0) - (b.messages ?? 0); break;
         case "score":       cmp = (a.score ?? 0) - (b.score ?? 0); break;
         case "stopTime":    cmp = (a.stopTime ?? "").localeCompare(b.stopTime ?? ""); break;
       }
@@ -203,6 +204,7 @@ function UnifiedCampaignTableInner({
       case "cpc":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
       case "cpm":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
       case "calls":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
+      case "messages":    return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6b7280" }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
         const s = c.score;

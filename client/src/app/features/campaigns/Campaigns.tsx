@@ -229,14 +229,23 @@ export default function Campaigns() {
         clicks: ins?.clicks, ctr: ins?.ctr, reach: ins?.reach,
         cpc: ins?.cpc, cpm: ins?.cpm, conversions: ins?.conversions,
         calls: ins?.calls ?? null,
-        // OpportunityScore: weighted formula from CTR, CPC, Spend
+        messages: ins?.messages ?? null,
+        // OpportunityScore — same formula as adsAnalyzer.calcPerformanceScore
         score: (() => {
-          if (!ins?.spend && !ins?.impressions) return null;
-          const ctrScore  = Math.min((ins?.ctr ?? 0) / 5 * 40, 40);   // CTR 5%+ → 40pts
-          const cpcScore  = ins?.cpc && ins.cpc > 0 ? Math.min(40 / ins.cpc, 30) : 0; // lower CPC → more pts
-          const spendScore = Math.min((ins?.spend ?? 0) / 1000 * 10, 20); // up to 20pts for spend
-          const raw = Math.round(ctrScore + cpcScore + spendScore);
-          return Math.min(Math.max(raw, 1), 100);
+          if (!ins) return null;
+          let s = 50; // baseline
+          const ctr = ins.ctr ?? 0;
+          const cpc = ins.cpc ?? 0;
+          const spend = ins.spend ?? 0;
+          // CTR scoring (industry avg ~1%)
+          if (ctr >= 3) s += 20; else if (ctr >= 2) s += 15; else if (ctr >= 1) s += 10;
+          else if (ctr < 0.5) s -= 15; else s -= 5;
+          // CPC scoring (lower is better)
+          if (cpc > 0 && cpc < 0.5) s += 15; else if (cpc < 1) s += 10;
+          else if (cpc < 2) s += 5; else if (cpc > 5) s -= 10;
+          // Spend (activity signal)
+          if (spend > 1000) s += 5; else if (spend < 10) s -= 5;
+          return Math.max(0, Math.min(100, Math.round(s)));
         })(),
       };
     });

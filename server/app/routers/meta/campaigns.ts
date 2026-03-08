@@ -55,8 +55,10 @@ export const metaCampaignsRouter = router({
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
             // Conversions: purchase, lead, complete_registration, submit_application
             conversions: sumActions(d.actions, ["purchase", "lead", "complete_registration", "submit_application", "offsite_conversion"]),
-            // Calls: phone_call, click_to_call, messaging actions
-            calls: sumActions(d.actions, ["phone_call", "click_to_call", "onsite_conversion.messaging_first_reply", "onsite_conversion.total_messaging"]),
+            // Calls: phone calls only (not messaging)
+            calls: sumActions(d.actions, ["phone_call", "click_to_call"]),
+            // Messages: messaging conversations (WhatsApp, Messenger, Instagram DM)
+            messages: sumActions(d.actions, ["onsite_conversion.messaging_first_reply", "onsite_conversion.total_messaging", "onsite_conversion.messaging_conversation_started_7d"]),
           }));
 
         // Group selection: fetch insights from all accounts in the group

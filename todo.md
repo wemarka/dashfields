@@ -2619,3 +2619,11 @@
 - [x] Updated ALL_COLUMNS: Calls (visible by default), Score (visible by default), End Date (hidden by default)
 - [x] Updated sort logic for calls, score, stopTime
 - [x] Score badge: green ≥70, amber ≥40, red <40
+
+## 📊 Campaigns Table — Score/Calls/Messages Fix
+- [x] Score = OpportunityScore الحقيقي من adsAnalyzer.calcPerformanceScore (نفس الخوارزمية: CTR+CPC+Spend)
+- [x] Calls = مكالمات فقط (phone_call + click_to_call) بدون messaging
+- [x] إضافة عمود Messages منفصل (messaging_first_reply + total_messaging + conversation_started_7d)
+- [x] تحديث server campaignInsights لإرجاع messages كحقل منفصل
+- [x] تحديث UnifiedCampaign type لإضافة messages field
+- [x] تحديث ALL_COLUMNS لإضافة Messages column (visible by default)
