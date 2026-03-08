@@ -119,6 +119,10 @@ function namesSimilar(a: string, b: string): boolean {
   if (!na || !nb) return false;
   // Exact or substring match
   if (na === nb || na.includes(nb) || nb.includes(na)) return true;
+  // Space-removed comparison: "i lang center" → "ilangcenter" vs "ilang center" → "ilangcenter"
+  const naNoSpace = na.replace(/\s/g, "");
+  const nbNoSpace = nb.replace(/\s/g, "");
+  if (naNoSpace === nbNoSpace || naNoSpace.includes(nbNoSpace) || nbNoSpace.includes(naNoSpace)) return true;
   // Shared meaningful token
   const ta = extractTokens(a);
   const tb = new Set<string>(extractTokens(b));
@@ -209,45 +213,51 @@ function GroupRow({
   isGroupActive,
   isExpanded,
   onToggle,
+  onSelectGroup,
 }: {
   group: NamedGroup;
   isGroupActive: boolean;
   isExpanded: boolean;
   onToggle: () => void;
+  onSelectGroup: () => void;
 }) {
   return (
-    <button
-      onClick={onToggle}
+    <div
       className={[
-        "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors",
+        "w-full flex items-center gap-3 px-3 py-2.5 transition-colors",
         isGroupActive
           ? "bg-brand/10 text-brand"
           : "hover:bg-foreground/5 text-foreground",
       ].join(" ")}
     >
-      {/* Avatar */}
-      <AccountAvatar account={group.primaryAccount} size={38} badgeSize={14} />
+      {/* Clicking avatar+text area selects the whole group */}
+      <button
+        onClick={onSelectGroup}
+        className="flex items-center gap-3 flex-1 min-w-0 text-left"
+      >
+        <AccountAvatar account={group.primaryAccount} size={38} badgeSize={14} />
+        <div className="flex-1 min-w-0">
+          <p className={[
+            "text-[13px] font-semibold truncate leading-tight",
+            isGroupActive ? "text-brand" : "text-foreground",
+          ].join(" ")}>
+            {group.groupName}
+          </p>
+          <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 flex items-center gap-1">
+            <MetaInfinity />
+            {platformSubtitle(group.accounts)}
+          </p>
+        </div>
+      </button>
 
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p className={[
-          "text-[13px] font-semibold truncate leading-tight",
-          isGroupActive ? "text-brand" : "text-foreground",
-        ].join(" ")}>
-          {group.groupName}
-        </p>
-        <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 flex items-center gap-1">
-          <MetaInfinity />
-          {platformSubtitle(group.accounts)}
-        </p>
-      </div>
-
-      {/* Chevron */}
-      {isExpanded
-        ? <ChevronUp className="w-4 h-4 shrink-0 text-muted-foreground/50" />
-        : <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground/50" />
-      }
-    </button>
+      {/* Chevron toggles expand/collapse */}
+      <button onClick={onToggle} className="shrink-0 p-1 rounded hover:bg-foreground/10">
+        {isExpanded
+          ? <ChevronUp className="w-4 h-4 text-muted-foreground/50" />
+          : <ChevronDown className="w-4 h-4 text-muted-foreground/50" />
+        }
+      </button>
+    </div>
   );
 }
 
@@ -300,11 +310,13 @@ export function AccountGroupList({
   activeAccount,
   setActiveAccount,
   setShowAccountDropdown,
+  setActiveGroupIds,
 }: {
   accounts: Account[];
   activeAccount: Account | null | undefined;
   setActiveAccount: (id: number) => void;
   setShowAccountDropdown: (v: boolean) => void;
+  setActiveGroupIds?: (ids: number[]) => void;
 }) {
   const metaAccounts = accounts.filter(
     a => a.platform === "facebook" || a.platform === "instagram"
@@ -361,6 +373,16 @@ export function AccountGroupList({
               isGroupActive={isGroupActive}
               isExpanded={isExpanded}
               onToggle={() => toggleGroup(gi)}
+              onSelectGroup={() => {
+                // Select the first non-ad-account in the group as the primary active account
+                const primary =
+                  group.accounts.find(a => a.account_type !== "ad_account") ??
+                  group.accounts[0];
+                setActiveAccount(primary.id);
+                // Store all group IDs for pages that need multi-account filtering
+                if (setActiveGroupIds) setActiveGroupIds(group.accounts.map(a => a.id));
+                setShowAccountDropdown(false);
+              }}
             />
             {isExpanded && (
               <div>

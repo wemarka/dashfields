@@ -2542,3 +2542,7 @@
 - [x] Use token-based matching: split names into words, group if they share a significant common word (e.g. "wemarka" matches "wemarka Official" and "wemarka.com")
 - [x] Ignore common words (Center, Official, .com, Business, etc.) when comparing
 - [x] Group all FB+IG accounts that share any meaningful common token
+
+## 🔧 Group Matching & Selection Fixes
+- [x] Fix: "i Lang Center" and "ILANG CENTER" should merge (add space-removed comparison)
+- [x] Fix: clicking a group row selects ALL accounts in the group (FB + IG + Ad Account)

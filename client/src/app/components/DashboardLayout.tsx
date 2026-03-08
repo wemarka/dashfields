@@ -145,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const planInfoQuery = trpc.workspaces.getPlanInfo.useQuery(undefined, { enabled: !!user });
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
 
-  const { accounts, activeAccount, setActiveAccountId: setActiveAccount } = useActiveAccount();
+  const { accounts, activeAccount, setActiveAccountId: setActiveAccount, setActiveGroupIds } = useActiveAccount();
 
   // Auto-refresh ad account profile pictures
   const utils = trpc.useUtils();
@@ -584,6 +584,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       activeAccount={activeAccount}
                       setActiveAccount={setActiveAccount}
                       setShowAccountDropdown={setShowAccountDropdown}
+                      setActiveGroupIds={setActiveGroupIds}
                     />
                   )}
 

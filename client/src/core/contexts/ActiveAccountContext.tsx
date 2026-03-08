@@ -23,6 +23,9 @@ type ActiveAccountContextType = {
   activeAccount: SocialAccount | null;
   activeAccountId: number | null;
   setActiveAccountId: (id: number | null) => void;
+  /** IDs of all accounts in the active group (for linked FB+IG+Ad selection) */
+  activeGroupIds: number[];
+  setActiveGroupIds: (ids: number[]) => void;
   isLoading: boolean;
 };
 
@@ -31,6 +34,8 @@ const ActiveAccountContext = createContext<ActiveAccountContextType>({
   activeAccount: null,
   activeAccountId: null,
   setActiveAccountId: () => {},
+  activeGroupIds: [],
+  setActiveGroupIds: () => {},
   isLoading: false,
 });
 
@@ -39,6 +44,10 @@ export function ActiveAccountProvider({ children }: { children: ReactNode }) {
   const [activeId, setActiveId] = useState<number | null>(() => {
     const saved = localStorage.getItem("dashfields-active-account");
     return saved ? parseInt(saved, 10) : null;
+  });
+  const [activeGroupIds, setActiveGroupIdsState] = useState<number[]>(() => {
+    const saved = localStorage.getItem("dashfields-active-group");
+    return saved ? JSON.parse(saved) : [];
   });
 
   const { data: rawAccounts = [], isLoading } = trpc.social.list.useQuery(undefined, {
@@ -64,6 +73,11 @@ export function ActiveAccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setActiveGroupIds = (ids: number[]) => {
+    setActiveGroupIdsState(ids);
+    localStorage.setItem("dashfields-active-group", JSON.stringify(ids));
+  };
+
   const activeAccount = accounts.find(a => a.id === activeId) ?? accounts[0] ?? null;
 
   return (
@@ -72,6 +86,8 @@ export function ActiveAccountProvider({ children }: { children: ReactNode }) {
       activeAccount,
       activeAccountId: activeAccount?.id ?? null,
       setActiveAccountId,
+      activeGroupIds,
+      setActiveGroupIds,
       isLoading,
     }}>
       {children}
