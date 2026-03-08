@@ -41,6 +41,20 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
+  const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
+  const collapsedPopoverRef = useRef<HTMLDivElement>(null);
+
+  // Close collapsed popover when clicking outside
+  useEffect(() => {
+    if (!collapsedPopover) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (collapsedPopoverRef.current && !collapsedPopoverRef.current.contains(e.target as Node)) {
+        setCollapsedPopover(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [collapsedPopover]);
 
   const handleCollapse = (val: boolean) => {
     setCollapsed(val);
@@ -289,7 +303,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             }
 
             const sectionBtn = (
-                <button onClick={() => collapsed ? setLocation(item.subItems![0].path) : toggleSection(item.path)}
+                <button onClick={() => collapsed ? setCollapsedPopover(collapsedPopover === item.path ? null : item.path) : toggleSection(item.path)}
                   className={[
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium",
                     "transition-all duration-200 group relative",
@@ -311,12 +325,53 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
               );
             return (
-              <div key={item.path}>
+              <div key={item.path} className="relative">
                 {collapsed ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>{sectionBtn}</TooltipTrigger>
-                    <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t(item.labelKey)}</TooltipContent>
-                  </Tooltip>
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>{sectionBtn}</TooltipTrigger>
+                      <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t(item.labelKey)}</TooltipContent>
+                    </Tooltip>
+                    {/* Collapsed submenu popover */}
+                    {collapsedPopover === item.path && (
+                      <div
+                        ref={collapsedPopoverRef}
+                        className="absolute top-0 z-50 py-1.5 rounded-xl overflow-hidden"
+                        style={{
+                          left: isRTL ? 'auto' : '100%',
+                          right: isRTL ? '100%' : 'auto',
+                          marginLeft: isRTL ? 0 : 8,
+                          marginRight: isRTL ? 8 : 0,
+                          background: '#ffffff',
+                          border: '1px solid #ebebeb',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                          minWidth: 180,
+                        }}
+                      >
+                        <div className="px-3 py-1.5 mb-0.5">
+                          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{t(item.labelKey)}</span>
+                        </div>
+                        {item.subItems!.map(sub => {
+                          const isSubActive = location.startsWith(sub.path);
+                          return (
+                            <button
+                              key={sub.path}
+                              onClick={() => { setLocation(sub.path); setCollapsedPopover(null); }}
+                              className={[
+                                "w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium transition-all duration-150",
+                                isRTL ? "flex-row-reverse text-right" : "text-left",
+                                isSubActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                              ].join(" ")}
+                            >
+                              <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-blue-500" : "text-gray-400"].join(" ")} />
+                              <span className="truncate">{t(sub.labelKey)}</span>
+                              {isSubActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
                 ) : sectionBtn}
                 {!collapsed && (
                   <div className="overflow-hidden transition-all duration-200 ease-out"

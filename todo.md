@@ -2455,3 +2455,9 @@
 ## 🎨 Sidebar Style Update
 - [x] Remove shadow from Sidebar
 - [x] Change Sidebar background to light off-white (#f7f7f8)
+
+## 🔄 Collapsed Sidebar Submenu Popover
+- [x] When sidebar is collapsed and user clicks an icon with children, show a Popover to the right with the submenu items
+- [x] Popover shows section title + all child links
+- [x] Clicking a child link navigates and closes the popover
+- [x] Clicking outside closes the popover
