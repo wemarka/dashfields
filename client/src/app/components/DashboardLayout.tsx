@@ -32,6 +32,7 @@ import {
   useDarkMode, PLATFORM_ICONS,
   WorkspaceSwitcherModal, AccountSwitcherModal,
 } from "./layout-parts";
+import { AccountGroupList } from "./AccountGroupList";
 
 function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: string; className?: string }) {
   const Icon = PLATFORM_ICONS[platform] ?? Globe2;
@@ -578,136 +579,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                   {/* Accounts list grouped by platform */}
                   {accounts.length > 0 && (
-                    <div className="py-1.5 max-h-60 overflow-y-auto">
-                      {(() => {
-                        type AccType = typeof accounts[0];
-
-                        // ── Smart grouping helpers ──
-                        const normalizeName = (s: string) =>
-                          s.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s]/g, "").replace(/\s+/g, " ").trim();
-                        const namesSimilar = (a: string, b: string) => {
-                          const na = normalizeName(a), nb = normalizeName(b);
-                          if (!na || !nb) return false;
-                          return na === nb || na.includes(nb) || nb.includes(na);
-                        };
-
-                        const metaAccounts = accounts.filter(a => a.platform === "facebook" || a.platform === "instagram");
-                        const otherAccounts = accounts.filter(a => a.platform !== "facebook" && a.platform !== "instagram");
-
-                        // Build named groups
-                        type NamedGroup = { groupName: string; accounts: AccType[] };
-                        const groups: NamedGroup[] = [];
-                        const assignedIds = new Set<number>();
-                        for (const acc of metaAccounts) {
-                          if (assignedIds.has(acc.id)) continue;
-                          const accName = acc.name ?? acc.username ?? "";
-                          const siblings = metaAccounts.filter(other =>
-                            !assignedIds.has(other.id) && other.id !== acc.id &&
-                            namesSimilar(accName, other.name ?? other.username ?? "")
-                          );
-                          const groupMembers = [acc, ...siblings];
-                          groupMembers.forEach(m => assignedIds.add(m.id));
-                          const groupName = groupMembers
-                            .map(m => m.name ?? m.username ?? "").filter(Boolean)
-                            .sort((a, b) => a.length - b.length)[0] ?? accName;
-                          groups.push({ groupName, accounts: groupMembers });
-                        }
-
-                        // Build a map: accountId -> groupIndex (for linked highlighting)
-                        const accountGroupMap = new Map<number, number>();
-                        groups.forEach((g, gi) => g.accounts.forEach(a => accountGroupMap.set(a.id, gi)));
-
-                        // Active group index (if active account belongs to a Meta group)
-                        const activeGroupIdx = activeAccount ? accountGroupMap.get(activeAccount.id) ?? -1 : -1;
-
-                        // Meta infinity SVG
-                        const MetaLogo = () => (
-                          <svg viewBox="0 0 24 12" className="w-4 h-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 6C6 4.343 7.343 3 9 3C10.657 3 11.657 4.5 12 6C12.343 7.5 13.343 9 15 9C16.657 9 18 7.657 18 6C18 4.343 16.657 3 15 3C13.343 3 12.343 4.5 12 6C11.657 7.5 10.657 9 9 9C7.343 9 6 7.657 6 6Z" stroke="#0866FF" strokeWidth="2" strokeLinecap="round"/>
-                          </svg>
-                        );
-
-                        // Render individual account row (old design) with linked group highlighting
-                        const renderAccountRow = (acc: AccType, groupIdx = -1) => {
-                          // Account is "active" if it is the selected account OR belongs to the active group
-                          const isGroupActive = groupIdx >= 0 && groupIdx === activeGroupIdx;
-                          const isDirectlyActive = activeAccount?.id === acc.id;
-                          const isActive = isDirectlyActive || isGroupActive;
-
-                          const handleClick = () => {
-                            setActiveAccount(acc.id);
-                            setShowAccountDropdown(false);
-                          };
-
-                          return (
-                            <button
-                              key={acc.id}
-                              onClick={handleClick}
-                              className={[
-                                "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
-                                isActive ? "bg-brand/8 text-brand" : "hover:bg-foreground/5 text-foreground",
-                              ].join(" ")}
-                            >
-                              <div className="relative shrink-0">
-                                <Avatar className="w-6 h-6">
-                                  {acc.profile_picture && <AvatarImage src={acc.profile_picture} />}
-                                  <AvatarFallback className="text-[9px] bg-brand/10 text-brand font-semibold">
-                                    {(acc.name ?? acc.username ?? acc.platform).charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-background border border-border/30 flex items-center justify-center">
-                                  <PlatformIcon platform={acc.platform} className="w-1.5 h-1.5" />
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[11px] font-medium truncate">{acc.name ?? acc.username ?? acc.platform}</p>
-                                {acc.account_type && (
-                                  <p className="text-[10px] text-muted-foreground/50 truncate capitalize">
-                                    {acc.account_type === "ad_account" ? "Ad account" : acc.account_type}
-                                  </p>
-                                )}
-                              </div>
-                              {isDirectlyActive && (
-                                <svg className="w-3 h-3 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                              )}
-                            </button>
-                          );
-                        };
-
-                        return (
-                          <>
-                            {/* ── Meta groups: header + individual rows ── */}
-                            {groups.map((group, gi) => (
-                              <div key={`meta-group-${gi}`}>
-                                <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                  <MetaLogo />
-                                  {group.groupName}
-                                </p>
-                                {group.accounts.map(acc => renderAccountRow(acc, gi))}
-                              </div>
-                            ))}
-
-                            {/* ── Other platforms ── */}
-                            {(() => {
-                              const otherGrouped = otherAccounts.reduce<Record<string, AccType[]>>((acc, a) => {
-                                if (!acc[a.platform]) acc[a.platform] = [];
-                                acc[a.platform].push(a);
-                                return acc;
-                              }, {});
-                              return Object.entries(otherGrouped).map(([platform, accs]) => (
-                                <div key={platform}>
-                                  <p className="text-[9px] font-semibold tracking-widest uppercase text-muted-foreground/40 px-4 pt-2 pb-1 flex items-center gap-1.5">
-                                    <PlatformIcon platform={platform} className="w-2.5 h-2.5" />
-                                    {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                                  </p>
-                                  {accs.map(acc => renderAccountRow(acc))}
-                                </div>
-                              ));
-                            })()}
-                          </>
-                        );
-                      })()}
-                    </div>
+                    <AccountGroupList
+                      accounts={accounts}
+                      activeAccount={activeAccount}
+                      setActiveAccount={setActiveAccount}
+                      setShowAccountDropdown={setShowAccountDropdown}
+                    />
                   )}
 
                   {/* No accounts state */}

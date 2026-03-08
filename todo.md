@@ -2521,3 +2521,11 @@
 - [x] Keep Meta group header with Meta logo
 - [x] Selecting any account in a group activates all accounts in that group (linked selection)
 - [x] All accounts in active group show checkmark/highlight
+
+## 🏢 Business-Grouped Dropdown Design
+- [x] One row per business group (FB Page + IG + Ad Account grouped by same business name)
+- [x] Two small circular avatars (FB + IG page pictures) side by side
+- [x] Business name as main title
+- [x] Subtitle: platform names (Facebook · Instagram)
+- [x] Expand/collapse to show individual accounts inside the group
+- [x] Selecting group activates all accounts in it as one unit
