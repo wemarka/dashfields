@@ -2561,6 +2561,13 @@
 - [x] Update Analytics.tsx to pass activeGroupIds when a group is selected
 - [x] Fallback: if no group selected, use single activeAccountId as before
 
+## 🎨 Campaign Detail Drawer Simplification
+- [x] Simplify DrawerHeader: remove OpportunityScore ring, lighter layout with inline KPI stats
+- [x] Simplify side nav: w-36 instead of w-44, no desc text, cleaner active indicator
+- [x] Simplify ContentStatusBar: white background, less visual noise
+- [x] Overall: white/grey palette, no heavy borders or shadows
+- [x] Date preset buttons: dark bg when active (foreground/background) for clean look
+
 ## 🎨 Campaigns Table Simplification
 - [x] Remove OpportunityBadge ring gauge (too heavy visually)
 - [x] Simplify table container: remove rounded-xl border, use simple divider lines

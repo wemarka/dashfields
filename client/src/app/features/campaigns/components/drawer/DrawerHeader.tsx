@@ -1,51 +1,44 @@
 /**
- * drawer/DrawerHeader.tsx — Professional campaign drawer header.
+ * drawer/DrawerHeader.tsx — Clean, minimal campaign drawer header.
  *
  * Layout:
  *  ┌─────────────────────────────────────────────────────────────┐
- *  │  [Platform Logo]  Campaign Name              [Health Score] │
- *  │  Status • Objective                                         │
+ *  │  [Platform Logo]  Campaign Name  Status  Objective          │
  *  ├─────────────────────────────────────────────────────────────┤
- *  │  Spend ████░░░░  $447 / $15  ·  CTR 2.7%  ·  CPC $0.06    │
+ *  │  CTR · CPC · CPM · Impressions                              │
  *  ├─────────────────────────────────────────────────────────────┤
- *  │  [Pause]  [Budget $15/day]  [Clone]          [Report]  [X] │
+ *  │  [Active ●]  [$15/day]  [Clone]          [Report]           │
  *  ├─────────────────────────────────────────────────────────────┤
  *  │  7D  14D  [30D]  90D                          ● Live        │
  *  └─────────────────────────────────────────────────────────────┘
  */
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
-import { Button } from "@/core/components/ui/button";
 import { Loader2, Copy, FileDown, Activity } from "lucide-react";
 import { StatusBadge, InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
-// ─── Platform Logos (inline SVG for zero-dependency) ────────────────────────
-function FacebookLogo({ size = 20 }: { size?: number }) {
+// ─── Platform Logos ───────────────────────────────────────────────────────────
+function FacebookLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" rx="6" fill="#1877F2" />
-      <path
-        d="M16.5 8H14.5C13.948 8 13.5 8.448 13.5 9V11H16.5L16 14H13.5V22H10.5V14H8.5V11H10.5V9C10.5 6.791 12.291 5 14.5 5H16.5V8Z"
-        fill="white"
-      />
+      <path d="M16.5 8H14.5C13.948 8 13.5 8.448 13.5 9V11H16.5L16 14H13.5V22H10.5V14H8.5V11H10.5V9C10.5 6.791 12.291 5 14.5 5H16.5V8Z" fill="white" />
     </svg>
   );
 }
 
-function InstagramLogo({ size = 20 }: { size?: number }) {
+function InstagramLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <defs>
-        <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <linearGradient id="ig-grad-hdr" x1="0%" y1="100%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#FFDC80" />
-          <stop offset="25%" stopColor="#FCAF45" />
           <stop offset="50%" stopColor="#F77737" />
-          <stop offset="75%" stopColor="#E1306C" />
           <stop offset="100%" stopColor="#833AB4" />
         </linearGradient>
       </defs>
-      <rect width="24" height="24" rx="6" fill="url(#ig-grad)" />
+      <rect width="24" height="24" rx="6" fill="url(#ig-grad-hdr)" />
       <rect x="7" y="7" width="10" height="10" rx="3" stroke="white" strokeWidth="1.5" fill="none" />
       <circle cx="12" cy="12" r="2.5" stroke="white" strokeWidth="1.5" fill="none" />
       <circle cx="16.5" cy="7.5" r="1" fill="white" />
@@ -53,164 +46,24 @@ function InstagramLogo({ size = 20 }: { size?: number }) {
   );
 }
 
-function MetaLogo({ size = 20 }: { size?: number }) {
+function MetaLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" rx="6" fill="#0082FB" />
-      <path
-        d="M4 14.5C4 16.433 5.12 18 6.5 18C7.5 18 8.2 17.4 9 16.2L11 13L9 9.8C8.2 8.6 7.5 8 6.5 8C5.12 8 4 9.567 4 11.5V14.5Z"
-        fill="white"
-      />
-      <path
-        d="M12 13L14 16.2C14.8 17.4 15.5 18 16.5 18C17.88 18 19 16.433 19 14.5V11.5C19 9.567 17.88 8 16.5 8C15.5 8 14.8 8.6 14 9.8L12 13Z"
-        fill="white"
-        opacity="0.8"
-      />
+      <path d="M4 14.5C4 16.433 5.12 18 6.5 18C7.5 18 8.2 17.4 9 16.2L11 13L9 9.8C8.2 8.6 7.5 8 6.5 8C5.12 8 4 9.567 4 11.5V14.5Z" fill="white" />
+      <path d="M12 13L14 16.2C14.8 17.4 15.5 18 16.5 18C17.88 18 19 16.433 19 14.5V11.5C19 9.567 17.88 8 16.5 8C15.5 8 14.8 8.6 14 9.8L12 13Z" fill="white" opacity="0.8" />
     </svg>
   );
 }
 
-function PlatformLogo({ platform, size = 20 }: { platform?: string | null; size?: number }) {
+function PlatformLogo({ platform, size = 18 }: { platform?: string | null; size?: number }) {
   const p = (platform ?? "").toLowerCase();
   if (p.includes("instagram")) return <InstagramLogo size={size} />;
   if (p.includes("meta") || p.includes("all")) return <MetaLogo size={size} />;
-  // Default: Facebook
   return <FacebookLogo size={size} />;
 }
 
-// ─── Opportunity Score ───────────────────────────────────────────────────────
-function computeOpportunityScore(insight?: {
-  ctr: number; cpc: number; cpm: number; spend: number; impressions: number;
-} | null): number {
-  if (!insight) return 0;
-  let score = 50;
-  if (insight.ctr >= 3) score += 20;
-  else if (insight.ctr >= 1) score += 10;
-  else score -= 10;
-  if (insight.cpc < 0.5) score += 15;
-  else if (insight.cpc < 1) score += 7;
-  else if (insight.cpc > 2) score -= 10;
-  if (insight.impressions > 50000) score += 15;
-  else if (insight.impressions > 10000) score += 7;
-  return Math.min(100, Math.max(0, score));
-}
-
-function getScoreConfig(score: number) {
-  if (score >= 70) return { stroke: "#10b981", glow: "rgba(16,185,129,0.3)", text: "text-emerald-500", label: "High", gradient: ["#10b981", "#34d399"] };
-  if (score >= 45) return { stroke: "#f59e0b", glow: "rgba(245,158,11,0.3)",  text: "text-amber-500",   label: "Medium", gradient: ["#f59e0b", "#fbbf24"] };
-  return             { stroke: "#ef4444",  glow: "rgba(239,68,68,0.3)",   text: "text-red-500",     label: "Low",    gradient: ["#ef4444", "#f87171"] };
-}
-
-function OpportunityScore({ score }: { score: number }) {
-  const [displayed, setDisplayed] = useState(0);
-  const [animated, setAnimated] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const { stroke, glow, text, label, gradient } = getScoreConfig(score);
-  const r = 20;
-  const circ = 2 * Math.PI * r;
-  const dash = (displayed / 100) * circ;
-
-  // Animate score number counting up
-  useEffect(() => {
-    if (score === 0) return;
-    const timer = setTimeout(() => setAnimated(true), 100);
-    return () => clearTimeout(timer);
-  }, [score]);
-
-  useEffect(() => {
-    if (!animated) return;
-    let start = 0;
-    const step = Math.ceil(score / 30);
-    const interval = setInterval(() => {
-      start += step;
-      if (start >= score) { setDisplayed(score); clearInterval(interval); }
-      else setDisplayed(start);
-    }, 30);
-    return () => clearInterval(interval);
-  }, [animated, score]);
-
-  const gradId = `opp-grad-${score}`;
-
-  return (
-    <div ref={ref} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/50">
-      {/* Arc ring */}
-      <div className="relative w-10 h-10 shrink-0">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-          <defs>
-            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={gradient[0]} />
-              <stop offset="100%" stopColor={gradient[1]} />
-            </linearGradient>
-          </defs>
-          {/* Track */}
-          <circle cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
-          {/* Progress arc */}
-          <circle
-            cx="24" cy="24" r={r} fill="none"
-            stroke={`url(#${gradId})`}
-            strokeWidth="4"
-            strokeDasharray={`${dash} ${circ}`}
-            strokeLinecap="round"
-            style={{
-              transition: "stroke-dasharray 0.6s cubic-bezier(0.34,1.56,0.64,1)",
-              filter: animated ? `drop-shadow(0 0 4px ${glow})` : "none",
-            }}
-          />
-        </svg>
-        {/* Score number */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-[11px] font-extrabold ${text} tabular-nums`}>{displayed}</span>
-        </div>
-      </div>
-      {/* Label */}
-      <div className="flex flex-col leading-tight">
-        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Opportunity</span>
-        <span className={`text-xs font-bold ${text}`}>{label}</span>
-      </div>
-    </div>
-  );
-}
-
-// ─── KPI Pill ────────────────────────────────────────────────────────────────
-function KpiPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/50 border border-border/40">
-      <span className="text-[10px] text-muted-foreground">{label}</span>
-      <span className="text-[11px] font-semibold text-foreground">{value}</span>
-    </div>
-  );
-}
-
-// ─── Budget Bar ──────────────────────────────────────────────────────────────
-function BudgetBar({ budget, spend, fmtCurrency }: {
-  budget: number; spend: number; fmtCurrency: (n: number) => string;
-}) {
-  const pct = budget > 0 ? Math.min(100, (spend / budget) * 100) : 0;
-  const isOver = pct >= 90;
-  const isMid  = pct >= 60;
-  const barColor = isOver ? "bg-red-500" : isMid ? "bg-amber-500" : "bg-emerald-500";
-  const textColor = isOver ? "text-red-500" : isMid ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400";
-
-  return (
-    <div className="flex items-center gap-3">
-      {/* Label */}
-      <span className="text-[10px] text-muted-foreground shrink-0">Daily Budget</span>
-      {/* Bar */}
-      <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${barColor}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      {/* Values */}
-      <span className={`text-[11px] font-medium shrink-0 ${textColor}`}>
-        {fmtCurrency(spend)} <span className="text-muted-foreground font-normal">/ {fmtCurrency(budget)}</span>
-      </span>
-    </div>
-  );
-}
-
-// ─── Date Presets ────────────────────────────────────────────────────────────
+// ─── Date Presets ─────────────────────────────────────────────────────────────
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: "last_7d",  label: "7D" },
   { value: "last_14d", label: "14D" },
@@ -218,7 +71,7 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: "last_90d", label: "90D" },
 ];
 
-// ─── Props ───────────────────────────────────────────────────────────────────
+// ─── Props ────────────────────────────────────────────────────────────────────
 interface DrawerHeaderProps {
   campaign: MetaCampaign | null;
   datePreset: DatePreset;
@@ -242,37 +95,27 @@ export function DrawerHeader({
   const isActive  = campaign?.status?.toLowerCase() === "active";
   const isPaused  = campaign?.status?.toLowerCase() === "paused";
   const canToggle = isActive || isPaused;
-  const opportunityScore = computeOpportunityScore(insight);
 
   const fmtPct = (n: number) => `${n.toFixed(2)}%`;
-  const fmtMoney = (n: number) => fmtCurrency(n);
 
   return (
-    <div className="border-b border-border bg-background">
+    <div className="border-b border-border/60 bg-white">
 
-      {/* ── Row 1: Platform + Campaign Info + Health Score inline ── */}
-      <div className="px-5 pt-4 pb-3 flex items-start gap-3">
-        {/* Platform logo */}
+      {/* ── Row 1: Platform + Campaign Name + Status ── */}
+      <div className="px-5 pt-4 pb-2.5 flex items-start gap-2.5">
         <div className="mt-0.5 shrink-0">
-          <PlatformLogo platform={campaign?.platform} size={28} />
+          <PlatformLogo platform={campaign?.platform} size={20} />
         </div>
-
-        {/* Campaign info */}
         <div className="flex-1 min-w-0">
-          <SheetTitle className="text-sm font-bold leading-snug truncate text-foreground">
+          <SheetTitle className="text-sm font-semibold leading-snug truncate text-foreground">
             {campaign?.name ?? "Campaign"}
           </SheetTitle>
           <SheetDescription asChild>
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               {campaign?.status && <StatusBadge status={campaign.status} />}
               {campaign?.objective && (
-                <span className="text-[10px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded font-medium tracking-wider uppercase">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                   {campaign.objective.replace(/_/g, " ")}
-                </span>
-              )}
-              {campaign?.platform && (
-                <span className="text-[10px] text-muted-foreground/70 capitalize">
-                  {campaign.platform}
                 </span>
               )}
             </div>
@@ -280,65 +123,79 @@ export function DrawerHeader({
         </div>
       </div>
 
-      {/* ── Row 2: KPI Pills + Health Score ── */}
-      {insight && (
-        <div className="px-5 pb-3 flex items-center gap-1.5 flex-wrap">
-          {insight.ctr > 0 && <KpiPill label="CTR" value={fmtPct(insight.ctr)} />}
-          {insight.cpc > 0 && <KpiPill label="CPC" value={fmtMoney(insight.cpc)} />}
-          {insight.cpm > 0 && <KpiPill label="CPM" value={fmtMoney(insight.cpm)} />}
-          {insight.impressions > 0 && (
-            <KpiPill
-              label="Impressions"
-              value={insight.impressions >= 1000
-                ? `${(insight.impressions / 1000).toFixed(1)}K`
-                : String(insight.impressions)}
-            />
+      {/* ── Row 2: KPI inline stats (only if insight data exists) ── */}
+      {insight && (insight.ctr > 0 || insight.cpc > 0 || insight.cpm > 0 || insight.impressions > 0) && (
+        <div className="px-5 pb-2.5 flex items-center gap-4 flex-wrap">
+          {insight.ctr > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">CTR</span>
+              <span className="text-[11px] font-medium text-foreground">{fmtPct(insight.ctr)}</span>
+            </div>
           )}
-          {/* Opportunity Score — end of KPI row */}
-          <div className="ml-auto shrink-0">
-            <OpportunityScore score={opportunityScore} />
-          </div>
+          {insight.cpc > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">CPC</span>
+              <span className="text-[11px] font-medium text-foreground">{fmtCurrency(insight.cpc)}</span>
+            </div>
+          )}
+          {insight.cpm > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">CPM</span>
+              <span className="text-[11px] font-medium text-foreground">{fmtCurrency(insight.cpm)}</span>
+            </div>
+          )}
+          {insight.impressions > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">Impressions</span>
+              <span className="text-[11px] font-medium text-foreground">
+                {insight.impressions >= 1000
+                  ? `${(insight.impressions / 1000).toFixed(1)}K`
+                  : String(insight.impressions)}
+              </span>
+            </div>
+          )}
+          {insight.spend > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">Spend</span>
+              <span className="text-[11px] font-medium text-foreground">{fmtCurrency(insight.spend)}</span>
+            </div>
+          )}
         </div>
       )}
 
       {/* ── Divider ── */}
-      <div className="mx-5 border-t border-border/50" />
+      <div className="border-t border-border/40 mx-5" />
 
-      {/* ── Row 3: Quick Actions ── */}
-      <div className="px-5 py-2.5 flex items-center gap-1.5 flex-wrap">
+      {/* ── Row 3: Actions ── */}
+      <div className="px-5 py-2 flex items-center gap-2 flex-wrap">
+        {/* Toggle Status */}
         {canToggle && (
-          <div className="flex items-center gap-2.5">
-            {/* Switch Toggle */}
+          <div className="flex items-center gap-2">
             <button
               role="switch"
               aria-checked={isActive}
               onClick={onToggleStatus}
               disabled={isTogglingStatus}
-              title={isActive ? "Click to pause campaign" : "Click to activate campaign"}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60 ${
-                isActive
-                  ? "bg-emerald-500 hover:bg-emerald-600"
-                  : "bg-slate-300 hover:bg-slate-400 dark:bg-slate-600 dark:hover:bg-slate-500"
+              title={isActive ? "Pause campaign" : "Activate campaign"}
+              className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none disabled:cursor-wait disabled:opacity-50 ${
+                isActive ? "bg-emerald-500" : "bg-slate-300"
               }`}
             >
-              <span
-                className={`pointer-events-none relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
-                  isActive ? "translate-x-4" : "translate-x-0"
-                }`}
-              >
-                {isTogglingStatus && <Loader2 className="w-2.5 h-2.5 text-slate-400 animate-spin" />}
+              <span className={`pointer-events-none inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                isActive ? "translate-x-3.5" : "translate-x-0"
+              }`}>
+                {isTogglingStatus && <Loader2 className="w-2 h-2 text-slate-400 animate-spin" />}
               </span>
             </button>
-            <span className={`text-xs font-semibold ${
-              isActive ? "text-emerald-600" : "text-slate-400"
-            }`}>
+            <span className={`text-xs ${isActive ? "text-emerald-600" : "text-muted-foreground"}`}>
               {isTogglingStatus ? "Updating..." : isActive ? "Active" : "Paused"}
             </span>
           </div>
         )}
 
+        {/* Budget */}
         {campaign?.dailyBudget != null && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/40 px-2.5 py-1 rounded-md border border-border/50 h-7">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded border border-border/40">
             <Activity className="w-3 h-3 shrink-0" />
             <InlineBudgetEditor
               value={campaign.dailyBudget}
@@ -349,44 +206,41 @@ export function DrawerHeader({
           </div>
         )}
 
-        <Button
-          variant="ghost" size="sm"
-          className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+        {/* Clone */}
+        <button
           onClick={onClone}
+          className="flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded transition-colors"
         >
           <Copy className="w-3 h-3" /> Clone
-        </Button>
+        </button>
 
         <div className="flex-1" />
 
-        <Button
-          variant="outline" size="sm"
-          className="h-7 text-xs gap-1.5"
+        {/* Export Report */}
+        <button
           onClick={onExport}
           disabled={isExporting}
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground border border-border/60 hover:border-border rounded transition-colors disabled:opacity-50"
         >
-          {isExporting
-            ? <Loader2 className="w-3 h-3 animate-spin" />
-            : <FileDown className="w-3 h-3" />
-          }
+          {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileDown className="w-3 h-3" />}
           {isExporting ? "Generating..." : "Report"}
-        </Button>
+        </button>
       </div>
 
       {/* ── Divider ── */}
-      <div className="mx-5 border-t border-border/50" />
+      <div className="border-t border-border/40 mx-5" />
 
-      {/* ── Row 4: Date Preset ── */}
-      <div className="px-5 py-2 flex items-center gap-1">
+      {/* ── Row 4: Date Presets ── */}
+      <div className="px-5 py-1.5 flex items-center gap-0.5">
         {DATE_PRESETS.map(p => (
           <button
             key={p.value}
             onClick={() => onDatePresetChange(p.value)}
             className={[
-              "px-3 py-1 text-xs font-medium rounded-md transition-all duration-150",
+              "px-2.5 py-1 text-xs font-medium rounded transition-all duration-150",
               datePreset === p.value
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
             ].join(" ")}
           >
             {p.label}
@@ -394,7 +248,7 @@ export function DrawerHeader({
         ))}
 
         {isActive && (
-          <div className="ml-auto flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
+          <div className="ml-auto flex items-center gap-1.5 text-[10px] text-emerald-500 font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Live
           </div>
