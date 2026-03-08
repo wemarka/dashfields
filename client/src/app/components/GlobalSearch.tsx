@@ -168,13 +168,13 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Trigger button in header — icon only */}
+      {/* Trigger button in header — simple icon */}
       <button
         onClick={() => setOpen(true)}
         title="Search (Ctrl+K)"
-        className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground/5 hover:bg-foreground/10 text-muted-foreground transition-colors border border-border/50"
+        className="flex items-center justify-center w-8 h-8 rounded-lg text-foreground/40 hover:text-foreground/70 transition-colors"
       >
-        <Search className="w-4 h-4" />
+        <Search className="w-[18px] h-[18px]" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
