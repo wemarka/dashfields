@@ -2465,3 +2465,6 @@
 ## 🎨 Topbar Search Expand + NotificationBell Simplify
 - [x] Convert Search trigger to expand input animation (icon → input on click, collapse on blur/Escape)
 - [x] Simplify NotificationBell icon — remove background/border, keep icon only like Search
+
+## 🐛 Fix GlobalSearch infinite loop
+- [x] Fix Maximum update depth exceeded error in GlobalSearch — stabilize buildResults dependencies

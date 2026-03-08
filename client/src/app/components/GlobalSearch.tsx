@@ -1,7 +1,7 @@
 // GlobalSearch.tsx
 // Topbar search: icon expands to inline input on click, collapses on blur/Escape.
 // Full command-palette Dialog still opens on Cmd+K / Ctrl+K.
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -80,31 +80,33 @@ export function GlobalSearch() {
     { enabled: open || expanded }
   );
 
-  // ── Build results helper ───────────────────────────────────────────────────
-  const buildResults = useCallback((q: string): SearchResult[] => {
+  // ── Build results helper (pure function, no useCallback to avoid stale closure issues) ─
+  const buildResults = (q: string, camps: typeof campaigns, reps: typeof reports): SearchResult[] => {
     if (!q.trim()) return PAGES.slice(0, 6).map(p => ({ ...p, id: p.path }));
     const lq = q.toLowerCase();
     const matched: SearchResult[] = [];
     PAGES.forEach(p => { if (p.label.toLowerCase().includes(lq)) matched.push({ ...p, id: p.path }); });
-    (campaigns as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
-      if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
+    (camps as Array<{ id: number; name: string; platform: string; status: string }>).forEach(c => {
+      if (c.name.toLowerCase().includes(lq)) matched.push({ id: `campaign-${c.id}`, label: c.name, sublabel: `${c.platform} · ${c.status}`, path: "/ads/campaigns", icon: Megaphone, category: "Campaigns", badge: c.status });
     });
-    (reports as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
+    (reps as Array<{ id: number; name: string; schedule: string; format: string }>).forEach(r => {
       if (r.name.toLowerCase().includes(lq)) matched.push({ id: `report-${r.id}`, label: r.name, sublabel: `${r.schedule} · ${r.format.toUpperCase()}`, path: "/reports", icon: FileText, category: "Reports" });
     });
     return matched.slice(0, 8);
-  }, [campaigns, reports]);
+  };
 
-  // Update inline results when query changes
+  // Update inline results when query or data changes — NO function reference in deps
   useEffect(() => {
     if (expanded) {
-      setInlineResults(buildResults(inlineQuery));
+      setInlineResults(buildResults(inlineQuery, campaigns, reports));
       setInlineIdx(0);
     }
-  }, [inlineQuery, expanded, buildResults]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inlineQuery, expanded, campaigns, reports]);
 
-  // Update dialog results when query changes
-  const dialogResults: SearchResult[] = (() => buildResults(query))();
+  // Dialog results computed inline (no setState, no loop)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const dialogResults: SearchResult[] = useMemo(() => buildResults(query, campaigns, reports), [query, campaigns, reports]);
 
   // Keyboard shortcut Cmd+K / Ctrl+K → open Dialog
   useEffect(() => {
