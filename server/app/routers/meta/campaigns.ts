@@ -53,12 +53,28 @@ export const metaCampaignsRouter = router({
             impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0),
             clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0),
             ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0),
-            // Conversions: purchase, lead, complete_registration, submit_application
-            conversions: sumActions(d.actions, ["purchase", "lead", "complete_registration", "submit_application", "offsite_conversion"]),
-            // Calls: phone calls only (not messaging)
-            calls: sumActions(d.actions, ["phone_call", "click_to_call"]),
-            // Messages: messaging conversations (WhatsApp, Messenger, Instagram DM)
-            messages: sumActions(d.actions, ["onsite_conversion.messaging_first_reply", "onsite_conversion.total_messaging", "onsite_conversion.messaging_conversation_started_7d"]),
+            // Conversions: use onsite_conversion.lead_grouped (all leads: Messenger + Instant Forms)
+            // plus offsite pixel purchases. Avoid double-counting by using grouped types.
+            conversions: sumActions(d.actions, [
+              "onsite_conversion.lead_grouped",
+              "offsite_conversion.fb_pixel_purchase",
+              "offsite_conversion.fb_pixel_complete_registration",
+              "onsite_conversion.purchase",
+            ]),
+            // Calls: click-to-call actions (confirmed calls + native calls placed)
+            calls: sumActions(d.actions, [
+              "click_to_call_call_confirm",
+              "click_to_call_native_call_placed",
+              "click_to_call_native_20s_call_connect",
+              "click_to_call_native_60s_call_connect",
+              "click_to_call_callback_request_submitted",
+              "call_confirm_grouped",
+            ]),
+            // Messages: messaging conversations started — matches Meta Ads Manager "Messaging Conversations Started"
+            // Use messaging_conversation_started_7d ONLY (total_messaging_connection is a superset that causes double-counting)
+            messages: sumActions(d.actions, [
+              "onsite_conversion.messaging_conversation_started_7d",
+            ]),
           }));
 
         // Group selection: fetch insights from all accounts in the group

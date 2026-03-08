@@ -2627,3 +2627,11 @@
 - [x] تحديث server campaignInsights لإرجاع messages كحقل منفصل
 - [x] تحديث UnifiedCampaign type لإضافة messages field
 - [x] تحديث ALL_COLUMNS لإضافة Messages column (visible by default)
+
+## 🐛 Messages Column Fix — تطابق Meta API action_types
+- [x] البحث عن action_types الصحيحة لـ Messages في Meta Ads API (Meta docs + بيانات حقيقية)
+- [x] فحص البيانات الفعلية من Meta API — وجدنا action_types الحقيقية في الحساب
+- [x] Calls: تصحيح ليستخدم click_to_call_call_confirm + native_call_placed + 20s/60s + callback_request + call_confirm_grouped
+- [x] Messages: تصحيح ليستخدم messaging_conversation_started_7d فقط (يطابق Meta Ads Manager)
+- [x] Conversions: تحديث ليستخدم lead_grouped + fb_pixel_purchase + fb_pixel_complete_registration
+- [x] تحقق من عدم التكرار: total_messaging_connection محذوف (superset يسبب double-counting)
