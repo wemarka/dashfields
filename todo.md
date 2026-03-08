@@ -2529,3 +2529,11 @@
 - [x] Subtitle: platform names (Facebook · Instagram)
 - [x] Expand/collapse to show individual accounts inside the group
 - [x] Selecting group activates all accounts in it as one unit
+
+## 🎯 AccountGroupList - Reference Design Match
+- [x] Group row: avatar (primary account) + business name (bold) + ∞ + platform subtitle + chevron
+- [x] Active group row highlighted in blue/brand background
+- [x] Expand/collapse on chevron click
+- [x] Individual account rows: avatar + name + type label + blue checkmark if active
+- [x] All Meta accounts (FB+IG) grouped by business name similarity
+- [x] Future-ready: same pattern for other platforms
