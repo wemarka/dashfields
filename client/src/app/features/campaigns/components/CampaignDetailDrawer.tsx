@@ -44,6 +44,7 @@ const TABS: { value: DetailTab; label: string; icon: React.ElementType; desc: st
 interface ContentStatusBarProps {
   activeTab: DetailTab;
   datePreset: string;
+  onDatePresetChange: (p: string) => void;
   isFetchingDaily: boolean;
   isFetchingAdSets: boolean;
   isFetchingAds: boolean;
@@ -54,8 +55,15 @@ interface ContentStatusBarProps {
   isRefreshing: boolean;
 }
 
+const DATE_PRESETS_BAR = [
+  { value: "last_7d",  label: "7D" },
+  { value: "last_14d", label: "14D" },
+  { value: "last_30d", label: "30D" },
+  { value: "last_90d", label: "90D" },
+] as const;
+
 function ContentStatusBar({
-  activeTab, datePreset,
+  activeTab, datePreset, onDatePresetChange,
   isFetchingDaily, isFetchingAdSets, isFetchingAds,
   daily, adSetsData, adsData,
   onRefresh, isRefreshing,
@@ -82,17 +90,29 @@ function ContentStatusBar({
   if (!current) return null;
 
   return (
-    <div className="flex items-center justify-between px-4 py-1.5 bg-white border-b border-border/40 shrink-0">
-      <div className="flex items-center gap-1.5">
-        <svg className="w-3 h-3 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
-        <span className="text-[10px] font-medium text-muted-foreground capitalize">{presetLabel}</span>
+    <div className="flex items-center gap-2 px-4 py-1.5 bg-white border-b border-border/40 shrink-0">
+      {/* Date preset buttons */}
+      <div className="flex items-center gap-0">
+        {DATE_PRESETS_BAR.map(p => (
+          <button
+            key={p.value}
+            onClick={() => onDatePresetChange(p.value)}
+            className={[
+              "px-2 py-0.5 text-[11px] font-medium rounded transition-all duration-150",
+              datePreset === p.value
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+            ].join(" ")}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
-      <div className="flex items-center gap-2">
+
+      <span className="w-px h-3 bg-border/50 shrink-0" />
+
+      {/* Status: fetching or last updated */}
+      <div className="flex items-center gap-2 flex-1">
         {isFetching ? (
           <span className="flex items-center gap-1 text-[10px] text-primary">
             <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -104,17 +124,18 @@ function ContentStatusBar({
         ) : label ? (
           <span className="text-[10px] text-muted-foreground/60">{label}</span>
         ) : null}
-        {/* Manual Refresh Button */}
-        <button
-          onClick={onRefresh}
-          disabled={isFetching}
-          title="Clear cache and refresh data"
-          className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40 disabled:cursor-wait"
-        >
-          <RefreshCw className={`w-2.5 h-2.5 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
       </div>
+
+      {/* Refresh button */}
+      <button
+        onClick={onRefresh}
+        disabled={isFetching}
+        title="Clear cache and refresh data"
+        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40 disabled:cursor-wait shrink-0"
+      >
+        <RefreshCw className={`w-2.5 h-2.5 ${isFetching ? "animate-spin" : ""}`} />
+        Refresh
+      </button>
     </div>
   );
 }
@@ -412,6 +433,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             <ContentStatusBar
               activeTab={activeTab}
               datePreset={datePreset}
+              onDatePresetChange={(p) => setDatePreset(p as DatePreset)}
               isFetchingDaily={isFetchingDaily || isFetchingInsights}
               isFetchingAdSets={isFetchingAdSets}
               isFetchingAds={isFetchingAds}

@@ -54,14 +54,6 @@ function PlatformLogo({ platform, size = 16 }: { platform?: string | null; size?
   return <FacebookLogo size={size} />;
 }
 
-// ─── Date Presets ─────────────────────────────────────────────────────────────
-const DATE_PRESETS: { value: DatePreset; label: string }[] = [
-  { value: "last_7d",  label: "7D" },
-  { value: "last_14d", label: "14D" },
-  { value: "last_30d", label: "30D" },
-  { value: "last_90d", label: "90D" },
-];
-
 // ─── Separator ────────────────────────────────────────────────────────────────
 function Sep() {
   return <span className="w-px h-3.5 bg-border/60 shrink-0 self-center" />;
@@ -208,26 +200,6 @@ export function DrawerHeader({
         </button>
 
         <div className="flex-1 min-w-2" />
-
-        {/* Date presets */}
-        <div className="flex items-center gap-0 shrink-0">
-          {DATE_PRESETS.map(p => (
-            <button
-              key={p.value}
-              onClick={() => onDatePresetChange(p.value)}
-              className={[
-                "px-2 py-0.5 text-[11px] font-medium rounded transition-all duration-150",
-                datePreset === p.value
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-              ].join(" ")}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        <Sep />
 
         {/* Export Report */}
         <button
