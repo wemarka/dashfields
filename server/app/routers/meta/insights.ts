@@ -10,6 +10,8 @@ import {
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
 import { getSupabase } from "../../../supabase";
+import { metaCache } from "../../../services/integrations/metaCache";
+import { SERVER_CACHE_TTL } from "../../../services/cache/cacheConfig";
 
 /** Helper: get Meta tokens for a group of account IDs (filters to facebook ad accounts only) */
 async function getMetaTokensForGroup(
@@ -94,9 +96,12 @@ export const metaInsightsRouter = router({
 
       const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
-      const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
-      if (insights.length === 0) return null;
-      return { ...parseInsight(insights[0]), datePreset: input.datePreset };
+      const cacheKey = metaCache.key("accountInsights", ctx.user.id, conn.adAccountId, input.datePreset, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, SERVER_CACHE_TTL.ALL_INSIGHTS, async () => {
+        const insights = await getAccountInsights(conn.adAccountId, conn.token, input.datePreset);
+        if (insights.length === 0) return null;
+        return { ...parseInsight(insights[0]), datePreset: input.datePreset };
+      });
     }),
 
   /** Compare current period vs previous period */
@@ -149,16 +154,19 @@ export const metaInsightsRouter = router({
 
       const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
       if (!conn) return null;
-      const [current, previous] = await Promise.all([
-        getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
-        getAccountInsights(conn.adAccountId, conn.token, prevPreset),
-      ]);
-      const parse = (insights: MetaInsight[]) => {
-        if (!insights[0]) return null;
-        const d = insights[0];
-        return { impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0), clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0), ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0) };
-      };
-      return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
+      const cacheKey = metaCache.key("compareInsights", ctx.user.id, conn.adAccountId, input.datePreset, input.workspaceId);
+      return metaCache.getOrFetch(cacheKey, SERVER_CACHE_TTL.COMPARE_INSIGHTS, async () => {
+        const [current, previous] = await Promise.all([
+          getAccountInsights(conn.adAccountId, conn.token, input.datePreset),
+          getAccountInsights(conn.adAccountId, conn.token, prevPreset),
+        ]);
+        const parse = (insights: MetaInsight[]) => {
+          if (!insights[0]) return null;
+          const d = insights[0];
+          return { impressions: Number(d.impressions ?? 0), reach: Number(d.reach ?? 0), clicks: Number(d.clicks ?? 0), spend: Number(d.spend ?? 0), ctr: Number(d.ctr ?? 0), cpc: Number(d.cpc ?? 0), cpm: Number(d.cpm ?? 0) };
+        };
+        return { current: parse(current), previous: parse(previous), datePreset: input.datePreset, prevPreset };
+      });
     }),
 
   /** Conversion Funnel data */

@@ -146,9 +146,14 @@ function MarketingRouter() {
 }
 
 // ─── Content loading fallback (inside layout — sidebar stays stable) ───────────
-// This is used ONLY for the page content area, NOT the full screen.
-// The sidebar and topbar remain mounted during page transitions.
+// Uses PageSkeleton for a structured loading state instead of a spinner.
+import { PageSkeleton } from "@/app/components/skeletons";
 function ContentLoader() {
+  return (
+    <PageSkeleton />
+  );
+}
+function _ContentLoaderLegacy() {
   return (
     <div className="flex items-center justify-center h-full min-h-[300px]">
       <div className="flex flex-col items-center gap-3">

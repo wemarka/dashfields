@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/core/components/ui/tooltip";
 import { navSections } from "@/config/navigation";
-import { useState, useEffect, useRef } from "react";
+import { usePrefetch } from "@/core/hooks/usePrefetch";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
@@ -282,8 +283,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               const isActive = item.path === "/dashboard"
                 ? location === "/dashboard" || location === "/"
                 : location.startsWith(item.path);
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const { onMouseEnter: prefetchEnter, onMouseLeave: prefetchLeave } = usePrefetch(item.path);
               const btn = (
                 <button key={item.path} onClick={() => setLocation(item.path)}
+                  onMouseEnter={prefetchEnter} onMouseLeave={prefetchLeave}
                   className={[
                     "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium",
                     "transition-all duration-150 group relative",

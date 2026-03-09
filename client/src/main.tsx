@@ -2,7 +2,8 @@ import { trpc } from "@/core/lib/trpc";
 import "./core/i18n";
 import { Toaster } from "sonner";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/core/lib/queryConfig";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { navigate as wouterNavigate } from "wouter/use-browser-location";
 import { createRoot } from "react-dom/client";
@@ -12,7 +13,7 @@ import "./index.css";
 import { supabase } from "@/core/lib/supabase";
 import { SupabaseAuthProvider } from "@/core/contexts/SupabaseAuthContext";
 
-const queryClient = new QueryClient();
+const queryClient = createQueryClient();
 
 const redirectToLoginIfUnauthorized = async (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

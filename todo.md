@@ -2722,3 +2722,41 @@
 - [x] Add "Refresh Preview" button in AdPreviewIframe.tsx to force re-fetch
 - [x] Add unique constraint (creative_id, ad_format, user_id) for upsert
 - [x] Add cron cleanup for expired cache entries (runs every hour)
+
+## ✅ Loading Optimization — All 7 Layers
+
+### Layer 1 — Client-Side staleTime Config
+- [x] Create client/src/core/lib/queryConfig.ts — centralized staleTime/gcTime constants
+- [x] Update main.tsx QueryClient with global staleTime defaults
+- [x] Per-query staleTime overrides: DASHBOARD(5m), CAMPAIGNS(3m), ANALYTICS(10m), STATIC(30m)
+
+### Layer 2 — Server-Side Cache Expansion (metaCache)
+- [x] Audit all meta procedures for missing cache usage
+- [x] Add cache to: accountInsights, compareInsights (insights.ts)
+- [x] Create server/services/cache/cacheConfig.ts — centralized TTL constants
+
+### Layer 3 — Prefetching
+- [x] Create client/src/core/hooks/usePrefetch.ts — hover + background prefetch hook
+- [x] Add hover prefetch on all sidebar nav links (DashboardLayout.tsx)
+- [x] Add background prefetch in Dashboard after 2s (useBackgroundPrefetch)
+- [x] Create client/src/core/lib/prefetch.ts — route → prefetch map
+
+### Layer 4 — Optimistic UI
+- [x] Notification mark-as-read → optimistic update
+- [x] Notification mark-all-read → optimistic update
+- [x] Notification delete → optimistic update
+- [x] Alert delete → optimistic update
+- [x] Create client/src/core/lib/optimistic.ts — optimistic update helpers
+
+### Layer 5 — Skeleton Screens Audit
+- [x] Create client/src/app/components/skeletons/index.tsx — unified skeleton library
+- [x] KpiCardSkeleton, TableSkeleton, ChartSkeleton, CardSkeleton, ListItemSkeleton, FormSkeleton, PageSkeleton
+
+### Layer 6 — Code Splitting (React.lazy + Suspense)
+- [x] App.tsx already uses React.lazy() for all page imports
+- [x] Replace ContentLoader spinner with PageSkeleton for structured loading state
+- [x] Inner Suspense boundary (sidebar stable, only content area shows skeleton)
+
+### Layer 7 — DB Query Optimization
+- [x] Audited Supabase queries — queries are already efficient with proper .eq() + .order() + .limit()
+- [x] Supabase indexes SQL provided for user to run in Supabase SQL Editor

@@ -93,16 +93,5 @@ class MetaCache {
 // Singleton instance shared across all procedures
 export const metaCache = new MetaCache();
 
-// TTL constants (seconds)
-export const CACHE_TTL = {
-  /** Ad sets per campaign — changes infrequently */
-  CAMPAIGN_AD_SETS: 5 * 60,       // 5 minutes
-  /** Ads/creatives per campaign — changes infrequently */
-  CAMPAIGN_ADS: 5 * 60,           // 5 minutes
-  /** Daily insights time-series — medium freshness */
-  DAILY_INSIGHTS: 5 * 60,         // 5 minutes
-  /** Campaign insights list — refreshed often by user */
-  CAMPAIGN_INSIGHTS: 3 * 60,      // 3 minutes
-  /** Ad set insights */
-  AD_SET_INSIGHTS: 5 * 60,        // 5 minutes
-} as const;
+// Re-export from centralized config for backward compatibility
+export { SERVER_CACHE_TTL as CACHE_TTL } from "../cache/cacheConfig";
