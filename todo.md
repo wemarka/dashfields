@@ -2801,3 +2801,10 @@
 - [x] Add bulkToggleCampaigns procedure in meta campaigns router
 - [x] Optimistic: clear selection + invalidate cache after bulk action
 - [x] 0 TypeScript errors
+
+## ✅ Campaign Table — Switch On/Off
+- [x] Add Switch as first column on the right in MetaCampaignTable
+- [x] Connect Switch to toggleCampaignStatus (Meta API) with optimistic update
+- [x] Show loading spinner on Switch while API call is in progress
+- [x] Rollback Switch state on API error with toast
+- [x] 0 TypeScript errors
