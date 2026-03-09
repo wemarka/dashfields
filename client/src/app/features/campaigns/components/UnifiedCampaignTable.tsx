@@ -21,7 +21,7 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 import {
   type UnifiedCampaign, type UnifiedCampaignTableProps, type SortKey, type SortDir, type ColumnDef,
   ALL_COLUMNS, fmtNum, fmtPercent, getPlatformName,
-  StatusBadge, InlineBudgetEditor, BulkActionBar,
+  StatusBadge, InlineBudgetEditor, BulkActionBar, CampaignSwitch,
 } from "./campaign-table";
 
 // Re-export types for consumers
@@ -327,6 +327,12 @@ function UnifiedCampaignTableInner({
                   {col.sortKey && <SortIcon active={sortKey === col.sortKey} dir={sortDir} />}
                 </th>
               ))}
+              {/* Switch */}
+              {onStatusToggle && (
+                <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  On/Off
+                </th>
+              )}
               {/* Actions */}
               <th style={{ width: 40 }} />
             </tr>
@@ -376,6 +382,16 @@ function UnifiedCampaignTableInner({
                         {renderCell(col, c)}
                       </td>
                     ))}
+                    {/* Switch */}
+                    {onStatusToggle && (
+                      <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
+                        <CampaignSwitch
+                          campaign={c}
+                          onToggle={onStatusToggle}
+                          pending={statusTogglePending === c.id}
+                        />
+                      </td>
+                    )}
                     {/* Actions menu */}
                     <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>

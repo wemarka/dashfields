@@ -136,6 +136,59 @@ export function ExpandedRow({ campaign, fmtMoney }: { campaign: UnifiedCampaign;
   );
 }
 
+// ─── Campaign Switch ─────────────────────────────────────────────────────────
+export function CampaignSwitch({
+  campaign, onToggle, pending,
+}: {
+  campaign: UnifiedCampaign;
+  onToggle: (campaign: UnifiedCampaign) => void;
+  pending: boolean;
+}) {
+  const isActive = campaign.status.toLowerCase() === "active";
+  const isDisabled = pending || ["ended", "archived", "deleted"].includes(campaign.status.toLowerCase());
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); if (!isDisabled) onToggle(campaign); }}
+      disabled={isDisabled}
+      title={isActive ? "Click to pause" : "Click to activate"}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        width: 36,
+        height: 20,
+        borderRadius: 10,
+        border: "none",
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        transition: "background-color 0.2s",
+        backgroundColor: pending ? "#d1d5db" : isActive ? "#10b981" : "#d1d5db",
+        opacity: isDisabled && !pending ? 0.5 : 1,
+        flexShrink: 0,
+      }}
+    >
+      {pending ? (
+        <span style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}>
+          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          </svg>
+        </span>
+      ) : (
+        <span style={{
+          position: "absolute",
+          left: isActive ? 18 : 2,
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          backgroundColor: "white",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          transition: "left 0.2s",
+        }} />
+      )}
+    </button>
+  );
+}
+
 // ─── Bulk Action Bar ──────────────────────────────────────────────────────────
 export function BulkActionBar({
   count, onAction, onClear,
