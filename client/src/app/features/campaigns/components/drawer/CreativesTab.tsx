@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Badge } from "@/core/components/ui/badge";
 import {
   Eye, Play, Check, X, Image, Video, BarChart2,
-  Loader2, AlertTriangle, Trophy, ChevronDown, ChevronUp,
+  Loader2, AlertTriangle, Trophy, ChevronDown, ChevronUp, ExternalLink,
 } from "lucide-react";
 import {
   AdInfo, STATUS_CONFIG, CREATIVE_TYPE_ICONS, CREATIVE_TYPE_LABELS,
@@ -18,19 +18,19 @@ import {
 } from "./types";
 import type { CreativeFilter, CreativeSort } from "./types";
 import {
-  AdPreview, PLACEMENT_LABELS, PLACEMENT_ICONS,
+  AdPreview, PLACEMENT_LABELS, PLACEMENT_ICONS, OpenInMetaButton,
   type AdPlacement,
 } from "./AdPreviews";
 
 // ─── Placement Selector ───────────────────────────────────────────────────────
-const ALL_PLACEMENTS: AdPlacement[] = ["fb_feed", "ig_feed", "ig_story", "ig_reel", "fb_story"];
+const ALL_PLACEMENTS: AdPlacement[] = ["fb_feed", "ig_feed", "ig_story", "ig_reel", "fb_story", "fb_reel"];
 
 function PlacementSelector({ value, onChange, videoOnly }: {
   value: AdPlacement;
   onChange: (p: AdPlacement) => void;
   videoOnly?: boolean;
 }) {
-  const placements = videoOnly ? ALL_PLACEMENTS : ALL_PLACEMENTS.filter(p => p !== "ig_reel");
+  const placements = videoOnly ? ALL_PLACEMENTS : ALL_PLACEMENTS.filter(p => p !== "ig_reel" && p !== "fb_reel");
   return (
     <div className="flex items-center gap-1 flex-wrap">
       {placements.map(p => (
@@ -165,16 +165,20 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
         </div>
       </div>
 
-      {/* Preview Toggle */}
-      <div className="border-t border-border/50">
+      {/* Preview Toggle + Open in Meta */}
+      <div className="border-t border-border/50 flex items-center">
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           {showPreview ? "Hide Preview" : "Preview Ad"}
           {showPreview ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </button>
+        <div className="w-px h-8 bg-border/50" />
+        <div className="px-3 py-2.5">
+          <OpenInMetaButton adId={ad.id} />
+        </div>
       </div>
 
       {/* Preview Panel */}
@@ -186,7 +190,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
           </div>
           <div className="flex justify-center p-4">
             <div className={`flex-shrink-0 ${
-              placement === "ig_story" || placement === "ig_reel" || placement === "fb_story"
+              placement === "ig_story" || placement === "ig_reel" || placement === "fb_story" || placement === "fb_reel"
                 ? "w-[180px]"
                 : "w-[280px]"
             }`}>

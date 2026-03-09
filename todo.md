@@ -2702,3 +2702,8 @@
 - [x] Add: getImageUrlsFromHashes — batch resolve image_hash to URL via Meta adimages API
 - [x] Add: image_hash field to getCampaignAds fields list
 - [x] Fix: getPageInfo now fetches real page name + avatar from Meta Graph API per ad
+
+## 🔄 Phase — Creatives Tab Enhancements (Mar 2026)
+- [ ] Add Reels preview — vertical mockup with play button and progress bar (Instagram Reels + Facebook Reels)
+- [ ] Add Carousel preview — swipeable cards with image and headline per card
+- [ ] Add "Open in Meta Ads Manager" button — direct link to open ad in Meta Ads Manager

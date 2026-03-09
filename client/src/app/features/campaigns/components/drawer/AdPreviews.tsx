@@ -5,19 +5,25 @@
  *  - Facebook Feed Post (image, video, carousel, dynamic)
  *  - Instagram Feed Post (image, video, carousel, dynamic)
  *  - Instagram Story (9:16)
- *  - Instagram Reels (9:16)
+ *  - Instagram Reels (9:16) — with progress bar + time indicator
  *  - Facebook Story (9:16)
+ *  - Facebook Reels (9:16) — new
  *
  * Page name and avatar are fetched from Meta Graph API and passed as props.
  */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Play, Pause, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
   ThumbsUp, Share2, Globe, ChevronLeft, ChevronRight, Volume2, VolumeX,
-  Layers, Shuffle,
+  Layers, Shuffle, ExternalLink, Music2,
 } from "lucide-react";
 import type { AdInfo } from "./types";
 import { CTA_LABELS } from "./types";
+
+// ─── Meta Ads Manager URL builder ────────────────────────────────────────────
+export function getMetaAdUrl(adId: string): string {
+  return `https://adsmanager.facebook.com/adsmanager/manage/ads?selected_ad_ids=${adId}`;
+}
 
 // ─── Video URL Helper ─────────────────────────────────────────────────────────
 function resolveVideoUrl(ad: AdInfo): string | null {
@@ -28,8 +34,10 @@ function resolveVideoUrl(ad: AdInfo): string | null {
 }
 
 // ─── Inline Video Player ──────────────────────────────────────────────────────
-function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false }: {
+function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false, onTimeUpdate, onDurationChange }: {
   videoUrl: string; posterUrl?: string | null; className?: string; compact?: boolean;
+  onTimeUpdate?: (current: number, duration: number) => void;
+  onDurationChange?: (duration: number) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -75,6 +83,14 @@ function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false }:
         className="absolute inset-0 w-full h-full object-cover"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onTimeUpdate={() => {
+          const v = videoRef.current;
+          if (v && onTimeUpdate) onTimeUpdate(v.currentTime, v.duration || 0);
+        }}
+        onDurationChange={() => {
+          const v = videoRef.current;
+          if (v && onDurationChange) onDurationChange(v.duration || 0);
+        }}
       />
       {!playing && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -104,6 +120,7 @@ function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false }:
 export type AdPlacement =
   | "fb_feed"
   | "fb_story"
+  | "fb_reel"
   | "ig_feed"
   | "ig_story"
   | "ig_reel"
@@ -299,75 +316,104 @@ function DynamicMediaRotator({ ad }: { ad: AdInfo }) {
   );
 }
 
-// ─── CAROUSEL INNER ───────────────────────────────────────────────────────────
+// ─── CAROUSEL HORIZONTAL STRIP (Meta-style) ───────────────────────────────────
 function CarouselPreviewInner({ cards, ctaType, variant }: {
   cards: AdInfo["carouselCards"]; ctaType: string; variant: "fb" | "ig";
 }) {
   const [idx, setIdx] = useState(0);
-  const card = cards[idx];
+  const scrollRef = useRef<HTMLDivElement>(null);
   const ctaLabel = CTA_LABELS[ctaType] ?? (ctaType ? ctaType.replace(/_/g, " ") : "");
+
+  // Scroll to active card
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const cardWidth = container.scrollWidth / cards.length;
+    container.scrollTo({ left: idx * cardWidth, behavior: "smooth" });
+  }, [idx, cards.length]);
+
+  const card = cards[idx];
 
   return (
     <div className="relative">
-      <div className="relative w-full overflow-hidden bg-[#F0F2F5]" style={{ aspectRatio: "1/1" }}>
-        {card?.imageUrl ? (
-          <img src={card.imageUrl} alt={card.headline ?? ""} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#BEC3C9]">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1.1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-            </svg>
+      {/* Horizontal scrollable strip */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none"
+        style={{ scrollbarWidth: "none" }}
+        onScroll={(e) => {
+          const container = e.currentTarget;
+          const cardWidth = container.scrollWidth / cards.length;
+          const newIdx = Math.round(container.scrollLeft / cardWidth);
+          if (newIdx !== idx) setIdx(newIdx);
+        }}
+      >
+        {cards.map((c, i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 snap-start"
+            style={{ width: "75%" }}
+          >
+            <div className="relative overflow-hidden bg-[#F0F2F5] mx-1" style={{ aspectRatio: "1/1" }}>
+              {c.imageUrl ? (
+                <img src={c.imageUrl} alt={c.headline ?? ""} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[#BEC3C9]">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1.1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                  </svg>
+                </div>
+              )}
+              {/* Card index badge */}
+              <div className="absolute top-1.5 right-1.5 bg-black/50 text-white text-[8px] font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                {i + 1}/{cards.length}
+              </div>
+            </div>
+            {/* Card footer */}
+            <div className={`flex items-center justify-between px-2 py-2 border-t border-[#CDD0D4] ${variant === "fb" ? "bg-[#F0F2F5]" : "bg-white"}`}>
+              <div className="flex-1 min-w-0">
+                {c.headline && (
+                  <p className="text-[10px] font-semibold text-[#050505] truncate">{c.headline}</p>
+                )}
+                {c.description && (
+                  <p className="text-[8px] text-[#65676B] truncate">{c.description}</p>
+                )}
+              </div>
+              {ctaLabel && (
+                <button className={`ml-1.5 flex-shrink-0 text-[8px] font-semibold px-2 py-1 rounded-md ${
+                  variant === "ig"
+                    ? "bg-[#0095F6] text-white"
+                    : "border border-[#CDD0D4] bg-white text-[#050505]"
+                }`}>
+                  {ctaLabel}
+                </button>
+              )}
+            </div>
           </div>
-        )}
-
-        {/* Carousel badge */}
-        <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-          <Layers className="w-2.5 h-2.5" />
-          {idx + 1}/{cards.length}
-        </div>
-
-        {cards.length > 1 && (
-          <>
-            {idx > 0 && (
-              <button
-                onClick={() => setIdx(i => i - 1)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-[#050505]" />
-              </button>
-            )}
-            {idx < cards.length - 1 && (
-              <button
-                onClick={() => setIdx(i => i + 1)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-[#050505]" />
-              </button>
-            )}
-          </>
-        )}
+        ))}
       </div>
 
-      {/* Card info */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#F0F2F5] border-t border-[#CDD0D4]">
-        <div className="flex-1 min-w-0">
-          {card?.headline && (
-            <p className="text-[11px] font-semibold text-[#050505] truncate">{card.headline}</p>
+      {/* Navigation arrows */}
+      {cards.length > 1 && (
+        <>
+          {idx > 0 && (
+            <button
+              onClick={() => setIdx(i => i - 1)}
+              className="absolute left-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
+            >
+              <ChevronLeft className="w-4 h-4 text-[#050505]" />
+            </button>
           )}
-          {card?.description && (
-            <p className="text-[9px] text-[#65676B] truncate">{card.description}</p>
+          {idx < cards.length - 1 && (
+            <button
+              onClick={() => setIdx(i => i + 1)}
+              className="absolute right-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
+            >
+              <ChevronRight className="w-4 h-4 text-[#050505]" />
+            </button>
           )}
-        </div>
-        {ctaLabel && (
-          <button className={`ml-2 flex-shrink-0 text-[9px] font-semibold px-2.5 py-1 rounded-md ${
-            variant === "ig"
-              ? "bg-[#0095F6] text-white"
-              : "border border-[#CDD0D4] bg-white text-[#050505]"
-          }`}>
-            {ctaLabel}
-          </button>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Dots */}
       {cards.length > 1 && (
@@ -393,7 +439,6 @@ function CarouselPreviewInner({ cards, ctaType, variant }: {
 export function FacebookFeedPreview({ ad, pageName, pageAvatarUrl }: {
   ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
-  // Use per-ad page info if available, fallback to prop
   const resolvedPageName = ad.pageName ?? pageName;
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
 
@@ -627,11 +672,20 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
   const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(30);
+
+  const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   return (
     <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
       {videoUrl ? (
-        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+        <AdVideoPlayer
+          videoUrl={videoUrl}
+          posterUrl={bgSrc}
+          onTimeUpdate={(cur, dur) => { setProgress(cur); if (dur) setDuration(dur); }}
+          onDurationChange={setDuration}
+        />
       ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
@@ -639,9 +693,16 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       )}
       {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
-      {/* Top: IG logo */}
-      <div className="absolute top-3 left-3 z-10">
-        <IgLogo size={16} />
+      {/* Top bar: IG logo + Reels label */}
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+        <div className="flex items-center gap-1.5">
+          <IgLogo size={16} />
+          <span className="text-white text-[11px] font-semibold tracking-wide">Reels</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Send className="w-4 h-4 text-white" />
+          <MoreHorizontal className="w-4 h-4 text-white" />
+        </div>
       </div>
 
       {/* Right actions */}
@@ -658,27 +719,150 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
           <Send className="w-5 h-5 text-white" />
           <span className="text-[8px] text-white">Share</span>
         </div>
-        {/* Page avatar in bottom-right */}
+        {/* Page avatar */}
         <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
           <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={32} />
         </div>
       </div>
 
       {/* Bottom info */}
-      <div className="absolute bottom-4 left-3 right-14 z-10">
+      <div className="absolute bottom-10 left-3 right-14 z-10">
         <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-6 h-6 rounded-full overflow-hidden border border-white/50 flex-shrink-0">
+            <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={24} />
+          </div>
           <p className="text-[11px] font-semibold text-white">{resolvedPageName}</p>
           <span className="text-[9px] text-white/70 border border-white/40 px-1.5 py-0.5 rounded-md">Sponsored</span>
         </div>
         {ad.message && (
           <p className="text-[10px] text-white line-clamp-2 mb-2">{ad.message}</p>
         )}
+        {/* Music row */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <Music2 className="w-3 h-3 text-white/70" />
+          <span className="text-[8px] text-white/70 truncate">Original Audio · {resolvedPageName}</span>
+        </div>
         {ctaLabel && (
           <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
             {ctaLabel}
             <ChevronRight className="w-3 h-3" />
           </button>
         )}
+      </div>
+
+      {/* Progress bar at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <div className="flex items-center gap-2 px-3 pb-2">
+          <div className="flex-1 h-0.5 rounded-full bg-white/30 overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-300"
+              style={{ width: `${duration > 0 ? (progress / duration) * 100 : 0}%` }}
+            />
+          </div>
+          <span className="text-[7px] text-white/70 flex-shrink-0">{fmtTime(progress)} / {fmtTime(duration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── FACEBOOK REELS ───────────────────────────────────────────────────────────
+export function FacebookReelPreview({ ad, pageName, pageAvatarUrl }: {
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
+}) {
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
+  const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
+  const videoUrl = resolveVideoUrl(ad);
+  const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(30);
+
+  const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
+      {videoUrl ? (
+        <AdVideoPlayer
+          videoUrl={videoUrl}
+          posterUrl={bgSrc}
+          onTimeUpdate={(cur, dur) => { setProgress(cur); if (dur) setDuration(dur); }}
+          onDurationChange={setDuration}
+        />
+      ) : bgSrc ? (
+        <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-950 to-blue-800" />
+      )}
+      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
+
+      {/* Top bar: FB logo + Reels label */}
+      <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+        <div className="flex items-center gap-1.5">
+          <FbLogo size={16} />
+          <span className="text-white text-[11px] font-semibold tracking-wide">Reels</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MoreHorizontal className="w-4 h-4 text-white" />
+        </div>
+      </div>
+
+      {/* Right actions */}
+      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-4 z-10">
+        <div className="flex flex-col items-center gap-0.5">
+          <ThumbsUp className="w-5 h-5 text-white" />
+          <span className="text-[8px] text-white">8.2K</span>
+        </div>
+        <div className="flex flex-col items-center gap-0.5">
+          <MessageCircle className="w-5 h-5 text-white" />
+          <span className="text-[8px] text-white">184</span>
+        </div>
+        <div className="flex flex-col items-center gap-0.5">
+          <Share2 className="w-5 h-5 text-white" />
+          <span className="text-[8px] text-white">Share</span>
+        </div>
+        {/* Page avatar */}
+        <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
+          <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={32} />
+        </div>
+      </div>
+
+      {/* Bottom info */}
+      <div className="absolute bottom-10 left-3 right-14 z-10">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-6 h-6 rounded-full overflow-hidden border border-white/50 flex-shrink-0">
+            <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={24} />
+          </div>
+          <p className="text-[11px] font-semibold text-white">{resolvedPageName}</p>
+          <span className="text-[9px] text-white/70 border border-white/40 px-1.5 py-0.5 rounded-md">Sponsored</span>
+        </div>
+        {ad.message && (
+          <p className="text-[10px] text-white line-clamp-2 mb-2">{ad.message}</p>
+        )}
+        {/* Music row */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <Music2 className="w-3 h-3 text-white/70" />
+          <span className="text-[8px] text-white/70 truncate">Original Audio · {resolvedPageName}</span>
+        </div>
+        {ctaLabel && (
+          <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
+            {ctaLabel}
+            <ChevronRight className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+
+      {/* Progress bar at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <div className="flex items-center gap-2 px-3 pb-2">
+          <div className="flex-1 h-0.5 rounded-full bg-white/30 overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-300"
+              style={{ width: `${duration > 0 ? (progress / duration) * 100 : 0}%` }}
+            />
+          </div>
+          <span className="text-[7px] text-white/70 flex-shrink-0">{fmtTime(progress)} / {fmtTime(duration)}</span>
+        </div>
       </div>
     </div>
   );
@@ -757,7 +941,10 @@ export function CarouselPreview({ ad, pageName, pageAvatarUrl, platform = "faceb
 // ─── AUTO-DETECT PLACEMENT ────────────────────────────────────────────────────
 export function detectPlacements(ad: AdInfo): AdPlacement[] {
   const placements: AdPlacement[] = ["fb_feed", "ig_feed"];
-  if (ad.creativeType === "video") placements.push("ig_reel");
+  if (ad.creativeType === "video") {
+    placements.push("ig_reel");
+    placements.push("fb_reel");
+  }
   return placements;
 }
 
@@ -768,6 +955,7 @@ export function AdPreview({ ad, placement, pageName, pageAvatarUrl }: {
   switch (placement) {
     case "fb_feed":    return <FacebookFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
     case "fb_story":   return <FacebookStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "fb_reel":    return <FacebookReelPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
     case "ig_feed":    return <InstagramFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
     case "ig_story":   return <InstagramStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
     case "ig_reel":    return <InstagramReelPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
@@ -777,15 +965,33 @@ export function AdPreview({ ad, placement, pageName, pageAvatarUrl }: {
 
 // ─── PLACEMENT LABELS ─────────────────────────────────────────────────────────
 export const PLACEMENT_LABELS: Record<AdPlacement, string> = {
-  fb_feed:        "Facebook Feed",
-  fb_story:       "Facebook Story",
-  ig_feed:        "Instagram Feed",
-  ig_story:       "Instagram Story",
-  ig_reel:        "Instagram Reels",
+  fb_feed:         "Facebook Feed",
+  fb_story:        "Facebook Story",
+  fb_reel:         "Facebook Reels",
+  ig_feed:         "Instagram Feed",
+  ig_story:        "Instagram Story",
+  ig_reel:         "Instagram Reels",
   messenger_inbox: "Messenger",
 };
 
 export function PLACEMENT_ICONS(placement: AdPlacement): React.ReactNode {
-  const isFb = placement === "fb_feed" || placement === "fb_story" || placement === "messenger_inbox";
+  const isFb = placement === "fb_feed" || placement === "fb_story" || placement === "fb_reel" || placement === "messenger_inbox";
   return isFb ? <FbLogo size={12} /> : <IgLogo size={12} />;
+}
+
+// ─── OPEN IN META ADS MANAGER BUTTON ─────────────────────────────────────────
+export function OpenInMetaButton({ adId, className = "" }: { adId: string; className?: string }) {
+  return (
+    <a
+      href={getMetaAdUrl(adId)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1.5 text-[10px] font-medium text-[#1877F2] hover:text-[#1464D8] transition-colors ${className}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <FbLogo size={12} />
+      Open in Ads Manager
+      <ExternalLink className="w-2.5 h-2.5" />
+    </a>
+  );
 }
