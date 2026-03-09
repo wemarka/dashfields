@@ -91,26 +91,6 @@ function ContentStatusBar({
 
   return (
     <div className="flex items-center gap-2 px-4 py-1.5 bg-white border-b border-border/40 shrink-0">
-      {/* Date preset buttons */}
-      <div className="flex items-center gap-0">
-        {DATE_PRESETS_BAR.map(p => (
-          <button
-            key={p.value}
-            onClick={() => onDatePresetChange(p.value)}
-            className={[
-              "px-2 py-0.5 text-[11px] font-medium rounded transition-all duration-150",
-              datePreset === p.value
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-            ].join(" ")}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      <span className="w-px h-3 bg-border/50 shrink-0" />
-
       {/* Status: fetching or last updated */}
       <div className="flex items-center gap-2 flex-1">
         {isFetching ? (
