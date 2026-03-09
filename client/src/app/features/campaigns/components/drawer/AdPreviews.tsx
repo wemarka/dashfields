@@ -15,10 +15,11 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Play, Pause, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
   ThumbsUp, Share2, Globe, ChevronLeft, ChevronRight, Volume2, VolumeX,
-  Layers, Shuffle, ExternalLink, Music2,
+  Layers, Shuffle, ExternalLink, Music2, Loader2,
 } from "lucide-react";
 import type { AdInfo } from "./types";
 import { CTA_LABELS } from "./types";
+import { trpc } from "@/core/lib/trpc";
 
 // ─── Meta Ads Manager URL builder ────────────────────────────────────────────
 export function getMetaAdUrl(adId: string): string {
@@ -26,23 +27,33 @@ export function getMetaAdUrl(adId: string): string {
 }
 
 // ─── Video URL Helper ─────────────────────────────────────────────────────────
-function resolveVideoUrl(ad: AdInfo): string | null {
+function resolveDirectVideoUrl(ad: AdInfo): string | null {
   if (ad.thumbnailUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.thumbnailUrl)) return ad.thumbnailUrl;
   if (ad.imageUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.imageUrl)) return ad.imageUrl;
-  if (ad.videoId) return `https://www.facebook.com/video/embed?video_id=${ad.videoId}`;
   return null;
 }
 
-// ─── Inline Video Player ──────────────────────────────────────────────────────
-function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false, onTimeUpdate, onDurationChange }: {
-  videoUrl: string; posterUrl?: string | null; className?: string; compact?: boolean;
+// ─── Smart Video Player — fetches source URL via tRPC if only videoId available ──
+function AdVideoPlayer({ ad, videoId, posterUrl, className = "", compact = false, onTimeUpdate, onDurationChange }: {
+  ad?: AdInfo; videoId?: string | null; posterUrl?: string | null; className?: string; compact?: boolean;
   onTimeUpdate?: (current: number, duration: number) => void;
   onDurationChange?: (duration: number) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
-  const isEmbed = videoUrl.includes("facebook.com/video/embed");
+
+  // Resolve direct URL first (no API call needed)
+  const directUrl = ad ? resolveDirectVideoUrl(ad) : null;
+  const resolvedVideoId = videoId ?? ad?.videoId ?? null;
+
+  // Fetch video source from Meta API if we only have videoId
+  const { data: videoSourceData, isLoading: videoLoading } = trpc.meta.videoSource.useQuery(
+    { videoId: resolvedVideoId! },
+    { enabled: !!resolvedVideoId && !directUrl, staleTime: 1000 * 60 * 30 }
+  );
+
+  const videoUrl = directUrl ?? videoSourceData?.url ?? null;
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
@@ -59,15 +70,35 @@ function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false, o
     setMuted(v.muted);
   }, []);
 
-  if (isEmbed) {
+  // Loading state while fetching video source
+  if (!videoUrl && videoLoading) {
     return (
-      <iframe
-        src={videoUrl}
-        className={`absolute inset-0 w-full h-full border-0 ${className}`}
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-        title="Ad Video"
-      />
+      <div className={`absolute inset-0 flex items-center justify-center bg-black/80 ${className}`}>
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-8 h-8 text-white animate-spin" />
+          <span className="text-white/70 text-[9px]">Loading video...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // No video available — show poster or placeholder
+  if (!videoUrl) {
+    return (
+      <div className={`absolute inset-0 ${className}`}>
+        {posterUrl ? (
+          <img src={posterUrl} alt="Video thumbnail" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <Play className="w-10 h-10 text-white/40" />
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={`rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/30 ${compact ? "w-10 h-10" : "w-14 h-14"}`}>
+            <Play className={`text-white ml-0.5 ${compact ? "w-4 h-4" : "w-6 h-6"}`} />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -198,13 +229,11 @@ function CtaButton({ ctaType, variant = "fb" }: { ctaType: string; variant?: "fb
 
 // ─── Media Area ───────────────────────────────────────────────────────────────
 function MediaArea({ ad, aspectRatio = "1/1" }: { ad: AdInfo; aspectRatio?: string }) {
-  const videoUrl = resolveVideoUrl(ad);
   const src = ad.imageUrl ?? ad.thumbnailUrl;
-
   return (
-    <div className="relative w-full overflow-hidden bg-[#F0F2F5]" style={{ aspectRatio }}>
-      {videoUrl ? (
-        <AdVideoPlayer videoUrl={videoUrl} posterUrl={src} />
+    <div className="relative overflow-hidden bg-black" style={{ aspectRatio }}>
+      {(ad.videoId || resolveDirectVideoUrl(ad)) ? (
+        <AdVideoPlayer ad={ad} posterUrl={src} />
       ) : src ? (
         <img src={src} alt={ad.headline || ad.name} className="w-full h-full object-cover" />
       ) : (
@@ -243,7 +272,7 @@ function DynamicMediaRotator({ ad }: { ad: AdInfo }) {
         {isVideo && videoAsset ? (
           videoAsset.videoId ? (
             <AdVideoPlayer
-              videoUrl={`https://www.facebook.com/video/embed?video_id=${videoAsset.videoId}`}
+              videoId={videoAsset.videoId}
               posterUrl={videoAsset.thumbnail}
             />
           ) : videoAsset.thumbnail ? (
@@ -605,19 +634,19 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedPageName = ad.pageName ?? pageName;
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
-  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const hasVideo = !!(ad.videoId || resolveDirectVideoUrl(ad));
 
   return (
     <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
-      {videoUrl ? (
-        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+      {hasVideo ? (
+        <AdVideoPlayer ad={ad} posterUrl={bgSrc} />
       ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700" />
       )}
-      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />}
+      {!hasVideo && <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />}
 
       {/* Progress bars */}
       <div className="absolute top-2 left-2 right-2 flex gap-0.5 z-10">
@@ -670,18 +699,18 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedPageName = ad.pageName ?? pageName;
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
-  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(30);
+  const hasVideo = !!(ad.videoId || resolveDirectVideoUrl(ad));
 
   const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   return (
     <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
-      {videoUrl ? (
+      {hasVideo ? (
         <AdVideoPlayer
-          videoUrl={videoUrl}
+          ad={ad}
           posterUrl={bgSrc}
           onTimeUpdate={(cur, dur) => { setProgress(cur); if (dur) setDuration(dur); }}
           onDurationChange={setDuration}
@@ -691,7 +720,7 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-700" />
       )}
-      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
+      {!hasVideo && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
       {/* Top bar: IG logo + Reels label */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
@@ -773,18 +802,18 @@ export function FacebookReelPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedPageName = ad.pageName ?? pageName;
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
-  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(30);
+  const hasVideo = !!(ad.videoId || resolveDirectVideoUrl(ad));
 
   const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
   return (
     <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
-      {videoUrl ? (
+      {hasVideo ? (
         <AdVideoPlayer
-          videoUrl={videoUrl}
+          ad={ad}
           posterUrl={bgSrc}
           onTimeUpdate={(cur, dur) => { setProgress(cur); if (dur) setDuration(dur); }}
           onDurationChange={setDuration}
@@ -794,7 +823,7 @@ export function FacebookReelPreview({ ad, pageName, pageAvatarUrl }: {
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-950 to-blue-800" />
       )}
-      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
+      {!hasVideo && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
       {/* Top bar: FB logo + Reels label */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
@@ -875,19 +904,19 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedPageName = ad.pageName ?? pageName;
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
-  const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
+  const hasVideo = !!(ad.videoId || resolveDirectVideoUrl(ad));
 
   return (
     <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
-      {videoUrl ? (
-        <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
+      {hasVideo ? (
+        <AdVideoPlayer ad={ad} posterUrl={bgSrc} />
       ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-700" />
       )}
-      {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />}
+      {!hasVideo && <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />}
 
       {/* Progress */}
       <div className="absolute top-2 left-2 right-2 z-10">

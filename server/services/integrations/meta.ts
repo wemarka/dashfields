@@ -666,3 +666,24 @@ export async function getCampaignDailyInsights(
   );
   return data.data ?? [];
 }
+
+/**
+ * Get video source URL from Meta Graph API.
+ * Returns the direct MP4 source URL for a given video_id.
+ * This requires the access token that has permission to access the video.
+ */
+export async function getVideoSource(
+  videoId: string,
+  accessToken: string
+): Promise<string | null> {
+  try {
+    const data = await metaGet<{ source?: string; id?: string }>(
+      videoId,
+      accessToken,
+      { fields: "source" }
+    );
+    return data.source ?? null;
+  } catch {
+    return null;
+  }
+}

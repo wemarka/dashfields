@@ -19,6 +19,7 @@ import {
   getAdInsights,
   getPageInfo,
   getImageUrlsFromHashes,
+  getVideoSource,
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
 import { metaCache, CACHE_TTL } from "../../../services/integrations/metaCache";
@@ -824,5 +825,23 @@ export const metaCampaignsRouter = router({
       const succeeded = results.filter(r => r.status === "fulfilled" && (r.value as any).success).length;
       const failed = results.length - succeeded;
       return { succeeded, failed, total: results.length };
+    }),
+
+  /** Get video source URL from Meta Graph API for a given video_id */
+  videoSource: protectedProcedure
+    .input(z.object({
+      videoId: z.string().min(1),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return null;
+      try {
+        const sourceUrl = await getVideoSource(input.videoId, conn.token);
+        return sourceUrl ? { url: sourceUrl } : null;
+      } catch {
+        return null;
+      }
     }),
 });
