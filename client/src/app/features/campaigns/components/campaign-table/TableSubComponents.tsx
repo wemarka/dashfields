@@ -70,10 +70,23 @@ export function InlineBudgetEditor({
 
   if (!editing) {
     return (
-      <button onClick={(e) => { e.stopPropagation(); setDraft(String(value ?? 0)); setEditing(true); }}
-        className="group/edit inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-        <span className="font-mono">{value != null ? fmtMoney(value, 0) : "—"}</span>
-        <Pencil className="w-3 h-3 opacity-0 group-hover/edit:opacity-60 transition-opacity" />
+      <button
+        onClick={(e) => { e.stopPropagation(); setDraft(String(value ?? 0)); setEditing(true); }}
+        className="group/edit inline-flex items-center gap-1 transition-colors"
+        style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+      >
+        <span
+          style={{
+            fontSize: 12,
+            fontFamily: "Inter, sans-serif",
+            fontVariantNumeric: "tabular-nums",
+            color: "#374151",
+            fontWeight: 500,
+          }}
+        >
+          {value != null ? fmtMoney(value, 0) : "—"}
+        </span>
+        <Pencil className="w-3 h-3 opacity-0 group-hover/edit:opacity-60 transition-opacity" style={{ color: "#9ca3af" }} />
       </button>
     );
   }
