@@ -2832,3 +2832,9 @@
 - [x] Update navigation.ts — replace Dashboard icon with Sparkles + aiAgent label
 - [x] Update App.tsx route /dashboard → AI Agent page
 - [x] 630/630 tests passing, 0 TypeScript errors
+
+## ✅ Bug Fix — AI Agent Language
+- [x] Fix hardcoded Arabic text in AIAgentPage — now uses useTranslation, respects app language (EN/AR)
+- [x] Added aiAgent translation keys to en.json and ar.json
+- [x] Input direction (rtl/ltr) and button position adapt to selected language
+- [x] 0 TypeScript errors

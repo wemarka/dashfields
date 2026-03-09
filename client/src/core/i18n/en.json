@@ -433,5 +433,30 @@
     "thisWeek": "This week",
     "thisMonth": "This month",
     "custom": "Custom range"
+  },
+  "aiAgent": {
+    "title": "Dashfields AI",
+    "subtitle": "Marketing Agent",
+    "newChat": "New Chat",
+    "greeting": "Hello {{name}}!",
+    "greetingDesc": "I'm Dashfields AI, your smart digital marketing assistant. I can analyze your campaigns, create ads, write ad copy, and research competitors.",
+    "placeholder": "Type your question or request here... (e.g., I want an ad campaign for a men's perfume in Saudi Arabia)",
+    "disclaimer": "Dashfields AI is powered by AI — always verify important information",
+    "copied": "Copied",
+    "error": "An error occurred. Please try again.",
+    "connectionError": "Connection error with AI",
+    "hint": "Type in Arabic or English • Enter to send • Shift+Enter for new line",
+    "suggestions": {
+      "analyze": "Analyze my campaigns",
+      "create": "Create a campaign",
+      "copy": "Generate ad copy",
+      "competitors": "Research competitors"
+    },
+    "prompts": {
+      "analyze": "Analyze my current ad campaigns and tell me the strengths and weaknesses, and what should be improved?",
+      "create": "I want to create a new ad campaign. Help me define the objective, audience, budget, and the right platform.",
+      "copy": "Write me a professional ad copy (Headline + Body + CTA) for a product or service I'll describe to you.",
+      "competitors": "Research competitor strategies in my industry and tell me about the current trends in the market."
+    }
   }
 }

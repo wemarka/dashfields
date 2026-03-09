@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/core/components/ui/button";
 import { Textarea } from "@/core/components/ui/textarea";
-import { ScrollArea } from "@/core/components/ui/scroll-area";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { supabase } from "@/core/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/core/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { useTranslation } from "react-i18next";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ChatMessage {
@@ -24,42 +24,6 @@ interface ChatMessage {
   content: string;
   isStreaming?: boolean;
 }
-
-// ─── Quick suggestion chips ───────────────────────────────────────────────────
-const QUICK_SUGGESTIONS = [
-  {
-    icon: BarChart3,
-    label: "حلّل أداء حملاتي",
-    prompt: "حلّل أداء حملاتي الإعلانية الحالية وأخبرني ما هي نقاط القوة والضعف، وما الذي يجب تحسينه؟",
-    color: "text-blue-500",
-    bg: "bg-blue-500/8 hover:bg-blue-500/14",
-    border: "border-blue-500/20",
-  },
-  {
-    icon: Megaphone,
-    label: "أنشئ حملة إعلانية",
-    prompt: "أريد إنشاء حملة إعلانية جديدة. ساعدني في تحديد الهدف والجمهور والميزانية والمنصة المناسبة.",
-    color: "text-violet-500",
-    bg: "bg-violet-500/8 hover:bg-violet-500/14",
-    border: "border-violet-500/20",
-  },
-  {
-    icon: Image,
-    label: "ولّد نص إعلاني",
-    prompt: "اكتب لي نصاً إعلانياً احترافياً (Headline + Body + CTA) لمنتج أو خدمة أصفها لك.",
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/8 hover:bg-emerald-500/14",
-    border: "border-emerald-500/20",
-  },
-  {
-    icon: TrendingUp,
-    label: "ابحث عن المنافسين",
-    prompt: "ابحث عن استراتيجيات المنافسين في مجال عملي وأخبرني ما هي الترندات الحالية في السوق العربي.",
-    color: "text-amber-500",
-    bg: "bg-amber-500/8 hover:bg-amber-500/14",
-    border: "border-amber-500/20",
-  },
-];
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 function MessageContent({ content }: { content: string }) {
@@ -81,13 +45,51 @@ function MessageContent({ content }: { content: string }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AIAgentPage() {
-  const { user, session } = useAuth();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Quick suggestion chips — built from translations
+  const QUICK_SUGGESTIONS = [
+    {
+      icon: BarChart3,
+      label: t("aiAgent.suggestions.analyze"),
+      prompt: t("aiAgent.prompts.analyze"),
+      color: "text-blue-500",
+      bg: "bg-blue-500/8 hover:bg-blue-500/14",
+      border: "border-blue-500/20",
+    },
+    {
+      icon: Megaphone,
+      label: t("aiAgent.suggestions.create"),
+      prompt: t("aiAgent.prompts.create"),
+      color: "text-violet-500",
+      bg: "bg-violet-500/8 hover:bg-violet-500/14",
+      border: "border-violet-500/20",
+    },
+    {
+      icon: Image,
+      label: t("aiAgent.suggestions.copy"),
+      prompt: t("aiAgent.prompts.copy"),
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/8 hover:bg-emerald-500/14",
+      border: "border-emerald-500/20",
+    },
+    {
+      icon: TrendingUp,
+      label: t("aiAgent.suggestions.competitors"),
+      prompt: t("aiAgent.prompts.competitors"),
+      color: "text-amber-500",
+      bg: "bg-amber-500/8 hover:bg-amber-500/14",
+      border: "border-amber-500/20",
+    },
+  ];
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -199,7 +201,7 @@ export default function AIAgentPage() {
                 )
               );
             }
-          } catch (parseErr) {
+          } catch {
             // Skip malformed chunks
           }
         }
@@ -217,17 +219,17 @@ export default function AIAgentPage() {
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
-            ? { ...m, content: "عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.", isStreaming: false }
+            ? { ...m, content: t("aiAgent.error"), isStreaming: false }
             : m
         )
       );
-      toast.error("حدث خطأ في الاتصال بالـ AI");
+      toast.error(t("aiAgent.connectionError"));
     } finally {
       setIsLoading(false);
       abortRef.current = null;
       textareaRef.current?.focus();
     }
-  }, [messages, isLoading, getToken]);
+  }, [messages, isLoading, getToken, t]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -247,7 +249,7 @@ export default function AIAgentPage() {
 
   const handleCopy = (content: string) => {
     void navigator.clipboard.writeText(content);
-    toast.success("تم النسخ");
+    toast.success(t("aiAgent.copied"));
   };
 
   const handleClear = () => {
@@ -257,7 +259,7 @@ export default function AIAgentPage() {
   };
 
   const isEmptyState = messages.length === 0;
-  const userName = user?.name?.split(" ")[0] ?? "هناك";
+  const userName = user?.name?.split(" ")[0] ?? "";
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -268,8 +270,8 @@ export default function AIAgentPage() {
             <Sparkles className="w-4 h-4 text-brand" />
           </div>
           <div>
-            <h1 className="text-[15px] font-semibold text-foreground">Dashfields AI</h1>
-            <p className="text-[11px] text-muted-foreground">Marketing Agent</p>
+            <h1 className="text-[15px] font-semibold text-foreground">{t("aiAgent.title")}</h1>
+            <p className="text-[11px] text-muted-foreground">{t("aiAgent.subtitle")}</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -280,7 +282,7 @@ export default function AIAgentPage() {
             className="text-muted-foreground hover:text-foreground gap-1.5 text-[12px]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            محادثة جديدة
+            {t("aiAgent.newChat")}
           </Button>
         )}
       </div>
@@ -298,10 +300,10 @@ export default function AIAgentPage() {
               <Sparkles className="w-7 h-7 text-brand" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
-              مرحباً {userName}!
+              {t("aiAgent.greeting", { name: userName })}
             </h2>
             <p className="text-muted-foreground text-center text-[14px] leading-relaxed mb-8 max-w-md">
-              أنا Dashfields AI، مساعدك الذكي للتسويق الرقمي. يمكنني تحليل حملاتك، إنشاء إعلانات، بحث المنافسين، وتوليد محتوى إبداعي.
+              {t("aiAgent.greetingDesc")}
             </p>
 
             {/* Quick suggestions */}
@@ -311,7 +313,8 @@ export default function AIAgentPage() {
                   key={s.label}
                   onClick={() => handleSuggestion(s.prompt)}
                   className={cn(
-                    "flex items-start gap-3 p-4 rounded-xl border text-right transition-all duration-150",
+                    "flex items-start gap-3 p-4 rounded-xl border transition-all duration-150",
+                    isRtl ? "text-right" : "text-left",
                     "hover:shadow-sm active:scale-[0.98]",
                     s.bg, s.border
                   )}
@@ -327,7 +330,7 @@ export default function AIAgentPage() {
             </div>
 
             <p className="text-[11px] text-muted-foreground/60 mt-6">
-              اكتب بالعربي أو الإنجليزي • Enter للإرسال • Shift+Enter لسطر جديد
+              {t("aiAgent.hint")}
             </p>
           </div>
         ) : (
@@ -389,13 +392,12 @@ export default function AIAgentPage() {
                       <button
                         onClick={() => handleCopy(msg.content)}
                         className="p-1.5 rounded-md text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60 transition-colors"
-                        title="نسخ"
+                        title={t("aiAgent.copied")}
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                       <button
                         className="p-1.5 rounded-md text-muted-foreground/50 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors"
-                        title="مفيد"
                       >
                         <ThumbsUp className="w-3.5 h-3.5" />
                       </button>
@@ -439,24 +441,26 @@ export default function AIAgentPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="اكتب سؤالك أو طلبك هنا... (مثال: أريد حملة إعلانية لمنتج عطر رجالي في السعودية)"
+              placeholder={t("aiAgent.placeholder")}
               disabled={isLoading}
               rows={1}
               className={cn(
-                "resize-none pr-4 pl-14 py-3.5 rounded-xl border-border/60",
+                "resize-none py-3.5 rounded-xl border-border/60",
                 "text-[14px] leading-relaxed min-h-[52px] max-h-[200px]",
                 "focus-visible:ring-1 focus-visible:ring-brand/40",
                 "disabled:opacity-60 bg-muted/30",
-                "scrollbar-thin"
+                "scrollbar-thin",
+                isRtl ? "pr-4 pl-14" : "pl-4 pr-14"
               )}
-              style={{ direction: "rtl" }}
+              style={{ direction: isRtl ? "rtl" : "ltr" }}
             />
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
               size="icon"
               className={cn(
-                "absolute left-2 bottom-2 w-9 h-9 rounded-lg",
+                "absolute bottom-2 w-9 h-9 rounded-lg",
+                isRtl ? "left-2" : "right-2",
                 "bg-brand hover:bg-brand/90 text-white",
                 "disabled:opacity-40 disabled:cursor-not-allowed",
                 "transition-all duration-150"
@@ -470,7 +474,7 @@ export default function AIAgentPage() {
           </form>
 
           <p className="text-[11px] text-muted-foreground/50 text-center mt-2">
-            Dashfields AI يعمل بالذكاء الاصطناعي — تحقق دائماً من المعلومات المهمة
+            {t("aiAgent.disclaimer")}
           </p>
         </div>
       </div>
