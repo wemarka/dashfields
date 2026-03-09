@@ -20,6 +20,7 @@ import {
   getPageInfo,
   getImageUrlsFromHashes,
   getVideoSource,
+  getAdCreativePreviews,
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
 import { metaCache, CACHE_TTL } from "../../../services/integrations/metaCache";
@@ -825,6 +826,31 @@ export const metaCampaignsRouter = router({
       const succeeded = results.filter(r => r.status === "fulfilled" && (r.value as any).success).length;
       const failed = results.length - succeeded;
       return { succeeded, failed, total: results.length };
+    }),
+
+  /**
+   * Get official Meta Ad Preview iframe HTML for a given creative ID and ad format.
+   * Returns the raw iframe HTML string from Meta's /{creative_id}/previews endpoint.
+   * Supported formats: DESKTOP_FEED_STANDARD, MOBILE_FEED_STANDARD, INSTAGRAM_STANDARD,
+   * INSTAGRAM_STORY, INSTAGRAM_REELS, FACEBOOK_REELS, FACEBOOK_STORY_MOBILE
+   */
+  adPreviews: protectedProcedure
+    .input(z.object({
+      creativeId: z.string().min(1),
+      adFormat: z.string().default("DESKTOP_FEED_STANDARD"),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) return { iframeHtml: null };
+      try {
+        const previews = await getAdCreativePreviews(input.creativeId, conn.token, input.adFormat);
+        return { iframeHtml: previews[0] ?? null };
+      } catch (err) {
+        console.error("[Meta] adPreviews error:", err);
+        return { iframeHtml: null };
+      }
     }),
 
   /** Get video source URL from Meta Graph API for a given video_id */

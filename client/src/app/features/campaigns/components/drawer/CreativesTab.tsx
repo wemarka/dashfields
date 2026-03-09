@@ -18,9 +18,10 @@ import {
 } from "./types";
 import type { CreativeFilter, CreativeSort } from "./types";
 import {
-  AdPreview, PLACEMENT_LABELS, PLACEMENT_ICONS, OpenInMetaButton,
+  PLACEMENT_LABELS, PLACEMENT_ICONS, OpenInMetaButton, AdPreview,
   type AdPlacement,
 } from "./AdPreviews";
+import { AdPreviewIframe } from "./AdPreviewIframe";
 
 // ─── Placement Selector ───────────────────────────────────────────────────────
 const ALL_PLACEMENTS: AdPlacement[] = ["fb_feed", "ig_feed", "ig_story", "ig_reel", "fb_story", "fb_reel"];
@@ -188,19 +189,37 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
             <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wide mb-2">Preview on</p>
             <PlacementSelector value={placement} onChange={setPlacement} videoOnly={isVideo} />
           </div>
-          <div className="flex justify-center p-4">
-            <div className={`flex-shrink-0 ${
-              placement === "ig_story" || placement === "ig_reel" || placement === "fb_story" || placement === "fb_reel"
-                ? "w-[180px]"
-                : "w-[280px]"
-            }`}>
-              <AdPreview
-                ad={ad}
+          <div className="flex justify-center p-4 overflow-x-auto">
+            {/* Official Meta Ad Preview iframe — 100% identical to Ads Manager */}
+            {ad.creativeId ? (
+              <AdPreviewIframe
+                creativeId={ad.creativeId}
+                adId={ad.id}
                 placement={placement}
-                pageName={resolvedPageName}
-                pageAvatarUrl={resolvedAvatarUrl}
+                fallback={
+                  <AdPreview
+                    ad={ad}
+                    placement={placement}
+                    pageName={resolvedPageName}
+                    pageAvatarUrl={resolvedAvatarUrl}
+                  />
+                }
               />
-            </div>
+            ) : (
+              /* Fallback to mockup if no creativeId */
+              <div className={`flex-shrink-0 ${
+                placement === "ig_story" || placement === "ig_reel" || placement === "fb_story" || placement === "fb_reel"
+                  ? "w-[180px]"
+                  : "w-[280px]"
+              }`}>
+                <AdPreview
+                  ad={ad}
+                  placement={placement}
+                  pageName={resolvedPageName}
+                  pageAvatarUrl={resolvedAvatarUrl}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

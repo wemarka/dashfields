@@ -2707,3 +2707,9 @@
 - [ ] Add Reels preview — vertical mockup with play button and progress bar (Instagram Reels + Facebook Reels)
 - [ ] Add Carousel preview — swipeable cards with image and headline per card
 - [ ] Add "Open in Meta Ads Manager" button — direct link to open ad in Meta Ads Manager
+
+## ✅ Meta Ad Preview API (Official iframe from Meta)
+- [x] Add getAdCreativePreviews function in server/services/integrations/meta.ts
+- [x] Add adPreviews procedure in campaigns router
+- [x] Build AdPreviewIframe.tsx component (renders Meta iframe directly)
+- [x] Replace AdPreviews mockup with official Meta iframe in CreativesTab
