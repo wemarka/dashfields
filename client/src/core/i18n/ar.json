@@ -11,6 +11,7 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
+    "aiAgent": "AI Agent",
     "campaigns": "الحملات",
     "alerts": "التنبيهات",
     "overview": "نظرة عامة",

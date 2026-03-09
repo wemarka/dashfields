@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { startCron } from "../cron";
 import { runMissingMigrations } from "../migrations";
 import { registerPlatformOAuthRoutes } from "../services/integrations/platformOAuth";
+import { handleAIAgentChat } from "../app/services/aiAgent";
 import rateLimit from "express-rate-limit";
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
@@ -84,6 +85,9 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Unified platform OAuth routes (Meta, TikTok, LinkedIn, YouTube, Twitter, Snapchat, Pinterest)
   registerPlatformOAuthRoutes(app);
+
+  // AI Agent SSE streaming endpoint
+  app.post("/api/ai-agent/chat", (req, res) => { void handleAIAgentChat(req, res); });
 
   // tRPC API
   app.use(

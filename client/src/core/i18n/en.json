@@ -11,6 +11,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "aiAgent": "AI Agent",
     "campaigns": "Campaigns",
     "alerts": "Alerts",
     "overview": "Overview",

@@ -3,7 +3,7 @@
 // The Sidebar component maps over this config — never hardcode links inside it.
 
 import {
-  LayoutDashboard,
+  Sparkles,
   Megaphone,
   Users,
   Brain,
@@ -47,9 +47,9 @@ export const navSections: NavSection[] = [
   {
     items: [
       {
-        labelKey: "nav.dashboard",
+        labelKey: "nav.aiAgent",
         path: "/dashboard",
-        icon: LayoutDashboard,
+        icon: Sparkles,
         iconAnimation: "icon-pulse",
       },
     ],

@@ -2821,3 +2821,14 @@
 - [x] Connect to local campaigns via campaigns.updateBudget procedure
 - [x] Daily Budget column added to column toggle (hidden by default, enable from Columns menu)
 - [x] 630/630 tests passing, 0 TypeScript errors
+
+## ✅ AI Marketing Agent — Main Page
+- [x] server/app/services/aiAgent.ts — SSE streaming chat endpoint with full marketing context
+- [x] Register /api/ai-agent/chat SSE route in server/_core/index.ts
+- [x] client/src/app/features/ai-agent/AIAgentPage.tsx — Full chat UI replacing Dashboard
+- [x] Quick suggestion chips (Analyze campaigns, Create campaign, Generate ad, Research competitors)
+- [x] Streaming message rendering with markdown support (react-markdown)
+- [x] Chat history (last 10 messages per session)
+- [x] Update navigation.ts — replace Dashboard icon with Sparkles + aiAgent label
+- [x] Update App.tsx route /dashboard → AI Agent page
+- [x] 630/630 tests passing, 0 TypeScript errors

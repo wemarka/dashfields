@@ -67,9 +67,11 @@ function ExternalRedirect({ to }: { to: string }) {
 }
 
 // ─── Eager-loaded (critical path) ────────────────────────────────────────────
-import Home from "./app/features/dashboard/Home";
 import NotFound from "./app/features/shared/NotFound";
 import DashboardLayout from "./app/components/DashboardLayout";
+
+// ─── AI Agent (main home page) ───────────────────────────────────────────────
+const AIAgentPage = lazy(() => import("./app/features/ai-agent/AIAgentPage"));
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
 const Alerts            = lazy(() => import("./app/features/alerts/Alerts"));
@@ -190,7 +192,7 @@ function AppRouter() {
             <Suspense fallback={<ContentLoader />}>
             <Switch>
               {/* ── Core ──────────────────────────────────────────────────── */}
-              <Route path="/dashboard"              component={Home} />
+              <Route path="/dashboard"              component={AIAgentPage} />
               {/* ── Ads sub-pages ──────────────────────────────────────────── */}
               <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/campaigns"          component={CampaignsPage} />
