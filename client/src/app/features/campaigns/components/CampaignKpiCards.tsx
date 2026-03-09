@@ -1,9 +1,8 @@
 // CampaignKpiCards.tsx
-// Platform-agnostic KPI summary cards with sparkline mini-charts and trend indicators.
+// Elegant minimal KPI summary bar — single-row pill design with subtle icons.
 import { useMemo } from "react";
 import {
-  DollarSign, Eye, MousePointer2, TrendingUp, TrendingDown,
-  Activity, Target, BarChart3, Minus,
+  TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import { KpiCardSkeleton } from "@/core/components/ui/skeleton-cards";
 import { useCurrency } from "@/shared/hooks/useCurrency";
@@ -20,12 +19,10 @@ interface CampaignKpiCardsProps {
   roas?: number;
   frequency?: number;
   loading?: boolean;
-  // Previous period data for trend comparison
   prevSpend?: number | null;
   prevImpressions?: number | null;
   prevClicks?: number | null;
   prevCtr?: number | null;
-  // Daily data for sparklines
   dailyData?: Array<{
     date: string;
     spend: number;
@@ -33,76 +30,11 @@ interface CampaignKpiCardsProps {
     clicks: number;
     ctr: number;
   }>;
-  // Click handler for filtering
   onKpiClick?: (metric: string) => void;
   activeMetric?: string | null;
 }
 
-// ─── Sparkline SVG ────────────────────────────────────────────────────────────
-function Sparkline({
-  data,
-  color,
-  height = 32,
-  width = 80,
-}: {
-  data: number[];
-  color: string;
-  height?: number;
-  width?: number;
-}) {
-  if (!data.length || data.every(d => d === 0)) {
-    return <div style={{ width, height }} />;
-  }
-
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const padding = 2;
-
-  const points = data.map((val, i) => {
-    const x = padding + (i / Math.max(data.length - 1, 1)) * (width - padding * 2);
-    const y = height - padding - ((val - min) / range) * (height - padding * 2);
-    return `${x},${y}`;
-  });
-
-  const gradientId = `spark-${color.replace(/[^a-z0-9]/gi, "")}`;
-
-  // Area path
-  const firstX = padding;
-  const lastX = padding + ((data.length - 1) / Math.max(data.length - 1, 1)) * (width - padding * 2);
-  const areaPath = `M${points[0]} ${points.slice(1).map(p => `L${p}`).join(" ")} L${lastX},${height} L${firstX},${height} Z`;
-
-  return (
-    <svg width={width} height={height} className="shrink-0">
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-          <stop offset="100%" stopColor={color} stopOpacity={0.02} />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill={`url(#${gradientId})`} />
-      <polyline
-        points={points.join(" ")}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Last point dot */}
-      {data.length > 0 && (
-        <circle
-          cx={parseFloat(points[points.length - 1].split(",")[0])}
-          cy={parseFloat(points[points.length - 1].split(",")[1])}
-          r={2}
-          fill={color}
-        />
-      )}
-    </svg>
-  );
-}
-
-// ─── Trend Indicator ──────────────────────────────────────────────────────────
+// ─── Trend Badge ──────────────────────────────────────────────────────────────
 function TrendBadge({
   current,
   previous,
@@ -112,37 +44,24 @@ function TrendBadge({
   previous: number | null | undefined;
   higherIsBetter?: boolean;
 }) {
-  if (previous == null || previous === 0) {
-    return null;
-  }
-
+  if (previous == null || previous === 0) return null;
   const change = ((current - previous) / previous) * 100;
   const isPositive = change > 0;
   const isGood = higherIsBetter ? isPositive : !isPositive;
   const absChange = Math.abs(change);
-
   if (absChange < 0.1) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
-        <Minus className="w-2.5 h-2.5" />
-        0%
+      <span className="inline-flex items-center gap-0.5" style={{ fontSize: 10, color: "#9ca3af", fontWeight: 500 }}>
+        <Minus className="w-2.5 h-2.5" />0%
       </span>
     );
   }
-
   return (
     <span
-      className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${
-        isGood
-          ? "text-emerald-600 dark:text-emerald-400"
-          : "text-red-600 dark:text-red-400"
-      }`}
+      className="inline-flex items-center gap-0.5"
+      style={{ fontSize: 10, fontWeight: 600, color: isGood ? "#10b981" : "#ef4444" }}
     >
-      {isPositive ? (
-        <TrendingUp className="w-2.5 h-2.5" />
-      ) : (
-        <TrendingDown className="w-2.5 h-2.5" />
-      )}
+      {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
       {absChange > 999 ? "999+" : absChange.toFixed(1)}%
     </span>
   );
@@ -155,6 +74,126 @@ function fmtCompact(n: number): string {
   return n.toLocaleString();
 }
 
+// ─── Minimal SVG Icons ────────────────────────────────────────────────────────
+const SpendIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M7 4v6M5.5 8.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S8 7 7 7s-1.5-.67-1.5-1.5S6.17 4 7 4s1.5.67 1.5 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+  </svg>
+);
+
+const ImpressionsIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M1 7c0 0 2.5-4 6-4s6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2" />
+  </svg>
+);
+
+const ClicksIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M3 3l8 4-4 1-1 4-3-9z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+  </svg>
+);
+
+const CtrIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M2 10L5 6.5l2.5 2L9.5 5 12 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M10 4h2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const CampaignsIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <rect x="1.5" y="3.5" width="11" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M4.5 7h5M4.5 9h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+  </svg>
+);
+
+// ─── Single KPI Item ──────────────────────────────────────────────────────────
+function KpiItem({
+  label,
+  value,
+  sub,
+  icon,
+  current,
+  previous,
+  higherIsBetter,
+  isSelected,
+  onClick,
+  isLast,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: React.ReactNode;
+  current: number;
+  previous?: number | null;
+  higherIsBetter?: boolean;
+  isSelected?: boolean;
+  onClick?: () => void;
+  isLast?: boolean;
+}) {
+  return (
+    <>
+      <button
+        onClick={onClick}
+        className="flex items-center gap-3 py-3 px-4 transition-all group"
+        style={{
+          background: isSelected ? "#f9fafb" : "transparent",
+          borderRadius: isSelected ? 8 : 0,
+          cursor: onClick ? "pointer" : "default",
+          outline: "none",
+          border: "none",
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
+        {/* Icon */}
+        <div
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            backgroundColor: "#f3f4f6",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#6b7280",
+            flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          className="group-hover:bg-gray-200/70"
+        >
+          {icon}
+        </div>
+
+        {/* Text */}
+        <div className="min-w-0 text-left">
+          <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
+            {label}
+          </p>
+          <div className="flex items-baseline gap-2">
+            <span style={{ fontSize: 17, fontWeight: 700, color: "#111827", fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+              {value}
+            </span>
+            <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
+          </div>
+          {sub && (
+            <p style={{ fontSize: 10.5, color: "#9ca3af", marginTop: 2, fontFamily: "Inter, sans-serif" }}>
+              {sub}
+            </p>
+          )}
+        </div>
+      </button>
+
+      {/* Divider */}
+      {!isLast && (
+        <div style={{ width: 1, backgroundColor: "#f0f0f0", alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
+      )}
+    </>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function CampaignKpiCards({
   totalSpend,
@@ -164,29 +203,15 @@ export function CampaignKpiCards({
   totalCampaigns,
   activeCampaigns,
   conversions,
-  roas,
-  frequency,
   loading,
   prevSpend,
   prevImpressions,
   prevClicks,
   prevCtr,
-  dailyData,
   onKpiClick,
   activeMetric,
 }: CampaignKpiCardsProps) {
   const { fmt: fmtMoney } = useCurrency();
-
-  // Extract sparkline data arrays
-  const sparkData = useMemo(() => {
-    if (!dailyData || dailyData.length === 0) return null;
-    return {
-      spend: dailyData.map(d => d.spend),
-      impressions: dailyData.map(d => d.impressions),
-      clicks: dailyData.map(d => d.clicks),
-      ctr: dailyData.map(d => d.ctr),
-    };
-  }, [dailyData]);
 
   if (loading) {
     return (
@@ -199,114 +224,83 @@ export function CampaignKpiCards({
   const kpis = [
     {
       key: "spend",
-      label: "Total Spend",
+      label: "Spend",
       value: fmtMoney(totalSpend, 0),
-      Icon: DollarSign,
-      color: "#10b981",
-      iconColor: "text-emerald-500",
-      iconBg: "bg-emerald-500/10",
+      icon: <SpendIcon />,
       current: totalSpend,
       previous: prevSpend,
       higherIsBetter: false,
-      sparkline: sparkData?.spend,
-      sub: `${activeCampaigns} active of ${totalCampaigns}`,
+      sub: `${activeCampaigns} active / ${totalCampaigns}`,
     },
     {
       key: "impressions",
       label: "Impressions",
       value: fmtCompact(totalImpressions),
-      Icon: Eye,
-      color: "#3b82f6",
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-500/10",
+      icon: <ImpressionsIcon />,
       current: totalImpressions,
       previous: prevImpressions,
       higherIsBetter: true,
-      sparkline: sparkData?.impressions,
       sub: totalImpressions > 0 ? `CPM ${fmtMoney(totalSpend / (totalImpressions / 1000), 2)}` : undefined,
     },
     {
       key: "clicks",
       label: "Clicks",
       value: fmtCompact(totalClicks),
-      Icon: MousePointer2,
-      color: "#8b5cf6",
-      iconColor: "text-violet-500",
-      iconBg: "bg-violet-500/10",
+      icon: <ClicksIcon />,
       current: totalClicks,
       previous: prevClicks,
       higherIsBetter: true,
-      sparkline: sparkData?.clicks,
       sub: totalClicks > 0 ? `CPC ${fmtMoney(totalSpend / totalClicks, 2)}` : undefined,
     },
     {
       key: "ctr",
       label: "Avg. CTR",
       value: avgCtr.toFixed(2) + "%",
-      Icon: Activity,
-      color: "#f59e0b",
-      iconColor: "text-amber-500",
-      iconBg: "bg-amber-500/10",
+      icon: <CtrIcon />,
       current: avgCtr,
       previous: prevCtr,
       higherIsBetter: true,
-      sparkline: sparkData?.ctr,
-      sub: conversions != null ? `${fmtCompact(conversions)} conversions` : undefined,
+      sub: conversions != null ? `${fmtCompact(conversions)} conv.` : undefined,
+    },
+    {
+      key: "campaigns",
+      label: "Campaigns",
+      value: `${activeCampaigns} active`,
+      icon: <CampaignsIcon />,
+      current: activeCampaigns,
+      previous: null,
+      higherIsBetter: true,
+      sub: `of ${totalCampaigns} total`,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {kpis.map((kpi) => {
-        const isSelected = activeMetric === kpi.key;
-        return (
-          <button
-            key={kpi.key}
-            onClick={() => onKpiClick?.(kpi.key)}
-            className={`rounded-xl border bg-card p-4 transition-all text-left group relative overflow-hidden ${
-              isSelected
-                ? "border-primary ring-1 ring-primary/20 shadow-sm"
-                : "border-border hover:border-primary/30 hover:shadow-sm"
-            } ${onKpiClick ? "cursor-pointer" : "cursor-default"}`}
-          >
-            {/* Header row */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                {kpi.label}
-              </span>
-              <div className={`w-7 h-7 rounded-lg ${kpi.iconBg} flex items-center justify-center`}>
-                <kpi.Icon className={`w-3.5 h-3.5 ${kpi.iconColor}`} />
-              </div>
-            </div>
-
-            {/* Value + Trend */}
-            <div className="flex items-end justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-xl font-bold tracking-tight text-foreground leading-none mb-1">
-                  {kpi.value}
-                </p>
-                <div className="flex items-center gap-2">
-                  <TrendBadge
-                    current={kpi.current}
-                    previous={kpi.previous}
-                    higherIsBetter={kpi.higherIsBetter}
-                  />
-                  {kpi.sub && (
-                    <span className="text-[10px] text-muted-foreground truncate">
-                      {kpi.sub}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Sparkline */}
-              {kpi.sparkline && kpi.sparkline.length > 1 && (
-                <Sparkline data={kpi.sparkline} color={kpi.color} />
-              )}
-            </div>
-          </button>
-        );
-      })}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        backgroundColor: "#ffffff",
+        border: "1px solid #f0f0f0",
+        borderRadius: 12,
+        overflow: "hidden",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+      }}
+    >
+      {kpis.map((kpi, i) => (
+        <KpiItem
+          key={kpi.key}
+          label={kpi.label}
+          value={kpi.value}
+          sub={kpi.sub}
+          icon={kpi.icon}
+          current={kpi.current}
+          previous={kpi.previous}
+          higherIsBetter={kpi.higherIsBetter}
+          isSelected={activeMetric === kpi.key}
+          onClick={onKpiClick ? () => onKpiClick(kpi.key) : undefined}
+          isLast={i === kpis.length - 1}
+        />
+      ))}
     </div>
   );
 }
