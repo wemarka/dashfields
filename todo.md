@@ -2760,3 +2760,7 @@
 ### Layer 7 — DB Query Optimization
 - [x] Audited Supabase queries — queries are already efficient with proper .eq() + .order() + .limit()
 - [x] Supabase indexes SQL provided for user to run in Supabase SQL Editor
+
+## ✅ Bug Fix — usePrefetch inside .map() (Rules of Hooks violation)
+- [x] Fix DashboardLayout: usePrefetch called inside .map() causes "Rendered more hooks" error
+- [x] Solution: created NavItemButton wrapper component that calls usePrefetch at top level

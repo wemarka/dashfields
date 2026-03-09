@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/core/components/ui/tooltip";
 import { navSections } from "@/config/navigation";
-import { usePrefetch } from "@/core/hooks/usePrefetch";
+import { NavItemButton } from "./layout-parts/NavItemButton";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -283,35 +283,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               const isActive = item.path === "/dashboard"
                 ? location === "/dashboard" || location === "/"
                 : location.startsWith(item.path);
-              // eslint-disable-next-line react-hooks/rules-of-hooks
-              const { onMouseEnter: prefetchEnter, onMouseLeave: prefetchLeave } = usePrefetch(item.path);
-              const btn = (
-                <button key={item.path} onClick={() => setLocation(item.path)}
-                  onMouseEnter={prefetchEnter} onMouseLeave={prefetchLeave}
-                  className={[
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium",
-                    "transition-all duration-150 group relative",
-                    isRTL ? "flex-row-reverse text-right" : "text-left",
-                    isActive ? "text-brand" : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
-                    collapsed ? "justify-center" : "",
-                  ].join(" ")}>
-                  {isActive && !collapsed && (
-                    <span className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-brand`} />
-                  )}
-                  <item.icon className={["w-[18px] h-[18px] shrink-0 transition-all duration-150", isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70"].join(" ")} />
-                  {!collapsed && (
-                    <span
-                      className="truncate flex-1"
-                    >{t(item.labelKey)}</span>
-                  )}
-                </button>
+              // ✅ NavItemButton calls usePrefetch at component top level — no Rules of Hooks violation
+              return (
+                <NavItemButton
+                  key={item.path}
+                  path={item.path}
+                  isActive={isActive}
+                  isRTL={isRTL}
+                  collapsed={collapsed}
+                  label={t(item.labelKey)}
+                  icon={item.icon}
+                  onClick={() => setLocation(item.path)}
+                />
               );
-              return collapsed ? (
-                <Tooltip key={item.path}>
-                  <TooltipTrigger asChild>{btn}</TooltipTrigger>
-                  <TooltipContent side={isRTL ? "left" : "right"} sideOffset={8}>{t(item.labelKey)}</TooltipContent>
-                </Tooltip>
-              ) : btn;
             }
 
             const sectionBtn = (
