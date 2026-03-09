@@ -2,7 +2,7 @@
  * Campaigns page — Clean, minimal design inspired by Settings Dialog.
  * Light, airy layout with compact stats row and simple filter bar.
  */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, Fragment } from "react";
 import {
   Plus, RefreshCw, GitCompare, Link2, FileDown, Search, X,
   CalendarIcon, ChevronDown,
@@ -107,10 +107,10 @@ function StatsBar({
 }) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden" }}>
         {[1,2,3,4,5].map((i, idx) => (
-          <>
-            <div key={i} style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+          <Fragment key={i}>
+            <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#f3f4f6" }} />
@@ -118,7 +118,7 @@ function StatsBar({
               </div>
             </div>
             {idx < 4 && <div style={{ width: 1, backgroundColor: "#f0f0f0", margin: "10px 0", flexShrink: 0 }} />}
-          </>
+          </Fragment>
         ))}
       </div>
     );
@@ -133,10 +133,10 @@ function StatsBar({
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden" }}>
       {stats.map((s, i) => (
-        <>
-          <div key={s.key} style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+        <Fragment key={s.key}>
+          <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
             {/* Icon */}
             <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", flexShrink: 0 }}>
               {s.icon}
@@ -159,7 +159,7 @@ function StatsBar({
           {i < stats.length - 1 && (
             <div style={{ width: 1, backgroundColor: "#f0f0f0", alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
           )}
-        </>
+        </Fragment>
       ))}
     </div>
   );
