@@ -1,0 +1,16 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS ad_preview_cache (\n  id BIGSERIAL PRIMARY KEY,\n  creative_id TEXT NOT NULL,\n  ad_format TEXT NOT NULL,\n  user_id TEXT NOT NULL,\n  iframe_html TEXT NOT NULL,\n  cached_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '24 hours'),\n  UNIQUE (creative_id, ad_format, user_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_ad_preview_cache_lookup \n  ON ad_preview_cache (creative_id, ad_format, user_id, expires_at);\n\nCREATE INDEX IF NOT EXISTS idx_ad_preview_cache_expires\n  ON ad_preview_cache (expires_at);\n\nCOMMENT ON TABLE ad_preview_cache IS 'Cache for Meta Ad Preview API iframe HTML — TTL 24 hours';\nCOMMENT ON COLUMN ad_preview_cache.creative_id IS 'Meta creative ID';\nCOMMENT ON COLUMN ad_preview_cache.ad_format IS 'Meta ad format (e.g. MOBILE_FEED_STANDARD, INSTAGRAM_STORY)';\nCOMMENT ON COLUMN ad_preview_cache.user_id IS 'User who fetched the preview';\nCOMMENT ON COLUMN ad_preview_cache.iframe_html IS 'Raw iframe HTML string from Meta API';\nCOMMENT ON COLUMN ad_preview_cache.expires_at IS 'Cache expiry timestamp (24h TTL)';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute \nCREATE TABLE IF NOT EXISTS ad_preview_cache (\n  id BIGSERIAL PRIMARY KEY,\n  creative_id TEXT NOT NULL,\n  ad_format TEXT NOT NULL,\n  user_id TEXT NOT NULL,\n  iframe_html TEXT NOT NULL,\n  cached_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '24 hours'),\n  UNIQUE (creative_id, ad_format, user_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_ad_preview_cache_lookup \n  ON ad_preview_cache (creative_id, ad_format, user_id, expires_at);\n\nCREATE INDEX IF NOT EXISTS idx_ad_preview_cache_expires\n  ON ad_preview_cache (expires_at);\n\nCOMMENT ON TABLE ad_preview_cache IS 'Cache for Meta Ad Preview API iframe HTML — TTL 24 hours';\nCOMMENT ON COLUMN ad_preview_cache.creative_id IS 'Meta creative ID';\nCOMMENT ON COLUMN ad_preview_cache.ad_format IS 'Meta ad format (e.g. MOBILE_FEED_STANDARD, INSTAGRAM_STORY)';\nCOMMENT ON COLUMN ad_preview_cache.user_id IS 'User who fetched the preview';\nCOMMENT ON COLUMN ad_preview_cache.iframe_html IS 'Raw iframe HTML string from Meta API';\nCOMMENT ON COLUMN ad_preview_cache.expires_at IS 'Cache expiry timestamp (24h TTL)';\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 2: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 2 column 15 near \"BIGSERIAL PRIMARY KEY,",
+    "  creative_id TEXT NOT NULL,",
+    "  ad_format TEXT NOT NULL,",
+    "  user_id TEXT NOT NULL,",
+    "  iframe_html TEXT NOT NULL,",
+    "  cached_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),",
+    "  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '24 hours'),",
+    "  UNIQUE (creative_id, ad_format, user_id)",
+    ")\""
+  ]
+}

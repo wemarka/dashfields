@@ -102,6 +102,18 @@ CREATE TABLE IF NOT EXISTS performance_goals (
   created_at timestamp DEFAULT now() NOT NULL,
   updated_at timestamp DEFAULT now() NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS ad_preview_cache (
+  id serial PRIMARY KEY,
+  creative_id text NOT NULL,
+  ad_format text NOT NULL,
+  user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  iframe_html text NOT NULL,
+  cached_at timestamp DEFAULT now() NOT NULL,
+  expires_at timestamp NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_ad_preview_cache_lookup ON ad_preview_cache (creative_id, ad_format, user_id, expires_at);
+CREATE INDEX IF NOT EXISTS idx_ad_preview_cache_expires ON ad_preview_cache (expires_at);
   `;
 
   try {

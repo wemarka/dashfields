@@ -430,3 +430,18 @@ export const contentTemplates = pgTable("content_templates", {
 });
 export type ContentTemplate       = typeof contentTemplates.$inferSelect;
 export type InsertContentTemplate = typeof contentTemplates.$inferInsert;
+
+// ─── Ad Preview Cache ─────────────────────────────────────────────────────────
+// Caches Meta Ad Preview API iframe HTML to avoid repeated API calls.
+// TTL: 24 hours. Keyed by (creative_id, ad_format, user_id).
+export const adPreviewCache = pgTable("ad_preview_cache", {
+  id:          serial("id").primaryKey(),
+  creativeId:  text("creative_id").notNull(),
+  adFormat:    text("ad_format").notNull(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  iframeHtml:  text("iframe_html").notNull(),
+  cachedAt:    timestamp("cached_at").defaultNow().notNull(),
+  expiresAt:   timestamp("expires_at").notNull(),
+});
+export type AdPreviewCache       = typeof adPreviewCache.$inferSelect;
+export type InsertAdPreviewCache = typeof adPreviewCache.$inferInsert;

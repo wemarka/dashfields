@@ -444,11 +444,30 @@ export async function runCronJob(): Promise<{
     console.error("[Cron] Error checking budgets:", msg);
   }
 
+  // ── 5. Clean up expired ad_preview_cache entries ────────────────────────────
+  let cacheEntriesCleaned = 0;
+  try {
+    const { error: cleanErr, count } = await sb
+      .from("ad_preview_cache")
+      .delete()
+      .lt("expires_at", now.toISOString());
+
+    if (!cleanErr) {
+      cacheEntriesCleaned = count ?? 0;
+      if (cacheEntriesCleaned > 0) {
+        console.log(`[Cron] Cleaned ${cacheEntriesCleaned} expired ad preview cache entries`);
+      }
+    }
+  } catch (err) {
+    // Non-critical — don't add to errors
+    console.warn("[Cron] Cache cleanup error:", err instanceof Error ? err.message : String(err));
+  }
+
   _lastRunAt = now;
   _runCount++;
 
   console.log(
-    `[Cron] Done — reports: ${reportsSent}/${reportsProcessed}, budget checks: ${budgetAlertsChecked}, errors: ${errors.length}`
+    `[Cron] Done — reports: ${reportsSent}/${reportsProcessed}, budget checks: ${budgetAlertsChecked}, cache cleaned: ${cacheEntriesCleaned}, errors: ${errors.length}`
   );
 
   return { reportsProcessed, reportsSent, budgetAlertsChecked, errors };

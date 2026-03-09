@@ -2713,3 +2713,12 @@
 - [x] Add adPreviews procedure in campaigns router
 - [x] Build AdPreviewIframe.tsx component (renders Meta iframe directly)
 - [x] Replace AdPreviews mockup with official Meta iframe in CreativesTab
+
+## ✅ Smart iframe Caching in Supabase
+- [x] Create ad_preview_cache table in Supabase (creative_id, ad_format, iframe_html, cached_at, expires_at)
+- [x] Update adPreviews procedure to read from cache before calling Meta API
+- [x] Write to cache after successful Meta API call (TTL: 24h)
+- [x] Add cache invalidation mutation (clearAdPreviewCache)
+- [x] Add "Refresh Preview" button in AdPreviewIframe.tsx to force re-fetch
+- [x] Add unique constraint (creative_id, ad_format, user_id) for upsert
+- [x] Add cron cleanup for expired cache entries (runs every hour)

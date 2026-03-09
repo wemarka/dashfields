@@ -831,6 +831,12 @@ export const metaCampaignsRouter = router({
   /**
    * Get official Meta Ad Preview iframe HTML for a given creative ID and ad format.
    * Returns the raw iframe HTML string from Meta's /{creative_id}/previews endpoint.
+   *
+   * Cache strategy:
+   *  1. Check ad_preview_cache in Supabase (TTL: 24h)
+   *  2. On cache hit → return immediately (no Meta API call)
+   *  3. On cache miss → call Meta API, store result, return iframe HTML
+   *
    * Supported formats: DESKTOP_FEED_STANDARD, MOBILE_FEED_STANDARD, INSTAGRAM_STANDARD,
    * INSTAGRAM_STORY, INSTAGRAM_REELS, FACEBOOK_REELS, FACEBOOK_STORY_MOBILE
    */
@@ -840,17 +846,98 @@ export const metaCampaignsRouter = router({
       adFormat: z.string().default("DESKTOP_FEED_STANDARD"),
       accountId: z.number().optional(),
       workspaceId: z.number().int().positive().optional(),
+      forceRefresh: z.boolean().default(false),
     }))
     .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const now = new Date();
+
+      // ── 1. Cache lookup (skip if forceRefresh) ──────────────────────────────
+      if (!input.forceRefresh) {
+        const { data: cached } = await sb
+          .from("ad_preview_cache")
+          .select("iframe_html, cached_at, expires_at")
+          .eq("creative_id", input.creativeId)
+          .eq("ad_format", input.adFormat)
+          .eq("user_id", ctx.user.id)
+          .gt("expires_at", now.toISOString())
+          .order("cached_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (cached?.iframe_html) {
+          console.log(`[Meta] adPreviews cache HIT: ${input.creativeId}/${input.adFormat}`);
+          return {
+            iframeHtml: cached.iframe_html,
+            fromCache: true,
+            cachedAt: cached.cached_at,
+            expiresAt: cached.expires_at,
+          };
+        }
+      }
+
+      // ── 2. Cache miss → call Meta API ───────────────────────────────────────
       const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-      if (!conn) return { iframeHtml: null };
+      if (!conn) return { iframeHtml: null, fromCache: false };
+
       try {
         const previews = await getAdCreativePreviews(input.creativeId, conn.token, input.adFormat);
-        return { iframeHtml: previews[0] ?? null };
+        const iframeHtml = previews[0] ?? null;
+
+        if (iframeHtml) {
+          // ── 3. Write to cache (upsert — overwrite if exists) ───────────────
+          const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +24h
+          const { error: upsertErr } = await sb
+            .from("ad_preview_cache")
+            .upsert(
+              {
+                creative_id: input.creativeId,
+                ad_format: input.adFormat,
+                user_id: ctx.user.id,
+                iframe_html: iframeHtml,
+                cached_at: now.toISOString(),
+                expires_at: expiresAt.toISOString(),
+              },
+              { onConflict: "creative_id,ad_format,user_id" }
+            );
+
+          if (upsertErr) {
+            console.warn("[Meta] adPreviews cache write failed:", upsertErr.message);
+          } else {
+            console.log(`[Meta] adPreviews cache MISS → stored: ${input.creativeId}/${input.adFormat}`);
+          }
+        }
+
+        return { iframeHtml, fromCache: false, cachedAt: now.toISOString(), expiresAt: null };
       } catch (err) {
         console.error("[Meta] adPreviews error:", err);
-        return { iframeHtml: null };
+        return { iframeHtml: null, fromCache: false };
       }
+    }),
+
+  /**
+   * Invalidate (delete) cached previews for a specific creative or all creatives.
+   * Useful when the creative is updated and the cached iframe is stale.
+   */
+  clearAdPreviewCache: protectedProcedure
+    .input(z.object({
+      creativeId: z.string().optional(),  // omit to clear ALL for this user
+      adFormat: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("ad_preview_cache")
+        .delete()
+        .eq("user_id", ctx.user.id);
+
+      if (input.creativeId) query = query.eq("creative_id", input.creativeId);
+      if (input.adFormat)   query = query.eq("ad_format", input.adFormat);
+
+      const { error, count } = await query;
+      if (error) throw new Error(error.message);
+      console.log(`[Meta] adPreviewCache cleared: ${count ?? "?"} entries for user ${ctx.user.id}`);
+      return { cleared: count ?? 0 };
     }),
 
   /** Get video source URL from Meta Graph API for a given video_id */
