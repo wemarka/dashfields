@@ -107,7 +107,7 @@ function StatsBar({
 }) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
         {[1,2,3,4,5].map((i, idx) => (
           <Fragment key={i}>
             <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
@@ -133,7 +133,7 @@ function StatsBar({
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden" }}>
+    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
       {stats.map((s, i) => (
         <Fragment key={s.key}>
           <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
