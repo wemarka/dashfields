@@ -2651,3 +2651,11 @@
 - [x] Loading state while generating CSV (spinner + "..." label)
 - [x] Auto-download on success with named file (campaign-name-datepreset-date.csv)
 - [x] 0 TypeScript errors
+
+## ✅ Campaigns Table — Font Clarity
+- [x] Changed cell color from #6b7280 (muted gray) to #374151 (dark gray) + fontWeight 500 for all numeric columns (impressions, clicks, CTR, reach, conversions, CPC, CPM, leads, calls, messages, stopTime)
+
+## 🔤 Inter Font — Global Typography
+- [ ] Add Inter from Google Fonts in index.html
+- [ ] Set Inter as default font in index.css
+- [ ] Update table cells to use Inter with tabular-nums instead of monospace
