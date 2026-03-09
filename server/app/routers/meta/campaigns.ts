@@ -18,6 +18,7 @@ import {
   getCampaignAds,
   getAdInsights,
   getPageInfo,
+  getImageUrlsFromHashes,
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
 import { metaCache, CACHE_TTL } from "../../../services/integrations/metaCache";
@@ -200,30 +201,50 @@ export const metaCampaignsRouter = router({
       // If accountIds array is provided (group selection), fetch from all those accounts
       if (input.accountIds && input.accountIds.length > 0) {
         const sb = getSupabase();
-        const { data: acctRows } = await sb
+        const { data: acctRows, error: acctErr } = await sb
           .from("social_accounts")
           .select("id, name, access_token, platform_account_id, platform")
           .eq("user_id", ctx.user.id)
           .in("id", input.accountIds)
           .eq("is_active", true);
+        console.log("[Meta.campaigns] accountIds:", input.accountIds, "userId:", ctx.user.id, "acctRows:", acctRows?.length, "err:", acctErr?.message);
         // Only use facebook/ad_account rows that have tokens
         const adAccounts = (acctRows ?? []).filter(
           d => d.access_token && d.platform_account_id && d.platform === "facebook"
         );
+        console.log("[Meta.campaigns] facebook adAccounts:", adAccounts.map(a => ({ id: a.id, name: a.name, platform: a.platform, adAccountId: a.platform_account_id })));
         if (adAccounts.length === 0) return [];
         const results = await Promise.allSettled(
           adAccounts.map(async acct => {
             const campaigns = await getMetaCampaigns(acct.platform_account_id, acct.access_token, input.limit);
+            console.log("[Meta.campaigns] fetched", campaigns.length, "campaigns for", acct.name);
             return mapCampaigns(campaigns, { name: acct.name ?? "", adAccountId: acct.platform_account_id });
           })
         );
-        return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        const allCampaigns = results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        console.log("[Meta.campaigns] total campaigns returned:", allCampaigns.length);
+        return allCampaigns;
       }
 
       if (input.accountId) {
-        const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
-        if (!conn) return [];
         const sb = getSupabase();
+        // First check if the selected account is a facebook ad account
+        let conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+        if (!conn) {
+          // The selected account might be Instagram — find the facebook accounts in the same workspace
+          const { data: acctInfo } = await sb.from("social_accounts").select("workspace_id").eq("id", input.accountId).limit(1);
+          const wsId = acctInfo?.[0]?.workspace_id ?? input.workspaceId;
+          // Fall back to all facebook accounts in the same workspace
+          const allConns = await getAllMetaTokens(ctx.user.id, wsId);
+          if (allConns.length === 0) return [];
+          const results = await Promise.allSettled(
+            allConns.map(async c => {
+              const campaigns = await getMetaCampaigns(c.adAccountId, c.token, input.limit);
+              return mapCampaigns(campaigns, c);
+            })
+          );
+          return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        }
         const { data: acctData } = await sb.from("social_accounts").select("name").eq("id", input.accountId).limit(1);
         const accountName = acctData?.[0]?.name ?? "";
         const campaigns = await getMetaCampaigns(conn.adAccountId, conn.token, input.limit);
@@ -391,32 +412,68 @@ export const metaCampaignsRouter = router({
 
         // Collect unique page IDs from all ads
         const pageIds = new Set<string>();
+        // Collect all image_hashes that need URL resolution
+        const imageHashes = new Set<string>();
         for (const ad of ads) {
-          const pageId = ad.creative?.object_story_spec?.page_id;
+          const c = ad.creative;
+          const oss = c?.object_story_spec;
+          const afs = c?.asset_feed_spec;
+          const pageId = oss?.page_id;
           if (pageId) pageIds.add(pageId);
           // Also try from effective_object_story_id (format: pageId_postId)
-          const storyId = ad.creative?.effective_object_story_id;
+          const storyId = c?.effective_object_story_id;
           if (storyId) {
             const pid = storyId.split("_")[0];
             if (pid) pageIds.add(pid);
           }
-        }
-
-        // Fetch page info for all unique page IDs in parallel
-        const pageInfoMap = new Map<string, { name: string; pictureUrl: string | null }>();
-        if (pageIds.size > 0) {
-          const pageInfoResults = await Promise.allSettled(
-            Array.from(pageIds).map(async pid => {
-              const info = await getPageInfo(pid, conn.token);
-              return { pid, info };
-            })
-          );
-          for (const r of pageInfoResults) {
-            if (r.status === "fulfilled" && r.value.info) {
-              pageInfoMap.set(r.value.pid, { name: r.value.info.name, pictureUrl: r.value.info.pictureUrl });
+          // Collect image hashes when image_url is missing
+          if (!c?.image_url) {
+            if (c?.image_hash) imageHashes.add(c.image_hash);
+            if (oss?.link_data?.image_hash) imageHashes.add(oss.link_data.image_hash);
+            if (oss?.video_data?.image_hash) imageHashes.add(oss.video_data.image_hash);
+            if (oss?.photo_data?.image_hash) imageHashes.add(oss.photo_data.image_hash);
+            // Carousel child attachments
+            for (const child of oss?.link_data?.child_attachments ?? []) {
+              if (child.image_hash) imageHashes.add(child.image_hash);
+            }
+            // Dynamic asset images
+            for (const img of afs?.images ?? []) {
+              if (img.hash) imageHashes.add(img.hash);
             }
           }
         }
+
+        // Fetch page info + resolve image hashes in parallel
+        const pageInfoMap = new Map<string, { name: string; pictureUrl: string | null }>();
+        const [, hashUrlMap] = await Promise.all([
+          // Page info
+          (async () => {
+            if (pageIds.size > 0) {
+              const pageInfoResults = await Promise.allSettled(
+                Array.from(pageIds).map(async pid => {
+                  const info = await getPageInfo(pid, conn.token);
+                  return { pid, info };
+                })
+              );
+              for (const r of pageInfoResults) {
+                if (r.status === "fulfilled" && r.value.info) {
+                  pageInfoMap.set(r.value.pid, { name: r.value.info.name, pictureUrl: r.value.info.pictureUrl });
+                }
+              }
+            }
+          })(),
+          // Image hash resolution
+          imageHashes.size > 0
+            ? getImageUrlsFromHashes(conn.adAccountId, conn.token, Array.from(imageHashes))
+            : Promise.resolve(new Map<string, string>()),
+        ]);
+
+        // Helper to resolve image from hash or direct URL
+        const resolveImageUrl = (directUrl?: string | null, hash?: string | null): string | null => {
+          if (directUrl) return directUrl;
+          if (hash) return hashUrlMap.get(hash) ?? null;
+          return null;
+        };
 
         return ads.map(ad => {
           const c = ad.creative;
@@ -434,9 +491,10 @@ export const metaCampaignsRouter = router({
           if (afs && ((afs.images?.length ?? 0) > 1 || (afs.videos?.length ?? 0) > 0)) creativeType = "dynamic";
           else if (oss?.link_data?.child_attachments?.length) creativeType = "carousel";
           else if (oss?.video_data || c?.video_id) creativeType = "video";
-          else if (oss?.photo_data || oss?.link_data?.picture || c?.image_url) creativeType = "image";
+          else if (oss?.photo_data || oss?.link_data?.picture || oss?.link_data?.image_hash || c?.image_url || c?.image_hash) creativeType = "image";
 
-          let imageUrl = c?.image_url ?? c?.thumbnail_url ?? null;
+          // Resolve imageUrl: direct URL first, then hash lookup
+          let imageUrl = resolveImageUrl(c?.image_url, c?.image_hash) ?? c?.thumbnail_url ?? null;
           let videoId = c?.video_id ?? null;
           let message = "";
           let headline = c?.title ?? "";
@@ -449,13 +507,17 @@ export const metaCampaignsRouter = router({
             message = oss.link_data.message ?? message;
             headline = headline || (oss.link_data.caption ?? "");
             description = description || (oss.link_data.description ?? "");
-            imageUrl = imageUrl ?? oss.link_data.picture ?? null;
+            // Resolve link_data picture: direct URL or hash
+            const ldImageUrl = resolveImageUrl(oss.link_data.picture, oss.link_data.image_hash);
+            imageUrl = imageUrl ?? ldImageUrl ?? null;
             ctaType = oss.link_data.call_to_action?.type ?? "";
             ctaLink = (oss.link_data.call_to_action?.value?.link ?? oss.link_data.link) ?? "";
             if (oss.link_data.child_attachments) {
               for (const child of oss.link_data.child_attachments) {
+                // Resolve carousel card image: direct picture or hash
+                const cardImageUrl = resolveImageUrl(child.picture, child.image_hash);
                 carouselCards.push({
-                  imageUrl: child.picture ?? undefined, headline: child.name ?? undefined,
+                  imageUrl: cardImageUrl ?? undefined, headline: child.name ?? undefined,
                   description: child.description ?? undefined, link: child.link ?? undefined,
                   videoId: child.video_id ?? undefined,
                 });
@@ -465,18 +527,23 @@ export const metaCampaignsRouter = router({
           if (oss?.video_data) {
             message = oss.video_data.message ?? message;
             headline = headline || (oss.video_data.title ?? "");
-            imageUrl = imageUrl ?? oss.video_data.image_url ?? null;
+            // Resolve video thumbnail: direct URL or hash
+            const vdImageUrl = resolveImageUrl(oss.video_data.image_url, oss.video_data.image_hash);
+            imageUrl = imageUrl ?? vdImageUrl ?? null;
             videoId = videoId ?? oss.video_data.video_id ?? null;
             ctaType = ctaType || (oss.video_data.call_to_action?.type ?? "");
             ctaLink = ctaLink || (oss.video_data.call_to_action?.value?.link ?? "");
           }
           if (oss?.photo_data) {
             message = oss.photo_data.caption ?? message;
-            imageUrl = imageUrl ?? oss.photo_data.url ?? null;
+            // Resolve photo: direct URL or hash
+            const pdImageUrl = resolveImageUrl(oss.photo_data.url, oss.photo_data.image_hash);
+            imageUrl = imageUrl ?? pdImageUrl ?? null;
           }
 
           const dynamicAssets = afs ? {
-            images: (afs.images ?? []).map(img => img.url ?? "").filter(Boolean),
+            // Resolve dynamic asset images: URL first, then hash
+            images: (afs.images ?? []).map(img => img.url ?? (img.hash ? hashUrlMap.get(img.hash) ?? "" : "")).filter(Boolean),
             videos: (afs.videos ?? []).map(v => ({ videoId: v.video_id ?? "", thumbnail: v.thumbnail_url ?? "" })),
             bodies: (afs.bodies ?? []).map(b => b.text ?? ""),
             titles: (afs.titles ?? []).map(t => t.text ?? ""),

@@ -2691,3 +2691,14 @@
 - [x] Ad Sets column only shows for API (Meta) campaigns
 - [x] All existing features preserved (filters, KPI bar, sort, drawer, compare, export)
 - [x] Vitest tests for tri-panel logic (20 tests passing)
+
+## 🐛 Bug Fix — Creatives Tab Media
+- [ ] Fix: images and videos not displaying in ad preview (Creatives tab)
+
+## 🐛 Bug Fix — Creatives Tab Media (Mar 2026)
+- [x] Fix: images and videos not displaying in ad preview (Creatives tab)
+- [x] Fix: meta.campaigns returning empty when Instagram account selected — fallback to facebook accounts in same workspace
+- [x] Fix: metaGet empty response body causing SyntaxError (Unexpected end of JSON)
+- [x] Add: getImageUrlsFromHashes — batch resolve image_hash to URL via Meta adimages API
+- [x] Add: image_hash field to getCampaignAds fields list
+- [x] Fix: getPageInfo now fetches real page name + avatar from Meta Graph API per ad

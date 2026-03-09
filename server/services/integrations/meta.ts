@@ -63,7 +63,18 @@ async function metaGet<T>(
     url.searchParams.set(k, v);
   }
   const res = await fetch(url.toString());
-  const json = await res.json() as Record<string, unknown>;
+  // Handle empty response bodies (204 No Content or empty body) gracefully
+  const text = await res.text();
+  if (!text || text.trim() === "") {
+    return { data: [] } as unknown as T;
+  }
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    console.warn(`[Meta API] Non-JSON response for path=${path}: ${text.slice(0, 100)}`);
+    return { data: [] } as unknown as T;
+  }
   if (!res.ok || json.error) {
     const err = json.error as Record<string, unknown> | undefined;
     const code = err?.code as number | undefined;
@@ -522,7 +533,7 @@ export async function getCampaignAds(
     `${campaignId}/ads`,
     accessToken,
     {
-      fields: "id,name,status,effective_status,adset_id,created_time,creative{id,name,title,body,image_url,thumbnail_url,video_id,object_story_spec,effective_object_story_id,asset_feed_spec}",
+      fields: "id,name,status,effective_status,adset_id,created_time,creative{id,name,title,body,image_url,image_hash,thumbnail_url,video_id,object_story_spec{page_id,link_data{message,picture,image_hash,caption,description,link,call_to_action,child_attachments{picture,image_hash,name,description,link,video_id}},video_data{message,title,image_url,image_hash,video_id,call_to_action},photo_data{caption,url,image_hash}},effective_object_story_id,asset_feed_spec{images,videos,bodies,titles,descriptions,call_to_action_types,link_urls}}",
       limit: String(limit),
     }
   );
@@ -545,6 +556,38 @@ export async function getAdInsights(
     }
   );
   return data.data ?? [];
+}
+
+/** Batch-resolve image_hashes to full URLs via /{adAccountId}/adimages */
+export async function getImageUrlsFromHashes(
+  adAccountId: string,
+  accessToken: string,
+  hashes: string[]
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  if (hashes.length === 0) return result;
+  try {
+    // Meta allows up to 50 hashes per request
+    const chunks: string[][] = [];
+    for (let i = 0; i < hashes.length; i += 50) chunks.push(hashes.slice(i, i + 50));
+    console.log(`[Meta] Resolving ${hashes.length} image hashes for account ${adAccountId}`);
+    await Promise.all(chunks.map(async chunk => {
+      const data = await metaGet<{ data: Array<{ hash?: string; url?: string; url_128?: string; permalink_url?: string }> }>(
+        `${ensureActPrefix(adAccountId)}/adimages`,
+        accessToken,
+        { hashes: JSON.stringify(chunk), fields: "hash,url,url_128,permalink_url" }
+      );
+      console.log(`[Meta] adimages response: ${data.data?.length ?? 0} images resolved`);
+      for (const img of data.data ?? []) {
+        if (img.hash) {
+          result.set(img.hash, img.url ?? img.permalink_url ?? img.url_128 ?? "");
+        }
+      }
+    }));
+  } catch (err) {
+    console.error(`[Meta] getImageUrlsFromHashes error:`, err);
+  }
+  return result;
 }
 
 /** Get ad creative image/video preview URLs */
