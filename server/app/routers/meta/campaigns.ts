@@ -940,6 +940,27 @@ export const metaCampaignsRouter = router({
       return { cleared: count ?? 0 };
     }),
 
+  /** Bulk toggle campaign status (ACTIVE ↔ PAUSED) for multiple campaigns */
+  bulkToggleCampaigns: protectedProcedure
+    .input(z.object({
+      campaignIds: z.array(z.string().min(1)).min(1).max(50),
+      status: z.enum(["ACTIVE", "PAUSED"]),
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) throw new Error("No Meta connection found");
+      const results = await Promise.allSettled(
+        input.campaignIds.map(id =>
+          updateMetaCampaignStatus(id, conn.token, input.status)
+        ),
+      );
+      const succeeded = results.filter(r => r.status === "fulfilled" && r.value).length;
+      const failed = results.length - succeeded;
+      return { succeeded, failed, total: results.length };
+    }),
+
   /** Get video source URL from Meta Graph API for a given video_id */
   videoSource: protectedProcedure
     .input(z.object({

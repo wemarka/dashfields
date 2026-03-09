@@ -1,7 +1,11 @@
-// MetaCampaignTable.tsx
-// Table for displaying Meta Ads campaigns with insights.
-// Supports status toggle and direct link to Meta Ads Manager.
-import { Link2, LayoutGrid, ExternalLink, Loader2 } from "lucide-react";
+/**
+ * MetaCampaignTable.tsx
+ *
+ * Campaign table with:
+ * - Status toggle (per-row optimistic)
+ * - Bulk Actions: select multiple campaigns → Activate / Pause all at once
+ */
+import { Link2, LayoutGrid, ExternalLink, Loader2, Play, Pause, CheckSquare } from "lucide-react";
 import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
 import { Link } from "wouter";
 import { trpc } from "@/core/lib/trpc";
@@ -9,6 +13,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/shared/hooks/useCurrency";
+
+// ─── Status helpers ───────────────────────────────────────────────────────────
 
 const statusDot: Record<string, string> = {
   active: "bg-emerald-500", ACTIVE: "bg-emerald-500",
@@ -25,12 +31,13 @@ const statusText: Record<string, string> = {
   scheduled: "text-blue-700",
 };
 
-
 function fmtNum(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toLocaleString();
 }
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface CampaignInsight {
   campaignId: string;
@@ -59,6 +66,8 @@ interface MetaCampaignTableProps {
   onRowClick: (campaign: { id: string; name: string; status: string; objective?: string; dailyBudget?: number | null }) => void;
 }
 
+// ─── Per-row status toggle ────────────────────────────────────────────────────
+
 function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggled: () => void }) {
   const isActive = campaign.status === "ACTIVE" || campaign.status === "active";
   const isArchived = ["ARCHIVED", "DELETED"].includes(campaign.status);
@@ -71,7 +80,7 @@ function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggl
       toast.success(optimisticActive ? "Campaign paused" : "Campaign activated");
     },
     onError: (err) => {
-      setOptimisticActive(isActive); // rollback on error
+      setOptimisticActive(isActive);
       toast.error("Failed to update status", { description: err.message });
     },
     onSettled: () => setPending(false),
@@ -87,10 +96,7 @@ function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggl
     const newActive = !optimisticActive;
     setOptimisticActive(newActive);
     setPending(true);
-    toggleMutation.mutate({
-      campaignId: campaign.id,
-      status: newActive ? "ACTIVE" : "PAUSED",
-    });
+    toggleMutation.mutate({ campaignId: campaign.id, status: newActive ? "ACTIVE" : "PAUSED" });
   };
 
   return (
@@ -115,19 +121,96 @@ function StatusToggle({ campaign, onToggled }: { campaign: MetaCampaign; onToggl
           {pending && <Loader2 className="w-2.5 h-2.5 text-slate-400 animate-spin" />}
         </span>
       </button>
-      <span className={`text-[10px] font-medium ${
-        optimisticActive ? "text-emerald-600" : "text-slate-400"
-      }`}>
+      <span className={`text-[10px] font-medium ${optimisticActive ? "text-emerald-600" : "text-slate-400"}`}>
         {optimisticActive ? "On" : "Off"}
       </span>
     </div>
   );
 }
 
+// ─── Bulk Action Bar ──────────────────────────────────────────────────────────
+
+function BulkActionBar({ selectedIds, campaigns, onDone }: {
+  selectedIds: Set<string>;
+  campaigns: MetaCampaign[];
+  onDone: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const bulkToggle = trpc.meta.bulkToggleCampaigns.useMutation({
+    onSuccess: (data, vars) => {
+      toast.success(`${data.succeeded} campaign(s) ${vars.status === "ACTIVE" ? "activated" : "paused"}${data.failed > 0 ? `, ${data.failed} failed` : ""}`);
+      utils.meta.campaigns.invalidate();
+      utils.meta.campaignInsights.invalidate();
+      onDone();
+    },
+    onError: (err) => toast.error("Bulk action failed", { description: err.message }),
+  });
+
+  const count = selectedIds.size;
+  const ids = Array.from(selectedIds);
+  const isPending = bulkToggle.isPending;
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-2.5 bg-foreground/[0.04] border-b border-foreground/5 animate-in slide-in-from-top-1 duration-150">
+      <CheckSquare className="w-3.5 h-3.5 text-primary shrink-0" />
+      <span className="text-xs font-semibold text-foreground">{count} selected</span>
+      <div className="flex items-center gap-2 ml-auto">
+        <button
+          onClick={() => bulkToggle.mutate({ campaignIds: ids, status: "ACTIVE" })}
+          disabled={isPending}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+        >
+          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+          Activate all
+        </button>
+        <button
+          onClick={() => bulkToggle.mutate({ campaignIds: ids, status: "PAUSED" })}
+          disabled={isPending}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+        >
+          {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
+          Pause all
+        </button>
+        <button
+          onClick={onDone}
+          disabled={isPending}
+          className="px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main table ───────────────────────────────────────────────────────────────
+
 export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick }: MetaCampaignTableProps) {
   const { fmt: fmtMoney } = useCurrency();
   const { t } = useTranslation();
   const utils = trpc.useUtils();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.size === campaigns.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(campaigns.map(c => c.id)));
+    }
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+  const allSelected = campaigns.length > 0 && selectedIds.size === campaigns.length;
+  const someSelected = selectedIds.size > 0 && !allSelected;
 
   if (!isConnected) {
     return (
@@ -156,15 +239,13 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
           <table className="w-full">
             <thead>
               <tr className="border-b border-foreground/5">
-                {["Campaign", "Status", "Objective", "Budget", "Spend", "Impressions", "Clicks", "CTR", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
+                {["", "Campaign", "Status", "Objective", "Budget", "Spend", "Impressions", "Clicks", "CTR", ""].map((h, i) => (
+                  <th key={i} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <CampaignRowSkeleton key={i} />
-              ))}
+              {Array.from({ length: 5 }).map((_, i) => <CampaignRowSkeleton key={i} />)}
             </tbody>
           </table>
         </div>
@@ -174,6 +255,7 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
 
   return (
     <div className="glass rounded-2xl overflow-hidden">
+      {/* Table header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/5">
         <div className="flex items-center gap-2">
           <LayoutGrid className="w-4 h-4 text-primary" />
@@ -190,68 +272,108 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
           Open in Ads Manager <ExternalLink className="w-3 h-3" />
         </a>
       </div>
+
+      {/* Bulk action bar (shown when rows are selected) */}
+      {selectedIds.size > 0 && (
+        <BulkActionBar
+          selectedIds={selectedIds}
+          campaigns={campaigns}
+          onDone={clearSelection}
+        />
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-foreground/5">
+              {/* Select-all checkbox */}
+              <th className="pl-4 pr-2 py-3 w-8">
+                <button
+                  onClick={toggleAll}
+                  className="w-4 h-4 rounded border border-border flex items-center justify-center hover:border-primary transition-colors"
+                  title={allSelected ? "Deselect all" : "Select all"}
+                >
+                  {allSelected && <span className="w-2.5 h-2.5 rounded-sm bg-primary" />}
+                  {someSelected && <span className="w-2.5 h-0.5 rounded-sm bg-primary" />}
+                </button>
+              </th>
               {["Campaign", "Status", "Objective", "Budget", "Spend", "Impressions", "Clicks", "CTR", ""].map((h) => (
                 <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {campaigns.map((c) => (
-              <tr
-                key={c.id}
-                className="border-b border-foreground/5 last:border-0 hover:bg-foreground/3 transition-colors cursor-pointer"
-                onClick={() => onRowClick({ id: c.id, name: c.name, status: c.status, objective: c.objective ?? undefined, dailyBudget: c.dailyBudget })}
-              >
-                <td className="px-4 py-3.5">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium max-w-[180px] truncate" title={c.name}>{c.name}</span>
-                    <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
-                    {c.accountName && <span className="text-[10px] text-blue-400">{c.accountName}</span>}
-                  </div>
-                </td>
-                <td className="px-4 py-3.5">
-                  <div className="flex items-center gap-1.5">
-                    <div className={"w-1.5 h-1.5 rounded-full " + (statusDot[c.status] ?? "bg-slate-300")} />
-                    <span className={"text-xs capitalize font-medium " + (statusText[c.status] ?? "text-slate-500")}>
-                      {c.status?.toLowerCase()}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-4 py-3.5 text-xs text-muted-foreground capitalize">
-                  {c.objective?.replace("OUTCOME_", "").replace(/_/g, " ").toLowerCase() ?? "--"}
-                </td>
-                <td className="px-4 py-3.5 text-sm text-muted-foreground">
-                  {c.dailyBudget ? fmtMoney(c.dailyBudget) + "/d"
-                    : c.lifetimeBudget ? fmtMoney(c.lifetimeBudget) + " total"
-                    : "--"}
-                </td>
-                <td className="px-4 py-3.5 text-sm font-medium">
-                  {c.insights ? fmtMoney(c.insights.spend) : "--"}
-                </td>
-                <td className="px-4 py-3.5 text-sm text-muted-foreground">
-                  {c.insights ? fmtNum(c.insights.impressions) : "--"}
-                </td>
-                <td className="px-4 py-3.5 text-sm text-muted-foreground">
-                  {c.insights ? fmtNum(c.insights.clicks) : "--"}
-                </td>
-                <td className="px-4 py-3.5 text-sm font-medium">
-                  {c.insights ? c.insights.ctr.toFixed(2) + "%" : "--"}
-                </td>
-                <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
-                  <StatusToggle
-                    campaign={c}
-                    onToggled={() => {
-                      utils.meta.campaigns.invalidate();
-                      utils.meta.campaignInsights.invalidate();
-                    }}
-                  />
-                </td>
-              </tr>
-            ))}
+            {campaigns.map((c) => {
+              const isSelected = selectedIds.has(c.id);
+              return (
+                <tr
+                  key={c.id}
+                  className={`border-b border-foreground/5 last:border-0 transition-colors cursor-pointer ${
+                    isSelected ? "bg-primary/5 hover:bg-primary/8" : "hover:bg-foreground/3"
+                  }`}
+                  onClick={() => onRowClick({ id: c.id, name: c.name, status: c.status, objective: c.objective ?? undefined, dailyBudget: c.dailyBudget })}
+                >
+                  {/* Row checkbox */}
+                  <td className="pl-4 pr-2 py-3.5 w-8" onClick={(e) => toggleSelect(c.id, e)}>
+                    <button
+                      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        isSelected ? "bg-primary border-primary" : "border-border hover:border-primary"
+                      }`}
+                    >
+                      {isSelected && (
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
+                          <path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium max-w-[180px] truncate" title={c.name}>{c.name}</span>
+                      <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
+                      {c.accountName && <span className="text-[10px] text-blue-400">{c.accountName}</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className={"w-1.5 h-1.5 rounded-full " + (statusDot[c.status] ?? "bg-slate-300")} />
+                      <span className={"text-xs capitalize font-medium " + (statusText[c.status] ?? "text-slate-500")}>
+                        {c.status?.toLowerCase()}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-xs text-muted-foreground capitalize">
+                    {c.objective?.replace("OUTCOME_", "").replace(/_/g, " ").toLowerCase() ?? "--"}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm text-muted-foreground">
+                    {c.dailyBudget ? fmtMoney(c.dailyBudget) + "/d"
+                      : c.lifetimeBudget ? fmtMoney(c.lifetimeBudget) + " total"
+                      : "--"}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm font-medium">
+                    {c.insights ? fmtMoney(c.insights.spend) : "--"}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm text-muted-foreground">
+                    {c.insights ? fmtNum(c.insights.impressions) : "--"}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm text-muted-foreground">
+                    {c.insights ? fmtNum(c.insights.clicks) : "--"}
+                  </td>
+                  <td className="px-4 py-3.5 text-sm font-medium">
+                    {c.insights ? c.insights.ctr.toFixed(2) + "%" : "--"}
+                  </td>
+                  <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
+                    <StatusToggle
+                      campaign={c}
+                      onToggled={() => {
+                        utils.meta.campaigns.invalidate();
+                        utils.meta.campaignInsights.invalidate();
+                      }}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {campaigns.length === 0 && (

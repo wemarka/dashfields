@@ -2783,3 +2783,21 @@
 - [x] Manual "Load more" fallback button
 - [x] Fix Alerts.tsx to use paginated response shape
 - [x] 0 TypeScript errors
+
+## ✅ Feature: A/B Comparison with Official Meta iframe
+- [x] Replace mockup preview with AdPreviewIframe component in comparison view
+- [x] Support side-by-side iframe display for two creatives (Live Preview section)
+- [x] Platform selector (Desktop Feed, Mobile Feed, Instagram, Story, Reels)
+
+## ✅ Feature: Notification Grouping
+- [x] Group notifications by type+title in NotificationBell
+- [x] Show grouped count badge on collapsed group (e.g. "3 budget alerts")
+- [x] Expand group on click to show individual notifications
+- [x] Cursor-based pagination + IntersectionObserver preserved
+
+## ✅ Feature: Campaign Bulk Actions
+- [x] Add checkbox column to MetaCampaignTable (per-row + select-all)
+- [x] Add bulk action bar (appears when ≥1 campaign selected): Activate all, Pause all
+- [x] Add bulkToggleCampaigns procedure in meta campaigns router
+- [x] Optimistic: clear selection + invalidate cache after bulk action
+- [x] 0 TypeScript errors

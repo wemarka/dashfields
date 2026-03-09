@@ -231,6 +231,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
 function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
   adA: AdInfo; adB: AdInfo; fmtCurrency: (n: number) => string; onClose: () => void;
 }) {
+  const [previewPlacement, setPreviewPlacement] = useState<AdPlacement>("fb_feed");
   const metrics: Array<{
     label: string; a: number; b: number;
     fmt: (n: number) => string; lowerBetter: boolean;
@@ -316,6 +317,36 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
           );
         })}
       </div>
+
+      {/* Live Preview section — official Meta iframes side by side */}
+      {(adA.creativeId || adB.creativeId) && (
+        <div className="border-t border-border">
+          {/* Placement selector */}
+          <div className="px-4 pt-3 pb-2">
+            <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wide mb-2">Live Preview</p>
+            <PlacementSelector value={previewPlacement} onChange={setPreviewPlacement} />
+          </div>
+          {/* Side-by-side iframes */}
+          <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
+            {[{ ad: adA, color: "blue" }, { ad: adB, color: "violet" }].map(({ ad, color }, idx) => (
+              <div key={ad.id} className="flex flex-col items-center p-3 gap-2">
+                <div className={`flex items-center gap-1.5 self-start`}>
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-violet-500"}`} />
+                  <span className="text-[9px] font-semibold text-muted-foreground">{idx === 0 ? "Ad A" : "Ad B"}</span>
+                </div>
+                <div className="w-full flex justify-center overflow-x-auto">
+                  <AdPreviewIframe
+                    creativeId={ad.creativeId}
+                    adId={ad.id}
+                    placement={previewPlacement}
+                    fallback={undefined}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
