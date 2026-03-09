@@ -13,10 +13,11 @@ export const notificationsRouter = router({
   list: protectedProcedure
     .input(z.object({
       unreadOnly: z.boolean().default(false),
-      limit:      z.number().min(1).max(100).default(50),
+      limit:      z.number().min(1).max(50).default(20),
+      cursor:     z.string().optional(), // ISO timestamp cursor for pagination
     }).optional())
-    .query(async ({ ctx }) => {
-      return getUserNotifications(ctx.user.id);
+    .query(async ({ ctx, input }) => {
+      return getUserNotifications(ctx.user.id, input?.limit ?? 20, input?.cursor);
     }),
 
   /** Count unread notifications */

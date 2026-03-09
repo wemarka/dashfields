@@ -228,7 +228,8 @@ export default function Alerts() {
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
 
   const { data: rules = [], isLoading: rulesLoading } = trpc.alerts.list.useQuery({ workspaceId: activeWorkspace?.id });
-  const { data: notifications = [], isLoading: notifLoading } = trpc.notifications.list.useQuery();
+  const { data: _notifPage, isLoading: notifLoading } = trpc.notifications.list.useQuery();
+  const notifications = (_notifPage as { items: { id: number; type: string; title: string; message: string; is_read: boolean; created_at: string; metadata?: Record<string, unknown> | null }[]; nextCursor: string | null } | undefined)?.items ?? [];
   const { data: accounts = [] } = trpc.social.list.useQuery({ workspaceId: activeWorkspace?.id });
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery();
 

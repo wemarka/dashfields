@@ -2770,3 +2770,16 @@
 - [x] Apply optimisticMarkAllRead in NotificationBell.tsx
 - [x] Fix TypeScript types in optimistic.ts (NotifList | undefined)
 - [x] Supabase indexes added: notifications, alert_rules, campaigns, posts, social_accounts
+
+## ✅ Optimistic UI — Campaign Status Toggle
+- [x] Add optimisticToggleCampaignStatus helper in optimistic.ts
+- [x] Apply optimistic toggle in CampaignStatusToggle / campaigns list component
+- [x] Rollback on API error with toast notification
+
+## ✅ Infinite Scroll — NotificationBell
+- [x] Add cursor-based pagination to notifications.list procedure (limit + cursor)
+- [x] Cursor-based pagination in getUserNotifications (db/settings.ts)
+- [x] IntersectionObserver sentinel for auto-load on scroll
+- [x] Manual "Load more" fallback button
+- [x] Fix Alerts.tsx to use paginated response shape
+- [x] 0 TypeScript errors

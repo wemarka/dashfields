@@ -176,16 +176,32 @@ export type NotificationRow = {
   created_at: string;
 };
 
-export async function getUserNotifications(userId: number, limit = 20): Promise<NotificationRow[]> {
+export async function getUserNotifications(
+  userId: number,
+  limit = 20,
+  cursor?: string // ISO timestamp — fetch notifications older than this
+): Promise<{ items: NotificationRow[]; nextCursor: string | null }> {
   const sb = getSupabase();
-  const { data, error } = await sb
+  let query = sb
     .from("notifications")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(limit + 1); // fetch one extra to detect if there’s a next page
+
+  if (cursor) {
+    query = query.lt("created_at", cursor);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as NotificationRow[];
+
+  const rows = (data ?? []) as NotificationRow[];
+  const hasMore = rows.length > limit;
+  const items = hasMore ? rows.slice(0, limit) : rows;
+  const nextCursor = hasMore ? items[items.length - 1].created_at : null;
+
+  return { items, nextCursor };
 }
 
 export async function createNotification(notification: {
