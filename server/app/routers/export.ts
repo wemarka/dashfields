@@ -677,4 +677,138 @@ export const exportRouter = router({
         hasLiveData: rows.some((r) => r.isLive),
       };
     }),
+
+  /**
+   * Generate a detailed CSV export for a single campaign from the Drawer.
+   * Includes KPIs (Spend, Impressions, CTR, CPC, CPM, Reach),
+   * conversion metrics (Leads, Calls, Messages, Conversions),
+   * campaign metadata (Status, Objective, Budget, Score, End Date),
+   * and daily breakdown rows.
+   */
+  campaignDetailCsv: protectedProcedure
+    .input(z.object({
+      campaignId:   z.string(),
+      campaignName: z.string(),
+      status:       z.string(),
+      platform:     z.string(),
+      objective:    z.string().nullable().optional(),
+      dailyBudget:  z.number().nullable().optional(),
+      lifetimeBudget: z.number().nullable().optional(),
+      stopTime:     z.string().nullable().optional(),
+      datePreset:   z.string().default("last_30d"),
+      // KPIs
+      spend:        z.number().nullable().optional(),
+      impressions:  z.number().nullable().optional(),
+      clicks:       z.number().nullable().optional(),
+      ctr:          z.number().nullable().optional(),
+      reach:        z.number().nullable().optional(),
+      cpc:          z.number().nullable().optional(),
+      cpm:          z.number().nullable().optional(),
+      conversions:  z.number().nullable().optional(),
+      leads:        z.number().nullable().optional(),
+      calls:        z.number().nullable().optional(),
+      messages:     z.number().nullable().optional(),
+      score:        z.number().nullable().optional(),
+      // Messaging detail
+      messagingFirstReply: z.number().nullable().optional(),
+      messagingReplied7d:  z.number().nullable().optional(),
+      // Daily breakdown
+      dailyData: z.array(z.object({
+        date:        z.string(),
+        spend:       z.number(),
+        impressions: z.number(),
+        clicks:      z.number(),
+        reach:       z.number().optional(),
+      })).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const label = DATE_PRESET_LABELS[input.datePreset] ?? input.datePreset;
+      const now = new Date().toISOString().split("T")[0];
+
+      // ── Section 1: Campaign Summary ───────────────────────────────────────
+      const summaryHeader = [
+        "Campaign Name", "Status", "Platform", "Objective",
+        "Daily Budget", "Lifetime Budget", "End Date", "Date Range", "Score",
+      ].join(",");
+
+      const summaryRow = [
+        `"${input.campaignName.replace(/"/g, '""')}"`,
+        input.status,
+        input.platform,
+        input.objective ?? "",
+        input.dailyBudget != null ? input.dailyBudget.toFixed(2) : "",
+        input.lifetimeBudget != null ? input.lifetimeBudget.toFixed(2) : "",
+        input.stopTime ?? "",
+        label,
+        input.score != null ? String(input.score) : "",
+      ].join(",");
+
+      // ── Section 2: Performance KPIs ───────────────────────────────────────
+      const kpiHeader = [
+        "Spend", "Impressions", "Clicks", "CTR (%)", "Reach", "CPC", "CPM",
+      ].join(",");
+
+      const kpiRow = [
+        input.spend?.toFixed(2) ?? "",
+        input.impressions?.toLocaleString() ?? "",
+        input.clicks?.toLocaleString() ?? "",
+        input.ctr?.toFixed(2) ?? "",
+        input.reach?.toLocaleString() ?? "",
+        input.cpc?.toFixed(2) ?? "",
+        input.cpm?.toFixed(2) ?? "",
+      ].join(",");
+
+      // ── Section 3: Conversion Metrics ─────────────────────────────────────
+      const convHeader = [
+        "Conversions", "Leads", "Calls", "Messages (Conversations Started)",
+        "Messaging First Replies", "Messaging Replied (7d)",
+      ].join(",");
+
+      const convRow = [
+        input.conversions?.toLocaleString() ?? "",
+        input.leads?.toLocaleString() ?? "",
+        input.calls?.toLocaleString() ?? "",
+        input.messages?.toLocaleString() ?? "",
+        input.messagingFirstReply?.toLocaleString() ?? "",
+        input.messagingReplied7d?.toLocaleString() ?? "",
+      ].join(",");
+
+      // ── Section 4: Daily Breakdown ────────────────────────────────────────
+      const daily = input.dailyData ?? [];
+      const dailyHeader = "Date,Spend,Impressions,Clicks,Reach,CTR (%)";
+      const dailyRows = daily.map(d => [
+        d.date,
+        d.spend.toFixed(2),
+        d.impressions.toLocaleString(),
+        d.clicks.toLocaleString(),
+        d.reach?.toLocaleString() ?? "",
+        d.impressions > 0 ? ((d.clicks / d.impressions) * 100).toFixed(2) : "0.00",
+      ].join(","));
+
+      // ── Assemble CSV ──────────────────────────────────────────────────────
+      const csv = [
+        `"CAMPAIGN DETAIL EXPORT — ${now}"`,
+        "",
+        "CAMPAIGN INFO",
+        summaryHeader,
+        summaryRow,
+        "",
+        "PERFORMANCE KPIs",
+        kpiHeader,
+        kpiRow,
+        "",
+        "CONVERSION METRICS",
+        convHeader,
+        convRow,
+        "",
+        ...(daily.length > 0 ? [
+          `"DAILY BREAKDOWN (${daily.length} days)"`,
+          dailyHeader,
+          ...dailyRows,
+        ] : []),
+      ].join("\n");
+
+      const safeName = input.campaignName.replace(/[^a-z0-9]/gi, "-").toLowerCase().slice(0, 40);
+      return { csv, filename: `campaign-${safeName}-${input.datePreset}-${now}.csv` };
+    }),
 });

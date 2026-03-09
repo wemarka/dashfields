@@ -2643,3 +2643,11 @@
 - [x] Add messaging detail section in PerformanceTab (Leads + Conversations Started + Calls with first_reply & replied_7d breakdown)
 - [x] Add messagingFirstReply + messagingReplied7d fields to server campaignInsights
 - [x] Update CSV export to include Leads, Calls, Messages, Score, End Date columns + totals row
+
+## ✅ Campaign Detail Drawer — Export Button
+- [x] Add server procedure `export.campaignDetailCsv` for single campaign CSV export
+- [x] Add CSV button in DrawerHeader (TableIcon, next to Report button)
+- [x] CSV includes 4 sections: Campaign Info, Performance KPIs, Conversion Metrics (Leads/Calls/Messages/first_reply/replied_7d), Daily Breakdown
+- [x] Loading state while generating CSV (spinner + "..." label)
+- [x] Auto-download on success with named file (campaign-name-datepreset-date.csv)
+- [x] 0 TypeScript errors

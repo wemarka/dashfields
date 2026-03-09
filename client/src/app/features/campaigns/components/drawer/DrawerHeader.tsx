@@ -5,7 +5,7 @@
  *  [FB]  Campaign Name  |  CTR · CPC · CPM · Impressions · Spend  |  ● Active  Clone  Report  |  7D 14D [30D] 90D
  */
 import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
-import { Loader2, Copy, FileDown, Activity } from "lucide-react";
+import { Loader2, Copy, FileDown, Activity, TableIcon } from "lucide-react";
 import { InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
@@ -67,9 +67,11 @@ interface DrawerHeaderProps {
   insight?: { ctr: number; cpc: number; cpm: number; spend: number; impressions: number } | null;
   isTogglingStatus: boolean;
   isExporting: boolean;
+  isExportingCsv?: boolean;
   onToggleStatus: () => void;
   onClone: () => void;
   onExport: () => void;
+  onExportCsv?: () => void;
   onBudgetSave: (v: number) => void;
   fmtCurrency: (n: number) => string;
 }
@@ -77,8 +79,8 @@ interface DrawerHeaderProps {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function DrawerHeader({
   campaign, datePreset, onDatePresetChange,
-  insight, isTogglingStatus, isExporting,
-  onToggleStatus, onClone, onExport, onBudgetSave, fmtCurrency,
+  insight, isTogglingStatus, isExporting, isExportingCsv,
+  onToggleStatus, onClone, onExport, onExportCsv, onBudgetSave, fmtCurrency,
 }: DrawerHeaderProps) {
   const isActive  = campaign?.status?.toLowerCase() === "active";
   const isPaused  = campaign?.status?.toLowerCase() === "paused";
@@ -162,6 +164,19 @@ export function DrawerHeader({
         </button>
 
         <div className="flex-1 min-w-2" />
+
+        {/* Export CSV */}
+        {onExportCsv && (
+          <button
+            onClick={onExportCsv}
+            disabled={isExportingCsv}
+            title="Export campaign data as CSV"
+            className="flex items-center gap-1 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground border border-border/50 hover:border-border rounded transition-colors disabled:opacity-50 shrink-0"
+          >
+            {isExportingCsv ? <Loader2 className="w-3 h-3 animate-spin" /> : <TableIcon className="w-3 h-3" />}
+            {isExportingCsv ? "..." : "CSV"}
+          </button>
+        )}
 
         {/* Export Report */}
         <button

@@ -290,6 +290,18 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     onError: () => toast.error("Failed to generate report"),
   });
 
+  const exportDetailCsv = trpc.export.campaignDetailCsv.useMutation({
+    onSuccess: (result) => {
+      const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = result.filename; a.click();
+      URL.revokeObjectURL(url);
+      toast.success("CSV exported successfully");
+    },
+    onError: () => toast.error("Failed to export CSV"),
+  });
+
   const handleNotesChange = useCallback((value: string) => {
     setNotes(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -326,6 +338,42 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
       notes: notes || undefined, tags: savedTags.map((t: { tag: string }) => t.tag), datePreset,
     });
   }, [campaign, campaignInsight, daily, notes, savedTags, datePreset, exportReport]);
+
+  const handleDownloadCsv = useCallback(() => {
+    if (!campaign) return;
+    exportDetailCsv.mutate({
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      status: campaign.status,
+      platform: campaign.platform ?? "facebook",
+      objective: campaign.objective ?? null,
+      dailyBudget: campaign.dailyBudget ?? null,
+      lifetimeBudget: campaign.lifetimeBudget ?? null,
+      stopTime: (campaign as any).stopTime ?? null,
+      datePreset,
+      spend: campaignInsight ? Number(campaignInsight.spend) : null,
+      impressions: campaignInsight ? Number(campaignInsight.impressions) : null,
+      clicks: campaignInsight ? Number(campaignInsight.clicks) : null,
+      ctr: campaignInsight ? Number(campaignInsight.ctr) : null,
+      reach: campaignInsight ? Number(campaignInsight.reach) : null,
+      cpc: campaignInsight ? Number(campaignInsight.cpc) : null,
+      cpm: campaignInsight ? Number(campaignInsight.cpm) : null,
+      conversions: campaignInsight ? Number((campaignInsight as any).conversions ?? 0) : null,
+      leads: campaignInsight ? Number((campaignInsight as any).leads ?? 0) : null,
+      calls: campaignInsight ? Number((campaignInsight as any).calls ?? 0) : null,
+      messages: campaignInsight ? Number((campaignInsight as any).messages ?? 0) : null,
+      score: campaignInsight ? Number((campaignInsight as any).score ?? 0) : null,
+      messagingFirstReply: campaignInsight ? Number((campaignInsight as any).messagingFirstReply ?? 0) : null,
+      messagingReplied7d: campaignInsight ? Number((campaignInsight as any).messagingReplied7d ?? 0) : null,
+      dailyData: (daily ?? []).map(d => ({
+        date: d.date ?? "",
+        spend: Number(d.spend ?? 0),
+        impressions: Number(d.impressions ?? 0),
+        clicks: Number(d.clicks ?? 0),
+        reach: Number(d.reach ?? 0),
+      })),
+    });
+  }, [campaign, campaignInsight, daily, datePreset, exportDetailCsv]);
 
   const handleAddTag = () => {
     const t = tagInput.trim();
@@ -378,6 +426,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             } : null}
             isTogglingStatus={toggleMetaStatus.isPending}
             isExporting={exportReport.isPending}
+            isExportingCsv={exportDetailCsv.isPending}
             onToggleStatus={() => {
               if (!campaign) return;
               const isActive = campaign.status?.toLowerCase() === "active";
@@ -388,6 +437,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             }}
             onClone={() => toast.info("Clone feature coming soon")}
             onExport={handleDownloadReport}
+            onExportCsv={handleDownloadCsv}
             onBudgetSave={(v) => {
               if (campaign) updateBudget.mutate({ campaignId: campaign.id, dailyBudget: v });
             }}
