@@ -63,6 +63,39 @@ function fmtCompact(n: number): string {
   return n.toLocaleString();
 }
 
+// ─── SVG Icons for StatsBar ──────────────────────────────────────────────────
+const StatsIcons = {
+  spend: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M7 4v6M5.5 8.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S8 7 7 7s-1.5-.67-1.5-1.5S6.17 4 7 4s1.5.67 1.5 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  ),
+  impressions: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M1 7c0 0 2.5-4 6-4s6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  ),
+  clicks: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M3 3l8 4-4 1-1 4-3-9z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  ),
+  ctr: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M2 10L5 6.5l2.5 2L9.5 5 12 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 4h2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  campaigns: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="3.5" width="11" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4.5 7h5M4.5 9h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  ),
+};
+
 // ─── Compact Stats Bar ────────────────────────────────────────────────────────
 function StatsBar({
   totalSpend, totalImpressions, totalClicks, avgCtr,
@@ -74,32 +107,59 @@ function StatsBar({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center gap-6 py-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        {[1,2,3,4].map(i => (
-          <div key={i} className="flex flex-col gap-1">
-            <div className="h-2.5 w-12 rounded bg-gray-200 animate-pulse" />
-            <div className="h-4 w-16 rounded bg-gray-100 animate-pulse" />
-          </div>
+      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        {[1,2,3,4,5].map((i, idx) => (
+          <>
+            <div key={i} style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#f3f4f6" }} />
+                <div style={{ height: 14, width: 56, borderRadius: 4, backgroundColor: "#f0f0f0" }} />
+              </div>
+            </div>
+            {idx < 4 && <div style={{ width: 1, backgroundColor: "#f0f0f0", margin: "10px 0", flexShrink: 0 }} />}
+          </>
         ))}
       </div>
     );
   }
 
   const stats = [
-    { label: "Spend",       value: fmtMoney(totalSpend, 0) },
-    { label: "Impressions", value: fmtCompact(totalImpressions) },
-    { label: "Clicks",      value: fmtCompact(totalClicks) },
-    { label: "Avg. CTR",    value: avgCtr.toFixed(2) + "%" },
-    { label: "Campaigns",   value: `${activeCampaigns} active / ${totalCampaigns}` },
+    { key: "spend",       label: "Spend",       value: fmtMoney(totalSpend, 0),              sub: `${activeCampaigns} active / ${totalCampaigns}`, icon: StatsIcons.spend },
+    { key: "impressions", label: "Impressions", value: fmtCompact(totalImpressions),         sub: totalImpressions > 0 ? `CPM ${fmtMoney(totalSpend / (totalImpressions / 1000), 2)}` : undefined, icon: StatsIcons.impressions },
+    { key: "clicks",      label: "Clicks",      value: fmtCompact(totalClicks),              sub: totalClicks > 0 ? `CPC ${fmtMoney(totalSpend / totalClicks, 2)}` : undefined, icon: StatsIcons.clicks },
+    { key: "ctr",         label: "Avg. CTR",    value: avgCtr.toFixed(2) + "%",             sub: undefined, icon: StatsIcons.ctr },
+    { key: "campaigns",   label: "Campaigns",   value: `${activeCampaigns} active`,          sub: `of ${totalCampaigns} total`, icon: StatsIcons.campaigns },
   ];
 
   return (
-    <div className="flex items-center gap-8 py-3 flex-wrap" style={{ borderBottom: "1px solid #f0f0f0" }}>
-      {stats.map((s) => (
-        <div key={s.label} className="flex flex-col">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">{s.label}</span>
-          <span className="text-[13px] font-semibold text-gray-800 mt-0.5">{s.value}</span>
-        </div>
+    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      {stats.map((s, i) => (
+        <>
+          <div key={s.key} style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+            {/* Icon */}
+            <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", flexShrink: 0 }}>
+              {s.icon}
+            </div>
+            {/* Text */}
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
+                {s.label}
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: "#111827", fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: 0 }}>
+                {s.value}
+              </p>
+              {s.sub && (
+                <p style={{ fontSize: 10, color: "#9ca3af", marginTop: 3, fontFamily: "Inter, sans-serif", lineHeight: 1 }}>
+                  {s.sub}
+                </p>
+              )}
+            </div>
+          </div>
+          {i < stats.length - 1 && (
+            <div style={{ width: 1, backgroundColor: "#f0f0f0", alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
+          )}
+        </>
       ))}
     </div>
   );
