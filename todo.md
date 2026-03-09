@@ -2655,7 +2655,8 @@
 ## ✅ Campaigns Table — Font Clarity
 - [x] Changed cell color from #6b7280 (muted gray) to #374151 (dark gray) + fontWeight 500 for all numeric columns (impressions, clicks, CTR, reach, conversions, CPC, CPM, leads, calls, messages, stopTime)
 
-## 🔤 Inter Font — Global Typography
-- [ ] Add Inter from Google Fonts in index.html
-- [ ] Set Inter as default font in index.css
-- [ ] Update table cells to use Inter with tabular-nums instead of monospace
+## ✅ Inter Font — Global Typography
+- [x] Inter already loaded in index.html (Google Fonts, variable weight 100-900)
+- [x] Inter already set as first font in --font-sans CSS variable in index.css
+- [x] Updated all table data cells: fontFamily Inter + fontVariantNumeric tabular-nums
+- [x] Spend column: fontWeight 600 (darkest, most important); other columns: fontWeight 500

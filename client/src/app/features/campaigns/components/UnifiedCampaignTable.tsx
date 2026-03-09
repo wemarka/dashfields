@@ -196,17 +196,17 @@ function UnifiedCampaignTableInner({
         );
       case "spend":
         if (onBudgetUpdate && c.source === "local") return <InlineBudgetEditor value={c.spend} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
-        return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#111827" }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
-      case "impressions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
-      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
-      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;
-      case "reach":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{fmtNum(c.reach)}</span>;
-      case "conversions": return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{fmtNum(c.conversions)}</span>;
-      case "cpc":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
-      case "cpm":         return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
-      case "leads":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
-      case "calls":       return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
-      case "messages":    return <span style={{ fontSize: 12, fontFamily: "monospace", color: "#374151", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
+        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#111827", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
+      case "impressions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
+      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
+      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;
+      case "reach":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.reach)}</span>;
+      case "conversions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.conversions)}</span>;
+      case "cpc":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
+      case "cpm":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
+      case "leads":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
+      case "calls":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
+      case "messages":    return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
         const s = c.score;
