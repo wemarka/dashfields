@@ -66,6 +66,7 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: "status",      label: "Status",      sortKey: "status",      width: "w-[100px]",     defaultVisible: true },
   { key: "platform",    label: "Platform",    sortKey: "platform",    width: "w-[120px]",     defaultVisible: true },
   { key: "spend",       label: "Spend",       sortKey: "spend",       width: "w-[100px]",     defaultVisible: true,  align: "right" },
+  { key: "dailyBudget", label: "Daily Budget",                         width: "w-[110px]",     defaultVisible: false, align: "right" },
   { key: "impressions", label: "Impressions", sortKey: "impressions", width: "w-[110px]",     defaultVisible: true,  align: "right" },
   { key: "clicks",      label: "Clicks",      sortKey: "clicks",      width: "w-[90px]",      defaultVisible: true,  align: "right" },
   { key: "ctr",         label: "CTR",         sortKey: "ctr",         width: "w-[80px]",      defaultVisible: true,  align: "right" },

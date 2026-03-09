@@ -144,48 +144,112 @@ export function CampaignSwitch({
   onToggle: (campaign: UnifiedCampaign) => void;
   pending: boolean;
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const isActive = campaign.status.toLowerCase() === "active";
   const isDisabled = pending || ["ended", "archived", "deleted"].includes(campaign.status.toLowerCase());
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isDisabled) return;
+    // Only show confirmation when pausing an active campaign
+    if (isActive) {
+      setShowConfirm(true);
+    } else {
+      onToggle(campaign);
+    }
+  };
+
   return (
-    <button
-      onClick={(e) => { e.stopPropagation(); if (!isDisabled) onToggle(campaign); }}
-      disabled={isDisabled}
-      title={isActive ? "Click to pause" : "Click to activate"}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        width: 36,
-        height: 20,
-        borderRadius: 10,
-        border: "none",
-        cursor: isDisabled ? "not-allowed" : "pointer",
-        transition: "background-color 0.2s",
-        backgroundColor: pending ? "#d1d5db" : isActive ? "#10b981" : "#d1d5db",
-        opacity: isDisabled && !pending ? 0.5 : 1,
-        flexShrink: 0,
-      }}
-    >
-      {pending ? (
-        <span style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}>
-          <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-          </svg>
-        </span>
-      ) : (
-        <span style={{
-          position: "absolute",
-          left: isActive ? 18 : 2,
-          width: 16,
-          height: 16,
-          borderRadius: "50%",
-          backgroundColor: "white",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-          transition: "left 0.2s",
-        }} />
+    <>
+      <button
+        onClick={handleClick}
+        disabled={isDisabled}
+        title={isActive ? "Click to pause" : "Click to activate"}
+        style={{
+          position: "relative",
+          display: "inline-flex",
+          alignItems: "center",
+          width: 36,
+          height: 20,
+          borderRadius: 10,
+          border: "none",
+          cursor: isDisabled ? "not-allowed" : "pointer",
+          transition: "background-color 0.2s",
+          backgroundColor: pending ? "#d1d5db" : isActive ? "#10b981" : "#d1d5db",
+          opacity: isDisabled && !pending ? 0.5 : 1,
+          flexShrink: 0,
+        }}
+      >
+        {pending ? (
+          <span style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}>
+            <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          </span>
+        ) : (
+          <span style={{
+            position: "absolute",
+            left: isActive ? 18 : 2,
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            backgroundColor: "white",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            transition: "left 0.2s",
+          }} />
+        )}
+      </button>
+
+      {/* ── Pause Confirmation Dialog ── */}
+      {showConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+          onClick={(e) => { e.stopPropagation(); setShowConfirm(false); }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-[340px] p-6 animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 mb-4 mx-auto">
+              <Pause className="w-5 h-5 text-gray-500" />
+            </div>
+
+            {/* Title */}
+            <h3 className="text-sm font-semibold text-gray-900 text-center mb-1">
+              Pause Campaign?
+            </h3>
+
+            {/* Campaign name */}
+            <p className="text-xs text-gray-500 text-center mb-1 truncate px-2">
+              &ldquo;{campaign.name}&rdquo;
+            </p>
+
+            {/* Warning */}
+            <p className="text-xs text-gray-400 text-center mb-5">
+              This will stop delivery immediately. You can reactivate at any time.
+            </p>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 h-8 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setShowConfirm(false); onToggle(campaign); }}
+                className="flex-1 h-8 rounded-lg bg-gray-800 text-xs font-medium text-white hover:bg-gray-700 transition-colors"
+              >
+                Pause Campaign
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    </button>
+    </>
   );
 }
 

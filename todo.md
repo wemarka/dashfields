@@ -2808,3 +2808,16 @@
 - [x] Show loading spinner on Switch while API call is in progress
 - [x] Rollback Switch state on API error with toast
 - [x] 0 TypeScript errors
+
+### ✅ Confirmation Dialog — Campaign Switch
+- [x] Show confirmation dialog when pausing an ACTIVE campaign
+- [x] Dialog: grey/white design, campaign name, warning message, Confirm/Cancel buttons
+- [x] No dialog needed when activating (only when pausing)
+## ✅ Campaign Budget Inline Edit
+- [x] Add click-to-edit on Daily Budget column in UnifiedCampaignTable
+- [x] Show input field on click with current budget value
+- [x] Save on Enter, cancel on Escape
+- [x] Connect to Meta API updateCampaignBudget procedure (meta campaigns)
+- [x] Connect to local campaigns via campaigns.updateBudget procedure
+- [x] Daily Budget column added to column toggle (hidden by default, enable from Columns menu)
+- [x] 630/630 tests passing, 0 TypeScript errors

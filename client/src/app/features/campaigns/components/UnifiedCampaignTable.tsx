@@ -203,8 +203,10 @@ function UnifiedCampaignTableInner({
           </div>
         );
       case "spend":
-        if (onBudgetUpdate && c.source === "local") return <InlineBudgetEditor value={c.spend} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#111827", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
+      case "dailyBudget":
+        if (onBudgetUpdate) return <InlineBudgetEditor value={c.dailyBudget} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
+        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.dailyBudget != null ? fmtMoney(c.dailyBudget, 0) : "—"}</span>;
       case "impressions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
       case "clicks":      return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
       case "ctr":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;

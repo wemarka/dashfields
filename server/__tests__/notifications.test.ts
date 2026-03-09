@@ -75,15 +75,16 @@ import {
 } from "../app/db/settings";
 
 describe("getUserNotifications", () => {
-  it("returns array of notifications for user", async () => {
+  it("returns paginated response with items array", async () => {
     const result = await getUserNotifications(1);
-    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveProperty("items");
+    expect(Array.isArray(result.items)).toBe(true);
   });
 
   it("returns notifications with required fields", async () => {
     const result = await getUserNotifications(1);
-    if (result.length > 0) {
-      const notif = result[0];
+    if (result.items.length > 0) {
+      const notif = result.items[0];
       expect(notif).toHaveProperty("id");
       expect(notif).toHaveProperty("title");
       expect(notif).toHaveProperty("message");

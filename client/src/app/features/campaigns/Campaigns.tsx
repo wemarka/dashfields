@@ -226,6 +226,14 @@ export default function Campaigns() {
     onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Campaign cloned"); },
     onError: () => toast.error("Failed to clone campaign"),
   });
+  const updateMetaBudget = trpc.meta.updateCampaignBudget.useMutation({
+    onSuccess: () => { refetchMeta(); toast.success("Budget updated"); },
+    onError: (e) => toast.error("Failed to update budget", { description: e.message }),
+  });
+  const updateLocalBudget = trpc.campaigns.updateBudget.useMutation({
+    onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Budget updated"); },
+    onError: (e) => toast.error("Failed to update budget", { description: e.message }),
+  });
   const toggleMetaStatus = trpc.meta.toggleCampaignStatus.useMutation({
     onMutate: ({ campaignId }) => setStatusTogglePending(campaignId),
     onSettled: () => setStatusTogglePending(null),
@@ -379,6 +387,14 @@ export default function Campaigns() {
     setSearch(""); setStatusFilter("active"); setPlatformFilter("all");
     setDatePreset("last_30d"); setCustomDateRange(undefined); setTagFilter("all");
   }, []);
+  const handleBudgetUpdate = useCallback((campaign: UnifiedCampaign, newBudget: number) => {
+    if (campaign.source === "api") {
+      if (!campaign.adAccountId) { toast.error("No ad account ID found"); return; }
+      updateMetaBudget.mutate({ campaignId: campaign.id, dailyBudget: newBudget });
+    } else {
+      updateLocalBudget.mutate({ campaignId: Number(campaign.id), dailyBudget: newBudget });
+    }
+  }, [updateMetaBudget, updateLocalBudget]);
   const handleBulkAction = useCallback((action: "pause" | "activate" | "delete", ids: string[]) => {
     const count = ids.length;
     switch (action) {
@@ -717,6 +733,7 @@ export default function Campaigns() {
             onDelete={handleDelete}
             onClone={handleClone}
             onBulkAction={handleBulkAction}
+            onBudgetUpdate={handleBudgetUpdate}
             statusTogglePending={statusTogglePending}
           />
         </div>

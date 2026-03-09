@@ -308,6 +308,19 @@ export const campaignsRouter = router({
       return { success: true };
     }),
 
+  /** Update local campaign daily budget */
+  updateBudget: protectedProcedure
+    .input(z.object({ campaignId: z.number().int().positive(), dailyBudget: z.number().min(0) }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await sb
+        .from("campaigns")
+        .update({ budget: input.dailyBudget.toString(), budget_type: "daily", updated_at: new Date().toISOString() })
+        .eq("id", input.campaignId)
+        .eq("user_id", ctx.user.id);
+      return { success: true };
+    }),
+
   /** Bulk update campaign status */
   bulkUpdateStatus: protectedProcedure
     .input(z.object({
