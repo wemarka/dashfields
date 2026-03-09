@@ -206,37 +206,6 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
 
   return (
     <div className="p-5 space-y-4">
-      {/* ── KPI Summary Strip ── */}
-      {campaignInsight && (
-        <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/30 rounded-lg border border-border/40">
-          {campaignInsight.ctr > 0 && (
-            <span className="text-[12px] text-muted-foreground">
-              CTR <span className="font-semibold text-foreground">{fmtPct(campaignInsight.ctr)}</span>
-            </span>
-          )}
-          {campaignInsight.cpc > 0 && (
-            <span className="text-[12px] text-muted-foreground">
-              CPC <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.cpc)}</span>
-            </span>
-          )}
-          {campaignInsight.cpm > 0 && (
-            <span className="text-[12px] text-muted-foreground">
-              CPM <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.cpm)}</span>
-            </span>
-          )}
-          {campaignInsight.impressions > 0 && (
-            <span className="text-[12px] text-muted-foreground">
-              Impressions <span className="font-semibold text-foreground">{fmtNum(campaignInsight.impressions)}</span>
-            </span>
-          )}
-          {campaignInsight.spend > 0 && (
-            <span className="text-[12px] text-muted-foreground">
-              Spend <span className="font-semibold text-foreground">{fmtCurrency(campaignInsight.spend)}</span>
-            </span>
-          )}
-        </div>
-      )}
-
       {/* KPI Grid */}
       {campaignInsight ? (
         <>
@@ -254,7 +223,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             <SparklineKpiCard
               icon={MousePointerClick} label="Clicks"
               value={fmtNum(campaignInsight.clicks)}
-              sub={`CTR: ${fmtPct(campaignInsight.ctr)}`}
+              sub={`CPC: ${fmtCurrency(campaignInsight.cpc)}`}
               color="text-emerald-500" bgColor="bg-emerald-500/10"
               sparkData={sparkClicks} sparkColor="#10b981"
               trend={trendOf(sparkClicks)}
@@ -264,7 +233,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             <SparklineKpiCard
               icon={DollarSign} label="Spend"
               value={fmtCurrency(campaignInsight.spend)}
-              sub={`CPC: ${fmtCurrency(campaignInsight.cpc)}`}
+              sub={`CPM: ${fmtCurrency(campaignInsight.cpm)}`}
               color="text-violet-500" bgColor="bg-violet-500/10"
               sparkData={sparkSpend} sparkColor="#8b5cf6"
               trend={trendOf(sparkSpend)}
@@ -280,6 +249,21 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               currentVal={campaignInsight.cpm}
               prevVal={prevPeriodInsight?.cpm ?? null}
               fmtPrevVal={fmtCurrency}
+            />
+            <SparklineKpiCard
+              icon={TrendingUp} label="CTR"
+              value={fmtPct(campaignInsight.ctr)}
+              sub="Click-through rate"
+              color="text-sky-500" bgColor="bg-sky-500/10"
+              sparkData={sparkClicks.map((c, i) =>
+                sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
+              )}
+              sparkColor="#0ea5e9"
+              trend={trendOf(sparkClicks.map((c, i) =>
+                sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
+              ))}
+              currentVal={campaignInsight.ctr}
+              prevVal={prevPeriodInsight?.ctr ?? null}
             />
           </div>
         </>
