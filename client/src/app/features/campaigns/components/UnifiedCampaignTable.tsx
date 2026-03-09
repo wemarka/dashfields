@@ -298,6 +298,12 @@ function UnifiedCampaignTableInner({
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #f0f0f0", backgroundColor: "#fafafa" }}>
+              {/* Switch — first column on the left */}
+              {onStatusToggle && (
+                <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  On/Off
+                </th>
+              )}
               {/* Checkbox */}
               <th style={{ width: 36, padding: "9px 12px" }}>
                 <button onClick={toggleSelectAll} className="p-0.5">
@@ -327,12 +333,6 @@ function UnifiedCampaignTableInner({
                   {col.sortKey && <SortIcon active={sortKey === col.sortKey} dir={sortDir} />}
                 </th>
               ))}
-              {/* Switch */}
-              {onStatusToggle && (
-                <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  On/Off
-                </th>
-              )}
               {/* Actions */}
               <th style={{ width: 40 }} />
             </tr>
@@ -361,6 +361,16 @@ function UnifiedCampaignTableInner({
                         (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "white";
                     }}
                   >
+                    {/* Switch — first column on the left */}
+                    {onStatusToggle && (
+                      <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
+                        <CampaignSwitch
+                          campaign={c}
+                          onToggle={onStatusToggle}
+                          pending={statusTogglePending === c.id}
+                        />
+                      </td>
+                    )}
                     {/* Checkbox */}
                     <td style={{ padding: "10px 12px" }} onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => toggleSelect(c.id)} className="p-0.5">
@@ -382,16 +392,6 @@ function UnifiedCampaignTableInner({
                         {renderCell(col, c)}
                       </td>
                     ))}
-                    {/* Switch */}
-                    {onStatusToggle && (
-                      <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
-                        <CampaignSwitch
-                          campaign={c}
-                          onToggle={onStatusToggle}
-                          pending={statusTogglePending === c.id}
-                        />
-                      </td>
-                    )}
                     {/* Actions menu */}
                     <td style={{ padding: "10px 8px" }} onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
