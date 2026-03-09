@@ -2838,3 +2838,14 @@
 - [x] Added aiAgent translation keys to en.json and ar.json
 - [x] Input direction (rtl/ltr) and button position adapt to selected language
 - [x] 0 TypeScript errors
+
+## 🔄 AI Agent Chat Redesign — Trenchy AI Inspired
+- [ ] Dark background with subtle texture/gradient (like Trenchy AI)
+- [ ] Left sidebar: chat history list + New Chat button
+- [ ] Empty state: large greeting + 3 card-based quick actions (not small chips)
+- [ ] Cards: icon + title + description, hover with orange/brand accent
+- [ ] Chat bubbles: user right (brand color), assistant left (dark card)
+- [ ] Premium input box: rounded, subtle glow on focus, attach button
+- [ ] AI avatar: gradient circle with Sparkles icon
+- [ ] Smooth animations on message appear
+- [ ] Responsive: sidebar collapses on small screens

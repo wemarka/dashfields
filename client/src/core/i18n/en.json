@@ -457,6 +457,19 @@
       "create": "I want to create a new ad campaign. Help me define the objective, audience, budget, and the right platform.",
       "copy": "Write me a professional ad copy (Headline + Body + CTA) for a product or service I'll describe to you.",
       "competitors": "Research competitor strategies in my industry and tell me about the current trends in the market."
-    }
+    },
+    "quick": {
+      "analyze": "Analyze Campaigns",
+      "analyzeDesc": "Get insights on your campaign performance",
+      "create": "Create Campaign",
+      "createDesc": "Launch a new ad campaign step by step",
+      "generate": "Generate Ad Creative",
+      "generateDesc": "Write copy and generate visuals for your ads",
+      "research": "Research Competitors",
+      "researchDesc": "Discover trends and competitor strategies"
+    },
+    "recents": "Recent Conversations",
+    "noHistory": "No conversations yet",
+    "copy": "Copy"
   }
 }

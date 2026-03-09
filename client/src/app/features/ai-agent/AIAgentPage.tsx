@@ -1,14 +1,14 @@
 /**
  * client/src/app/features/ai-agent/AIAgentPage.tsx
- * Dashfields AI Marketing Agent — main page replacing the Dashboard.
- * Full-screen chat interface with streaming responses and marketing context.
+ * Dashfields AI Marketing Agent — Lovable-inspired redesign.
+ * Gradient background, collapsible sidebar, floating input, card quick actions.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  Send, Sparkles, BarChart3, Megaphone, Image, TrendingUp,
-  RotateCcw, Copy, ThumbsUp, Loader2, Bot, User,
+  Send, Plus, BarChart3, Megaphone, Image as ImageIcon,
+  TrendingUp, Loader2, Bot, ChevronLeft, ChevronRight,
+  Sparkles, Clock, Trash2, Copy, RotateCcw,
 } from "lucide-react";
-import { Button } from "@/core/components/ui/button";
 import { Textarea } from "@/core/components/ui/textarea";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { supabase } from "@/core/lib/supabase";
@@ -17,7 +17,7 @@ import { cn } from "@/core/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { useTranslation } from "react-i18next";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -25,82 +25,105 @@ interface ChatMessage {
   isStreaming?: boolean;
 }
 
-// ─── Markdown renderer ────────────────────────────────────────────────────────
+interface ChatSession {
+  id: string;
+  title: string;
+  preview: string;
+  timestamp: Date;
+  messages: ChatMessage[];
+}
+
+// ─── Markdown renderer ──────────────────────────────────────────────────────
 function MessageContent({ content }: { content: string }) {
   return (
-    <div className="prose prose-sm max-w-none dark:prose-invert
-      prose-headings:font-semibold prose-headings:text-foreground
-      prose-p:text-foreground/90 prose-p:leading-relaxed
-      prose-strong:text-foreground prose-strong:font-semibold
-      prose-ul:text-foreground/90 prose-ol:text-foreground/90
-      prose-li:marker:text-muted-foreground
-      prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
-      prose-blockquote:border-l-brand prose-blockquote:text-muted-foreground
-      prose-table:text-sm prose-th:bg-muted/60 prose-th:font-semibold
+    <div className="prose prose-sm max-w-none
+      prose-headings:font-semibold prose-headings:text-gray-900
+      prose-p:text-gray-700 prose-p:leading-relaxed
+      prose-strong:text-gray-900 prose-strong:font-semibold
+      prose-ul:text-gray-700 prose-ol:text-gray-700
+      prose-li:marker:text-gray-400
+      prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-gray-800
+      prose-blockquote:border-l-violet-400 prose-blockquote:text-gray-500
+      prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
     ">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Quick Action Cards ──────────────────────────────────────────────────────
+const QUICK_ACTIONS = [
+  {
+    icon: BarChart3,
+    titleKey: "aiAgent.quick.analyze",
+    descKey: "aiAgent.quick.analyzeDesc",
+    prompt: "Analyze my current campaign performance and give me actionable insights",
+    gradient: "from-blue-500/10 to-indigo-500/10",
+    iconColor: "text-blue-500",
+    border: "border-blue-200/60 hover:border-blue-300",
+  },
+  {
+    icon: Megaphone,
+    titleKey: "aiAgent.quick.create",
+    descKey: "aiAgent.quick.createDesc",
+    prompt: "I want to create a new advertising campaign",
+    gradient: "from-violet-500/10 to-purple-500/10",
+    iconColor: "text-violet-500",
+    border: "border-violet-200/60 hover:border-violet-300",
+  },
+  {
+    icon: ImageIcon,
+    titleKey: "aiAgent.quick.generate",
+    descKey: "aiAgent.quick.generateDesc",
+    prompt: "Generate creative ad copy and visuals for my product",
+    gradient: "from-pink-500/10 to-rose-500/10",
+    iconColor: "text-pink-500",
+    border: "border-pink-200/60 hover:border-pink-300",
+  },
+  {
+    icon: TrendingUp,
+    titleKey: "aiAgent.quick.research",
+    descKey: "aiAgent.quick.researchDesc",
+    prompt: "Research my competitors and current market trends",
+    gradient: "from-emerald-500/10 to-teal-500/10",
+    iconColor: "text-emerald-500",
+    border: "border-emerald-200/60 hover:border-emerald-300",
+  },
+];
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 export default function AIAgentPage() {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
   const { user } = useAuth();
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Quick suggestion chips — built from translations
-  const QUICK_SUGGESTIONS = [
-    {
-      icon: BarChart3,
-      label: t("aiAgent.suggestions.analyze"),
-      prompt: t("aiAgent.prompts.analyze"),
-      color: "text-blue-500",
-      bg: "bg-blue-500/8 hover:bg-blue-500/14",
-      border: "border-blue-500/20",
-    },
-    {
-      icon: Megaphone,
-      label: t("aiAgent.suggestions.create"),
-      prompt: t("aiAgent.prompts.create"),
-      color: "text-violet-500",
-      bg: "bg-violet-500/8 hover:bg-violet-500/14",
-      border: "border-violet-500/20",
-    },
-    {
-      icon: Image,
-      label: t("aiAgent.suggestions.copy"),
-      prompt: t("aiAgent.prompts.copy"),
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/8 hover:bg-emerald-500/14",
-      border: "border-emerald-500/20",
-    },
-    {
-      icon: TrendingUp,
-      label: t("aiAgent.suggestions.competitors"),
-      prompt: t("aiAgent.prompts.competitors"),
-      color: "text-amber-500",
-      bg: "bg-amber-500/8 hover:bg-amber-500/14",
-      border: "border-amber-500/20",
-    },
-  ];
+  const isInChat = messages.length > 0;
 
-  // Auto-scroll to bottom
-  const scrollToBottom = useCallback(() => {
+  // Auto-scroll
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, []);
+  }, [messages]);
 
+  // Auto-resize textarea
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+  }, [input]);
 
   // Get auth token
   const getToken = useCallback(async (): Promise<string | null> => {
@@ -120,40 +143,53 @@ export default function AIAgentPage() {
     } catch { return null; }
   }, []);
 
-  // Send message to AI Agent
-  const sendMessage = useCallback(async (messageText: string) => {
-    if (!messageText.trim() || isLoading) return;
+  // ── Send message ──────────────────────────────────────────────────────────
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isLoading) return;
 
-    const userMessage: ChatMessage = {
+    const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: messageText.trim(),
+      content: trimmed,
     };
-
     const assistantId = (Date.now() + 1).toString();
-    const assistantMessage: ChatMessage = {
+    const assistantMsg: ChatMessage = {
       id: assistantId,
       role: "assistant",
       content: "",
       isStreaming: true,
     };
 
-    setMessages(prev => [...prev, userMessage, assistantMessage]);
+    const prevMessages = messages;
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
     setInput("");
     setIsLoading(true);
 
-    // Build conversation history (last 10 messages for context)
-    const history = [...messages, userMessage].slice(-10).map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
+    // Create session on first message
+    if (prevMessages.length === 0) {
+      const newSession: ChatSession = {
+        id: crypto.randomUUID(),
+        title: trimmed.slice(0, 45) + (trimmed.length > 45 ? "…" : ""),
+        preview: trimmed.slice(0, 65),
+        timestamp: new Date(),
+        messages: [],
+      };
+      setActiveSession(newSession.id);
+      setSessions((prev) => [newSession, ...prev]);
+    }
 
     try {
       const token = await getToken();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
-      const response = await fetch("/api/ai-agent/chat", {
+      const history = [...prevMessages, userMsg].slice(-10).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const res = await fetch("/api/ai-agent/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,60 +200,44 @@ export default function AIAgentPage() {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
-      const reader = response.body?.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
-
-      if (!reader) throw new Error("No response stream");
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
+        for (const line of chunk.split("\n")) {
           if (!line.startsWith("data: ")) continue;
           const data = line.slice(6).trim();
           if (data === "[DONE]") break;
-
           try {
             const parsed = JSON.parse(data) as { text?: string; error?: string };
-            if (parsed.error) {
-              throw new Error(parsed.error);
-            }
+            if (parsed.error) throw new Error(parsed.error);
             if (parsed.text !== undefined) {
               accumulated += parsed.text;
-              setMessages(prev =>
-                prev.map(m =>
-                  m.id === assistantId
-                    ? { ...m, content: accumulated, isStreaming: true }
-                    : m
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId ? { ...m, content: accumulated } : m
                 )
               );
             }
-          } catch {
-            // Skip malformed chunks
-          }
+          } catch { /* skip malformed */ }
         }
       }
 
-      // Mark streaming as done
-      setMessages(prev =>
-        prev.map(m =>
+      setMessages((prev) =>
+        prev.map((m) =>
           m.id === assistantId ? { ...m, isStreaming: false } : m
         )
       );
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
-      console.error("[AIAgent] Error:", err);
-      setMessages(prev =>
-        prev.map(m =>
+      setMessages((prev) =>
+        prev.map((m) =>
           m.id === assistantId
             ? { ...m, content: t("aiAgent.error"), isStreaming: false }
             : m
@@ -229,12 +249,7 @@ export default function AIAgentPage() {
       abortRef.current = null;
       textareaRef.current?.focus();
     }
-  }, [messages, isLoading, getToken, t]);
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    void sendMessage(input);
-  };
+  }, [isLoading, messages, getToken, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -243,240 +258,491 @@ export default function AIAgentPage() {
     }
   };
 
-  const handleSuggestion = (prompt: string) => {
-    void sendMessage(prompt);
-  };
-
-  const handleCopy = (content: string) => {
-    void navigator.clipboard.writeText(content);
-    toast.success(t("aiAgent.copied"));
-  };
-
-  const handleClear = () => {
+  const handleNewChat = () => {
+    if (messages.length > 0 && activeSession) {
+      setSessions((prev) =>
+        prev.map((s) => (s.id === activeSession ? { ...s, messages } : s))
+      );
+    }
     setMessages([]);
-    if (abortRef.current) abortRef.current.abort();
+    setInput("");
+    setActiveSession(null);
+    abortRef.current?.abort();
     setIsLoading(false);
   };
 
-  const isEmptyState = messages.length === 0;
-  const userName = user?.name?.split(" ")[0] ?? "";
+  const handleLoadSession = (session: ChatSession) => {
+    setMessages(session.messages.length > 0 ? session.messages : []);
+    setActiveSession(session.id);
+  };
 
+  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    if (activeSession === id) {
+      setMessages([]);
+      setActiveSession(null);
+    }
+  };
+
+  const firstName = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/40 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-brand" />
-          </div>
-          <div>
-            <h1 className="text-[15px] font-semibold text-foreground">{t("aiAgent.title")}</h1>
-            <p className="text-[11px] text-muted-foreground">{t("aiAgent.subtitle")}</p>
-          </div>
-        </div>
-        {messages.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            className="text-muted-foreground hover:text-foreground gap-1.5 text-[12px]"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            {t("aiAgent.newChat")}
-          </Button>
-        )}
-      </div>
-
-      {/* ── Messages / Empty State ──────────────────────────────────────────── */}
+    <div
+      className={cn(
+        "flex h-full overflow-hidden relative",
+        isRtl ? "flex-row-reverse" : "flex-row"
+      )}
+    >
+      {/* ── Gradient Background ─────────────────────────────────────────── */}
       <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto"
+        className="absolute inset-0 pointer-events-none transition-all duration-1000"
+        style={{
+          background: isInChat
+            ? "linear-gradient(145deg, #f5f7ff 0%, #f0f4ff 40%, #faf8ff 100%)"
+            : "linear-gradient(145deg, #c7d2fe 0%, #ddd6fe 25%, #e0e7ff 50%, #ede9fe 70%, #fce7f3 100%)",
+        }}
+      />
+
+      {/* Animated gradient orbs — empty state only */}
+      {!isInChat && (
+        <>
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: 700,
+              height: 700,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 65%)",
+              top: "-10%",
+              left: "5%",
+              animation: "pulse 5s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: 600,
+              height: 600,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(236,72,153,0.18) 0%, transparent 65%)",
+              bottom: "5%",
+              right: "10%",
+              animation: "pulse 7s ease-in-out infinite",
+              animationDelay: "1.5s",
+            }}
+          />
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: 450,
+              height: 450,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 65%)",
+              top: "50%",
+              left: "55%",
+              animation: "pulse 6s ease-in-out infinite",
+              animationDelay: "3s",
+            }}
+          />
+        </>
+      )}
+
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+      <aside
+        className={cn(
+          "relative z-10 flex flex-col shrink-0 transition-all duration-300 ease-in-out",
+          "bg-white/65 backdrop-blur-2xl",
+          isRtl ? "border-l border-white/50" : "border-r border-white/50",
+          sidebarOpen ? "w-60" : "w-0 overflow-hidden"
+        )}
       >
-        {isEmptyState ? (
-          /* ── Empty State ── */
-          <div className="flex flex-col items-center justify-center h-full px-6 py-12 max-w-2xl mx-auto">
-            {/* Greeting */}
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center mb-5 shadow-sm">
-              <Sparkles className="w-7 h-7 text-brand" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
-              {t("aiAgent.greeting", { name: userName })}
-            </h2>
-            <p className="text-muted-foreground text-center text-[14px] leading-relaxed mb-8 max-w-md">
-              {t("aiAgent.greetingDesc")}
-            </p>
-
-            {/* Quick suggestions */}
-            <div className="w-full grid grid-cols-2 gap-3">
-              {QUICK_SUGGESTIONS.map((s) => (
-                <button
-                  key={s.label}
-                  onClick={() => handleSuggestion(s.prompt)}
-                  className={cn(
-                    "flex items-start gap-3 p-4 rounded-xl border transition-all duration-150",
-                    isRtl ? "text-right" : "text-left",
-                    "hover:shadow-sm active:scale-[0.98]",
-                    s.bg, s.border
-                  )}
-                >
-                  <div className={cn("w-8 h-8 rounded-lg bg-white/60 dark:bg-white/10 flex items-center justify-center shrink-0 mt-0.5", s.color)}>
-                    <s.icon className="w-4 h-4" />
-                  </div>
-                  <span className="text-[13px] font-medium text-foreground/80 leading-snug">
-                    {s.label}
-                  </span>
-                </button>
-              ))}
+        {sidebarOpen && (
+          <div className="flex flex-col h-full min-w-0">
+            {/* Sidebar Header */}
+            <div className={cn(
+              "flex items-center gap-2.5 px-4 py-4 border-b border-gray-100/60",
+              isRtl ? "flex-row-reverse" : ""
+            )}>
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="text-sm font-semibold text-gray-800 truncate">Dashfields AI</span>
             </div>
 
-            <p className="text-[11px] text-muted-foreground/60 mt-6">
-              {t("aiAgent.hint")}
-            </p>
-          </div>
-        ) : (
-          /* ── Messages ── */
-          <div className="max-w-3xl mx-auto px-6 py-6 space-y-6">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
+            {/* New Chat */}
+            <div className="px-3 pt-3 pb-2">
+              <button
+                onClick={handleNewChat}
                 className={cn(
-                  "flex gap-3",
-                  msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium",
+                  "bg-gradient-to-r from-violet-500 to-indigo-600 text-white",
+                  "hover:from-violet-600 hover:to-indigo-700 transition-all duration-200",
+                  "shadow-sm hover:shadow-md active:scale-[0.98]",
+                  isRtl ? "flex-row-reverse" : ""
                 )}
               >
-                {/* Avatar */}
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                  msg.role === "user"
-                    ? "bg-brand/10 text-brand"
-                    : "bg-muted text-muted-foreground"
-                )}>
-                  {msg.role === "user"
-                    ? <User className="w-4 h-4" />
-                    : <Bot className="w-4 h-4" />
-                  }
-                </div>
+                <Plus className="w-4 h-4 shrink-0" />
+                <span>{t("aiAgent.newChat")}</span>
+              </button>
+            </div>
 
-                {/* Bubble */}
-                <div className={cn(
-                  "flex-1 max-w-[85%]",
-                  msg.role === "user" ? "items-end" : "items-start"
-                )}>
-                  <div className={cn(
-                    "rounded-2xl px-4 py-3",
-                    msg.role === "user"
-                      ? "bg-brand text-white rounded-tr-sm ml-auto"
-                      : "bg-muted/60 border border-border/40 rounded-tl-sm"
-                  )}>
-                    {msg.role === "user" ? (
-                      <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    ) : (
-                      <>
-                        {msg.content ? (
-                          <MessageContent content={msg.content} />
-                        ) : null}
-                        {msg.isStreaming && (
-                          <span className="inline-flex items-center gap-1 mt-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  {/* Actions (assistant only, after streaming) */}
-                  {msg.role === "assistant" && !msg.isStreaming && msg.content && (
-                    <div className="flex items-center gap-1 mt-1.5 px-1">
-                      <button
-                        onClick={() => handleCopy(msg.content)}
-                        className="p-1.5 rounded-md text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60 transition-colors"
-                        title={t("aiAgent.copied")}
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        className="p-1.5 rounded-md text-muted-foreground/50 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors"
-                      >
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
+            {/* Sessions */}
+            <div className="flex-1 overflow-y-auto px-2 py-1 scrollbar-none">
+              {sessions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center px-4">
+                  <Clock className="w-7 h-7 text-gray-300 mb-2" />
+                  <p className="text-xs text-gray-400">{t("aiAgent.noHistory")}</p>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <>
+                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 py-2">
+                    {t("aiAgent.recents")}
+                  </p>
+                  {sessions.map((session) => (
+                    <button
+                      key={session.id}
+                      onClick={() => handleLoadSession(session)}
+                      className={cn(
+                        "w-full text-left px-3 py-2.5 rounded-xl group transition-all duration-150 mb-0.5",
+                        "hover:bg-gray-100/80",
+                        activeSession === session.id
+                          ? "bg-violet-50/80 border border-violet-200/60"
+                          : "border border-transparent",
+                        isRtl ? "text-right" : "text-left"
+                      )}
+                    >
+                      <div className={cn("flex items-start gap-1", isRtl ? "flex-row-reverse" : "")}>
+                        <p className={cn(
+                          "text-xs font-medium truncate flex-1 leading-relaxed",
+                          activeSession === session.id ? "text-violet-700" : "text-gray-700"
+                        )}>
+                          {session.title}
+                        </p>
+                        <button
+                          onClick={(e) => handleDeleteSession(session.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-400 transition-all shrink-0"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-gray-400 truncate mt-0.5">{session.preview}</p>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         )}
-      </div>
+      </aside>
 
-      {/* ── Input Area ─────────────────────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-border/40 bg-background px-6 py-4">
-        <div className="max-w-3xl mx-auto">
-          {/* Inline quick chips (visible when chat is active) */}
-          {!isEmptyState && (
-            <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-none">
-              {QUICK_SUGGESTIONS.map((s) => (
+      {/* ── Toggle Sidebar ───────────────────────────────────────────────── */}
+      <button
+        onClick={() => setSidebarOpen((v) => !v)}
+        className={cn(
+          "absolute z-20 top-5 flex items-center justify-center",
+          "w-5 h-5 rounded-full bg-white/95 backdrop-blur-sm",
+          "border border-gray-200/80 shadow-sm hover:shadow-md",
+          "text-gray-500 hover:text-gray-700 transition-all duration-300",
+          isRtl
+            ? sidebarOpen ? "right-60 -mr-2.5" : "right-1"
+            : sidebarOpen ? "left-60 -ml-2.5" : "left-1"
+        )}
+      >
+        {sidebarOpen
+          ? (isRtl ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />)
+          : (isRtl ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />)
+        }
+      </button>
+
+      {/* ── Main Content ────────────────────────────────────────────────── */}
+      <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {/* ── Empty State ─────────────────────────────────────────────── */}
+        {!isInChat && (
+          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 overflow-y-auto">
+            {/* Greeting */}
+            <div className="text-center mb-8 animate-fade-in">
+              <h1
+                className="text-[2rem] font-bold text-gray-800 mb-2 tracking-tight"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                {t("aiAgent.greeting", { name: firstName })}
+              </h1>
+              <p className="text-gray-500 text-[15px]">{t("aiAgent.subtitle")}</p>
+            </div>
+
+            {/* Quick Action Cards */}
+            <div className="grid grid-cols-2 gap-3 w-full max-w-xl mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+              {QUICK_ACTIONS.map((action) => (
                 <button
-                  key={s.label}
-                  onClick={() => handleSuggestion(s.prompt)}
-                  disabled={isLoading}
+                  key={action.titleKey}
+                  onClick={() => void sendMessage(action.prompt)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] font-medium whitespace-nowrap transition-all",
-                    "disabled:opacity-40 disabled:cursor-not-allowed",
-                    s.bg, s.border, s.color
+                    "group relative flex flex-col items-start gap-2.5 p-4 rounded-2xl text-left",
+                    "bg-white/75 backdrop-blur-sm border transition-all duration-200",
+                    "hover:bg-white/95 hover:shadow-xl hover:scale-[1.02] active:scale-[0.99]",
+                    action.border
                   )}
                 >
-                  <s.icon className="w-3 h-3" />
-                  {s.label}
+                  <div className={cn(
+                    "w-9 h-9 rounded-xl flex items-center justify-center",
+                    `bg-gradient-to-br ${action.gradient}`
+                  )}>
+                    <action.icon className={cn("w-[18px] h-[18px]", action.iconColor)} />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-gray-800 group-hover:text-gray-900">
+                      {t(action.titleKey)}
+                    </p>
+                    <p className="text-[11.5px] text-gray-500 mt-0.5 leading-relaxed">
+                      {t(action.descKey)}
+                    </p>
+                  </div>
+                  <ChevronRight className={cn(
+                    "absolute top-4 w-3.5 h-3.5 text-gray-300 group-hover:text-gray-400 transition-all",
+                    isRtl ? "left-4 rotate-180 group-hover:-translate-x-0.5" : "right-4 group-hover:translate-x-0.5"
+                  )} />
                 </button>
               ))}
             </div>
-          )}
 
-          {/* Input box */}
-          <form onSubmit={handleSubmit} className="relative">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={t("aiAgent.placeholder")}
-              disabled={isLoading}
-              rows={1}
-              className={cn(
-                "resize-none py-3.5 rounded-xl border-border/60",
-                "text-[14px] leading-relaxed min-h-[52px] max-h-[200px]",
-                "focus-visible:ring-1 focus-visible:ring-brand/40",
-                "disabled:opacity-60 bg-muted/30",
-                "scrollbar-thin",
-                isRtl ? "pr-4 pl-14" : "pl-4 pr-14"
-              )}
-              style={{ direction: isRtl ? "rtl" : "ltr" }}
-            />
-            <Button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              size="icon"
-              className={cn(
-                "absolute bottom-2 w-9 h-9 rounded-lg",
-                isRtl ? "left-2" : "right-2",
-                "bg-brand hover:bg-brand/90 text-white",
-                "disabled:opacity-40 disabled:cursor-not-allowed",
-                "transition-all duration-150"
-              )}
+            {/* Input */}
+            <div className="w-full max-w-xl animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <InputBox
+                input={input}
+                setInput={setInput}
+                isLoading={isLoading}
+                onSend={() => void sendMessage(input)}
+                onKeyDown={handleKeyDown}
+                textareaRef={textareaRef}
+                isRtl={isRtl}
+                t={t}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── Chat State ──────────────────────────────────────────────── */}
+        {isInChat && (
+          <>
+            {/* Chat header */}
+            <div className={cn(
+              "flex items-center justify-between px-5 py-3 shrink-0",
+              "bg-white/50 backdrop-blur-sm border-b border-white/60",
+              isRtl ? "flex-row-reverse" : ""
+            )}>
+              <div className={cn("flex items-center gap-2", isRtl ? "flex-row-reverse" : "")}>
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700">Dashfields AI</span>
+              </div>
+              <button
+                onClick={handleNewChat}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
+                  "text-gray-500 hover:text-gray-700 hover:bg-gray-100/80 transition-all",
+                  isRtl ? "flex-row-reverse" : ""
+                )}
+              >
+                <RotateCcw className="w-3 h-3" />
+                {t("aiAgent.newChat")}
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto px-4 py-6 scrollbar-none"
             >
-              {isLoading
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <Send className="w-4 h-4" />
-              }
-            </Button>
-          </form>
+              <div className="max-w-2xl mx-auto space-y-5">
+                {messages.map((msg) => (
+                  <MessageBubble key={msg.id} msg={msg} t={t} isRtl={isRtl} />
+                ))}
+                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                  <ThinkingBubble />
+                )}
+              </div>
+            </div>
 
-          <p className="text-[11px] text-muted-foreground/50 text-center mt-2">
-            {t("aiAgent.disclaimer")}
-          </p>
+            {/* Input */}
+            <div className="px-4 pb-4 shrink-0">
+              <div className="max-w-2xl mx-auto">
+                <InputBox
+                  input={input}
+                  setInput={setInput}
+                  isLoading={isLoading}
+                  onSend={() => void sendMessage(input)}
+                  onKeyDown={handleKeyDown}
+                  textareaRef={textareaRef}
+                  isRtl={isRtl}
+                  t={t}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Input Box ───────────────────────────────────────────────────────────────
+function InputBox({
+  input, setInput, isLoading, onSend, onKeyDown, textareaRef, isRtl, t,
+}: {
+  input: string;
+  setInput: (v: string) => void;
+  isLoading: boolean;
+  onSend: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  isRtl: boolean;
+  t: (key: string) => string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-end gap-3 p-3 rounded-2xl",
+        "bg-white/90 backdrop-blur-xl",
+        "border border-gray-200/70",
+        "shadow-[0_4px_24px_rgba(0,0,0,0.08)]",
+        "hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)]",
+        "focus-within:border-violet-300/80 focus-within:shadow-[0_4px_32px_rgba(139,92,246,0.15)]",
+        "transition-all duration-200",
+        isRtl ? "flex-row-reverse" : ""
+      )}
+    >
+      <Textarea
+        ref={textareaRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={onKeyDown}
+        placeholder={t("aiAgent.placeholder")}
+        disabled={isLoading}
+        rows={1}
+        dir={isRtl ? "rtl" : "ltr"}
+        className={cn(
+          "flex-1 resize-none border-0 bg-transparent p-0 text-sm text-gray-800",
+          "placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0",
+          "min-h-[24px] max-h-[160px] leading-relaxed",
+          isRtl ? "text-right" : "text-left"
+        )}
+        style={{ boxShadow: "none" }}
+      />
+      <button
+        onClick={onSend}
+        disabled={!input.trim() || isLoading}
+        className={cn(
+          "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
+          input.trim() && !isLoading
+            ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+        )}
+      >
+        {isLoading
+          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          : <Send className={cn("w-3.5 h-3.5", isRtl ? "rotate-180" : "")} />
+        }
+      </button>
+    </div>
+  );
+}
+
+// ─── Message Bubble ──────────────────────────────────────────────────────────
+function MessageBubble({
+  msg, t, isRtl,
+}: {
+  msg: ChatMessage;
+  t: (key: string) => string;
+  isRtl: boolean;
+}) {
+  const isUser = msg.role === "user";
+
+  const handleCopy = () => {
+    void navigator.clipboard.writeText(msg.content);
+    toast.success(t("aiAgent.copied"));
+  };
+
+  if (isUser) {
+    return (
+      <div className={cn("flex animate-fade-in", isRtl ? "justify-start" : "justify-end")}>
+        <div className={cn(
+          "max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+          "bg-gradient-to-br from-violet-500 to-indigo-600 text-white",
+          isRtl ? "rounded-bl-md" : "rounded-br-md"
+        )}>
+          {msg.content}
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex items-start gap-3 animate-fade-in group", isRtl ? "flex-row-reverse" : "")}>
+      {/* Avatar */}
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm mt-0.5">
+        <Bot className="w-4 h-4 text-white" />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className={cn(
+          "px-4 py-3 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100/80 shadow-sm text-sm",
+          isRtl ? "rounded-tr-md" : "rounded-tl-md"
+        )}>
+          {msg.content ? (
+            <MessageContent content={msg.content} />
+          ) : (
+            <ThinkingDots />
+          )}
+        </div>
+
+        {/* Copy button */}
+        {msg.content && !msg.isStreaming && (
+          <div className={cn(
+            "flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity",
+            isRtl ? "flex-row-reverse" : ""
+          )}>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+            >
+              <Copy className="w-3 h-3" />
+              {t("aiAgent.copy")}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Thinking Dots ───────────────────────────────────────────────────────────
+function ThinkingDots() {
+  return (
+    <div className="flex items-center gap-1.5 py-0.5">
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Thinking Bubble ─────────────────────────────────────────────────────────
+function ThinkingBubble() {
+  return (
+    <div className="flex items-start gap-3 animate-fade-in">
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm mt-0.5">
+        <Bot className="w-4 h-4 text-white" />
+      </div>
+      <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-white/90 backdrop-blur-sm border border-gray-100/80 shadow-sm">
+        <ThinkingDots />
       </div>
     </div>
   );
