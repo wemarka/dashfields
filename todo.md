@@ -2764,3 +2764,9 @@
 ## ✅ Bug Fix — usePrefetch inside .map() (Rules of Hooks violation)
 - [x] Fix DashboardLayout: usePrefetch called inside .map() causes "Rendered more hooks" error
 - [x] Solution: created NavItemButton wrapper component that calls usePrefetch at top level
+
+## ✅ Optimistic UI — NotificationBell + Supabase Indexes
+- [x] Apply optimisticMarkNotificationRead in NotificationBell.tsx
+- [x] Apply optimisticMarkAllRead in NotificationBell.tsx
+- [x] Fix TypeScript types in optimistic.ts (NotifList | undefined)
+- [x] Supabase indexes added: notifications, alert_rules, campaigns, posts, social_accounts

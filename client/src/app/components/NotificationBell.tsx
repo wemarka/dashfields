@@ -1,6 +1,13 @@
-// NotificationBell.tsx
-// Header notification bell with unread count badge and dropdown panel.
-// Uses Supabase Realtime for live push updates — no polling needed.
+/**
+ * client/src/app/components/NotificationBell.tsx
+ *
+ * Header notification bell with:
+ * - Unread count badge with animation
+ * - Supabase Realtime live push updates (no polling)
+ * - Optimistic UI: mark-as-read, mark-all-read are instant (no loading spinner)
+ * - Rollback on error
+ */
+
 import { useState, useRef, useEffect } from "react";
 import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, X, Check } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
@@ -8,6 +15,12 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { useRealtimeNotifications } from "@/shared/hooks/useRealtimeNotifications";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import {
+  optimisticMarkNotificationRead,
+  optimisticMarkAllNotificationsRead,
+} from "@/core/lib/optimistic";
+
+// ─── Icon map ─────────────────────────────────────────────────────────────────
 
 const TYPE_ICONS = {
   info:    <Info className="h-3.5 w-3.5 text-blue-500" />,
@@ -16,30 +29,36 @@ const TYPE_ICONS = {
   success: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />,
 };
 
-export function NotificationBell() {
-  const [open, setOpen] = useState(false);
-  const [newBadge, setNewBadge] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const [, setLocation] = useLocation();
-  const utils = trpc.useUtils();
-  const { user } = useAuth();
+// ─── Component ────────────────────────────────────────────────────────────────
 
+export function NotificationBell() {
+  const [open, setOpen]         = useState(false);
+  const [newBadge, setNewBadge] = useState(false);
+  const ref                     = useRef<HTMLDivElement>(null);
+  const [, setLocation]         = useLocation();
+  const utils                   = trpc.useUtils();
+  const { user }                = useAuth();
+
+  // ── Data ──────────────────────────────────────────────────────────────────
   const { data: notifications = [] } = trpc.notifications.list.useQuery();
 
-  const markRead = trpc.notifications.markRead.useMutation({
-    onSuccess: () => utils.notifications.list.invalidate(),
-  });
+  // ── Mutations with Optimistic UI ──────────────────────────────────────────
+  const markRead = trpc.notifications.markRead.useMutation(
+    optimisticMarkNotificationRead(utils)
+  );
 
-  // ── Supabase Realtime subscription ─────────────────────────────────────────
+  const markAllRead = trpc.notifications.markAllRead.useMutation(
+    optimisticMarkAllNotificationsRead(utils)
+  );
+
+  // ── Supabase Realtime subscription ────────────────────────────────────────
   useRealtimeNotifications({
     userId: user?.id?.toString(),
     onNew: (n) => {
-      // Refresh the list from server
       utils.notifications.list.invalidate();
-      // Animate badge
       setNewBadge(true);
       setTimeout(() => setNewBadge(false), 2000);
-      // Show toast
+
       const icon = TYPE_ICONS[n.type as keyof typeof TYPE_ICONS] ?? TYPE_ICONS.info;
       toast.custom(
         () => (
@@ -56,10 +75,11 @@ export function NotificationBell() {
     },
   });
 
-  const unread = notifications.filter((n) => !n.is_read);
+  // ── Derived state ─────────────────────────────────────────────────────────
+  const unread      = notifications.filter((n) => !n.is_read);
   const unreadCount = unread.length;
 
-  // Close on outside click
+  // ── Close on outside click ────────────────────────────────────────────────
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -69,6 +89,19 @@ export function NotificationBell() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  function handleMarkAllRead() {
+    if (unreadCount === 0) return;
+    markAllRead.mutate(undefined);
+  }
+
+  function handleMarkOneRead(notificationId: number) {
+    markRead.mutate({ notificationId });
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div ref={ref} className="relative">
@@ -90,7 +123,10 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl shadow-lg overflow-hidden z-50" style={{background:'#ffffff',border:'1px solid #ebebeb'}}>
+        <div
+          className="absolute right-0 top-full mt-2 w-80 rounded-xl shadow-lg overflow-hidden z-50"
+          style={{ background: "#ffffff", border: "1px solid #ebebeb" }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#ebebeb]">
             <div className="flex items-center gap-2">
@@ -105,7 +141,7 @@ export function NotificationBell() {
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
                 <button
-                  onClick={() => unread.forEach((n) => markRead.mutate({ notificationId: n.id }))}
+                  onClick={handleMarkAllRead}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-foreground/5"
                   title="Mark all as read"
                 >
@@ -132,7 +168,9 @@ export function NotificationBell() {
               notifications.slice(0, 10).map((n) => (
                 <div
                   key={n.id}
-                  className={`flex items-start gap-3 px-4 py-3 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-foreground/3"}`}
+                  className={`flex items-start gap-3 px-4 py-3 transition-colors ${
+                    !n.is_read ? "bg-amber-500/5" : "hover:bg-foreground/[0.03]"
+                  }`}
                 >
                   <div className="mt-0.5 shrink-0">
                     {TYPE_ICONS[n.type as keyof typeof TYPE_ICONS] ?? TYPE_ICONS.info}
@@ -144,9 +182,10 @@ export function NotificationBell() {
                       {new Date(n.created_at).toLocaleString()}
                     </p>
                   </div>
+                  {/* Optimistic mark-as-read dot — instant, no spinner */}
                   {!n.is_read && (
                     <button
-                      onClick={() => markRead.mutate({ notificationId: n.id })}
+                      onClick={() => handleMarkOneRead(n.id)}
                       className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 hover:bg-blue-700 transition-colors"
                       title="Mark as read"
                     />

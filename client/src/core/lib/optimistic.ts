@@ -36,7 +36,7 @@ export function optimisticMarkNotificationRead(utils: Utils) {
 
       return { previous };
     },
-    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList } | undefined) => {
+    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList | undefined } | undefined) => {
       if (ctx?.previous !== undefined) {
         utils.notifications.list.setData(undefined, ctx.previous);
       }
@@ -48,7 +48,7 @@ export function optimisticMarkNotificationRead(utils: Utils) {
   };
 }
 
-// ─── Notification: mark all notifications as read ────────────────────────────────────────────
+// ─── Notification: mark all notifications as read ─────────────────────────────────────────────
 
 export function optimisticMarkAllNotificationsRead(utils: Utils) {
   type NotifList = Awaited<ReturnType<typeof utils.notifications.list.fetch>>;
@@ -65,7 +65,7 @@ export function optimisticMarkAllNotificationsRead(utils: Utils) {
 
       return { previous };
     },
-    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList } | undefined) => {
+    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList | undefined } | undefined) => {
       if (ctx?.previous !== undefined) {
         utils.notifications.list.setData(undefined, ctx.previous);
       }
@@ -94,7 +94,7 @@ export function optimisticDeleteAlert(utils: Utils) {
 
       return { previous };
     },
-    onError: (_err: unknown, _vars: unknown, ctx: { previous: AlertList } | undefined) => {
+    onError: (_err: unknown, _vars: unknown, ctx: { previous: AlertList | undefined } | undefined) => {
       if (ctx?.previous !== undefined) {
         utils.alerts.list.setData(undefined, ctx.previous);
       }
@@ -122,7 +122,7 @@ export function optimisticDeleteNotification(utils: Utils) {
 
       return { previous };
     },
-    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList } | undefined) => {
+    onError: (_err: unknown, _vars: unknown, ctx: { previous: NotifList | undefined } | undefined) => {
       if (ctx?.previous !== undefined) {
         utils.notifications.list.setData(undefined, ctx.previous);
       }
