@@ -70,6 +70,10 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
   const isVideo = ad.creativeType === "video";
   const isFatigued = ad.insights && ad.insights.impressions > 1000 && ad.insights.ctr < 0.5;
 
+  // Use per-ad page info from Meta API if available, fallback to campaign-level props
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
+
   return (
     <div className={`rounded-xl border bg-card overflow-hidden transition-all duration-200 ${
       isSelected
@@ -145,6 +149,19 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
               </span>
             )}
           </div>
+          {/* Page info row */}
+          {resolvedPageName && resolvedPageName !== "Your Page" && (
+            <div className="flex items-center gap-1.5 mt-1.5">
+              {resolvedAvatarUrl ? (
+                <img src={resolvedAvatarUrl} alt={resolvedPageName} className="w-3.5 h-3.5 rounded-full object-cover" />
+              ) : (
+                <div className="w-3.5 h-3.5 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-blue-600">{resolvedPageName[0]?.toUpperCase()}</span>
+                </div>
+              )}
+              <span className="text-[9px] text-muted-foreground truncate">{resolvedPageName}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -176,8 +193,8 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
               <AdPreview
                 ad={ad}
                 placement={placement}
-                pageName={pageName}
-                pageAvatarUrl={pageAvatarUrl}
+                pageName={resolvedPageName}
+                pageAvatarUrl={resolvedAvatarUrl}
               />
             </div>
           </div>

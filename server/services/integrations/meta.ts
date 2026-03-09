@@ -584,6 +584,28 @@ export async function getAdImage(
   }
 }
 
+/** Get Facebook Page info (name + picture) by page ID */
+export async function getPageInfo(
+  pageId: string,
+  accessToken: string
+): Promise<{ id: string; name: string; pictureUrl: string | null } | null> {
+  try {
+    const data = await metaGet<{ id?: string; name?: string; picture?: { data?: { url?: string } } }>(
+      pageId,
+      accessToken,
+      { fields: "id,name,picture{url}" }
+    );
+    if (!data.id) return null;
+    return {
+      id: data.id,
+      name: data.name ?? "",
+      pictureUrl: data.picture?.data?.url ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Get daily time-series insights for a campaign */
 export async function getCampaignDailyInsights(
   campaignId: string,

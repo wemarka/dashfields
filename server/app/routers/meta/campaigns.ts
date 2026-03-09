@@ -17,6 +17,7 @@ import {
   getAdSetInsights,
   getCampaignAds,
   getAdInsights,
+  getPageInfo,
 } from "../../../services/integrations/meta";
 import { getMetaToken, getAllMetaTokens } from "./helpers";
 import { metaCache, CACHE_TTL } from "../../../services/integrations/metaCache";
@@ -388,10 +389,46 @@ export const metaCampaignsRouter = router({
           ]),
         );
 
+        // Collect unique page IDs from all ads
+        const pageIds = new Set<string>();
+        for (const ad of ads) {
+          const pageId = ad.creative?.object_story_spec?.page_id;
+          if (pageId) pageIds.add(pageId);
+          // Also try from effective_object_story_id (format: pageId_postId)
+          const storyId = ad.creative?.effective_object_story_id;
+          if (storyId) {
+            const pid = storyId.split("_")[0];
+            if (pid) pageIds.add(pid);
+          }
+        }
+
+        // Fetch page info for all unique page IDs in parallel
+        const pageInfoMap = new Map<string, { name: string; pictureUrl: string | null }>();
+        if (pageIds.size > 0) {
+          const pageInfoResults = await Promise.allSettled(
+            Array.from(pageIds).map(async pid => {
+              const info = await getPageInfo(pid, conn.token);
+              return { pid, info };
+            })
+          );
+          for (const r of pageInfoResults) {
+            if (r.status === "fulfilled" && r.value.info) {
+              pageInfoMap.set(r.value.pid, { name: r.value.info.name, pictureUrl: r.value.info.pictureUrl });
+            }
+          }
+        }
+
         return ads.map(ad => {
           const c = ad.creative;
           const oss = c?.object_story_spec;
           const afs = c?.asset_feed_spec;
+
+          // Resolve page info for this ad
+          let pageId = oss?.page_id ?? null;
+          if (!pageId && c?.effective_object_story_id) {
+            pageId = c.effective_object_story_id.split("_")[0] ?? null;
+          }
+          const pageInfo = pageId ? pageInfoMap.get(pageId) : null;
 
           let creativeType: "image" | "video" | "carousel" | "dynamic" | "unknown" = "unknown";
           if (afs && ((afs.images?.length ?? 0) > 1 || (afs.videos?.length ?? 0) > 0)) creativeType = "dynamic";
@@ -455,6 +492,10 @@ export const metaCampaignsRouter = router({
             message, headline, description, ctaType, ctaLink,
             carouselCards, dynamicAssets,
             insights: insightMap.get(ad.id) ?? null,
+            // Page info from Meta Graph API
+            pageId: pageId ?? null,
+            pageName: pageInfo?.name ?? null,
+            pageAvatarUrl: pageInfo?.pictureUrl ?? null,
           };
         });
         } catch (err) {

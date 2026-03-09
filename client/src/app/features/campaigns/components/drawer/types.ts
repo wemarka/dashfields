@@ -64,6 +64,10 @@ export interface AdInfo {
     impressions: number; reach: number; clicks: number; spend: number;
     ctr: number; cpc: number; cpm: number; conversions?: number;
   } | null;
+  // Page info from Meta Graph API
+  pageId?: string | null;
+  pageName?: string | null;
+  pageAvatarUrl?: string | null;
 }
 
 // ─── Shared Helpers ─────────────────────────────────────────────────────────

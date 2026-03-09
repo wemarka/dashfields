@@ -2,61 +2,38 @@
  * drawer/AdPreviews.tsx — Platform-native ad preview mockups.
  *
  * Renders pixel-accurate mockups of how an ad appears on each platform:
- *  - Facebook Feed Post
- *  - Instagram Feed Post
+ *  - Facebook Feed Post (image, video, carousel, dynamic)
+ *  - Instagram Feed Post (image, video, carousel, dynamic)
  *  - Instagram Story (9:16)
  *  - Instagram Reels (9:16)
- *  - Carousel (horizontal scroll)
+ *  - Facebook Story (9:16)
  *
- * Usage:
- *   <AdPreview ad={adInfo} placement="fb_feed" pageName="My Brand" pageAvatarUrl="..." />
+ * Page name and avatar are fetched from Meta Graph API and passed as props.
  */
 import { useState, useRef, useCallback } from "react";
-import { Play, Pause, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
-  ThumbsUp, Share2, Globe, ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import {
+  Play, Pause, Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
+  ThumbsUp, Share2, Globe, ChevronLeft, ChevronRight, Volume2, VolumeX,
+  Layers, Shuffle,
+} from "lucide-react";
 import type { AdInfo } from "./types";
 import { CTA_LABELS } from "./types";
 
 // ─── Video URL Helper ─────────────────────────────────────────────────────────
-/**
- * Attempts to build a playable video URL from the ad's videoId or thumbnailUrl.
- * Meta video IDs can be played via the Graph API embed URL.
- * If a direct video URL is stored in thumbnailUrl (e.g. .mp4), it is used directly.
- */
 function resolveVideoUrl(ad: AdInfo): string | null {
-  // If thumbnailUrl is actually a video URL (mp4, webm, mov)
-  if (ad.thumbnailUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.thumbnailUrl)) {
-    return ad.thumbnailUrl;
-  }
-  // If imageUrl is a video URL
-  if (ad.imageUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.imageUrl)) {
-    return ad.imageUrl;
-  }
-  // Meta video embed via videoId
-  if (ad.videoId) {
-    return `https://www.facebook.com/video/embed?video_id=${ad.videoId}`;
-  }
+  if (ad.thumbnailUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.thumbnailUrl)) return ad.thumbnailUrl;
+  if (ad.imageUrl && /\.(mp4|webm|mov|m4v)/i.test(ad.imageUrl)) return ad.imageUrl;
+  if (ad.videoId) return `https://www.facebook.com/video/embed?video_id=${ad.videoId}`;
   return null;
 }
 
 // ─── Inline Video Player ──────────────────────────────────────────────────────
-/**
- * AdVideoPlayer — renders a native <video> for direct URLs or an <iframe>
- * for Meta embed URLs. Provides play/pause and mute controls.
- */
-function AdVideoPlayer({
-  videoUrl,
-  posterUrl,
-  className = "",
-}: {
-  videoUrl: string;
-  posterUrl?: string | null;
-  className?: string;
+function AdVideoPlayer({ videoUrl, posterUrl, className = "", compact = false }: {
+  videoUrl: string; posterUrl?: string | null; className?: string; compact?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
-
   const isEmbed = videoUrl.includes("facebook.com/video/embed");
 
   const togglePlay = useCallback(() => {
@@ -75,7 +52,6 @@ function AdVideoPlayer({
   }, []);
 
   if (isEmbed) {
-    // Meta video embed — no JS controls possible, show iframe
     return (
       <iframe
         src={videoUrl}
@@ -88,7 +64,7 @@ function AdVideoPlayer({
   }
 
   return (
-    <div className={`absolute inset-0 ${className}`} onClick={togglePlay}>
+    <div className={`absolute inset-0 ${className}`} onClick={togglePlay} style={{ cursor: "pointer" }}>
       <video
         ref={videoRef}
         src={videoUrl}
@@ -100,15 +76,13 @@ function AdVideoPlayer({
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
-      {/* Play/Pause overlay — visible when paused */}
       {!playing && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/30 transition-opacity hover:bg-black/60">
-            <Play className="w-6 h-6 text-white ml-0.5" />
+          <div className={`rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/30 ${compact ? "w-10 h-10" : "w-14 h-14"}`}>
+            <Play className={`text-white ml-0.5 ${compact ? "w-4 h-4" : "w-6 h-6"}`} />
           </div>
         </div>
       )}
-      {/* Pause icon — briefly visible when playing and hovered */}
       {playing && (
         <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
           <div className="w-10 h-10 rounded-full bg-black/30 flex items-center justify-center">
@@ -116,15 +90,11 @@ function AdVideoPlayer({
           </div>
         </div>
       )}
-      {/* Mute toggle */}
       <button
         onClick={toggleMute}
-        className="absolute bottom-3 right-3 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center border border-white/20 z-10"
+        className="absolute bottom-3 right-3 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center border border-white/20 z-10"
       >
-        {muted
-          ? <VolumeX className="w-3.5 h-3.5 text-white" />
-          : <Volume2 className="w-3.5 h-3.5 text-white" />
-        }
+        {muted ? <VolumeX className="w-3.5 h-3.5 text-white" /> : <Volume2 className="w-3.5 h-3.5 text-white" />}
       </button>
     </div>
   );
@@ -140,7 +110,7 @@ export type AdPlacement =
   | "messenger_inbox";
 
 // ─── Platform Logos (inline SVG) ─────────────────────────────────────────────
-function FbLogo({ size = 14 }: { size?: number }) {
+export function FbLogo({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" rx="6" fill="#1877F2" />
@@ -149,17 +119,17 @@ function FbLogo({ size = 14 }: { size?: number }) {
   );
 }
 
-function IgLogo({ size = 14 }: { size?: number }) {
+export function IgLogo({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <defs>
-        <linearGradient id="ig-p" x1="0%" y1="100%" x2="100%" y2="0%">
+        <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#FFDC80" />
           <stop offset="50%" stopColor="#E1306C" />
           <stop offset="100%" stopColor="#833AB4" />
         </linearGradient>
       </defs>
-      <rect width="24" height="24" rx="6" fill="url(#ig-p)" />
+      <rect width="24" height="24" rx="6" fill="url(#ig-grad)" />
       <rect x="7" y="7" width="10" height="10" rx="3" stroke="white" strokeWidth="1.5" fill="none" />
       <circle cx="12" cy="12" r="2.5" stroke="white" strokeWidth="1.5" fill="none" />
       <circle cx="16.5" cy="7.5" r="1" fill="white" />
@@ -167,7 +137,7 @@ function IgLogo({ size = 14 }: { size?: number }) {
   );
 }
 
-// ─── Page Avatar Placeholder ──────────────────────────────────────────────────
+// ─── Page Avatar ──────────────────────────────────────────────────────────────
 function PageAvatar({ url, name, size = 36 }: { url?: string | null; name: string; size?: number }) {
   const initials = name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
   if (url) {
@@ -175,15 +145,16 @@ function PageAvatar({ url, name, size = 36 }: { url?: string | null; name: strin
       <img
         src={url}
         alt={name}
-        className="rounded-full object-cover bg-muted"
+        className="rounded-full object-cover"
         style={{ width: size, height: size }}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
       />
     );
   }
   return (
     <div
-      className="rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold"
-      style={{ width: size, height: size, fontSize: size * 0.35 }}
+      className="rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold flex-shrink-0"
+      style={{ width: size, height: size, fontSize: Math.max(size * 0.35, 9) }}
     >
       {initials || "P"}
     </div>
@@ -192,52 +163,226 @@ function PageAvatar({ url, name, size = 36 }: { url?: string | null; name: strin
 
 // ─── CTA Button ───────────────────────────────────────────────────────────────
 function CtaButton({ ctaType, variant = "fb" }: { ctaType: string; variant?: "fb" | "ig" }) {
-  const label = CTA_LABELS[ctaType] ?? (ctaType ? ctaType.replace(/_/g, " ") : "Learn More");
+  const label = CTA_LABELS[ctaType] ?? (ctaType ? ctaType.replace(/_/g, " ") : null);
   if (!label) return null;
   if (variant === "ig") {
     return (
-      <div className="mx-3 mb-3">
-        <button className="w-full py-1.5 rounded-lg bg-[#0095F6] text-white text-[11px] font-semibold text-center">
-          {label}
-        </button>
-      </div>
+      <button className="w-full py-1.5 rounded-lg bg-[#0095F6] text-white text-[11px] font-semibold text-center">
+        {label}
+      </button>
     );
   }
   return (
-    <div className="mx-3 mb-3">
-      <button className="w-full py-1.5 rounded-md border border-[#CDD0D4] bg-[#F0F2F5] dark:bg-[#3A3B3C] dark:border-[#3A3B3C] text-[11px] font-semibold text-[#050505] dark:text-white text-center">
-        {label}
-      </button>
-    </div>
+    <button className="w-full py-1.5 rounded-md border border-[#CDD0D4] bg-[#F0F2F5] text-[11px] font-semibold text-[#050505] text-center">
+      {label}
+    </button>
   );
 }
 
 // ─── Media Area ───────────────────────────────────────────────────────────────
-function MediaArea({ ad, aspectRatio = "1/1", className = "" }: {
-  ad: AdInfo;
-  aspectRatio?: string;
-  className?: string;
-}) {
+function MediaArea({ ad, aspectRatio = "1/1" }: { ad: AdInfo; aspectRatio?: string }) {
+  const videoUrl = resolveVideoUrl(ad);
   const src = ad.imageUrl ?? ad.thumbnailUrl;
+
   return (
-    <div className={`relative w-full overflow-hidden bg-[#F0F2F5] dark:bg-[#242526] ${className}`} style={{ aspectRatio }}>
-      {src ? (
+    <div className="relative w-full overflow-hidden bg-[#F0F2F5]" style={{ aspectRatio }}>
+      {videoUrl ? (
+        <AdVideoPlayer videoUrl={videoUrl} posterUrl={src} />
+      ) : src ? (
         <img src={src} alt={ad.headline || ad.name} className="w-full h-full object-cover" />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <div className="text-[#BEC3C9] dark:text-[#3E4042] flex flex-col items-center gap-1">
+          <div className="text-[#BEC3C9] flex flex-col items-center gap-1">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
               <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1.1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
             </svg>
-            <span className="text-[9px]">No image</span>
+            <span className="text-[9px]">No media</span>
           </div>
         </div>
       )}
-      {ad.creativeType === "video" && src && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-          <div className="w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
-            <Play className="w-4 h-4 text-black ml-0.5" />
+    </div>
+  );
+}
+
+// ─── Dynamic Ad Media Rotator ─────────────────────────────────────────────────
+function DynamicMediaRotator({ ad }: { ad: AdInfo }) {
+  const assets = ad.dynamicAssets;
+  const allImages = assets?.images ?? [];
+  const allVideos = assets?.videos ?? [];
+  const totalAssets = allImages.length + allVideos.length;
+  const [idx, setIdx] = useState(0);
+
+  if (totalAssets === 0) {
+    return <MediaArea ad={ad} aspectRatio="1/1" />;
+  }
+
+  const isVideo = idx >= allImages.length;
+  const videoAsset = isVideo ? allVideos[idx - allImages.length] : null;
+  const imageSrc = !isVideo ? allImages[idx] : null;
+
+  return (
+    <div className="relative">
+      <div className="relative w-full overflow-hidden bg-[#F0F2F5]" style={{ aspectRatio: "1/1" }}>
+        {isVideo && videoAsset ? (
+          videoAsset.videoId ? (
+            <AdVideoPlayer
+              videoUrl={`https://www.facebook.com/video/embed?video_id=${videoAsset.videoId}`}
+              posterUrl={videoAsset.thumbnail}
+            />
+          ) : videoAsset.thumbnail ? (
+            <img src={videoAsset.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-[#F0F2F5]">
+              <Play className="w-8 h-8 text-[#BEC3C9]" />
+            </div>
+          )
+        ) : imageSrc ? (
+          <img src={imageSrc} alt={`Asset ${idx + 1}`} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-[#F0F2F5]">
+            <Layers className="w-8 h-8 text-[#BEC3C9]" />
           </div>
+        )}
+
+        {/* Dynamic badge */}
+        <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+          <Shuffle className="w-2.5 h-2.5" />
+          Dynamic
+        </div>
+
+        {/* Navigation */}
+        {totalAssets > 1 && (
+          <>
+            {idx > 0 && (
+              <button
+                onClick={() => setIdx(i => i - 1)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-[#050505]" />
+              </button>
+            )}
+            {idx < totalAssets - 1 && (
+              <button
+                onClick={() => setIdx(i => i + 1)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-[#050505]" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Asset counter + dots */}
+      {totalAssets > 1 && (
+        <div className="flex items-center justify-center gap-1 py-1.5">
+          {Array.from({ length: totalAssets }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`rounded-full transition-all ${
+                i === idx ? "w-4 h-1.5 bg-[#1877F2]" : "w-1.5 h-1.5 bg-[#CDD0D4]"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Dynamic text rotator */}
+      {(assets?.bodies?.length ?? 0) > 0 && (
+        <div className="px-3 py-1.5 bg-[#F0F2F5] border-t border-[#CDD0D4] text-[10px] text-[#65676B] italic">
+          <span className="font-medium text-[#050505]">Body: </span>
+          {assets!.bodies[idx % assets!.bodies.length]}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── CAROUSEL INNER ───────────────────────────────────────────────────────────
+function CarouselPreviewInner({ cards, ctaType, variant }: {
+  cards: AdInfo["carouselCards"]; ctaType: string; variant: "fb" | "ig";
+}) {
+  const [idx, setIdx] = useState(0);
+  const card = cards[idx];
+  const ctaLabel = CTA_LABELS[ctaType] ?? (ctaType ? ctaType.replace(/_/g, " ") : "");
+
+  return (
+    <div className="relative">
+      <div className="relative w-full overflow-hidden bg-[#F0F2F5]" style={{ aspectRatio: "1/1" }}>
+        {card?.imageUrl ? (
+          <img src={card.imageUrl} alt={card.headline ?? ""} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#BEC3C9]">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1.1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+          </div>
+        )}
+
+        {/* Carousel badge */}
+        <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+          <Layers className="w-2.5 h-2.5" />
+          {idx + 1}/{cards.length}
+        </div>
+
+        {cards.length > 1 && (
+          <>
+            {idx > 0 && (
+              <button
+                onClick={() => setIdx(i => i - 1)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-[#050505]" />
+              </button>
+            )}
+            {idx < cards.length - 1 && (
+              <button
+                onClick={() => setIdx(i => i + 1)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-[#050505]" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Card info */}
+      <div className="flex items-center justify-between px-3 py-2 bg-[#F0F2F5] border-t border-[#CDD0D4]">
+        <div className="flex-1 min-w-0">
+          {card?.headline && (
+            <p className="text-[11px] font-semibold text-[#050505] truncate">{card.headline}</p>
+          )}
+          {card?.description && (
+            <p className="text-[9px] text-[#65676B] truncate">{card.description}</p>
+          )}
+        </div>
+        {ctaLabel && (
+          <button className={`ml-2 flex-shrink-0 text-[9px] font-semibold px-2.5 py-1 rounded-md ${
+            variant === "ig"
+              ? "bg-[#0095F6] text-white"
+              : "border border-[#CDD0D4] bg-white text-[#050505]"
+          }`}>
+            {ctaLabel}
+          </button>
+        )}
+      </div>
+
+      {/* Dots */}
+      {cards.length > 1 && (
+        <div className="flex justify-center gap-1 py-1.5">
+          {cards.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`rounded-full transition-all ${
+                i === idx
+                  ? `w-4 h-1.5 ${variant === "ig" ? "bg-[#0095F6]" : "bg-[#1877F2]"}`
+                  : "w-1.5 h-1.5 bg-[#CDD0D4]"
+              }`}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -246,80 +391,90 @@ function MediaArea({ ad, aspectRatio = "1/1", className = "" }: {
 
 // ─── FACEBOOK FEED POST ───────────────────────────────────────────────────────
 export function FacebookFeedPreview({ ad, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
+  // Use per-ad page info if available, fallback to prop
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
+
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-[#CDD0D4] dark:border-[#3A3B3C] bg-white dark:bg-[#242526] shadow-sm font-[system-ui,sans-serif]">
-      {/* Post Header */}
+    <div className="w-full rounded-xl overflow-hidden border border-[#CDD0D4] bg-white shadow-sm font-[system-ui,sans-serif]">
+      {/* Header */}
       <div className="flex items-start justify-between px-3 pt-3 pb-2">
         <div className="flex items-center gap-2">
-          <PageAvatar url={pageAvatarUrl} name={pageName} size={36} />
-          <div>
-            <div className="flex items-center gap-1">
-              <p className="text-[12px] font-semibold text-[#050505] dark:text-[#E4E6EB] leading-tight">{pageName}</p>
-              <FbLogo size={12} />
+          <div className="relative">
+            <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={36} />
+            <div className="absolute -bottom-0.5 -right-0.5">
+              <FbLogo size={13} />
             </div>
+          </div>
+          <div>
+            <p className="text-[12px] font-semibold text-[#050505] leading-tight">{resolvedPageName}</p>
             <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[10px] text-[#65676B] dark:text-[#B0B3B8]">Sponsored</span>
-              <span className="text-[#65676B] dark:text-[#B0B3B8]">·</span>
-              <Globe className="w-2.5 h-2.5 text-[#65676B] dark:text-[#B0B3B8]" />
+              <span className="text-[10px] text-[#65676B]">Sponsored</span>
+              <span className="text-[#65676B]">·</span>
+              <Globe className="w-2.5 h-2.5 text-[#65676B]" />
             </div>
           </div>
         </div>
-        <MoreHorizontal className="w-4 h-4 text-[#65676B] dark:text-[#B0B3B8] mt-1" />
+        <MoreHorizontal className="w-4 h-4 text-[#65676B] mt-1" />
       </div>
 
       {/* Caption */}
       {ad.message && (
-        <p className="px-3 pb-2 text-[12px] text-[#050505] dark:text-[#E4E6EB] leading-snug line-clamp-3">
-          {ad.message}
-        </p>
+        <p className="px-3 pb-2 text-[12px] text-[#050505] leading-snug line-clamp-3">{ad.message}</p>
       )}
 
       {/* Media */}
       {ad.creativeType === "carousel" && ad.carouselCards.length > 0 ? (
         <CarouselPreviewInner cards={ad.carouselCards} ctaType={ad.ctaType} variant="fb" />
+      ) : ad.creativeType === "dynamic" ? (
+        <DynamicMediaRotator ad={ad} />
       ) : (
         <MediaArea ad={ad} aspectRatio="1/1" />
       )}
 
-      {/* Link bar (headline + description) */}
-      {(ad.headline || ad.description || ad.ctaLink) && (
-        <div className="flex items-center justify-between px-3 py-2 bg-[#F0F2F5] dark:bg-[#3A3B3C] border-t border-[#CDD0D4] dark:border-[#3E4042]">
+      {/* Link bar */}
+      {(ad.headline || ad.description || ad.ctaLink) && ad.creativeType !== "carousel" && ad.creativeType !== "dynamic" && (
+        <div className="flex items-center justify-between px-3 py-2 bg-[#F0F2F5] border-t border-[#CDD0D4]">
           <div className="flex-1 min-w-0">
             {ad.ctaLink && (
-              <p className="text-[9px] text-[#65676B] dark:text-[#B0B3B8] uppercase truncate">
+              <p className="text-[9px] text-[#65676B] uppercase truncate">
                 {ad.ctaLink.replace(/^https?:\/\//, "").split("/")[0]}
               </p>
             )}
             {ad.headline && (
-              <p className="text-[11px] font-semibold text-[#050505] dark:text-[#E4E6EB] truncate">{ad.headline}</p>
+              <p className="text-[11px] font-semibold text-[#050505] truncate">{ad.headline}</p>
             )}
             {ad.description && (
-              <p className="text-[10px] text-[#65676B] dark:text-[#B0B3B8] truncate">{ad.description}</p>
+              <p className="text-[10px] text-[#65676B] truncate">{ad.description}</p>
             )}
           </div>
-          {ad.ctaType && <CtaButton ctaType={ad.ctaType} variant="fb" />}
+          {ad.ctaType && (
+            <div className="ml-2 flex-shrink-0">
+              <CtaButton ctaType={ad.ctaType} variant="fb" />
+            </div>
+          )}
         </div>
       )}
-      {!ad.headline && !ad.description && ad.ctaType && (
-        <CtaButton ctaType={ad.ctaType} variant="fb" />
+      {!ad.headline && !ad.description && ad.ctaType && ad.creativeType !== "carousel" && ad.creativeType !== "dynamic" && (
+        <div className="px-3 pb-2 pt-2">
+          <CtaButton ctaType={ad.ctaType} variant="fb" />
+        </div>
       )}
 
       {/* Reactions bar */}
-      <div className="px-3 py-2 border-t border-[#CDD0D4] dark:border-[#3A3B3C]">
+      <div className="px-3 py-2 border-t border-[#CDD0D4]">
         <div className="flex items-center justify-between">
-          <button className="flex items-center gap-1.5 text-[#65676B] dark:text-[#B0B3B8] hover:text-[#1877F2] transition-colors">
+          <button className="flex items-center gap-1.5 text-[#65676B] hover:text-[#1877F2] transition-colors">
             <ThumbsUp className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">Like</span>
           </button>
-          <button className="flex items-center gap-1.5 text-[#65676B] dark:text-[#B0B3B8]">
+          <button className="flex items-center gap-1.5 text-[#65676B]">
             <MessageCircle className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">Comment</span>
           </button>
-          <button className="flex items-center gap-1.5 text-[#65676B] dark:text-[#B0B3B8]">
+          <button className="flex items-center gap-1.5 text-[#65676B]">
             <Share2 className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">Share</span>
           </button>
@@ -331,36 +486,39 @@ export function FacebookFeedPreview({ ad, pageName, pageAvatarUrl }: {
 
 // ─── INSTAGRAM FEED POST ──────────────────────────────────────────────────────
 export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
+
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-[#DBDBDB] dark:border-[#262626] bg-white dark:bg-[#000000] shadow-sm font-[system-ui,sans-serif]">
+    <div className="w-full rounded-xl overflow-hidden border border-[#DBDBDB] bg-white shadow-sm font-[system-ui,sans-serif]">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
           <div className="relative">
             <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
-              <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-black p-[1.5px]">
-                <PageAvatar url={pageAvatarUrl} name={pageName} size={26} />
+              <div className="w-full h-full rounded-full overflow-hidden bg-white p-[1.5px]">
+                <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={26} />
               </div>
             </div>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-[#262626] dark:text-white leading-tight">{pageName}</p>
+            <p className="text-[11px] font-semibold text-[#262626] leading-tight">{resolvedPageName}</p>
             <div className="flex items-center gap-1">
               <span className="text-[9px] text-[#8E8E8E]">Sponsored</span>
               <IgLogo size={10} />
             </div>
           </div>
         </div>
-        <MoreHorizontal className="w-4 h-4 text-[#262626] dark:text-white" />
+        <MoreHorizontal className="w-4 h-4 text-[#262626]" />
       </div>
 
       {/* Media */}
       {ad.creativeType === "carousel" && ad.carouselCards.length > 0 ? (
         <CarouselPreviewInner cards={ad.carouselCards} ctaType={ad.ctaType} variant="ig" />
+      ) : ad.creativeType === "dynamic" ? (
+        <DynamicMediaRotator ad={ad} />
       ) : (
         <MediaArea ad={ad} aspectRatio="1/1" />
       )}
@@ -375,28 +533,20 @@ export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
       {/* Action bar */}
       <div className="flex items-center justify-between px-3 py-1.5">
         <div className="flex items-center gap-3">
-          <Heart className="w-4 h-4 text-[#262626] dark:text-white" />
-          <MessageCircle className="w-4 h-4 text-[#262626] dark:text-white" />
-          <Send className="w-4 h-4 text-[#262626] dark:text-white" />
+          <Heart className="w-4 h-4 text-[#262626]" />
+          <MessageCircle className="w-4 h-4 text-[#262626]" />
+          <Send className="w-4 h-4 text-[#262626]" />
         </div>
-        <Bookmark className="w-4 h-4 text-[#262626] dark:text-white" />
+        <Bookmark className="w-4 h-4 text-[#262626]" />
       </div>
 
       {/* Caption */}
       {(ad.headline || ad.message) && (
         <div className="px-3 pb-3">
-          {ad.headline && (
-            <p className="text-[11px] text-[#262626] dark:text-white">
-              <span className="font-semibold">{pageName}</span>{" "}
-              {ad.headline}
-            </p>
-          )}
-          {ad.message && !ad.headline && (
-            <p className="text-[11px] text-[#262626] dark:text-white line-clamp-2">
-              <span className="font-semibold">{pageName}</span>{" "}
-              {ad.message}
-            </p>
-          )}
+          <p className="text-[11px] text-[#262626]">
+            <span className="font-semibold">{resolvedPageName}</span>{" "}
+            {ad.headline || ad.message}
+          </p>
         </div>
       )}
     </div>
@@ -405,20 +555,16 @@ export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
 
 // ─── INSTAGRAM STORY ──────────────────────────────────────────────────────────
 export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
   const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
-      style={{ aspectRatio: "9/16" }}
-    >
-      {/* Background: video or image */}
+    <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
       {videoUrl ? (
         <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
       ) : bgSrc ? (
@@ -426,11 +572,9 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700" />
       )}
-
-      {/* Dark overlay (only on non-video or when video is paused) */}
       {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />}
 
-      {/* Progress bar */}
+      {/* Progress bars */}
       <div className="absolute top-2 left-2 right-2 flex gap-0.5 z-10">
         <div className="flex-1 h-0.5 rounded-full bg-white/40">
           <div className="h-full w-2/3 rounded-full bg-white" />
@@ -442,15 +586,16 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
       {/* Header */}
       <div className="absolute top-5 left-3 right-3 flex items-center justify-between z-10">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full border-2 border-white overflow-hidden">
-            <PageAvatar url={pageAvatarUrl} name={pageName} size={28} />
+          <div className="w-7 h-7 rounded-full border-2 border-white overflow-hidden flex-shrink-0">
+            <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={28} />
           </div>
           <div>
-            <p className="text-[10px] font-semibold text-white leading-tight">{pageName}</p>
+            <p className="text-[10px] font-semibold text-white leading-tight">{resolvedPageName}</p>
             <p className="text-[8px] text-white/80">Sponsored</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <IgLogo size={14} />
           <MoreHorizontal className="w-4 h-4 text-white" />
         </div>
       </div>
@@ -469,31 +614,22 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
           </div>
         )}
       </div>
-
-      {/* IG badge */}
-      <div className="absolute top-5 right-3 z-10">
-        <IgLogo size={14} />
-      </div>
     </div>
   );
 }
 
 // ─── INSTAGRAM REELS ─────────────────────────────────────────────────────────
 export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
   const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
-      style={{ aspectRatio: "9/16" }}
-    >
-      {/* Background: video or image */}
+    <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
       {videoUrl ? (
         <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
       ) : bgSrc ? (
@@ -503,8 +639,13 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       )}
       {!videoUrl && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
+      {/* Top: IG logo */}
+      <div className="absolute top-3 left-3 z-10">
+        <IgLogo size={16} />
+      </div>
+
       {/* Right actions */}
-      <div className="absolute right-3 bottom-24 flex flex-col items-center gap-4 z-10">
+      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-4 z-10">
         <div className="flex flex-col items-center gap-0.5">
           <Heart className="w-5 h-5 text-white" />
           <span className="text-[8px] text-white">12K</span>
@@ -517,31 +658,27 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
           <Send className="w-5 h-5 text-white" />
           <span className="text-[8px] text-white">Share</span>
         </div>
+        {/* Page avatar in bottom-right */}
+        <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
+          <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={32} />
+        </div>
       </div>
 
       {/* Bottom info */}
-      <div className="absolute bottom-4 left-3 right-12 z-10">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-full border-2 border-white overflow-hidden">
-            <PageAvatar url={pageAvatarUrl} name={pageName} size={28} />
-          </div>
-          <p className="text-[11px] font-semibold text-white">{pageName}</p>
+      <div className="absolute bottom-4 left-3 right-14 z-10">
+        <div className="flex items-center gap-2 mb-1.5">
+          <p className="text-[11px] font-semibold text-white">{resolvedPageName}</p>
           <span className="text-[9px] text-white/70 border border-white/40 px-1.5 py-0.5 rounded-md">Sponsored</span>
         </div>
         {ad.message && (
           <p className="text-[10px] text-white line-clamp-2 mb-2">{ad.message}</p>
         )}
         {ctaLabel && (
-          <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-medium px-3 py-1.5 rounded-lg">
+          <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
             {ctaLabel}
             <ChevronRight className="w-3 h-3" />
           </button>
         )}
-      </div>
-
-      {/* IG badge */}
-      <div className="absolute top-3 right-3">
-        <IgLogo size={14} />
       </div>
     </div>
   );
@@ -549,20 +686,16 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
 
 // ─── FACEBOOK STORY ───────────────────────────────────────────────────────────
 export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null;
 }) {
+  const resolvedPageName = ad.pageName ?? pageName;
+  const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
   const bgSrc = ad.imageUrl ?? ad.thumbnailUrl;
   const videoUrl = resolveVideoUrl(ad);
   const ctaLabel = CTA_LABELS[ad.ctaType] ?? (ad.ctaType ? ad.ctaType.replace(/_/g, " ") : "");
 
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]"
-      style={{ aspectRatio: "9/16" }}
-    >
-      {/* Background: video or image */}
+    <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-sm font-[system-ui,sans-serif]" style={{ aspectRatio: "9/16" }}>
       {videoUrl ? (
         <AdVideoPlayer videoUrl={videoUrl} posterUrl={bgSrc} />
       ) : bgSrc ? (
@@ -580,14 +713,20 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
       </div>
 
       {/* Header */}
-      <div className="absolute top-5 left-3 right-3 flex items-center gap-2 z-10">
-        <div className="w-8 h-8 rounded-full border-2 border-[#1877F2] overflow-hidden">
-          <PageAvatar url={pageAvatarUrl} name={pageName} size={32} />
+      <div className="absolute top-5 left-3 right-3 flex items-center justify-between z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full border-2 border-[#1877F2] overflow-hidden flex-shrink-0">
+            <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={32} />
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-white">{resolvedPageName}</p>
+            <div className="flex items-center gap-1">
+              <span className="text-[8px] text-white/80">Sponsored</span>
+              <FbLogo size={9} />
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] font-semibold text-white">{pageName}</p>
-          <p className="text-[8px] text-white/80">Sponsored · <FbLogo size={8} /></p>
-        </div>
+        <MoreHorizontal className="w-4 h-4 text-white" />
       </div>
 
       {/* Bottom */}
@@ -605,100 +744,9 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
   );
 }
 
-// ─── CAROUSEL INNER ───────────────────────────────────────────────────────────
-function CarouselPreviewInner({ cards, ctaType, variant }: {
-  cards: AdInfo["carouselCards"];
-  ctaType: string;
-  variant: "fb" | "ig";
-}) {
-  const [idx, setIdx] = useState(0);
-  const card = cards[idx];
-  const ctaLabel = CTA_LABELS[ctaType] ?? (ctaType ? ctaType.replace(/_/g, " ") : "");
-
-  return (
-    <div className="relative">
-      {/* Main card image */}
-      <div className="relative w-full overflow-hidden bg-[#F0F2F5] dark:bg-[#242526]" style={{ aspectRatio: "1/1" }}>
-        {card?.imageUrl ? (
-          <img src={card.imageUrl} alt={card.headline ?? ""} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#BEC3C9]">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1.1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-            </svg>
-          </div>
-        )}
-
-        {/* Navigation arrows */}
-        {cards.length > 1 && (
-          <>
-            {idx > 0 && (
-              <button
-                onClick={() => setIdx(i => i - 1)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 dark:bg-black/70 shadow-md flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-[#050505] dark:text-white" />
-              </button>
-            )}
-            {idx < cards.length - 1 && (
-              <button
-                onClick={() => setIdx(i => i + 1)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 dark:bg-black/70 shadow-md flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-[#050505] dark:text-white" />
-              </button>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Card info bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#F0F2F5] dark:bg-[#3A3B3C] border-t border-[#CDD0D4] dark:border-[#3E4042]">
-        <div className="flex-1 min-w-0">
-          {card?.headline && (
-            <p className="text-[11px] font-semibold text-[#050505] dark:text-white truncate">{card.headline}</p>
-          )}
-          {card?.description && (
-            <p className="text-[9px] text-[#65676B] dark:text-[#B0B3B8] truncate">{card.description}</p>
-          )}
-        </div>
-        {ctaLabel && (
-          <button className={`ml-2 flex-shrink-0 text-[9px] font-semibold px-2.5 py-1 rounded-md ${
-            variant === "ig"
-              ? "bg-[#0095F6] text-white"
-              : "border border-[#CDD0D4] bg-white dark:bg-[#3A3B3C] dark:border-[#3A3B3C] text-[#050505] dark:text-white"
-          }`}>
-            {ctaLabel}
-          </button>
-        )}
-      </div>
-
-      {/* Dots */}
-      {cards.length > 1 && (
-        <div className="flex justify-center gap-1 py-1.5">
-          {cards.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIdx(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                i === idx
-                  ? variant === "ig" ? "bg-[#0095F6]" : "bg-[#1877F2]"
-                  : "bg-[#CDD0D4] dark:bg-[#3E4042]"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── CAROUSEL FULL PREVIEW ────────────────────────────────────────────────────
 export function CarouselPreview({ ad, pageName, pageAvatarUrl, platform = "facebook" }: {
-  ad: AdInfo;
-  pageName: string;
-  pageAvatarUrl?: string | null;
-  platform?: "facebook" | "instagram";
+  ad: AdInfo; pageName: string; pageAvatarUrl?: string | null; platform?: "facebook" | "instagram";
 }) {
   if (platform === "instagram") {
     return <InstagramFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
@@ -708,46 +756,32 @@ export function CarouselPreview({ ad, pageName, pageAvatarUrl, platform = "faceb
 
 // ─── AUTO-DETECT PLACEMENT ────────────────────────────────────────────────────
 export function detectPlacements(ad: AdInfo): AdPlacement[] {
-  const placements: AdPlacement[] = [];
-  // Default to Facebook feed if no specific info
-  placements.push("fb_feed");
-  placements.push("ig_feed");
-  if (ad.creativeType === "video") {
-    placements.push("ig_reel");
-  }
+  const placements: AdPlacement[] = ["fb_feed", "ig_feed"];
+  if (ad.creativeType === "video") placements.push("ig_reel");
   return placements;
 }
 
 // ─── UNIFIED AD PREVIEW ───────────────────────────────────────────────────────
 export function AdPreview({ ad, placement, pageName, pageAvatarUrl }: {
-  ad: AdInfo;
-  placement: AdPlacement;
-  pageName: string;
-  pageAvatarUrl?: string | null;
+  ad: AdInfo; placement: AdPlacement; pageName: string; pageAvatarUrl?: string | null;
 }) {
   switch (placement) {
-    case "fb_feed":
-      return <FacebookFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
-    case "fb_story":
-      return <FacebookStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
-    case "ig_feed":
-      return <InstagramFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
-    case "ig_story":
-      return <InstagramStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
-    case "ig_reel":
-      return <InstagramReelPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
-    default:
-      return <FacebookFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "fb_feed":    return <FacebookFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "fb_story":   return <FacebookStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "ig_feed":    return <InstagramFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "ig_story":   return <InstagramStoryPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    case "ig_reel":    return <InstagramReelPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
+    default:           return <FacebookFeedPreview ad={ad} pageName={pageName} pageAvatarUrl={pageAvatarUrl} />;
   }
 }
 
 // ─── PLACEMENT LABELS ─────────────────────────────────────────────────────────
 export const PLACEMENT_LABELS: Record<AdPlacement, string> = {
-  fb_feed: "Facebook Feed",
-  fb_story: "Facebook Story",
-  ig_feed: "Instagram Feed",
-  ig_story: "Instagram Story",
-  ig_reel: "Instagram Reels",
+  fb_feed:        "Facebook Feed",
+  fb_story:       "Facebook Story",
+  ig_feed:        "Instagram Feed",
+  ig_story:       "Instagram Story",
+  ig_reel:        "Instagram Reels",
   messenger_inbox: "Messenger",
 };
 

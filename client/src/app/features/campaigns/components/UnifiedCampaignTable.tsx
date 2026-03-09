@@ -161,7 +161,15 @@ function UnifiedCampaignTableInner({
       case "name":
         return (
           <div className="min-w-0">
-            <p className="truncate leading-tight" style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>{c.name}</p>
+            <p
+              className="truncate leading-tight"
+              style={{ fontSize: 13, fontWeight: 500, color: "#111827", cursor: onOpenDrawer ? "pointer" : "default" }}
+              onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
+              onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#2563eb"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
+              onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#111827"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
+            >
+              {c.name}
+            </p>
             {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#9ca3af" }}>{c.objective}</p>}
           </div>
         );

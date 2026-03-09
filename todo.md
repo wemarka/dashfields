@@ -2669,3 +2669,25 @@
 - [x] Inter font, tabular-nums, trend badges preserved
 - [x] Removed sparklines for cleaner look
 - [x] 0 TypeScript errors
+
+## 🏗️ Tri-Panel Layout — Meta Ads Manager Style
+- [ ] Build TriPanelLayout: 3 independently scrollable columns (Campaigns | Ad Sets | Ads)
+- [ ] Column 1: Campaigns table with all existing features (filters, KPI bar, sort, score)
+- [ ] Column 2: Ad Sets table — appears when campaign is selected, fetches from API
+- [ ] Column 3: Ads/Creatives — appears when Ad Set is selected, shows ads with thumbnails
+- [ ] Row click → select campaign (highlight), name click → open Campaign Detail Drawer
+- [ ] Column headers: platform icon + name + count badge + KPI summary
+- [ ] Responsive: collapse to single column on mobile
+
+## ✅ Tri-Panel Layout — Meta Ads Manager Style (COMPLETE)
+- [x] AdSetsPanel component (middle column) with merged insights
+- [x] AdsPanel component (right column) with thumbnail cards
+- [x] Campaigns.tsx rewritten with tri-panel layout
+- [x] Row click → select campaign → shows Ad Sets column
+- [x] Ad Set click → shows Ads column
+- [x] Each column scrolls independently
+- [x] KPI mini-bar in each column header
+- [x] Deselect on second click (toggle behavior)
+- [x] Ad Sets column only shows for API (Meta) campaigns
+- [x] All existing features preserved (filters, KPI bar, sort, drawer, compare, export)
+- [x] Vitest tests for tri-panel logic (20 tests passing)
