@@ -210,13 +210,39 @@ function UnifiedCampaignTableInner({
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
         const s = c.score;
-        const color = s >= 70 ? "#10b981" : s >= 40 ? "#f59e0b" : "#ef4444";
-        const bg    = s >= 70 ? "#ecfdf5" : s >= 40 ? "#fffbeb" : "#fef2f2";
+        const arcColor = s >= 70 ? "#10b981" : s >= 40 ? "#f59e0b" : "#ef4444";
+        const textColor = s >= 70 ? "#059669" : s >= 40 ? "#d97706" : "#dc2626";
+        // SVG circle arc: r=14, circumference=2πr≈87.96, dasharray = (s/100)*87.96
+        const r = 14;
+        const circ = 2 * Math.PI * r;
+        const dash = (s / 100) * circ;
+        const size = 36;
+        const cx = size / 2;
         return (
-          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center",
-            fontSize: 11, fontWeight: 700, color, backgroundColor: bg,
-            borderRadius: 6, padding: "2px 7px", fontFamily: "monospace", minWidth: 32 }}>
-            {s}
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative", width: size, height: size }}>
+            <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+              {/* Track */}
+              <circle cx={cx} cy={cx} r={r} fill="none" stroke="#f3f4f6" strokeWidth={3} />
+              {/* Arc */}
+              <circle
+                cx={cx} cy={cx} r={r}
+                fill="none"
+                stroke={arcColor}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeDasharray={`${dash} ${circ - dash}`}
+                strokeDashoffset={0}
+              />
+            </svg>
+            <span style={{
+              position: "absolute", top: 0, left: 0, width: size, height: size,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, fontWeight: 700, color: textColor,
+              fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums",
+              lineHeight: 1,
+            }}>
+              {s}
+            </span>
           </span>
         );
       }
