@@ -4,12 +4,6 @@
 
 import {
   Sparkles,
-  Megaphone,
-  PenSquare,
-  BarChart3,
-  TrendingUp,
-  LineChart,
-  FileBarChart,
   Settings,
   Link2,
   Building2,
@@ -53,38 +47,6 @@ export const navSections: NavSection[] = [
         labelKey: "nav.marketingTools",
         path: "/marketing-tools",
         icon: LayoutGrid,
-      },
-    ],
-  },
-  {
-    label: "nav.sectionMarketing",
-    items: [
-      {
-        labelKey: "nav.ads",
-        path: "/ads",
-        icon: Megaphone,
-        subItems: [
-          { labelKey: "nav.campaigns", path: "/ads/campaigns", icon: Megaphone },
-        ],
-      },
-      {
-        labelKey: "nav.content",
-        path: "/content",
-        icon: PenSquare,
-        subItems: [
-          { labelKey: "nav.calendar", path: "/content/planner", icon: PenSquare },
-        ],
-      },
-      {
-        labelKey: "nav.analytics",
-        path: "/analytics",
-        icon: BarChart3,
-        subItems: [
-          { labelKey: "nav.overview",    path: "/analytics/overview",      icon: BarChart3 },
-          { labelKey: "nav.paidOrganic", path: "/analytics/paid-organic",  icon: TrendingUp },
-          { labelKey: "nav.competitors", path: "/analytics/competitors",   icon: LineChart },
-          { labelKey: "nav.reports",     path: "/analytics/reports",       icon: FileBarChart },
-        ],
       },
     ],
   },

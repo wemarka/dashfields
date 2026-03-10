@@ -1,4 +1,4 @@
-import { Megaphone, PenSquare, BarChart3 } from "lucide-react";
+import { Megaphone, PenSquare, BarChart3, FileBarChart } from "lucide-react";
 
 export const TOOLS = [
   {
@@ -27,5 +27,14 @@ export const TOOLS = [
     gradient: "from-emerald-50 to-teal-50",
     iconColor: "text-emerald-600",
     borderColor: "border-emerald-200/60 hover:border-emerald-300",
+  },
+  {
+    icon: FileBarChart,
+    titleKey: "nav.reports",
+    descKey: "marketingTools.reportsDesc",
+    href: "/analytics/reports",
+    gradient: "from-orange-50 to-amber-50",
+    iconColor: "text-orange-600",
+    borderColor: "border-orange-200/60 hover:border-orange-300",
   },
 ] as const;

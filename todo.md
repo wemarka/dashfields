@@ -2893,3 +2893,8 @@
 - [x] Delete Assets page and remove from nav/routes
 - [x] Create Marketing Tools hub page (/marketing-tools) with 3 cards: Campaigns, Content, Analytics
 - [x] Add Marketing Tools (LayoutGrid icon) entry in sidebar navigation config
+
+## ✅ Sidebar — Remove Marketing Section + Add Reports Card
+- [x] Remove Marketing section (Ads, Content, Analytics) from sidebar navSections
+- [x] Add Reports card to Marketing Tools hub page (toolsConfig.ts)
+- [x] Add reportsDesc i18n keys to en.json and ar.json

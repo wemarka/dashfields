@@ -70,7 +70,8 @@
     "subtitle": "Choose a tool to get started",
     "campaignsDesc": "Manage and track your ad campaigns",
     "contentDesc": "Plan and schedule your content",
-    "analyticsDesc": "Measure performance and growth"
+    "analyticsDesc": "Measure performance and growth",
+    "reportsDesc": "Generate and export detailed reports"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

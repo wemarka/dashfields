@@ -10,7 +10,7 @@ export default function MarketingToolsPage() {
         <h1 className="text-2xl font-bold text-gray-900">{t("nav.marketingTools")}</h1>
         <p className="text-gray-500 mt-1 text-sm">{t("marketingTools.subtitle")}</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {TOOLS.map((tool) => (
           <ToolCard
             key={tool.href}

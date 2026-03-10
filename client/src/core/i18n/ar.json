@@ -70,7 +70,8 @@
     "subtitle": "اختر أداة للبدء",
     "campaignsDesc": "إدارة ومتابعة حملاتك الإعلانية",
     "contentDesc": "خطط وجدوِل محتواك",
-    "analyticsDesc": "قِس الأداء والنمو"
+    "analyticsDesc": "قِس الأداء والنمو",
+    "reportsDesc": "أنشئ وصدِّر تقارير مفصّلة"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",
