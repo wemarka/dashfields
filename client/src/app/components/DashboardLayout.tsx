@@ -45,6 +45,7 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [recentSessions, setRecentSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
@@ -62,8 +63,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Listen for AI session updates from AIAgentPage
   useEffect(() => {
     const handler = (e: Event) => {
-      const custom = e as CustomEvent<ChatSession[]>;
-      setRecentSessions(custom.detail ?? []);
+      const custom = e as CustomEvent<{ sessions: ChatSession[]; activeId: string | null }>;
+      setRecentSessions(custom.detail?.sessions ?? []);
+      setActiveSessionId(custom.detail?.activeId ?? null);
     };
     window.addEventListener("ai-sessions-update", handler);
     return () => window.removeEventListener("ai-sessions-update", handler);
@@ -439,7 +441,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
 
-        {/* ── Recent Conversations (only when on AI Agent page) ── */}
+        {/* ── Recent Conversations ── */}
         {recentSessions.length > 0 && !collapsed && (
           <div className="px-2 pb-2 shrink-0">
             <div className="h-px bg-border/30 mb-2" />
@@ -449,23 +451,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </span>
             </div>
             <div className="space-y-0.5">
-              {recentSessions.slice(0, 5).map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => {
-                    setLocation("/dashboard");
-                    window.dispatchEvent(new CustomEvent("ai-load-session", { detail: session }));
-                  }}
-                  className={[
-                    "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px]",
-                    "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-all duration-150",
-                    isRTL ? "flex-row-reverse text-right" : "text-left",
-                  ].join(" ")}
-                >
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0 text-foreground/30" />
-                  <span className="truncate flex-1">{session.title}</span>
-                </button>
-              ))}
+              {recentSessions.slice(0, 5).map((session) => {
+                const isActive = session.id === activeSessionId;
+                return (
+                  <div key={session.id} className="group relative flex items-center">
+                    <button
+                      onClick={() => {
+                        setLocation("/dashboard");
+                        window.dispatchEvent(new CustomEvent("ai-load-session", { detail: session }));
+                      }}
+                      className={[
+                        "flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] transition-all duration-150",
+                        isActive
+                          ? "bg-violet-500/10 text-violet-600 font-medium"
+                          : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
+                        isRTL ? "flex-row-reverse text-right" : "text-left",
+                      ].join(" ")}
+                    >
+                      <MessageSquare className={["w-3.5 h-3.5 shrink-0", isActive ? "text-violet-500" : "text-foreground/30"].join(" ")} />
+                      <span className="truncate flex-1">{session.title}</span>
+                    </button>
+                    {/* Delete button — visible on hover */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.dispatchEvent(new CustomEvent("ai-delete-session", { detail: session.id }));
+                      }}
+                      className="absolute right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-red-50 hover:text-red-500 text-foreground/30"
+                      title="Delete conversation"
+                    >
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

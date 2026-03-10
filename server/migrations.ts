@@ -12,12 +12,14 @@ export async function runMissingMigrations(): Promise<void> {
     sb.from("saved_audiences").select("id").limit(1),
     sb.from("content_templates").select("id").limit(1),
     sb.from("performance_goals").select("id").limit(1),
+    sb.from("ai_conversations").select("id").limit(1),
   ]);
 
   const missingTables: string[] = [];
   if (tableChecks[0].error?.message?.includes("schema cache")) missingTables.push("saved_audiences");
   if (tableChecks[1].error?.message?.includes("schema cache")) missingTables.push("content_templates");
   if (tableChecks[2].error?.message?.includes("schema cache")) missingTables.push("performance_goals");
+  if (tableChecks[3].error?.message?.includes("schema cache")) missingTables.push("ai_conversations");
 
   if (missingTables.length === 0) {
     console.log("[Migrations] All tables present.");
@@ -114,6 +116,18 @@ CREATE TABLE IF NOT EXISTS ad_preview_cache (
 );
 CREATE INDEX IF NOT EXISTS idx_ad_preview_cache_lookup ON ad_preview_cache (creative_id, ad_format, user_id, expires_at);
 CREATE INDEX IF NOT EXISTS idx_ad_preview_cache_expires ON ad_preview_cache (expires_at);
+
+CREATE TABLE IF NOT EXISTS ai_conversations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  preview text NOT NULL DEFAULT '',
+  messages jsonb NOT NULL DEFAULT '[]',
+  created_at timestamptz DEFAULT now() NOT NULL,
+  updated_at timestamptz DEFAULT now() NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ai_conversations_user_id_idx ON ai_conversations(user_id);
+CREATE INDEX IF NOT EXISTS ai_conversations_user_updated_idx ON ai_conversations(user_id, updated_at DESC);
   `;
 
   try {

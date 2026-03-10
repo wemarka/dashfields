@@ -2872,3 +2872,11 @@
 - [x] Show section on all pages when sessions exist (not just /dashboard)
 - [x] Sync sessions between AIAgentPage and DashboardLayout via localStorage + CustomEvent
 - [x] Session click loads conversation back into AIAgentPage via ai-load-session event
+
+## ✅ AI Agent — Recent Conversations Enhancements
+- [x] Add ai_conversations table to Supabase (id, user_id, title, preview, messages JSONB, created_at, updated_at)
+- [x] Add tRPC procedures: aiConversations.list, save, delete
+- [x] Update AIAgentPage to load/save/delete sessions from Supabase (fallback to localStorage when unauthenticated)
+- [x] Add delete (X) button per conversation in DashboardLayout sidebar
+- [x] Highlight active session in sidebar with violet accent
+- [x] Broadcast active session ID via CustomEvent for sidebar to track

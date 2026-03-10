@@ -445,3 +445,17 @@ export const adPreviewCache = pgTable("ad_preview_cache", {
 });
 export type AdPreviewCache       = typeof adPreviewCache.$inferSelect;
 export type InsertAdPreviewCache = typeof adPreviewCache.$inferInsert;
+
+// ─── AI Conversations ─────────────────────────────────────────────────────────
+// Stores AI Agent chat sessions per user for cross-device sync.
+export const aiConversations = pgTable("ai_conversations", {
+  id:          uuid("id").primaryKey().defaultRandom(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title:       text("title").notNull(),
+  preview:     text("preview").notNull().default(""),
+  messages:    jsonb("messages").notNull().default([]),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+export type AiConversation       = typeof aiConversations.$inferSelect;
+export type InsertAiConversation = typeof aiConversations.$inferInsert;
