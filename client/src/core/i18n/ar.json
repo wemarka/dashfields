@@ -62,7 +62,8 @@
     "workspace": "مساحة العمل والفريق",
     "assets": "الأصول",
     "paidOrganic": "المدفوع مقابل المجاني",
-    "sectionMarketing": "التسويق"
+    "sectionMarketing": "التسويق",
+    "sectionRecent": "الأخيرة"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

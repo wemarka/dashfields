@@ -1,13 +1,13 @@
 /**
  * client/src/app/features/ai-agent/AIAgentPage.tsx
- * Dashfields AI Marketing Agent — Lovable-inspired redesign.
- * Gradient background, collapsible sidebar, floating input, card quick actions.
+ * Dashfields AI Marketing Agent — Full-width, no internal sidebar.
+ * Gradient background, floating input, card quick actions.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Plus, BarChart3, Megaphone, Image as ImageIcon,
-  TrendingUp, Loader2, Bot, ChevronLeft, ChevronRight,
-  Sparkles, Clock, Trash2, Copy, RotateCcw,
+  TrendingUp, Loader2, Bot, ChevronRight,
+  Sparkles, Copy, RotateCcw,
 } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -25,12 +25,18 @@ interface ChatMessage {
   isStreaming?: boolean;
 }
 
-interface ChatSession {
+export interface ChatSession {
   id: string;
   title: string;
   preview: string;
   timestamp: Date;
   messages: ChatMessage[];
+}
+
+// Export sessions state so DashboardLayout can access it
+// We use a simple event emitter pattern via window events
+export function dispatchSessionsUpdate(sessions: ChatSession[]) {
+  window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: sessions }));
 }
 
 // ─── Markdown renderer ──────────────────────────────────────────────────────
@@ -102,13 +108,17 @@ export default function AIAgentPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const isInChat = messages.length > 0;
+
+  // Broadcast sessions to sidebar
+  useEffect(() => {
+    dispatchSessionsUpdate(sessions);
+  }, [sessions]);
 
   // Auto-scroll
   useEffect(() => {
@@ -176,7 +186,7 @@ export default function AIAgentPage() {
         messages: [],
       };
       setActiveSession(newSession.id);
-      setSessions((prev) => [newSession, ...prev]);
+      setSessions((prev) => [newSession, ...prev.slice(0, 9)]);
     }
 
     try {
@@ -200,7 +210,7 @@ export default function AIAgentPage() {
         credentials: "include",
       });
 
-      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok || !res.body) throw new Error("Stream failed");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -210,22 +220,24 @@ export default function AIAgentPage() {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
+        const lines = chunk.split("\n");
+        for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") break;
+          const raw = line.slice(6).trim();
+          if (raw === "[DONE]") break;
           try {
-            const parsed = JSON.parse(data) as { text?: string; error?: string };
+            const parsed = JSON.parse(raw) as { content?: string; error?: string };
             if (parsed.error) throw new Error(parsed.error);
-            if (parsed.text !== undefined) {
-              accumulated += parsed.text;
+            if (parsed.content) {
+              accumulated += parsed.content;
+              const snap = accumulated;
               setMessages((prev) =>
                 prev.map((m) =>
-                  m.id === assistantId ? { ...m, content: accumulated } : m
+                  m.id === assistantId ? { ...m, content: snap, isStreaming: true } : m
                 )
               );
             }
-          } catch { /* skip malformed */ }
+          } catch { /* ignore parse errors */ }
         }
       }
 
@@ -234,22 +246,15 @@ export default function AIAgentPage() {
           m.id === assistantId ? { ...m, isStreaming: false } : m
         )
       );
-    } catch (err) {
-      if ((err as Error).name === "AbortError") return;
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId
-            ? { ...m, content: t("aiAgent.error"), isStreaming: false }
-            : m
-        )
-      );
-      toast.error(t("aiAgent.connectionError"));
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      toast.error(t("aiAgent.error"));
+      setMessages((prev) => prev.filter((m) => m.id !== assistantId));
     } finally {
       setIsLoading(false);
       abortRef.current = null;
-      textareaRef.current?.focus();
     }
-  }, [isLoading, messages, getToken, t]);
+  }, [messages, isLoading, getToken, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -271,30 +276,11 @@ export default function AIAgentPage() {
     setIsLoading(false);
   };
 
-  const handleLoadSession = (session: ChatSession) => {
-    setMessages(session.messages.length > 0 ? session.messages : []);
-    setActiveSession(session.id);
-  };
-
-  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSessions((prev) => prev.filter((s) => s.id !== id));
-    if (activeSession === id) {
-      setMessages([]);
-      setActiveSession(null);
-    }
-  };
-
   const firstName = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      className={cn(
-        "flex h-full overflow-hidden relative",
-        isRtl ? "flex-row-reverse" : "flex-row"
-      )}
-    >
+    <div className="flex h-full overflow-hidden relative">
       {/* ── Gradient Background ─────────────────────────────────────────── */}
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-1000"
@@ -311,24 +297,18 @@ export default function AIAgentPage() {
           <div
             className="absolute pointer-events-none"
             style={{
-              width: 700,
-              height: 700,
-              borderRadius: "50%",
+              width: 700, height: 700, borderRadius: "50%",
               background: "radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 65%)",
-              top: "-10%",
-              left: "5%",
+              top: "-10%", left: "5%",
               animation: "pulse 5s ease-in-out infinite",
             }}
           />
           <div
             className="absolute pointer-events-none"
             style={{
-              width: 600,
-              height: 600,
-              borderRadius: "50%",
+              width: 600, height: 600, borderRadius: "50%",
               background: "radial-gradient(circle, rgba(236,72,153,0.18) 0%, transparent 65%)",
-              bottom: "5%",
-              right: "10%",
+              bottom: "5%", right: "10%",
               animation: "pulse 7s ease-in-out infinite",
               animationDelay: "1.5s",
             }}
@@ -336,125 +316,15 @@ export default function AIAgentPage() {
           <div
             className="absolute pointer-events-none"
             style={{
-              width: 450,
-              height: 450,
-              borderRadius: "50%",
+              width: 450, height: 450, borderRadius: "50%",
               background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 65%)",
-              top: "50%",
-              left: "55%",
+              top: "50%", left: "55%",
               animation: "pulse 6s ease-in-out infinite",
               animationDelay: "3s",
             }}
           />
         </>
       )}
-
-      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside
-        className={cn(
-          "relative z-10 flex flex-col shrink-0 transition-all duration-300 ease-in-out",
-          "bg-white/65 backdrop-blur-2xl",
-          isRtl ? "border-l border-white/50" : "border-r border-white/50",
-          sidebarOpen ? "w-60" : "w-0 overflow-hidden"
-        )}
-      >
-        {sidebarOpen && (
-          <div className="flex flex-col h-full min-w-0">
-            {/* Sidebar Header */}
-            <div className={cn(
-              "flex items-center gap-2.5 px-4 py-4 border-b border-gray-100/60",
-              isRtl ? "flex-row-reverse" : ""
-            )}>
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-sm font-semibold text-gray-800 truncate">Dashfields AI</span>
-            </div>
-
-            {/* New Chat */}
-            <div className="px-3 pt-3 pb-2">
-              <button
-                onClick={handleNewChat}
-                className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium",
-                  "bg-gradient-to-r from-violet-500 to-indigo-600 text-white",
-                  "hover:from-violet-600 hover:to-indigo-700 transition-all duration-200",
-                  "shadow-sm hover:shadow-md active:scale-[0.98]",
-                  isRtl ? "flex-row-reverse" : ""
-                )}
-              >
-                <Plus className="w-4 h-4 shrink-0" />
-                <span>{t("aiAgent.newChat")}</span>
-              </button>
-            </div>
-
-            {/* Sessions */}
-            <div className="flex-1 overflow-y-auto px-2 py-1 scrollbar-none">
-              {sessions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center px-4">
-                  <Clock className="w-7 h-7 text-gray-300 mb-2" />
-                  <p className="text-xs text-gray-400">{t("aiAgent.noHistory")}</p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 py-2">
-                    {t("aiAgent.recents")}
-                  </p>
-                  {sessions.map((session) => (
-                    <button
-                      key={session.id}
-                      onClick={() => handleLoadSession(session)}
-                      className={cn(
-                        "w-full text-left px-3 py-2.5 rounded-xl group transition-all duration-150 mb-0.5",
-                        "hover:bg-gray-100/80",
-                        activeSession === session.id
-                          ? "bg-violet-50/80 border border-violet-200/60"
-                          : "border border-transparent",
-                        isRtl ? "text-right" : "text-left"
-                      )}
-                    >
-                      <div className={cn("flex items-start gap-1", isRtl ? "flex-row-reverse" : "")}>
-                        <p className={cn(
-                          "text-xs font-medium truncate flex-1 leading-relaxed",
-                          activeSession === session.id ? "text-violet-700" : "text-gray-700"
-                        )}>
-                          {session.title}
-                        </p>
-                        <button
-                          onClick={(e) => handleDeleteSession(session.id, e)}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-400 transition-all shrink-0"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <p className="text-[11px] text-gray-400 truncate mt-0.5">{session.preview}</p>
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </aside>
-
-      {/* ── Toggle Sidebar ───────────────────────────────────────────────── */}
-      <button
-        onClick={() => setSidebarOpen((v) => !v)}
-        className={cn(
-          "absolute z-20 top-5 flex items-center justify-center",
-          "w-5 h-5 rounded-full bg-white/95 backdrop-blur-sm",
-          "border border-gray-200/80 shadow-sm hover:shadow-md",
-          "text-gray-500 hover:text-gray-700 transition-all duration-300",
-          isRtl
-            ? sidebarOpen ? "right-60 -mr-2.5" : "right-1"
-            : sidebarOpen ? "left-60 -ml-2.5" : "left-1"
-        )}
-      >
-        {sidebarOpen
-          ? (isRtl ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />)
-          : (isRtl ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />)
-        }
-      </button>
 
       {/* ── Main Content ────────────────────────────────────────────────── */}
       <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -464,10 +334,10 @@ export default function AIAgentPage() {
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 overflow-y-auto">
             {/* Greeting */}
             <div className="text-center mb-8 animate-fade-in">
-              <h1
-                className="text-[2rem] font-bold text-gray-800 mb-2 tracking-tight"
-                style={{ fontFamily: "'Inter', sans-serif" }}
-              >
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg mb-5">
+                <Sparkles className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-[2rem] font-bold text-gray-800 mb-2 tracking-tight">
                 {t("aiAgent.greeting", { name: firstName })}
               </h1>
               <p className="text-gray-500 text-[15px]">{t("aiAgent.subtitle")}</p>
@@ -501,8 +371,8 @@ export default function AIAgentPage() {
                     </p>
                   </div>
                   <ChevronRight className={cn(
-                    "absolute top-4 w-3.5 h-3.5 text-gray-300 group-hover:text-gray-400 transition-all",
-                    isRtl ? "left-4 rotate-180 group-hover:-translate-x-0.5" : "right-4 group-hover:translate-x-0.5"
+                    "absolute top-4 right-4 w-3.5 h-3.5 text-gray-300 group-hover:text-gray-400 transition-all",
+                    isRtl ? "rotate-180" : "group-hover:translate-x-0.5"
                   )} />
                 </button>
               ))}
@@ -547,7 +417,7 @@ export default function AIAgentPage() {
                   isRtl ? "flex-row-reverse" : ""
                 )}
               >
-                <RotateCcw className="w-3 h-3" />
+                <Plus className="w-3 h-3" />
                 {t("aiAgent.newChat")}
               </button>
             </div>
@@ -722,12 +592,15 @@ function MessageBubble({
 // ─── Thinking Dots ───────────────────────────────────────────────────────────
 function ThinkingDots() {
   return (
-    <div className="flex items-center gap-1.5 py-0.5">
-      {[0, 150, 300].map((delay) => (
-        <span
-          key={delay}
-          className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce"
-          style={{ animationDelay: `${delay}ms` }}
+    <div className="flex items-center gap-1 py-1">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="w-2 h-2 rounded-full bg-violet-400"
+          style={{
+            animation: "bounce 1.2s ease-in-out infinite",
+            animationDelay: `${i * 0.2}s`,
+          }}
         />
       ))}
     </div>
@@ -747,3 +620,6 @@ function ThinkingBubble() {
     </div>
   );
 }
+
+// Unused but kept for potential future use
+export { RotateCcw };

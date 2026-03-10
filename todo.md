@@ -2859,3 +2859,9 @@
 - [x] Card component: softer shadow, lighter border
 - [x] Button component: rounded-lg, smoother transitions, softer secondary/ghost variants
 - [x] 630/630 tests passing, 0 TypeScript errors
+
+## ✅ AI Agent Sidebar Refactor
+- [x] Remove internal AI Agent sidebar panel from AIAgentPage
+- [x] Make AIAgentPage full-width (no internal sidebar)
+- [x] Add "Recent" section in main DashboardLayout sidebar under AI Agent nav item
+- [x] Recent shows last 5 conversations (via window event from AIAgentPage)

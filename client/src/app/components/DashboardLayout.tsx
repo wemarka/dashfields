@@ -19,12 +19,14 @@ import { KeyboardShortcutsModal } from "@/app/components/KeyboardShortcutsModal"
 import {
   ChevronLeft, ChevronRight,
   Sun, Moon, ChevronDown, PlusCircle, Globe2,
+  MessageSquare,
   // ChevronLeft kept for sidebar collapse button
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/core/components/ui/tooltip";
 import { navSections } from "@/config/navigation";
 import { NavItemButton } from "./layout-parts/NavItemButton";
 import { useState, useEffect, useRef, useCallback } from "react";
+import type { ChatSession } from "@/app/features/ai-agent/AIAgentPage";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
@@ -42,11 +44,22 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [recentSessions, setRecentSessions] = useState<ChatSession[]>([]);
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
+
+  // Listen for AI session updates from AIAgentPage
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<ChatSession[]>;
+      setRecentSessions(custom.detail ?? []);
+    };
+    window.addEventListener("ai-sessions-update", handler);
+    return () => window.removeEventListener("ai-sessions-update", handler);
+  }, []);
 
   // Close collapsed popover when clicking outside
   useEffect(() => {
@@ -417,6 +430,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           ))}
         </nav>
+
+        {/* ── Recent Conversations (only when on AI Agent page) ── */}
+        {location === "/dashboard" && recentSessions.length > 0 && !collapsed && (
+          <div className="px-2 pb-2 shrink-0">
+            <div className="h-px bg-border/30 mb-2" />
+            <div className="px-2.5 py-1.5">
+              <span className="text-[10.5px] font-semibold text-foreground/30 uppercase tracking-widest">
+                {t("nav.sectionRecent")}
+              </span>
+            </div>
+            <div className="space-y-0.5">
+              {recentSessions.slice(0, 5).map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => setLocation("/dashboard")}
+                  className={[
+                    "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px]",
+                    "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-all duration-150",
+                    isRTL ? "flex-row-reverse text-right" : "text-left",
+                  ].join(" ")}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0 text-foreground/30" />
+                  <span className="truncate flex-1">{session.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom icon row: Tools + Install + Settings + Help + Sign Out */}
         <div className="px-3 pb-3 shrink-0">
