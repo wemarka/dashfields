@@ -71,7 +71,10 @@
     "campaignsDesc": "إدارة ومتابعة حملاتك الإعلانية",
     "contentDesc": "خطط وجدوِل محتواك",
     "analyticsDesc": "قِس الأداء والنمو",
-    "reportsDesc": "أنشئ وصدِّر تقارير مفصّلة"
+    "reportsDesc": "أنشئ وصدِّر تقارير مفصّلة",
+    "statActive": "نشطة",
+    "statScheduled": "مجدول",
+    "statReports": "تقرير"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",

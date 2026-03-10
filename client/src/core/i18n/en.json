@@ -71,7 +71,10 @@
     "campaignsDesc": "Manage and track your ad campaigns",
     "contentDesc": "Plan and schedule your content",
     "analyticsDesc": "Measure performance and growth",
-    "reportsDesc": "Generate and export detailed reports"
+    "reportsDesc": "Generate and export detailed reports",
+    "statActive": "active",
+    "statScheduled": "scheduled",
+    "statReports": "reports"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

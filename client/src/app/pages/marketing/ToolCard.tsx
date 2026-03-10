@@ -9,10 +9,18 @@ interface Props {
   gradient: string;
   iconColor: string;
   borderColor: string;
+  statValue?: number | null;
+  statLabel?: string;
+  isLoading?: boolean;
 }
 
-export function ToolCard({ icon: Icon, title, description, href, gradient, iconColor, borderColor }: Props) {
+export function ToolCard({
+  icon: Icon, title, description, href,
+  gradient, iconColor, borderColor,
+  statValue, statLabel, isLoading,
+}: Props) {
   const [, setLocation] = useLocation();
+
   return (
     <button
       onClick={() => setLocation(href)}
@@ -22,13 +30,33 @@ export function ToolCard({ icon: Icon, title, description, href, gradient, iconC
         gradient, borderColor,
       ].join(" ")}
     >
+      {/* Icon */}
       <div className={["w-12 h-12 rounded-xl flex items-center justify-center bg-white/80 shadow-sm", iconColor].join(" ")}>
         <Icon className="w-6 h-6" />
       </div>
-      <div>
+
+      {/* Title + description */}
+      <div className="flex-1">
         <p className="font-semibold text-gray-900 text-base mb-1">{title}</p>
         <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
       </div>
+
+      {/* Live stat badge */}
+      {statLabel && (
+        <div className="flex items-center gap-2 mt-1">
+          {isLoading ? (
+            <span className="h-5 w-16 rounded-full bg-gray-200 animate-pulse inline-block" />
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-white/70 border border-gray-200 rounded-full px-2.5 py-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+              <span className="tabular-nums">{statValue ?? 0}</span>
+              <span>{statLabel}</span>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Arrow on hover */}
       <div className="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
         <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7" />

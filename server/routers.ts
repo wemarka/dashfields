@@ -37,6 +37,7 @@ import { savedAudiencesRouter }       from "./app/routers/savedAudiences";
 import { performanceGoalsRouter }     from "./app/routers/performanceGoals";
 import { contentTemplatesRouter }     from "./app/routers/contentTemplates";
 import { aiConversationsRouter }      from "./app/routers/aiConversations";
+import { marketingStatsRouter }       from "./app/routers/marketingStats";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -83,6 +84,7 @@ export const appRouter = router({
   performanceGoals:     performanceGoalsRouter,
   contentTemplates:     contentTemplatesRouter,
   aiConversations:      aiConversationsRouter,
+  marketingStats:       marketingStatsRouter,
 });
 
 export type AppRouter = typeof appRouter;

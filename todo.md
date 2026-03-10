@@ -2898,3 +2898,9 @@
 - [x] Remove Marketing section (Ads, Content, Analytics) from sidebar navSections
 - [x] Add Reports card to Marketing Tools hub page (toolsConfig.ts)
 - [x] Add reportsDesc i18n keys to en.json and ar.json
+
+## ✅ Marketing Tools — Live Stats on Cards
+- [x] Add marketingStats.getStats tRPC procedure (campaigns active, posts scheduled, reports count)
+- [x] Update ToolCard to accept and display a stat badge with skeleton loading
+- [x] Update MarketingToolsPage to fetch stats and pass to each card
+- [x] Add i18n keys for stat labels (en + ar)
