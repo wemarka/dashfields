@@ -63,7 +63,14 @@
     "assets": "Assets",
     "paidOrganic": "Paid vs Organic",
     "sectionMarketing": "Marketing",
-    "sectionRecent": "Recent"
+    "sectionRecent": "Recent",
+    "marketingTools": "Marketing Tools"
+  },
+  "marketingTools": {
+    "subtitle": "Choose a tool to get started",
+    "campaignsDesc": "Manage and track your ad campaigns",
+    "contentDesc": "Plan and schedule your content",
+    "analyticsDesc": "Measure performance and growth"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

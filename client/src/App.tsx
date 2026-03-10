@@ -31,12 +31,9 @@ import { DemoBanner } from "./app/components/DemoBanner";
   "/dashboard",
   // Ads
   "/ads/campaigns",
-  "/ads/audiences",
-  "/ads/ai-analyzer",
   // Content
   "/content/planner",
-  "/content/ai-studio",
-  "/content/assets",
+  "/marketing-tools",
   // Analytics
   "/analytics/overview",
   "/analytics/paid-organic",
@@ -82,13 +79,10 @@ const PerformanceMonitor = lazy(() => import("./app/features/monitor/Performance
 const PerformanceGoals   = lazy(() => import("./app/features/analytics/PerformanceGoals"));
 // ─── Standalone sub-pages (Accordion Sidebar architecture) ──────────────────
 // Ads
-const CampaignsPage    = lazy(() => import("./app/pages/ads/CampaignsPage"));
-const AudiencesPage    = lazy(() => import("./app/pages/ads/AudiencesPage"));
-const AIAnalyzerPage   = lazy(() => import("./app/pages/ads/AIAnalyzerPage"));
+const CampaignsPage       = lazy(() => import("./app/pages/ads/CampaignsPage"));
 // Content
-const PlannerPage      = lazy(() => import("./app/pages/content/PlannerPage"));
-const AIStudioPage     = lazy(() => import("./app/pages/content/AIStudioPage"));
-const AssetsPage       = lazy(() => import("./app/pages/content/AssetsPage"));
+const PlannerPage         = lazy(() => import("./app/pages/content/PlannerPage"));
+const MarketingToolsPage  = lazy(() => import("./app/pages/marketing/MarketingToolsPage"));
 // Analytics
 const OverviewPage     = lazy(() => import("./app/pages/analytics/OverviewPage"));
 const PaidOrganicPage  = lazy(() => import("./app/pages/analytics/PaidOrganicPage"));
@@ -198,13 +192,11 @@ function AppRouter() {
               <Route path="/ads/campaigns"          component={CampaignsPage} />
               <Route path="/ads/creatives"          component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/adsets"             component={() => <Redirect to="/ads/campaigns" />} />
-              <Route path="/ads/audiences"          component={AudiencesPage} />
-              <Route path="/ads/ai-analyzer"        component={AIAnalyzerPage} />
-              {/* ── Content sub-pages ──────────────────────────────────────── */}
+              {/* ── Content sub-pages ──────────────────────────────────────────────── */}
               <Route path="/content"                component={() => <Redirect to="/content/planner" />} />
               <Route path="/content/planner"        component={PlannerPage} />
-              <Route path="/content/ai-studio"      component={AIStudioPage} />
-              <Route path="/content/assets"         component={AssetsPage} />
+              {/* ── Marketing Tools hub ─────────────────────────────────────────────── */}
+              <Route path="/marketing-tools"        component={MarketingToolsPage} />
               {/* ── Analytics sub-pages ────────────────────────────────────── */}
               <Route path="/analytics"              component={() => <Redirect to="/analytics/overview" />} />
               <Route path="/analytics/overview"     component={OverviewPage} />
@@ -224,15 +216,15 @@ function AppRouter() {
               <Route path="/performance-goals"      component={PerformanceGoals} />
               {/* ── Legacy redirects ───────────────────────────────────────── */}
               <Route path="/campaigns"              component={() => <Redirect to="/ads/campaigns" />} />
-              <Route path="/audience"               component={() => <Redirect to="/ads/audiences" />} />
-              <Route path="/ads-analyzer"           component={() => <Redirect to="/ads/ai-analyzer" />} />
-              <Route path="/audience-overlap"       component={() => <Redirect to="/ads/audiences" />} />
-              <Route path="/saved-audiences"        component={() => <Redirect to="/ads/audiences" />} />
+              <Route path="/audience"               component={() => <Redirect to="/marketing-tools" />} />
+              <Route path="/ads-analyzer"           component={() => <Redirect to="/marketing-tools" />} />
+              <Route path="/audience-overlap"       component={() => <Redirect to="/marketing-tools" />} />
+              <Route path="/saved-audiences"        component={() => <Redirect to="/marketing-tools" />} />
               <Route path="/ab-testing"             component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/calendar"               component={() => <Redirect to="/content/planner" />} />
-              <Route path="/ai-content"             component={() => <Redirect to="/content/ai-studio" />} />
-              <Route path="/brand-kit"              component={() => <Redirect to="/content/assets" />} />
-              <Route path="/content-templates"      component={() => <Redirect to="/content/assets" />} />
+              <Route path="/ai-content"             component={() => <Redirect to="/marketing-tools" />} />
+              <Route path="/brand-kit"              component={() => <Redirect to="/marketing-tools" />} />
+              <Route path="/content-templates"      component={() => <Redirect to="/marketing-tools" />} />
               <Route path="/publishing"             component={() => <Redirect to="/content/planner" />} />
               <Route path="/post-analytics"         component={() => <Redirect to="/analytics/overview" />} />
               <Route path="/insights"               component={() => <Redirect to="/analytics/overview" />} />

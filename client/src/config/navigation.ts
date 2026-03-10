@@ -5,12 +5,7 @@
 import {
   Sparkles,
   Megaphone,
-  Users,
-  Brain,
   PenSquare,
-  CalendarDays,
-  Wand2,
-  FolderOpen,
   BarChart3,
   TrendingUp,
   LineChart,
@@ -19,6 +14,7 @@ import {
   Link2,
   Building2,
   CreditCard,
+  LayoutGrid,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -53,6 +49,11 @@ export const navSections: NavSection[] = [
         icon: Sparkles,
         iconAnimation: "icon-pulse",
       },
+      {
+        labelKey: "nav.marketingTools",
+        path: "/marketing-tools",
+        icon: LayoutGrid,
+      },
     ],
   },
   {
@@ -63,9 +64,7 @@ export const navSections: NavSection[] = [
         path: "/ads",
         icon: Megaphone,
         subItems: [
-          { labelKey: "nav.campaigns",    path: "/ads/campaigns",    icon: Megaphone },
-          { labelKey: "nav.audience",     path: "/ads/audiences",    icon: Users },
-          { labelKey: "nav.adsAnalyzer",  path: "/ads/ai-analyzer",  icon: Brain },
+          { labelKey: "nav.campaigns", path: "/ads/campaigns", icon: Megaphone },
         ],
       },
       {
@@ -73,9 +72,7 @@ export const navSections: NavSection[] = [
         path: "/content",
         icon: PenSquare,
         subItems: [
-          { labelKey: "nav.calendar",   path: "/content/planner",    icon: CalendarDays },
-          { labelKey: "nav.aiStudio",   path: "/content/ai-studio",  icon: Wand2 },
-          { labelKey: "nav.assets",     path: "/content/assets",     icon: FolderOpen },
+          { labelKey: "nav.calendar", path: "/content/planner", icon: PenSquare },
         ],
       },
       {
@@ -83,10 +80,10 @@ export const navSections: NavSection[] = [
         path: "/analytics",
         icon: BarChart3,
         subItems: [
-          { labelKey: "nav.overview",      path: "/analytics/overview",      icon: BarChart3 },
-          { labelKey: "nav.paidOrganic",   path: "/analytics/paid-organic",  icon: TrendingUp },
-          { labelKey: "nav.competitors",   path: "/analytics/competitors",   icon: LineChart },
-          { labelKey: "nav.reports",       path: "/analytics/reports",       icon: FileBarChart },
+          { labelKey: "nav.overview",    path: "/analytics/overview",      icon: BarChart3 },
+          { labelKey: "nav.paidOrganic", path: "/analytics/paid-organic",  icon: TrendingUp },
+          { labelKey: "nav.competitors", path: "/analytics/competitors",   icon: LineChart },
+          { labelKey: "nav.reports",     path: "/analytics/reports",       icon: FileBarChart },
         ],
       },
     ],

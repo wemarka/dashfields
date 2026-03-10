@@ -2885,3 +2885,11 @@
 - [x] AI-generated conversation title via LLM after first AI reply
 - [x] Persist activeSessionId in localStorage so sidebar highlight survives navigation
 - [x] Add "New Chat" button in sidebar next to Recent section header
+
+## ✅ Sidebar Restructure — Marketing Tools Hub
+- [x] Delete Audience page and remove from nav/routes
+- [x] Delete AI Ads Analyzer page and remove from nav/routes
+- [x] Delete AI Studio page and remove from nav/routes
+- [x] Delete Assets page and remove from nav/routes
+- [x] Create Marketing Tools hub page (/marketing-tools) with 3 cards: Campaigns, Content, Analytics
+- [x] Add Marketing Tools (LayoutGrid icon) entry in sidebar navigation config
