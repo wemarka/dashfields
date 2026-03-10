@@ -38,6 +38,7 @@ export interface NavItem {
 
 export interface NavSection {
   groupKey?: string;     // optional section label (hidden in minimalist mode)
+  label?: string;        // i18n key for Lovable-style section header
   items: NavItem[];
 }
 
@@ -55,6 +56,7 @@ export const navSections: NavSection[] = [
     ],
   },
   {
+    label: "nav.sectionMarketing",
     items: [
       {
         labelKey: "nav.ads",

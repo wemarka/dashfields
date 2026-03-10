@@ -41,22 +41,19 @@ export function NavItemButton({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={[
-        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium",
+        "w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium",
         "transition-all duration-150 group relative",
         isRTL ? "flex-row-reverse text-right" : "text-left",
-        isActive ? "text-brand" : "text-foreground/55 hover:text-foreground hover:bg-foreground/5",
+        isActive
+          ? "bg-foreground/[0.07] text-foreground"
+          : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
         collapsed ? "justify-center" : "",
       ].join(" ")}
     >
-      {isActive && !collapsed && (
-        <span
-          className={`absolute ${isRTL ? "right-0" : "left-0"} top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-brand`}
-        />
-      )}
       <Icon
         className={[
-          "w-[18px] h-[18px] shrink-0 transition-all duration-150",
-          isActive ? "text-brand" : "text-foreground/40 group-hover:text-foreground/70",
+          "w-[16px] h-[16px] shrink-0 transition-all duration-150",
+          isActive ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/60",
         ].join(" ")}
       />
       {!collapsed && (

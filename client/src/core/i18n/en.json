@@ -61,7 +61,8 @@
     "integrations": "Integrations",
     "workspace": "Workspace & Team",
     "assets": "Assets",
-    "paidOrganic": "Paid vs Organic"
+    "paidOrganic": "Paid vs Organic",
+    "sectionMarketing": "Marketing"
   },
   "topbar": {
     "platformsConnected": "{{count}} platforms connected",

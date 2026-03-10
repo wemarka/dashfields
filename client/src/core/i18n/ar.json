@@ -61,7 +61,8 @@
     "integrations": "التكاملات",
     "workspace": "مساحة العمل والفريق",
     "assets": "الأصول",
-    "paidOrganic": "المدفوع مقابل المجاني"
+    "paidOrganic": "المدفوع مقابل المجاني",
+    "sectionMarketing": "التسويق"
   },
   "topbar": {
     "platformsConnected": "{{count}} منصات مربوطة",
