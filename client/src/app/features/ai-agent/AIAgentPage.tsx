@@ -2,12 +2,13 @@
  * client/src/app/features/ai-agent/AIAgentPage.tsx
  * Dashfields AI Marketing Agent — Full-width, no internal sidebar.
  * Gradient background, floating input, card quick actions.
+ * Sessions persisted in localStorage + broadcast via CustomEvent.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Plus, BarChart3, Megaphone, Image as ImageIcon,
   TrendingUp, Loader2, Bot, ChevronRight,
-  Sparkles, Copy, RotateCcw,
+  Sparkles, Copy,
 } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -29,13 +30,30 @@ export interface ChatSession {
   id: string;
   title: string;
   preview: string;
-  timestamp: Date;
+  timestamp: number; // Unix ms — safe for JSON serialization
   messages: ChatMessage[];
 }
 
-// Export sessions state so DashboardLayout can access it
-// We use a simple event emitter pattern via window events
-export function dispatchSessionsUpdate(sessions: ChatSession[]) {
+const STORAGE_KEY = "dashfields_ai_sessions";
+const MAX_SESSIONS = 10;
+
+// ─── Persistence helpers ────────────────────────────────────────────────────
+function loadSessions(): ChatSession[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as ChatSession[];
+  } catch { return []; }
+}
+
+function saveSessions(sessions: ChatSession[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
+  } catch { /* quota exceeded — ignore */ }
+}
+
+// ─── Broadcast to DashboardLayout sidebar ──────────────────────────────────
+function broadcastSessions(sessions: ChatSession[]) {
   window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: sessions }));
 }
 
@@ -106,8 +124,8 @@ export default function AIAgentPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeSession, setActiveSession] = useState<string | null>(null);
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,10 +133,19 @@ export default function AIAgentPage() {
 
   const isInChat = messages.length > 0;
 
-  // Broadcast sessions to sidebar
+  // Broadcast sessions to sidebar on mount and on every change
   useEffect(() => {
-    dispatchSessionsUpdate(sessions);
+    broadcastSessions(sessions);
   }, [sessions]);
+
+  // Also broadcast on mount so sidebar shows persisted sessions immediately
+  useEffect(() => {
+    const persisted = loadSessions();
+    if (persisted.length > 0) {
+      broadcastSessions(persisted);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
@@ -177,16 +204,23 @@ export default function AIAgentPage() {
     setIsLoading(true);
 
     // Create session on first message
+    let currentSessionId = activeSessionId;
     if (prevMessages.length === 0) {
+      const newId = crypto.randomUUID();
+      currentSessionId = newId;
+      setActiveSessionId(newId);
       const newSession: ChatSession = {
-        id: crypto.randomUUID(),
+        id: newId,
         title: trimmed.slice(0, 45) + (trimmed.length > 45 ? "…" : ""),
         preview: trimmed.slice(0, 65),
-        timestamp: new Date(),
+        timestamp: Date.now(),
         messages: [],
       };
-      setActiveSession(newSession.id);
-      setSessions((prev) => [newSession, ...prev.slice(0, 9)]);
+      setSessions((prev) => {
+        const updated = [newSession, ...prev.slice(0, MAX_SESSIONS - 1)];
+        saveSessions(updated);
+        return updated;
+      });
     }
 
     try {
@@ -241,11 +275,22 @@ export default function AIAgentPage() {
         }
       }
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId ? { ...m, isStreaming: false } : m
-        )
-      );
+      // Finalize message
+      const finalMessages = [...prevMessages, userMsg, { id: assistantId, role: "assistant" as const, content: accumulated, isStreaming: false }];
+      setMessages(finalMessages.map(m => m.id === assistantId ? { ...m, isStreaming: false } : m));
+
+      // Update session with latest messages
+      if (currentSessionId) {
+        setSessions((prev) => {
+          const updated = prev.map((s) =>
+            s.id === currentSessionId
+              ? { ...s, messages: finalMessages }
+              : s
+          );
+          saveSessions(updated);
+          return updated;
+        });
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
       toast.error(t("aiAgent.error"));
@@ -254,7 +299,7 @@ export default function AIAgentPage() {
       setIsLoading(false);
       abortRef.current = null;
     }
-  }, [messages, isLoading, getToken, t]);
+  }, [messages, isLoading, getToken, t, activeSessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -264,17 +309,28 @@ export default function AIAgentPage() {
   };
 
   const handleNewChat = () => {
-    if (messages.length > 0 && activeSession) {
-      setSessions((prev) =>
-        prev.map((s) => (s.id === activeSession ? { ...s, messages } : s))
-      );
-    }
     setMessages([]);
     setInput("");
-    setActiveSession(null);
+    setActiveSessionId(null);
     abortRef.current?.abort();
     setIsLoading(false);
   };
+
+  // Load a session from sidebar click
+  const handleLoadSession = useCallback((session: ChatSession) => {
+    setMessages(session.messages);
+    setActiveSessionId(session.id);
+  }, []);
+
+  // Listen for session load requests from sidebar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<ChatSession>;
+      handleLoadSession(custom.detail);
+    };
+    window.addEventListener("ai-load-session", handler);
+    return () => window.removeEventListener("ai-load-session", handler);
+  }, [handleLoadSession]);
 
   const firstName = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
 
@@ -620,6 +676,3 @@ function ThinkingBubble() {
     </div>
   );
 }
-
-// Unused but kept for potential future use
-export { RotateCcw };

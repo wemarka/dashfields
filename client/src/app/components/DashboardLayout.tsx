@@ -51,6 +51,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
+  // Load persisted sessions from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("dashfields_ai_sessions");
+      if (raw) setRecentSessions(JSON.parse(raw) as ChatSession[]);
+    } catch { /* ignore */ }
+  }, []);
+
   // Listen for AI session updates from AIAgentPage
   useEffect(() => {
     const handler = (e: Event) => {
@@ -432,7 +440,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* ── Recent Conversations (only when on AI Agent page) ── */}
-        {location === "/dashboard" && recentSessions.length > 0 && !collapsed && (
+        {recentSessions.length > 0 && !collapsed && (
           <div className="px-2 pb-2 shrink-0">
             <div className="h-px bg-border/30 mb-2" />
             <div className="px-2.5 py-1.5">
@@ -444,7 +452,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {recentSessions.slice(0, 5).map((session) => (
                 <button
                   key={session.id}
-                  onClick={() => setLocation("/dashboard")}
+                  onClick={() => {
+                    setLocation("/dashboard");
+                    window.dispatchEvent(new CustomEvent("ai-load-session", { detail: session }));
+                  }}
                   className={[
                     "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px]",
                     "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-all duration-150",

@@ -2865,3 +2865,10 @@
 - [x] Make AIAgentPage full-width (no internal sidebar)
 - [x] Add "Recent" section in main DashboardLayout sidebar under AI Agent nav item
 - [x] Recent shows last 5 conversations (via window event from AIAgentPage)
+
+## ✅ Bug Fix — Recent Conversations Not Showing in Sidebar
+- [x] Fix Recent Conversations section not appearing in DashboardLayout sidebar
+- [x] Use localStorage to persist sessions across page refreshes
+- [x] Show section on all pages when sessions exist (not just /dashboard)
+- [x] Sync sessions between AIAgentPage and DashboardLayout via localStorage + CustomEvent
+- [x] Session click loads conversation back into AIAgentPage via ai-load-session event
