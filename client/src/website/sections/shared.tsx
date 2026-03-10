@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 
 // ─── Logo URL ─────────────────────────────────────────────────────────────────
 export const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full_b474e724.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg";
 
 // ─── Intersection Observer Hook ───────────────────────────────────────────────
 export function useInView(threshold = 0.15) {

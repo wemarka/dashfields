@@ -234,8 +234,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <img
                   src={dark
-                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-white-cropped_9f9de9c4.png"
-                    : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-logo-full-cropped_e5f165fe.png"
+                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
+                    : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
                   }
                   alt="Dashfields"
                   className="h-8 w-auto shrink-0 object-contain"
@@ -266,8 +266,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* App icon — fades out on hover */}
               <img
                 src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_0f5f68db.png"
-                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_53514cde.png"
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
+                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
                 }
                 alt="Dashfields"
                 onClick={() => setLocation("/dashboard")}

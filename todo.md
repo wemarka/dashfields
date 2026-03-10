@@ -2904,3 +2904,11 @@
 - [x] Update ToolCard to accept and display a stat badge with skeleton loading
 - [x] Update MarketingToolsPage to fetch stats and pass to each card
 - [x] Add i18n keys for stat labels (en + ar)
+
+## ✅ Branding — Replace Logo & Icon with New Dashfields Brand
+- [x] Upload new SVG icon and PNG icon to CDN
+- [x] Replace all old logo URLs in sidebar, login, register, forgot/reset password, auth callback pages
+- [x] Replace favicon with new SVG icon (browser tab)
+- [x] Update apple-touch-icon and 192x192 PNG icon
+- [x] Update OG image and Twitter card image in index.html
+- [x] Update GlobalSettingsModal logo
