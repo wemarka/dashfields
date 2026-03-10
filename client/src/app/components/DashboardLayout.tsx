@@ -30,6 +30,7 @@ import type { ChatSession } from "@/app/features/ai-agent/AIAgentPage";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
+import { cn } from "@/core/lib/utils";
 
 import {
   useDarkMode, PLATFORM_ICONS,
@@ -45,14 +46,17 @@ function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: strin
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [recentSessions, setRecentSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
+    try { return localStorage.getItem("dashfields_ai_active_session"); }
+    catch { return null; }
+  });
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
-  // Load persisted sessions from localStorage on mount
+  // Load persisted sessions + activeSessionId from localStorage on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem("dashfields_ai_sessions");
@@ -445,10 +449,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {recentSessions.length > 0 && !collapsed && (
           <div className="px-2 pb-2 shrink-0">
             <div className="h-px bg-border/30 mb-2" />
-            <div className="px-2.5 py-1.5">
+            <div className={cn("px-2.5 py-1.5 flex items-center justify-between", isRTL ? "flex-row-reverse" : "")}>
               <span className="text-[10.5px] font-semibold text-foreground/30 uppercase tracking-widest">
                 {t("nav.sectionRecent")}
               </span>
+              {/* New Chat button */}
+              <button
+                onClick={() => {
+                  setLocation("/dashboard");
+                  window.dispatchEvent(new CustomEvent("ai-new-chat"));
+                }}
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium text-foreground/40 hover:text-violet-500 hover:bg-violet-500/8 transition-all duration-150"
+                title={t("aiAgent.newChat")}
+              >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                {t("aiAgent.newChat")}
+              </button>
             </div>
             <div className="space-y-0.5">
               {recentSessions.slice(0, 5).map((session) => {

@@ -34,8 +34,20 @@ export interface ChatSession {
   messages: ChatMessage[];
 }
 
-const STORAGE_KEY = "dashfields_ai_sessions";
-const MAX_LOCAL   = 10;
+const STORAGE_KEY        = "dashfields_ai_sessions";
+const ACTIVE_SESSION_KEY = "dashfields_ai_active_session";
+const MAX_LOCAL          = 10;
+
+function loadActiveSessionId(): string | null {
+  try { return localStorage.getItem(ACTIVE_SESSION_KEY); }
+  catch { return null; }
+}
+function saveActiveSessionId(id: string | null) {
+  try {
+    if (id) localStorage.setItem(ACTIVE_SESSION_KEY, id);
+    else localStorage.removeItem(ACTIVE_SESSION_KEY);
+  } catch { /* quota */ }
+}
 
 // ─── localStorage helpers (fallback when unauthenticated) ──────────────────
 function loadLocal(): ChatSession[] {
@@ -87,7 +99,7 @@ export default function AIAgentPage() {
   const [messages, setMessages]           = useState<ChatMessage[]>([]);
   const [input, setInput]                 = useState("");
   const [isLoading, setIsLoading]         = useState(false);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => loadActiveSessionId());
   const [sessions, setSessions]           = useState<ChatSession[]>(() => loadLocal());
 
   const scrollRef   = useRef<HTMLDivElement>(null);
@@ -97,8 +109,9 @@ export default function AIAgentPage() {
   const isInChat = messages.length > 0;
 
   // ── tRPC mutations ────────────────────────────────────────────────────────
-  const saveConversation  = trpc.aiConversations.save.useMutation();
+  const saveConversation   = trpc.aiConversations.save.useMutation();
   const deleteConversation = trpc.aiConversations.delete.useMutation();
+  const generateTitle      = trpc.aiConversations.generateTitle.useMutation();
   const { data: remoteSessionsData } = trpc.aiConversations.list.useQuery(undefined, {
     enabled: !!user,
     staleTime: 30_000,
@@ -116,8 +129,9 @@ export default function AIAgentPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remoteSessionsData]);
 
-  // Broadcast on every sessions/activeSessionId change
+  // Persist activeSessionId to localStorage on change
   useEffect(() => {
+    saveActiveSessionId(activeSessionId);
     broadcastSessions(sessions, activeSessionId);
   }, [sessions, activeSessionId]);
 
@@ -256,16 +270,31 @@ export default function AIAgentPage() {
 
       // Persist updated session
       if (currentSessionId) {
+        // For the first exchange, generate a smart AI title asynchronously
+        const isFirstExchange = prevMessages.length === 0;
+        const fallbackTitle   = trimmed.slice(0, 45) + (trimmed.length > 45 ? "\u2026" : "");
+        const existingTitle   = sessions.find((s) => s.id === currentSessionId)?.title ?? fallbackTitle;
+
         const updatedSession: ChatSession = {
           id:        currentSessionId,
-          title:     prevMessages.length === 0
-            ? trimmed.slice(0, 45) + (trimmed.length > 45 ? "…" : "")
-            : (sessions.find((s) => s.id === currentSessionId)?.title ?? trimmed.slice(0, 45)),
+          title:     isFirstExchange ? fallbackTitle : existingTitle,
           preview:   accumulated.slice(0, 65),
           timestamp: Date.now(),
           messages:  finalMessages,
         };
         persistSession(updatedSession);
+
+        // Generate smart title in background after first exchange
+        if (isFirstExchange && accumulated.length > 0) {
+          generateTitle.mutateAsync({
+            userMessage:    trimmed.slice(0, 500),
+            assistantReply: accumulated.slice(0, 1000),
+          }).then(({ title }) => {
+            if (!title) return;
+            const withSmartTitle: ChatSession = { ...updatedSession, title };
+            persistSession(withSmartTitle);
+          }).catch(() => { /* keep fallback title */ });
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
@@ -281,13 +310,14 @@ export default function AIAgentPage() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(input); }
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     setMessages([]);
     setInput("");
     setActiveSessionId(null);
+    saveActiveSessionId(null);
     abortRef.current?.abort();
     setIsLoading(false);
-  };
+  }, []);
 
   // Load session from sidebar click
   const handleLoadSession = useCallback((session: ChatSession) => {
@@ -313,15 +343,18 @@ export default function AIAgentPage() {
 
   // Listen for sidebar events
   useEffect(() => {
-    const loadHandler = (e: Event) => handleLoadSession((e as CustomEvent<ChatSession>).detail);
+    const loadHandler   = (e: Event) => handleLoadSession((e as CustomEvent<ChatSession>).detail);
     const deleteHandler = (e: Event) => handleDeleteSession((e as CustomEvent<string>).detail);
+    const newChatHandler = () => handleNewChat();
     window.addEventListener("ai-load-session",   loadHandler);
     window.addEventListener("ai-delete-session", deleteHandler);
+    window.addEventListener("ai-new-chat",        newChatHandler);
     return () => {
       window.removeEventListener("ai-load-session",   loadHandler);
       window.removeEventListener("ai-delete-session", deleteHandler);
+      window.removeEventListener("ai-new-chat",        newChatHandler);
     };
-  }, [handleLoadSession, handleDeleteSession]);
+  }, [handleLoadSession, handleDeleteSession, handleNewChat]);
 
   const firstName = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
 

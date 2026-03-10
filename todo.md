@@ -2880,3 +2880,8 @@
 - [x] Add delete (X) button per conversation in DashboardLayout sidebar
 - [x] Highlight active session in sidebar with violet accent
 - [x] Broadcast active session ID via CustomEvent for sidebar to track
+
+## ✅ AI Agent — Three New Enhancements
+- [x] AI-generated conversation title via LLM after first AI reply
+- [x] Persist activeSessionId in localStorage so sidebar highlight survives navigation
+- [x] Add "New Chat" button in sidebar next to Recent section header
