@@ -238,7 +238,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png"
                   }
                   alt="Dashfields"
-                  className="h-8 w-auto shrink-0 object-contain"
+                  className="h-10 w-auto shrink-0 object-contain"
   
                 />
               </div>
@@ -271,7 +271,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }
                 alt="Dashfields"
                 onClick={() => setLocation("/dashboard")}
-                className="w-8 h-8 object-contain cursor-pointer"
+                className="w-10 h-10 object-contain cursor-pointer"
                 style={{
                   opacity: logoAreaHovered ? 0 : 1,
                   transform: logoAreaHovered ? 'scale(0.85)' : 'scale(1)',

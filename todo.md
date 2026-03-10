@@ -2924,3 +2924,7 @@
 - [x] Convert SVG to PNG (512x512) for both black and white versions
 - [x] Upload PNG versions to CDN
 - [x] Replace all SVG logo URLs with PNG URLs across entire codebase
+
+## ✅ Sidebar — Increase Logo Size
+- [x] Increase logo from h-8 to h-10 in expanded sidebar
+- [x] Increase icon from w-8 h-8 to w-10 h-10 in collapsed sidebar
