@@ -37,6 +37,7 @@ import {
   WorkspaceSwitcherModal, AccountSwitcherModal,
 } from "./layout-parts";
 import { AccountGroupList } from "./AccountGroupList";
+import { MarketingToolsDialog } from "./dialogs/MarketingToolsDialog";
 
 function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: string; className?: string }) {
   const Icon = PLATFORM_ICONS[platform] ?? Globe2;
@@ -51,6 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     catch { return null; }
   });
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
+  const [openDialogKey, setOpenDialogKey] = useState<string | null>(null);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
@@ -335,7 +337,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   collapsed={collapsed}
                   label={t(item.labelKey)}
                   icon={item.icon}
-                  onClick={() => setLocation(item.path)}
+                  onClick={() => item.openDialog ? setOpenDialogKey(item.openDialog) : setLocation(item.path)}
                 />
               );
             }
@@ -742,7 +744,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <KeyboardShortcutsModal open={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
       <GlobalSettingsModal open={showGlobalSettings} onOpenChange={setShowGlobalSettings} initialTab={settingsInitialTab} />
-
+      <MarketingToolsDialog open={openDialogKey === "marketingTools"} onClose={() => setOpenDialogKey(null)} />
       {/* Sign Out Confirmation Dialog */}
       {showSignOutConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center">

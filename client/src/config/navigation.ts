@@ -24,6 +24,8 @@ export interface NavItem {
   icon: LucideIcon;
   iconAnimation?: string;
   subItems?: NavSubItem[];
+  /** If set, clicking opens a dialog instead of navigating */
+  openDialog?: string;
 }
 
 export interface NavSection {
@@ -47,6 +49,7 @@ export const navSections: NavSection[] = [
         labelKey: "nav.marketingTools",
         path: "/marketing-tools",
         icon: LayoutGrid,
+        openDialog: "marketingTools",
       },
     ],
   },

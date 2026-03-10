@@ -12,18 +12,26 @@ interface Props {
   statValue?: number | null;
   statLabel?: string;
   isLoading?: boolean;
+  /** Optional override for navigation — used when card is inside a Dialog */
+  onNavigate?: (href: string) => void;
 }
 
 export function ToolCard({
   icon: Icon, title, description, href,
   gradient, iconColor, borderColor,
   statValue, statLabel, isLoading,
+  onNavigate,
 }: Props) {
   const [, setLocation] = useLocation();
 
+  function handleClick() {
+    if (onNavigate) onNavigate(href);
+    else setLocation(href);
+  }
+
   return (
     <button
-      onClick={() => setLocation(href)}
+      onClick={handleClick}
       className={[
         "group relative flex flex-col gap-4 p-6 rounded-2xl border bg-gradient-to-br text-left",
         "transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 w-full",

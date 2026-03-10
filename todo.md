@@ -2935,3 +2935,9 @@
 - [x] Section group labels: maxHeight + opacity fade on collapse/expand
 - [x] Section button labels (with subItems): fade + translateX slide
 - [x] ChevronDown: opacity fade on collapse
+
+## ✅ Marketing Tools — Convert to Dialog
+- [x] Create MarketingToolsDialog component with 4 tool cards + live stats
+- [x] Update DashboardLayout sidebar to open dialog instead of navigating to /marketing-tools
+- [x] Remove /marketing-tools route from App.tsx
+- [x] Delete MarketingToolsPage.tsx file
