@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/core/lib/supabase";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png";
 
 export default function ResetPasswordPage() {
   const [, setLocation] = useLocation();

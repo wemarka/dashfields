@@ -12,7 +12,7 @@ import { Label } from "@/core/components/ui/label";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png";
 
 export default function RegisterPage() {
   const [, setLocation] = useLocation();

@@ -10,7 +10,7 @@ import { supabase } from "@/core/lib/supabase";
 import { Loader2 } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png";
 
 export default function AuthCallbackPage() {
   const [, setLocation] = useLocation();

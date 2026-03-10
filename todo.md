@@ -2918,3 +2918,9 @@
 - [x] Upload white icon to CDN
 - [x] Use white icon in dark sidebar (expanded + collapsed states)
 - [x] Auth pages already use CSS brightness filter (no change needed)
+
+## ✅ Bug Fix — Logo Not Displaying in Sidebar
+- [x] Diagnose CDN URL issue: SVG served as application/octet-stream, blocked by browser security
+- [x] Convert SVG to PNG (512x512) for both black and white versions
+- [x] Upload PNG versions to CDN
+- [x] Replace all SVG logo URLs with PNG URLs across entire codebase
