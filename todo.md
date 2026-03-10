@@ -2912,3 +2912,9 @@
 - [x] Update apple-touch-icon and 192x192 PNG icon
 - [x] Update OG image and Twitter card image in index.html
 - [x] Update GlobalSettingsModal logo
+
+## ✅ Branding — White Icon for Dark Mode
+- [x] Create white SVG version of Dashfields icon
+- [x] Upload white icon to CDN
+- [x] Use white icon in dark sidebar (expanded + collapsed states)
+- [x] Auth pages already use CSS brightness filter (no change needed)

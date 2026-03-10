@@ -234,7 +234,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <img
                   src={dark
-                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
+                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_556a67db.svg"
                     : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
                   }
                   alt="Dashfields"
@@ -266,7 +266,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* App icon — fades out on hover */}
               <img
                 src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-white_556a67db.svg"
                   : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon_899a5cce.svg"
                 }
                 alt="Dashfields"
