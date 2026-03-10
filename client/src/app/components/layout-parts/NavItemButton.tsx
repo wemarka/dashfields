@@ -42,23 +42,35 @@ export function NavItemButton({
       onMouseLeave={onMouseLeave}
       className={[
         "w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium",
-        "transition-all duration-150 group relative",
+        "transition-all duration-200 group relative overflow-hidden",
         isRTL ? "flex-row-reverse text-right" : "text-left",
         isActive
           ? "bg-foreground/[0.07] text-foreground"
           : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
-        collapsed ? "justify-center" : "",
       ].join(" ")}
     >
       <Icon
         className={[
-          "w-[16px] h-[16px] shrink-0 transition-all duration-150",
+          "w-[16px] h-[16px] shrink-0 transition-all duration-200",
           isActive ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/60",
         ].join(" ")}
       />
-      {!collapsed && (
-        <span className="truncate flex-1">{label}</span>
-      )}
+      {/* Label — always rendered, animated with opacity + translate for smooth sidebar transition */}
+      <span
+        className="truncate flex-1 whitespace-nowrap"
+        style={{
+          opacity: collapsed ? 0 : 1,
+          transform: collapsed
+            ? `translateX(${isRTL ? "6px" : "-6px"})`
+            : "translateX(0)",
+          transition: "opacity 220ms ease, transform 220ms ease",
+          pointerEvents: collapsed ? "none" : "auto",
+          maxWidth: collapsed ? 0 : "100%",
+          overflow: "hidden",
+        }}
+      >
+        {label}
+      </span>
     </button>
   );
 

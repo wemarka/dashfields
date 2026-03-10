@@ -303,8 +303,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className={`flex-1 px-2 py-2 overflow-y-auto scrollbar-none ${isRTL ? "text-right" : ""}`}>
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className="mb-1">
-              {!collapsed && section.label && (
-                <div className="px-2.5 py-1.5 mt-2">
+              {section.label && (
+                <div
+                  className="px-2.5 py-1.5 mt-2 overflow-hidden"
+                  style={{
+                    maxHeight: collapsed ? 0 : 32,
+                    opacity: collapsed ? 0 : 1,
+                    transition: "max-height 250ms ease, opacity 200ms ease",
+                  }}
+                >
                   <span className="text-[10.5px] font-semibold text-foreground/30 uppercase tracking-widest">{t(section.label)}</span>
                 </div>
               )}
@@ -356,16 +363,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     collapsed ? "justify-center" : "",
                   ].join(" ")}>
                   <item.icon className={["w-[16px] h-[16px] shrink-0 transition-all duration-150", isSectionActive ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/60"].join(" ")} />
-                  {!collapsed && (
-                    <>
-                      <span
-                        className="truncate flex-1"
-                      >{t(item.labelKey)}</span>
-                      <ChevronDown
-                        className={["w-3 h-3 text-foreground/25 shrink-0 transition-transform duration-200", isOpen ? "rotate-180" : ""].join(" ")}
-                      />
-                    </>
-                  )}
+                  {/* Label + chevron — animated fade+slide for smooth sidebar transition */}
+                  <span
+                    className="truncate flex-1 whitespace-nowrap"
+                    style={{
+                      opacity: collapsed ? 0 : 1,
+                      transform: collapsed ? "translateX(-6px)" : "translateX(0)",
+                      transition: "opacity 220ms ease, transform 220ms ease",
+                      maxWidth: collapsed ? 0 : "100%",
+                      overflow: "hidden",
+                      pointerEvents: collapsed ? "none" : "auto",
+                    }}
+                  >{t(item.labelKey)}</span>
+                  <ChevronDown
+                    className={["w-3 h-3 text-foreground/25 shrink-0 transition-transform duration-200", isOpen ? "rotate-180" : ""].join(" ")}
+                    style={{
+                      opacity: collapsed ? 0 : 1,
+                      transition: "opacity 180ms ease",
+                      maxWidth: collapsed ? 0 : undefined,
+                      overflow: "hidden",
+                    }}
+                  />
                 </button>
               );
             return (

@@ -2928,3 +2928,10 @@
 ## ✅ Sidebar — Increase Logo Size
 - [x] Increase logo from h-8 to h-10 in expanded sidebar
 - [x] Increase icon from w-8 h-8 to w-10 h-10 in collapsed sidebar
+
+## ✅ Sidebar — Smooth Animation
+- [x] Width transition already present (280ms cubic-bezier)
+- [x] NavItemButton label: fade + translateX slide on collapse/expand
+- [x] Section group labels: maxHeight + opacity fade on collapse/expand
+- [x] Section button labels (with subItems): fade + translateX slide
+- [x] ChevronDown: opacity fade on collapse
