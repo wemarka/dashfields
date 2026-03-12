@@ -64,7 +64,8 @@
     "paidOrganic": "المدفوع مقابل المجاني",
     "sectionMarketing": "التسويق",
     "sectionRecent": "الأخيرة",
-    "marketingTools": "أدوات التسويق"
+    "marketingTools": "أدوات التسويق",
+    "accounts": "الحسابات المربوطة"
   },
   "marketingTools": {
     "subtitle": "اختر أداة للبدء",

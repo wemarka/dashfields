@@ -64,7 +64,8 @@
     "paidOrganic": "Paid vs Organic",
     "sectionMarketing": "Marketing",
     "sectionRecent": "Recent",
-    "marketingTools": "Marketing Tools"
+    "marketingTools": "Marketing Tools",
+    "accounts": "Connected Accounts"
   },
   "marketingTools": {
     "subtitle": "Choose a tool to get started",

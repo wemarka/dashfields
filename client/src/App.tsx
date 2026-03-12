@@ -183,9 +183,9 @@ function AppRouter() {
                 The sidebar/topbar remain mounted — no full-screen flash. */}
             <Suspense fallback={<ContentLoader />}>
             <Switch>
-              {/* ── Core ──────────────────────────────────────────────────── */}
+              {/* ── Core ───────────────────────────────────────────────────────── */}
               <Route path="/dashboard"              component={AIAgentPage} />
-              {/* ── Ads sub-pages ──────────────────────────────────────────── */}
+              {/* ── Ads sub-pages ────────────────────────────────────────────────── */}
               <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/campaigns"          component={CampaignsPage} />
               <Route path="/ads/creatives"          component={() => <Redirect to="/ads/campaigns" />} />

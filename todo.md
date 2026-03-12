@@ -2959,3 +2959,13 @@
 - [x] Build inline dropdown popover on the Workspace Switcher button
 - [x] Sections: active workspace header, All Workspaces list, divider, Workspace Settings / Invite Member / Create New Workspace
 - [x] Remove setShowWorkspaceSwitcher Dialog trigger from the button
+
+## ✅ Connected Accounts Page (above AI Agent in sidebar)
+- [x] AccountsPage already existed with full platform cards, follower counts, and trend indicators
+- [x] PlatformAccountCard component with followers + trend indicator
+- [x] AccountDetailSheet for detailed view
+- [x] ConnectPlatformDialog for adding new accounts
+- [x] social.list tRPC procedure already wired
+- [x] Added "Accounts" nav item in sidebar above AI Agent (navigation.ts)
+- [x] Added nav.accounts i18n keys (en.json + ar.json)
+- [x] /accounts route registered in App.tsx
