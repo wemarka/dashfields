@@ -242,14 +242,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 onClick={() => setLocation("/dashboard")}
                 className="cursor-pointer select-none flex items-center min-w-0 flex-1 overflow-hidden"
               >
-                <img
-                  src={dark
-                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_white_259757da.svg"
-                    : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
-                  }
-                  alt="Dashfields"
-                  className="h-10 w-auto shrink-0 object-contain"
-                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 5504 3072"
+                  className="h-8 w-auto shrink-0"
+                  fill="currentColor"
+                  aria-label="Dashfields"
+                >
+                  <path d="M820.93,2705.08c145.31-177.32,317.52-332.5,481.07-493.35l949.38-8.15,1430.87-1391.02h-1030.75l-405.54,416.81H629.42l128.93-135.79,1031.16-16.49,830.49-847.99s1654.12-2.78,1654.12-2.78c311.83,50.91,413.84,408.84,197.12,637.4-642.55,606.59-1270.6,1230.84-1909.88,1841.37H820.93Z"/>
+                  <polygon points="2420.56 1477.19 2167.1 1736.28 1153.25 1736.28 1141.87 1713.75 1378.55 1477.19 2420.56 1477.19"/>
+                </svg>
               </div>
               {/* Collapse button — visible when expanded */}
               <button
@@ -273,19 +275,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onMouseLeave={() => setLogoAreaHovered(false)}
             >
               {/* App icon — fades out on hover */}
-              <img
-                src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_white_259757da.svg"
-                  : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
-                }
-                alt="Dashfields"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 5504 3072"
+                className="w-8 h-8 cursor-pointer"
+                fill="currentColor"
+                aria-label="Dashfields"
                 onClick={() => setLocation("/dashboard")}
-                className="w-10 h-10 object-contain cursor-pointer"
                 style={{
                   opacity: logoAreaHovered ? 0 : 1,
                   transform: logoAreaHovered ? 'scale(0.85)' : 'scale(1)',
                 }}
-              />
+              >
+                <path d="M820.93,2705.08c145.31-177.32,317.52-332.5,481.07-493.35l949.38-8.15,1430.87-1391.02h-1030.75l-405.54,416.81H629.42l128.93-135.79,1031.16-16.49,830.49-847.99s1654.12-2.78,1654.12-2.78c311.83,50.91,413.84,408.84,197.12,637.4-642.55,606.59-1270.6,1230.84-1909.88,1841.37H820.93Z"/>
+                <polygon points="2420.56 1477.19 2167.1 1736.28 1153.25 1736.28 1141.87 1713.75 1378.55 1477.19 2420.56 1477.19"/>
+              </svg>
               {/* Expand button — appears on hover */}
               <button
                 onClick={() => handleCollapse(false)}
