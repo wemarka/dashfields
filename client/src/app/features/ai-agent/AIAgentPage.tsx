@@ -54,7 +54,11 @@ function saveLocal(sessions: ChatSession[]) {
 }
 
 export function broadcastSessions(sessions: ChatSession[], activeId: string | null = null) {
-  window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
+  // Defer the dispatch so it never fires during a React render cycle,
+  // preventing the "setState during render" warning in DashboardLayout.
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
+  }, 0);
 }
 
 // ─── Markdown renderer ──────────────────────────────────────────────────────
@@ -299,7 +303,9 @@ export default function AIAgentPage() {
     setSessions((prev) => {
       const updated = prev.filter((s) => s.id !== sessionId);
       saveLocal(updated);
-      broadcastSessions(updated, activeSessionId === sessionId ? null : activeSessionId);
+      // Broadcast outside the setState updater to avoid nested setState calls
+      const nextActiveId = activeSessionId === sessionId ? null : activeSessionId;
+      setTimeout(() => broadcastSessions(updated, nextActiveId), 0);
       return updated;
     });
     if (activeSessionId === sessionId) handleNewChat();
