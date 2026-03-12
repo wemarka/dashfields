@@ -2,10 +2,14 @@
  * WorkspaceDropdown.tsx
  * Elegant inline dropdown for the sidebar workspace switcher.
  * Sections: active workspace header → all workspaces list → actions (Settings, Invite, Create)
+ * "Create New Workspace" opens an inline form — no navigation required.
  */
 import { useState, useRef, useEffect } from "react";
-import { Settings, UserPlus, ChevronRight, Plus, Check } from "lucide-react";
+import { Settings, UserPlus, ChevronRight, Plus, Check, Loader2, X } from "lucide-react";
+import { trpc } from "@/core/lib/trpc";
+import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
+import { toast } from "sonner";
 
 interface WorkspaceDropdownProps {
   activeWorkspace: WorkspaceItem | null;
@@ -29,6 +33,80 @@ function WorkspaceAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "m
   );
 }
 
+// ─── Inline Create Form ───────────────────────────────────────────────────────
+function CreateWorkspaceForm({ onClose, onCreated }: { onClose: () => void; onCreated: (id: number) => void }) {
+  const [name, setName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { refetch } = useWorkspace();
+
+  const createMutation = trpc.workspaces.create.useMutation({
+    onSuccess: (ws) => {
+      toast.success(`"${ws.name}" workspace created`);
+      refetch();
+      onCreated(ws.id);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to create workspace");
+    },
+  });
+
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (trimmed.length < 2) {
+      toast.error("Workspace name must be at least 2 characters");
+      return;
+    }
+    createMutation.mutate({ name: trimmed });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="px-3 py-2.5 border-t border-border/40">
+      <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-2">
+        New Workspace
+      </p>
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Workspace name…"
+          maxLength={64}
+          disabled={createMutation.isPending}
+          className="flex-1 min-w-0 text-[12.5px] bg-muted/50 border border-border/60 rounded-lg px-2.5 py-1.5
+            text-foreground placeholder:text-muted-foreground/40 outline-none
+            focus:ring-1 focus:ring-primary/40 focus:border-primary/50 transition-all"
+        />
+        <button
+          type="submit"
+          disabled={createMutation.isPending || name.trim().length < 2}
+          className="shrink-0 w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center
+            hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          {createMutation.isPending
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            : <Check className="w-3.5 h-3.5" />
+          }
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={createMutation.isPending}
+          className="shrink-0 w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60
+            flex items-center justify-center transition-all"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ─── Main Dropdown ────────────────────────────────────────────────────────────
 export function WorkspaceDropdown({
   activeWorkspace,
   workspaces,
@@ -38,6 +116,7 @@ export function WorkspaceDropdown({
   onNavigate,
 }: WorkspaceDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const displayName = activeWorkspace?.name ?? user?.name ?? "Workspace";
   const plan = activeWorkspace?.plan ?? "free";
@@ -46,7 +125,10 @@ export function WorkspaceDropdown({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setShowCreate(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -55,16 +137,27 @@ export function WorkspaceDropdown({
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showCreate) { setShowCreate(false); return; }
+        setOpen(false);
+      }
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open]);
+  }, [open, showCreate]);
+
+  const handleCreated = (newId: number) => {
+    onSelectWorkspace(newId);
+    setShowCreate(false);
+    setOpen(false);
+  };
 
   return (
     <div ref={ref} className="relative px-2 pt-2 pb-1">
-      {/* Trigger Button */}
+      {/* ── Trigger Button ── */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => { setOpen((v) => !v); if (open) setShowCreate(false); }}
         className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200
           hover:bg-foreground/[0.05] active:scale-[0.98] group
           ${collapsed ? "justify-center" : ""}
@@ -93,7 +186,7 @@ export function WorkspaceDropdown({
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* ── Dropdown Panel ── */}
       {open && (
         <div
           className="absolute left-2 right-2 top-full mt-1 z-50 rounded-xl border border-border/60 bg-background shadow-lg shadow-black/10 overflow-hidden"
@@ -122,7 +215,7 @@ export function WorkspaceDropdown({
                   return (
                     <button
                       key={ws.id}
-                      onClick={() => { onSelectWorkspace(ws.id); setOpen(false); }}
+                      onClick={() => { onSelectWorkspace(ws.id); setOpen(false); setShowCreate(false); }}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors duration-150
                         ${isActive ? "bg-foreground/[0.04]" : "hover:bg-foreground/[0.04]"}
                       `}
@@ -141,34 +234,44 @@ export function WorkspaceDropdown({
           )}
 
           {/* Action items */}
-          <div className="py-1">
-            <ActionItem
-              icon={<Settings className="w-3.5 h-3.5" />}
-              label="Workspace Settings"
-              onClick={() => { onNavigate("/settings/workspace"); setOpen(false); }}
-            />
-            <ActionItem
-              icon={<UserPlus className="w-3.5 h-3.5" />}
-              label="Invite Member"
-              onClick={() => { onNavigate("/settings/workspace?tab=members"); setOpen(false); }}
-            />
-          </div>
+          {!showCreate && (
+            <div className="py-1">
+              <ActionItem
+                icon={<Settings className="w-3.5 h-3.5" />}
+                label="Workspace Settings"
+                onClick={() => { onNavigate("/settings/workspace"); setOpen(false); }}
+              />
+              <ActionItem
+                icon={<UserPlus className="w-3.5 h-3.5" />}
+                label="Invite Member"
+                onClick={() => { onNavigate("/settings/workspace?tab=members"); setOpen(false); }}
+              />
+            </div>
+          )}
 
-          {/* Create new workspace */}
-          <div className="border-t border-border/40 py-1">
-            <ActionItem
-              icon={<Plus className="w-3.5 h-3.5" />}
-              label="Create New Workspace"
-              onClick={() => { onNavigate("/settings/workspace?action=create"); setOpen(false); }}
-              accent
+          {/* Create new workspace — inline form or trigger button */}
+          {showCreate ? (
+            <CreateWorkspaceForm
+              onClose={() => setShowCreate(false)}
+              onCreated={handleCreated}
             />
-          </div>
+          ) : (
+            <div className="border-t border-border/40 py-1">
+              <ActionItem
+                icon={<Plus className="w-3.5 h-3.5" />}
+                label="Create New Workspace"
+                onClick={() => setShowCreate(true)}
+                accent
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+// ─── Action Item ─────────────────────────────────────────────────────────────
 function ActionItem({
   icon,
   label,

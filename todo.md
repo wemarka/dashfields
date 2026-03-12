@@ -2969,3 +2969,12 @@
 - [x] Added "Accounts" nav item in sidebar above AI Agent (navigation.ts)
 - [x] Added nav.accounts i18n keys (en.json + ar.json)
 - [x] /accounts route registered in App.tsx
+
+## ✅ Workspace Switcher — ربط بقاعدة البيانات
+- [x] فحص WorkspaceContext و WorkspaceSwitcher الحالي
+- [x] تأكيد أن server/routers/workspaces.ts يحتوي على list, create, update, delete
+- [x] WorkspaceContext يجلب البيانات الحقيقية من trpc.workspaces.list بالفعل
+- [x] إضافة inline create form داخل WorkspaceDropdown مباشرة
+- [x] "Create New Workspace" يفتح form مدمج بدون navigation
+- [x] "Workspace Settings" ينتقل لـ /settings/workspace
+- [x] 630/630 اختبار ناجح، 0 TypeScript errors
