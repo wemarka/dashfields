@@ -1,14 +1,9 @@
 /**
  * client/src/app/features/ai-agent/AIAgentPage.tsx
- * Dashfields AI Marketing Agent — Full-width, no internal sidebar.
- * Sessions persisted in Supabase (fallback: localStorage).
- * Broadcasts sessions + activeSessionId to DashboardLayout sidebar.
+ * Dashfields AI Marketing Agent — red-black gradient, Lovable-style input.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Send, Plus, BarChart3, Megaphone, Image as ImageIcon,
-  TrendingUp, Loader2, Bot, ChevronRight, Sparkles, Copy,
-} from "lucide-react";
+import { Send, Plus, Loader2, Bot, Sparkles, Copy, Mic, MessageSquare } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { supabase } from "@/core/lib/supabase";
@@ -18,7 +13,7 @@ import ReactMarkdown from "react-markdown";
 import { useTranslation } from "react-i18next";
 import { trpc } from "@/core/lib/trpc";
 
-// ─── Types ─────────────────────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────────────
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -49,7 +44,6 @@ function saveActiveSessionId(id: string | null) {
   } catch { /* quota */ }
 }
 
-// ─── localStorage helpers (fallback when unauthenticated) ──────────────────
 function loadLocal(): ChatSession[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]"); }
   catch { return []; }
@@ -59,31 +53,22 @@ function saveLocal(sessions: ChatSession[]) {
   catch { /* quota */ }
 }
 
-// ─── Broadcast helpers ──────────────────────────────────────────────────────
 export function broadcastSessions(sessions: ChatSession[], activeId: string | null = null) {
   window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
 }
-
-// ─── Quick Action Cards ──────────────────────────────────────────────────────
-const QUICK_ACTIONS = [
-  { icon: BarChart3,   titleKey: "aiAgent.quick.analyze",  descKey: "aiAgent.quick.analyzeDesc",  prompt: "Analyze my current campaign performance and give me actionable insights",  gradient: "from-blue-500/10 to-indigo-500/10",   iconColor: "text-blue-500",    border: "border-blue-200/60 hover:border-blue-300" },
-  { icon: Megaphone,   titleKey: "aiAgent.quick.create",   descKey: "aiAgent.quick.createDesc",   prompt: "I want to create a new advertising campaign",                             gradient: "from-violet-500/10 to-purple-500/10", iconColor: "text-violet-500",  border: "border-violet-200/60 hover:border-violet-300" },
-  { icon: ImageIcon,   titleKey: "aiAgent.quick.generate", descKey: "aiAgent.quick.generateDesc", prompt: "Generate creative ad copy and visuals for my product",                    gradient: "from-pink-500/10 to-rose-500/10",     iconColor: "text-pink-500",    border: "border-pink-200/60 hover:border-pink-300" },
-  { icon: TrendingUp,  titleKey: "aiAgent.quick.research", descKey: "aiAgent.quick.researchDesc", prompt: "Research my competitors and current market trends",                       gradient: "from-emerald-500/10 to-teal-500/10",  iconColor: "text-emerald-500", border: "border-emerald-200/60 hover:border-emerald-300" },
-];
 
 // ─── Markdown renderer ──────────────────────────────────────────────────────
 function MessageContent({ content }: { content: string }) {
   return (
     <div className="prose prose-sm max-w-none
-      prose-headings:font-semibold prose-headings:text-gray-900
-      prose-p:text-gray-700 prose-p:leading-relaxed
-      prose-strong:text-gray-900 prose-strong:font-semibold
-      prose-ul:text-gray-700 prose-ol:text-gray-700
-      prose-li:marker:text-gray-400
-      prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-gray-800
-      prose-blockquote:border-l-violet-400 prose-blockquote:text-gray-500
-      prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
+      prose-headings:font-semibold prose-headings:text-white/90
+      prose-p:text-white/80 prose-p:leading-relaxed
+      prose-strong:text-white prose-strong:font-semibold
+      prose-ul:text-white/80 prose-ol:text-white/80
+      prose-li:marker:text-white/40
+      prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-white/90
+      prose-blockquote:border-l-red-400 prose-blockquote:text-white/60
+      prose-table:text-sm prose-th:bg-white/10 prose-th:font-semibold
     ">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
@@ -96,11 +81,11 @@ export default function AIAgentPage() {
   const isRtl = i18n.language === "ar";
   const { user } = useAuth();
 
-  const [messages, setMessages]           = useState<ChatMessage[]>([]);
-  const [input, setInput]                 = useState("");
-  const [isLoading, setIsLoading]         = useState(false);
+  const [messages, setMessages]               = useState<ChatMessage[]>([]);
+  const [input, setInput]                     = useState("");
+  const [isLoading, setIsLoading]             = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(() => loadActiveSessionId());
-  const [sessions, setSessions]           = useState<ChatSession[]>(() => loadLocal());
+  const [sessions, setSessions]               = useState<ChatSession[]>(() => loadLocal());
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -108,7 +93,7 @@ export default function AIAgentPage() {
 
   const isInChat = messages.length > 0;
 
-  // ── tRPC mutations ────────────────────────────────────────────────────────
+  // ── tRPC ──────────────────────────────────────────────────────────────────
   const saveConversation   = trpc.aiConversations.save.useMutation();
   const deleteConversation = trpc.aiConversations.delete.useMutation();
   const generateTitle      = trpc.aiConversations.generateTitle.useMutation();
@@ -117,7 +102,6 @@ export default function AIAgentPage() {
     staleTime: 30_000,
   });
 
-  // Merge remote sessions into local state on first load
   useEffect(() => {
     if (!remoteSessionsData) return;
     const remote = remoteSessionsData as ChatSession[];
@@ -129,25 +113,21 @@ export default function AIAgentPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remoteSessionsData]);
 
-  // Persist activeSessionId to localStorage on change
   useEffect(() => {
     saveActiveSessionId(activeSessionId);
     broadcastSessions(sessions, activeSessionId);
   }, [sessions, activeSessionId]);
 
-  // Broadcast on mount from localStorage
   useEffect(() => {
     const local = loadLocal();
     if (local.length > 0) broadcastSessions(local, null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  // Auto-resize textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -155,7 +135,6 @@ export default function AIAgentPage() {
     ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
   }, [input]);
 
-  // Get auth token
   const getToken = useCallback(async (): Promise<string | null> => {
     if (!supabase) return null;
     try {
@@ -172,7 +151,6 @@ export default function AIAgentPage() {
     } catch { return null; }
   }, []);
 
-  // ── Persist session helper ────────────────────────────────────────────────
   const persistSession = useCallback((session: ChatSession) => {
     setSessions((prev) => {
       const without = prev.filter((s) => s.id !== session.id);
@@ -180,9 +158,7 @@ export default function AIAgentPage() {
       saveLocal(updated);
       return updated;
     });
-    if (user) {
-      saveConversation.mutate(session);
-    }
+    if (user) saveConversation.mutate(session);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -191,8 +167,8 @@ export default function AIAgentPage() {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
-    const userMsg: ChatMessage    = { id: Date.now().toString(),       role: "user",      content: trimmed };
-    const assistantId             = (Date.now() + 1).toString();
+    const userMsg: ChatMessage      = { id: Date.now().toString(), role: "user", content: trimmed };
+    const assistantId               = (Date.now() + 1).toString();
     const assistantMsg: ChatMessage = { id: assistantId, role: "assistant", content: "", isStreaming: true };
 
     const prevMessages = messages;
@@ -200,20 +176,18 @@ export default function AIAgentPage() {
     setInput("");
     setIsLoading(true);
 
-    // Create session on first message
     let currentSessionId = activeSessionId;
     if (prevMessages.length === 0) {
       const newId = crypto.randomUUID();
       currentSessionId = newId;
       setActiveSessionId(newId);
-      const newSession: ChatSession = {
-        id:        newId,
+      persistSession({
+        id: newId,
         title:     trimmed.slice(0, 45) + (trimmed.length > 45 ? "…" : ""),
         preview:   trimmed.slice(0, 65),
         timestamp: Date.now(),
         messages:  [],
-      };
-      persistSession(newSession);
+      });
     }
 
     try {
@@ -253,95 +227,86 @@ export default function AIAgentPage() {
             if (parsed.error) throw new Error(parsed.error);
             if (parsed.content) {
               accumulated += parsed.content;
-              const snap = accumulated;
-              setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, content: snap } : m));
+              const finalAcc = accumulated;
+              setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, content: finalAcc } : m));
             }
-          } catch { /* ignore parse errors */ }
+          } catch { /* partial JSON */ }
         }
       }
 
-      // Finalize
-      const finalMessages: ChatMessage[] = [
-        ...prevMessages,
-        userMsg,
-        { id: assistantId, role: "assistant", content: accumulated, isStreaming: false },
-      ];
-      setMessages(finalMessages);
-
-      // Persist updated session
+      const finalMessages = [...prevMessages, userMsg, { id: assistantId, role: "assistant" as const, content: accumulated }];
       if (currentSessionId) {
-        // For the first exchange, generate a smart AI title asynchronously
-        const isFirstExchange = prevMessages.length === 0;
-        const fallbackTitle   = trimmed.slice(0, 45) + (trimmed.length > 45 ? "\u2026" : "");
-        const existingTitle   = sessions.find((s) => s.id === currentSessionId)?.title ?? fallbackTitle;
-
         const updatedSession: ChatSession = {
           id:        currentSessionId,
-          title:     isFirstExchange ? fallbackTitle : existingTitle,
+          title:     prevMessages.length === 0 ? (trimmed.slice(0, 45) + (trimmed.length > 45 ? "…" : "")) : (sessions.find((s) => s.id === currentSessionId)?.title ?? trimmed.slice(0, 45)),
           preview:   accumulated.slice(0, 65),
           timestamp: Date.now(),
           messages:  finalMessages,
         };
         persistSession(updatedSession);
 
-        // Generate smart title in background after first exchange
-        if (isFirstExchange && accumulated.length > 0) {
-          generateTitle.mutateAsync({
-            userMessage:    trimmed.slice(0, 500),
-            assistantReply: accumulated.slice(0, 1000),
-          }).then(({ title }) => {
-            if (!title) return;
-            const withSmartTitle: ChatSession = { ...updatedSession, title };
-            persistSession(withSmartTitle);
-          }).catch(() => { /* keep fallback title */ });
+        // Generate AI title after first exchange
+        if (prevMessages.length === 0 && user) {
+          generateTitle.mutate(
+            { userMessage: trimmed, assistantReply: accumulated.slice(0, 1000) },
+            {
+              onSuccess: (result) => {
+                const title = result?.title;
+                if (title) {
+                  setSessions((prev) => {
+                    const updated = prev.map((s) => s.id === currentSessionId ? { ...s, title } : s);
+                    saveLocal(updated);
+                    broadcastSessions(updated, currentSessionId);
+                    return updated;
+                  });
+                }
+              },
+            },
+          );
         }
       }
+
+      setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, isStreaming: false } : m));
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
       toast.error(t("aiAgent.error"));
       setMessages((prev) => prev.filter((m) => m.id !== assistantId));
     } finally {
       setIsLoading(false);
-      abortRef.current = null;
     }
-  }, [messages, isLoading, getToken, t, activeSessionId, sessions, persistSession]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, input, isLoading, activeSessionId, sessions, user, getToken, persistSession]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(input); }
-  };
+  }, [input, sendMessage]);
 
   const handleNewChat = useCallback(() => {
+    abortRef.current?.abort();
     setMessages([]);
     setInput("");
-    setActiveSessionId(null);
-    saveActiveSessionId(null);
-    abortRef.current?.abort();
     setIsLoading(false);
+    setActiveSessionId(null);
   }, []);
 
-  // Load session from sidebar click
   const handleLoadSession = useCallback((session: ChatSession) => {
     setMessages(session.messages);
     setActiveSessionId(session.id);
+    setInput("");
   }, []);
 
-  // Delete session
-  const handleDeleteSession = useCallback((id: string) => {
+  const handleDeleteSession = useCallback((sessionId: string) => {
     setSessions((prev) => {
-      const updated = prev.filter((s) => s.id !== id);
+      const updated = prev.filter((s) => s.id !== sessionId);
       saveLocal(updated);
-      broadcastSessions(updated, activeSessionId === id ? null : activeSessionId);
+      broadcastSessions(updated, activeSessionId === sessionId ? null : activeSessionId);
       return updated;
     });
-    if (activeSessionId === id) {
-      setMessages([]);
-      setActiveSessionId(null);
-    }
-    if (user) deleteConversation.mutate({ id });
+    if (activeSessionId === sessionId) handleNewChat();
+        if (user) deleteConversation.mutate({ id: sessionId });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSessionId, user]);
 
-  // Listen for sidebar events
   useEffect(() => {
     const loadHandler   = (e: Event) => handleLoadSession((e as CustomEvent<ChatSession>).detail);
     const deleteHandler = (e: Event) => handleDeleteSession((e as CustomEvent<string>).detail);
@@ -361,70 +326,97 @@ export default function AIAgentPage() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-full overflow-hidden relative">
-      {/* Gradient Background */}
-      <div className="absolute inset-0 pointer-events-none transition-all duration-1000"
-        style={{ background: isInChat
-          ? "linear-gradient(145deg, #f5f7ff 0%, #f0f4ff 40%, #faf8ff 100%)"
-          : "linear-gradient(145deg, #c7d2fe 0%, #ddd6fe 25%, #e0e7ff 50%, #ede9fe 70%, #fce7f3 100%)" }}
+      {/* Red-Black Gradient Background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(135deg, #0a0a0a 0%, #1a0505 30%, #2d0808 55%, #1a0000 75%, #0d0d0d 100%)",
+        }}
       />
 
-      {/* Animated orbs — empty state only */}
-      {!isInChat && (<>
-        <div className="absolute pointer-events-none" style={{ width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 65%)", top: "-10%", left: "5%", animation: "pulse 5s ease-in-out infinite" }} />
-        <div className="absolute pointer-events-none" style={{ width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(236,72,153,0.18) 0%, transparent 65%)", bottom: "5%", right: "10%", animation: "pulse 7s ease-in-out infinite", animationDelay: "1.5s" }} />
-        <div className="absolute pointer-events-none" style={{ width: 450, height: 450, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 65%)", top: "50%", left: "55%", animation: "pulse 6s ease-in-out infinite", animationDelay: "3s" }} />
-      </>)}
+      {/* Subtle noise/grain overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "128px",
+        }}
+      />
+
+      {/* Glow orbs */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 600, height: 600, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(220,38,38,0.18) 0%, transparent 65%)",
+          top: "-15%", left: "20%",
+          animation: "pulse 6s ease-in-out infinite",
+        }}
+      />
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 500, height: 500, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(185,28,28,0.12) 0%, transparent 65%)",
+          bottom: "0%", right: "15%",
+          animation: "pulse 8s ease-in-out infinite",
+          animationDelay: "2s",
+        }}
+      />
 
       {/* Main Content */}
       <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
 
-        {/* Empty State */}
+        {/* ── Empty State ── */}
         {!isInChat && (
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 overflow-y-auto">
-            <div className="text-center mb-8 animate-fade-in">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg mb-5">
-                <Sparkles className="w-7 h-7 text-white" />
+            <div className="text-center mb-10 animate-fade-in">
+              {/* Icon */}
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
+                style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.4)" }}>
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-[2rem] font-bold text-gray-800 mb-2 tracking-tight">
+              <h1 className="text-[2.2rem] font-bold text-white mb-2 tracking-tight">
                 {t("aiAgent.greeting", { name: firstName })}
               </h1>
-              <p className="text-gray-500 text-[15px]">{t("aiAgent.subtitle")}</p>
+              <p className="text-white/50 text-[15px]">{t("aiAgent.subtitle")}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 w-full max-w-xl mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              {QUICK_ACTIONS.map((action) => (
-                <button key={action.titleKey} onClick={() => void sendMessage(action.prompt)}
-                  className={cn("group relative flex flex-col items-start gap-2.5 p-4 rounded-2xl text-left bg-white/75 backdrop-blur-sm border transition-all duration-200 hover:bg-white/95 hover:shadow-xl hover:scale-[1.02] active:scale-[0.99]", action.border)}>
-                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", `bg-gradient-to-br ${action.gradient}`)}>
-                    <action.icon className={cn("w-[18px] h-[18px]", action.iconColor)} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-gray-800 group-hover:text-gray-900">{t(action.titleKey)}</p>
-                    <p className="text-[11.5px] text-gray-500 mt-0.5 leading-relaxed">{t(action.descKey)}</p>
-                  </div>
-                  <ChevronRight className={cn("absolute top-4 right-4 w-3.5 h-3.5 text-gray-300 group-hover:text-gray-400 transition-all", isRtl ? "rotate-180" : "group-hover:translate-x-0.5")} />
-                </button>
-              ))}
-            </div>
-
-            <div className="w-full max-w-xl animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <InputBox input={input} setInput={setInput} isLoading={isLoading} onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown} textareaRef={textareaRef} isRtl={isRtl} t={t} />
+            {/* Input */}
+            <div className="w-full max-w-2xl animate-fade-in" style={{ animationDelay: "0.1s" }}>
+              <InputBox
+                input={input} setInput={setInput} isLoading={isLoading}
+                onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown}
+                textareaRef={textareaRef} isRtl={isRtl} t={t}
+              />
             </div>
           </div>
         )}
 
-        {/* Chat State */}
+        {/* ── Chat State ── */}
         {isInChat && (<>
           {/* Chat header */}
-          <div className={cn("flex items-center justify-between px-5 py-3 shrink-0 bg-white/50 backdrop-blur-sm border-b border-white/60", isRtl ? "flex-row-reverse" : "")}>
+          <div className={cn(
+            "flex items-center justify-between px-5 py-3 shrink-0 border-b",
+            "border-white/[0.06] bg-black/20 backdrop-blur-sm",
+            isRtl ? "flex-row-reverse" : "",
+          )}>
             <div className={cn("flex items-center gap-2", isRtl ? "flex-row-reverse" : "")}>
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-semibold text-gray-700">Dashfields AI</span>
+              <span className="text-sm font-semibold text-white/80">Dashfields AI</span>
             </div>
-            <button onClick={handleNewChat}
-              className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100/80 transition-all", isRtl ? "flex-row-reverse" : "")}>
+            <button
+              onClick={handleNewChat}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
+                "text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-all",
+                isRtl ? "flex-row-reverse" : "",
+              )}
+            >
               <Plus className="w-3 h-3" />
               {t("aiAgent.newChat")}
             </button>
@@ -441,7 +433,11 @@ export default function AIAgentPage() {
           {/* Input */}
           <div className="px-4 pb-4 shrink-0">
             <div className="max-w-2xl mx-auto">
-              <InputBox input={input} setInput={setInput} isLoading={isLoading} onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown} textareaRef={textareaRef} isRtl={isRtl} t={t} />
+              <InputBox
+                input={input} setInput={setInput} isLoading={isLoading}
+                onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown}
+                textareaRef={textareaRef} isRtl={isRtl} t={t}
+              />
             </div>
           </div>
         </>)}
@@ -450,23 +446,92 @@ export default function AIAgentPage() {
   );
 }
 
-// ─── Input Box ───────────────────────────────────────────────────────────────
+// ─── Input Box (Lovable-style) ───────────────────────────────────────────────
 function InputBox({ input, setInput, isLoading, onSend, onKeyDown, textareaRef, isRtl, t }: {
   input: string; setInput: (v: string) => void; isLoading: boolean;
   onSend: () => void; onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>; isRtl: boolean; t: (k: string) => string;
 }) {
+  const hasText = input.trim().length > 0;
   return (
-    <div className={cn("flex items-end gap-3 p-3 rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200/70 shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] focus-within:border-violet-300/80 focus-within:shadow-[0_4px_32px_rgba(139,92,246,0.15)] transition-all duration-200", isRtl ? "flex-row-reverse" : "")}>
-      <Textarea ref={textareaRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKeyDown}
-        placeholder={t("aiAgent.placeholder")} disabled={isLoading} rows={1} dir={isRtl ? "rtl" : "ltr"}
-        className={cn("flex-1 resize-none border-0 bg-transparent p-0 text-sm text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[24px] max-h-[160px] leading-relaxed", isRtl ? "text-right" : "text-left")}
-        style={{ boxShadow: "none" }} />
-      <button onClick={onSend} disabled={!input.trim() || isLoading}
-        className={cn("shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
-          input.trim() && !isLoading ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm hover:shadow-md hover:scale-105 active:scale-95" : "bg-gray-100 text-gray-400 cursor-not-allowed")}>
-        {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className={cn("w-3.5 h-3.5", isRtl ? "rotate-180" : "")} />}
-      </button>
+    <div
+      className={cn(
+        "relative flex flex-col rounded-2xl transition-all duration-200",
+        "border border-white/10 hover:border-white/20 focus-within:border-red-500/40",
+      )}
+      style={{
+        background: "rgba(255,255,255,0.06)",
+        backdropFilter: "blur(20px)",
+        boxShadow: "0 4px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+      }}
+    >
+      {/* Textarea */}
+      <Textarea
+        ref={textareaRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={onKeyDown}
+        placeholder={t("aiAgent.placeholder")}
+        disabled={isLoading}
+        rows={1}
+        dir={isRtl ? "rtl" : "ltr"}
+        className={cn(
+          "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-white",
+          "placeholder:text-white/30 focus-visible:ring-0 focus-visible:ring-offset-0",
+          "min-h-[28px] max-h-[160px] leading-relaxed",
+          isRtl ? "text-right" : "text-left",
+        )}
+        style={{ boxShadow: "none" }}
+      />
+
+      {/* Bottom bar: left icons + send button */}
+      <div className={cn("flex items-center justify-between px-3 pb-3 pt-1", isRtl ? "flex-row-reverse" : "")}>
+        {/* Left icons */}
+        <div className={cn("flex items-center gap-1", isRtl ? "flex-row-reverse" : "")}>
+          <button
+            type="button"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            title="Attach"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            title="Conversations"
+          >
+            <MessageSquare className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            title="Voice"
+          >
+            <Mic className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Send button */}
+        <button
+          onClick={onSend}
+          disabled={!hasText || isLoading}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
+            hasText && !isLoading
+              ? "text-white hover:scale-105 active:scale-95"
+              : "text-white/20 cursor-not-allowed",
+          )}
+          style={hasText && !isLoading ? {
+            background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
+            boxShadow: "0 2px 12px rgba(220,38,38,0.5)",
+          } : { background: "rgba(255,255,255,0.06)" }}
+        >
+          {isLoading
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Send className={cn("w-4 h-4", isRtl ? "rotate-180" : "")} />
+          }
+        </button>
+      </div>
     </div>
   );
 }
@@ -479,7 +544,10 @@ function MessageBubble({ msg, t, isRtl }: { msg: ChatMessage; t: (k: string) => 
   if (isUser) {
     return (
       <div className={cn("flex animate-fade-in", isRtl ? "justify-start" : "justify-end")}>
-        <div className={cn("max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm bg-gradient-to-br from-violet-500 to-indigo-600 text-white", isRtl ? "rounded-bl-md" : "rounded-br-md")}>
+        <div
+          className={cn("max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed text-white", isRtl ? "rounded-bl-md" : "rounded-br-md")}
+          style={{ background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)", boxShadow: "0 2px 12px rgba(220,38,38,0.3)" }}
+        >
           {msg.content}
         </div>
       </div>
@@ -488,16 +556,25 @@ function MessageBubble({ msg, t, isRtl }: { msg: ChatMessage; t: (k: string) => 
 
   return (
     <div className={cn("flex items-start gap-3 animate-fade-in group", isRtl ? "flex-row-reverse" : "")}>
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm mt-0.5">
+      <div
+        className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm mt-0.5"
+        style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}
+      >
         <Bot className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className={cn("px-4 py-3 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100/80 shadow-sm text-sm", isRtl ? "rounded-tr-md" : "rounded-tl-md")}>
+        <div
+          className={cn("px-4 py-3 rounded-2xl text-sm border border-white/[0.08]", isRtl ? "rounded-tr-md" : "rounded-tl-md")}
+          style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)" }}
+        >
           {msg.content ? <MessageContent content={msg.content} /> : <ThinkingDots />}
         </div>
         {msg.content && !msg.isStreaming && (
           <div className={cn("flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity", isRtl ? "flex-row-reverse" : "")}>
-            <button onClick={handleCopy} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            >
               <Copy className="w-3 h-3" />
               {t("aiAgent.copy")}
             </button>
@@ -512,7 +589,7 @@ function ThinkingDots() {
   return (
     <div className="flex items-center gap-1 py-1">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="w-2 h-2 rounded-full bg-violet-400"
+        <div key={i} className="w-2 h-2 rounded-full bg-red-500/70"
           style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }} />
       ))}
     </div>
@@ -522,10 +599,16 @@ function ThinkingDots() {
 function ThinkingBubble() {
   return (
     <div className="flex items-start gap-3 animate-fade-in">
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm mt-0.5">
+      <div
+        className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-sm mt-0.5"
+        style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}
+      >
         <Bot className="w-4 h-4 text-white" />
       </div>
-      <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-white/90 backdrop-blur-sm border border-gray-100/80 shadow-sm">
+      <div
+        className="px-4 py-3 rounded-2xl rounded-tl-md border border-white/[0.08]"
+        style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)" }}
+      >
         <ThinkingDots />
       </div>
     </div>

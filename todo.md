@@ -2947,3 +2947,10 @@
 - [x] Add i18n keys for time labels (aiAgent.time.*) in en.json and ar.json
 - [x] Display relative timestamp below each conversation title in Recent Conversations sidebar
 - [x] Auto-refresh timestamps every 60 seconds (so "just now" → "1 min ago" without page reload)
+
+## ✅ AI Agent — Redesign UI
+- [x] Change background to red-black gradient
+- [x] Redesign chat input to Lovable-style (large rounded pill, icons: +, chat, mic, send)
+- [x] Remove Quick Action cards from empty state
+- [x] Update message bubbles to match new dark theme (red gradient bubbles, glass AI responses)
+- [x] Update greeting/empty state to match new design (white text on dark bg)
