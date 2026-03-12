@@ -244,12 +244,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <img
                   src={dark
-                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
+                    ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_white_259757da.svg"
                     : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
                   }
                   alt="Dashfields"
                   className="h-10 w-auto shrink-0 object-contain"
-  
                 />
               </div>
               {/* Collapse button — visible when expanded */}
@@ -276,7 +275,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* App icon — fades out on hover */}
               <img
                 src={dark
-                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
+                  ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_white_259757da.svg"
                   : "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
                 }
                 alt="Dashfields"
