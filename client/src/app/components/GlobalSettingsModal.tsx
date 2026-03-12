@@ -172,7 +172,7 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
           {/* Logo */}
           <div className="px-5 py-5 shrink-0">
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png"
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg"
               alt="Dashfields"
               className="h-5 w-auto object-contain"
               style={{ filter: "invert(1) brightness(0)" }}

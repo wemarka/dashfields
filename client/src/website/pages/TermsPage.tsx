@@ -7,7 +7,7 @@ import { FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/core/components/ui/button";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg";
 
 const LAST_UPDATED = "March 1, 2026";
 const COMPANY_NAME = "DashFields / Wemarka";

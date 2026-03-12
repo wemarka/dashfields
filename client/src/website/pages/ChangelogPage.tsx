@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { ArrowLeft, Sparkles, Wrench, Zap, Shield, Bug } from "lucide-react";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/dashfields-icon-512_6023dedc.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg";
 
 type ChangeType = "feature" | "improvement" | "fix" | "security" | "performance";
 
