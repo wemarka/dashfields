@@ -5,7 +5,7 @@
  * "Create New Workspace" opens an inline form — no navigation required.
  */
 import { useState, useRef, useEffect } from "react";
-import { Settings, UserPlus, ChevronRight, Plus, Check, Loader2, X } from "lucide-react";
+import { Settings, ChevronRight, Plus, Check, Loader2, X } from "lucide-react";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import type { WorkspaceItem } from "@/core/contexts/WorkspaceContext";
@@ -240,11 +240,6 @@ export function WorkspaceDropdown({
                 icon={<Settings className="w-3.5 h-3.5" />}
                 label="Workspace Settings"
                 onClick={() => { onNavigate("/settings/workspace"); setOpen(false); }}
-              />
-              <ActionItem
-                icon={<UserPlus className="w-3.5 h-3.5" />}
-                label="Invite Member"
-                onClick={() => { onNavigate("/settings/workspace?tab=members"); setOpen(false); }}
               />
             </div>
           )}
