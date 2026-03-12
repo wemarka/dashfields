@@ -312,7 +312,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className={`flex-1 px-2 py-2 overflow-y-auto scrollbar-none ${isRTL ? "text-right" : ""}`}>
           {navSections.map((section, sectionIdx) => (
             <div key={sectionIdx} className="mb-1">
-              {section.label && (
+              {(section.label || section.groupKey) && (
                 <div
                   className="px-2.5 py-1.5 mt-2 overflow-hidden"
                   style={{
@@ -321,7 +321,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     transition: "max-height 250ms ease, opacity 200ms ease",
                   }}
                 >
-                  <span className="text-[10.5px] font-semibold text-foreground/30 uppercase tracking-widest">{t(section.label)}</span>
+                  <span className="text-[10.5px] font-semibold text-foreground/30 uppercase tracking-widest">
+                    {section.label ? t(section.label) : section.groupKey ? t(section.groupKey) : ""}
+                  </span>
                 </div>
               )}
               <div className="space-y-0.5">
