@@ -326,42 +326,18 @@ export default function AIAgentPage() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-full overflow-hidden relative">
-      {/* Red-Black Gradient Background */}
+      {/* Cream/off-white background */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(135deg, #0a0a0a 0%, #1a0505 30%, #2d0808 55%, #1a0000 75%, #0d0d0d 100%)",
-        }}
+        style={{ background: "#faf8f5" }}
       />
-
-      {/* Subtle noise/grain overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: "repeat",
-          backgroundSize: "128px",
-        }}
-      />
-
-      {/* Glow orbs */}
+      {/* Subtle warm glow */}
       <div
         className="absolute pointer-events-none"
         style={{
-          width: 600, height: 600, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(220,38,38,0.18) 0%, transparent 65%)",
-          top: "-15%", left: "20%",
-          animation: "pulse 6s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 500, height: 500, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(185,28,28,0.12) 0%, transparent 65%)",
-          bottom: "0%", right: "15%",
-          animation: "pulse 8s ease-in-out infinite",
-          animationDelay: "2s",
+          width: 700, height: 500, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(220,38,38,0.06) 0%, transparent 65%)",
+          top: "-10%", left: "30%",
         }}
       />
 
@@ -377,10 +353,10 @@ export default function AIAgentPage() {
                 style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.4)" }}>
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-[2.2rem] font-bold text-white mb-2 tracking-tight">
+              <h1 className="text-[2.2rem] font-bold text-gray-900 mb-2 tracking-tight">
                 {t("aiAgent.greeting", { name: firstName })}
               </h1>
-              <p className="text-white/50 text-[15px]">{t("aiAgent.subtitle")}</p>
+              <p className="text-gray-500 text-[15px]">{t("aiAgent.subtitle")}</p>
             </div>
 
             {/* Input */}
@@ -399,7 +375,7 @@ export default function AIAgentPage() {
           {/* Chat header */}
           <div className={cn(
             "flex items-center justify-between px-5 py-3 shrink-0 border-b",
-            "border-white/[0.06] bg-black/20 backdrop-blur-sm",
+            "border-gray-200/80 bg-white/60 backdrop-blur-sm",
             isRtl ? "flex-row-reverse" : "",
           )}>
             <div className={cn("flex items-center gap-2", isRtl ? "flex-row-reverse" : "")}>
@@ -407,13 +383,13 @@ export default function AIAgentPage() {
                 style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-semibold text-white/80">Dashfields AI</span>
+              <span className="text-sm font-semibold text-gray-700">Dashfields AI</span>
             </div>
             <button
               onClick={handleNewChat}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
-                "text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-all",
+                "text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all",
                 isRtl ? "flex-row-reverse" : "",
               )}
             >
@@ -457,12 +433,10 @@ function InputBox({ input, setInput, isLoading, onSend, onKeyDown, textareaRef, 
     <div
       className={cn(
         "relative flex flex-col rounded-2xl transition-all duration-200",
-        "border border-white/10 hover:border-white/20 focus-within:border-red-500/40",
+        "border border-gray-200 hover:border-gray-300 focus-within:border-red-400/60 bg-white",
       )}
       style={{
-        background: "rgba(255,255,255,0.06)",
-        backdropFilter: "blur(20px)",
-        boxShadow: "0 4px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
       }}
     >
       {/* Textarea */}
@@ -476,8 +450,8 @@ function InputBox({ input, setInput, isLoading, onSend, onKeyDown, textareaRef, 
         rows={1}
         dir={isRtl ? "rtl" : "ltr"}
         className={cn(
-          "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-white",
-          "placeholder:text-white/30 focus-visible:ring-0 focus-visible:ring-offset-0",
+          "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-gray-800",
+          "placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0",
           "min-h-[28px] max-h-[160px] leading-relaxed",
           isRtl ? "text-right" : "text-left",
         )}
@@ -490,21 +464,21 @@ function InputBox({ input, setInput, isLoading, onSend, onKeyDown, textareaRef, 
         <div className={cn("flex items-center gap-1", isRtl ? "flex-row-reverse" : "")}>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
             title="Attach"
           >
             <Plus className="w-4 h-4" />
           </button>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
             title="Conversations"
           >
             <MessageSquare className="w-4 h-4" />
           </button>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
             title="Voice"
           >
             <Mic className="w-4 h-4" />
@@ -519,12 +493,12 @@ function InputBox({ input, setInput, isLoading, onSend, onKeyDown, textareaRef, 
             "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
             hasText && !isLoading
               ? "text-white hover:scale-105 active:scale-95"
-              : "text-white/20 cursor-not-allowed",
+              : "text-gray-300 cursor-not-allowed",
           )}
           style={hasText && !isLoading ? {
             background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
             boxShadow: "0 2px 12px rgba(220,38,38,0.5)",
-          } : { background: "rgba(255,255,255,0.06)" }}
+          } : { background: "#f3f4f6" }}
         >
           {isLoading
             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -564,8 +538,7 @@ function MessageBubble({ msg, t, isRtl }: { msg: ChatMessage; t: (k: string) => 
       </div>
       <div className="flex-1 min-w-0">
         <div
-          className={cn("px-4 py-3 rounded-2xl text-sm border border-white/[0.08]", isRtl ? "rounded-tr-md" : "rounded-tl-md")}
-          style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)" }}
+          className={cn("px-4 py-3 rounded-2xl text-sm border border-gray-200 bg-white text-gray-800", isRtl ? "rounded-tr-md" : "rounded-tl-md")}
         >
           {msg.content ? <MessageContent content={msg.content} /> : <ThinkingDots />}
         </div>
@@ -573,7 +546,7 @@ function MessageBubble({ msg, t, isRtl }: { msg: ChatMessage; t: (k: string) => 
           <div className={cn("flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity", isRtl ? "flex-row-reverse" : "")}>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
             >
               <Copy className="w-3 h-3" />
               {t("aiAgent.copy")}
@@ -589,7 +562,7 @@ function ThinkingDots() {
   return (
     <div className="flex items-center gap-1 py-1">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="w-2 h-2 rounded-full bg-red-500/70"
+        <div key={i} className="w-2 h-2 rounded-full bg-red-400"
           style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }} />
       ))}
     </div>
@@ -606,8 +579,7 @@ function ThinkingBubble() {
         <Bot className="w-4 h-4 text-white" />
       </div>
       <div
-        className="px-4 py-3 rounded-2xl rounded-tl-md border border-white/[0.08]"
-        style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)" }}
+        className="px-4 py-3 rounded-2xl rounded-tl-md border border-gray-200 bg-white"
       >
         <ThinkingDots />
       </div>
