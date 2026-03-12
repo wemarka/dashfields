@@ -631,7 +631,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-hidden min-w-0 flex flex-col">
-        <div className={`flex items-center justify-between px-5 py-2 border-b border-border/50 shrink-0 bg-background ${isRTL ? "flex-row-reverse" : ""}`}>
+        <div className={`flex items-center justify-between px-5 h-12 border-b border-border/40 shrink-0 bg-background ${isRTL ? "flex-row-reverse" : ""}`}>
           {/* Left: search */}
           <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <GlobalSearch />
