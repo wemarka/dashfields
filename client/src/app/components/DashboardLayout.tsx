@@ -38,6 +38,7 @@ import {
   WorkspaceSwitcherModal, AccountSwitcherModal,
 } from "./layout-parts";
 import { AccountGroupList } from "./AccountGroupList";
+import { WorkspaceDropdown } from "./WorkspaceDropdown";
 import { MarketingToolsDialog } from "./dialogs/MarketingToolsDialog";
 
 function PlatformIcon({ platform, className = "w-3.5 h-3.5" }: { platform: string; className?: string }) {
@@ -308,40 +309,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </div>
 
-        {/* ── Workspace Switcher ─────────────────────────────────────────── */}
-        <div className="px-2 pt-2 pb-1">
-          <button
-            onClick={() => setShowWorkspaceSwitcher(true)}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200
-              hover:bg-foreground/[0.05] active:scale-[0.98] group
-              ${collapsed ? "justify-center" : ""}
-            `}
-            title={collapsed ? (activeWorkspace?.name ?? user?.name ?? "Workspace") : undefined}
-          >
-            {/* Avatar */}
-            <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-[13px] font-bold text-white shadow-sm"
-              style={{ background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)" }}
-            >
-              {(activeWorkspace?.name ?? user?.name ?? "W").charAt(0).toUpperCase()}
-            </div>
-            {/* Name + chevron */}
-            {!collapsed && (
-              <>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
-                    {activeWorkspace?.name ?? user?.name ?? t("nav.workspace")}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60 truncate leading-tight capitalize">
-                    {activeWorkspace?.plan ?? "free"}
-                  </p>
-                </div>
-                <svg className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors shrink-0" fill="none" viewBox="0 0 16 16">
-                  <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </>
-            )}
-          </button>
-        </div>
+        {/* ── Workspace Switcher Dropdown ────────────────────────────── */}
+        <WorkspaceDropdown
+          activeWorkspace={activeWorkspace}
+          workspaces={workspaces}
+          user={user}
+          collapsed={collapsed}
+          onSelectWorkspace={(id: number) => setActiveWorkspace(id)}
+          onNavigate={(path: string) => setLocation(path)}
+        />
 
         {/* Nav Groups — Accordion Pattern */}
         <nav className={`flex-1 px-2 py-1 overflow-y-auto scrollbar-none ${isRTL ? "text-right" : ""}`}>

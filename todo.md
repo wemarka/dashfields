@@ -2954,3 +2954,8 @@
 - [x] Remove Quick Action cards from empty state
 - [x] Update message bubbles to match new dark theme (red gradient bubbles, glass AI responses)
 - [x] Update greeting/empty state to match new design (white text on dark bg)
+
+## ✅ Sidebar — Workspace Dropdown (replace Dialog)
+- [x] Build inline dropdown popover on the Workspace Switcher button
+- [x] Sections: active workspace header, All Workspaces list, divider, Workspace Settings / Invite Member / Create New Workspace
+- [x] Remove setShowWorkspaceSwitcher Dialog trigger from the button
