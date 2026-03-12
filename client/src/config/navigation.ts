@@ -9,7 +9,6 @@ import {
   Building2,
   CreditCard,
   LayoutGrid,
-  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -39,17 +38,6 @@ export interface NavSection {
 
 export const navSections: NavSection[] = [
   {
-    groupKey: "nav.groups.workspace",
-    items: [
-      {
-        labelKey: "nav.workspace",
-        path: "/settings/workspace",
-        icon: Users,
-      },
-    ],
-  },
-  {
-    groupKey: "nav.groups.tools",
     items: [
       {
         labelKey: "nav.aiAgent",
