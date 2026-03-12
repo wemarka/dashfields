@@ -319,6 +319,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onNavigate={(path: string) => setLocation(path)}
         />
 
+        {/* Divider */}
+        <div className="mx-3 border-t border-border/40" />
+
         {/* Nav Groups — Accordion Pattern */}
         <nav className={`flex-1 px-2 py-1 overflow-y-auto scrollbar-none ${isRTL ? "text-right" : ""}`}>
           {navSections.map((section, sectionIdx) => (
