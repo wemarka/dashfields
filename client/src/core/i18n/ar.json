@@ -483,6 +483,13 @@
     },
     "recents": "المحادثات الأخيرة",
     "noHistory": "لا توجد محادثات بعد",
-    "copy": "نسخ"
+    "copy": "نسخ",
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ {{count}} د",
+      "hoursAgo": "منذ {{count}} س",
+      "yesterday": "أمس",
+      "daysAgo": "منذ {{count}} أيام"
+    }
   }
 }

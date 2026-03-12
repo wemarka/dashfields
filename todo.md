@@ -2941,3 +2941,9 @@
 - [x] Update DashboardLayout sidebar to open dialog instead of navigating to /marketing-tools
 - [x] Remove /marketing-tools route from App.tsx
 - [x] Delete MarketingToolsPage.tsx file
+
+## ✅ Sidebar — Relative Timestamps for Recent Conversations
+- [x] Create formatRelativeTime() helper (Arabic + English) supporting: just now, X min ago, X hours ago, yesterday, X days ago
+- [x] Add i18n keys for time labels (aiAgent.time.*) in en.json and ar.json
+- [x] Display relative timestamp below each conversation title in Recent Conversations sidebar
+- [x] Auto-refresh timestamps every 60 seconds (so "just now" → "1 min ago" without page reload)

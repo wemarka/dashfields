@@ -483,6 +483,13 @@
     },
     "recents": "Recent Conversations",
     "noHistory": "No conversations yet",
-    "copy": "Copy"
+    "copy": "Copy",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}}d ago"
+    }
   }
 }

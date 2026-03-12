@@ -27,6 +27,7 @@ import { navSections } from "@/config/navigation";
 import { NavItemButton } from "./layout-parts/NavItemButton";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ChatSession } from "@/app/features/ai-agent/AIAgentPage";
+import { formatRelativeTime } from "@/shared/lib/formatRelativeTime";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { useLocation } from "wouter";
@@ -53,6 +54,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
   const [logoAreaHovered, setLogoAreaHovered] = useState(false);
   const [openDialogKey, setOpenDialogKey] = useState<string | null>(null);
+  // Ticker to re-render relative timestamps every 60 s
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const collapsedPopoverRef = useRef<HTMLDivElement>(null);
@@ -500,15 +507,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         window.dispatchEvent(new CustomEvent("ai-load-session", { detail: session }));
                       }}
                       className={[
-                        "flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] transition-all duration-150",
+                        "flex-1 flex items-start gap-2 px-2.5 py-1.5 rounded-lg text-[12px] transition-all duration-150",
                         isActive
                           ? "bg-violet-500/10 text-violet-600 font-medium"
                           : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
                         isRTL ? "flex-row-reverse text-right" : "text-left",
                       ].join(" ")}
                     >
-                      <MessageSquare className={["w-3.5 h-3.5 shrink-0", isActive ? "text-violet-500" : "text-foreground/30"].join(" ")} />
-                      <span className="truncate flex-1">{session.title}</span>
+                      <MessageSquare className={["w-3.5 h-3.5 shrink-0 mt-0.5", isActive ? "text-violet-500" : "text-foreground/30"].join(" ")} />
+                      <span className="flex-1 min-w-0">
+                        <span className="block truncate leading-snug">{session.title}</span>
+                        <span className={["block text-[10px] mt-0.5 leading-none", isActive ? "text-violet-400/80" : "text-foreground/30"].join(" ")}>
+                          {formatRelativeTime(session.timestamp, t)}
+                        </span>
+                      </span>
                     </button>
                     {/* Delete button — visible on hover */}
                     <button
