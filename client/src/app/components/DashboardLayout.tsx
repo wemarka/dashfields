@@ -26,7 +26,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/core/components/ui/to
 import { navSections } from "@/config/navigation";
 import { NavItemButton } from "./layout-parts/NavItemButton";
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { ChatSession } from "@/app/features/ai-agent/AIAgentPage";
+import type { ChatSession } from "@/app/features/ai-agent/types";
 import { formatRelativeTime } from "@/shared/lib/formatRelativeTime";
 import { useActiveAccount } from "@/core/contexts/ActiveAccountContext";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";

@@ -3043,3 +3043,11 @@
 - [x] padding فخم ونظيف في CreativeGrid وDialog
 - [x] A/B variant toggle filter (A فقط / B فقط / الكل)
 - [x] زر "تحليل الأفضل" بالـ LLM لتحديد أفضل صورة
+
+## 🤖 AI Agent Page Refactoring — Conversational UI
+- [x] Remove grid-based tool selectors from AIAgentPage
+- [x] Convert to full-height conversational UI (Claude/ChatGPT style)
+- [ ] Build Generative UI component renderer for custom React components in chat
+- [x] Premium chat input area with shadcn components
+- [ ] Support rendering charts, cards, tables, forms inside chat stream
+- [ ] Smooth animations and transitions for messages
