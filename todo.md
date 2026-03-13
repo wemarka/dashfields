@@ -3106,3 +3106,9 @@
 - [x] On chat history load, render saved images immediately without calling Atlas Cloud
 - [x] Wire onBlockUpdate callback through GenerativeUIRenderer → MessageBubble → AIAgentPage
 - [x] All 18 geminiImage tests passing, 681 total tests passing
+- [x] Fix: Generated images re-trigger on navigation back to chat — persistence not working correctly
+- [x] Fix handleBlockUpdate stale closure: moved DB save inside setSessions callback for latest state
+- [x] Fix content string patching: patchContent helper correctly injects generated_image_url into ui-block JSON
+- [x] Fix displayText: always use cleanText when blocks exist (prevents showing raw JSON fences)
+- [x] Add uiBlockPersistence.test.ts — 10 tests for round-trip persistence (parseUIBlocks + patchContent)
+- [x] All 688 tests passing across 49 test files

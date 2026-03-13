@@ -342,92 +342,61 @@ export default function AIAgentPage() {
 
   // ── Block Update Handler (persists generated images to state + DB) ─────────
   const handleBlockUpdate = useCallback((messageId: string, blockIndex: number, updatedBlock: UIBlock) => {
-    setMessages((prev) => {
-      const updated = prev.map((m) => {
-        if (m.id !== messageId) return m;
-        const blocks = [...(m.uiBlocks ?? [])];
-        blocks[blockIndex] = updatedBlock;
-        // Also update the content string to include the generated_image_url
-        // so that when the session is loaded from DB, the URL is persisted
-        let newContent = m.content;
-        if (updatedBlock.type === "campaign_preview" && updatedBlock.generated_image_url) {
-          // Find and update the ui-block JSON in the content string
-          const blockRegex = /```ui-block\s*\n(\{[\s\S]*?"type"\s*:\s*"campaign_preview"[\s\S]*?\})\s*\n```/g;
-          let matchIndex = 0;
-          newContent = m.content.replace(blockRegex, (match, jsonStr) => {
-            // Only update the specific block by counting campaign_preview occurrences
-            if (matchIndex === blockIndex || blocks.filter((b, i) => i < blockIndex && b.type === "campaign_preview").length === matchIndex) {
-              try {
-                const parsed = JSON.parse(jsonStr);
-                parsed.generated_image_url = updatedBlock.generated_image_url;
-                matchIndex++;
-                return "```ui-block\n" + JSON.stringify(parsed) + "\n```";
-              } catch {
-                matchIndex++;
-                return match;
-              }
+    // Helper: update a message's content string to persist generated_image_url inside ui-block JSON
+    const patchContent = (content: string): string => {
+      if (updatedBlock.type !== "campaign_preview" || !updatedBlock.generated_image_url) return content;
+      // Replace ALL ui-block fences that are campaign_preview and inject the URL
+      let cpIdx = 0;
+      return content.replace(/```ui-block\s*\n([\s\S]*?)```/g, (match, json: string) => {
+        try {
+          const parsed = JSON.parse(json.trim());
+          if (parsed.type === "campaign_preview") {
+            if (cpIdx === blockIndex) {
+              parsed.generated_image_url = updatedBlock.generated_image_url;
+              cpIdx++;
+              return "```ui-block\n" + JSON.stringify(parsed) + "\n```";
             }
-            matchIndex++;
-            return match;
-          });
-        }
-        return { ...m, uiBlocks: blocks, content: newContent };
+            cpIdx++;
+          }
+        } catch { /* skip */ }
+        return match;
       });
-      return updated;
-    });
+    };
 
-    // Persist to session storage + DB
+    // Helper: update a single message
+    const patchMessage = (m: ChatMessage): ChatMessage => {
+      if (m.id !== messageId) return m;
+      const blocks = [...(m.uiBlocks ?? [])];
+      blocks[blockIndex] = updatedBlock;
+      return { ...m, uiBlocks: blocks, content: patchContent(m.content) };
+    };
+
+    // 1. Update messages state
+    setMessages((prev) => prev.map(patchMessage));
+
+    // 2. Persist to sessions (localStorage) + DB in one setSessions call
+    //    This avoids the stale-closure bug where sessions hadn't been updated yet.
     setSessions((prev) => {
       if (!activeSessionId) return prev;
       const updatedSessions = prev.map((s) => {
         if (s.id !== activeSessionId) return s;
-        const updatedMessages = s.messages.map((m) => {
-          if (m.id !== messageId) return m;
-          const blocks = [...(m.uiBlocks ?? [])];
-          blocks[blockIndex] = updatedBlock;
-          let newContent = m.content;
-          if (updatedBlock.type === "campaign_preview" && updatedBlock.generated_image_url) {
-            const blockRegex = /```ui-block\s*\n(\{[\s\S]*?"type"\s*:\s*"campaign_preview"[\s\S]*?\})\s*\n```/g;
-            let matchIdx = 0;
-            newContent = m.content.replace(blockRegex, (match, jsonStr) => {
-              if (matchIdx === blockIndex || blocks.filter((b, i) => i < blockIndex && b.type === "campaign_preview").length === matchIdx) {
-                try {
-                  const parsed = JSON.parse(jsonStr);
-                  parsed.generated_image_url = updatedBlock.generated_image_url;
-                  matchIdx++;
-                  return "```ui-block\n" + JSON.stringify(parsed) + "\n```";
-                } catch {
-                  matchIdx++;
-                  return match;
-                }
-              }
-              matchIdx++;
-              return match;
-            });
-          }
-          return { ...m, uiBlocks: blocks, content: newContent };
-        });
-        return { ...s, messages: updatedMessages };
+        const updatedMessages = s.messages.map(patchMessage);
+        const updatedSession = { ...s, messages: updatedMessages };
+
+        // Save to DB inside the callback so we use the LATEST session data
+        if (user) {
+          // Strip uiBlocks before sending to DB (DB only stores content string)
+          const dbMessages = updatedMessages.map(({ uiBlocks: _ub, isStreaming: _is, ...rest }) => rest);
+          saveConversation.mutate({ ...updatedSession, messages: dbMessages });
+        }
+
+        return updatedSession;
       });
       saveLocal(updatedSessions);
       return updatedSessions;
     });
-
-    // Also save to DB
-    if (user && activeSessionId) {
-      const currentSession = sessions.find((s) => s.id === activeSessionId);
-      if (currentSession) {
-        const updatedMessages = currentSession.messages.map((m) => {
-          if (m.id !== messageId) return m;
-          const blocks = [...(m.uiBlocks ?? [])];
-          blocks[blockIndex] = updatedBlock;
-          return { ...m, uiBlocks: blocks };
-        });
-        saveConversation.mutate({ ...currentSession, messages: updatedMessages });
-      }
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSessionId, user, sessions]);
+  }, [activeSessionId, user]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -700,7 +669,8 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   // Parse UI blocks from content (for loaded sessions)
   const { text: cleanText, blocks: parsedBlocks } = parseUIBlocks(msg.content);
   const uiBlocks: UIBlock[] = msg.uiBlocks ?? parsedBlocks;
-  const displayText = msg.uiBlocks ? cleanText : msg.content;
+  // Always use cleanText when blocks exist (whether from uiBlocks or parsed from content)
+  const displayText = uiBlocks.length > 0 ? cleanText : msg.content;
 
   if (isUser) {
     return (
