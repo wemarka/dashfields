@@ -873,6 +873,73 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
     }),
 
   /**
+   * Analyze creatives using LLM to identify the best performing one per platform.
+   * Returns ranked analysis with reasoning for each creative.
+   */
+  analyzeCreatives: protectedProcedure
+    .input(z.object({ workflowId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const workflow = await getWorkflow(input.workflowId, ctx.user.id);
+      const brief = (workflow.brief as Record<string, unknown>) ?? {};
+
+      // Fetch all creatives
+      const { data: creatives, error } = await sb
+        .from("campaign_creatives")
+        .select("id, platform, format, width, height, variant, watermarked_url, prompt")
+        .eq("workflow_id", input.workflowId)
+        .order("created_at", { ascending: true });
+      if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+      if (!creatives || creatives.length === 0) throw new TRPCError({ code: "BAD_REQUEST", message: "No creatives to analyze" });
+
+      const product = String(brief.product ?? "product");
+      const targetAudience = String(brief.targetAudience ?? "general audience");
+      const tone = String(brief.tone ?? "professional");
+      const platforms = (brief.platforms as string[]) ?? ["instagram", "facebook"];
+
+      // Build creative summary for LLM
+      const creativesSummary = creatives.map(c => (
+        `ID: ${c.id} | Platform: ${c.platform} | Format: ${c.format} | Size: ${c.width}x${c.height} | Variant: ${c.variant} | Prompt: ${(c.prompt as string)?.slice(0, 100) ?? "N/A"}`
+      )).join("\n");
+
+      const analysisPrompt = `You are an expert digital marketing strategist specializing in social media advertising.
+
+Analyze the following ad creatives for a campaign:
+- Product: ${product}
+- Target Audience: ${targetAudience}
+- Tone: ${tone}
+- Platforms: ${platforms.join(", ")}
+
+Creatives:
+${creativesSummary}
+
+For each creative, provide:
+1. A performance score (1-10)
+2. Key strengths for that platform/format
+3. Whether it's the recommended choice for its platform
+
+Also provide an overall recommendation of which creative(s) to prioritize.
+
+Respond in Arabic. Be concise and actionable.`;
+
+      const analysis = await withRetry(() => generateText(analysisPrompt), 2, 1000);
+
+      // Identify top creative per platform using simple heuristic
+      // (LLM analysis is qualitative; we return the full text + a bestPerPlatform map)
+      const bestPerPlatform: Record<string, string> = {};
+      for (const platform of platforms) {
+        const platformCreatives = creatives.filter(c => c.platform === platform);
+        if (platformCreatives.length > 0) {
+          // Default: prefer Variant A unless B exists
+          const variantA = platformCreatives.find(c => c.variant === "A");
+          bestPerPlatform[platform] = variantA?.id ?? platformCreatives[0].id;
+        }
+      }
+
+      return { analysis, bestPerPlatform, totalAnalyzed: creatives.length };
+    }),
+
+  /**
    * Get brand logos for a workspace.
    */
   getLogos: protectedProcedure

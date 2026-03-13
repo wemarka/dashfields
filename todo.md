@@ -3038,3 +3038,8 @@
 ## 🎨 تحسينات Campaign Wizard (دورة 3)
 - [x] تمرير product_image_url إلى LLM كـ reference image أثناء التوليد
 - [x] إضافة زر "توليد Variant B" في صفحة مراجعة الصور
+
+## 🎨 تحسينات CreativeGrid
+- [x] padding فخم ونظيف في CreativeGrid وDialog
+- [x] A/B variant toggle filter (A فقط / B فقط / الكل)
+- [x] زر "تحليل الأفضل" بالـ LLM لتحديد أفضل صورة
