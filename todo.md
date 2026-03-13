@@ -3112,3 +3112,40 @@
 - [x] Fix displayText: always use cleanText when blocks exist (prevents showing raw JSON fences)
 - [x] Add uiBlockPersistence.test.ts — 10 tests for round-trip persistence (parseUIBlocks + patchContent)
 - [x] All 688 tests passing across 49 test files
+
+## 🔄 Major UI/UX Architectural Pivot — Topbar + Dark Mode
+
+### Global Directives
+- [x] Force strict Dark Mode (dark gray palette: zinc-950, neutral-900, zinc-800 borders)
+- [x] Convert ALL UI text to English only (remove Arabic)
+- [x] Modular component architecture (small single-responsibility components)
+
+### Task 1: Application Shell & Topbar
+- [x] Remove/unmount legacy DashboardLayout sidebar
+- [x] Build sticky glassmorphism GlobalTopbar (dark gray, subtle bottom border)
+- [x] App uses full viewport width
+
+### Task 2: Center Navigation
+- [x] Home nav item → routes to /
+- [x] Assist nav item → routes to AI Master Chat
+- [x] Dash Studios nav item → routes to creative playground
+- [x] Marketing dropdown (Campaign, Content, Analytics, Reports)
+- [x] Assets nav item → routes to media library
+- [x] Active state styling for current route
+
+### Task 3: Topbar Right Side (User Menu)
+- [x] User Avatar trigger for dropdown
+- [x] Credit Usage with progress bar
+- [x] Buy more credits (highlighted)
+- [x] Workspace Switcher section
+- [x] View Profile link
+- [x] Settings link
+- [x] Sign Out action
+- [x] Visual dividers between sections
+
+### Task 4: New Home Page (Morning Briefing)
+- [x] Actionable Ideas widget (3-4 marketing prompt presets)
+- [x] Trending & News widget (upcoming events/holidays)
+- [x] Quick Snapshot widget (active campaign metrics)
+- [x] Recent Creations widget (AI-generated images/videos gallery)
+- [x] Dark-themed modular widget components
