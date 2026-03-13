@@ -377,7 +377,7 @@ export default function Connections() {
     accounts.forEach((acc) => {
       const pid = acc.platform;
       if (!grouped[pid]) grouped[pid] = [];
-      const metadata = acc.metadata as Record<string, unknown> | null;
+      const metadata = (acc as Record<string, unknown>).metadata as Record<string, unknown> | null;
       grouped[pid].push({
         id: acc.id, platform: acc.platform,
         name: acc.name ?? acc.username, username: acc.username,
@@ -386,8 +386,8 @@ export default function Connections() {
         profilePicture: acc.profile_picture ?? null,
         userProfilePicture: (metadata?.userProfilePicture as string) ?? null,
         accountType: acc.account_type ?? null,
-        tokenExpiresAt: acc.token_expires_at ?? null,
-        updatedAt: acc.updated_at,
+        tokenExpiresAt: ((acc as Record<string, unknown>).token_expires_at as string) ?? null,
+        updatedAt: ((acc as Record<string, unknown>).updated_at as string) ?? new Date().toISOString(),
       });
     });
     return grouped;

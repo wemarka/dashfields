@@ -5,7 +5,7 @@
 // Falls back to zero-values (never random) when no data is available.
 import { z } from "zod";
 import { router, protectedProcedure } from "../../_core/trpc";
-import { getUserSocialAccounts } from "../db/social";
+import { getUserSocialAccountsFull as getUserSocialAccounts } from "../db/social";
 import { getAccountInsights } from "../../services/integrations/meta";
 import { getSupabase } from "../../supabase";
 

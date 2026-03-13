@@ -21,7 +21,7 @@ function buildAccountData(raw: {
   username: string | null;
   profile_picture: string | null;
   is_active: boolean;
-  metadata: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
   account_type: string | null;
 }): AccountData {
   const meta = raw.metadata ?? {};

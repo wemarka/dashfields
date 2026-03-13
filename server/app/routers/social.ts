@@ -2,7 +2,7 @@
 // tRPC router for social account management.
 import { z } from "zod";
 import { router, protectedProcedure } from "../../_core/trpc";
-import { getUserSocialAccounts, upsertSocialAccount, deleteSocialAccount, getSocialAccountById } from "../db/social";
+import { getUserSocialAccounts, getUserSocialAccountsFull, upsertSocialAccount, deleteSocialAccount, getSocialAccountById } from "../db/social";
 import { getSupabase } from "../../supabase";
 
 // ─── Platform health check helpers ───────────────────────────────────────────
@@ -107,7 +107,7 @@ export const socialRouter = router({
   healthCheck: protectedProcedure
     .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
     .mutation(async ({ ctx, input }) => {
-    const accounts = await getUserSocialAccounts(ctx.user.id, input?.workspaceId);
+    const accounts = await getUserSocialAccountsFull(ctx.user.id, input?.workspaceId);
     const sb = getSupabase();
     const results: Array<{ id: number; platform: string; valid: boolean; name?: string }> = [];
 

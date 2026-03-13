@@ -23,14 +23,40 @@ export type SocialAccountRow = {
   updated_at: string;
 };
 
-export async function getUserSocialAccounts(userId: number, workspaceId?: number): Promise<SocialAccountRow[]> {
+// Lightweight type for frontend display (no sensitive tokens)
+export type SocialAccountPublic = {
+  id: number;
+  platform: string;
+  account_type: string | null;
+  platform_account_id: string | null;
+  name: string | null;
+  username: string | null;
+  profile_picture: string | null;
+  is_active: boolean;
+  workspace_id: number | null;
+};
+
+export async function getUserSocialAccounts(userId: number, workspaceId?: number): Promise<SocialAccountPublic[]> {
+  const sb = getSupabase();
+  let query = sb
+    .from("social_accounts")
+    .select("id, platform, account_type, platform_account_id, name, username, profile_picture, is_active, workspace_id")
+    .eq("user_id", userId);
+  if (workspaceId) query = query.eq("workspace_id", workspaceId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as SocialAccountPublic[];
+}
+
+/** Full row including tokens — for server-side use only */
+export async function getUserSocialAccountsFull(userId: number, workspaceId?: number): Promise<SocialAccountRow[]> {
   const sb = getSupabase();
   let query = sb
     .from("social_accounts")
     .select("*")
     .eq("user_id", userId);
   if (workspaceId) query = query.eq("workspace_id", workspaceId);
-  const { data, error } = await query.order("created_at", { ascending: false });
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as SocialAccountRow[];
 }
