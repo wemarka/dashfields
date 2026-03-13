@@ -459,3 +459,94 @@ export const aiConversations = pgTable("ai_conversations", {
 });
 export type AiConversation       = typeof aiConversations.$inferSelect;
 export type InsertAiConversation = typeof aiConversations.$inferInsert;
+
+// ─── Marketing Workflow Agent ─────────────────────────────────────────────────
+
+export const workflowStepEnum = pgEnum("workflow_step", [
+  "discovery",
+  "brand_assets",
+  "generating",
+  "creative_review",
+  "content_plan",
+  "budget_review",
+  "preview",
+  "confirmed",
+  "launched",
+]);
+
+export const campaignWorkflows = pgTable("campaign_workflows", {
+  id:               uuid("id").primaryKey().defaultRandom(),
+  userId:           integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId:      integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  campaignId:       integer("campaign_id").references(() => campaigns.id, { onDelete: "set null" }),
+  step:             workflowStepEnum("step").default("discovery").notNull(),
+  brief:            jsonb("brief").default({}),
+  logoUrl:          text("logo_url"),
+  productImageUrl:  text("product_image_url"),
+  budgetAllocation: jsonb("budget_allocation").default({}),
+  audienceInsights: jsonb("audience_insights").default({}),
+  messages:         jsonb("messages").default([]),
+  createdAt:        timestamp("created_at").defaultNow().notNull(),
+  updatedAt:        timestamp("updated_at").defaultNow().notNull(),
+});
+export type CampaignWorkflow       = typeof campaignWorkflows.$inferSelect;
+export type InsertCampaignWorkflow = typeof campaignWorkflows.$inferInsert;
+
+export const creativeStatusEnum = pgEnum("creative_status", [
+  "generating", "ready", "approved", "rejected", "watermarked",
+]);
+
+export const campaignCreatives = pgTable("campaign_creatives", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  workflowId:     uuid("workflow_id").notNull().references(() => campaignWorkflows.id, { onDelete: "cascade" }),
+  userId:         integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  platform:       platformEnum("platform").notNull(),
+  format:         varchar("format", { length: 32 }).notNull(),
+  width:          integer("width").notNull(),
+  height:         integer("height").notNull(),
+  rawImageUrl:    text("raw_image_url"),
+  watermarkedUrl: text("watermarked_url"),
+  variant:        varchar("variant", { length: 4 }).default("A"),
+  prompt:         text("prompt"),
+  status:         creativeStatusEnum("status").default("generating").notNull(),
+  approved:       boolean("approved").default(false),
+  createdAt:      timestamp("created_at").defaultNow().notNull(),
+});
+export type CampaignCreative       = typeof campaignCreatives.$inferSelect;
+export type InsertCampaignCreative = typeof campaignCreatives.$inferInsert;
+
+export const contentPlanItemStatusEnum = pgEnum("content_plan_item_status", [
+  "draft", "scheduled", "published", "skipped",
+]);
+
+export const campaignContentPlan = pgTable("campaign_content_plan", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  workflowId:     uuid("workflow_id").notNull().references(() => campaignWorkflows.id, { onDelete: "cascade" }),
+  campaignId:     integer("campaign_id").references(() => campaigns.id, { onDelete: "cascade" }),
+  platform:       platformEnum("platform").notNull(),
+  postDate:       timestamp("post_date").notNull(),
+  postTime:       varchar("post_time", { length: 8 }).notNull(),
+  caption:        text("caption").notNull(),
+  hashtags:       text("hashtags").array().default([]),
+  creativeId:     uuid("creative_id").references(() => campaignCreatives.id, { onDelete: "set null" }),
+  status:         contentPlanItemStatusEnum("status").default("draft").notNull(),
+  platformPostId: varchar("platform_post_id", { length: 128 }),
+  createdAt:      timestamp("created_at").defaultNow().notNull(),
+});
+export type CampaignContentPlan       = typeof campaignContentPlan.$inferSelect;
+export type InsertCampaignContentPlan = typeof campaignContentPlan.$inferInsert;
+
+export const brandLogoAssets = pgTable("brand_logo_assets", {
+  id:          serial("id").primaryKey(),
+  workspaceId: integer("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name:        varchar("name", { length: 128 }).notNull().default("Brand Logo"),
+  url:         text("url").notNull(),
+  fileKey:     text("file_key").notNull(),
+  width:       integer("width"),
+  height:      integer("height"),
+  isDefault:   boolean("is_default").default(false),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+});
+export type BrandLogoAsset       = typeof brandLogoAssets.$inferSelect;
+export type InsertBrandLogoAsset = typeof brandLogoAssets.$inferInsert;

@@ -29,6 +29,7 @@ import { DemoBanner } from "./app/components/DemoBanner";
   "/auth/callback",
   // Dashboard
   "/dashboard",
+  "/campaign-wizard",
   // Ads
   "/ads/campaigns",
   // Content
@@ -68,6 +69,8 @@ import DashboardLayout from "./app/components/DashboardLayout";
 
 // ─── AI Agent (main home page) ───────────────────────────────────────────────
 const AIAgentPage = lazy(() => import("./app/features/ai-agent/AIAgentPage"));
+// ─── Marketing Workflow Agent ─────────────────────────────────────────────────
+const CampaignWizardPage = lazy(() => import("./app/features/campaign-wizard/CampaignWizardPage"));
 
 // ─── Lazy-loaded pages (code-split for performance) ───────────────────────────
 const Alerts            = lazy(() => import("./app/features/alerts/Alerts"));
@@ -185,6 +188,7 @@ function AppRouter() {
             <Switch>
               {/* ── Core ───────────────────────────────────────────────────────── */}
               <Route path="/dashboard"              component={AIAgentPage} />
+              <Route path="/campaign-wizard"       component={CampaignWizardPage} />
               {/* ── Ads sub-pages ────────────────────────────────────────────────── */}
               <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
               <Route path="/ads/campaigns"          component={CampaignsPage} />

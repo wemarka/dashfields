@@ -9,6 +9,7 @@ import {
   Building2,
   CreditCard,
   LayoutGrid,
+  Wand2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -39,6 +40,12 @@ export interface NavSection {
 export const navSections: NavSection[] = [
   {
     items: [
+      {
+        labelKey: "nav.campaignWizard",
+        path: "/campaign-wizard",
+        icon: Wand2,
+        iconAnimation: "icon-pulse",
+      },
       {
         labelKey: "nav.aiAgent",
         path: "/dashboard",

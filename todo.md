@@ -2978,3 +2978,26 @@
 - [x] "Create New Workspace" يفتح form مدمج بدون navigation
 - [x] "Workspace Settings" ينتقل لـ /settings/workspace
 - [x] 630/630 اختبار ناجح، 0 TypeScript errors
+
+## ✅ Marketing Workflow Agent — Full Build
+- [x] إضافة ATLAS_API_KEY كـ secret (Atlas Cloud OpenAI-compatible)
+- [x] تثبيت sharp لـ Watermark pipeline
+- [x] إنشاء جداول DB: campaign_workflows, campaign_creatives, campaign_content_plan, brand_logo_assets
+- [x] بناء gemini-text.ts — Atlas Cloud text helper (google/gemini-2.5-flash-lite)
+- [x] بناء gemini-image.ts — Atlas Cloud image helper (google/gemini-2.5-flash-image)
+- [x] بناء watermark.ts — Watermark pipeline بـ Sharp.js (PNG overlay, 5 positions)
+- [x] Platform Image Resizer (5 مقاسات: IG Feed, IG Story, FB Feed, TikTok, Twitter)
+- [x] بناء campaignWorkflow.ts tRPC procedures (start, message, generateCreatives, approveCampaign, launch)
+- [x] Brand Memory (حفظ شعار العميل + brand_logo_assets table)
+- [x] Budget Optimizer (توزيع الميزانية على المنصات بناءً على الهدف)
+- [x] Audience Insights per platform
+- [x] A/B Variants generator (نسختان A و B لكل منصة)
+- [x] Campaign Templates (إطلاق منتج، تخفيضات، موسمية)
+- [x] بناء CampaignWizardPage — Discovery Flow Chat UI
+- [x] بناء CreativeGrid — Creative Review UI (اختيار/رفض/إعادة توليد)
+- [x] بناء ContentPlanView — Content Plan UI (جدول المحتوى)
+- [x] بناء CampaignPreview — Campaign Preview UI (محاكاة كل منصة)
+- [x] بناء WizardProgressBar — Progress indicator
+- [x] إضافة /campaign-wizard route في App.tsx
+- [x] إضافة Campaign Wizard nav item في sidebar
+- [x] Atlas Cloud API test: 633/633 اختبار ناجح، 0 TypeScript errors

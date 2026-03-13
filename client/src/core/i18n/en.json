@@ -11,6 +11,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "campaignWizard": "Campaign Wizard",
     "aiAgent": "AI Agent",
     "campaigns": "Campaigns",
     "alerts": "Alerts",

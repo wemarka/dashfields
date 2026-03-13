@@ -148,6 +148,13 @@
       "when": 1773103305538,
       "tag": "0020_stale_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1773360123789,
+      "tag": "0021_warm_black_cat",
+      "breakpoints": true
     }
   ]
 }
