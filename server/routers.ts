@@ -40,6 +40,8 @@ import { aiConversationsRouter }      from "./app/routers/aiConversations";
 import { marketingStatsRouter }       from "./app/routers/marketingStats";
 import { campaignWorkflowRouter }     from "./app/routers/campaignWorkflow";
 import { aiAgentRouter }              from "./app/routers/aiAgent";
+import { homeStatsRouter }             from "./app/routers/homeStats";
+import { studiosRouter }               from "./app/routers/studios";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -89,6 +91,8 @@ export const appRouter = router({
   marketingStats:       marketingStatsRouter,
   campaignWorkflow:     campaignWorkflowRouter,
   aiAgent:              aiAgentRouter,
+  homeStats:            homeStatsRouter,
+  studios:              studiosRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,7 +1,7 @@
 /**
  * RegisterPage.tsx
  * Supabase Auth — Create new account
- * Design: Clean white/off-white — matches Settings Dialog palette
+ * Design: Premium dark gray — consistent with the Topbar-only app shell
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -52,33 +52,30 @@ export default function RegisterPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#f7f7f8" }}>
+    <div className="min-h-screen flex bg-[#0a0a0f]">
       {/* Left panel — branding */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
-        style={{ backgroundColor: "#111827" }}
-      >
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#0f0f17] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
-          <blockquote className="text-white/80 text-lg leading-relaxed font-light mb-6">
+          <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">
             "Join thousands of marketers who manage their ad campaigns smarter with Dashfields."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
             <div>
-              <p className="text-white text-sm font-medium">Dashfields Team</p>
-              <p className="text-white/40 text-xs">dashfields.com</p>
+              <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
+              <p className="text-white/30 text-xs">dashfields.com</p>
             </div>
           </div>
         </div>
-        <p className="text-white/20 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
+        <p className="text-white/15 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
       </div>
 
       {/* Right panel — form */}
@@ -86,25 +83,24 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
-            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain" style={{ filter: "brightness(0)" }} />
+            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
           </div>
 
           {success ? (
-            /* Success state */
             <div className="text-center py-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-green-500" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Check your email</h2>
-              <p className="text-gray-500 text-sm mb-6">
-                We sent a verification link to <strong className="text-gray-900">{email}</strong>.
+              <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
+              <p className="text-white/40 text-sm mb-6">
+                We sent a verification link to <strong className="text-white/80">{email}</strong>.
                 Click the link to activate your account.
               </p>
               <Button
                 variant="outline"
-                className="gap-2 rounded-xl border-[#e5e7eb] text-gray-700 hover:bg-gray-50"
+                className="gap-2 rounded-xl border-white/[0.08] text-white/60 hover:bg-white/[0.04]"
                 onClick={() => setLocation("/login")}
               >
                 Back to sign in
@@ -113,80 +109,79 @@ export default function RegisterPage() {
           ) : (
             <>
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">Create account</h1>
-                <p className="text-gray-500 text-sm">Start your free Dashfields account</p>
+                <h1 className="text-2xl font-bold text-white mb-1">Create account</h1>
+                <p className="text-white/40 text-sm">Start your free Dashfields account</p>
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 mb-5">
-                  <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                  <p className="text-red-600 text-sm">{error}</p>
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-5">
+                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                  <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
 
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-gray-700 text-sm font-medium">Full name</Label>
+                  <Label htmlFor="name" className="text-white/60 text-sm font-medium">Full name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="name" type="text" placeholder="Your name" value={name}
                       onChange={e => setName(e.target.value)} required autoComplete="name"
-                      className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-gray-700 text-sm font-medium">Email</Label>
+                  <Label htmlFor="email" className="text-white/60 text-sm font-medium">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="email" type="email" placeholder="you@example.com" value={email}
                       onChange={e => setEmail(e.target.value)} required autoComplete="email"
-                      className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-gray-700 text-sm font-medium">Password</Label>
+                  <Label htmlFor="password" className="text-white/60 text-sm font-medium">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min. 8 characters"
                       value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password"
-                      className="pl-10 pr-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl" />
+                      className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
                     <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {password && (
                     <div className="flex gap-1 mt-1.5">
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= passwordStrength.score ? passwordStrength.color : "bg-gray-200"}`} />
+                        <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= passwordStrength.score ? passwordStrength.color : "bg-white/[0.06]"}`} />
                       ))}
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword" className="text-gray-700 text-sm font-medium">Confirm password</Label>
+                  <Label htmlFor="confirmPassword" className="text-white/60 text-sm font-medium">Confirm password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Repeat password"
                       value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required autoComplete="new-password"
-                      className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
                   </div>
                 </div>
 
                 <Button type="submit" disabled={submitting || !email || !password || !name}
-                  className="w-full h-11 rounded-xl font-medium"
-                  style={{ backgroundColor: "#111827", color: "#fff" }}>
+                  className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors">
                   {submitting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create account"}
                 </Button>
               </form>
 
-              <p className="text-center text-gray-500 text-sm mt-6">
+              <p className="text-center text-white/35 text-sm mt-6">
                 Already have an account?{" "}
                 <button type="button" onClick={() => setLocation("/login")}
-                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
                   Sign in
                 </button>
               </p>
@@ -199,14 +194,14 @@ export default function RegisterPage() {
 }
 
 function getPasswordStrength(password: string): { score: number; color: string } {
-  if (!password) return { score: 0, color: "bg-gray-200" };
+  if (!password) return { score: 0, color: "bg-white/[0.06]" };
   let score = 0;
   if (password.length >= 8) score++;
   if (password.length >= 12) score++;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
-  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-green-500"];
-  return { score, color: colors[score - 1] ?? "bg-gray-200" };
+  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-emerald-500"];
+  return { score, color: colors[score - 1] ?? "bg-white/[0.06]" };
 }
 
 function getErrorMessage(msg: string): string {

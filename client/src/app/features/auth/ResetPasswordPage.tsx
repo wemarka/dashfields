@@ -2,7 +2,7 @@
  * ResetPasswordPage.tsx
  * Supabase Auth — Set new password after clicking reset link
  * Route: /auth/reset-password (Supabase redirects here)
- * Design: Clean white/off-white split-panel — matches Settings Dialog palette
+ * Design: Premium dark gray — consistent with the Topbar-only app shell
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -57,26 +57,23 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#f7f7f8" }}>
+    <div className="min-h-screen flex bg-[#0a0a0f]">
       {/* Left panel — branding */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
-        style={{ backgroundColor: "#111827" }}
-      >
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#0f0f17] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
-          <blockquote className="text-white/80 text-lg leading-relaxed font-light mb-6">
+          <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">
             "Your account security matters. Choose a strong password to keep your data safe."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
             <div>
-              <p className="text-white text-sm font-medium">Dashfields Team</p>
-              <p className="text-white/40 text-xs">dashfields.com</p>
+              <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
+              <p className="text-white/30 text-xs">dashfields.com</p>
             </div>
           </div>
         </div>
-        <p className="text-white/20 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
+        <p className="text-white/15 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
       </div>
 
       {/* Right panel — form */}
@@ -84,38 +81,38 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
-            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain" style={{ filter: "brightness(0)" }} />
+            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
           </div>
 
           {success ? (
             <div className="text-center py-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-green-500" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Password updated!</h2>
-              <p className="text-gray-500 text-sm">Redirecting you to the dashboard...</p>
+              <h2 className="text-xl font-bold text-white mb-2">Password updated!</h2>
+              <p className="text-white/40 text-sm">Redirecting you to the dashboard...</p>
               <div className="mt-4 flex justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
               </div>
             </div>
           ) : (
             <>
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">Set new password</h1>
-                <p className="text-gray-500 text-sm">Choose a strong password for your account.</p>
+                <h1 className="text-2xl font-bold text-white mb-1">Set new password</h1>
+                <p className="text-white/40 text-sm">Choose a strong password for your account.</p>
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 mb-5">
-                  <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                  <p className="text-red-600 text-sm">{error}</p>
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-5">
+                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                  <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
 
               {!sessionReady && !error && (
-                <div className="flex items-center gap-2 text-gray-500 text-sm mb-5 p-3 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+                <div className="flex items-center gap-2 text-white/40 text-sm mb-5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                   Verifying reset link...
                 </div>
@@ -123,9 +120,9 @@ export default function ResetPasswordPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-gray-700 text-sm font-medium">New password</Label>
+                  <Label htmlFor="password" className="text-white/60 text-sm font-medium">New password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -135,12 +132,12 @@ export default function ResetPasswordPage() {
                       required
                       disabled={!sessionReady}
                       autoComplete="new-password"
-                      className="pl-10 pr-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl disabled:opacity-50 disabled:bg-gray-50"
+                      className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl disabled:opacity-40"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(v => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -149,9 +146,9 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword" className="text-gray-700 text-sm font-medium">Confirm new password</Label>
+                  <Label htmlFor="confirmPassword" className="text-white/60 text-sm font-medium">Confirm new password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
@@ -161,7 +158,7 @@ export default function ResetPasswordPage() {
                       required
                       disabled={!sessionReady}
                       autoComplete="new-password"
-                      className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl disabled:opacity-50 disabled:bg-gray-50"
+                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl disabled:opacity-40"
                     />
                   </div>
                 </div>
@@ -169,8 +166,7 @@ export default function ResetPasswordPage() {
                 <Button
                   type="submit"
                   disabled={submitting || !password || !confirmPassword || !sessionReady}
-                  className="w-full h-11 rounded-xl font-medium"
-                  style={{ backgroundColor: "#111827", color: "#fff" }}
+                  className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
                 >
                   {submitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin mr-2" />Updating...</>

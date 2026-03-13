@@ -1,7 +1,7 @@
 /**
  * LoginPage.tsx
  * Supabase Auth — Email/Password login
- * Design: Clean white/off-white — matches Settings Dialog palette
+ * Design: Premium dark gray — consistent with the Topbar-only app shell
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -50,33 +50,30 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#f7f7f8" }}>
+    <div className="min-h-screen flex bg-[#0a0a0f]">
       {/* Left panel — branding */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
-        style={{ backgroundColor: "#111827" }}
-      >
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#0f0f17] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
-          <blockquote className="text-white/80 text-lg leading-relaxed font-light mb-6">
+          <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">
             "Dashfields brings all your ad accounts into one intelligent workspace — so you can focus on what matters."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
             <div>
-              <p className="text-white text-sm font-medium">Dashfields Team</p>
-              <p className="text-white/40 text-xs">dashfields.com</p>
+              <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
+              <p className="text-white/30 text-xs">dashfields.com</p>
             </div>
           </div>
         </div>
-        <p className="text-white/20 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
+        <p className="text-white/15 text-xs">© {new Date().getFullYear()} Dashfields. All rights reserved.</p>
       </div>
 
       {/* Right panel — form */}
@@ -84,29 +81,29 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
-            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain" style={{ filter: "brightness(0)" }} />
+            <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
           </div>
 
           {/* Heading */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
-            <p className="text-gray-500 text-sm">Sign in to your Dashfields account</p>
+            <h1 className="text-2xl font-bold text-white mb-1">Welcome back</h1>
+            <p className="text-white/40 text-sm">Sign in to your Dashfields account</p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 mb-5">
-              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-5">
+              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
           {/* Form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-gray-700 text-sm font-medium">Email</Label>
+              <Label htmlFor="email" className="text-white/60 text-sm font-medium">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                 <Input
                   id="email"
                   type="email"
@@ -115,24 +112,24 @@ export default function LoginPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="pl-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl"
+                  className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-gray-700 text-sm font-medium">Password</Label>
+                <Label htmlFor="password" className="text-white/60 text-sm font-medium">Password</Label>
                 <button
                   type="button"
                   onClick={() => setLocation("/forgot-password")}
-                  className="text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors"
+                  className="text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors"
                 >
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -141,12 +138,12 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="pl-10 pr-10 h-11 bg-white border-[#e5e7eb] text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/10 rounded-xl"
+                  className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -157,8 +154,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={submitting || !email || !password}
-              className="w-full h-11 rounded-xl font-medium"
-              style={{ backgroundColor: "#111827", color: "#fff" }}
+              className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin mr-2" />Signing in...</>
@@ -167,12 +163,12 @@ export default function LoginPage() {
           </form>
 
           {/* Register link */}
-          <p className="text-center text-gray-500 text-sm mt-6">
+          <p className="text-center text-white/35 text-sm mt-6">
             Don&apos;t have an account?{" "}
             <button
               type="button"
               onClick={() => setLocation("/register")}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
             >
               Create account
             </button>

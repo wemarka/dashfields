@@ -1,0 +1,10 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS studio_creations (\n  id SERIAL PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  type TEXT NOT NULL DEFAULT 'image',\n  prompt TEXT NOT NULL,\n  style TEXT,\n  aspect_ratio TEXT NOT NULL DEFAULT '1:1',\n  image_url TEXT NOT NULL,\n  model_used TEXT,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE IF NOT EXISTS studio_creations (\n  id SERIAL PRIMARY KEY,\n  user_id INTEGER NOT NULL,\n  type TEXT NOT NULL DEFAULT 'image',\n  prompt TEXT NOT NULL,\n  style TEXT,\n  aspect_ratio TEXT NOT NULL DEFAULT '1:1',\n  image_url TEXT NOT NULL,\n  model_used TEXT,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),\n  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 10 column 25 near \"TIMESTAMPTZ NOT NULL DEFAULT NOW(),",
+    "  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+    ")\""
+  ]
+}

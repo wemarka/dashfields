@@ -3149,3 +3149,24 @@
 - [x] Quick Snapshot widget (active campaign metrics)
 - [x] Recent Creations widget (AI-generated images/videos gallery)
 - [x] Dark-themed modular widget components
+
+## 🔧 Continuation: Auth Dark Theme + Data Widgets + Dash Studios
+
+### Auth Pages Dark Theme
+- [x] Update LoginPage to dark gray theme (consistent with app)
+- [x] Update RegisterPage to dark gray theme
+- [x] Update ForgotPasswordPage to dark gray theme
+- [x] Update ResetPasswordPage to dark gray theme
+
+### Quick Snapshot Widget — Real Data
+- [x] Connect Quick Snapshot widget to real campaign data via tRPC
+- [x] Show actual active campaigns count, total spend, impressions, click rate
+- [x] Connect Recent Creations widget to real AI-generated images from DB
+
+### Dash Studios — Full AI Generation Playground
+- [x] Build full Dash Studios page with image generation tab
+- [x] Add video generation tab (placeholder/coming soon)
+- [x] Add brand kit generation tab
+- [x] Integrate existing AI image generation pipeline
+- [x] Add prompt input, aspect ratio selector, style presets
+- [x] Show generation history/gallery
