@@ -1,12 +1,20 @@
 /**
  * client/src/app/features/ai-agent/AIAgentPage.tsx
- * Dashfields AI — Master Chat interface with Generative UI support.
- * Dark Neutral (#0a0a0a / neutral-950) + Brand Red (#E62020) design.
+ * Dashfields AI — Full-viewport chat interface.
+ *
+ * Layout:
+ *   ┌──────────────────────────────────────────────────────┐
+ *   │  [Sidebar 260px]  │  [Chat Area — flex-1]            │
+ *   │  - New Chat btn   │  - Empty state / Messages        │
+ *   │  - Session list   │  - Pinned input bar at bottom    │
+ *   └──────────────────────────────────────────────────────┘
+ *
+ * Design: Dark Neutral (neutral-950) + Brand Red (#E62020)
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Plus, Loader2, Sparkles, Copy, Mic, Paperclip,
-  ArrowDown, StopCircle,
+  ArrowDown, StopCircle, MessageSquare, Trash2, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { Button } from "@/core/components/ui/button";
@@ -43,11 +51,22 @@ function saveLocal(sessions: ChatSession[]) {
 }
 
 export function broadcastSessions(sessions: ChatSession[], activeId: string | null = null) {
-  // Defer the event dispatch to avoid setState-during-render errors
-  // when called from inside a setState callback
   queueMicrotask(() => {
     window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
   });
+}
+
+// ─── Relative time helper ──────────────────────────────────────────────────
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return "Yesterday";
+  return `${days}d ago`;
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────
@@ -62,7 +81,8 @@ export default function AIAgentPage() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(() => loadActiveSessionId());
   const [sessions, setSessions]               = useState<ChatSession[]>(() => loadLocal());
   const [showScrollBtn, setShowScrollBtn]     = useState(false);
-  const [toolStatus, setToolStatus]             = useState<ToolStatus | null>(null);
+  const [toolStatus, setToolStatus]           = useState<ToolStatus | null>(null);
+  const [sidebarOpen, setSidebarOpen]         = useState(true);
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -213,7 +233,6 @@ export default function AIAgentPage() {
         if (done) break;
         sseBuffer += decoder.decode(value, { stream: true });
         const lines = sseBuffer.split("\n");
-        // Keep the last potentially incomplete line in the buffer
         sseBuffer = lines.pop() ?? "";
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
@@ -222,7 +241,6 @@ export default function AIAgentPage() {
           try {
             const parsed = JSON.parse(raw) as { content?: string; text?: string; status?: string; error?: string };
             if (parsed.error) throw new Error(parsed.error);
-            // Handle status events (tool calling indicators)
             if (parsed.status) {
               if (parsed.status === "thinking") {
                 setToolStatus({ type: "thinking" });
@@ -232,10 +250,9 @@ export default function AIAgentPage() {
               }
               continue;
             }
-            // Handle content chunks (new format) or text chunks (legacy format)
             const chunk = parsed.content ?? parsed.text;
             if (chunk) {
-              setToolStatus(null); // Clear tool status when content starts flowing
+              setToolStatus(null);
               accumulated += chunk;
               const finalAcc = accumulated;
               setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, content: finalAcc } : m));
@@ -245,7 +262,6 @@ export default function AIAgentPage() {
       }
       setToolStatus(null);
 
-      // Parse UI blocks from the final content
       const { blocks } = parseUIBlocks(accumulated);
 
       const finalMessages: ChatMessage[] = [
@@ -343,12 +359,10 @@ export default function AIAgentPage() {
     void sendMessage(action);
   }, [sendMessage]);
 
-  // ── Block Update Handler (persists generated images to state + DB) ─────────
+  // ── Block Update Handler ───────────────────────────────────────────────────
   const handleBlockUpdate = useCallback((messageId: string, blockIndex: number, updatedBlock: UIBlock) => {
-    // Helper: update a message's content string to persist generated_image_url inside ui-block JSON
     const patchContent = (content: string): string => {
       if (updatedBlock.type !== "campaign_preview" || !updatedBlock.generated_image_url) return content;
-      // Replace ALL ui-block fences that are campaign_preview and inject the URL
       let cpIdx = 0;
       return content.replace(/```ui-block\s*\n([\s\S]*?)```/g, (match, json: string) => {
         try {
@@ -366,7 +380,6 @@ export default function AIAgentPage() {
       });
     };
 
-    // Helper: update a single message
     const patchMessage = (m: ChatMessage): ChatMessage => {
       if (m.id !== messageId) return m;
       const blocks = [...(m.uiBlocks ?? [])];
@@ -374,25 +387,18 @@ export default function AIAgentPage() {
       return { ...m, uiBlocks: blocks, content: patchContent(m.content) };
     };
 
-    // 1. Update messages state
     setMessages((prev) => prev.map(patchMessage));
 
-    // 2. Persist to sessions (localStorage) + DB in one setSessions call
-    //    This avoids the stale-closure bug where sessions hadn't been updated yet.
     setSessions((prev) => {
       if (!activeSessionId) return prev;
       const updatedSessions = prev.map((s) => {
         if (s.id !== activeSessionId) return s;
         const updatedMessages = s.messages.map(patchMessage);
         const updatedSession = { ...s, messages: updatedMessages };
-
-        // Save to DB inside the callback so we use the LATEST session data
         if (user) {
-          // Strip uiBlocks before sending to DB (DB only stores content string)
           const dbMessages = updatedMessages.map(({ uiBlocks: _ub, isStreaming: _is, ...rest }) => rest);
           saveConversation.mutate({ ...updatedSession, messages: dbMessages });
         }
-
         return updatedSession;
       });
       saveLocal(updatedSessions);
@@ -422,7 +428,6 @@ export default function AIAgentPage() {
 
   const firstName = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
 
-  // ── Suggested prompts for empty state ──────────────────────────────────────
   const suggestions = [
     t("aiAgent.suggestion1", "Create a new campaign"),
     t("aiAgent.suggestion2", "Analyze my ad performance"),
@@ -432,141 +437,231 @@ export default function AIAgentPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full bg-neutral-950 relative overflow-hidden">
+    <div className="flex h-full bg-neutral-950 overflow-hidden relative">
 
-      {/* ── Empty State ── */}
-      {!isInChat && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6">
-          {/* Greeting */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-red/10 mb-5 shadow-lg border border-brand-red/20">
-              <Sparkles className="w-6 h-6 text-brand-red" />
+      {/* ── Sidebar ── */}
+      <aside
+        className={cn(
+          "flex flex-col shrink-0 border-r border-neutral-800 bg-neutral-950 transition-all duration-300 overflow-hidden",
+          sidebarOpen ? "w-64" : "w-0",
+        )}
+      >
+        {/* Sidebar header */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-800 shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-brand-red/10 border border-brand-red/20 flex items-center justify-center">
+              <Sparkles className="w-3 h-3 text-brand-red" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
-              {t("aiAgent.greeting", { name: firstName })}
-            </h1>
-            <p className="text-neutral-400 text-[15px] max-w-md mx-auto leading-relaxed">
-              {t("aiAgent.subtitle")}
-            </p>
-          </div>
-
-          {/* Suggestion chips */}
-          <div className="flex flex-wrap justify-center gap-2.5 mb-8 max-w-xl">
-            {suggestions.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => void sendMessage(s)}
-                className={cn(
-                  "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                  "border border-neutral-800 bg-neutral-900 text-neutral-300",
-                  "hover:border-neutral-700 hover:bg-neutral-800 hover:text-white",
-                  "active:scale-[0.97]",
-                )}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-
-          {/* Input */}
-          <div className="w-full max-w-2xl">
-            <ChatInput
-              input={input}
-              setInput={setInput}
-              isLoading={isLoading}
-              onSend={() => void sendMessage(input)}
-              onKeyDown={handleKeyDown}
-              onStop={handleStop}
-              textareaRef={textareaRef}
-              isRtl={isRtl}
-              t={t}
-            />
+            <span className="text-sm font-semibold text-white whitespace-nowrap">Dashfields AI</span>
           </div>
         </div>
-      )}
 
-      {/* ── Chat State ── */}
-      {isInChat && (
-        <>
-          {/* Chat header */}
-          <div className={cn(
-            "flex items-center justify-between px-5 py-3 shrink-0",
-            "border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md",
-            isRtl ? "flex-row-reverse" : "",
-          )}>
-            <div className={cn("flex items-center gap-2.5", isRtl ? "flex-row-reverse" : "")}>
-              <div className="w-7 h-7 rounded-lg bg-brand-red/10 border border-brand-red/20 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-brand-red" />
-              </div>
-              <span className="text-sm font-semibold text-white">Dashfields AI</span>
+        {/* New Chat button */}
+        <div className="px-3 pt-3 pb-2 shrink-0">
+          <button
+            onClick={handleNewChat}
+            className={cn(
+              "w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+              "border border-neutral-800 bg-neutral-900 text-neutral-300",
+              "hover:border-neutral-700 hover:bg-neutral-800 hover:text-white",
+              "active:scale-[0.98]",
+            )}
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">New Chat</span>
+          </button>
+        </div>
+
+        {/* Session list */}
+        <div className="flex-1 overflow-y-auto px-2 pb-4">
+          {sessions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center px-4">
+              <MessageSquare className="w-8 h-8 text-neutral-700 mb-2" />
+              <p className="text-xs text-neutral-600">No conversations yet</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleNewChat}
-              className={cn(
-                "text-xs text-neutral-400 hover:text-white hover:bg-neutral-800 gap-1.5",
-                isRtl ? "flex-row-reverse" : "",
-              )}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {t("aiAgent.newChat")}
-            </Button>
-          </div>
-
-          {/* Messages area */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto relative">
-            <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-              {messages.map((msg) => (
-                <MessageBubble
-                  key={msg.id}
-                  msg={msg}
-                  t={t}
-                  isRtl={isRtl}
-                  onChipClick={handleChipClick}
-                  onAction={handleActionClick}
-                  onBlockUpdate={(blockIndex, updatedBlock) => handleBlockUpdate(msg.id, blockIndex, updatedBlock)}
+          ) : (
+            <div className="space-y-0.5 mt-1">
+              {sessions.map((session) => (
+                <SessionItem
+                  key={session.id}
+                  session={session}
+                  isActive={session.id === activeSessionId}
+                  onLoad={handleLoadSession}
+                  onDelete={handleDeleteSession}
                 />
               ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
-              {isLoading && toolStatus && <ToolStatusIndicator status={toolStatus} />}
-              <div ref={bottomRef} />
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* ── Sidebar toggle button ── */}
+      <button
+        onClick={() => setSidebarOpen((v) => !v)}
+        className={cn(
+          "absolute z-20 top-1/2 -translate-y-1/2 transition-all duration-300",
+          "w-5 h-10 flex items-center justify-center",
+          "bg-neutral-900 border border-neutral-800 rounded-r-lg",
+          "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800",
+          sidebarOpen ? "left-64" : "left-0",
+        )}
+      >
+        {sidebarOpen ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+      </button>
+
+      {/* ── Main chat area ── */}
+      <div className="flex-1 flex flex-col min-w-0 relative">
+
+        {/* ── Empty State ── */}
+        {!isInChat && (
+          <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-y-auto">
+            <div className="w-full max-w-2xl flex flex-col items-center">
+              {/* Greeting */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-red/10 mb-5 border border-brand-red/20">
+                  <Sparkles className="w-6 h-6 text-brand-red" />
+                </div>
+                <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
+                  {t("aiAgent.greeting", { name: firstName })}
+                </h1>
+                <p className="text-neutral-400 text-[15px] max-w-md mx-auto leading-relaxed">
+                  {t("aiAgent.subtitle")}
+                </p>
+              </div>
+
+              {/* Suggestion chips */}
+              <div className="flex flex-wrap justify-center gap-2.5 mb-8 w-full">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => void sendMessage(s)}
+                    className={cn(
+                      "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                      "border border-neutral-800 bg-neutral-900 text-neutral-300",
+                      "hover:border-neutral-700 hover:bg-neutral-800 hover:text-white",
+                      "active:scale-[0.97]",
+                    )}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input */}
+              <div className="w-full">
+                <ChatInput
+                  input={input}
+                  setInput={setInput}
+                  isLoading={isLoading}
+                  onSend={() => void sendMessage(input)}
+                  onKeyDown={handleKeyDown}
+                  onStop={handleStop}
+                  textareaRef={textareaRef}
+                  isRtl={isRtl}
+                  t={t}
+                />
+                <p className="text-center text-[11px] text-neutral-600 mt-2">
+                  {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Chat State ── */}
+        {isInChat && (
+          <>
+            {/* Messages area — scrollable */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto relative">
+              <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+                {messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    t={t}
+                    isRtl={isRtl}
+                    onChipClick={handleChipClick}
+                    onAction={handleActionClick}
+                    onBlockUpdate={(blockIndex, updatedBlock) => handleBlockUpdate(msg.id, blockIndex, updatedBlock)}
+                  />
+                ))}
+                {isLoading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
+                {isLoading && toolStatus && <ToolStatusIndicator status={toolStatus} />}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Scroll to bottom button */}
+              {showScrollBtn && (
+                <button
+                  onClick={scrollToBottom}
+                  className={cn(
+                    "sticky bottom-6 left-1/2 -translate-x-1/2 z-20 block mx-auto",
+                    "w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 shadow-lg",
+                    "flex items-center justify-center",
+                    "hover:bg-neutral-800 transition-all",
+                  )}
+                >
+                  <ArrowDown className="w-4 h-4 text-neutral-400" />
+                </button>
+              )}
             </div>
 
-            {/* Scroll to bottom button */}
-            {showScrollBtn && (
-              <button
-                onClick={scrollToBottom}
-                className={cn(
-                  "fixed bottom-28 left-1/2 -translate-x-1/2 z-20",
-                  "w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 shadow-lg",
-                  "flex items-center justify-center",
-                  "hover:bg-neutral-800 transition-all",
-                )}
-              >
-                <ArrowDown className="w-4 h-4 text-neutral-400" />
-              </button>
-            )}
-          </div>
-
-          {/* Input area */}
-          <div className="px-4 pb-4 pt-2 shrink-0 bg-gradient-to-t from-neutral-950 via-neutral-950 to-transparent">
-            <div className="max-w-2xl mx-auto">
-              <ChatInput
-                input={input}
-                setInput={setInput}
-                isLoading={isLoading}
-                onSend={() => void sendMessage(input)}
-                onKeyDown={handleKeyDown}
-                onStop={handleStop}
-                textareaRef={textareaRef}
-                isRtl={isRtl}
-                t={t}
-              />
+            {/* Input area — pinned to bottom */}
+            <div className="shrink-0 px-4 pb-4 pt-2 bg-gradient-to-t from-neutral-950 via-neutral-950/95 to-transparent">
+              <div className="max-w-2xl mx-auto">
+                <ChatInput
+                  input={input}
+                  setInput={setInput}
+                  isLoading={isLoading}
+                  onSend={() => void sendMessage(input)}
+                  onKeyDown={handleKeyDown}
+                  onStop={handleStop}
+                  textareaRef={textareaRef}
+                  isRtl={isRtl}
+                  t={t}
+                />
+                <p className="text-center text-[11px] text-neutral-600 mt-2">
+                  {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
+                </p>
+              </div>
             </div>
-          </div>
-        </>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Session Item ──────────────────────────────────────────────────────────
+function SessionItem({
+  session, isActive, onLoad, onDelete,
+}: {
+  session: ChatSession;
+  isActive: boolean;
+  onLoad: (s: ChatSession) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all",
+        isActive
+          ? "bg-neutral-800 text-white"
+          : "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200",
       )}
+      onClick={() => onLoad(session)}
+    >
+      <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium truncate">{session.title}</p>
+        <p className="text-[10px] text-neutral-600 mt-0.5">{relativeTime(session.timestamp)}</p>
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete(session.id); }}
+        className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-neutral-700 hover:text-brand-red transition-all"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
     </div>
   );
 }
@@ -668,10 +763,8 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   const isUser = msg.role === "user";
   const handleCopy = () => { void navigator.clipboard.writeText(msg.content); toast.success(t("aiAgent.copied")); };
 
-  // Parse UI blocks from content (for loaded sessions)
   const { text: cleanText, blocks: parsedBlocks } = parseUIBlocks(msg.content);
   const uiBlocks: UIBlock[] = msg.uiBlocks ?? parsedBlocks;
-  // Always use cleanText when blocks exist (whether from uiBlocks or parsed from content)
   const displayText = uiBlocks.length > 0 ? cleanText : msg.content;
 
   if (isUser) {
@@ -690,7 +783,6 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
     );
   }
 
-  // Assistant message
   return (
     <div className={cn("flex items-start gap-3 group", isRtl ? "flex-row-reverse" : "")}>
       {/* Avatar */}
@@ -700,7 +792,6 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
 
       {/* Content */}
       <div className="flex-1 min-w-0 space-y-1">
-        {/* Text content */}
         <div className={cn(
           "rounded-2xl text-sm text-white",
           isRtl ? "rounded-tr-md" : "rounded-tl-md",
@@ -714,7 +805,6 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
           )}
         </div>
 
-        {/* Generative UI blocks */}
         {uiBlocks.length > 0 && !msg.isStreaming && (
           <GenerativeUIRenderer
             blocks={uiBlocks}
@@ -724,7 +814,6 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
           />
         )}
 
-        {/* Action bar */}
         {displayText && !msg.isStreaming && (
           <div className={cn(
             "flex items-center gap-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200",

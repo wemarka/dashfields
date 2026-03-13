@@ -48,9 +48,9 @@ export default function TopbarLayout({ children }: TopbarLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen app-bg">
+    <div className="h-screen flex flex-col app-bg overflow-hidden">
       <GlobalTopbar />
-      <main className="w-full">
+      <main className="flex-1 overflow-y-auto h-full">
         {children}
       </main>
     </div>
