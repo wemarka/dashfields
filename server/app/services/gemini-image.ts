@@ -1,19 +1,26 @@
 /**
  * gemini-image.ts
- * Atlas Cloud — Ad Creative Image Generation
- * Primary model: openai/gpt-image-1-developer (confirmed working)
- * Future upgrade: google/nano-banana-2/text-to-image-developer (Nano Banana 2)
+ * Atlas Cloud — Ad Creative Image Generation (Google Nano Banana models ONLY)
+ *
+ * Primary model:  google/gemini-3.1-flash-image-preview  (Nano Banana 2 — fast)
+ * Fallback model: google/gemini-3-pro-image-preview       (Nano Banana Pro — robust)
+ *
+ * Flow:
+ *   1. Try primary model with a 45-second timeout
+ *   2. If primary fails (timeout, 4xx, 5xx, network error) → fallback to Pro
+ *   3. If fallback also fails → throw with combined error details
  *
  * Uses OpenAI-compatible /images/generations endpoint at https://api.atlascloud.ai/v1
- * NOTE: gpt-image-1-developer does NOT accept 'size' parameter — omit it.
  */
 
 const ATLAS_BASE_URL = "https://api.atlascloud.ai/v1";
 
-// Primary model — confirmed working with b64_json output
-const IMAGE_MODEL_PRIMARY = "openai/gpt-image-1-developer";
-// Future upgrade — Nano Banana 2 (text-to-image, higher quality)
-const IMAGE_MODEL_NANO_BANANA = "google/nano-banana-2/text-to-image-developer";
+// ── Model Configuration ─────────────────────────────────────────────────────
+const MODEL_PRIMARY  = "google/gemini-3.1-flash-image-preview";   // Nano Banana 2
+const MODEL_FALLBACK = "google/gemini-3-pro-image-preview";       // Nano Banana Pro
+
+/** Per-request timeout in milliseconds (45 s per model attempt) */
+const REQUEST_TIMEOUT_MS = 45_000;
 
 function getApiKey(): string {
   const key = process.env.ATLAS_API_KEY;
@@ -21,9 +28,11 @@ function getApiKey(): string {
   return key;
 }
 
+// ── Types ───────────────────────────────────────────────────────────────────
 export interface ImageGenerationResult {
   imageUrl: string;
   mimeType: string;
+  modelUsed: string;   // which model actually produced the image
 }
 
 interface AtlasImageResponse {
@@ -33,98 +42,207 @@ interface AtlasImageResponse {
   }>;
 }
 
-/**
- * Generate an ad image via Atlas Cloud.
- * Uses gpt-image-1-developer as primary, falls back gracefully.
- * NOTE: Does NOT pass 'size' — model determines output dimensions.
- * If referenceImageUrl is provided, uses /images/edits endpoint with the product image as reference.
- */
-export async function generateAdImage(
-  prompt: string,
-  options: {
-    n?: number;
-    useNanoBanana?: boolean; // set true when nano-banana-2 becomes stable
-    referenceImageUrl?: string; // product image URL to use as reference
-  } = {}
-): Promise<ImageGenerationResult[]> {
-  const { n = 1, useNanoBanana = false, referenceImageUrl } = options;
-  const model = useNanoBanana ? IMAGE_MODEL_NANO_BANANA : IMAGE_MODEL_PRIMARY;
-
-  // If a reference product image is provided, use images/edits endpoint
-  if (referenceImageUrl) {
-    try {
-      // Fetch the product image and convert to base64
-      const imgResponse = await fetch(referenceImageUrl);
-      if (imgResponse.ok) {
-        const imgBuffer = await imgResponse.arrayBuffer();
-        const base64Image = Buffer.from(imgBuffer).toString("base64");
-        const mimeType = imgResponse.headers.get("content-type") ?? "image/png";
-        const dataUrl = `data:${mimeType};base64,${base64Image}`;
-
-        const editResponse = await fetch(`${ATLAS_BASE_URL}/images/edits`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getApiKey()}`,
-          },
-          body: JSON.stringify({
-            model,
-            image: dataUrl,
-            prompt: `${prompt}. Use the provided product image as the main subject. Professional advertising photo, high quality, no text overlay.`,
-            n,
-            response_format: "b64_json",
-          }),
-        });
-
-        if (editResponse.ok) {
-          const editData = (await editResponse.json()) as AtlasImageResponse;
-          if (editData.data && editData.data.length > 0) {
-            return editData.data.map((item) => ({
-              imageUrl: item.url ?? (item.b64_json?.startsWith("data:") ? item.b64_json : `data:image/png;base64,${item.b64_json}`),
-              mimeType: "image/png",
-            }));
-          }
-        }
-        // Fall through to standard generation if edit fails
-        console.warn("[Atlas Image] Edit endpoint failed, falling back to standard generation");
-      }
-    } catch (err) {
-      console.warn("[Atlas Image] Reference image processing failed, falling back:", err);
-    }
+// ── Internal: fetch with timeout ────────────────────────────────────────────
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  // Standard generation (no reference image)
-  const response = await fetch(`${ATLAS_BASE_URL}/images/generations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getApiKey()}`,
+// ── Internal: single-model generation attempt ───────────────────────────────
+async function attemptGeneration(
+  model: string,
+  prompt: string,
+  n: number,
+): Promise<ImageGenerationResult[]> {
+  const response = await fetchWithTimeout(
+    `${ATLAS_BASE_URL}/images/generations`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApiKey()}`,
+      },
+      body: JSON.stringify({
+        model,
+        prompt,
+        n,
+        response_format: "b64_json",
+      }),
     },
-    body: JSON.stringify({
-      model,
-      prompt,
-      n,
-      response_format: "b64_json",
-    }),
-  });
+    REQUEST_TIMEOUT_MS,
+  );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`[Atlas Image] ${response.status}: ${errorText}`);
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`[Atlas Image] ${model} → ${response.status}: ${errorText}`);
   }
 
   const data = (await response.json()) as AtlasImageResponse;
 
   if (!data.data || data.data.length === 0) {
-    throw new Error("[Atlas Image] No images generated");
+    throw new Error(`[Atlas Image] ${model} → No images in response`);
   }
 
   return data.data.map((item) => ({
-    // b64_json already includes the data:image/png;base64, prefix from Atlas
-    imageUrl: item.url ?? (item.b64_json?.startsWith("data:") ? item.b64_json : `data:image/png;base64,${item.b64_json}`),
+    imageUrl:
+      item.url ??
+      (item.b64_json?.startsWith("data:")
+        ? item.b64_json
+        : `data:image/png;base64,${item.b64_json}`),
     mimeType: "image/png",
+    modelUsed: model,
   }));
 }
+
+// ── Internal: single-model edit attempt (reference image) ───────────────────
+async function attemptEdit(
+  model: string,
+  prompt: string,
+  referenceDataUrl: string,
+  n: number,
+): Promise<ImageGenerationResult[]> {
+  const response = await fetchWithTimeout(
+    `${ATLAS_BASE_URL}/images/edits`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApiKey()}`,
+      },
+      body: JSON.stringify({
+        model,
+        image: referenceDataUrl,
+        prompt: `${prompt}. Use the provided product image as the main subject. Professional advertising photo, high quality, no text overlay.`,
+        n,
+        response_format: "b64_json",
+      }),
+    },
+    REQUEST_TIMEOUT_MS,
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`[Atlas Image Edit] ${model} → ${response.status}: ${errorText}`);
+  }
+
+  const data = (await response.json()) as AtlasImageResponse;
+
+  if (!data.data || data.data.length === 0) {
+    throw new Error(`[Atlas Image Edit] ${model} → No images in response`);
+  }
+
+  return data.data.map((item) => ({
+    imageUrl:
+      item.url ??
+      (item.b64_json?.startsWith("data:")
+        ? item.b64_json
+        : `data:image/png;base64,${item.b64_json}`),
+    mimeType: "image/png",
+    modelUsed: model,
+  }));
+}
+
+// ── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * Generate an ad image via Atlas Cloud using Google Nano Banana models.
+ *
+ * Attempts the primary model first (Nano Banana 2 / gemini-3.1-flash-image-preview).
+ * On any failure (timeout, HTTP error, empty response), automatically falls back
+ * to the fallback model (Nano Banana Pro / gemini-3-pro-image-preview).
+ *
+ * @param prompt - Detailed text description of the image to generate
+ * @param options.n - Number of images to generate (default: 1)
+ * @param options.referenceImageUrl - Optional product image URL for image editing
+ */
+export async function generateAdImage(
+  prompt: string,
+  options: {
+    n?: number;
+    referenceImageUrl?: string;
+  } = {},
+): Promise<ImageGenerationResult[]> {
+  const { n = 1, referenceImageUrl } = options;
+
+  // ── Reference image path (edit endpoint) ──────────────────────────────
+  if (referenceImageUrl) {
+    let referenceDataUrl: string | null = null;
+    try {
+      const imgResponse = await fetchWithTimeout(referenceImageUrl, {}, 15_000);
+      if (imgResponse.ok) {
+        const imgBuffer = await imgResponse.arrayBuffer();
+        const base64Image = Buffer.from(imgBuffer).toString("base64");
+        const mimeType = imgResponse.headers.get("content-type") ?? "image/png";
+        referenceDataUrl = `data:${mimeType};base64,${base64Image}`;
+      }
+    } catch (err) {
+      console.warn("[Atlas Image] Failed to fetch reference image, falling back to standard generation:", err);
+    }
+
+    if (referenceDataUrl) {
+      // Try edit with primary → fallback
+      try {
+        console.log(`[Atlas Image] Edit attempt with PRIMARY: ${MODEL_PRIMARY}`);
+        return await attemptEdit(MODEL_PRIMARY, prompt, referenceDataUrl, n);
+      } catch (primaryErr) {
+        console.warn(`[Atlas Image] Edit PRIMARY failed:`, primaryErr);
+        try {
+          console.log(`[Atlas Image] Edit fallback with: ${MODEL_FALLBACK}`);
+          return await attemptEdit(MODEL_FALLBACK, prompt, referenceDataUrl, n);
+        } catch (fallbackErr) {
+          console.warn(`[Atlas Image] Edit FALLBACK also failed:`, fallbackErr);
+          // Fall through to standard generation
+        }
+      }
+    }
+  }
+
+  // ── Standard generation path ──────────────────────────────────────────
+  let primaryError: Error | null = null;
+
+  // Attempt 1: Primary model (Nano Banana 2)
+  try {
+    console.log(`[Atlas Image] Generation attempt with PRIMARY: ${MODEL_PRIMARY}`);
+    return await attemptGeneration(MODEL_PRIMARY, prompt, n);
+  } catch (err) {
+    primaryError = err instanceof Error ? err : new Error(String(err));
+    const isAbort = primaryError.name === "AbortError";
+    console.warn(
+      `[Atlas Image] PRIMARY ${isAbort ? "TIMED OUT" : "FAILED"}: ${primaryError.message}`,
+    );
+  }
+
+  // Attempt 2: Fallback model (Nano Banana Pro)
+  try {
+    console.log(`[Atlas Image] Fallback attempt with: ${MODEL_FALLBACK}`);
+    return await attemptGeneration(MODEL_FALLBACK, prompt, n);
+  } catch (fallbackErr) {
+    const fbError = fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
+    const isAbort = fbError.name === "AbortError";
+    console.error(
+      `[Atlas Image] FALLBACK ${isAbort ? "TIMED OUT" : "FAILED"}: ${fbError.message}`,
+    );
+
+    // Both models failed — throw a combined error
+    throw new Error(
+      `[Atlas Image] All models failed.\n` +
+      `  Primary (${MODEL_PRIMARY}): ${primaryError?.message ?? "unknown"}\n` +
+      `  Fallback (${MODEL_FALLBACK}): ${fbError.message}`,
+    );
+  }
+}
+
+// ── Platform Specs ──────────────────────────────────────────────────────────
 
 /**
  * Platform specs for social media ad images.
@@ -160,7 +278,7 @@ export const PLATFORM_SPECS: Record<
  * Get specs for selected platforms.
  */
 export function getSpecsForPlatforms(
-  platforms: string[]
+  platforms: string[],
 ): Array<{
   platform: string;
   format: string;
