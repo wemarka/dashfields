@@ -117,6 +117,7 @@ export interface CampaignPreviewBlock {
   image_prompt_idea: string;  // The prompt used to generate the ad image asynchronously
   headline?: string;
   description?: string;
+  generated_image_url?: string; // Persisted S3 URL after first generation — prevents re-triggering
 }
 
 export type UIBlock =

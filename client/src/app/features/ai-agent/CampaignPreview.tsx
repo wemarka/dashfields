@@ -1,9 +1,9 @@
 /**
  * CampaignPreview — Async Generative UI Component
  *
- * Renders campaign details immediately, then triggers image generation
- * via tRPC mutation in a useEffect. Shows a beautiful loading skeleton
- * while the image is being generated, then swaps in the real image.
+ * Renders campaign details immediately. For the image:
+ * - If `block.generated_image_url` exists → render the image immediately (no API call)
+ * - Otherwise → show loading skeleton → call Atlas Cloud → persist the URL via callback
  */
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/core/lib/utils";
@@ -35,18 +35,35 @@ const PLATFORM_COLORS: Record<string, string> = {
 
 // ── Image States ─────────────────────────────────────────────────────────────
 type ImageState =
+  | { status: "idle" }
   | { status: "loading" }
   | { status: "success"; url: string }
   | { status: "error"; message: string };
 
-export function CampaignPreview({ block }: { block: CampaignPreviewBlock }) {
-  const [imageState, setImageState] = useState<ImageState>({ status: "loading" });
+interface CampaignPreviewProps {
+  block: CampaignPreviewBlock;
+  /** Called when image is generated for the first time — parent persists the URL */
+  onImageGenerated?: (imageUrl: string) => void;
+}
+
+export function CampaignPreview({ block, onImageGenerated }: CampaignPreviewProps) {
+  // ── Guard: if URL already exists, skip generation entirely ────────────────
+  const alreadyHasImage = !!block.generated_image_url;
+
+  const [imageState, setImageState] = useState<ImageState>(
+    alreadyHasImage
+      ? { status: "success", url: block.generated_image_url! }
+      : { status: "idle" },
+  );
+
   const hasTriggered = useRef(false);
 
   const generateMutation = trpc.aiAgent.generateAdImage.useMutation({
     onSuccess: (data) => {
       if (data.success && data.imageUrl) {
         setImageState({ status: "success", url: data.imageUrl });
+        // Notify parent to persist the URL
+        onImageGenerated?.(data.imageUrl);
       } else {
         setImageState({
           status: "error",
@@ -62,14 +79,16 @@ export function CampaignPreview({ block }: { block: CampaignPreviewBlock }) {
     },
   });
 
-  // Trigger image generation once on mount
+  // Trigger image generation once on mount — ONLY if no persisted URL
   useEffect(() => {
-    if (hasTriggered.current) return;
+    if (alreadyHasImage) return;          // Already have a URL → skip
+    if (hasTriggered.current) return;     // Already triggered in this mount → skip
     if (!block.image_prompt_idea) {
       setImageState({ status: "error", message: "لا يوجد وصف للصورة" });
       return;
     }
     hasTriggered.current = true;
+    setImageState({ status: "loading" });
     generateMutation.mutate({ prompt: block.image_prompt_idea });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -100,7 +119,7 @@ export function CampaignPreview({ block }: { block: CampaignPreviewBlock }) {
 
       {/* ── Image Area ──────────────────────────────────────────────────── */}
       <div className="relative aspect-square bg-gray-50 overflow-hidden">
-        {imageState.status === "loading" && <ImageSkeleton />}
+        {(imageState.status === "idle" || imageState.status === "loading") && <ImageSkeleton />}
         {imageState.status === "success" && (
           <img
             src={imageState.url}

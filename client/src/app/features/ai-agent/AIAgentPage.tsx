@@ -340,6 +340,95 @@ export default function AIAgentPage() {
     void sendMessage(action);
   }, [sendMessage]);
 
+  // ── Block Update Handler (persists generated images to state + DB) ─────────
+  const handleBlockUpdate = useCallback((messageId: string, blockIndex: number, updatedBlock: UIBlock) => {
+    setMessages((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id !== messageId) return m;
+        const blocks = [...(m.uiBlocks ?? [])];
+        blocks[blockIndex] = updatedBlock;
+        // Also update the content string to include the generated_image_url
+        // so that when the session is loaded from DB, the URL is persisted
+        let newContent = m.content;
+        if (updatedBlock.type === "campaign_preview" && updatedBlock.generated_image_url) {
+          // Find and update the ui-block JSON in the content string
+          const blockRegex = /```ui-block\s*\n(\{[\s\S]*?"type"\s*:\s*"campaign_preview"[\s\S]*?\})\s*\n```/g;
+          let matchIndex = 0;
+          newContent = m.content.replace(blockRegex, (match, jsonStr) => {
+            // Only update the specific block by counting campaign_preview occurrences
+            if (matchIndex === blockIndex || blocks.filter((b, i) => i < blockIndex && b.type === "campaign_preview").length === matchIndex) {
+              try {
+                const parsed = JSON.parse(jsonStr);
+                parsed.generated_image_url = updatedBlock.generated_image_url;
+                matchIndex++;
+                return "```ui-block\n" + JSON.stringify(parsed) + "\n```";
+              } catch {
+                matchIndex++;
+                return match;
+              }
+            }
+            matchIndex++;
+            return match;
+          });
+        }
+        return { ...m, uiBlocks: blocks, content: newContent };
+      });
+      return updated;
+    });
+
+    // Persist to session storage + DB
+    setSessions((prev) => {
+      if (!activeSessionId) return prev;
+      const updatedSessions = prev.map((s) => {
+        if (s.id !== activeSessionId) return s;
+        const updatedMessages = s.messages.map((m) => {
+          if (m.id !== messageId) return m;
+          const blocks = [...(m.uiBlocks ?? [])];
+          blocks[blockIndex] = updatedBlock;
+          let newContent = m.content;
+          if (updatedBlock.type === "campaign_preview" && updatedBlock.generated_image_url) {
+            const blockRegex = /```ui-block\s*\n(\{[\s\S]*?"type"\s*:\s*"campaign_preview"[\s\S]*?\})\s*\n```/g;
+            let matchIdx = 0;
+            newContent = m.content.replace(blockRegex, (match, jsonStr) => {
+              if (matchIdx === blockIndex || blocks.filter((b, i) => i < blockIndex && b.type === "campaign_preview").length === matchIdx) {
+                try {
+                  const parsed = JSON.parse(jsonStr);
+                  parsed.generated_image_url = updatedBlock.generated_image_url;
+                  matchIdx++;
+                  return "```ui-block\n" + JSON.stringify(parsed) + "\n```";
+                } catch {
+                  matchIdx++;
+                  return match;
+                }
+              }
+              matchIdx++;
+              return match;
+            });
+          }
+          return { ...m, uiBlocks: blocks, content: newContent };
+        });
+        return { ...s, messages: updatedMessages };
+      });
+      saveLocal(updatedSessions);
+      return updatedSessions;
+    });
+
+    // Also save to DB
+    if (user && activeSessionId) {
+      const currentSession = sessions.find((s) => s.id === activeSessionId);
+      if (currentSession) {
+        const updatedMessages = currentSession.messages.map((m) => {
+          if (m.id !== messageId) return m;
+          const blocks = [...(m.uiBlocks ?? [])];
+          blocks[blockIndex] = updatedBlock;
+          return { ...m, uiBlocks: blocks };
+        });
+        saveConversation.mutate({ ...currentSession, messages: updatedMessages });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSessionId, user, sessions]);
+
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -464,6 +553,7 @@ export default function AIAgentPage() {
                   isRtl={isRtl}
                   onChipClick={handleChipClick}
                   onAction={handleActionClick}
+                  onBlockUpdate={(blockIndex, updatedBlock) => handleBlockUpdate(msg.id, blockIndex, updatedBlock)}
                 />
               ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
@@ -599,9 +689,10 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
 }
 
 // ─── Message Bubble ────────────────────────────────────────────────────────
-function MessageBubble({ msg, t, isRtl, onChipClick, onAction }: {
+function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: {
   msg: ChatMessage; t: (k: string) => string; isRtl: boolean;
   onChipClick?: (c: string) => void; onAction?: (a: string) => void;
+  onBlockUpdate?: (blockIndex: number, updatedBlock: UIBlock) => void;
 }) {
   const isUser = msg.role === "user";
   const handleCopy = () => { void navigator.clipboard.writeText(msg.content); toast.success(t("aiAgent.copied")); };
@@ -657,6 +748,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction }: {
             blocks={uiBlocks}
             onChipClick={onChipClick}
             onAction={onAction}
+            onBlockUpdate={onBlockUpdate}
           />
         )}
 

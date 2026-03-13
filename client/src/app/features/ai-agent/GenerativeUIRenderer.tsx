@@ -36,14 +36,16 @@ interface GenerativeUIRendererProps {
   blocks: UIBlock[];
   onAction?: (action: string) => void;
   onChipClick?: (chip: string) => void;
+  /** Called when a block is updated (e.g., image generated) — parent persists the change */
+  onBlockUpdate?: (blockIndex: number, updatedBlock: UIBlock) => void;
 }
 
-export function GenerativeUIRenderer({ blocks, onAction, onChipClick }: GenerativeUIRendererProps) {
+export function GenerativeUIRenderer({ blocks, onAction, onChipClick, onBlockUpdate }: GenerativeUIRendererProps) {
   if (!blocks.length) return null;
   return (
     <div className="flex flex-col gap-3 mt-3">
       {blocks.map((block, i) => (
-        <BlockRenderer key={i} block={block} onAction={onAction} onChipClick={onChipClick} />
+        <BlockRenderer key={i} block={block} blockIndex={i} onAction={onAction} onChipClick={onChipClick} onBlockUpdate={onBlockUpdate} />
       ))}
     </div>
   );
@@ -51,12 +53,16 @@ export function GenerativeUIRenderer({ blocks, onAction, onChipClick }: Generati
 
 function BlockRenderer({
   block,
+  blockIndex,
   onAction,
   onChipClick,
+  onBlockUpdate,
 }: {
   block: UIBlock;
+  blockIndex: number;
   onAction?: (a: string) => void;
   onChipClick?: (c: string) => void;
+  onBlockUpdate?: (blockIndex: number, updatedBlock: UIBlock) => void;
 }) {
   switch (block.type) {
     case "metric_card":
@@ -80,7 +86,16 @@ function BlockRenderer({
     case "suggestion_chips":
       return <SuggestionChips block={block} onChipClick={onChipClick} />;
     case "campaign_preview":
-      return <CampaignPreview block={block} />;
+      return (
+        <CampaignPreview
+          block={block}
+          onImageGenerated={(imageUrl) => {
+            if (onBlockUpdate) {
+              onBlockUpdate(blockIndex, { ...block, generated_image_url: imageUrl });
+            }
+          }}
+        />
+      );
     default:
       return null;
   }

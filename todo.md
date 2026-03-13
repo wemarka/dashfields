@@ -3098,3 +3098,11 @@
 - [x] Fix: "This operation was aborted" — POST timeout increased from 30s to 60s (Atlas Cloud takes ~32s)
 - [x] Debug actual Atlas Cloud API call — confirmed working, polling completes in ~3s after POST
 - [x] Increased total timeout to 150s, poll maxWait to 90s
+- [x] Fix: CampaignPreview re-generates image on every re-render/navigation
+- [x] Add generated_image_url guard in CampaignPreview — skip generation if URL already exists
+- [x] Persist generated imageUrl back to chat message state via onBlockUpdate callback
+- [x] Persist generated imageUrl to localStorage sessions
+- [x] Persist generated imageUrl to database via saveConversation mutation
+- [x] On chat history load, render saved images immediately without calling Atlas Cloud
+- [x] Wire onBlockUpdate callback through GenerativeUIRenderer → MessageBubble → AIAgentPage
+- [x] All 18 geminiImage tests passing, 681 total tests passing
