@@ -3170,3 +3170,6 @@
 - [x] Integrate existing AI image generation pipeline
 - [x] Add prompt input, aspect ratio selector, style presets
 - [x] Show generation history/gallery
+
+## 🎨 Color Update
+- [x] Change app background color to #1A1919 as per reference image
