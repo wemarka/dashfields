@@ -56,6 +56,16 @@ export function broadcastSessions(sessions: ChatSession[], activeId: string | nu
   });
 }
 
+// ─── Language detection helper ────────────────────────────────────────────
+// Returns 'rtl' if the text is predominantly Arabic/Hebrew, 'ltr' otherwise
+function detectDir(text: string): "rtl" | "ltr" {
+  if (!text) return "ltr";
+  // Count Arabic/Hebrew characters
+  const rtlChars = (text.match(/[\u0600-\u06FF\u0590-\u05FF]/g) ?? []).length;
+  const total = text.replace(/\s/g, "").length;
+  return total > 0 && rtlChars / total > 0.3 ? "rtl" : "ltr";
+}
+
 // ─── Relative time helper ──────────────────────────────────────────────────
 function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -446,25 +456,14 @@ export default function AIAgentPage() {
           sidebarOpen ? "w-64" : "w-0",
         )}
       >
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-800 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-brand-red/10 border border-brand-red/20 flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-brand-red" />
-            </div>
-            <span className="text-sm font-semibold text-white whitespace-nowrap">Dashfields AI</span>
-          </div>
-        </div>
-
-        {/* New Chat button */}
-        <div className="px-3 pt-3 pb-2 shrink-0">
+        {/* New Chat button — prominent, top of sidebar */}
+        <div className="px-3 pt-4 pb-3 shrink-0">
           <button
             onClick={handleNewChat}
             className={cn(
-              "w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-              "border border-neutral-800 bg-neutral-900 text-neutral-300",
-              "hover:border-neutral-700 hover:bg-neutral-800 hover:text-white",
-              "active:scale-[0.98]",
+              "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all",
+              "bg-brand-red text-white shadow-md shadow-brand-red/20",
+              "hover:bg-brand-red/90 active:scale-[0.98]",
             )}
           >
             <Plus className="w-4 h-4 shrink-0" />
@@ -767,15 +766,19 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   const uiBlocks: UIBlock[] = msg.uiBlocks ?? parsedBlocks;
   const displayText = uiBlocks.length > 0 ? cleanText : msg.content;
 
+  const msgDir = detectDir(msg.content);
+  const msgIsRtl = msgDir === "rtl";
+
   if (isUser) {
     return (
-      <div className={cn("flex", isRtl ? "justify-start" : "justify-end")}>
+      <div className={cn("flex", msgIsRtl ? "justify-start" : "justify-end")}>
         <div
           className={cn(
             "max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed",
             "bg-brand-red/10 border border-brand-red/20 text-white",
-            isRtl ? "rounded-bl-md" : "rounded-br-md",
+            msgIsRtl ? "rounded-bl-md" : "rounded-br-md",
           )}
+          dir={msgDir}
         >
           <p className="whitespace-pre-wrap">{msg.content}</p>
         </div>
@@ -784,7 +787,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   }
 
   return (
-    <div className={cn("flex items-start gap-3 group", isRtl ? "flex-row-reverse" : "")}>
+    <div className={cn("flex items-start gap-3 group", msgIsRtl ? "flex-row-reverse" : "")}>
       {/* Avatar */}
       <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mt-0.5">
         <Sparkles className="w-3.5 h-3.5 text-brand-red" />
@@ -792,10 +795,13 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
 
       {/* Content */}
       <div className="flex-1 min-w-0 space-y-1">
-        <div className={cn(
-          "rounded-2xl text-sm text-white",
-          isRtl ? "rounded-tr-md" : "rounded-tl-md",
-        )}>
+        <div
+          className={cn(
+            "rounded-2xl text-sm text-white",
+            msgIsRtl ? "rounded-tr-md" : "rounded-tl-md",
+          )}
+          dir={msgDir}
+        >
           {displayText ? (
             <div className="prose prose-sm max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-p:leading-relaxed prose-strong:text-white prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-neutral-300 prose-blockquote:border-l-brand-red prose-blockquote:text-neutral-400 prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline">
               <Streamdown>{displayText}</Streamdown>
@@ -817,7 +823,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
         {displayText && !msg.isStreaming && (
           <div className={cn(
             "flex items-center gap-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-            isRtl ? "flex-row-reverse" : "",
+            msgIsRtl ? "flex-row-reverse" : "",
           )}>
             <button
               onClick={handleCopy}
