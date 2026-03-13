@@ -1,0 +1,8 @@
+{
+  "query": "CREATE TABLE media_assets (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, workspace_id INT, file_name VARCHAR(500) NOT NULL, file_key VARCHAR(500) NOT NULL, url TEXT NOT NULL, mime_type VARCHAR(100) NOT NULL DEFAULT 'application/octet-stream', size INT NOT NULL DEFAULT 0, tags JSON, folder VARCHAR(200) DEFAULT 'all', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE media_assets (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, workspace_id INT, file_name VARCHAR(500) NOT NULL, file_key VARCHAR(500) NOT NULL, url TEXT NOT NULL, mime_type VARCHAR(100) NOT NULL DEFAULT 'application/octet-stream', size INT NOT NULL DEFAULT 0, tags JSON, folder VARCHAR(200) DEFAULT 'all', created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1050 (42S01) at line 1: Table 'KXbJ95iGQTQDrViqhuR8ny.media_assets' already exists"
+  ]
+}

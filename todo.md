@@ -3236,3 +3236,14 @@
 - [x] Reports page (/analytics/reports) — already fully built (192 lines) with create/edit/delete/run
 - [x] All pages use dark neutral design system (verified, 0 old color refs remaining)
 - [x] Routes wired in App.tsx (via GlobalTopbar Marketing dropdown)
+
+## 🐛 Bug Fix: media_assets table not in Supabase schema cache
+- [x] Fix media_assets table not found in Supabase schema cache on /assets page (created in Supabase PostgreSQL)
+
+## 🎨 Assist (AI Agent) Page Full Redesign
+- [x] Audit all AI Agent component files for color mismatches
+- [x] Refactor AIAgentPage.tsx to dark neutral palette
+- [x] Refactor all generative UI components (CampaignPreview, GenerativeUIRenderer)
+- [x] Refactor chat input, message bubbles, session sidebar to dark neutral
+- [x] Ensure brand-red accent on primary actions
+- [x] Verify consistent look with rest of app

@@ -1,7 +1,7 @@
 /**
  * client/src/app/features/ai-agent/AIAgentPage.tsx
  * Dashfields AI — Master Chat interface with Generative UI support.
- * Clean grey/white design, full-height conversational layout.
+ * Dark Neutral (#0a0a0a / neutral-950) + Brand Red (#E62020) design.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -264,7 +264,10 @@ export default function AIAgentPage() {
         };
         persistSession(updatedSession);
 
-        if (prevMessages.length === 0 && user) {
+        if (
+          prevMessages.length === 0 &&
+          accumulated.length > 20
+        ) {
           generateTitle.mutate(
             { userMessage: trimmed, assistantReply: accumulated.slice(0, 1000) },
             {
@@ -429,15 +432,15 @@ export default function AIAgentPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full bg-[#faf9f7] relative overflow-hidden">
+    <div className="flex flex-col h-full bg-neutral-950 relative overflow-hidden">
 
       {/* ── Empty State ── */}
       {!isInChat && (
         <div className="flex-1 flex flex-col items-center justify-center px-6">
           {/* Greeting */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-900 mb-5 shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-red/10 mb-5 shadow-lg border border-brand-red/20">
+              <Sparkles className="w-6 h-6 text-brand-red" />
             </div>
             <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
               {t("aiAgent.greeting", { name: firstName })}
@@ -455,8 +458,8 @@ export default function AIAgentPage() {
                 onClick={() => void sendMessage(s)}
                 className={cn(
                   "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                  "border border-neutral-700 bg-neutral-800 text-neutral-300",
-                  "hover:border-neutral-700 hover:shadow-sm hover:text-white",
+                  "border border-neutral-800 bg-neutral-900 text-neutral-300",
+                  "hover:border-neutral-700 hover:bg-neutral-800 hover:text-white",
                   "active:scale-[0.97]",
                 )}
               >
@@ -488,12 +491,12 @@ export default function AIAgentPage() {
           {/* Chat header */}
           <div className={cn(
             "flex items-center justify-between px-5 py-3 shrink-0",
-            "border-b border-neutral-700/60 bg-neutral-900/80 backdrop-blur-md",
+            "border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md",
             isRtl ? "flex-row-reverse" : "",
           )}>
             <div className={cn("flex items-center gap-2.5", isRtl ? "flex-row-reverse" : "")}>
-              <div className="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-brand-red/10 border border-brand-red/20 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-brand-red" />
               </div>
               <span className="text-sm font-semibold text-white">Dashfields AI</span>
             </div>
@@ -502,7 +505,7 @@ export default function AIAgentPage() {
               size="sm"
               onClick={handleNewChat}
               className={cn(
-                "text-xs text-neutral-400 hover:text-white gap-1.5",
+                "text-xs text-neutral-400 hover:text-white hover:bg-neutral-800 gap-1.5",
                 isRtl ? "flex-row-reverse" : "",
               )}
             >
@@ -536,9 +539,9 @@ export default function AIAgentPage() {
                 onClick={scrollToBottom}
                 className={cn(
                   "fixed bottom-28 left-1/2 -translate-x-1/2 z-20",
-                  "w-9 h-9 rounded-full bg-neutral-800 border border-neutral-700 shadow-lg",
+                  "w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 shadow-lg",
                   "flex items-center justify-center",
-                  "hover:bg-neutral-800/50 transition-all",
+                  "hover:bg-neutral-800 transition-all",
                 )}
               >
                 <ArrowDown className="w-4 h-4 text-neutral-400" />
@@ -547,7 +550,7 @@ export default function AIAgentPage() {
           </div>
 
           {/* Input area */}
-          <div className="px-4 pb-4 pt-2 shrink-0 bg-gradient-to-t from-[#faf9f7] via-[#faf9f7] to-transparent">
+          <div className="px-4 pb-4 pt-2 shrink-0 bg-gradient-to-t from-neutral-950 via-neutral-950 to-transparent">
             <div className="max-w-2xl mx-auto">
               <ChatInput
                 input={input}
@@ -580,11 +583,10 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
     <div
       className={cn(
         "relative flex flex-col rounded-2xl transition-all duration-200",
-        "border border-neutral-700 bg-neutral-800",
+        "border border-neutral-800 bg-neutral-900",
         "hover:border-neutral-700",
-        "focus-within:border-neutral-500 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]",
+        "focus-within:border-neutral-600 focus-within:shadow-[0_0_0_3px_rgba(230,32,32,0.08)]",
       )}
-      style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}
     >
       {/* Textarea */}
       <Textarea
@@ -611,7 +613,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
         <div className={cn("flex items-center gap-0.5", isRtl ? "flex-row-reverse" : "")}>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-colors"
             title="Attach file"
             onClick={() => toast.info("Feature coming soon")}
           >
@@ -619,7 +621,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
           </button>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-colors"
             title="Voice input"
             onClick={() => toast.info("Feature coming soon")}
           >
@@ -633,7 +635,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
             onClick={onStop}
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
-              "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95",
+              "bg-neutral-800 text-white hover:bg-neutral-700 active:scale-95",
             )}
           >
             <StopCircle className="w-4 h-4" />
@@ -645,8 +647,8 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
               hasText
-                ? "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95"
-                : "bg-neutral-800 text-neutral-500 cursor-not-allowed",
+                ? "bg-brand-red text-white hover:bg-brand-red/90 active:scale-95 shadow-sm shadow-brand-red/20"
+                : "bg-neutral-800 text-neutral-600 cursor-not-allowed",
             )}
           >
             <Send className={cn("w-4 h-4", isRtl ? "rotate-180" : "")} />
@@ -678,7 +680,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
         <div
           className={cn(
             "max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed",
-            "bg-neutral-900 text-white",
+            "bg-brand-red/10 border border-brand-red/20 text-white",
             isRtl ? "rounded-bl-md" : "rounded-br-md",
           )}
         >
@@ -692,8 +694,8 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   return (
     <div className={cn("flex items-start gap-3 group", isRtl ? "flex-row-reverse" : "")}>
       {/* Avatar */}
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
-        <Sparkles className="w-3.5 h-3.5 text-white" />
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mt-0.5">
+        <Sparkles className="w-3.5 h-3.5 text-brand-red" />
       </div>
 
       {/* Content */}
@@ -704,7 +706,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
           isRtl ? "rounded-tr-md" : "rounded-tl-md",
         )}>
           {displayText ? (
-            <div className="prose prose-sm max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-p:leading-relaxed prose-strong:text-white prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-white prose-blockquote:border-l-neutral-600 prose-blockquote:text-neutral-400">
+            <div className="prose prose-sm max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-p:leading-relaxed prose-strong:text-white prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-neutral-300 prose-blockquote:border-l-brand-red prose-blockquote:text-neutral-400 prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline">
               <Streamdown>{displayText}</Streamdown>
             </div>
           ) : (
@@ -730,7 +732,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
           )}>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-colors"
             >
               <Copy className="w-3 h-3" />
               {t("aiAgent.copy")}
@@ -749,7 +751,7 @@ function ThinkingDots() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-full bg-neutral-500"
+          className="w-2 h-2 rounded-full bg-brand-red/60"
           style={{ animation: "pulse 1.4s ease-in-out infinite", animationDelay: `${i * 0.2}s` }}
         />
       ))}
@@ -760,8 +762,8 @@ function ThinkingDots() {
 function ThinkingIndicator() {
   return (
     <div className="flex items-start gap-3">
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
-        <Sparkles className="w-3.5 h-3.5 text-white" />
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mt-0.5">
+        <Sparkles className="w-3.5 h-3.5 text-brand-red" />
       </div>
       <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-neutral-900 border border-neutral-800">
         <ThinkingDots />
@@ -789,11 +791,11 @@ function ToolStatusIndicator({ status }: { status: { type: string; toolName?: st
 
   return (
     <div className="flex items-start gap-3">
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
-        <Sparkles className="w-3.5 h-3.5 text-white" />
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mt-0.5">
+        <Sparkles className="w-3.5 h-3.5 text-brand-red" />
       </div>
       <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-tl-md bg-neutral-900 border border-neutral-800">
-        <Loader2 className="w-3.5 h-3.5 text-neutral-500 animate-spin" />
+        <Loader2 className="w-3.5 h-3.5 text-brand-red animate-spin" />
         <span className="text-xs text-neutral-400 font-medium">{label}</span>
       </div>
     </div>

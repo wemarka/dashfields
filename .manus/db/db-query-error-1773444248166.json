@@ -1,0 +1,8 @@
+{
+  "query": "CREATE TABLE public.media_assets (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, workspace_id INTEGER, file_name TEXT NOT NULL, file_key TEXT NOT NULL, url TEXT NOT NULL, mime_type TEXT NOT NULL DEFAULT 'application/octet-stream', size INTEGER NOT NULL DEFAULT 0, tags JSONB DEFAULT '[]', folder TEXT DEFAULT 'all', created_at TIMESTAMPTZ NOT NULL DEFAULT now());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE public.media_assets (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, workspace_id INTEGER, file_name TEXT NOT NULL, file_key TEXT NOT NULL, url TEXT NOT NULL, mime_type TEXT NOT NULL DEFAULT 'application/octet-stream', size INTEGER NOT NULL DEFAULT 0, tags JSONB DEFAULT '[]', folder TEXT DEFAULT 'all', created_at TIMESTAMPTZ NOT NULL DEFAULT now());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 276 near \"JSONB DEFAULT '[]', folder TEXT DEFAULT 'all', created_at TIMESTAMPTZ NOT NULL DEFAULT now())\""
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "rows": [
+    {
+      "TABLE_NAME": "users"
+    },
+    {
+      "TABLE_NAME": "user_settings"
+    },
+    {
+      "TABLE_NAME": "social_accounts"
+    },
+    {
+      "TABLE_NAME": "saved_audiences"
+    },
+    {
+      "TABLE_NAME": "posts"
+    },
+    {
+      "TABLE_NAME": "performance_goals"
+    },
+    {
+      "TABLE_NAME": "notifications"
+    },
+    {
+      "TABLE_NAME": "media_assets"
+    },
+    {
+      "TABLE_NAME": "content_templates"
+    },
+    {
+      "TABLE_NAME": "campaigns"
+    },
+    {
+      "TABLE_NAME": "campaign_tags"
+    },
+    {
+      "TABLE_NAME": "campaign_notes"
+    },
+    {
+      "TABLE_NAME": "campaign_metrics"
+    },
+    {
+      "TABLE_NAME": "ab_tests"
+    },
+    {
+      "TABLE_NAME": "__drizzle_migrations"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\nusers\nuser_settings\nsocial_accounts\nsaved_audiences\nposts\nperformance_goals\nnotifications\nmedia_assets\ncontent_templates\ncampaigns\ncampaign_tags\ncampaign_notes\ncampaign_metrics\nab_tests\n__drizzle_migrations\n",
+  "stderr": "",
+  "execution_time_ms": 1649
+}
