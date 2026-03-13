@@ -326,7 +326,7 @@ export default function ContentTemplates() {
   const topTemplate = (templates as TemplateRow[]).sort((a, b) => b.usage_count - a.usage_count)[0];
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>

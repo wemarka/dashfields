@@ -25,7 +25,7 @@ function TopbarLayoutSkeleton() {
         <div className="w-7 h-7 rounded-full bg-white/[0.06] shimmer" />
       </div>
       {/* Content skeleton */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="w-48 h-7 rounded bg-white/[0.06] shimmer mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (

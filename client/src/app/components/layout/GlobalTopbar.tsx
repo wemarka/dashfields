@@ -1,7 +1,9 @@
 /**
  * GlobalTopbar.tsx — Premium sticky topbar with glassmorphism.
  * Inspired by Vercel/Linear dark UI. Full viewport width, no sidebar.
+ * Includes mobile hamburger menu for responsive navigation.
  */
+import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -14,9 +16,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/core/components/ui/dropdown-menu";
 import {
   Home,
@@ -35,6 +34,8 @@ import {
   Zap,
   Building2,
   Check,
+  Menu,
+  X,
 } from "lucide-react";
 import { CreditUsageBar } from "./CreditUsageBar";
 
@@ -62,6 +63,7 @@ export function GlobalTopbar() {
   const [location, setLocation] = useLocation();
   const { user, signOut } = useAuth();
   const { workspaces, activeWorkspace, setActiveWorkspace } = useWorkspace();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location === path || location.startsWith(path + "/");
   const isMarketingActive = MARKETING_ITEMS.some((item) => isActive(item.path));
@@ -70,10 +72,24 @@ export function GlobalTopbar() {
     ? user.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
+  const navigateMobile = (path: string) => {
+    setLocation(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="glass-strong border-b border-white/[0.06]">
         <div className="flex items-center h-14 px-4 lg:px-6 gap-2">
+          {/* ── Mobile Hamburger ──────────────────────────────────────── */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-muted-foreground"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           {/* ── Logo ──────────────────────────────────────────────────── */}
           <Link href="/dashboard" className="flex items-center gap-2.5 mr-2 shrink-0">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
@@ -84,8 +100,8 @@ export function GlobalTopbar() {
             </span>
           </Link>
 
-          {/* ── Center Navigation ─────────────────────────────────────── */}
-          <nav className="flex items-center gap-0.5 mx-auto">
+          {/* ── Center Navigation (Desktop) ──────────────────────────── */}
+          <nav className="hidden md:flex items-center gap-0.5 mx-auto">
             {NAV_ITEMS.map((item) => (
               <Link key={item.path} href={item.path}>
                 <button
@@ -97,7 +113,7 @@ export function GlobalTopbar() {
                   )}
                 >
                   {item.icon}
-                  <span className="hidden md:inline">{item.label}</span>
+                  <span>{item.label}</span>
                 </button>
               </Link>
             ))}
@@ -114,7 +130,7 @@ export function GlobalTopbar() {
                   )}
                 >
                   <Megaphone className="w-4 h-4" />
-                  <span className="hidden md:inline">Marketing</span>
+                  <span>Marketing</span>
                   <ChevronDown className="w-3 h-3 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
@@ -146,10 +162,13 @@ export function GlobalTopbar() {
                 )}
               >
                 <FolderOpen className="w-4 h-4" />
-                <span className="hidden md:inline">Assets</span>
+                <span>Assets</span>
               </button>
             </Link>
           </nav>
+
+          {/* ── Spacer for mobile (pushes user menu to right) ────────── */}
+          <div className="flex-1 md:hidden" />
 
           {/* ── Right Side: User Menu ─────────────────────────────────── */}
           <div className="flex items-center gap-2 shrink-0">
@@ -165,6 +184,74 @@ export function GlobalTopbar() {
           </div>
         </div>
       </div>
+
+      {/* ── Mobile Navigation Drawer ───────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Drawer */}
+          <div className="fixed top-14 left-0 right-0 z-50 md:hidden glass-strong border-b border-white/[0.06] max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-fade-in">
+            <nav className="px-3 py-3 space-y-1">
+              {/* Main Nav */}
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigateMobile(item.path)}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                    isActive(item.path)
+                      ? "bg-white/[0.08] text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                  )}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+
+              {/* Marketing Section */}
+              <div className="pt-2 pb-1">
+                <span className="px-3 text-[11px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+                  Marketing
+                </span>
+              </div>
+              {MARKETING_ITEMS.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigateMobile(item.path)}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all pl-6",
+                    isActive(item.path)
+                      ? "bg-white/[0.08] text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                  )}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+
+              {/* Assets */}
+              <button
+                onClick={() => navigateMobile("/assets")}
+                className={cn(
+                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive("/assets")
+                    ? "bg-white/[0.08] text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                )}
+              >
+                <FolderOpen className="w-4 h-4" />
+                Assets
+              </button>
+            </nav>
+          </div>
+        </>
+      )}
     </header>
   );
 }

@@ -4,7 +4,7 @@
 export function AccountsPageSkeleton() {
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-background">
-      <div className="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
         {/* Header skeleton */}
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">

@@ -98,7 +98,7 @@ export default function DashStudiosPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Dash Studios</h1>
@@ -108,7 +108,7 @@ export default function DashStudiosPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-8 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
+      <div className="flex gap-1 mb-6 sm:mb-8 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-full sm:w-fit overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -133,7 +133,7 @@ export default function DashStudiosPage() {
 
       {/* Image Generator Tab */}
       {activeTab === "generate" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
           {/* Left: History Gallery */}
           <div>
             <div className="flex items-center justify-between mb-4">

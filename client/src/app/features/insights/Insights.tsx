@@ -200,7 +200,7 @@ export default function Insights() {
 
   return (
     <>
-      <div className="p-6 max-w-6xl mx-auto space-y-6 animate-fade-in">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 animate-fade-in">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between flex-wrap gap-3">
