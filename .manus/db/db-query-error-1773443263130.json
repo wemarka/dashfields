@@ -1,0 +1,8 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS media_assets (id int AUTO_INCREMENT PRIMARY KEY, user_id int NOT NULL, workspace_id int, file_name varchar(256) NOT NULL, file_key text NOT NULL, url text NOT NULL, mime_type varchar(128) NOT NULL, size bigint NOT NULL, width int, height int, tags json DEFAULT NULL, folder varchar(128) DEFAULT 'Uncategorized', created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, CONSTRAINT fk_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, CONSTRAINT fk_media_workspace FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE IF NOT EXISTS media_assets (id int AUTO_INCREMENT PRIMARY KEY, user_id int NOT NULL, workspace_id int, file_name varchar(256) NOT NULL, file_key text NOT NULL, url text NOT NULL, mime_type varchar(128) NOT NULL, size bigint NOT NULL, width int, height int, tags json DEFAULT NULL, folder varchar(128) DEFAULT 'Uncategorized', created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, CONSTRAINT fk_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, CONSTRAINT fk_media_workspace FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1824 (HY000) at line 1: Failed to open the referenced table 'workspaces'"
+  ]
+}

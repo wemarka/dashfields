@@ -19,7 +19,7 @@ const DONUT_COLORS = [
   "#c41919", // brand-red-dark
   "#14b8a6", // teal-500
   "#f97316", // orange-500
-  "#94a3b8", // slate-400
+  "#a3a3a3", // neutral-400
 ];
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────

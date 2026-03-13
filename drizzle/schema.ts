@@ -550,3 +550,23 @@ export const brandLogoAssets = pgTable("brand_logo_assets", {
 });
 export type BrandLogoAsset       = typeof brandLogoAssets.$inferSelect;
 export type InsertBrandLogoAsset = typeof brandLogoAssets.$inferInsert;
+
+// ─── Media Assets (Library) ──────────────────────────────────────────────────
+export const mediaAssets = pgTable("media_assets", {
+  id:          serial("id").primaryKey(),
+  userId:      integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workspaceId: integer("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+  fileName:    varchar("file_name", { length: 256 }).notNull(),
+  fileKey:     text("file_key").notNull(),
+  url:         text("url").notNull(),
+  mimeType:    varchar("mime_type", { length: 128 }).notNull(),
+  size:        bigint("size", { mode: "number" }).notNull(),
+  width:       integer("width"),
+  height:      integer("height"),
+  tags:        jsonb("tags").$type<string[]>().default([]),
+  folder:      varchar("folder", { length: 128 }).default("Uncategorized"),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+export type MediaAsset       = typeof mediaAssets.$inferSelect;
+export type InsertMediaAsset = typeof mediaAssets.$inferInsert;

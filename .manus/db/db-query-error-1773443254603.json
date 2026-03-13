@@ -1,0 +1,8 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS media_assets (id serial PRIMARY KEY NOT NULL, user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE, workspace_id integer REFERENCES workspaces(id) ON DELETE CASCADE, file_name varchar(256) NOT NULL, file_key text NOT NULL, url text NOT NULL, mime_type varchar(128) NOT NULL, size bigint NOT NULL, width integer, height integer, tags text[] DEFAULT '{}', folder varchar(128) DEFAULT 'Uncategorized', created_at timestamp DEFAULT now() NOT NULL, updated_at timestamp DEFAULT now() NOT NULL);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2qNhRDYaxzneXfG.9d70d45e7b6d --database KXbJ95iGQTQDrViqhuR8ny --execute CREATE TABLE IF NOT EXISTS media_assets (id serial PRIMARY KEY NOT NULL, user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE, workspace_id integer REFERENCES workspaces(id) ON DELETE CASCADE, file_name varchar(256) NOT NULL, file_key text NOT NULL, url text NOT NULL, mime_type varchar(128) NOT NULL, size bigint NOT NULL, width integer, height integer, tags text[] DEFAULT '{}', folder varchar(128) DEFAULT 'Uncategorized', created_at timestamp DEFAULT now() NOT NULL, updated_at timestamp DEFAULT now() NOT NULL);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 376 near \"[] DEFAULT '{}', folder varchar(128) DEFAULT 'Uncategorized', created_at timestamp DEFAULT now() NOT NULL, updated_at timestamp DEFAULT now() NOT NULL)\""
+  ]
+}

@@ -42,6 +42,7 @@ import { campaignWorkflowRouter }     from "./app/routers/campaignWorkflow";
 import { aiAgentRouter }              from "./app/routers/aiAgent";
 import { homeStatsRouter }             from "./app/routers/homeStats";
 import { studiosRouter }               from "./app/routers/studios";
+import { assetsRouter }                from "./app/routers/assets";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -93,6 +94,7 @@ export const appRouter = router({
   aiAgent:              aiAgentRouter,
   homeStats:            homeStatsRouter,
   studios:              studiosRouter,
+  assets:               assetsRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -3212,3 +3212,27 @@
 - [x] Refactor AI Agent page to neutral palette
 ### Task 3: English Only
 - [x] Verify all UI text is strictly English
+
+## 📦 Assets (Media Library) Page
+### Backend
+- [x] Create media_assets table in DB (id, userId, fileName, fileKey, url, mimeType, size, tags, folder, createdAt)
+- [x] Create server/app/routers/assets.ts — upload, list, delete, update tags, search
+- [x] S3 upload integration via storagePut
+- [x] Register assets router in routers.ts
+### Frontend
+- [x] Full Assets page with drag-and-drop upload zone
+- [x] Grid/list view toggle for media gallery
+- [x] Tag management (add/remove tags per asset)
+- [x] Search by filename and tags
+- [x] Folder/collection organization
+- [x] Lightbox preview for images
+- [x] Bulk select and delete
+- [x] Upload progress indicator
+
+## 📊 Marketing Dropdown Pages
+- [x] Campaign page (/ads/campaigns) — already fully built (765 lines) with status, budget, platform
+- [x] Content page (/content/planner) — already fully built (316 lines) with calendar view
+- [x] Analytics page (/analytics/overview) — already fully built with sub-tabs (Posts, Insights, Sentiment, Hashtags)
+- [x] Reports page (/analytics/reports) — already fully built (192 lines) with create/edit/delete/run
+- [x] All pages use dark neutral design system (verified, 0 old color refs remaining)
+- [x] Routes wired in App.tsx (via GlobalTopbar Marketing dropdown)
