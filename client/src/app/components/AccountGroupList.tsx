@@ -58,24 +58,28 @@ function AccountAvatar({
   size?: number;
   badgeSize?: number;
 }) {
+  const [imgError, setImgError] = useState(false);
+  const initials = (account.name ?? account.username ?? account.platform).charAt(0).toUpperCase();
+  const showImage = account.profile_picture && !imgError;
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <div
         className="rounded-full overflow-hidden bg-muted"
         style={{ width: size, height: size }}
       >
-        {account.profile_picture ? (
+        {showImage ? (
           <img
-            src={account.profile_picture}
+            src={account.profile_picture!}
             alt={account.name ?? ""}
             className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center bg-brand/10 text-brand font-bold"
             style={{ fontSize: size * 0.35 }}
           >
-            {(account.name ?? account.username ?? account.platform).charAt(0).toUpperCase()}
+            {initials}
           </div>
         )}
       </div>

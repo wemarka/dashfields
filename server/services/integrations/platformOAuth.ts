@@ -24,6 +24,21 @@ import crypto from "crypto";
 import { getSupabase } from "../../supabase";
 import { upsertUserBySupabaseUid } from "../../app/db/users";
 import { sdk } from "../../_core/sdk";
+import { storagePut } from "../../storage";
+
+/** Download an image URL and upload it to S3 for permanent storage */
+async function uploadPicToS3(imageUrl: string, key: string): Promise<string | null> {
+  try {
+    const res = await fetch(imageUrl);
+    if (!res.ok) return null;
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    const { url } = await storagePut(key, buffer, contentType);
+    return url;
+  } catch {
+    return null;
+  }
+}
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface OAuthConfig {
@@ -528,6 +543,11 @@ export function registerPlatformOAuthRoutes(app: Express) {
         for (const page of pages) {
           if (page.instagram_business_account) {
             const ig = page.instagram_business_account;
+            // Upload Instagram profile picture to S3 for permanent storage
+            let igPicture: string | null = ig.profile_picture_url ?? null;
+            if (igPicture) {
+              igPicture = (await uploadPicToS3(igPicture, `profile-pictures/ig-${ig.id}.jpg`)) ?? igPicture;
+            }
             await upsertAccount({
               userId, workspaceId,
               platform: "instagram",
@@ -535,7 +555,7 @@ export function registerPlatformOAuthRoutes(app: Express) {
               name: ig.name ?? page.name,
               username: ig.username ?? null,
               accessToken: page.access_token ?? longToken,
-              profilePicture: ig.profile_picture_url ?? null,
+              profilePicture: igPicture,
               accountType: "business",
               metadata: { facebookPageId: page.id, followersCount: ig.followers_count ?? 0, metaUserId: metaUser.id },
             });

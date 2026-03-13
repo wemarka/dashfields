@@ -5,6 +5,21 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../../../_core/trpc";
 import { getSupabase } from "../../../supabase";
 import { getAdAccounts, getAdAccountPicture } from "../../../services/integrations/meta";
+import { storagePut } from "../../../storage";
+
+/** Download an image URL and upload it to S3 for permanent storage */
+async function uploadPictureToS3(imageUrl: string, key: string): Promise<string | null> {
+  try {
+    const res = await fetch(imageUrl);
+    if (!res.ok) return null;
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    const { url } = await storagePut(key, buffer, contentType);
+    return url;
+  } catch {
+    return null;
+  }
+}
 
 export const metaConnectionRouter = router({
   /** Check if user has a connected Meta ad account */
@@ -127,12 +142,16 @@ export const metaConnectionRouter = router({
       const firstToken = dbAccounts.find(a => a.access_token)?.access_token;
       if (!firstToken) return { updated: 0 };
 
-      // Fetch the user's personal FB profile picture
+      // Fetch the user's personal FB profile picture and upload to S3
       let userProfilePicUrl: string | null = null;
       try {
-        const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=picture.width(200).height(200)&access_token=${firstToken}`);
-        const meJson = await meRes.json() as { picture?: { data?: { url?: string } } };
-        userProfilePicUrl = meJson.picture?.data?.url ?? null;
+        const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,picture.width(200).height(200)&access_token=${firstToken}`);
+        const meJson = await meRes.json() as { id?: string; picture?: { data?: { url?: string } } };
+        const rawPicUrl = meJson.picture?.data?.url ?? null;
+        if (rawPicUrl && meJson.id) {
+          const s3Url = await uploadPictureToS3(rawPicUrl, `profile-pictures/fb-user-${meJson.id}.jpg`);
+          userProfilePicUrl = s3Url ?? rawPicUrl; // fallback to CDN if S3 fails
+        }
       } catch { /* ignore */ }
 
       // Fetch all ad accounts from Meta API to get real names and statuses
@@ -161,7 +180,11 @@ export const metaConnectionRouter = router({
         }
 
         const isActive = metaInfo ? metaInfo.status === 1 : true;
-        const pictureUrl = isActive ? await getAdAccountPicture(acct.platform_account_id, acct.access_token) : null;
+        const rawPictureUrl = isActive ? await getAdAccountPicture(acct.platform_account_id, acct.access_token) : null;
+        // Upload to S3 for permanent storage (Meta CDN URLs expire)
+        const pictureUrl = rawPictureUrl
+          ? (await uploadPictureToS3(rawPictureUrl, `profile-pictures/meta-${acct.platform_account_id.replace("act_", "")}.jpg`)) ?? rawPictureUrl
+          : null;
 
         const updatePayload: Record<string, unknown> = {
           metadata: updatedMeta,

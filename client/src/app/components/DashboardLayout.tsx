@@ -195,7 +195,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (picturesRefreshedRef.current) return;
     if (!accounts || accounts.length === 0) return;
     const needsRefresh = accounts.some(
-      a => a.platform === "facebook" && (!a.profile_picture || a.profile_picture.includes("profilepic/?asid="))
+      a => a.platform === "facebook" && (
+        !a.profile_picture ||
+        a.profile_picture.includes("profilepic/?asid=") ||
+        a.profile_picture.includes("fbcdn.net") // CDN URLs expire — re-upload to S3
+      )
     );
     if (needsRefresh) {
       picturesRefreshedRef.current = true;
