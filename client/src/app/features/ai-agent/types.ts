@@ -16,7 +16,8 @@ export type UIBlockType =
   | "image_gallery"
   | "status_list"
   | "campaign_summary"
-  | "suggestion_chips";
+  | "suggestion_chips"
+  | "campaign_preview";
 
 /** A single metric (KPI) card */
 export interface MetricCardBlock {
@@ -103,6 +104,21 @@ export interface SuggestionChipsBlock {
   chips: string[];
 }
 
+/** Campaign preview with async image generation */
+export interface CampaignPreviewBlock {
+  type: "campaign_preview";
+  campaign_name: string;
+  platform: string;
+  objective?: string;
+  target_audience?: string;
+  ad_copy?: string;
+  cta?: string;
+  budget?: string;
+  image_prompt_idea: string;  // The prompt used to generate the ad image asynchronously
+  headline?: string;
+  description?: string;
+}
+
 export type UIBlock =
   | MetricCardBlock
   | DataTableBlock
@@ -113,7 +129,8 @@ export type UIBlock =
   | ImageGalleryBlock
   | StatusListBlock
   | CampaignSummaryBlock
-  | SuggestionChipsBlock;
+  | SuggestionChipsBlock
+  | CampaignPreviewBlock;
 
 // ── Tool Status ───────────────────────────────────────────────────────────
 export interface ToolStatus {

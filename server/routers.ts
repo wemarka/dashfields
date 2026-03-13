@@ -39,6 +39,7 @@ import { contentTemplatesRouter }     from "./app/routers/contentTemplates";
 import { aiConversationsRouter }      from "./app/routers/aiConversations";
 import { marketingStatsRouter }       from "./app/routers/marketingStats";
 import { campaignWorkflowRouter }     from "./app/routers/campaignWorkflow";
+import { aiAgentRouter }              from "./app/routers/aiAgent";
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
@@ -87,6 +88,7 @@ export const appRouter = router({
   aiConversations:      aiConversationsRouter,
   marketingStats:       marketingStatsRouter,
   campaignWorkflow:     campaignWorkflowRouter,
+  aiAgent:              aiAgentRouter,
 });
 
 export type AppRouter = typeof appRouter;

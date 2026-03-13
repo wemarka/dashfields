@@ -27,7 +27,9 @@ import type {
   StatusListBlock,
   CampaignSummaryBlock,
   SuggestionChipsBlock,
+  CampaignPreviewBlock,
 } from "./types";
+import { CampaignPreview } from "./CampaignPreview";
 
 // ── Props ──────────────────────────────────────────────────────────────────
 interface GenerativeUIRendererProps {
@@ -77,6 +79,8 @@ function BlockRenderer({
       return <CampaignSummary block={block} />;
     case "suggestion_chips":
       return <SuggestionChips block={block} onChipClick={onChipClick} />;
+    case "campaign_preview":
+      return <CampaignPreview block={block} />;
     default:
       return null;
   }

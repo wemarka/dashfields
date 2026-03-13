@@ -3065,3 +3065,9 @@
 - [ ] Add image generation model config (google/gemini-3.1-flash-image-preview)
 - [ ] Prepare video generation service structure (kling-2.5-turbo)
 - [x] Fix: setState-during-render error — broadcastSessions called inside setSessions callback in AIAgentPage
+- [x] Add generate_campaign_preview UI block type with image_prompt_idea field
+- [x] Create CampaignPreview async component with loading skeleton for image generation
+- [x] Add tRPC mutation aiAgent.generateAdImage using Atlas Cloud (gpt-image-1-developer + S3 upload)
+- [x] Wire async rendering: CampaignPreview triggers image generation on mount, replaces skeleton with real image
+- [x] Update AI system prompt to use campaign_preview block instead of simulating file attachments
+- [x] Vitest tests for aiAgent router (8 tests passing)

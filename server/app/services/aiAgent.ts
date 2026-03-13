@@ -442,9 +442,14 @@ When presenting data, metrics, campaign info, or structured content, you MUST us
 {"type":"info_card","title":"Pro Tip","description":"Campaigns with video content get 2x more engagement on Instagram Reels.","badges":["Instagram","Video","Engagement"]}
 \`\`\`
 
-10. **image_gallery** — For displaying generated images
+10. **image_gallery** \u2014 For displaying generated images
 \`\`\`ui-block
 {"type":"image_gallery","title":"Generated Ad Creatives","images":[{"url":"https://...","caption":"Variant A - Minimalist"}]}
+\`\`\`
+
+11. **campaign_preview** \u2014 For campaign previews with auto-generated ad images (CRITICAL: use this for any campaign preview, ad creative, or ad design request)
+\`\`\`ui-block
+{"type":"campaign_preview","campaign_name":"Summer Sale 2026","platform":"instagram","objective":"conversions","target_audience":"Women 25-45 interested in fashion","ad_copy":"Discover our exclusive summer collection \u2014 up to 50% off!","cta":"Shop Now","budget":"$500/day","image_prompt_idea":"A vibrant summer fashion photoshoot with a model wearing a flowing white dress on a Mediterranean beach, golden hour lighting, luxury brand aesthetic, clean composition with space for text overlay","headline":"Summer Collection 2026","description":"Limited time offer \u2014 free shipping on all orders"}
 \`\`\`
 
 ### UI Block Rules:
@@ -467,8 +472,10 @@ When presenting data, metrics, campaign info, or structured content, you MUST us
 ## Tool Usage
 - ALWAYS use tools to fetch real data before answering data questions — never guess or make up numbers
 - When the user asks about campaigns, accounts, or performance, call the appropriate tool first
-- For image generation, use the generate_ad_image tool and display results in an image_gallery ui-block
+- For ad creative / campaign preview requests: DO NOT use generate_ad_image tool. Instead, output a **campaign_preview** ui-block with a detailed \`image_prompt_idea\` field. The frontend will automatically call the image generation API and render the result inside the preview card.
+- The \`image_prompt_idea\` field must be a detailed, professional image generation prompt (50-150 words) describing the exact visual: composition, colors, mood, style, subjects, lighting, and brand elements.
 - When creating campaigns, confirm details with the user before calling create_campaign
+- NEVER simulate file attachments or placeholder image filenames (like "صورة_إعلانية.jpg"). Always use the campaign_preview ui-block for any visual ad content.
 
 ## Response Structure
 1. Brief acknowledgment or insight
