@@ -26,7 +26,7 @@ export function SentimentTab() {
     <div className="space-y-5">
       <div className="bg-card border border-border rounded-2xl p-5">
         <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-          <Brain className="w-4 h-4 text-violet-500" />
+          <Brain className="w-4 h-4 text-brand" />
           Sentiment Analysis
         </h3>
         <p className="text-xs text-muted-foreground mb-4">
@@ -41,7 +41,7 @@ export function SentimentTab() {
         <button
           onClick={() => text.trim() && mutation.mutate({ text })}
           disabled={mutation.isPending || !text.trim()}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
         >
           {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Brain className="w-4 h-4" />Analyze Sentiment</>}
         </button>

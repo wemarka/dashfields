@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
             "Your account security matters. Choose a strong password to keep your data safe."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-brand/15 flex items-center justify-center text-brand text-sm font-semibold">D</div>
             <div>
               <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
               <p className="text-white/30 text-xs">dashfields.com</p>
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
               <h2 className="text-xl font-bold text-white mb-2">Password updated!</h2>
               <p className="text-white/40 text-sm">Redirecting you to the dashboard...</p>
               <div className="mt-4 flex justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-brand" />
               </div>
             </div>
           ) : (
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
               )}
 
               {!sessionReady && !error && (
-                <div className="flex items-center gap-2 text-white/40 text-sm mb-5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-2 text-white/40 text-sm mb-5 p-3 rounded-xl bg-neutral-900/[0.03] border border-white/[0.06]">
                   <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                   Verifying reset link...
                 </div>
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
                       required
                       disabled={!sessionReady}
                       autoComplete="new-password"
-                      className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl disabled:opacity-40"
+                      className="pl-10 pr-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl disabled:opacity-40"
                     />
                     <button
                       type="button"
@@ -158,7 +158,7 @@ export default function ResetPasswordPage() {
                       required
                       disabled={!sessionReady}
                       autoComplete="new-password"
-                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl disabled:opacity-40"
+                      className="pl-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl disabled:opacity-40"
                     />
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
                 <Button
                   type="submit"
                   disabled={submitting || !password || !confirmPassword || !sessionReady}
-                  className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors"
                 >
                   {submitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin mr-2" />Updating...</>

@@ -9,13 +9,13 @@ const PLATFORM_COLOR: Record<string, string> = {
   facebook:  "text-blue-600 bg-blue-50",
   instagram: "text-pink-600 bg-pink-50",
   linkedin:  "text-blue-700 bg-blue-50",
-  twitter:   "text-slate-800 bg-slate-100",
+  twitter:   "text-neutral-800 bg-neutral-100",
 };
 
 const STATUS_STYLE: Record<string, string> = {
   published: "bg-emerald-50 text-emerald-700",
   scheduled: "bg-blue-50 text-blue-700",
-  draft:     "bg-slate-100 text-slate-600",
+  draft:     "bg-neutral-100 text-neutral-600",
 };
 
 interface Post {
@@ -49,7 +49,7 @@ export function PostCard({ post }: PostCardProps) {
                 return (
                   <span
                     key={pid}
-                    className={"w-5 h-5 rounded-md flex items-center justify-center text-xs " + (PLATFORM_COLOR[pid] ?? "bg-slate-100 text-slate-600")}
+                    className={"w-5 h-5 rounded-md flex items-center justify-center text-xs " + (PLATFORM_COLOR[pid] ?? "bg-neutral-100 text-neutral-600")}
                   >
                     <Icon className="w-3 h-3" />
                   </span>

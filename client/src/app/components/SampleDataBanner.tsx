@@ -18,7 +18,7 @@ export function SampleDataBanner({ hasRealData = false }: SampleDataBannerProps)
   if (hasRealData || dismissed) return null;
 
   return (
-    <div className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-400/20 mb-4 text-sm">
+    <div className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-brand/10 border border-blue-400/20 mb-4 text-sm">
       <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
       <p className="text-foreground/80 flex-1">
         <span className="font-semibold text-foreground">👋 Welcome!</span>{" "}

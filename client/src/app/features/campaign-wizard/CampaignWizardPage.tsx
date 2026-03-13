@@ -477,36 +477,36 @@ export default function CampaignWizardPage() {
 
       {/* History Sidebar */}
       {showHistory && (
-        <div className="relative z-20 w-64 bg-white border-r border-gray-100 flex flex-col shrink-0">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <span className="font-semibold text-gray-800 text-sm">الحملات السابقة</span>
-            <button onClick={() => setShowHistory(false)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+        <div className="relative z-20 w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
+            <span className="font-semibold text-white text-sm">الحملات السابقة</span>
+            <button onClick={() => setShowHistory(false)} className="text-neutral-500 hover:text-neutral-400 text-xs">✕</button>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {workflowHistory?.length === 0 && (
-              <p className="text-center text-gray-400 text-xs py-8">لا توجد حملات سابقة</p>
+              <p className="text-center text-neutral-500 text-xs py-8">لا توجد حملات سابقة</p>
             )}
             {workflowHistory?.map(wf => (
               <button
                 key={wf.id}
                 onClick={() => handleLoadWorkflow(wf as unknown as Record<string, unknown>)}
-                className="w-full text-right px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors mb-1"
+                className="w-full text-right px-3 py-2.5 rounded-xl hover:bg-neutral-800/50 transition-colors mb-1"
               >
-                <p className="text-sm font-medium text-gray-800 truncate">
+                <p className="text-sm font-medium text-white truncate">
                   {(wf.brief as CampaignBrief)?.name ?? "حملة جديدة"}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Badge className="text-[10px] bg-gray-100 text-gray-600 border-0">
+                  <Badge className="text-[10px] bg-neutral-800 text-neutral-400 border-0">
                     {STEP_LABELS[wf.step as WizardStep] ?? wf.step}
                   </Badge>
-                  <span className="text-[10px] text-gray-400">
+                  <span className="text-[10px] text-neutral-500">
                     {new Date(wf.created_at).toLocaleDateString("ar")}
                   </span>
                 </div>
               </button>
             ))}
           </div>
-          <div className="p-3 border-t border-gray-100">
+          <div className="p-3 border-t border-neutral-800">
             <Button onClick={handleNewCampaign} className="w-full bg-red-600 hover:bg-red-700 text-white text-xs">
               <Plus className="w-3 h-3 mr-1" />
               حملة جديدة
@@ -521,14 +521,14 @@ export default function CampaignWizardPage() {
         {/* Header bar */}
         <div className={cn(
           "flex items-center justify-between px-5 py-3 shrink-0",
-          isInChat ? "border-b border-gray-200/80 bg-white/60 backdrop-blur-sm" : "",
+          isInChat ? "border-b border-neutral-700/80 bg-neutral-900/60 backdrop-blur-sm" : "",
         )}>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-xl flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
               <Wand2 className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-sm font-semibold text-gray-700">Marketing Workflow</span>
+            <span className="text-sm font-semibold text-neutral-300">Marketing Workflow</span>
             {isInChat && (
               <Badge className="text-[10px] bg-red-50 text-red-600 border-red-100">
                 {STEP_LABELS[currentStep]}
@@ -538,7 +538,7 @@ export default function CampaignWizardPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-all"
             >
               <History className="w-3.5 h-3.5" />
               السابقة
@@ -556,7 +556,7 @@ export default function CampaignWizardPage() {
                 )}
                 <button
                   onClick={handleNewCampaign}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-all"
                 >
                   <Plus className="w-3 h-3" />
                   حملة جديدة
@@ -574,10 +574,10 @@ export default function CampaignWizardPage() {
                 style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.35)" }}>
                 <Wand2 className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-[2rem] font-bold text-gray-900 mb-2 tracking-tight">
+              <h1 className="text-[2rem] font-bold text-white mb-2 tracking-tight">
                 Marketing Workflow Agent
               </h1>
-              <p className="text-gray-500 text-[15px] max-w-md">
+              <p className="text-neutral-400 text-[15px] max-w-md">
                 أخبرني عن حملتك الإعلانية وسأتولى كل شيء — من توليد الصور إلى خطة المحتوى والميزانية
               </p>
             </div>
@@ -600,11 +600,11 @@ export default function CampaignWizardPage() {
                 <button
                   key={p.text}
                   onClick={() => void sendMessage(p.text)}
-                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-gray-200 bg-white hover:border-red-200 hover:bg-red-50/30 transition-all text-left text-sm text-gray-700 group"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-red-200 hover:bg-red-50/30 transition-all text-left text-sm text-neutral-300 group"
                 >
                   <span className="text-xl shrink-0">{p.icon}</span>
                   <span className="leading-snug group-hover:text-red-700 transition-colors">{p.text}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-red-400 mr-auto shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-red-400 mr-auto shrink-0" />
                 </button>
               ))}
             </div>
@@ -650,21 +650,21 @@ export default function CampaignWizardPage() {
           style={{ maxHeight: "90vh" }}
         >
           {/* Dialog Header with Progress */}
-          <div className="px-6 pt-5 pb-4 border-b border-gray-100 bg-white shrink-0">
+          <div className="px-6 pt-5 pb-4 border-b border-neutral-800 bg-neutral-900 shrink-0">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-xl flex items-center justify-center"
                   style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
                   <Wand2 className="w-3.5 h-3.5 text-white" />
                 </div>
-                <DialogTitle className="text-sm font-semibold text-gray-800 m-0">
+                <DialogTitle className="text-sm font-semibold text-white m-0">
                   {STEP_LABELS[currentStep] ?? "Marketing Workflow"}
                 </DialogTitle>
               </div>
               {!isGenerating && !isGeneratingPlan && (
                 <button
                   onClick={() => setDialogOpen(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -694,20 +694,20 @@ export default function CampaignWizardPage() {
                   style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.3)" }}>
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">جاري توليد الصور الإعلانية</h3>
-                <p className="text-gray-500 text-sm text-center max-w-sm mb-6">
+                <h3 className="text-lg font-semibold text-white mb-2">جاري توليد الصور الإعلانية</h3>
+                <p className="text-neutral-400 text-sm text-center max-w-sm mb-6">
                   يتم توليد صورة لكل منصة بشكل متوازٍ مع إضافة شعارك تلقائياً.
                   <br />قد يستغرق هذا 30-60 ثانية.
                 </p>
                 {/* Real-time progress bar */}
                 <div className="w-full max-w-xs">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                  <div className="flex justify-between text-xs text-neutral-400 mb-1.5">
                     <span>الصور المُولَّدة</span>
                     <span className="font-semibold text-red-600">
                       {genProgress?.generated ?? 0} / {genProgress?.total ?? (brief.platforms?.length ?? 4)}
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-700 ease-out"
                       style={{
@@ -724,7 +724,7 @@ export default function CampaignWizardPage() {
                           "w-2.5 h-2.5 rounded-full transition-all duration-500",
                           i < (genProgress?.generated ?? 0)
                             ? "bg-red-500 scale-110"
-                            : "bg-gray-200"
+                            : "bg-neutral-700"
                         )}
                       />
                     ))}
@@ -777,8 +777,8 @@ export default function CampaignWizardPage() {
                   style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.3)" }}>
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">جاري إعداد خطة المحتوى</h3>
-                <p className="text-gray-500 text-sm text-center max-w-sm">
+                <h3 className="text-lg font-semibold text-white mb-2">جاري إعداد خطة المحتوى</h3>
+                <p className="text-neutral-400 text-sm text-center max-w-sm">
                   يتم تحليل الجمهور المستهدف وتوزيع الميزانية وإعداد جدول النشر...
                 </p>
               </div>
@@ -854,13 +854,13 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
                   ? "bg-red-500 text-white"
                   : isCurrent
                     ? "bg-red-500 text-white ring-4 ring-red-100"
-                    : "bg-gray-100 text-gray-400 border border-gray-200",
+                    : "bg-neutral-800 text-neutral-500 border border-neutral-700",
               )}>
                 {isCompleted ? "✓" : idx + 1}
               </div>
               <span className={cn(
                 "text-[10px] font-medium whitespace-nowrap",
-                isCurrent || isCompleted ? "text-red-600" : "text-gray-400",
+                isCurrent || isCompleted ? "text-red-600" : "text-neutral-500",
               )}>
                 {s.label}
               </span>
@@ -868,7 +868,7 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
             {idx < PROGRESS_STEPS.length - 1 && (
               <div className={cn(
                 "flex-1 h-0.5 mx-2 mb-4 transition-all duration-500",
-                isCompleted ? "bg-red-400" : "bg-gray-200",
+                isCompleted ? "bg-red-400" : "bg-neutral-700",
               )} />
             )}
           </div>
@@ -894,7 +894,7 @@ function WizardInputBox({
 
   return (
     <div
-      className="relative flex flex-col rounded-2xl transition-all duration-200 border border-gray-200 hover:border-gray-300 focus-within:border-red-400/60 bg-white"
+      className="relative flex flex-col rounded-2xl transition-all duration-200 border border-neutral-700 hover:border-neutral-700 focus-within:border-red-400/60 bg-neutral-900"
       style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)" }}
     >
       <Textarea
@@ -906,7 +906,7 @@ function WizardInputBox({
         disabled={isLoading}
         rows={1}
         dir="rtl"
-        className="resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[28px] max-h-[140px] leading-relaxed text-right"
+        className="resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-white placeholder:text-neutral-500 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[28px] max-h-[140px] leading-relaxed text-right"
         style={{ boxShadow: "none" }}
       />
       <div className="flex items-center justify-between px-3 pb-3 pt-1 flex-row-reverse">
@@ -921,10 +921,10 @@ function WizardInputBox({
               رفع الشعار
             </button>
           )}
-          <button type="button" className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+          <button type="button" className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-all">
             <ImageIcon className="w-4 h-4" />
           </button>
-          <button type="button" className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+          <button type="button" className="w-8 h-8 flex items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-all">
             <Plus className="w-4 h-4" />
           </button>
         </div>
@@ -933,7 +933,7 @@ function WizardInputBox({
           disabled={!hasText || isLoading}
           className={cn(
             "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
-            hasText && !isLoading ? "text-white hover:scale-105 active:scale-95" : "text-gray-300 cursor-not-allowed",
+            hasText && !isLoading ? "text-white hover:scale-105 active:scale-95" : "text-neutral-500 cursor-not-allowed",
           )}
           style={hasText && !isLoading ? {
             background: "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
@@ -973,8 +973,8 @@ function WizardMessageBubble({ msg }: { msg: WizardMessage }) {
         <Bot className="w-4 h-4 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-gray-200 bg-white text-sm text-gray-800">
-          <div className="prose prose-sm max-w-none prose-p:text-gray-800 prose-strong:text-gray-900 prose-p:leading-relaxed">
+        <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-neutral-700 bg-neutral-900 text-sm text-white">
+          <div className="prose prose-sm max-w-none prose-p:text-white prose-strong:text-white prose-p:leading-relaxed">
             <ReactMarkdown>{msg.content}</ReactMarkdown>
           </div>
         </div>
@@ -990,7 +990,7 @@ function ThinkingBubble() {
         style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
         <Bot className="w-4 h-4 text-white" />
       </div>
-      <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-gray-200 bg-white">
+      <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-neutral-700 bg-neutral-900">
         <div className="flex items-center gap-1 py-1">
           {[0, 1, 2].map((i) => (
             <div key={i} className="w-2 h-2 rounded-full bg-red-400"
@@ -1036,8 +1036,8 @@ function ProductImageStep({
           style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
           <ImageIcon className="w-7 h-7 text-white" />
         </div>
-        <h3 className="text-base font-semibold text-gray-800 mb-1">هل لديك صورة للمنتج؟</h3>
-        <p className="text-sm text-gray-500 max-w-sm">
+        <h3 className="text-base font-semibold text-white mb-1">هل لديك صورة للمنتج؟</h3>
+        <p className="text-sm text-neutral-400 max-w-sm">
           رفع صورة المنتج يُحسّن جودة الصور الإعلانية المُولَّدة بشكل كبير.
           يمكنك تخطي هذه الخطوة إذا أردت.
         </p>
@@ -1051,7 +1051,7 @@ function ProductImageStep({
         onClick={() => productImageRef.current?.click()}
         className={cn(
           "w-full max-w-sm h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200",
-          isDragging ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-gray-50",
+          isDragging ? "border-red-400 bg-red-50" : "border-neutral-700 hover:border-red-300 hover:bg-neutral-800/50",
           preview ? "border-red-300 bg-red-50/30" : "",
         )}
       >
@@ -1059,10 +1059,10 @@ function ProductImageStep({
           <img src={preview} alt="preview" className="h-36 w-auto object-contain rounded-xl" />
         ) : (
           <>
-            <Upload className="w-8 h-8 text-gray-300" />
+            <Upload className="w-8 h-8 text-neutral-500" />
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">اسحب الصورة هنا أو انقر للاختيار</p>
-              <p className="text-xs text-gray-400 mt-0.5">PNG, JPG, WEBP — حتى 10MB</p>
+              <p className="text-sm font-medium text-neutral-400">اسحب الصورة هنا أو انقر للاختيار</p>
+              <p className="text-xs text-neutral-500 mt-0.5">PNG, JPG, WEBP — حتى 10MB</p>
             </div>
           </>
         )}
@@ -1107,7 +1107,7 @@ function ProductImageStep({
 
       <button
         onClick={() => onUpload(null)}
-        className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
+        className="text-xs text-neutral-500 hover:text-neutral-400 transition-colors underline underline-offset-2"
       >
         تخطي هذه الخطوة
       </button>

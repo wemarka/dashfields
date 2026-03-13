@@ -120,7 +120,7 @@ export function CalendarPlannerTab() {
           <button
             onClick={() => brand.trim() && industry.trim() && mutation.mutate({ brand, industry, platforms: selectedPlatforms, weekCount })}
             disabled={mutation.isPending || !brand.trim() || !industry.trim() || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
           >
             {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Planning...</> : <><Calendar className="w-4 h-4" />Generate Calendar</>}
           </button>
@@ -163,7 +163,7 @@ export function CalendarPlannerTab() {
           {result.keyMessages.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
               <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-violet-500" />
+                <Target className="w-3.5 h-3.5 text-brand" />
                 Key Messages
               </p>
               <ul className="space-y-1">

@@ -88,7 +88,7 @@ export function AdToolsTab() {
           <button
             onClick={handleGenerate}
             disabled={generateMutation.isPending || !prompt.trim()}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {generateMutation.isPending
               ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</>
@@ -100,7 +100,7 @@ export function AdToolsTab() {
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-violet-500" />
+              <Sparkles className="w-4 h-4 text-brand" />
               <h2 className="text-sm font-semibold text-foreground">Result</h2>
             </div>
             {result && (

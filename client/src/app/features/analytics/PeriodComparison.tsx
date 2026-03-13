@@ -30,7 +30,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const COLOR_MAP: Record<string, string> = {
-  violet: "text-violet-500 bg-violet-500/10",
+  red: "text-brand bg-brand/10",
   blue:   "text-blue-500 bg-blue-500/10",
   emerald: "text-emerald-500 bg-emerald-500/10",
   orange: "text-orange-500 bg-orange-500/10",
@@ -49,7 +49,7 @@ function ComparisonKpiCard({ kpi }: {
 }) {
   const { fmt } = useCurrency();
   const IconComp = ICON_MAP[kpi.icon] ?? BarChart2;
-  const colorClass = COLOR_MAP[kpi.color] ?? "text-violet-500 bg-violet-500/10";
+  const colorClass = COLOR_MAP[kpi.color] ?? "text-brand bg-brand/10";
 
   const isPositive = kpi.lowerIsBetter ? kpi.delta < 0 : kpi.delta > 0;
   const isNeutral  = kpi.delta === 0;
@@ -173,11 +173,11 @@ export default function PeriodComparison() {
         {data && (
           <div className="flex items-center gap-4 mb-5">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="w-3 h-0.5 bg-violet-500 rounded" />
+              <div className="w-3 h-0.5 bg-brand rounded" />
               <span>Current: {data.period.current.since} → {data.period.current.until}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="w-3 h-0.5 bg-slate-400 rounded border-dashed" />
+              <div className="w-3 h-0.5 bg-neutral-400 rounded border-dashed" />
               <span>Previous: {data.period.previous.since} → {data.period.previous.until}</span>
             </div>
           </div>
@@ -236,7 +236,7 @@ export default function PeriodComparison() {
                 <Legend
                   formatter={(value) => value === "current" ? "Current Period" : "Previous Period"}
                 />
-                <Line type="monotone" dataKey="current"  stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="current"  stroke="#E62020" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="previous" stroke="#94a3b8" strokeWidth={2} dot={false} strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>

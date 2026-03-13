@@ -257,7 +257,7 @@ export default function Insights() {
             {/* ── Summary KPIs ─────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Eye,          label: "Total Impressions", value: totalImpressions.toLocaleString(), color: "text-violet-500" },
+                { icon: Eye,          label: "Total Impressions", value: totalImpressions.toLocaleString(), color: "text-brand" },
                 { icon: MousePointer, label: "Total Clicks",      value: totalClicks.toLocaleString(),      color: "text-blue-500" },
                 { icon: DollarSign,   label: "Total Spend",       value: fmt(totalSpend),       color: "text-emerald-500" },
                 { icon: Users,        label: "Engagements",       value: totalEngagements.toLocaleString(), color: "text-pink-500" },
@@ -412,7 +412,7 @@ export default function Insights() {
                     {efficiencyData.map((row, i) => {
                       const p = getPlatform(row.platform);
                       return (
-                        <tr key={row.platform} className="hover:bg-white/3 transition-colors">
+                        <tr key={row.platform} className="hover:bg-neutral-900/3 transition-colors">
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-2">
                               {i === 0 && <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
@@ -467,7 +467,7 @@ export default function Insights() {
                 style={{ animationDelay: i * 60 + "ms" }}
               >
                 <div className="flex items-start gap-4">
-                  <div className={"w-9 h-9 rounded-xl bg-white/60 flex items-center justify-center shrink-0 " + (ICON_COLORS[ins.type] ?? "")}>
+                  <div className={"w-9 h-9 rounded-xl bg-neutral-900/60 flex items-center justify-center shrink-0 " + (ICON_COLORS[ins.type] ?? "")}>
                     <ins.icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">

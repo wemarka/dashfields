@@ -85,10 +85,10 @@ export const ALL_COLUMNS: ColumnDef[] = [
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
   active:      { dot: "bg-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", label: "Active" },
   paused:      { dot: "bg-amber-500",   bg: "bg-amber-500/10",   text: "text-amber-700 dark:text-amber-400",     label: "Paused" },
-  draft:       { dot: "bg-slate-400",   bg: "bg-slate-400/10",   text: "text-slate-600 dark:text-slate-400",     label: "Draft" },
-  ended:       { dot: "bg-slate-300",   bg: "bg-slate-300/10",   text: "text-slate-500 dark:text-slate-400",     label: "Ended" },
+  draft:       { dot: "bg-neutral-400",   bg: "bg-neutral-400/10",   text: "text-neutral-600 dark:text-neutral-400",     label: "Draft" },
+  ended:       { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Ended" },
   scheduled:   { dot: "bg-blue-400",    bg: "bg-blue-400/10",    text: "text-blue-700 dark:text-blue-400",       label: "Scheduled" },
-  archived:    { dot: "bg-slate-300",   bg: "bg-slate-300/10",   text: "text-slate-500 dark:text-slate-400",     label: "Archived" },
+  archived:    { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Archived" },
   deleted:     { dot: "bg-red-400",     bg: "bg-red-400/10",     text: "text-red-600 dark:text-red-400",         label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
   in_process:  { dot: "bg-blue-400",    bg: "bg-blue-400/10",    text: "text-blue-700 dark:text-blue-400",       label: "In Review" },

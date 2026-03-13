@@ -436,13 +436,13 @@ export default function AIAgentPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-6">
           {/* Greeting */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gray-900 mb-5 shadow-lg">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-900 mb-5 shadow-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">
+            <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
               {t("aiAgent.greeting", { name: firstName })}
             </h1>
-            <p className="text-gray-500 text-[15px] max-w-md mx-auto leading-relaxed">
+            <p className="text-neutral-400 text-[15px] max-w-md mx-auto leading-relaxed">
               {t("aiAgent.subtitle")}
             </p>
           </div>
@@ -455,8 +455,8 @@ export default function AIAgentPage() {
                 onClick={() => void sendMessage(s)}
                 className={cn(
                   "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                  "border border-gray-200 bg-white text-gray-600",
-                  "hover:border-gray-300 hover:shadow-sm hover:text-gray-800",
+                  "border border-neutral-700 bg-neutral-800 text-neutral-300",
+                  "hover:border-neutral-700 hover:shadow-sm hover:text-white",
                   "active:scale-[0.97]",
                 )}
               >
@@ -488,21 +488,21 @@ export default function AIAgentPage() {
           {/* Chat header */}
           <div className={cn(
             "flex items-center justify-between px-5 py-3 shrink-0",
-            "border-b border-gray-200/60 bg-white/80 backdrop-blur-md",
+            "border-b border-neutral-700/60 bg-neutral-900/80 backdrop-blur-md",
             isRtl ? "flex-row-reverse" : "",
           )}>
             <div className={cn("flex items-center gap-2.5", isRtl ? "flex-row-reverse" : "")}>
-              <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-sm font-semibold text-gray-800">Dashfields AI</span>
+              <span className="text-sm font-semibold text-white">Dashfields AI</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleNewChat}
               className={cn(
-                "text-xs text-gray-500 hover:text-gray-800 gap-1.5",
+                "text-xs text-neutral-400 hover:text-white gap-1.5",
                 isRtl ? "flex-row-reverse" : "",
               )}
             >
@@ -536,12 +536,12 @@ export default function AIAgentPage() {
                 onClick={scrollToBottom}
                 className={cn(
                   "fixed bottom-28 left-1/2 -translate-x-1/2 z-20",
-                  "w-9 h-9 rounded-full bg-white border border-gray-200 shadow-lg",
+                  "w-9 h-9 rounded-full bg-neutral-800 border border-neutral-700 shadow-lg",
                   "flex items-center justify-center",
-                  "hover:bg-gray-50 transition-all",
+                  "hover:bg-neutral-800/50 transition-all",
                 )}
               >
-                <ArrowDown className="w-4 h-4 text-gray-500" />
+                <ArrowDown className="w-4 h-4 text-neutral-400" />
               </button>
             )}
           </div>
@@ -580,9 +580,9 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
     <div
       className={cn(
         "relative flex flex-col rounded-2xl transition-all duration-200",
-        "border border-gray-200 bg-white",
-        "hover:border-gray-300",
-        "focus-within:border-gray-400 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]",
+        "border border-neutral-700 bg-neutral-800",
+        "hover:border-neutral-700",
+        "focus-within:border-neutral-500 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]",
       )}
       style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}
     >
@@ -597,8 +597,8 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
         rows={1}
         dir={isRtl ? "rtl" : "ltr"}
         className={cn(
-          "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-gray-800",
-          "placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0",
+          "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-white",
+          "placeholder:text-neutral-500 focus-visible:ring-0 focus-visible:ring-offset-0",
           "min-h-[28px] max-h-[200px] leading-relaxed",
           isRtl ? "text-right" : "text-left",
         )}
@@ -611,7 +611,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
         <div className={cn("flex items-center gap-0.5", isRtl ? "flex-row-reverse" : "")}>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
             title="Attach file"
             onClick={() => toast.info("Feature coming soon")}
           >
@@ -619,7 +619,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
           </button>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
             title="Voice input"
             onClick={() => toast.info("Feature coming soon")}
           >
@@ -633,7 +633,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
             onClick={onStop}
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
-              "bg-gray-900 text-white hover:bg-gray-800 active:scale-95",
+              "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95",
             )}
           >
             <StopCircle className="w-4 h-4" />
@@ -645,8 +645,8 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
               hasText
-                ? "bg-gray-900 text-white hover:bg-gray-800 active:scale-95"
-                : "bg-gray-100 text-gray-300 cursor-not-allowed",
+                ? "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95"
+                : "bg-neutral-800 text-neutral-500 cursor-not-allowed",
             )}
           >
             <Send className={cn("w-4 h-4", isRtl ? "rotate-180" : "")} />
@@ -678,7 +678,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
         <div
           className={cn(
             "max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed",
-            "bg-gray-900 text-white",
+            "bg-neutral-900 text-white",
             isRtl ? "rounded-bl-md" : "rounded-br-md",
           )}
         >
@@ -692,7 +692,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   return (
     <div className={cn("flex items-start gap-3 group", isRtl ? "flex-row-reverse" : "")}>
       {/* Avatar */}
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center mt-0.5 shadow-sm">
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
         <Sparkles className="w-3.5 h-3.5 text-white" />
       </div>
 
@@ -700,11 +700,11 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
       <div className="flex-1 min-w-0 space-y-1">
         {/* Text content */}
         <div className={cn(
-          "rounded-2xl text-sm text-gray-800",
+          "rounded-2xl text-sm text-white",
           isRtl ? "rounded-tr-md" : "rounded-tl-md",
         )}>
           {displayText ? (
-            <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-900 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-gray-800 prose-blockquote:border-l-gray-300 prose-blockquote:text-gray-500">
+            <div className="prose prose-sm max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-p:leading-relaxed prose-strong:text-white prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:text-white prose-blockquote:border-l-neutral-600 prose-blockquote:text-neutral-400">
               <Streamdown>{displayText}</Streamdown>
             </div>
           ) : (
@@ -730,7 +730,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
           )}>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-colors"
             >
               <Copy className="w-3 h-3" />
               {t("aiAgent.copy")}
@@ -749,7 +749,7 @@ function ThinkingDots() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-full bg-gray-400"
+          className="w-2 h-2 rounded-full bg-neutral-500"
           style={{ animation: "pulse 1.4s ease-in-out infinite", animationDelay: `${i * 0.2}s` }}
         />
       ))}
@@ -760,10 +760,10 @@ function ThinkingDots() {
 function ThinkingIndicator() {
   return (
     <div className="flex items-start gap-3">
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center mt-0.5 shadow-sm">
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
         <Sparkles className="w-3.5 h-3.5 text-white" />
       </div>
-      <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-white border border-gray-100">
+      <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-neutral-900 border border-neutral-800">
         <ThinkingDots />
       </div>
     </div>
@@ -789,12 +789,12 @@ function ToolStatusIndicator({ status }: { status: { type: string; toolName?: st
 
   return (
     <div className="flex items-start gap-3">
-      <div className="shrink-0 w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center mt-0.5 shadow-sm">
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-neutral-900 flex items-center justify-center mt-0.5 shadow-sm">
         <Sparkles className="w-3.5 h-3.5 text-white" />
       </div>
-      <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-tl-md bg-white border border-gray-100">
-        <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
-        <span className="text-xs text-gray-500 font-medium">{label}</span>
+      <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-tl-md bg-neutral-900 border border-neutral-800">
+        <Loader2 className="w-3.5 h-3.5 text-neutral-500 animate-spin" />
+        <span className="text-xs text-neutral-400 font-medium">{label}</span>
       </div>
     </div>
   );

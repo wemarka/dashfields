@@ -53,7 +53,7 @@ export default function RegisterPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function RegisterPage() {
             "Join thousands of marketers who manage their ad campaigns smarter with Dashfields."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-brand/15 flex items-center justify-center text-brand text-sm font-semibold">D</div>
             <div>
               <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
               <p className="text-white/30 text-xs">dashfields.com</p>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
               </p>
               <Button
                 variant="outline"
-                className="gap-2 rounded-xl border-white/[0.08] text-white/60 hover:bg-white/[0.04]"
+                className="gap-2 rounded-xl border-white/[0.08] text-white/60 hover:bg-neutral-900/[0.04]"
                 onClick={() => setLocation("/login")}
               >
                 Back to sign in
@@ -127,7 +127,7 @@ export default function RegisterPage() {
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="name" type="text" placeholder="Your name" value={name}
                       onChange={e => setName(e.target.value)} required autoComplete="name"
-                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl" />
                   </div>
                 </div>
 
@@ -137,7 +137,7 @@ export default function RegisterPage() {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="email" type="email" placeholder="you@example.com" value={email}
                       onChange={e => setEmail(e.target.value)} required autoComplete="email"
-                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl" />
                   </div>
                 </div>
 
@@ -147,7 +147,7 @@ export default function RegisterPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min. 8 characters"
                       value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password"
-                      className="pl-10 pr-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
+                      className="pl-10 pr-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl" />
                     <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -156,7 +156,7 @@ export default function RegisterPage() {
                   {password && (
                     <div className="flex gap-1 mt-1.5">
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= passwordStrength.score ? passwordStrength.color : "bg-white/[0.06]"}`} />
+                        <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= passwordStrength.score ? passwordStrength.color : "bg-neutral-900/[0.06]"}`} />
                       ))}
                     </div>
                   )}
@@ -168,12 +168,12 @@ export default function RegisterPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
                     <Input id="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Repeat password"
                       value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required autoComplete="new-password"
-                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl" />
+                      className="pl-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl" />
                   </div>
                 </div>
 
                 <Button type="submit" disabled={submitting || !email || !password || !name}
-                  className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors">
+                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors">
                   {submitting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create account"}
                 </Button>
               </form>
@@ -181,7 +181,7 @@ export default function RegisterPage() {
               <p className="text-center text-white/35 text-sm mt-6">
                 Already have an account?{" "}
                 <button type="button" onClick={() => setLocation("/login")}
-                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+                  className="text-brand hover:text-brand font-medium transition-colors">
                   Sign in
                 </button>
               </p>
@@ -194,14 +194,14 @@ export default function RegisterPage() {
 }
 
 function getPasswordStrength(password: string): { score: number; color: string } {
-  if (!password) return { score: 0, color: "bg-white/[0.06]" };
+  if (!password) return { score: 0, color: "bg-neutral-900/[0.06]" };
   let score = 0;
   if (password.length >= 8) score++;
   if (password.length >= 12) score++;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
   const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-emerald-500"];
-  return { score, color: colors[score - 1] ?? "bg-white/[0.06]" };
+  return { score, color: colors[score - 1] ?? "bg-neutral-900/[0.06]" };
 }
 
 function getErrorMessage(msg: string): string {

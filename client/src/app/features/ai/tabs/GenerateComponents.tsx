@@ -44,9 +44,9 @@ export function ContentIdeaCard({ idea, platform, onSaveDraft }: {
           {idea.estimatedEngagement} engagement
         </span>
       </div>
-      <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl px-3 py-2 mb-3">
-        <p className="text-xs font-medium text-violet-700 dark:text-violet-400">Hook</p>
-        <p className="text-xs text-violet-900 dark:text-violet-300 mt-0.5">{idea.hook}</p>
+      <div className="bg-brand/10 dark:bg-brand/10 border border-brand/20 dark:border-brand/30 rounded-xl px-3 py-2 mb-3">
+        <p className="text-xs font-medium text-brand dark:text-brand">Hook</p>
+        <p className="text-xs text-brand dark:text-brand mt-0.5">{idea.hook}</p>
       </div>
       <p className={`text-sm text-foreground leading-relaxed mb-3 ${!expanded ? "line-clamp-3" : ""}`}>
         {idea.caption}
@@ -95,7 +95,7 @@ export function HashtagPanel({ platform }: { platform: string }) {
   });
 
   const categoryColors: Record<string, string> = {
-    niche:    "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    niche:    "bg-brand/10 text-brand dark:bg-brand/15 dark:text-brand",
     broad:    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     trending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   };

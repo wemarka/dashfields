@@ -92,8 +92,8 @@ describe("Topbar Layout Architecture", () => {
     const cssContent = fs.readFileSync(path.join(CLIENT_SRC, "index.css"), "utf-8");
 
     it("uses dark gray background (not pitch black)", () => {
-      // Background should be around oklch(0.215) — dark gray (#1A1919), not oklch(0) black
-      expect(cssContent).toMatch(/--color-background:\s+oklch\(0\.21/);
+      // Background should be neutral-950 oklch(0.145) — dark gray, not oklch(0) black
+      expect(cssContent).toMatch(/--color-background:\s+oklch\(0\.14/);
     });
 
     it("defines glass utility for dark mode", () => {

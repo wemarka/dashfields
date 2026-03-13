@@ -201,7 +201,7 @@ function PageAvatar({ url, name, size = 36 }: { url?: string | null; name: strin
   }
   return (
     <div
-      className="rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold flex-shrink-0"
+      className="rounded-full bg-gradient-to-br from-brand to-red-700 flex items-center justify-center text-white font-bold flex-shrink-0"
       style={{ width: size, height: size, fontSize: Math.max(size * 0.35, 9) }}
     >
       {initials || "P"}
@@ -302,7 +302,7 @@ function DynamicMediaRotator({ ad }: { ad: AdInfo }) {
             {idx > 0 && (
               <button
                 onClick={() => setIdx(i => i - 1)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-neutral-900/90 shadow-md flex items-center justify-center"
               >
                 <ChevronLeft className="w-4 h-4 text-[#050505]" />
               </button>
@@ -310,7 +310,7 @@ function DynamicMediaRotator({ ad }: { ad: AdInfo }) {
             {idx < totalAssets - 1 && (
               <button
                 onClick={() => setIdx(i => i + 1)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow-md flex items-center justify-center"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-neutral-900/90 shadow-md flex items-center justify-center"
               >
                 <ChevronRight className="w-4 h-4 text-[#050505]" />
               </button>
@@ -399,7 +399,7 @@ function CarouselPreviewInner({ cards, ctaType, variant }: {
               </div>
             </div>
             {/* Card footer */}
-            <div className={`flex items-center justify-between px-2 py-2 border-t border-[#CDD0D4] ${variant === "fb" ? "bg-[#F0F2F5]" : "bg-white"}`}>
+            <div className={`flex items-center justify-between px-2 py-2 border-t border-[#CDD0D4] ${variant === "fb" ? "bg-[#F0F2F5]" : "bg-neutral-900"}`}>
               <div className="flex-1 min-w-0">
                 {c.headline && (
                   <p className="text-[10px] font-semibold text-[#050505] truncate">{c.headline}</p>
@@ -412,7 +412,7 @@ function CarouselPreviewInner({ cards, ctaType, variant }: {
                 <button className={`ml-1.5 flex-shrink-0 text-[8px] font-semibold px-2 py-1 rounded-md ${
                   variant === "ig"
                     ? "bg-[#0095F6] text-white"
-                    : "border border-[#CDD0D4] bg-white text-[#050505]"
+                    : "border border-[#CDD0D4] bg-neutral-900 text-[#050505]"
                 }`}>
                   {ctaLabel}
                 </button>
@@ -428,7 +428,7 @@ function CarouselPreviewInner({ cards, ctaType, variant }: {
           {idx > 0 && (
             <button
               onClick={() => setIdx(i => i - 1)}
-              className="absolute left-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
+              className="absolute left-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-neutral-900 shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
             >
               <ChevronLeft className="w-4 h-4 text-[#050505]" />
             </button>
@@ -436,7 +436,7 @@ function CarouselPreviewInner({ cards, ctaType, variant }: {
           {idx < cards.length - 1 && (
             <button
               onClick={() => setIdx(i => i + 1)}
-              className="absolute right-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
+              className="absolute right-0 top-[40%] -translate-y-1/2 w-7 h-7 rounded-full bg-neutral-900 shadow-md flex items-center justify-center z-10 border border-[#CDD0D4]"
             >
               <ChevronRight className="w-4 h-4 text-[#050505]" />
             </button>
@@ -472,7 +472,7 @@ export function FacebookFeedPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
 
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-[#CDD0D4] bg-white shadow-sm font-[system-ui,sans-serif]">
+    <div className="w-full rounded-xl overflow-hidden border border-[#CDD0D4] bg-neutral-900 shadow-sm font-[system-ui,sans-serif]">
       {/* Header */}
       <div className="flex items-start justify-between px-3 pt-3 pb-2">
         <div className="flex items-center gap-2">
@@ -566,13 +566,13 @@ export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
   const resolvedAvatarUrl = ad.pageAvatarUrl ?? pageAvatarUrl;
 
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-[#DBDBDB] bg-white shadow-sm font-[system-ui,sans-serif]">
+    <div className="w-full rounded-xl overflow-hidden border border-[#DBDBDB] bg-neutral-900 shadow-sm font-[system-ui,sans-serif]">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
-              <div className="w-full h-full rounded-full overflow-hidden bg-white p-[1.5px]">
+            <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-red-700">
+              <div className="w-full h-full rounded-full overflow-hidden bg-neutral-900 p-[1.5px]">
                 <PageAvatar url={resolvedAvatarUrl} name={resolvedPageName} size={26} />
               </div>
             </div>
@@ -650,11 +650,11 @@ export function InstagramStoryPreview({ ad, pageName, pageAvatarUrl }: {
 
       {/* Progress bars */}
       <div className="absolute top-2 left-2 right-2 flex gap-0.5 z-10">
-        <div className="flex-1 h-0.5 rounded-full bg-white/40">
-          <div className="h-full w-2/3 rounded-full bg-white" />
+        <div className="flex-1 h-0.5 rounded-full bg-neutral-900/40">
+          <div className="h-full w-2/3 rounded-full bg-neutral-900" />
         </div>
-        <div className="flex-1 h-0.5 rounded-full bg-white/40" />
-        <div className="flex-1 h-0.5 rounded-full bg-white/40" />
+        <div className="flex-1 h-0.5 rounded-full bg-neutral-900/40" />
+        <div className="flex-1 h-0.5 rounded-full bg-neutral-900/40" />
       </div>
 
       {/* Header */}
@@ -718,7 +718,7 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       ) : bgSrc ? (
         <img src={bgSrc} alt={ad.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-700" />
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 to-neutral-700" />
       )}
       {!hasVideo && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />}
 
@@ -772,7 +772,7 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
           <span className="text-[8px] text-white/70 truncate">Original Audio · {resolvedPageName}</span>
         </div>
         {ctaLabel && (
-          <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
+          <button className="flex items-center gap-1.5 bg-neutral-900/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
             {ctaLabel}
             <ChevronRight className="w-3 h-3" />
           </button>
@@ -782,9 +782,9 @@ export function InstagramReelPreview({ ad, pageName, pageAvatarUrl }: {
       {/* Progress bar at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <div className="flex items-center gap-2 px-3 pb-2">
-          <div className="flex-1 h-0.5 rounded-full bg-white/30 overflow-hidden">
+          <div className="flex-1 h-0.5 rounded-full bg-neutral-900/30 overflow-hidden">
             <div
-              className="h-full bg-white rounded-full transition-all duration-300"
+              className="h-full bg-neutral-900 rounded-full transition-all duration-300"
               style={{ width: `${duration > 0 ? (progress / duration) * 100 : 0}%` }}
             />
           </div>
@@ -874,7 +874,7 @@ export function FacebookReelPreview({ ad, pageName, pageAvatarUrl }: {
           <span className="text-[8px] text-white/70 truncate">Original Audio · {resolvedPageName}</span>
         </div>
         {ctaLabel && (
-          <button className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
+          <button className="flex items-center gap-1.5 bg-neutral-900/20 backdrop-blur-sm border border-white/30 text-white text-[10px] font-semibold px-3 py-1.5 rounded-lg">
             {ctaLabel}
             <ChevronRight className="w-3 h-3" />
           </button>
@@ -884,9 +884,9 @@ export function FacebookReelPreview({ ad, pageName, pageAvatarUrl }: {
       {/* Progress bar at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <div className="flex items-center gap-2 px-3 pb-2">
-          <div className="flex-1 h-0.5 rounded-full bg-white/30 overflow-hidden">
+          <div className="flex-1 h-0.5 rounded-full bg-neutral-900/30 overflow-hidden">
             <div
-              className="h-full bg-white rounded-full transition-all duration-300"
+              className="h-full bg-neutral-900 rounded-full transition-all duration-300"
               style={{ width: `${duration > 0 ? (progress / duration) * 100 : 0}%` }}
             />
           </div>
@@ -920,8 +920,8 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
 
       {/* Progress */}
       <div className="absolute top-2 left-2 right-2 z-10">
-        <div className="h-0.5 rounded-full bg-white/40">
-          <div className="h-full w-1/2 rounded-full bg-white" />
+        <div className="h-0.5 rounded-full bg-neutral-900/40">
+          <div className="h-full w-1/2 rounded-full bg-neutral-900" />
         </div>
       </div>
 
@@ -948,7 +948,7 @@ export function FacebookStoryPreview({ ad, pageName, pageAvatarUrl }: {
           <p className="text-[10px] text-white text-center line-clamp-2">{ad.message}</p>
         )}
         {ctaLabel && (
-          <button className="w-full py-2 rounded-lg bg-white text-[#050505] text-[11px] font-semibold">
+          <button className="w-full py-2 rounded-lg bg-neutral-900 text-[#050505] text-[11px] font-semibold">
             {ctaLabel}
           </button>
         )}

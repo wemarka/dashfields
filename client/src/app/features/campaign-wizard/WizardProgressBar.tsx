@@ -23,11 +23,11 @@ export function WizardProgressBar({ currentStep }: Props) {
   const currentIdx = STEP_ORDER.indexOf(currentStep);
 
   return (
-    <div className="w-full px-6 py-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
+    <div className="w-full px-6 py-4 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-sm">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between relative">
           {/* Connecting line */}
-          <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 z-0" />
+          <div className="absolute top-4 left-0 right-0 h-0.5 bg-neutral-800 z-0" />
           <div
             className="absolute top-4 left-0 h-0.5 bg-gradient-to-r from-red-500 to-red-600 z-0 transition-all duration-500"
             style={{
@@ -51,7 +51,7 @@ export function WizardProgressBar({ currentStep }: Props) {
                       ? "bg-red-500 text-white shadow-md shadow-red-200"
                       : isCurrent
                         ? "bg-red-500 text-white shadow-lg shadow-red-300 scale-110"
-                        : "bg-gray-100 text-gray-400 border border-gray-200",
+                        : "bg-neutral-800 text-neutral-500 border border-neutral-700",
                   )}
                 >
                   {isCompleted ? (
@@ -65,7 +65,7 @@ export function WizardProgressBar({ currentStep }: Props) {
                 <span
                   className={cn(
                     "text-[10px] font-medium text-center leading-tight max-w-[60px] hidden sm:block",
-                    isActive ? "text-red-600" : "text-gray-400",
+                    isActive ? "text-red-600" : "text-neutral-500",
                   )}
                 >
                   {STEP_LABELS[step]}

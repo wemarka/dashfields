@@ -86,7 +86,7 @@ export default function Settings() {
     <div className="flex flex-col h-full">
       {/* ── Header ── */}
       <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Settings</h2>
+        <h2 className="text-[17px] font-semibold text-white">Settings</h2>
       </div>
 
       {/* ── Scrollable body ── */}
@@ -94,11 +94,11 @@ export default function Settings() {
 
         {/* General section */}
         <div className="px-7 py-5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-gray-400">General</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-neutral-500">General</p>
 
           {/* Language */}
           <div className="mb-5">
-            <p className="text-[13px] font-semibold mb-2 text-gray-800">Language</p>
+            <p className="text-[13px] font-semibold mb-2 text-white">Language</p>
             <Select value={language} onValueChange={(v) => { setLanguage(v); updateMutation.mutate({ language: v }); }}>
               <SelectTrigger className="w-40 h-9 text-[13px]">
                 <SelectValue />
@@ -115,7 +115,7 @@ export default function Settings() {
 
           {/* Appearance */}
           <div>
-            <p className="text-[13px] font-semibold mb-3 text-gray-800">Appearance</p>
+            <p className="text-[13px] font-semibold mb-3 text-white">Appearance</p>
             <div className="flex gap-3">
               {themeOptions.map((opt) => {
                 const isActive = theme === opt.value;
@@ -150,13 +150,13 @@ export default function Settings() {
 
         {/* Communication preferences */}
         <div className="px-7 py-5" style={{ borderTop: "1px solid #f0f0f0" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-gray-400">Communication preferences</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-neutral-500">Communication preferences</p>
 
           <div className="space-y-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[13px] font-semibold text-gray-800">Receive product updates</p>
-                <p className="text-[12px] mt-0.5 leading-snug text-gray-400">
+                <p className="text-[13px] font-semibold text-white">Receive product updates</p>
+                <p className="text-[12px] mt-0.5 leading-snug text-neutral-500">
                   Receive early access to feature releases and success stories to optimize your workflow.
                 </p>
               </div>
@@ -169,8 +169,8 @@ export default function Settings() {
 
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[13px] font-semibold text-gray-800">Email me when my queued task starts</p>
-                <p className="text-[12px] mt-0.5 leading-snug text-gray-400">
+                <p className="text-[13px] font-semibold text-white">Email me when my queued task starts</p>
+                <p className="text-[12px] mt-0.5 leading-snug text-neutral-500">
                   When enabled, we'll send you a timely email once your task finishes queuing and begins processing.
                 </p>
               </div>
@@ -185,7 +185,7 @@ export default function Settings() {
 
         {/* API Keys */}
         <div className="px-7 py-5" style={{ borderTop: "1px solid #f0f0f0" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-gray-400">API Keys</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mb-4 text-neutral-500">API Keys</p>
           <ApiKeysSection />
         </div>
 
@@ -194,10 +194,10 @@ export default function Settings() {
           className="px-7 py-4 flex items-center justify-between"
           style={{ borderTop: "1px solid #f0f0f0" }}
         >
-          <span className="text-[13px] text-gray-600">Manage Cookies</span>
+          <span className="text-[13px] text-neutral-400">Manage Cookies</span>
           <button
             onClick={() => toast.info("Cookie preferences coming soon")}
-            className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+            className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
           >
             Manage
           </button>

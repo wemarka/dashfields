@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
             "Your account security matters. We'll help you get back in safely."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-400 text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-brand/15 flex items-center justify-center text-brand text-sm font-semibold">D</div>
             <div>
               <p className="text-white/90 text-sm font-medium">Dashfields Team</p>
               <p className="text-white/30 text-xs">dashfields.com</p>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
               </p>
               <Button
                 variant="outline"
-                className="gap-2 rounded-xl border-white/[0.08] text-white/60 hover:bg-white/[0.04]"
+                className="gap-2 rounded-xl border-white/[0.08] text-white/60 hover:bg-neutral-900/[0.04]"
                 onClick={() => setLocation("/login")}
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       autoComplete="email"
-                      className="pl-10 h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-violet-500/50 focus:ring-violet-500/10 rounded-xl"
+                      className="pl-10 h-11 bg-neutral-900/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/50 focus:ring-brand/10 rounded-xl"
                     />
                   </div>
                 </div>
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   type="submit"
                   disabled={submitting || !email}
-                  className="w-full h-11 rounded-xl font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors"
                 >
                   {submitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin mr-2" />Sending...</>

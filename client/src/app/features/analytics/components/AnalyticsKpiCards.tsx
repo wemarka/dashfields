@@ -56,7 +56,7 @@ export function AnalyticsKpiCards({ insights, prevData, comparePrevPreset }: Ana
     { label: "Reach",        value: fmtNum(insights.reach),              rawVal: insights.reach,        icon: Users,             color: "bg-emerald-50 text-emerald-600", prev: prevData?.reach },
     { label: "CTR",          value: insights.ctr.toFixed(2) + "%",       rawVal: insights.ctr,          icon: TrendingUp,        color: "bg-rose-50 text-rose-600",     prev: prevData?.ctr },
     { label: "CPC",          value: fmtMoney(insights.cpc),              rawVal: insights.cpc,          icon: DollarSign,        color: "bg-cyan-50 text-cyan-600",     prev: prevData?.cpc },
-    { label: "CPM",          value: fmtMoney(insights.cpm),              rawVal: insights.cpm,          icon: Eye,               color: "bg-indigo-50 text-indigo-600", prev: prevData?.cpm },
+    { label: "CPM",          value: fmtMoney(insights.cpm),              rawVal: insights.cpm,          icon: Eye,               color: "bg-brand/10 text-brand", prev: prevData?.cpm },
     { label: "Frequency",    value: insights.frequency.toFixed(2) + "x", rawVal: insights.frequency,    icon: Users,             color: "bg-orange-50 text-orange-600", prev: null },
   ];
 
@@ -75,7 +75,7 @@ export function AnalyticsKpiCards({ insights, prevData, comparePrevPreset }: Ana
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Current</span>
           <span>vs</span>
-          <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{comparePrevPreset}</span>
+          <span className="px-2 py-1 rounded-full bg-neutral-900/5 border border-white/10">{comparePrevPreset}</span>
         </div>
       )}
 

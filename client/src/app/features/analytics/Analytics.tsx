@@ -164,7 +164,7 @@ export default function Analytics() {
     { label: "Clicks", icon: MousePointer, curr: kpiData?.clicks ?? 0, prev: kpiData?.prevClicks ?? 0, fmt: fmtNum, color: "text-amber-500", bg: "bg-amber-500/10" },
     { label: "CTR", icon: Target, curr: kpiData?.ctr ?? 0, prev: kpiData?.prevCtr ?? 0, fmt: (n: number) => n.toFixed(2) + "%", color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { label: "CPC", icon: DollarSign, curr: kpiData?.cpc ?? 0, prev: kpiData?.prevCpc ?? 0, fmt: fmtMoney, color: "text-rose-500", bg: "bg-rose-500/10" },
-    { label: "Reach", icon: Users, curr: kpiData?.reach ?? 0, prev: kpiData?.prevReach ?? 0, fmt: fmtNum, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { label: "Reach", icon: Users, curr: kpiData?.reach ?? 0, prev: kpiData?.prevReach ?? 0, fmt: fmtNum, color: "text-brand", bg: "bg-brand/10" },
   ];
 
   return (
@@ -340,7 +340,7 @@ export default function Analytics() {
                             <td className="px-4 py-3 text-center">
                               {ins.isLive
                                 ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">Live</span>
-                                : <span className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">Demo</span>
+                                : <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-500 font-medium">Demo</span>
                               }
                             </td>
                           </tr>
@@ -405,7 +405,7 @@ export default function Analytics() {
                     .map((item, idx) => (
                       <div key={idx} className="flex items-center gap-3">
                         <span className="text-xs font-bold text-muted-foreground w-4">#{idx + 1}</span>
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: (PLATFORM_COLORS[item.platform] || "#6366f1") + "20" }}>
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: (PLATFORM_COLORS[item.platform] || "#c41919") + "20" }}>
                           <PlatformIcon platform={item.platform} className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -414,7 +414,7 @@ export default function Analytics() {
                             <span className="text-xs text-muted-foreground">ROAS: {item.roas}x</span>
                           </div>
                           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                            <div className="h-full rounded-full transition-all" style={{ width: "60%", background: PLATFORM_COLORS[item.platform] || "#6366f1" }} />
+                            <div className="h-full rounded-full transition-all" style={{ width: "60%", background: PLATFORM_COLORS[item.platform] || "#c41919" }} />
                           </div>
                         </div>
                       </div>
@@ -476,7 +476,7 @@ export default function Analytics() {
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} formatter={(v: unknown) => (v as number).toLocaleString()} />
                       <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="Current" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Current" fill="#c41919" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Previous" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>

@@ -235,7 +235,7 @@ export function AdPreviewIframe({
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Meta official iframe */}
-      <div className={`rounded-xl overflow-hidden border border-border shadow-sm bg-white transition-opacity ${isFetching ? "opacity-60" : "opacity-100"}`}>
+      <div className={`rounded-xl overflow-hidden border border-border shadow-sm bg-neutral-900 transition-opacity ${isFetching ? "opacity-60" : "opacity-100"}`}>
         <IframeRenderer html={data.iframeHtml} width={dims.width} height={dims.height} />
       </div>
 

@@ -47,7 +47,7 @@ export function ResultCard({ result, compact = false }: { result: SentimentResul
       {!compact && result.keywords && result.keywords.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-            <Tag className="w-3.5 h-3.5 text-violet-500" /> Key Terms
+            <Tag className="w-3.5 h-3.5 text-brand" /> Key Terms
           </p>
           <div className="flex flex-wrap gap-1.5">
             {result.keywords.slice(0, 10).map((kw, i) => (

@@ -19,10 +19,10 @@ const PLAN_ICONS: Record<WorkspacePlan, React.ElementType> = {
   free: Sparkles, pro: Zap, agency: Building2, enterprise: Crown,
 };
 const PLAN_ICON_COLOR: Record<WorkspacePlan, string> = {
-  free: "text-gray-400", pro: "text-blue-500", agency: "text-purple-500", enterprise: "text-amber-500",
+  free: "text-neutral-500", pro: "text-blue-500", agency: "text-purple-500", enterprise: "text-amber-500",
 };
 const PLAN_ICON_BG: Record<WorkspacePlan, string> = {
-  free: "bg-gray-100", pro: "bg-blue-50", agency: "bg-purple-50", enterprise: "bg-amber-50",
+  free: "bg-neutral-800", pro: "bg-blue-50", agency: "bg-purple-50", enterprise: "bg-amber-50",
 };
 const PLAN_ORDER: WorkspacePlan[] = ["free", "pro", "agency"];
 
@@ -46,7 +46,7 @@ function CardBrandIcon({ brand }: { brand: string }) {
     Visa: "bg-blue-600", Mastercard: "bg-red-500", Amex: "bg-green-600",
   };
   return (
-    <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-gray-500"}`}>
+    <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-neutral-800/500"}`}>
       {brand.slice(0, 4).toUpperCase()}
     </div>
   );
@@ -73,18 +73,18 @@ export function BillingPage() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Billing</h2>
-        <p className="text-[13px] mt-0.5 text-gray-400">Manage your subscription, payment methods, and invoices</p>
+        <h2 className="text-[17px] font-semibold text-white">Billing</h2>
+        <p className="text-[13px] mt-0.5 text-neutral-500">Manage your subscription, payment methods, and invoices</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-7 py-6 space-y-8">
 
         {/* ① SUBSCRIPTION ─────────────────────────────────────────────────── */}
         <section>
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Subscription</p>
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest mb-3">Subscription</p>
 
           {/* Current plan — single clean card */}
-          <div className="p-5 rounded-xl border border-gray-100 bg-gray-50/40">
+          <div className="p-5 rounded-xl border border-neutral-800 bg-neutral-800/50/40">
             {/* Top row: plan info + actions */}
             <div className="flex items-center gap-4">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${PLAN_ICON_BG[currentPlan]}`}>
@@ -92,12 +92,12 @@ export function BillingPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-bold text-gray-900">{planConfig.name}</span>
+                  <span className="text-[15px] font-bold text-white">{planConfig.name}</span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200 flex items-center gap-0.5">
                     <Check className="w-2.5 h-2.5" /> Active
                   </span>
                 </div>
-                <p className="text-[12px] text-gray-400 mt-0.5">
+                <p className="text-[12px] text-neutral-500 mt-0.5">
                   {planConfig.price.monthly === 0
                     ? "Free — no credit card required"
                     : `$${planConfig.price.monthly}/month · renews automatically`}
@@ -107,7 +107,7 @@ export function BillingPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => toast.info("Plan management coming soon.")}
-                    className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold border border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
+                    className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold border border-neutral-700 text-neutral-400 hover:bg-neutral-800 transition-all"
                   >
                     Manage
                   </button>
@@ -125,14 +125,14 @@ export function BillingPage() {
             </div>
 
             {/* Plan features */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="mt-4 pt-4 border-t border-neutral-800">
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 {planConfig.features.map((feature, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
                       <Check className="w-2.5 h-2.5 text-green-500" />
                     </div>
-                    <span className="text-[12px] text-gray-600">{feature}</span>
+                    <span className="text-[12px] text-neutral-400">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -140,12 +140,12 @@ export function BillingPage() {
           </div>
         </section>
 
-        <hr className="border-gray-100" />
+        <hr className="border-neutral-800" />
 
         {/* ② PAYMENT METHODS ──────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Payment Methods</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest">Payment Methods</p>
             {isOwner && (
               <button
                 onClick={() => toast.info("Payment method management coming soon.")}
@@ -158,25 +158,25 @@ export function BillingPage() {
 
           <div className="space-y-2">
             {MOCK_PAYMENT_METHODS.map(pm => (
-              <div key={pm.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100">
+              <div key={pm.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-800">
                 <CardBrandIcon brand={pm.brand} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-medium text-gray-800">
+                    <span className="text-[13px] font-medium text-white">
                       {pm.brand} ···· {pm.last4}
                     </span>
                     {pm.isDefault && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-500">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-800 text-neutral-400">
                         Default
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-gray-400">Expires {pm.expMonth}/{pm.expYear}</p>
+                  <p className="text-[11px] text-neutral-500">Expires {pm.expMonth}/{pm.expYear}</p>
                 </div>
                 {isOwner && !pm.isDefault && (
                   <button
                     onClick={() => toast.info("Remove card coming soon.")}
-                    className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all"
+                    className="p-1.5 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-all"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -184,7 +184,7 @@ export function BillingPage() {
                 {isOwner && (
                   <button
                     onClick={() => toast.info("Manage payment methods coming soon.")}
-                    className="p-1.5 rounded-lg text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-all"
+                    className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-400 hover:bg-neutral-800 transition-all"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
                   </button>
@@ -194,12 +194,12 @@ export function BillingPage() {
           </div>
         </section>
 
-        <hr className="border-gray-100" />
+        <hr className="border-neutral-800" />
 
         {/* ③ RECENT INVOICES ──────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Recent Invoices</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest">Recent Invoices</p>
             <button
               onClick={() => toast.info("Full invoice history coming soon.")}
               className="text-[12px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
@@ -209,7 +209,7 @@ export function BillingPage() {
           </div>
 
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">
             <span>Description</span>
             <span className="text-right">Date</span>
             <span className="text-right">Amount</span>
@@ -220,19 +220,19 @@ export function BillingPage() {
             {MOCK_INVOICES.map((inv, i) => (
               <div
                 key={inv.id}
-                className={`grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer ${
-                  i < MOCK_INVOICES.length - 1 ? "border-b border-gray-50" : ""
+                className={`grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-4 py-3 rounded-xl hover:bg-neutral-800/50 transition-colors cursor-pointer ${
+                  i < MOCK_INVOICES.length - 1 ? "border-b border-neutral-800" : ""
                 }`}
                 onClick={() => toast.info("Invoice download coming soon.")}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                    <Receipt className="w-3.5 h-3.5 text-gray-400" />
+                  <div className="w-7 h-7 rounded-lg bg-neutral-800 flex items-center justify-center shrink-0">
+                    <Receipt className="w-3.5 h-3.5 text-neutral-500" />
                   </div>
-                  <span className="text-[13px] text-gray-700 truncate">{inv.description}</span>
+                  <span className="text-[13px] text-neutral-300 truncate">{inv.description}</span>
                 </div>
-                <span className="text-[12px] text-gray-400 text-right whitespace-nowrap">{inv.date}</span>
-                <span className="text-[13px] font-semibold text-gray-800 text-right">{inv.amount}</span>
+                <span className="text-[12px] text-neutral-500 text-right whitespace-nowrap">{inv.date}</span>
+                <span className="text-[13px] font-semibold text-white text-right">{inv.amount}</span>
                 <span className="flex items-center justify-end">
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200">
                     {inv.status}
@@ -243,12 +243,12 @@ export function BillingPage() {
           </div>
         </section>
 
-        <hr className="border-gray-100" />
+        <hr className="border-neutral-800" />
 
         {/* ④ CANCEL SUBSCRIPTION ──────────────────────────────────────────── */}
         {currentPlan !== "free" && isOwner && (
           <section>
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Cancel Subscription</p>
+            <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest mb-3">Cancel Subscription</p>
 
             {!showCancelConfirm ? (
               <div className="flex items-start gap-4 p-4 rounded-xl border border-red-100 bg-red-50/30">
@@ -256,8 +256,8 @@ export function BillingPage() {
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-gray-800">Cancel your {planConfig.name} plan</p>
-                  <p className="text-[12px] text-gray-400 mt-0.5">
+                  <p className="text-[13px] font-semibold text-white">Cancel your {planConfig.name} plan</p>
+                  <p className="text-[12px] text-neutral-500 mt-0.5">
                     Your subscription will remain active until the end of the current billing period. After that, your workspace will revert to the Free plan.
                   </p>
                 </div>
@@ -270,8 +270,8 @@ export function BillingPage() {
               </div>
             ) : (
               <div className="p-4 rounded-xl border border-red-200 bg-red-50/50">
-                <p className="text-[14px] font-semibold text-gray-900 mb-1">Are you sure?</p>
-                <p className="text-[12px] text-gray-500 mb-4">
+                <p className="text-[14px] font-semibold text-white mb-1">Are you sure?</p>
+                <p className="text-[12px] text-neutral-400 mb-4">
                   This will cancel your {planConfig.name} subscription. You'll keep access until the end of your billing period.
                 </p>
                 <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ export function BillingPage() {
                   </button>
                   <button
                     onClick={() => setShowCancelConfirm(false)}
-                    className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
+                    className="px-4 py-2 rounded-lg text-[12px] font-semibold border border-neutral-700 text-neutral-400 hover:bg-neutral-800/50 transition-all"
                   >
                     Keep subscription
                   </button>

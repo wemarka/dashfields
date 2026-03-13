@@ -271,7 +271,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-background z-10">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-red-700 flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <h2 className="text-sm font-semibold text-foreground">Create Post</h2>
@@ -390,7 +390,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowAiPanel((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-600 hover:bg-violet-500/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand/10 border border-brand/20 text-xs font-medium text-brand hover:bg-brand/20 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
               AI Generate
@@ -420,14 +420,14 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
           {/* AI Panel */}
           {showAiPanel && (
-            <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-3">
-              <p className="text-xs font-semibold text-violet-700">✨ AI Caption Generator</p>
+            <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-3">
+              <p className="text-xs font-semibold text-brand">✨ AI Caption Generator</p>
               <input
                 type="text"
                 value={aiTopic}
                 onChange={(e) => setAiTopic(e.target.value)}
                 placeholder="Describe your post topic (e.g. summer sale, new product launch)"
-                className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand/30"
               />
               <div className="flex items-center gap-2 flex-wrap">
                 {(["casual", "professional", "humorous", "inspirational"] as const).map((tone) => (
@@ -437,7 +437,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                     className={
                       "px-2.5 py-1 rounded-lg text-xs font-medium border transition-all capitalize " +
                       (aiTone === tone
-                        ? "bg-violet-600 text-white border-violet-600"
+                        ? "bg-brand text-white border-brand"
                         : "bg-muted text-muted-foreground border-transparent hover:border-border")
                     }
                   >
@@ -448,7 +448,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
               <button
                 onClick={handleGenerateCaption}
                 disabled={generateCaption.isPending}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {generateCaption.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {generateCaption.isPending ? "Generating..." : "Generate Caption"}

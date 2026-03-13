@@ -24,8 +24,8 @@ const PLATFORM_COLORS: Record<string, string> = {
   facebook:  "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   instagram: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
   messenger: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-  audience_network: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  tiktok:    "bg-slate-500/10 text-slate-600 dark:text-slate-400",
+  audience_network: "bg-brand/10 text-brand dark:text-brand",
+  tiktok:    "bg-neutral-500/10 text-neutral-600 dark:text-neutral-400",
 };
 
 // ─── Budget Pacing Bar ───────────────────────────────────────────────────────

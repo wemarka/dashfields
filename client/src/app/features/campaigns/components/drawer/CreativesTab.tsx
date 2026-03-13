@@ -260,7 +260,7 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
       <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
         {[adA, adB].map((ad, idx) => (
           <div key={ad.id} className="p-3 flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-violet-500"}`} />
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-brand"}`} />
             <div className="w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-muted">
               {(ad.thumbnailUrl || ad.imageUrl) ? (
                 <img src={ad.thumbnailUrl ?? ad.imageUrl ?? ""} alt={ad.name} className="w-full h-full object-cover" />
@@ -307,7 +307,7 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
                   </div>
                   <div className="h-1 rounded-full bg-muted overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${bIsBetter ? "bg-emerald-500" : "bg-violet-400"}`}
+                      className={`h-full rounded-full ${bIsBetter ? "bg-emerald-500" : "bg-brand"}`}
                       style={{ width: `${(m.b / maxVal) * 100}%` }}
                     />
                   </div>
@@ -328,10 +328,10 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
           </div>
           {/* Side-by-side iframes */}
           <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
-            {[{ ad: adA, color: "blue" }, { ad: adB, color: "violet" }].map(({ ad, color }, idx) => (
+            {[{ ad: adA, color: "blue" }, { ad: adB, color: "red" }].map(({ ad, color }, idx) => (
               <div key={ad.id} className="flex flex-col items-center p-3 gap-2">
                 <div className={`flex items-center gap-1.5 self-start`}>
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-violet-500"}`} />
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-brand"}`} />
                   <span className="text-[9px] font-semibold text-muted-foreground">{idx === 0 ? "Ad A" : "Ad B"}</span>
                 </div>
                 <div className="w-full flex justify-center overflow-x-auto">

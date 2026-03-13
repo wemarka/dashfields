@@ -96,8 +96,8 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   google: {
-    color: "bg-white border border-gray-200",
-    textColor: "text-gray-700",
+    color: "bg-neutral-900 border border-neutral-700",
+    textColor: "text-neutral-300",
     label: "Google",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -140,7 +140,7 @@ function formatFollowers(n: number): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 export function PlatformAccountCard({ account, onClick }: PlatformAccountCardProps) {
   const cfg = PLATFORM_ICONS[account.platform] ?? {
-    color: "bg-gray-500",
+    color: "bg-neutral-800/500",
     textColor: "text-white",
     label: account.platform,
     icon: <span className="text-xs font-bold">{account.platform[0].toUpperCase()}</span>,

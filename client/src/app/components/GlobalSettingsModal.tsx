@@ -50,7 +50,7 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 function TabContent({ activeTab }: { activeTab: TabId }) {
   const fallback = (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+      <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />
     </div>
   );
 
@@ -72,14 +72,14 @@ function IntegrationsContent() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-7 pt-6 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Integrations</h2>
+        <h2 className="text-[17px] font-semibold text-white">Integrations</h2>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-          <Plug className="w-6 h-6 text-gray-400" />
+        <div className="w-14 h-14 rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+          <Plug className="w-6 h-6 text-neutral-500" />
         </div>
-        <h3 className="text-[15px] font-semibold text-gray-800 mb-1">Coming Soon</h3>
-        <p className="text-[13px] text-gray-400 max-w-[220px] leading-relaxed">
+        <h3 className="text-[15px] font-semibold text-white mb-1">Coming Soon</h3>
+        <p className="text-[13px] text-neutral-500 max-w-[220px] leading-relaxed">
           Integrations with your favorite apps are on the way.
         </p>
       </div>

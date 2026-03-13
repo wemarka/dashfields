@@ -10,10 +10,10 @@ export function HeroSection() {
   return (
     <section className="relative pt-24 pb-20 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-white to-neutral-100" />
       {/* Decorative blobs */}
       <div className="absolute top-20 right-0 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-40 pointer-events-none" />
-      <div className="absolute bottom-0 left-10 w-72 h-72 bg-indigo-100 rounded-full blur-3xl opacity-30 pointer-events-none" />
+      <div className="absolute bottom-0 left-10 w-72 h-72 bg-brand/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
@@ -26,7 +26,7 @@ export function HeroSection() {
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
             Manage All Your Ads &amp; Content.{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-red-700">
               One AI-Powered Dashboard.
             </span>
           </h1>
@@ -84,13 +84,13 @@ function DashboardMockup() {
           </div>
         </div>
         {/* Dashboard preview */}
-        <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+        <div className="bg-gradient-to-br from-neutral-50 to-blue-50 p-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-4 gap-3 mb-4">
             {[
               { label: "Total Reach", value: "2.4M", trend: "+18%", color: "blue" },
-              { label: "Impressions", value: "8.7M", trend: "+24%", color: "indigo" },
-              { label: "Avg CTR", value: "3.2%", trend: "+0.8%", color: "violet" },
+              { label: "Impressions", value: "8.7M", trend: "+24%", color: "red" },
+              { label: "Avg CTR", value: "3.2%", trend: "+0.8%", color: "red" },
               { label: "Total Spend", value: "$4,280", trend: "-5%", color: "purple" },
             ].map((kpi) => (
               <div key={kpi.label} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
@@ -116,7 +116,7 @@ function DashboardMockup() {
                 {[
                   { name: "Facebook", pct: 42, color: "bg-blue-500" },
                   { name: "Instagram", pct: 31, color: "bg-pink-500" },
-                  { name: "TikTok", pct: 18, color: "bg-slate-800" },
+                  { name: "TikTok", pct: 18, color: "bg-neutral-800" },
                   { name: "LinkedIn", pct: 9, color: "bg-blue-700" },
                 ].map((p) => (
                   <div key={p.name}>

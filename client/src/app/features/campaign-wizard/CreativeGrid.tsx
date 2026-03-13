@@ -122,8 +122,8 @@ export function CreativeGrid({
           <RefreshCw className="w-9 h-9 text-white animate-spin" />
         </div>
         <div className="text-center space-y-2">
-          <p className="font-semibold text-gray-800 text-xl">جاري توليد الصور الإعلانية...</p>
-          <p className="text-gray-400 text-sm">يستغرق هذا 30-60 ثانية</p>
+          <p className="font-semibold text-white text-xl">جاري توليد الصور الإعلانية...</p>
+          <p className="text-neutral-500 text-sm">يستغرق هذا 30-60 ثانية</p>
         </div>
         <div className="flex gap-2 mt-1">
           {[0, 1, 2, 3].map(i => (
@@ -140,7 +140,7 @@ export function CreativeGrid({
 
   if (creatives.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-neutral-500">
         <p className="text-sm">لا توجد صور بعد</p>
       </div>
     );
@@ -154,9 +154,9 @@ export function CreativeGrid({
         {/* Stats row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
-              <strong className="text-gray-800">{approvedCount}</strong>
-              <span className="mx-1 text-gray-300">/</span>
+            <span className="text-sm text-neutral-400">
+              <strong className="text-white">{approvedCount}</strong>
+              <span className="mx-1 text-neutral-500">/</span>
               <span>{totalCount} صورة</span>
             </span>
             {approvedCount > 0 && (
@@ -171,7 +171,7 @@ export function CreativeGrid({
             size="sm"
             onClick={onProceed}
             disabled={approvedCount === 0}
-            className="gap-2 bg-gray-900 hover:bg-gray-800 text-white text-xs px-4 h-8 rounded-lg shadow-sm"
+            className="gap-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs px-4 h-8 rounded-lg shadow-sm"
           >
             <Check className="w-3.5 h-3.5" />
             المتابعة ({approvedCount})
@@ -182,7 +182,7 @@ export function CreativeGrid({
         <div className="flex items-center gap-2 flex-wrap">
           {/* A/B Toggle */}
           {hasVariantB && (
-            <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
+            <div className="flex items-center bg-neutral-800 rounded-lg p-0.5 gap-0.5">
               {(["all", "A", "B"] as VariantFilter[]).map(v => (
                 <button
                   key={v}
@@ -190,8 +190,8 @@ export function CreativeGrid({
                   className={cn(
                     "px-3 py-1 rounded-md text-xs font-medium transition-all duration-150",
                     variantFilter === v
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700",
+                      ? "bg-neutral-900 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-neutral-300",
                   )}
                 >
                   {v === "all" ? "الكل" : `Variant ${v}`}
@@ -206,7 +206,7 @@ export function CreativeGrid({
             size="sm"
             onClick={() => void handleAnalyze()}
             disabled={isAnalyzing}
-            className="gap-1.5 text-xs h-8 border-violet-200 text-violet-700 hover:bg-violet-50 hover:border-violet-300"
+            className="gap-1.5 text-xs h-8 border-brand/20 text-brand hover:bg-brand/10 hover:border-brand/40"
           >
             {isAnalyzing
               ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />جاري التحليل...</>
@@ -235,7 +235,7 @@ export function CreativeGrid({
             variant="outline"
             size="sm"
             onClick={onRegenerateRequest}
-            className="gap-1.5 text-xs h-8 text-gray-500 hover:text-gray-700 ml-auto"
+            className="gap-1.5 text-xs h-8 text-neutral-400 hover:text-neutral-300 ml-auto"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             توليد جديد
@@ -245,17 +245,17 @@ export function CreativeGrid({
 
       {/* ── AI Analysis Panel ─────────────────────────────────────────────── */}
       {showAnalysis && (
-        <div className="mx-1 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-white overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-violet-100">
+        <div className="mx-1 rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/10 to-white overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-brand/20">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                <Brain className="w-4 h-4 text-violet-600" />
+              <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center">
+                <Brain className="w-4 h-4 text-brand" />
               </div>
-              <span className="text-sm font-semibold text-violet-900">التحليل الذكي للصور</span>
+              <span className="text-sm font-semibold text-brand">التحليل الذكي للصور</span>
             </div>
             <button
               onClick={() => setShowAnalysis(false)}
-              className="text-gray-400 hover:text-gray-600 text-xs"
+              className="text-neutral-500 hover:text-neutral-400 text-xs"
             >
               إغلاق
             </button>
@@ -263,11 +263,11 @@ export function CreativeGrid({
           <div className="px-5 py-4">
             {isAnalyzing ? (
               <div className="flex items-center gap-3 py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-violet-500" />
-                <span className="text-sm text-gray-500">يحلل الذكاء الاصطناعي الصور...</span>
+                <Loader2 className="w-5 h-5 animate-spin text-brand" />
+                <span className="text-sm text-neutral-400">يحلل الذكاء الاصطناعي الصور...</span>
               </div>
             ) : analysisResult ? (
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{analysisResult}</p>
+              <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">{analysisResult}</p>
             ) : null}
           </div>
         </div>
@@ -280,16 +280,16 @@ export function CreativeGrid({
           const platformApproved = platformCreatives.filter(c => c.approved).length;
 
           return (
-            <div key={platform} className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+            <div key={platform} className="border border-neutral-800 rounded-2xl overflow-hidden bg-neutral-900 shadow-sm">
               {/* Platform header */}
               <button
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50/70 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-neutral-800/50/70 transition-colors"
                 onClick={() => setExpandedPlatform(isExpanded && expandedPlatform === platform ? null : platform)}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{PLATFORM_ICONS[platform] ?? "📱"}</span>
-                  <span className="font-semibold text-gray-800 capitalize text-sm">{platform}</span>
-                  <Badge variant="outline" className="text-xs font-normal text-gray-500 border-gray-200">
+                  <span className="font-semibold text-white capitalize text-sm">{platform}</span>
+                  <Badge variant="outline" className="text-xs font-normal text-neutral-400 border-neutral-700">
                     {platformCreatives.length} صورة
                   </Badge>
                   {platformApproved > 0 && (
@@ -299,14 +299,14 @@ export function CreativeGrid({
                   )}
                 </div>
                 {isExpanded && expandedPlatform === platform
-                  ? <ChevronUp className="w-4 h-4 text-gray-300" />
-                  : <ChevronDown className="w-4 h-4 text-gray-300" />
+                  ? <ChevronUp className="w-4 h-4 text-neutral-500" />
+                  : <ChevronDown className="w-4 h-4 text-neutral-500" />
                 }
               </button>
 
               {/* Creatives grid */}
               {(expandedPlatform === null || expandedPlatform === platform) && (
-                <div className="px-5 pb-5 pt-1 bg-gray-50/50 grid grid-cols-2 gap-4">
+                <div className="px-5 pb-5 pt-1 bg-neutral-800/50/50 grid grid-cols-2 gap-4">
                   {platformCreatives.map((creative) => (
                     <CreativeCard
                       key={creative.id}
@@ -348,19 +348,19 @@ function CreativeCard({
   return (
     <div
       className={cn(
-        "rounded-2xl overflow-hidden border-2 transition-all duration-200 bg-white",
+        "rounded-2xl overflow-hidden border-2 transition-all duration-200 bg-neutral-900",
         isApproved
           ? "border-emerald-300 shadow-md shadow-emerald-50"
           : isRejected
-            ? "border-gray-100 opacity-40"
-            : "border-gray-100 hover:border-gray-200 hover:shadow-sm",
+            ? "border-neutral-800 opacity-40"
+            : "border-neutral-800 hover:border-neutral-700 hover:shadow-sm",
       )}
     >
       {/* Image */}
-      <div className="relative bg-gray-100" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
+      <div className="relative bg-neutral-800" style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
         {!imageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-            <div className="w-6 h-6 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-neutral-800/50">
+            <div className="w-6 h-6 border-2 border-neutral-700 border-t-neutral-600 rounded-full animate-spin" />
           </div>
         )}
         <img
@@ -396,8 +396,8 @@ function CreativeCard({
       {/* Info + actions */}
       <div className="px-3 pt-3 pb-3 space-y-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 capitalize font-medium">{creative.format}</span>
-          <span className="text-[10px] text-gray-300 font-mono">{creative.width}×{creative.height}</span>
+          <span className="text-xs text-neutral-400 capitalize font-medium">{creative.format}</span>
+          <span className="text-[10px] text-neutral-500 font-mono">{creative.width}×{creative.height}</span>
         </div>
         <div className="flex gap-1.5">
           <button
@@ -407,7 +407,7 @@ function CreativeCard({
               "flex-1 py-2 rounded-xl text-xs font-semibold transition-all duration-150",
               isApproved
                 ? "bg-emerald-50 text-emerald-600 cursor-default"
-                : "bg-gray-50 hover:bg-emerald-50 hover:text-emerald-700 text-gray-500",
+                : "bg-neutral-800/50 hover:bg-emerald-50 hover:text-emerald-700 text-neutral-400",
             )}
           >
             <Check className="w-3 h-3 inline mr-1" />
@@ -416,14 +416,14 @@ function CreativeCard({
           <button
             onClick={onReject}
             disabled={isLoading}
-            className="flex-1 py-2 rounded-xl text-xs font-semibold bg-gray-50 hover:bg-red-50 hover:text-red-600 text-gray-500 transition-all duration-150"
+            className="flex-1 py-2 rounded-xl text-xs font-semibold bg-neutral-800/50 hover:bg-red-50 hover:text-red-600 text-neutral-400 transition-all duration-150"
           >
             <X className="w-3 h-3 inline mr-1" />
             رفض
           </button>
           <button
             onClick={onDownload}
-            className="w-9 h-9 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-400 flex items-center justify-center transition-all duration-150"
+            className="w-9 h-9 rounded-xl bg-neutral-800/50 hover:bg-blue-50 hover:text-blue-600 text-neutral-500 flex items-center justify-center transition-all duration-150"
             title="تحميل"
           >
             <Download className="w-3.5 h-3.5" />

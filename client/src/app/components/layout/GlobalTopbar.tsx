@@ -79,12 +79,12 @@ export function GlobalTopbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="glass-strong border-b border-white/[0.06]">
+      <div className="glass-strong border-b border-neutral-800">
         <div className="flex items-center h-14 px-4 lg:px-6 gap-2">
           {/* ── Mobile Hamburger ──────────────────────────────────────── */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-muted-foreground"
+            className="md:hidden p-1.5 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-400"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -92,7 +92,7 @@ export function GlobalTopbar() {
 
           {/* ── Logo ──────────────────────────────────────────────────── */}
           <Link href="/dashboard" className="flex items-center gap-2.5 mr-2 shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="w-7 h-7 rounded-lg bg-brand flex items-center justify-center shadow-lg shadow-[oklch(0.592_0.227_28/0.25)]">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-semibold tracking-tight text-foreground hidden sm:block">
@@ -108,8 +108,8 @@ export function GlobalTopbar() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200",
                     isActive(item.path)
-                      ? "bg-white/[0.08] text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                      ? "bg-neutral-800 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                   )}
                 >
                   {item.icon}
@@ -124,8 +124,8 @@ export function GlobalTopbar() {
                 className={cn(
                   "flex items-center px-3 py-1.5 rounded-lg transition-all duration-200",
                   isActive("/studios")
-                    ? "bg-white/[0.08] shadow-sm"
-                    : "hover:bg-white/[0.04]"
+                    ? "bg-neutral-800 shadow-sm"
+                    : "hover:bg-neutral-800/60"
                 )}
               >
                 <DashStudiosLogo />
@@ -139,8 +139,8 @@ export function GlobalTopbar() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200",
                     isMarketingActive
-                      ? "bg-white/[0.08] text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                      ? "bg-neutral-800 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                   )}
                 >
                   <Megaphone className="w-4 h-4" />
@@ -148,14 +148,14 @@ export function GlobalTopbar() {
                   <ChevronDown className="w-3 h-3 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48 bg-popover border-white/[0.08]">
+              <DropdownMenuContent align="center" className="w-48 bg-neutral-900 border-neutral-800">
                 {MARKETING_ITEMS.map((item) => (
                   <DropdownMenuItem
                     key={item.path}
                     onClick={() => setLocation(item.path)}
                     className={cn(
                       "flex items-center gap-2 cursor-pointer",
-                      isActive(item.path) && "bg-white/[0.06]"
+                      isActive(item.path) && "bg-neutral-800"
                     )}
                   >
                     {item.icon}
@@ -170,9 +170,9 @@ export function GlobalTopbar() {
               <button
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200",
-                  isActive("/assets")
-                    ? "bg-white/[0.08] text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                    isActive("/assets")
+                    ? "bg-neutral-800 text-white shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 )}
               >
                 <FolderOpen className="w-4 h-4" />
@@ -208,7 +208,7 @@ export function GlobalTopbar() {
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Drawer */}
-          <div className="fixed top-14 left-0 right-0 z-50 md:hidden glass-strong border-b border-white/[0.06] max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-fade-in">
+          <div className="fixed top-14 left-0 right-0 z-50 md:hidden glass-strong border-b border-neutral-800 max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-fade-in">
             <nav className="px-3 py-3 space-y-1">
               {/* Main Nav */}
               {NAV_ITEMS.map((item) => (
@@ -218,8 +218,8 @@ export function GlobalTopbar() {
                   className={cn(
                     "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                     isActive(item.path)
-                      ? "bg-white/[0.08] text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                      ? "bg-neutral-800 text-white"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                   )}
                 >
                   {item.icon}
@@ -233,8 +233,8 @@ export function GlobalTopbar() {
                 className={cn(
                   "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                   isActive("/studios")
-                    ? "bg-white/[0.08] text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 )}
               >
                 <DashStudiosLogo className="h-4" />
@@ -242,7 +242,7 @@ export function GlobalTopbar() {
 
               {/* Marketing Section */}
               <div className="pt-2 pb-1">
-                <span className="px-3 text-[11px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+                <span className="px-3 text-[11px] uppercase tracking-wider text-neutral-500 font-medium">
                   Marketing
                 </span>
               </div>
@@ -253,8 +253,8 @@ export function GlobalTopbar() {
                   className={cn(
                     "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all pl-6",
                     isActive(item.path)
-                      ? "bg-white/[0.08] text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                      ? "bg-neutral-800 text-white"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                   )}
                 >
                   {item.icon}
@@ -267,9 +267,9 @@ export function GlobalTopbar() {
                 onClick={() => navigateMobile("/assets")}
                 className={cn(
                   "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-                  isActive("/assets")
-                    ? "bg-white/[0.08] text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                    isActive("/assets")
+                    ? "bg-neutral-800 text-white"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
                 )}
               >
                 <FolderOpen className="w-4 h-4" />
@@ -304,16 +304,16 @@ function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/[0.04] transition-colors">
-          <Avatar className="w-7 h-7 border border-white/[0.08]">
+        <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-neutral-800 transition-colors">
+          <Avatar className="w-7 h-7 border border-neutral-700">
             <AvatarImage src={user?.avatar_url ?? undefined} />
-            <AvatarFallback className="text-[10px] font-semibold bg-gradient-to-br from-violet-500/20 to-indigo-500/20 text-violet-300">
+            <AvatarFallback className="text-[10px] font-semibold bg-neutral-800 text-neutral-300">
               {initials}
             </AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-popover border-white/[0.08] p-0">
+      <DropdownMenuContent align="end" className="w-64 bg-neutral-900 border-neutral-800 p-0">
         {/* Credit Usage */}
         <div className="px-3 py-3">
           <CreditUsageBar used={1240} total={5000} />
@@ -323,14 +323,14 @@ function UserMenu({
           className="mx-1 rounded-md cursor-pointer"
         >
           <div className="flex items-center gap-2 w-full">
-            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-              <CreditCard className="w-3 h-3 text-amber-400" />
+            <div className="w-5 h-5 rounded-md bg-brand/10 flex items-center justify-center">
+              <CreditCard className="w-3 h-3 text-brand" />
             </div>
-            <span className="text-[13px] font-medium text-amber-400">Buy more credits</span>
+            <span className="text-[13px] font-medium text-brand">Buy more credits</span>
           </div>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-white/[0.06]" />
+        <DropdownMenuSeparator className="bg-neutral-800" />
 
         {/* Workspace Switcher */}
         <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium px-3 py-1.5">
@@ -343,18 +343,18 @@ function UserMenu({
             className="mx-1 rounded-md cursor-pointer flex items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-white/[0.06] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-md bg-neutral-800 flex items-center justify-center">
                 <Building2 className="w-3 h-3 text-muted-foreground" />
               </div>
               <span className="text-[13px]">{ws.name}</span>
             </div>
             {activeWorkspace?.id === ws.id && (
-              <Check className="w-3.5 h-3.5 text-violet-400" />
+              <Check className="w-3.5 h-3.5 text-brand" />
             )}
           </DropdownMenuItem>
         ))}
 
-        <DropdownMenuSeparator className="bg-white/[0.06]" />
+        <DropdownMenuSeparator className="bg-neutral-800" />
 
         {/* Profile & Settings */}
         <DropdownMenuItem
@@ -372,7 +372,7 @@ function UserMenu({
           <span className="text-[13px]">Settings</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-white/[0.06]" />
+        <DropdownMenuSeparator className="bg-neutral-800" />
 
         {/* Sign Out */}
         <DropdownMenuItem

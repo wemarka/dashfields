@@ -40,7 +40,7 @@ export function BrandPreviewCard({ brandName, brandDesc, colors, fonts, logoUrl 
         <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }} />
         <div className="relative flex items-center gap-3">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-12 h-12 rounded-xl object-contain bg-white/10 p-1" />
+            <img src={logoUrl} alt="Logo" className="w-12 h-12 rounded-xl object-contain bg-neutral-900/10 p-1" />
           ) : (
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}>
               {brandName?.[0]?.toUpperCase() ?? "B"}

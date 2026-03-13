@@ -138,7 +138,7 @@ export default function ContentCalendar() {
             </div>
             <button onClick={() => setShowAIPlanner(v => !v)}
               className={"flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all " +
-                (showAIPlanner ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white border-transparent shadow-md shadow-violet-500/20" : "bg-violet-500/10 text-violet-600 border-violet-500/20 hover:bg-violet-500/20")}>
+                (showAIPlanner ? "bg-gradient-to-r from-brand to-red-700 text-white border-transparent shadow-md shadow-brand/20" : "bg-brand/10 text-brand border-brand/20 hover:bg-brand/20")}>
               <Sparkles className="w-4 h-4" /> AI Planner
               {showAIPlanner ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
@@ -151,9 +151,9 @@ export default function ContentCalendar() {
 
         {/* AI Calendar Planner Panel */}
         {showAIPlanner && (
-          <div className="bg-gradient-to-br from-violet-500/5 to-purple-500/5 border border-violet-500/20 rounded-2xl p-5 mb-6">
+          <div className="bg-gradient-to-br from-brand/5 to-brand/50/5 border border-brand/20 rounded-2xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand to-red-700 flex items-center justify-center shadow-md shadow-brand/30">
                 <Wand2 className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -166,12 +166,12 @@ export default function ContentCalendar() {
                 <label className="block text-xs font-medium text-foreground mb-1.5">Campaign Topic / Brand Focus</label>
                 <input type="text" value={aiPlannerTopic} onChange={e => setAIPlannerTopic(e.target.value)}
                   placeholder="e.g. Summer sale, new product launch, Ramadan campaign..."
-                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand/30" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1.5">Primary Platform</label>
                 <select value={aiPlannerPlatform} onChange={e => setAIPlannerPlatform(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30">
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30">
                   {PLATFORMS.filter(p => p.features.includes("posts")).map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
@@ -184,7 +184,7 @@ export default function ContentCalendar() {
                 {[7, 14, 30].map(d => (
                   <button key={d} onClick={() => setAIPlannerDays(d)}
                     className={"px-2.5 py-1 rounded-lg text-xs font-medium border transition-all " +
-                      (aiPlannerDays === d ? "bg-violet-600 text-white border-violet-600" : "bg-muted text-muted-foreground border-transparent hover:border-border")}>{d}d</button>
+                      (aiPlannerDays === d ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-transparent hover:border-border")}>{d}d</button>
                 ))}
               </div>
               <button
@@ -201,27 +201,27 @@ export default function ContentCalendar() {
                   toast.success(`Generated ${plan.length}-day content plan!`);
                 }}
                 disabled={generateCalendarPlan.isPending}
-                className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-violet-500/20">
+                className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-brand/20">
                 {generateCalendarPlan.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Generate Plan
               </button>
             </div>
             {generatedPlan.length > 0 && (
-              <div className="mt-4 border-t border-violet-500/20 pt-4">
+              <div className="mt-4 border-t border-brand/20 pt-4">
                 <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-violet-500" /> Generated {generatedPlan.length}-Day Content Plan
+                  <Sparkles className="w-3.5 h-3.5 text-brand" /> Generated {generatedPlan.length}-Day Content Plan
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {generatedPlan.map((item, i) => (
                     <div key={i} className="bg-background rounded-xl border border-border p-3 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded-full">{item.day}</span>
+                        <span className="text-[10px] font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-full">{item.day}</span>
                         <span className="text-[10px] text-muted-foreground">{item.time}</span>
                       </div>
                       <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
                       <p className="text-[10px] text-muted-foreground line-clamp-2">{item.content}</p>
                       <button
                         onClick={() => { toast.success(`"${item.title}" added to drafts!`); setGeneratedPlan(prev => prev.filter((_, idx) => idx !== i)); }}
-                        className="w-full text-[10px] font-medium text-violet-600 bg-violet-500/10 hover:bg-violet-500/20 rounded-lg py-1 transition-colors">
+                        className="w-full text-[10px] font-medium text-brand bg-brand/10 hover:bg-brand/20 rounded-lg py-1 transition-colors">
                         + Add to Calendar
                       </button>
                     </div>

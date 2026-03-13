@@ -90,7 +90,7 @@ function ContentStatusBar({
   if (!current) return null;
 
   return (
-    <div className="flex items-center gap-2 px-4 py-1.5 bg-white border-b border-border/40 shrink-0">
+    <div className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 border-b border-border/40 shrink-0">
       {/* Status: fetching or last updated */}
       <div className="flex items-center gap-2 flex-1">
         {isFetching ? (
@@ -389,7 +389,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
     <Sheet open={open} onOpenChange={v => !v && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-4xl flex flex-col overflow-hidden border-l border-border/50 bg-white p-0"
+        className="w-full sm:max-w-4xl flex flex-col overflow-hidden border-l border-border/50 bg-neutral-900 p-0"
       >
         {/* ── Header ──────────────────────────────────────────────────── */}
         <SheetHeader className="p-0 shrink-0">
@@ -429,7 +429,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
         <div className="flex flex-1 overflow-hidden">
 
           {/* ── Left: Vertical Tab Navigation ───────────────────────── */}
-          <nav className="w-36 shrink-0 flex flex-col border-r border-border/50 bg-white overflow-y-auto">
+          <nav className="w-36 shrink-0 flex flex-col border-r border-border/50 bg-neutral-900 overflow-y-auto">
             <div className="flex flex-col py-2">
               {TABS.map(tab => {
                 const Icon = tab.icon;

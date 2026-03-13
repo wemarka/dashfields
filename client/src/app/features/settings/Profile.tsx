@@ -106,7 +106,7 @@ export default function Profile() {
     <div className="flex flex-col h-full">
       {/* ── Header ── */}
       <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Account</h2>
+        <h2 className="text-[17px] font-semibold text-white">Account</h2>
       </div>
 
       {/* ── Scrollable body ── */}
@@ -157,26 +157,26 @@ export default function Profile() {
                 <button onClick={handleSaveName} disabled={isSavingName} className="p-1 rounded text-emerald-600 hover:text-emerald-700 transition-colors">
                   {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 </button>
-                <button onClick={() => { setIsEditingName(false); setDisplayName(user?.name ?? ""); }} className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors">
+                <button onClick={() => { setIsEditingName(false); setDisplayName(user?.name ?? ""); }} className="p-1 rounded text-neutral-500 hover:text-neutral-400 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="font-semibold text-[15px] text-gray-900">{displayName || user?.name || "—"}</span>
-                <button onClick={() => setIsEditingName(true)} className="p-1 rounded text-gray-300 hover:text-gray-600 transition-colors">
+                <span className="font-semibold text-[15px] text-white">{displayName || user?.name || "—"}</span>
+                <button onClick={() => setIsEditingName(true)} className="p-1 rounded text-neutral-500 hover:text-neutral-400 transition-colors">
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
-            <p className="text-[13px] text-gray-400">{user?.email ?? "—"}</p>
+            <p className="text-[13px] text-neutral-500">{user?.email ?? "—"}</p>
           </div>
 
           {/* Action icons */}
           <div className="flex items-center gap-2 shrink-0">
             <button
               title="Account settings"
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800"
             >
               <UserCog className="w-4 h-4" />
             </button>
@@ -185,16 +185,16 @@ export default function Profile() {
 
         {/* ── Preferences ── */}
         <div className="px-7 pb-5" style={{ borderTop: "1px solid #f0f0f0" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-widest mt-5 mb-3 text-gray-400">Preferences</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mt-5 mb-3 text-neutral-500">Preferences</p>
 
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2].map(i => <div key={i} className="h-9 rounded-lg animate-pulse bg-gray-100" />)}
+              {[1, 2].map(i => <div key={i} className="h-9 rounded-lg animate-pulse bg-neutral-800" />)}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[12px] mb-1.5 text-gray-500">Timezone</p>
+                <p className="text-[12px] mb-1.5 text-neutral-400">Timezone</p>
                 <Select value={timezone} onValueChange={setTimezone}>
                   <SelectTrigger className="w-full h-9 text-[13px]">
                     <SelectValue />
@@ -205,7 +205,7 @@ export default function Profile() {
                 </Select>
               </div>
               <div>
-                <p className="text-[12px] mb-1.5 text-gray-500">Language</p>
+                <p className="text-[12px] mb-1.5 text-neutral-400">Language</p>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="w-full h-9 text-[13px]">
                     <SelectValue />
@@ -225,7 +225,7 @@ export default function Profile() {
 
         {/* ── Notifications ── */}
         <div className="px-7 pb-6" style={{ borderTop: "1px solid #f0f0f0" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-widest mt-5 mb-3 text-gray-400">Communication preferences</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest mt-5 mb-3 text-neutral-500">Communication preferences</p>
 
           <div className="space-y-4">
             {[
@@ -235,8 +235,8 @@ export default function Profile() {
             ].map(({ label, desc, value, onChange }) => (
               <div key={label} className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[13px] font-semibold text-gray-800">{label}</p>
-                  <p className="text-[12px] mt-0.5 leading-snug text-gray-400">{desc}</p>
+                  <p className="text-[13px] font-semibold text-white">{label}</p>
+                  <p className="text-[12px] mt-0.5 leading-snug text-neutral-500">{desc}</p>
                 </div>
                 <Switch checked={value} onCheckedChange={(v) => onChange(v)} className="shrink-0" />
               </div>
@@ -246,7 +246,7 @@ export default function Profile() {
           <button
             onClick={handleSaveNotifications}
             disabled={updateSettings.isPending}
-            className="mt-5 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+            className="mt-5 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
           >
             {updateSettings.isPending ? "Saving..." : "Save preferences"}
           </button>

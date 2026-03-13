@@ -162,7 +162,7 @@ function KpiItem({
             flexShrink: 0,
             transition: "background 0.15s",
           }}
-          className="group-hover:bg-gray-200/70"
+          className="group-hover:bg-neutral-700/70"
         >
           {icon}
         </div>

@@ -28,13 +28,13 @@ function dayWeight(d: number): number {
 
 function hmapCellColor(score: number): string {
   if (score === 0)   return "bg-muted/30";
-  if (score < 0.15)  return "bg-violet-500/10";
-  if (score < 0.30)  return "bg-violet-500/20";
-  if (score < 0.45)  return "bg-violet-500/35";
-  if (score < 0.60)  return "bg-violet-500/50";
-  if (score < 0.75)  return "bg-violet-500/65";
-  if (score < 0.88)  return "bg-violet-500/80";
-  return "bg-violet-500";
+  if (score < 0.15)  return "bg-brand/10";
+  if (score < 0.30)  return "bg-brand/20";
+  if (score < 0.45)  return "bg-brand/35";
+  if (score < 0.60)  return "bg-brand/50";
+  if (score < 0.75)  return "bg-brand/65";
+  if (score < 0.88)  return "bg-brand/80";
+  return "bg-brand";
 }
 
 interface HeatmapCell { day: number; hour: number; impressions: number; ctr: number; score: number; }
@@ -110,7 +110,7 @@ export function HeatmapTab({ ads, isLoading }: HeatmapTabProps) {
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-violet-400" />
+              <Flame className="w-4 h-4 text-brand" />
               <h3 className="text-sm font-semibold text-foreground">Performance Heatmap</h3>
               <Tooltip>
                 <TooltipTrigger asChild><Info className="w-3 h-3 text-muted-foreground cursor-help" /></TooltipTrigger>
@@ -120,8 +120,8 @@ export function HeatmapTab({ ads, isLoading }: HeatmapTabProps) {
               </Tooltip>
             </div>
             <div className="flex items-center gap-1 text-[10px]">
-              <button onClick={() => setMetric("impressions")} className={`px-2 py-0.5 rounded-md transition-colors ${metric === "impressions" ? "bg-violet-500/20 text-violet-400" : "text-muted-foreground hover:text-foreground"}`}>Impressions</button>
-              <button onClick={() => setMetric("ctr")} className={`px-2 py-0.5 rounded-md transition-colors ${metric === "ctr" ? "bg-violet-500/20 text-violet-400" : "text-muted-foreground hover:text-foreground"}`}>CTR</button>
+              <button onClick={() => setMetric("impressions")} className={`px-2 py-0.5 rounded-md transition-colors ${metric === "impressions" ? "bg-brand/20 text-brand" : "text-muted-foreground hover:text-foreground"}`}>Impressions</button>
+              <button onClick={() => setMetric("ctr")} className={`px-2 py-0.5 rounded-md transition-colors ${metric === "ctr" ? "bg-brand/20 text-brand" : "text-muted-foreground hover:text-foreground"}`}>CTR</button>
             </div>
           </div>
           <div className="flex gap-3 mb-3 text-[10px] text-muted-foreground">

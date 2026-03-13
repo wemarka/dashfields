@@ -60,7 +60,7 @@ export function DashboardTab() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Analyzed", value: stats.total, icon: Brain, color: "text-violet-500", bg: "bg-violet-500/10" },
+          { label: "Total Analyzed", value: stats.total, icon: Brain, color: "text-brand", bg: "bg-brand/10" },
           { label: "Positive Rate", value: `${stats.total > 0 ? Math.round((stats.positive / stats.total) * 100) : 0}%`, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
           { label: "Negative Rate", value: `${stats.total > 0 ? Math.round((stats.negative / stats.total) * 100) : 0}%`, icon: TrendingDown, color: "text-red-500", bg: "bg-red-500/10" },
           { label: "Avg Score", value: `${Math.round(((stats.avgScore + 1) / 2) * 100)}`, icon: Minus, color: cfg.color, bg: cfg.bg.split(" ")[0] },
@@ -150,7 +150,7 @@ export function DashboardTab() {
       {stats.topKeywords.length > 0 && (
         <div className="glass rounded-2xl p-5">
           <p className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Tag className="w-4 h-4 text-violet-500" /> Top Keywords
+            <Tag className="w-4 h-4 text-brand" /> Top Keywords
           </p>
           <div className="flex flex-wrap gap-2">
             {stats.topKeywords.map((kw, i) => {

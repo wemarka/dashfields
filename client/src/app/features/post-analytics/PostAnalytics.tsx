@@ -35,10 +35,10 @@ function EngagementHeatmap({ data }: { data: { day: number; hour: number; value:
   const getColor = (value: number) => {
     const intensity = value / maxVal;
     if (intensity === 0) return "bg-muted/30";
-    if (intensity < 0.25) return "bg-violet-200";
-    if (intensity < 0.5)  return "bg-violet-400";
-    if (intensity < 0.75) return "bg-violet-600";
-    return "bg-violet-800";
+    if (intensity < 0.25) return "bg-brand/30";
+    if (intensity < 0.5)  return "bg-brand";
+    if (intensity < 0.75) return "bg-brand";
+    return "bg-brand/80";
   };
 
   return (
@@ -71,7 +71,7 @@ function EngagementHeatmap({ data }: { data: { day: number; hour: number; value:
         {/* Legend */}
         <div className="flex items-center gap-2 mt-2 ml-10">
           <span className="text-[10px] text-muted-foreground">Less</span>
-          {["bg-muted/30", "bg-violet-200", "bg-violet-400", "bg-violet-600", "bg-violet-800"].map((c, i) => (
+          {["bg-muted/30", "bg-brand/30", "bg-brand", "bg-brand", "bg-brand/80"].map((c, i) => (
             <div key={i} className={`w-3 h-3 rounded-sm ${c}`} />
           ))}
           <span className="text-[10px] text-muted-foreground">More</span>
@@ -194,7 +194,7 @@ export default function PostAnalytics() {
   const { data: trendData } = trpc.postAnalytics.engagementTrend.useQuery(trendInput);
 
   const kpis = [
-    { label: "Total Posts",      value: summary?.totalPosts ?? 0,        icon: BarChart2, color: "text-violet-500 bg-violet-500/10", format: "number" },
+    { label: "Total Posts",      value: summary?.totalPosts ?? 0,        icon: BarChart2, color: "text-brand bg-brand/10", format: "number" },
     { label: "Total Engagement", value: summary?.totalEngagement ?? 0,   icon: TrendingUp, color: "text-blue-500 bg-blue-500/10",   format: "number" },
     { label: "Avg Engagement",   value: summary?.avgEngagementPerPost ?? 0, icon: Heart,  color: "text-pink-500 bg-pink-500/10",    format: "number" },
     { label: "Total Reach",      value: summary?.totalReach ?? 0,        icon: Users,     color: "text-emerald-500 bg-emerald-500/10", format: "number" },
@@ -319,7 +319,7 @@ export default function PostAnalytics() {
                   {/* Top 5 best times */}
                   <div className="flex flex-wrap gap-2 mb-5">
                     {bestTimes.bestTimes.map((t, i) => (
-                      <div key={t.hour} className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${i === 0 ? "border-violet-300 bg-violet-50 text-violet-700" : "border-border bg-muted/30 text-foreground"}`}>
+                      <div key={t.hour} className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${i === 0 ? "border-brand/40 bg-brand/10 text-brand" : "border-border bg-muted/30 text-foreground"}`}>
                         <span className="text-xs font-bold">#{i + 1}</span>
                         <Clock className="w-3.5 h-3.5" />
                         <span className="text-xs font-medium">{t.label}</span>
@@ -332,7 +332,7 @@ export default function PostAnalytics() {
                       <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={2} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(v: number) => [v.toLocaleString(), "Avg Engagement"]} />
-                      <Bar dataKey="avgEngagement" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="avgEngagement" fill="#E62020" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </>
@@ -360,8 +360,8 @@ export default function PostAnalytics() {
                   <AreaChart data={trendData.trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#E62020" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
@@ -373,7 +373,7 @@ export default function PostAnalytics() {
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
                     <Legend />
-                    <Area type="monotone" dataKey="engagement" stroke="#8b5cf6" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
+                    <Area type="monotone" dataKey="engagement" stroke="#E62020" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
                     <Area type="monotone" dataKey="reach" stroke="#06b6d4" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
                     <Area type="monotone" dataKey="likes" stroke="#f43f5e" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
                   </AreaChart>

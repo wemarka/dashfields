@@ -53,11 +53,11 @@ export function CampaignPreview({
   return (
     <div className="space-y-5">
       {/* Campaign Header */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 text-white">
+      <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-2xl p-5 text-white">
         <div className="flex items-start justify-between mb-3">
           <div>
             <h2 className="text-lg font-bold">{brief.name ?? "حملة إعلانية جديدة"}</h2>
-            <p className="text-gray-400 text-sm mt-0.5">{brief.product}</p>
+            <p className="text-neutral-500 text-sm mt-0.5">{brief.product}</p>
           </div>
           <Badge className="bg-red-500/20 text-red-300 border border-red-500/30 text-xs">
             {brief.campaignType ?? "حملة"}
@@ -65,31 +65,31 @@ export function CampaignPreview({
         </div>
 
         <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="bg-white/5 rounded-xl p-3">
-            <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
+          <div className="bg-neutral-900/5 rounded-xl p-3">
+            <div className="flex items-center gap-1.5 text-neutral-500 text-xs mb-1">
               <DollarSign className="w-3 h-3" />
               <span>الميزانية الإجمالية</span>
             </div>
             <p className="text-white font-bold text-lg">{totalBudget.toLocaleString()} {currency}</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-3">
-            <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
+          <div className="bg-neutral-900/5 rounded-xl p-3">
+            <div className="flex items-center gap-1.5 text-neutral-500 text-xs mb-1">
               <Target className="w-3 h-3" />
               <span>هدف الحملة</span>
             </div>
             <p className="text-white font-semibold capitalize">{brief.objective ?? "awareness"}</p>
           </div>
           {brief.startDate && (
-            <div className="bg-white/5 rounded-xl p-3">
-              <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
+            <div className="bg-neutral-900/5 rounded-xl p-3">
+              <div className="flex items-center gap-1.5 text-neutral-500 text-xs mb-1">
                 <Calendar className="w-3 h-3" />
                 <span>تاريخ البدء</span>
               </div>
               <p className="text-white font-semibold text-sm">{brief.startDate}</p>
             </div>
           )}
-          <div className="bg-white/5 rounded-xl p-3">
-            <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
+          <div className="bg-neutral-900/5 rounded-xl p-3">
+            <div className="flex items-center gap-1.5 text-neutral-500 text-xs mb-1">
               <Globe className="w-3 h-3" />
               <span>البلد المستهدف</span>
             </div>
@@ -100,9 +100,9 @@ export function CampaignPreview({
         {/* Platforms */}
         <div className="flex items-center gap-2 mt-3">
           {platforms.map(p => (
-            <div key={p} className="flex items-center gap-1 bg-white/10 rounded-lg px-2 py-1">
+            <div key={p} className="flex items-center gap-1 bg-neutral-900/10 rounded-lg px-2 py-1">
               <span className="text-sm">{PLATFORM_ICONS[p] ?? "📱"}</span>
-              <span className="text-xs text-gray-300 capitalize">{p}</span>
+              <span className="text-xs text-neutral-500 capitalize">{p}</span>
             </div>
           ))}
         </div>
@@ -111,13 +111,13 @@ export function CampaignPreview({
       {/* Approved Creatives Preview */}
       {approvedCreatives.length > 0 && (
         <div>
-          <h3 className="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-2">
+          <h3 className="font-semibold text-white text-sm mb-2 flex items-center gap-2">
             <span>🎨</span>
             الصور الإعلانية المعتمدة ({approvedCreatives.length})
           </h3>
           <div className="grid grid-cols-3 gap-2">
             {approvedCreatives.slice(0, 6).map(creative => (
-              <div key={creative.id} className="relative rounded-xl overflow-hidden border border-green-200 bg-gray-50">
+              <div key={creative.id} className="relative rounded-xl overflow-hidden border border-green-200 bg-neutral-800/50">
                 <div style={{ aspectRatio: `${creative.width}/${creative.height}` }}>
                   <img
                     src={creative.watermarkedUrl}
@@ -138,8 +138,8 @@ export function CampaignPreview({
       )}
 
       {/* Validation Checklist */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4">
-        <h3 className="font-semibold text-gray-800 text-sm mb-3">التحقق من الحملة</h3>
+      <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-4">
+        <h3 className="font-semibold text-white text-sm mb-3">التحقق من الحملة</h3>
         <div className="space-y-2">
           {checks.map(check => (
             <div key={check.label} className="flex items-center justify-between">
@@ -148,9 +148,9 @@ export function CampaignPreview({
                   ? <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
                   : <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
                 }
-                <span className="text-sm text-gray-700">{check.label}</span>
+                <span className="text-sm text-neutral-300">{check.label}</span>
               </div>
-              <span className={cn("text-xs", check.ok ? "text-gray-500" : "text-amber-600")}>
+              <span className={cn("text-xs", check.ok ? "text-neutral-400" : "text-amber-600")}>
                 {check.value}
               </span>
             </div>
@@ -161,18 +161,18 @@ export function CampaignPreview({
       {/* Budget per platform */}
       {Object.keys(budgetAllocation).length > 0 && (
         <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
-          <h3 className="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-2">
+          <h3 className="font-semibold text-white text-sm mb-2 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-orange-600" />
             توزيع الميزانية النهائي
           </h3>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(budgetAllocation).map(([platform, amount]) => (
-              <div key={platform} className="flex items-center justify-between bg-white rounded-lg px-3 py-2">
+              <div key={platform} className="flex items-center justify-between bg-neutral-900 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">{PLATFORM_ICONS[platform] ?? "📱"}</span>
-                  <span className="text-xs text-gray-700 capitalize">{platform}</span>
+                  <span className="text-xs text-neutral-300 capitalize">{platform}</span>
                 </div>
-                <span className="text-xs font-semibold text-gray-800">{(amount as number).toLocaleString()} {currency}</span>
+                <span className="text-xs font-semibold text-white">{(amount as number).toLocaleString()} {currency}</span>
               </div>
             ))}
           </div>
@@ -216,7 +216,7 @@ export function CampaignPreview({
           )}
         </Button>
 
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-neutral-500">
           بالنقر على "تأكيد وإطلاق"، سيتم حفظ الحملة وجدولة المنشورات
         </p>
       </div>

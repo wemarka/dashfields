@@ -17,7 +17,7 @@ interface UpgradeModalProps {
 }
 
 const PLAN_ICONS: Record<WorkspacePlan, React.ReactNode> = {
-  free: <Sparkles className="w-5 h-5 text-gray-500" />,
+  free: <Sparkles className="w-5 h-5 text-neutral-400" />,
   pro: <Zap className="w-5 h-5 text-blue-600" />,
   agency: <Building2 className="w-5 h-5 text-purple-600" />,
   enterprise: <Building2 className="w-5 h-5 text-amber-600" />,
@@ -134,9 +134,9 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
             <span className={`text-sm font-medium ${billing === "monthly" ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
             <button
               onClick={() => setBilling(b => b === "monthly" ? "annual" : "monthly")}
-              className={`relative w-12 h-6 rounded-full transition-colors ${billing === "annual" ? "bg-blue-600" : "bg-gray-200"}`}
+              className={`relative w-12 h-6 rounded-full transition-colors ${billing === "annual" ? "bg-blue-600" : "bg-neutral-700"}`}
             >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${billing === "annual" ? "translate-x-7" : "translate-x-1"}`} />
+              <span className={`absolute top-1 w-4 h-4 bg-neutral-900 rounded-full shadow transition-transform ${billing === "annual" ? "translate-x-7" : "translate-x-1"}`} />
             </button>
             <span className={`text-sm font-medium ${billing === "annual" ? "text-foreground" : "text-muted-foreground"}`}>
               Annual

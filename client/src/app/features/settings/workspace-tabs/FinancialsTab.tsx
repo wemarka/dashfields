@@ -113,8 +113,8 @@ export function FinancialsTab() {
       {/* Target ROAS */}
       <div className="glass rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
-            <Target className="w-5 h-5 text-violet-500" />
+          <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center">
+            <Target className="w-5 h-5 text-brand" />
           </div>
           <div>
             <h3 className="text-sm font-semibold">Target ROAS</h3>

@@ -20,15 +20,15 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 const statusDot: Record<string, string> = {
   active: "bg-emerald-500", ACTIVE: "bg-emerald-500",
   paused: "bg-amber-500",  PAUSED: "bg-amber-500",
-  draft: "bg-slate-400",   DELETED: "bg-red-400",
-  ended: "bg-slate-300",   ARCHIVED: "bg-slate-300",
+  draft: "bg-neutral-400",   DELETED: "bg-red-400",
+  ended: "bg-neutral-300",   ARCHIVED: "bg-neutral-300",
   scheduled: "bg-blue-400",
 };
 const statusText: Record<string, string> = {
   active: "text-emerald-700", ACTIVE: "text-emerald-700",
   paused: "text-amber-700",  PAUSED: "text-amber-700",
-  draft: "text-slate-600",   DELETED: "text-red-600",
-  ended: "text-slate-500",   ARCHIVED: "text-slate-500",
+  draft: "text-neutral-600",   DELETED: "text-red-600",
+  ended: "text-neutral-500",   ARCHIVED: "text-neutral-500",
   scheduled: "text-blue-700",
 };
 
@@ -126,19 +126,19 @@ function CampaignSwitch({ campaign, onToggled }: { campaign: MetaCampaign; onTog
           "disabled:cursor-wait",
           optimisticActive
             ? "bg-emerald-500 hover:bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.15)]"
-            : "bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600",
+            : "bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600",
         ].join(" ")}
       >
         {/* Switch thumb */}
         <span
           className={[
             "pointer-events-none relative inline-flex h-5 w-5 items-center justify-center",
-            "rounded-full bg-white shadow-md ring-0 transition-transform duration-200",
+            "rounded-full bg-neutral-900 shadow-md ring-0 transition-transform duration-200",
             optimisticActive ? "translate-x-5" : "translate-x-0",
           ].join(" ")}
         >
           {pending && (
-            <Loader2 className="w-3 h-3 text-slate-400 animate-spin" />
+            <Loader2 className="w-3 h-3 text-neutral-400 animate-spin" />
           )}
         </span>
       </button>
@@ -146,7 +146,7 @@ function CampaignSwitch({ campaign, onToggled }: { campaign: MetaCampaign; onTog
       {/* Label */}
       <span className={[
         "text-xs font-semibold min-w-[22px] select-none",
-        optimisticActive ? "text-emerald-600" : "text-slate-400 dark:text-slate-500",
+        optimisticActive ? "text-emerald-600" : "text-neutral-400 dark:text-neutral-500",
       ].join(" ")}>
         {optimisticActive ? "On" : "Off"}
       </span>
@@ -392,8 +392,8 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
                   {/* Status badge */}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      <div className={"w-1.5 h-1.5 rounded-full " + (statusDot[c.status] ?? "bg-slate-300")} />
-                      <span className={"text-xs capitalize font-medium " + (statusText[c.status] ?? "text-slate-500")}>
+                      <div className={"w-1.5 h-1.5 rounded-full " + (statusDot[c.status] ?? "bg-neutral-300")} />
+                      <span className={"text-xs capitalize font-medium " + (statusText[c.status] ?? "text-neutral-500")}>
                         {c.status?.toLowerCase()}
                       </span>
                     </div>

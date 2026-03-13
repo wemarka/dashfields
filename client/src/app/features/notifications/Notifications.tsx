@@ -331,7 +331,7 @@ export default function Notifications() {
                     onClick={item.toggle}
                     className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${item.state ? "bg-primary" : "bg-border"}`}
                   >
-                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${item.state ? "translate-x-4" : "translate-x-0.5"}`} />
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-neutral-900 shadow transition-transform ${item.state ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
                 </div>
               ))}
@@ -341,7 +341,7 @@ export default function Notifications() {
               <SmartAlertCard title="Budget Overspend Alert" description="Triggered when daily spend exceeds 110% of limit" icon={DollarSign} colorClass="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" />
               <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" />
               <SmartAlertCard title="Campaign Milestone" description="Triggered at 50%, 75%, 100% of budget" icon={BarChart3} colorClass="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" />
-              <SmartAlertCard title="Scheduled Report Ready" description="Triggered when a scheduled report is generated" icon={Star} colorClass="bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20" />
+              <SmartAlertCard title="Scheduled Report Ready" description="Triggered when a scheduled report is generated" icon={Star} colorClass="bg-brand/10 text-brand dark:text-brand border-brand/20" />
             </div>
           </div>
         )}
@@ -364,7 +364,7 @@ export default function Notifications() {
                 <Icon className="w-3.5 h-3.5" />
                 {cat.label}
                 {count > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${category === cat.id ? "bg-white/20" : "bg-border"}`}>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${category === cat.id ? "bg-neutral-900/20" : "bg-border"}`}>
                     {count}
                   </span>
                 )}

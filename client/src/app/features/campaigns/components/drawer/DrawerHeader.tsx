@@ -97,7 +97,7 @@ export function DrawerHeader({
 
   return (
     <div
-      className="shrink-0 bg-white"
+      className="shrink-0 bg-neutral-900"
       style={{ borderBottom: "1px solid #f0f0f0" }}
     >
       {/* ── Row 1: Name + Status + Actions ── */}
@@ -112,7 +112,7 @@ export function DrawerHeader({
 
         {/* Campaign name */}
         <SheetTitle
-          className="text-sm font-semibold text-gray-900 truncate leading-none"
+          className="text-sm font-semibold text-white truncate leading-none"
           style={{ maxWidth: 240 }}
         >
           {campaign?.name ?? "Campaign"}
@@ -191,7 +191,7 @@ export function DrawerHeader({
         {/* Clone button */}
         <button
           onClick={onClone}
-          className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          className="flex items-center gap-1.5 shrink-0 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
           style={{ padding: "4px 8px", borderRadius: 6, background: "transparent" }}
           title="Clone campaign"
         >
@@ -209,7 +209,7 @@ export function DrawerHeader({
               onClick={onExportCsv}
               disabled={isExportingCsv}
               title="Export as CSV"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-40"
+              className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-40"
               style={{
                 padding: "5px 10px",
                 borderRadius: 6,
@@ -230,7 +230,7 @@ export function DrawerHeader({
             onClick={onExport}
             disabled={isExporting}
             title="Export report"
-            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-40"
             style={{
               padding: "5px 10px",
               borderRadius: 6,
@@ -256,7 +256,7 @@ export function DrawerHeader({
         {/* Budget */}
         <div className="flex items-center gap-1.5">
           {campaign?.dailyBudget != null ? (
-            <div className="flex items-center gap-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1 text-xs text-neutral-400">
               <Activity style={{ width: 12, height: 12, color: "#9ca3af" }} />
               <InlineBudgetEditor
                 value={campaign.dailyBudget}
@@ -266,7 +266,7 @@ export function DrawerHeader({
               <span style={{ color: "#d1d5db" }}>/day</span>
             </div>
           ) : (
-            <span className="text-xs text-gray-300">—</span>
+            <span className="text-xs text-neutral-500">—</span>
           )}
         </div>
 

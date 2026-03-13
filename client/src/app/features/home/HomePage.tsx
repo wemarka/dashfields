@@ -23,10 +23,10 @@ export default function HomePage() {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fade-in">
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-white">
           {getGreeting()}, {firstName}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-neutral-400 mt-1">
           Here is your marketing briefing for today.
         </p>
       </div>

@@ -235,7 +235,7 @@ export function NotificationBell() {
       const icon = TYPE_ICONS[n.type as keyof typeof TYPE_ICONS] ?? TYPE_ICONS.info;
       toast.custom(
         () => (
-          <div className="flex items-start gap-3 bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl px-4 py-3 shadow-lg max-w-sm">
+          <div className="flex items-start gap-3 bg-neutral-900/90 backdrop-blur-xl border border-white/30 rounded-2xl px-4 py-3 shadow-lg max-w-sm">
             <div className="mt-0.5 shrink-0">{icon}</div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-foreground">{n.title}</p>

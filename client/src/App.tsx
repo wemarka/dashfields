@@ -98,7 +98,7 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen app-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
         <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
     </div>
@@ -110,7 +110,7 @@ function ContentLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[400px]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-7 h-7 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-7 h-7 border-2 border-brand border-t-transparent rounded-full animate-spin" />
         <span className="text-xs text-muted-foreground">Loading...</span>
       </div>
     </div>

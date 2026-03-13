@@ -77,7 +77,7 @@ export function TimingTab() {
           <button
             onClick={() => selectedPlatforms.length > 0 && mutation.mutate({ platforms: selectedPlatforms, industry: industry || "general", targetRegion: region })}
             disabled={mutation.isPending || selectedPlatforms.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
           >
             {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Zap className="w-4 h-4" />Get Recommendations</>}
           </button>

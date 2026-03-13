@@ -3189,3 +3189,26 @@
 - [x] Replace "Dash Studios" text with SVG logo in GlobalTopbar
 - [x] Apply white-to-gray gradient fill on logo
 - [x] Add shimmer/gleam animation on hover
+
+## 🎨 Dark Neutral & Brand Red Design System Overhaul
+### Task 1: Global Theme Configuration
+- [x] Replace all zinc/slate/violet/indigo/gray colors with pure neutral family (0 remaining)
+- [x] Set main app bg to neutral-950
+- [x] Set cards/modals/topbar/dropdowns to bg-neutral-900
+- [x] Set hover states to bg-neutral-800
+- [x] Set borders/dividers to border-neutral-800 or border-neutral-700
+- [x] Set primary text to pure white (text-white)
+- [x] Set secondary text to text-neutral-400
+- [x] Define brand-red custom color (#E62020) in CSS variables
+### Task 2: Component-Level Refactoring
+- [x] Primary CTA buttons use bg-brand text-white hover:bg-red-700
+- [x] Secondary buttons use bg-neutral-800 text-white hover:bg-neutral-700
+- [x] Inputs/textareas use bg-neutral-900 border-neutral-700 text-white
+- [x] Campaign Preview cards match dark theme (stand out vs neutral-950)
+- [x] Refactor GlobalTopbar to neutral palette
+- [x] Refactor Home page widgets to neutral palette
+- [x] Refactor DashStudiosPage to neutral palette
+- [x] Refactor Auth pages to neutral palette
+- [x] Refactor AI Agent page to neutral palette
+### Task 3: English Only
+- [x] Verify all UI text is strictly English

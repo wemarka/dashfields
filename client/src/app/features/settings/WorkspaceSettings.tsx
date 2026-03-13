@@ -22,8 +22,8 @@ const ROLE_ICONS: Record<string, React.ElementType> = {
 const ROLE_BADGE: Record<string, string> = {
   owner:  "bg-amber-50  text-amber-600  border border-amber-200",
   admin:  "bg-blue-50   text-blue-600   border border-blue-200",
-  member: "bg-gray-100  text-gray-600   border border-gray-200",
-  viewer: "bg-gray-50   text-gray-400   border border-gray-200",
+  member: "bg-neutral-800  text-neutral-400   border border-neutral-700",
+  viewer: "bg-neutral-800/50   text-neutral-500   border border-neutral-700",
 };
 
 export default function WorkspaceSettings() {
@@ -40,8 +40,8 @@ export default function WorkspaceSettings() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-7 pt-6 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-        <h2 className="text-[17px] font-semibold text-gray-900">Workspace & Team</h2>
-        <p className="text-[13px] mt-0.5 text-gray-400">
+        <h2 className="text-[17px] font-semibold text-white">Workspace & Team</h2>
+        <p className="text-[13px] mt-0.5 text-neutral-500">
           {activeWorkspace?.name ?? "Manage your workspace and team members"}
         </p>
       </div>
@@ -50,11 +50,11 @@ export default function WorkspaceSettings() {
         {/* ── No workspace ──────────────────────────────────────────────────── */}
         {!isLoading && workspaces.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <Building2 className="w-6 h-6 text-gray-400" />
+            <div className="w-14 h-14 rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+              <Building2 className="w-6 h-6 text-neutral-500" />
             </div>
-            <h3 className="text-[15px] font-semibold text-gray-800 mb-1">No Workspace Yet</h3>
-            <p className="text-[13px] text-gray-400 mb-5 max-w-[220px] leading-relaxed">
+            <h3 className="text-[15px] font-semibold text-white mb-1">No Workspace Yet</h3>
+            <p className="text-[13px] text-neutral-500 mb-5 max-w-[220px] leading-relaxed">
               Create your first workspace to start managing your team and brand.
             </p>
             {!showCreate ? (
@@ -72,7 +72,7 @@ export default function WorkspaceSettings() {
                   onChange={(e) => setCreateName(e.target.value)}
                   placeholder="Workspace name..."
                   autoFocus
-                  className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-white text-gray-800"
+                  className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-neutral-900 text-white"
                 />
                 <button
                   onClick={() => createMutation.mutate({ name: createName })}
@@ -82,7 +82,7 @@ export default function WorkspaceSettings() {
                 >
                   {createMutation.isPending ? "..." : "Create"}
                 </button>
-                <button onClick={() => setShowCreate(false)} className="px-3 py-2 rounded-xl text-[13px] text-gray-400 hover:text-gray-600">
+                <button onClick={() => setShowCreate(false)} className="px-3 py-2 rounded-xl text-[13px] text-neutral-500 hover:text-neutral-400">
                   Cancel
                 </button>
               </div>
@@ -96,12 +96,12 @@ export default function WorkspaceSettings() {
             {/* ① Workspace Name ───────────────────────────────────────────── */}
             <WorkspaceNameSection workspace={activeWorkspace} canAdmin={canAdmin} refetch={refetch} />
 
-            <hr className="border-gray-100 my-6" />
+            <hr className="border-neutral-800 my-6" />
 
             {/* ② Team Members ─────────────────────────────────────────────── */}
             <TeamMembersSection workspace={activeWorkspace} canAdmin={canAdmin} />
 
-            <hr className="border-gray-100 my-6" />
+            <hr className="border-neutral-800 my-6" />
 
             {/* ③ Invites & Seats ──────────────────────────────────────────── */}
             <InvitesSection workspace={activeWorkspace} canAdmin={canAdmin} />
@@ -133,15 +133,15 @@ function WorkspaceNameSection({
 
   return (
     <div>
-      <h3 className="text-[15px] font-semibold text-gray-900 mb-1">Workspace Name</h3>
-      <p className="text-[13px] text-gray-400 mb-4">The name of your workspace visible to all members.</p>
+      <h3 className="text-[15px] font-semibold text-white mb-1">Workspace Name</h3>
+      <p className="text-[13px] text-neutral-500 mb-4">The name of your workspace visible to all members.</p>
 
       <div className="flex gap-3 max-w-md">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={!canAdmin}
-          className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-white text-gray-800 disabled:bg-gray-50 disabled:text-gray-400"
+          className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-neutral-900 text-white disabled:bg-neutral-800/50 disabled:text-neutral-500"
           placeholder="Workspace name"
         />
         {canAdmin && (
@@ -159,9 +159,9 @@ function WorkspaceNameSection({
 
       {/* Plan badge */}
       <div className="mt-4 flex items-center gap-2">
-        <span className="text-[12px] text-gray-400">Plan:</span>
+        <span className="text-[12px] text-neutral-500">Plan:</span>
         <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
-          workspace.plan === "free" ? "bg-gray-100 text-gray-500" :
+          workspace.plan === "free" ? "bg-neutral-800 text-neutral-400" :
           workspace.plan === "pro"  ? "bg-blue-50 text-blue-600 border border-blue-200" :
           "bg-amber-50 text-amber-600 border border-amber-200"
         }`}>
@@ -197,8 +197,8 @@ function TeamMembersSection({
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-[15px] font-semibold text-gray-900">Team Members</h3>
-          <p className="text-[13px] text-gray-400 mt-0.5">
+          <h3 className="text-[15px] font-semibold text-white">Team Members</h3>
+          <p className="text-[13px] text-neutral-500 mt-0.5">
             {members ? `${members.length} member${members.length !== 1 ? "s" : ""}` : "Manage your team"}
           </p>
         </div>
@@ -208,10 +208,10 @@ function TeamMembersSection({
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3 animate-pulse">
-              <div className="w-9 h-9 rounded-full bg-gray-100" />
+              <div className="w-9 h-9 rounded-full bg-neutral-800" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3 bg-gray-100 rounded w-32" />
-                <div className="h-2.5 bg-gray-100 rounded w-24" />
+                <div className="h-3 bg-neutral-800 rounded w-32" />
+                <div className="h-2.5 bg-neutral-800 rounded w-24" />
               </div>
             </div>
           ))}
@@ -228,7 +228,7 @@ function TeamMembersSection({
             return (
               <div
                 key={userId}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-800/50 transition-colors group"
               >
                 {/* Avatar */}
                 <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0 text-[13px] font-semibold text-blue-600">
@@ -237,8 +237,8 @@ function TeamMembersSection({
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-gray-800 truncate">{user?.name ?? "Unknown"}</p>
-                  <p className="text-[12px] text-gray-400 truncate">{user?.email}</p>
+                  <p className="text-[13px] font-medium text-white truncate">{user?.name ?? "Unknown"}</p>
+                  <p className="text-[12px] text-neutral-500 truncate">{user?.email}</p>
                 </div>
 
                 {/* Role badge */}
@@ -256,7 +256,7 @@ function TeamMembersSection({
                         workspaceId: workspace.id, userId,
                         role: e.target.value as "admin" | "member" | "viewer",
                       })}
-                      className="text-[12px] px-2 py-1 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40"
+                      className="text-[12px] px-2 py-1 rounded-lg border border-neutral-700 bg-neutral-900 text-neutral-300 focus:outline-none focus:ring-1 focus:ring-blue-400/40"
                     >
                       <option value="admin">Admin</option>
                       <option value="member">Member</option>
@@ -264,7 +264,7 @@ function TeamMembersSection({
                     </select>
                     <button
                       onClick={() => removeMutation.mutate({ workspaceId: workspace.id, userId })}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-colors"
                       title="Remove member"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -313,8 +313,8 @@ function InvitesSection({
 
   return (
     <div>
-      <h3 className="text-[15px] font-semibold text-gray-900 mb-1">Invites & Seats</h3>
-      <p className="text-[13px] text-gray-400 mb-4">
+      <h3 className="text-[15px] font-semibold text-white mb-1">Invites & Seats</h3>
+      <p className="text-[13px] text-neutral-500 mb-4">
         Generate a secure invite link and share it — the recipient doesn't need an existing account.
       </p>
 
@@ -326,12 +326,12 @@ function InvitesSection({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="recipient@example.com"
-              className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-white text-gray-800"
+              className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-neutral-900 text-white"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as "admin" | "member" | "viewer")}
-              className="px-3 py-2 rounded-xl text-[13px] border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40"
+              className="px-3 py-2 rounded-xl text-[13px] border border-neutral-700 bg-neutral-900 text-neutral-300 focus:outline-none focus:ring-1 focus:ring-blue-400/40"
             >
               <option value="admin">Admin</option>
               <option value="member">Member</option>
@@ -367,21 +367,21 @@ function InvitesSection({
           {/* Pending invitations */}
           {pending.length > 0 && (
             <div className="mt-2">
-              <p className="text-[12px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <p className="text-[12px] font-semibold text-neutral-400 uppercase tracking-wide mb-2">
                 Pending — {pending.length}
               </p>
               <div className="space-y-1">
                 {pending.map((inv: Record<string, unknown>) => (
                   <div
                     key={inv.id as number}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-800/50 transition-colors group"
                   >
                     <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
                       <Clock className="w-3.5 h-3.5 text-amber-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-gray-800 truncate">{inv.email as string}</p>
-                      <p className="text-[12px] text-gray-400">
+                      <p className="text-[13px] font-medium text-white truncate">{inv.email as string}</p>
+                      <p className="text-[12px] text-neutral-500">
                         Expires {new Date(inv.expires_at as string).toLocaleDateString()}
                       </p>
                     </div>
@@ -390,7 +390,7 @@ function InvitesSection({
                     </span>
                     <button
                       onClick={() => revokeMutation.mutate({ invitationId: inv.id as number, workspaceId: workspace.id })}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
                       title="Revoke invitation"
                     >
                       <Ban className="w-3.5 h-3.5" />
@@ -404,7 +404,7 @@ function InvitesSection({
       )}
 
       {!canAdmin && (
-        <p className="text-[13px] text-gray-400 italic">Only admins and owners can manage invitations.</p>
+        <p className="text-[13px] text-neutral-500 italic">Only admins and owners can manage invitations.</p>
       )}
     </div>
   );
@@ -437,17 +437,17 @@ function DangerSection({
 
       {open && (
         <div className="mt-4 space-y-3">
-          <p className="text-[13px] text-gray-400">
-            Deleting this workspace is <strong className="text-gray-700">permanent and cannot be undone</strong>. All campaigns, posts, and data will be lost.
+          <p className="text-[13px] text-neutral-500">
+            Deleting this workspace is <strong className="text-neutral-300">permanent and cannot be undone</strong>. All campaigns, posts, and data will be lost.
           </p>
           <div className="space-y-1.5">
-            <label className="text-[12px] text-gray-500">
-              Type <span className="font-bold text-gray-800">{workspace.name}</span> to confirm
+            <label className="text-[12px] text-neutral-400">
+              Type <span className="font-bold text-white">{workspace.name}</span> to confirm
             </label>
             <input
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full max-w-md px-3 py-2 rounded-xl text-[13px] border border-red-200 focus:outline-none focus:ring-1 focus:ring-red-300/50 bg-white text-gray-800"
+              className="w-full max-w-md px-3 py-2 rounded-xl text-[13px] border border-red-200 focus:outline-none focus:ring-1 focus:ring-red-300/50 bg-neutral-900 text-white"
               placeholder={workspace.name}
             />
           </div>

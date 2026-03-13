@@ -44,7 +44,7 @@ export function ContentPlanView({
       <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border border-red-100">
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="w-4 h-4 text-red-600" />
-          <h3 className="font-semibold text-gray-800 text-sm">توزيع الميزانية</h3>
+          <h3 className="font-semibold text-white text-sm">توزيع الميزانية</h3>
           <Badge className="bg-red-100 text-red-700 border-0 text-xs mr-auto">
             {totalBudget.toLocaleString()} {currency}
           </Badge>
@@ -58,17 +58,17 @@ export function ContentPlanView({
                 <span className="text-base w-6 text-center">{PLATFORM_ICONS[platform] ?? "📱"}</span>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-700 capitalize">{platform}</span>
-                    <span className="text-xs text-gray-500">{amount.toLocaleString()} {currency}</span>
+                    <span className="text-xs font-medium text-neutral-300 capitalize">{platform}</span>
+                    <span className="text-xs text-neutral-400">{amount.toLocaleString()} {currency}</span>
                   </div>
-                  <div className="h-1.5 bg-white rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-neutral-900 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
                 </div>
-                <span className="text-xs text-gray-400 w-10 text-right">{Math.round(pct)}%</span>
+                <span className="text-xs text-neutral-500 w-10 text-right">{Math.round(pct)}%</span>
               </div>
             );
           })}
@@ -78,7 +78,7 @@ export function ContentPlanView({
       {/* Audience Insights */}
       {Object.keys(insights).length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-red-600" />
             تحليل الجمهور لكل منصة
           </h3>
@@ -87,31 +87,31 @@ export function ContentPlanView({
               const insight = insights[platform];
               if (!insight) return null;
               return (
-                <div key={platform} className="bg-white rounded-xl border border-gray-100 p-3">
+                <div key={platform} className="bg-neutral-900 rounded-xl border border-neutral-800 p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-base">{PLATFORM_ICONS[platform] ?? "📱"}</span>
-                    <span className="font-medium text-gray-800 text-sm capitalize">{platform}</span>
+                    <span className="font-medium text-white text-sm capitalize">{platform}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-1.5 text-gray-600">
+                    <div className="flex items-center gap-1.5 text-neutral-400">
                       <Users className="w-3 h-3 text-blue-500" />
                       <span>{insight.ageRange}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-600">
+                    <div className="flex items-center gap-1.5 text-neutral-400">
                       <Zap className="w-3 h-3 text-yellow-500" />
                       <span>{insight.estimatedReach?.toLocaleString()} وصول</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-600">
+                    <div className="flex items-center gap-1.5 text-neutral-400">
                       <Clock className="w-3 h-3 text-green-500" />
                       <span>{insight.bestTimes?.slice(0, 2).join(", ")}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-600">
+                    <div className="flex items-center gap-1.5 text-neutral-400">
                       <DollarSign className="w-3 h-3 text-red-500" />
                       <span>CPM: {insight.cpm} {currency}</span>
                     </div>
                   </div>
                   {insight.recommendation && (
-                    <p className="text-[11px] text-gray-500 mt-2 bg-gray-50 rounded-lg p-2">
+                    <p className="text-[11px] text-neutral-400 mt-2 bg-neutral-800/50 rounded-lg p-2">
                       💡 {insight.recommendation}
                     </p>
                   )}
@@ -124,7 +124,7 @@ export function ContentPlanView({
 
       {/* Content Calendar */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
           <Calendar className="w-4 h-4 text-red-600" />
           خطة النشر ({items.length} منشور)
         </h3>
@@ -135,13 +135,13 @@ export function ContentPlanView({
           const visiblePlatformItems = platformItems.filter((_, idx) => platformStartIdx + idx < visibleCount);
           if (visiblePlatformItems.length === 0) return null;
           return (
-            <div key={platform} className="border border-gray-100 rounded-xl overflow-hidden">
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-100">
+            <div key={platform} className="border border-neutral-800 rounded-xl overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 bg-neutral-800/50 border-b border-neutral-800">
                 <span className="text-base">{PLATFORM_ICONS[platform] ?? "📱"}</span>
-                <span className="font-medium text-gray-700 text-sm capitalize">{platform}</span>
+                <span className="font-medium text-neutral-300 text-sm capitalize">{platform}</span>
                 <Badge variant="outline" className="text-xs mr-auto">{platformItems.length} منشور</Badge>
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-neutral-800">
                 {visiblePlatformItems.map((item, idx) => (
                   <div
                     key={item.id}
@@ -175,14 +175,14 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
   const formattedDate = date.toLocaleDateString("ar-SA", { weekday: "short", month: "short", day: "numeric" });
 
   return (
-    <div className="p-3 bg-white">
+    <div className="p-3 bg-neutral-900">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-[11px] text-gray-500">
+          <div className="flex items-center gap-1 text-[11px] text-neutral-400">
             <Calendar className="w-3 h-3" />
             <span>{formattedDate}</span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-gray-500">
+          <div className="flex items-center gap-1 text-[11px] text-neutral-400">
             <Clock className="w-3 h-3" />
             <span>{item.postTime}</span>
           </div>
@@ -190,14 +190,14 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
         <Badge
           className={cn(
             "text-[10px] border-0",
-            item.status === "draft" ? "bg-gray-100 text-gray-600" : "bg-green-100 text-green-700",
+            item.status === "draft" ? "bg-neutral-800 text-neutral-400" : "bg-green-100 text-green-700",
           )}
         >
           {item.status === "draft" ? "مسودة" : "جاهز"}
         </Badge>
       </div>
 
-      <p className="text-sm text-gray-700 leading-relaxed mb-2 line-clamp-3">{item.caption}</p>
+      <p className="text-sm text-neutral-300 leading-relaxed mb-2 line-clamp-3">{item.caption}</p>
 
       {item.hashtags?.length > 0 && (
         <div className="flex flex-wrap gap-1">
@@ -208,7 +208,7 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
             </span>
           ))}
           {item.hashtags.length > 5 && (
-            <span className="text-[10px] text-gray-400">+{item.hashtags.length - 5}</span>
+            <span className="text-[10px] text-neutral-500">+{item.hashtags.length - 5}</span>
           )}
         </div>
       )}

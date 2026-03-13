@@ -75,7 +75,7 @@ export function Step3Creative({
   return (
     <div className="space-y-4">
       {/* AI Copy Generator */}
-      <div className="bg-gradient-to-br from-primary/5 via-violet-500/5 to-fuchsia-500/5 border border-primary/20 rounded-2xl p-4">
+      <div className="bg-gradient-to-br from-primary/5 via-brand/5 to-fuchsia-500/5 border border-primary/20 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">

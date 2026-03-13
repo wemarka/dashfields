@@ -135,7 +135,7 @@ function CreateAlertForm({
           <select
             value={metric}
             onChange={e => setMetric(e.target.value as Metric)}
-            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+            className="w-full px-3 py-2 rounded-xl bg-neutral-900/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           >
             {Object.entries(METRIC_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
@@ -149,7 +149,7 @@ function CreateAlertForm({
           <select
             value={operator}
             onChange={e => setOperator(e.target.value as Operator)}
-            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+            className="w-full px-3 py-2 rounded-xl bg-neutral-900/5 border border-white/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           >
             {Object.entries(OPERATOR_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
@@ -186,7 +186,7 @@ function CreateAlertForm({
                 value={threshold}
                 onChange={e => setThreshold(e.target.value)}
                 placeholder={`e.g. ${range.max / 4}`}
-                className="flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                className="flex-1 px-3 py-2 rounded-xl bg-neutral-900/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                 required
               />
               <span className="text-xs text-muted-foreground shrink-0">
@@ -381,7 +381,7 @@ export default function Alerts() {
           ) : (
             <div className="divide-y divide-white/5">
               {rules.map(rule => (
-                <div key={rule.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/3 transition-colors">
+                <div key={rule.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-neutral-900/3 transition-colors">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-foreground">
@@ -496,7 +496,7 @@ export default function Alerts() {
               {filteredNotifications.map(n => (
                 <div
                   key={n.id}
-                  className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-white/3"}`}
+                  className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-neutral-900/3"}`}
                 >
                   <div className="mt-0.5 shrink-0">
                     {NOTIFICATION_ICONS[n.type as keyof typeof NOTIFICATION_ICONS] ?? NOTIFICATION_ICONS.info}

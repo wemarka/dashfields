@@ -372,8 +372,8 @@ export default function AdvancedAnalytics() {
                         contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }}
                       />
                       <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="Last Click"  fill="#6366f1" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="First Click" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Last Click"  fill="#c41919" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="First Click" fill="#E62020" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Linear"      fill="#a78bfa" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Time Decay"  fill="#c4b5fd" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -388,7 +388,7 @@ export default function AdvancedAnalytics() {
                       <PolarGrid stroke="var(--border)" />
                       <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                       <PolarRadiusAxis tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
-                      <Radar name="Avg Value" dataKey="value" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} />
+                      <Radar name="Avg Value" dataKey="value" stroke="#c41919" fill="#c41919" fillOpacity={0.3} />
                       <Tooltip
                         formatter={(value: number) => fmtMoney(value)}
                         contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }}

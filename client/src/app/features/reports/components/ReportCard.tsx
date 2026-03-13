@@ -47,17 +47,17 @@ export function ReportCard({ report, onDelete, onDownload }: {
   onDownload: (report: ReportRow) => void;
 }) {
   const scheduleColors: Record<Schedule, string> = {
-    none:    "bg-gray-100 text-gray-600",
+    none:    "bg-neutral-800 text-neutral-400",
     weekly:  "bg-blue-100 text-blue-700",
-    monthly: "bg-violet-100 text-violet-700",
+    monthly: "bg-brand/10 text-brand",
   };
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-all group">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
-            <FileText className="w-5 h-5 text-violet-500" />
+          <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
+            <FileText className="w-5 h-5 text-brand" />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground truncate">{report.name}</h3>

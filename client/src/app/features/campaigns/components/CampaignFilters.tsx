@@ -69,8 +69,8 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
 const STATUS_DOTS: Record<string, string> = {
   active: "bg-emerald-500",
   paused: "bg-amber-500",
-  draft: "bg-slate-400",
-  ended: "bg-slate-300",
+  draft: "bg-neutral-400",
+  ended: "bg-neutral-300",
   scheduled: "bg-blue-400",
 };
 
@@ -193,7 +193,7 @@ export function CampaignFilters({
               <SelectItem key={s.value} value={s.value} className="text-xs">
                 <div className="flex items-center gap-2">
                   {s.value !== "all" && (
-                    <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOTS[s.value] ?? "bg-slate-400"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOTS[s.value] ?? "bg-neutral-400"}`} />
                   )}
                   {s.label}
                 </div>

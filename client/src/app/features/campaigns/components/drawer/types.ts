@@ -82,9 +82,9 @@ export const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
   active:    { dot: "bg-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", label: "Active" },
   paused:    { dot: "bg-amber-500",   bg: "bg-amber-500/10",   text: "text-amber-700 dark:text-amber-400",     label: "Paused" },
-  draft:     { dot: "bg-slate-400",   bg: "bg-slate-400/10",   text: "text-slate-600 dark:text-slate-400",     label: "Draft" },
-  ended:     { dot: "bg-slate-300",   bg: "bg-slate-300/10",   text: "text-slate-500 dark:text-slate-400",     label: "Ended" },
-  archived:  { dot: "bg-slate-300",   bg: "bg-slate-300/10",   text: "text-slate-500 dark:text-slate-400",     label: "Archived" },
+  draft:     { dot: "bg-neutral-400",   bg: "bg-neutral-400/10",   text: "text-neutral-600 dark:text-neutral-400",     label: "Draft" },
+  ended:     { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Ended" },
+  archived:  { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Archived" },
 };
 
 // ─── CTA Labels ─────────────────────────────────────────────────────────────

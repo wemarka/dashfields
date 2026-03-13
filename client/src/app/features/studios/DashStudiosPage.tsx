@@ -92,7 +92,7 @@ export default function DashStudiosPage() {
   };
 
   const tabs = [
-    { id: "generate" as Tab, label: "Image Generator", icon: ImagePlus, color: "text-violet-400" },
+    { id: "generate" as Tab, label: "Image Generator", icon: ImagePlus, color: "text-brand" },
     { id: "video" as Tab, label: "Video Creator", icon: Video, color: "text-pink-400" },
     { id: "brand" as Tab, label: "Brand Kit", icon: Wand2, color: "text-amber-400" },
   ];
@@ -108,7 +108,7 @@ export default function DashStudiosPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-6 sm:mb-8 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-full sm:w-fit overflow-x-auto">
+      <div className="flex gap-1 mb-6 sm:mb-8 p-1 rounded-xl bg-neutral-900 border border-neutral-800 w-full sm:w-fit overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -121,8 +121,8 @@ export default function DashStudiosPage() {
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? "bg-white/[0.08] text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                ? "bg-neutral-900/[0.08] text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-neutral-900/[0.04]"
             }`}
           >
             <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? tab.color : ""}`} />
@@ -146,15 +146,15 @@ export default function DashStudiosPage() {
             {historyQuery.isLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="aspect-square rounded-xl bg-white/[0.03] border border-white/[0.04] animate-pulse" />
+                  <div key={i} className="aspect-square rounded-xl bg-neutral-900/[0.03] border border-white/[0.04] animate-pulse" />
                 ))}
               </div>
             ) : historyQuery.data && historyQuery.data.items.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {/* Show latest generation in progress */}
                 {generateMutation.isPending && (
-                  <div className="aspect-square rounded-xl bg-white/[0.03] border border-violet-500/20 flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+                  <div className="aspect-square rounded-xl bg-neutral-900/[0.03] border border-brand/20 flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-brand" />
                     <span className="text-xs text-muted-foreground">Generating...</span>
                   </div>
                 )}
@@ -179,13 +179,13 @@ export default function DashStudiosPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDownload(item.imageUrl, `dashfields-${item.id}`); }}
-                            className="p-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+                            className="p-1.5 rounded-md bg-neutral-900/10 hover:bg-neutral-900/20 transition-colors"
                           >
                             <Download className="w-3.5 h-3.5 text-white" />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setLightboxUrl(item.imageUrl); }}
-                            className="p-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+                            className="p-1.5 rounded-md bg-neutral-900/10 hover:bg-neutral-900/20 transition-colors"
                           >
                             <ZoomIn className="w-3.5 h-3.5 text-white" />
                           </button>
@@ -210,14 +210,14 @@ export default function DashStudiosPage() {
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 {generateMutation.isPending ? (
                   <>
-                    <Loader2 className="w-10 h-10 animate-spin text-violet-400 mb-4" />
+                    <Loader2 className="w-10 h-10 animate-spin text-brand mb-4" />
                     <p className="text-sm text-muted-foreground">Generating your first creation...</p>
                     <p className="text-xs text-muted-foreground/60 mt-1">This may take 15-30 seconds</p>
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4">
-                      <Sparkles className="w-7 h-7 text-violet-400" />
+                    <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mb-4">
+                      <Sparkles className="w-7 h-7 text-brand" />
                     </div>
                     <p className="text-sm text-muted-foreground mb-1">No creations yet</p>
                     <p className="text-xs text-muted-foreground/60">
@@ -231,7 +231,7 @@ export default function DashStudiosPage() {
 
           {/* Right: Generation Panel */}
           <div className="space-y-5">
-            <div className="rounded-xl border border-white/[0.06] bg-card p-5 space-y-5">
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5 space-y-5">
               {/* Prompt */}
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
@@ -241,7 +241,7 @@ export default function DashStudiosPage() {
                   placeholder="Describe the image you want to create... e.g., 'A modern coffee shop interior with warm lighting and minimalist decor for an Instagram ad'"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[120px] bg-white/[0.03] border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 resize-none focus:border-violet-500/50"
+                  className="min-h-[120px] bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 resize-none focus:border-brand/50"
                 />
                 <div className="flex justify-end mt-1">
                   <span className={`text-[10px] ${prompt.length > 1800 ? "text-red-400" : "text-muted-foreground/40"}`}>
@@ -262,8 +262,8 @@ export default function DashStudiosPage() {
                       onClick={() => setAspectRatio(ar.value)}
                       className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg border transition-all text-xs ${
                         aspectRatio === ar.value
-                          ? "border-violet-500/50 bg-violet-500/10 text-violet-400"
-                          : "border-white/[0.06] text-muted-foreground hover:border-white/[0.12] hover:bg-white/[0.03]"
+                          ? "border-brand/50 bg-brand/10 text-brand"
+                          : "border-white/[0.06] text-muted-foreground hover:border-white/[0.12] hover:bg-neutral-900/[0.03]"
                       }`}
                     >
                       <ar.icon className="w-4 h-4" />
@@ -285,11 +285,11 @@ export default function DashStudiosPage() {
                       onClick={() => setStyle(s.id)}
                       className={`px-3 py-2 rounded-lg border text-left transition-all ${
                         style === s.id
-                          ? "border-violet-500/50 bg-violet-500/10"
-                          : "border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.03]"
+                          ? "border-brand/50 bg-brand/10"
+                          : "border-white/[0.06] hover:border-white/[0.12] hover:bg-neutral-900/[0.03]"
                       }`}
                     >
-                      <span className={`text-xs font-medium block ${style === s.id ? "text-violet-400" : "text-foreground"}`}>
+                      <span className={`text-xs font-medium block ${style === s.id ? "text-brand" : "text-foreground"}`}>
                         {s.label}
                       </span>
                     </button>
@@ -301,7 +301,7 @@ export default function DashStudiosPage() {
               <Button
                 onClick={handleGenerate}
                 disabled={generateMutation.isPending || !prompt.trim()}
-                className="w-full h-11 bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-xl transition-colors"
+                className="w-full h-11 bg-brand hover:bg-red-700 text-white font-medium rounded-xl transition-colors"
               >
                 {generateMutation.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generating...</>
@@ -318,7 +318,7 @@ export default function DashStudiosPage() {
             </div>
 
             {/* Tips */}
-            <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4">
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
               <h3 className="text-xs font-semibold text-muted-foreground mb-2">Tips for better results</h3>
               <ul className="space-y-1.5 text-[11px] text-muted-foreground/60">
                 <li>Be specific about colors, lighting, and composition</li>
@@ -339,7 +339,7 @@ export default function DashStudiosPage() {
         >
           <button
             onClick={() => setLightboxUrl(null)}
-            className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            className="absolute top-6 right-6 p-2 rounded-full bg-neutral-900/10 hover:bg-neutral-900/20 transition-colors"
           >
             <X className="w-5 h-5 text-white" />
           </button>
@@ -351,7 +351,7 @@ export default function DashStudiosPage() {
           />
           <button
             onClick={(e) => { e.stopPropagation(); handleDownload(lightboxUrl, "dashfields-creation"); }}
-            className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
+            className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/10 hover:bg-neutral-900/20 text-white text-sm transition-colors"
           >
             <Download className="w-4 h-4" />
             Download

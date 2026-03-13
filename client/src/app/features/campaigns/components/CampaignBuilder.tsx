@@ -114,7 +114,7 @@ export function CampaignBuilder({ onClose, onCreated }: { onClose: () => void; o
             </button>
           ) : (
             <button onClick={handleLaunch} disabled={createMutation.isPending}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-primary to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
               {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
               {createMutation.isPending ? "Creating..." : "Create Campaign"}
             </button>

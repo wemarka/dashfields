@@ -232,7 +232,7 @@ export function PerformanceMonitor() {
       prev: compare?.current?.ctr ?? 0,
       unit: "%",
       icon: Target,
-      color: "from-purple-500 to-purple-600",
+      color: "from-purple-500 to-red-700",
       format: fmt.percent,
     },
   ];
@@ -328,8 +328,8 @@ export function PerformanceMonitor() {
                 <AreaChart data={history} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id="impGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#c41919" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#c41919" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="clkGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -340,7 +340,7 @@ export function PerformanceMonitor() {
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="impressions" stroke="#6366f1" fill="url(#impGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="impressions" stroke="#c41919" fill="url(#impGrad)" strokeWidth={2} dot={false} />
                   <Area type="monotone" dataKey="clicks" stroke="#10b981" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -371,7 +371,7 @@ export function PerformanceMonitor() {
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
                   <Line yAxisId="left" type="monotone" dataKey="spend" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                  <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#E62020" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             )}

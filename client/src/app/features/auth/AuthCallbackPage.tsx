@@ -53,7 +53,7 @@ export default function AuthCallbackPage() {
             "Dashfields brings all your ad accounts into one intelligent workspace."
           </blockquote>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
+            <div className="w-9 h-9 rounded-full bg-neutral-900/10 flex items-center justify-center text-white text-sm font-semibold">D</div>
             <div>
               <p className="text-white text-sm font-medium">Dashfields Team</p>
               <p className="text-white/40 text-xs">dashfields.com</p>
@@ -71,11 +71,11 @@ export default function AuthCallbackPage() {
             <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain" style={{ filter: "brightness(0)" }} />
           </div>
 
-          <div className="w-14 h-14 rounded-2xl bg-gray-100 border border-[#e5e7eb] flex items-center justify-center mx-auto mb-5">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+          <div className="w-14 h-14 rounded-2xl bg-neutral-800 border border-[#e5e7eb] flex items-center justify-center mx-auto mb-5">
+            <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">Completing sign in</h2>
-          <p className="text-gray-500 text-sm">Please wait a moment...</p>
+          <h2 className="text-lg font-semibold text-white mb-1">Completing sign in</h2>
+          <p className="text-neutral-400 text-sm">Please wait a moment...</p>
         </div>
       </div>
     </div>

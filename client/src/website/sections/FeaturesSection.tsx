@@ -13,8 +13,8 @@ import { AnimatedSection } from "./shared";
 export function FeaturesGrid() {
   const features = [
     { icon: Brain, color: "blue", title: "AI Content Studio", desc: "Let AI write your ads, plan your content calendar, and generate creative ideas for all 8 platforms.", features: ["Ad Copywriter", "Content Ideas", "AI Calendar Planner"] },
-    { icon: BarChart3, color: "indigo", title: "Smart Analytics", desc: "Track performance across all platforms in real-time with beautiful charts and actionable insights.", features: ["Cross-platform KPIs", "Period Comparison", "Custom Reports"] },
-    { icon: Calendar, color: "violet", title: "Content Calendar", desc: "Schedule and manage posts with an intuitive calendar. Never miss the best time to post again.", features: ["Drag & Drop", "3 View Modes", "Best Time AI"] },
+    { icon: BarChart3, color: "red", title: "Smart Analytics", desc: "Track performance across all platforms in real-time with beautiful charts and actionable insights.", features: ["Cross-platform KPIs", "Period Comparison", "Custom Reports"] },
+    { icon: Calendar, color: "red", title: "Content Calendar", desc: "Schedule and manage posts with an intuitive calendar. Never miss the best time to post again.", features: ["Drag & Drop", "3 View Modes", "Best Time AI"] },
     { icon: Bell, color: "purple", title: "Performance Alerts", desc: "Get notified instantly when CTR drops, budget runs out, or campaigns need your attention.", features: ["Smart Thresholds", "Multi-platform", "Instant Notifications"] },
   ];
 
@@ -66,10 +66,10 @@ export function AIShowcase() {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-950 via-indigo-900 to-violet-950 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl opacity-10" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500 rounded-full blur-3xl opacity-10" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand/100 rounded-full blur-3xl opacity-10" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,7 +113,7 @@ export function PlatformSupport() {
   const platforms = [
     { name: "Facebook", bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-100" },
     { name: "Instagram", bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-100" },
-    { name: "TikTok", bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200" },
+    { name: "TikTok", bg: "bg-neutral-50", text: "text-neutral-700", border: "border-neutral-200" },
     { name: "X (Twitter)", bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-100" },
     { name: "LinkedIn", bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
     { name: "YouTube", bg: "bg-red-50", text: "text-red-700", border: "border-red-100" },

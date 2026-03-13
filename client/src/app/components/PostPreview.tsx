@@ -77,12 +77,12 @@ function Avatar({ src, name, size = 32 }: { src?: string; name: string; size?: n
 function MediaPlaceholder({ url, type = "image" }: { url?: string; type?: "image" | "video" }) {
   if (!url) {
     return (
-      <div className="w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+      <div className="w-full aspect-square bg-gradient-to-br from-neutral-800 to-neutral-700 dark:from-neutral-800 dark:to-neutral-700 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center mx-auto mb-1">
-            {type === "video" ? <Play className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
+          <div className="w-10 h-10 rounded-full bg-neutral-600 dark:bg-neutral-600 flex items-center justify-center mx-auto mb-1">
+            {type === "video" ? <Play className="w-5 h-5 text-neutral-400" /> : <Eye className="w-5 h-5 text-neutral-400" />}
           </div>
-          <p className="text-xs text-gray-400">No media</p>
+          <p className="text-xs text-neutral-500">No media</p>
         </div>
       </div>
     );
@@ -110,21 +110,21 @@ function InstagramPreview({ content, mediaUrl, mediaType, accountName, accountHa
   const handle = accountHandle || "youraccount";
 
   return (
-    <div className="bg-white dark:bg-[#121212] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 max-w-[375px] mx-auto shadow-sm">
+    <div className="bg-neutral-900 dark:bg-[#121212] rounded-xl overflow-hidden border border-neutral-700 dark:border-neutral-800 max-w-[375px] mx-auto shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5">
         <div className="flex items-center gap-2.5">
-          <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
-            <div className="bg-white dark:bg-[#121212] p-0.5 rounded-full">
+          <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-red-700">
+            <div className="bg-neutral-900 dark:bg-[#121212] p-0.5 rounded-full">
               <Avatar src={accountAvatar} name={name} size={30} />
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-900 dark:text-white leading-none">{handle}</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Sponsored</p>
+            <p className="text-xs font-semibold text-white dark:text-white leading-none">{handle}</p>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Sponsored</p>
           </div>
         </div>
-        <MoreHorizontal className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+        <MoreHorizontal className="w-5 h-5 text-neutral-300 dark:text-neutral-500" />
       </div>
 
       {/* Media */}
@@ -135,21 +135,21 @@ function InstagramPreview({ content, mediaUrl, mediaType, accountName, accountHa
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3.5">
             <button onClick={() => setLiked(!liked)}>
-              <Heart className={`w-6 h-6 transition-colors ${liked ? "fill-red-500 text-red-500" : "text-gray-900 dark:text-white"}`} />
+              <Heart className={`w-6 h-6 transition-colors ${liked ? "fill-red-500 text-red-500" : "text-white dark:text-white"}`} />
             </button>
-            <MessageCircle className="w-6 h-6 text-gray-900 dark:text-white" />
-            <Send className="w-6 h-6 text-gray-900 dark:text-white -rotate-12" />
+            <MessageCircle className="w-6 h-6 text-white dark:text-white" />
+            <Send className="w-6 h-6 text-white dark:text-white -rotate-12" />
           </div>
           <button onClick={() => setSaved(!saved)}>
-            <Bookmark className={`w-6 h-6 transition-colors ${saved ? "fill-gray-900 dark:fill-white text-gray-900 dark:text-white" : "text-gray-900 dark:text-white"}`} />
+            <Bookmark className={`w-6 h-6 transition-colors ${saved ? "fill-neutral-900 dark:fill-white text-white dark:text-white" : "text-white dark:text-white"}`} />
           </button>
         </div>
-        <p className="text-xs font-semibold text-gray-900 dark:text-white mb-1">{liked ? "1,234 likes" : "1,233 likes"}</p>
-        <p className="text-xs text-gray-900 dark:text-white leading-relaxed">
+        <p className="text-xs font-semibold text-white dark:text-white mb-1">{liked ? "1,234 likes" : "1,233 likes"}</p>
+        <p className="text-xs text-white dark:text-white leading-relaxed">
           <span className="font-semibold mr-1">{handle}</span>
           {formatContent(content, "instagram")}
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wide" style={{ fontSize: 10 }}>2 hours ago</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 uppercase tracking-wide" style={{ fontSize: 10 }}>2 hours ago</p>
       </div>
     </div>
   );
@@ -161,25 +161,25 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
   const name = accountName || "Your Page";
 
   return (
-    <div className="bg-white dark:bg-[#242526] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-[500px] mx-auto shadow-sm">
+    <div className="bg-neutral-900 dark:bg-[#242526] rounded-xl overflow-hidden border border-neutral-700 dark:border-neutral-700 max-w-[500px] mx-auto shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-3 pb-2">
         <div className="flex items-center gap-2.5">
           <Avatar src={accountAvatar} name={name} size={40} />
           <div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-[#e4e6eb] leading-none">{name}</p>
+            <p className="text-sm font-semibold text-white dark:text-[#e4e6eb] leading-none">{name}</p>
             <div className="flex items-center gap-1 mt-0.5">
-              <p className="text-[11px] text-gray-500 dark:text-[#b0b3b8]">2 hours ago · </p>
-              <span className="text-[11px] text-gray-500 dark:text-[#b0b3b8]">🌐</span>
+              <p className="text-[11px] text-neutral-400 dark:text-[#b0b3b8]">2 hours ago · </p>
+              <span className="text-[11px] text-neutral-400 dark:text-[#b0b3b8]">🌐</span>
             </div>
           </div>
         </div>
-        <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-[#b0b3b8]" />
+        <MoreHorizontal className="w-5 h-5 text-neutral-400 dark:text-[#b0b3b8]" />
       </div>
 
       {/* Content */}
       <div className="px-4 pb-2">
-        <p className="text-sm text-gray-900 dark:text-[#e4e6eb] leading-relaxed">
+        <p className="text-sm text-white dark:text-[#e4e6eb] leading-relaxed">
           {formatContent(content, "facebook")}
         </p>
       </div>
@@ -188,15 +188,15 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
       {mediaUrl && <MediaPlaceholder url={mediaUrl} type={mediaType} />}
 
       {/* Reactions bar */}
-      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-neutral-800 dark:border-neutral-700 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <div className="flex -space-x-1">
             <span className="w-4.5 h-4.5 rounded-full bg-blue-500 flex items-center justify-center text-[9px]">👍</span>
             <span className="w-4.5 h-4.5 rounded-full bg-red-500 flex items-center justify-center text-[9px]">❤️</span>
           </div>
-          <span className="text-xs text-gray-500 dark:text-[#b0b3b8] ml-1">1.2K</span>
+          <span className="text-xs text-neutral-400 dark:text-[#b0b3b8] ml-1">1.2K</span>
         </div>
-        <span className="text-xs text-gray-500 dark:text-[#b0b3b8]">48 comments · 12 shares</span>
+        <span className="text-xs text-neutral-400 dark:text-[#b0b3b8]">48 comments · 12 shares</span>
       </div>
 
       {/* Action buttons */}
@@ -209,7 +209,7 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
           <button
             key={label}
             onClick={onClick}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-xs font-semibold ${active ? "text-blue-500" : "text-gray-500 dark:text-[#b0b3b8]"}`}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors text-xs font-semibold ${active ? "text-blue-500" : "text-neutral-400 dark:text-[#b0b3b8]"}`}
           >
             <Icon className="w-4 h-4" />
             {label}
@@ -229,23 +229,23 @@ function TwitterPreview({ content, mediaUrl, mediaType, accountName, accountHand
   const isOverLimit = charCount > 280;
 
   return (
-    <div className="bg-white dark:bg-black rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 max-w-[500px] mx-auto shadow-sm">
+    <div className="bg-neutral-900 dark:bg-black rounded-xl overflow-hidden border border-neutral-700 dark:border-neutral-800 max-w-[500px] mx-auto shadow-sm">
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start gap-3">
           <Avatar src={accountAvatar} name={name} size={40} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{name}</p>
+              <p className="text-sm font-bold text-white dark:text-white truncate">{name}</p>
               <svg className="w-4 h-4 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1.01-2.52-1.27-3.91-.81C14.67 2.88 13.43 2 12 2s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81-1.01 1.01-1.27 2.52-.81 3.91C2.88 9.33 2 10.57 2 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91 1.01 1.01 2.52 1.27 3.91.81C9.33 21.12 10.57 22 12 22s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81 1.01-1.01 1.27-2.52.81-3.91C21.12 14.67 22 13.43 22 12h.25z" />
               </svg>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{handle}</p>
-              <span className="text-gray-400 dark:text-gray-600 ml-auto text-xs">· 2h</span>
+              <p className="text-sm text-neutral-400 dark:text-neutral-500 truncate">@{handle}</p>
+              <span className="text-neutral-500 dark:text-neutral-400 ml-auto text-xs">· 2h</span>
             </div>
 
             {/* Content */}
-            <p className={`text-sm mt-1 leading-relaxed ${isOverLimit ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
+            <p className={`text-sm mt-1 leading-relaxed ${isOverLimit ? "text-red-500" : "text-white dark:text-white"}`}>
               {formatContent(content, "twitter")}
             </p>
             {isOverLimit && (
@@ -254,13 +254,13 @@ function TwitterPreview({ content, mediaUrl, mediaType, accountName, accountHand
 
             {/* Media */}
             {mediaUrl && (
-              <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+              <div className="mt-3 rounded-xl overflow-hidden border border-neutral-700 dark:border-neutral-800">
                 <MediaPlaceholder url={mediaUrl} type={mediaType} />
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-between mt-3 text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-between mt-3 text-neutral-400 dark:text-neutral-500">
               {[
                 { icon: MessageCircle, count: "48" },
                 { icon: Repeat2, count: "12" },
@@ -296,17 +296,17 @@ function LinkedInPreview({ content, mediaUrl, mediaType, accountName, accountAva
   const hasMore = content.length > 200;
 
   return (
-    <div className="bg-white dark:bg-[#1b1f23] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-[500px] mx-auto shadow-sm">
+    <div className="bg-neutral-900 dark:bg-[#1b1f23] rounded-xl overflow-hidden border border-neutral-700 dark:border-neutral-700 max-w-[500px] mx-auto shadow-sm">
       {/* Header */}
       <div className="flex items-start justify-between px-4 pt-3 pb-2">
         <div className="flex items-center gap-2.5">
           <Avatar src={accountAvatar} name={name} size={48} />
           <div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white leading-none">{name}</p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Social Media Manager · 2h</p>
+            <p className="text-sm font-semibold text-white dark:text-white leading-none">{name}</p>
+            <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-0.5">Social Media Manager · 2h</p>
             <div className="flex items-center gap-1 mt-0.5">
-              <Globe2 className="w-3 h-3 text-gray-400" />
-              <span className="text-[10px] text-gray-400">Public</span>
+              <Globe2 className="w-3 h-3 text-neutral-500" />
+              <span className="text-[10px] text-neutral-500">Public</span>
             </div>
           </div>
         </div>
@@ -317,10 +317,10 @@ function LinkedInPreview({ content, mediaUrl, mediaType, accountName, accountAva
 
       {/* Content */}
       <div className="px-4 pb-2">
-        <p className="text-sm text-gray-900 dark:text-[#e7e9ea] leading-relaxed">
+        <p className="text-sm text-white dark:text-[#e7e9ea] leading-relaxed">
           {expanded ? formatContent(content, "linkedin") : formatContent(shortContent, "linkedin")}
           {hasMore && !expanded && (
-            <button onClick={() => setExpanded(true)} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 ml-1 font-medium">
+            <button onClick={() => setExpanded(true)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-300 ml-1 font-medium">
               ...see more
             </button>
           )}
@@ -331,12 +331,12 @@ function LinkedInPreview({ content, mediaUrl, mediaType, accountName, accountAva
       {mediaUrl && <MediaPlaceholder url={mediaUrl} type={mediaType} />}
 
       {/* Stats */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-100 dark:border-gray-700">
+      <div className="px-4 py-2 flex items-center justify-between border-b border-neutral-800 dark:border-neutral-700">
         <div className="flex items-center gap-1">
           <span className="text-xs">👍❤️🎉</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">1,234</span>
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">1,234</span>
         </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400">48 comments · 12 reposts</span>
+        <span className="text-xs text-neutral-400 dark:text-neutral-500">48 comments · 12 reposts</span>
       </div>
 
       {/* Actions */}
@@ -350,7 +350,7 @@ function LinkedInPreview({ content, mediaUrl, mediaType, accountName, accountAva
           <button
             key={label}
             onClick={onClick}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-xs font-semibold ${active ? "text-[#0A66C2]" : "text-gray-500 dark:text-gray-400"}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors text-xs font-semibold ${active ? "text-[#0A66C2]" : "text-neutral-400 dark:text-neutral-500"}`}
           >
             <Icon className="w-4 h-4" />
             {label}
@@ -373,7 +373,7 @@ function TikTokPreview({ content, mediaUrl, accountName, accountHandle, accountA
       {mediaUrl ? (
         <video src={mediaUrl} className="absolute inset-0 w-full h-full object-cover" loop muted />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-black flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-900 via-neutral-800 to-black flex items-center justify-center">
           <div className="text-center">
             <Play className="w-12 h-12 text-white/30 mx-auto mb-2" />
             <p className="text-white/30 text-xs">Video Preview</p>
@@ -415,7 +415,7 @@ function TikTokPreview({ content, mediaUrl, accountName, accountHandle, accountA
           <span className="text-white text-[10px] font-semibold">Share</span>
         </div>
         {/* Spinning music disc */}
-        <div className="w-9 h-9 rounded-full border-4 border-white/30 bg-gray-800 flex items-center justify-center animate-spin" style={{ animationDuration: "3s" }}>
+        <div className="w-9 h-9 rounded-full border-4 border-white/30 bg-neutral-800 flex items-center justify-center animate-spin" style={{ animationDuration: "3s" }}>
           <Music2 className="w-4 h-4 text-white" />
         </div>
       </div>

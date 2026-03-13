@@ -283,7 +283,7 @@ export default function Competitors() {
                 });
               }}
               disabled={generateStrategy.isPending || !summary}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-600 hover:bg-violet-500/20 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand/10 border border-brand/20 text-xs font-medium text-brand hover:bg-brand/20 transition-colors disabled:opacity-50"
             >
               {generateStrategy.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
               AI Strategy
@@ -328,12 +328,12 @@ export default function Competitors() {
                   ))}
                 </div>
                 {swotData.recommendations.length > 0 && (
-                  <div className="border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 rounded-xl p-3">
-                    <p className="text-xs font-bold text-violet-700 dark:text-violet-400 mb-2">💡 Strategic Recommendations</p>
+                  <div className="border border-brand/20 dark:border-brand/30 bg-brand/10 dark:bg-brand/10 rounded-xl p-3">
+                    <p className="text-xs font-bold text-brand dark:text-brand mb-2">💡 Strategic Recommendations</p>
                     <ul className="space-y-1">
                       {swotData.recommendations.map((r, i) => (
                         <li key={i} className="flex items-start gap-1.5 text-xs text-foreground">
-                          <span className="text-violet-500 font-bold shrink-0">{i + 1}.</span>{r}
+                          <span className="text-brand font-bold shrink-0">{i + 1}.</span>{r}
                         </li>
                       ))}
                     </ul>
@@ -344,9 +344,9 @@ export default function Competitors() {
 
             {/* AI Strategy Panel */}
             {showStrategy && aiStrategy && (
-          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 mb-2">
+          <div className="rounded-2xl border border-brand/20 bg-brand/5 p-5 mb-2">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-violet-700 flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Strategy Recommendations</p>
+              <p className="text-sm font-semibold text-brand flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Strategy Recommendations</p>
               <button onClick={() => setShowStrategy(false)} className="text-xs text-muted-foreground hover:text-foreground">Close ×</button>
             </div>
             <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{aiStrategy}</div>
@@ -360,7 +360,7 @@ export default function Competitors() {
               { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-blue-500 bg-blue-500/10" },
               { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-emerald-500 bg-emerald-500/10" },
               { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-red-500 bg-red-500/10" },
-              { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-violet-500 bg-violet-500/10" },
+              { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-brand bg-brand/10" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
@@ -383,8 +383,8 @@ export default function Competitors() {
           </div>
         ) : platforms.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4">
-              <BarChart2 className="w-8 h-8 text-violet-400" />
+            <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mb-4">
+              <BarChart2 className="w-8 h-8 text-brand" />
             </div>
             <h3 className="text-base font-semibold text-foreground mb-2">No campaigns yet</h3>
             <p className="text-sm text-muted-foreground max-w-sm">
@@ -425,7 +425,7 @@ export default function Competitors() {
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
                     <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                     <Legend />
-                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#c41919" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="benchCtr" name="Industry Avg"   fill="#e2e8f0" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -450,7 +450,7 @@ export default function Competitors() {
                         <PolarGrid stroke="var(--border)" />
                         <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis angle={90} domain={[0, 200]} tick={{ fontSize: 9 }} />
-                        <Radar name="Your Performance" dataKey="yours"     fill="#6366f1" fillOpacity={0.3} stroke="#6366f1" />
+                        <Radar name="Your Performance" dataKey="yours"     fill="#c41919" fillOpacity={0.3} stroke="#c41919" />
                         <Radar name="Industry Avg"     dataKey="benchmark" fill="#e2e8f0" fillOpacity={0.2} stroke="#94a3b8" strokeDasharray="4 4" />
                         <Legend />
                       </RadarChart>
@@ -478,7 +478,7 @@ export default function Competitors() {
                         <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                         <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                         <Legend />
-                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#6366f1" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#c41919" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 4" dot={false} />
                       </LineChart>
                     </ResponsiveContainer>

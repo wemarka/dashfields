@@ -27,7 +27,7 @@ export default function SentimentDashboard() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Brain className="w-6 h-6 text-violet-500" />
+              <Brain className="w-6 h-6 text-brand" />
               Sentiment Analysis
             </h1>
             <p className="text-sm text-muted-foreground mt-1">

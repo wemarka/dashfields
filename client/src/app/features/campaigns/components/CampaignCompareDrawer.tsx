@@ -55,7 +55,7 @@ const METRICS: Metric[] = [
 ];
 
 const COLORS = [
-  { main: "#8b5cf6", light: "bg-violet-50", text: "text-violet-600", border: "border-violet-400", dot: "bg-violet-500", name: "A" },
+  { main: "#E62020", light: "bg-brand/10", text: "text-brand", border: "border-brand", dot: "bg-brand", name: "A" },
   { main: "#3b82f6", light: "bg-blue-50",   text: "text-blue-600",   border: "border-blue-400",   dot: "bg-blue-500",   name: "B" },
   { main: "#10b981", light: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-400", dot: "bg-emerald-500", name: "C" },
   { main: "#f59e0b", light: "bg-amber-50",  text: "text-amber-600",  border: "border-amber-400",  dot: "bg-amber-500",  name: "D" },

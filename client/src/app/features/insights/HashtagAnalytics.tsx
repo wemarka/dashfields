@@ -19,7 +19,7 @@ const SORT_OPTIONS = [
 ] as const;
 
 const CHART_COLORS = [
-  "#6366f1", "#8b5cf6", "#ec4899", "#f59e0b",
+  "#c41919", "#E62020", "#ec4899", "#f59e0b",
   "#10b981", "#3b82f6", "#ef4444", "#14b8a6",
 ];
 
@@ -125,7 +125,7 @@ export default function HashtagAnalytics() {
           </div>
           <button
             onClick={() => setShowAiBox((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-600 hover:bg-violet-500/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand/10 border border-brand/20 text-xs font-medium text-brand hover:bg-brand/20 transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5" />
             AI Suggest Hashtags
@@ -135,9 +135,9 @@ export default function HashtagAnalytics() {
 
       {/* AI Hashtag Generator */}
       {showAiBox && (
-        <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 space-y-4">
+        <div className="rounded-2xl border border-brand/20 bg-brand/5 p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-violet-700 flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Hashtag Generator</p>
+            <p className="text-sm font-semibold text-brand flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Hashtag Generator</p>
             <button onClick={() => setShowAiBox(false)} className="text-xs text-muted-foreground hover:text-foreground">Close ×</button>
           </div>
           <div className="flex gap-2">
@@ -147,12 +147,12 @@ export default function HashtagAnalytics() {
               onChange={(e) => setAiTopic(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
               placeholder="Describe your content (e.g. summer fashion, tech startup, food photography)"
-              className="flex-1 px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+              className="flex-1 px-3 py-2 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand/30"
             />
             <button
               onClick={() => aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
               disabled={generateHashtags.isPending || !aiTopic.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
             >
               {generateHashtags.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Generate
@@ -168,7 +168,7 @@ export default function HashtagAnalytics() {
                       navigator.clipboard.writeText(tag);
                       toast.success(`${tag} copied!`);
                     }}
-                    className="px-2.5 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-medium hover:bg-violet-200 transition-colors border border-violet-200"
+                    className="px-2.5 py-1 rounded-full bg-brand/10 text-brand text-xs font-medium hover:bg-brand/30 transition-colors border border-brand/20"
                   >
                     {tag}
                   </button>
@@ -300,7 +300,7 @@ export default function HashtagAnalytics() {
                     <Pie
                       data={[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#10b981" },
-                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#6366f1" },
+                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#c41919" },
                         { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef4444" },
                       ]}
                       cx="50%"
@@ -312,7 +312,7 @@ export default function HashtagAnalytics() {
                     >
                       {[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#10b981" },
-                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#6366f1" },
+                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#c41919" },
                         { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef4444" },
                       ].map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
@@ -357,7 +357,7 @@ export default function HashtagAnalytics() {
                         <Tooltip
                           contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
                         />
-                        <Bar dataKey="engagement" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="engagement" fill="#c41919" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

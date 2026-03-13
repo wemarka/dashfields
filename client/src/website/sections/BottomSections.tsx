@@ -11,7 +11,7 @@ import { AnimatedSection, FAQItem, LOGO_URL } from "./shared";
 export function TestimonialsSection() {
   const testimonials = [
     { name: "Sarah Al-Mansouri", role: "Head of Digital Marketing", company: "Majid Al Futtaim", avatar: "SA", color: "bg-blue-500", quote: "DashFields cut our campaign setup time by 60%. The AI content suggestions are incredibly accurate for our Gulf audience — it understands regional nuances that other tools miss completely.", rating: 5 },
-    { name: "Omar Khalil", role: "Social Media Manager", company: "Aramex", avatar: "OK", color: "bg-violet-500", quote: "The AI Ads Analyzer alone is worth the subscription. It identified a 40% budget waste in our campaigns within the first week. ROI has never been better.", rating: 5 },
+    { name: "Omar Khalil", role: "Social Media Manager", company: "Aramex", avatar: "OK", color: "bg-brand/100", quote: "The AI Ads Analyzer alone is worth the subscription. It identified a 40% budget waste in our campaigns within the first week. ROI has never been better.", rating: 5 },
     { name: "Lina Haddad", role: "Marketing Director", company: "Zain Jordan", avatar: "LH", color: "bg-emerald-500", quote: "Managing 12 brand accounts across 6 platforms used to be a nightmare. Now it's streamlined. The bulk scheduling and sentiment analysis save us 15+ hours every week.", rating: 5 },
   ];
 
@@ -82,7 +82,7 @@ export function FAQSection() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimatedSection>
           <div className="text-center mb-12">
-            <span className="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">FAQ</span>
+            <span className="inline-block bg-brand/10 text-brand text-xs font-semibold px-3 py-1 rounded-full mb-3">FAQ</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Frequently asked questions</h2>
             <p className="text-lg text-gray-600">Everything you need to know about DashFields.</p>
           </div>
@@ -102,7 +102,7 @@ export function FAQSection() {
 // ─── CTA Section ──────────────────────────────────────────────────────────────
 export function CTASection() {
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-r from-brand to-red-700 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-white rounded-full opacity-5" />
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white rounded-full opacity-5" />

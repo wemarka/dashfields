@@ -61,7 +61,7 @@ export default function AIContent() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-violet-500" />
+            <Sparkles className="w-5 h-5 text-brand" />
             AI Content Studio
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -136,10 +136,10 @@ export default function AIContent() {
                     </label>
                     <input type="range" min={1} max={5} value={count}
                       onChange={(e) => setCount(Number(e.target.value))}
-                      className="w-full accent-violet-500" />
+                      className="w-full accent-brand" />
                   </div>
                   <button onClick={handleGenerate} disabled={generateMutation.isPending || !topic.trim()}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-violet-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-brand to-red-700 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
                     {generateMutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Generating...</> : <><Wand2 className="w-4 h-4" />Generate Ideas</>}
                   </button>
                 </div>
@@ -183,8 +183,8 @@ export default function AIContent() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full min-h-80 text-center">
-                  <div className="w-20 h-20 rounded-3xl bg-violet-500/10 flex items-center justify-center mb-4">
-                    <Sparkles className="w-10 h-10 text-violet-400" />
+                  <div className="w-20 h-20 rounded-3xl bg-brand/10 flex items-center justify-center mb-4">
+                    <Sparkles className="w-10 h-10 text-brand" />
                   </div>
                   <h3 className="text-base font-semibold text-foreground mb-2">Ready to create content</h3>
                   <p className="text-sm text-muted-foreground max-w-sm">

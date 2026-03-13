@@ -28,7 +28,7 @@ export function QuickAnalyzeTab() {
       <div className="space-y-4">
         <div className="glass rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <Brain className="w-4 h-4 text-violet-500" />
+            <Brain className="w-4 h-4 text-brand" />
             <h3 className="text-sm font-semibold text-foreground">Analyze Content</h3>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -67,7 +67,7 @@ export function QuickAnalyzeTab() {
           </div>
           <button onClick={() => text.trim() && mutation.mutate({ text, language, platform: platform || undefined, label: label || undefined })}
             disabled={mutation.isPending || !text.trim()}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-blue-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-blue-600 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm">
             {mutation.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Analyzing...</> : <><Brain className="w-4 h-4" />Analyze Sentiment</>}
           </button>
         </div>

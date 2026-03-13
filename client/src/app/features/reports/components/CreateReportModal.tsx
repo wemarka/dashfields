@@ -38,7 +38,7 @@ export function CreateReportModal({ onClose, onCreated }: { onClose: () => void;
       <div className="bg-background border border-border rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-background z-10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center"><FileText className="w-5 h-5 text-violet-500" /></div>
+            <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center"><FileText className="w-5 h-5 text-brand" /></div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">Create Report</h2>
               <p className="text-xs text-muted-foreground">Configure your analytics report</p>

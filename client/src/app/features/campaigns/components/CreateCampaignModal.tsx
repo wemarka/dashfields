@@ -13,7 +13,7 @@ const PLATFORMS = [
   { id: "facebook",  label: "Facebook",  icon: Facebook,  color: "text-blue-600",  bg: "bg-blue-50" },
   { id: "instagram", label: "Instagram", icon: Instagram, color: "text-pink-600",  bg: "bg-pink-50" },
   { id: "youtube",   label: "YouTube",   icon: Youtube,   color: "text-red-600",   bg: "bg-red-50" },
-  { id: "twitter",   label: "X (Twitter)", icon: Twitter, color: "text-slate-800", bg: "bg-slate-100" },
+  { id: "twitter",   label: "X (Twitter)", icon: Twitter, color: "text-neutral-800", bg: "bg-neutral-100" },
   { id: "linkedin",  label: "LinkedIn",  icon: Linkedin,  color: "text-blue-700",  bg: "bg-blue-50" },
 ];
 

@@ -41,14 +41,14 @@ export function BrandingPanel({ branding, onChange }: { branding: BrandingOption
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Primary Color</label>
             <div className="flex items-center gap-2">
               <input type="color" value={branding.primaryColor} onChange={e => onChange({ ...branding, primaryColor: e.target.value })} className="w-10 h-9 rounded-lg border border-border cursor-pointer p-0.5" />
-              <input value={branding.primaryColor} onChange={e => onChange({ ...branding, primaryColor: e.target.value })} placeholder="#6366f1" className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input value={branding.primaryColor} onChange={e => onChange({ ...branding, primaryColor: e.target.value })} placeholder="#c41919" className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Accent Color</label>
             <div className="flex items-center gap-2">
               <input type="color" value={branding.accentColor} onChange={e => onChange({ ...branding, accentColor: e.target.value })} className="w-10 h-9 rounded-lg border border-border cursor-pointer p-0.5" />
-              <input value={branding.accentColor} onChange={e => onChange({ ...branding, accentColor: e.target.value })} placeholder="#8b5cf6" className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input value={branding.accentColor} onChange={e => onChange({ ...branding, accentColor: e.target.value })} placeholder="#E62020" className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
           </div>
           <div className="sm:col-span-2">
@@ -68,7 +68,7 @@ export function BrandingPanel({ branding, onChange }: { branding: BrandingOption
               )}
               <span className="text-white/70 text-xs ml-auto">Preview</span>
             </div>
-            <div className="bg-white px-4 py-2 text-xs text-gray-400 border-t">{branding.footerText || "Your Company — Analytics Report"}</div>
+            <div className="bg-neutral-900 px-4 py-2 text-xs text-neutral-500 border-t">{branding.footerText || "Your Company — Analytics Report"}</div>
           </div>
         </div>
       )}

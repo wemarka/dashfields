@@ -144,7 +144,7 @@ export default function Reports() {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: "Total Reports", value: reports.length, icon: FileText, color: "text-violet-500 bg-violet-500/10" },
+            { label: "Total Reports", value: reports.length, icon: FileText, color: "text-brand bg-brand/10" },
             { label: "Scheduled", value: scheduledCount, icon: Calendar, color: "text-blue-500 bg-blue-500/10" },
             { label: "Generated Today", value: reports.filter(r => r.last_sent_at && new Date(r.last_sent_at).toDateString() === new Date().toDateString()).length, icon: CheckCircle2, color: "text-green-500 bg-green-500/10" },
           ].map((stat) => (
@@ -170,7 +170,7 @@ export default function Reports() {
           </div>
         ) : reports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4"><FileText className="w-8 h-8 text-violet-400" /></div>
+            <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mb-4"><FileText className="w-8 h-8 text-brand" /></div>
             <h3 className="text-base font-semibold text-foreground mb-2">No reports yet</h3>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">Create your first report to download analytics data for any platform and date range.</p>
             <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">

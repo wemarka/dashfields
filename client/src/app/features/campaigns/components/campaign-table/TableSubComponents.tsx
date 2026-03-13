@@ -221,26 +221,26 @@ export function CampaignSwitch({
           onClick={(e) => { e.stopPropagation(); setShowConfirm(false); }}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-[340px] p-6 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-neutral-900 rounded-xl shadow-2xl border border-neutral-700 w-[340px] p-6 animate-in fade-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Icon */}
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 mb-4 mx-auto">
-              <Pause className="w-5 h-5 text-gray-500" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-neutral-800 mb-4 mx-auto">
+              <Pause className="w-5 h-5 text-neutral-400" />
             </div>
 
             {/* Title */}
-            <h3 className="text-sm font-semibold text-gray-900 text-center mb-1">
+            <h3 className="text-sm font-semibold text-white text-center mb-1">
               Pause Campaign?
             </h3>
 
             {/* Campaign name */}
-            <p className="text-xs text-gray-500 text-center mb-1 truncate px-2">
+            <p className="text-xs text-neutral-400 text-center mb-1 truncate px-2">
               &ldquo;{campaign.name}&rdquo;
             </p>
 
             {/* Warning */}
-            <p className="text-xs text-gray-400 text-center mb-5">
+            <p className="text-xs text-neutral-500 text-center mb-5">
               This will stop delivery immediately. You can reactivate at any time.
             </p>
 
@@ -248,13 +248,13 @@ export function CampaignSwitch({
             <div className="flex gap-2">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 h-8 rounded-lg border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="flex-1 h-8 rounded-lg border border-neutral-700 bg-neutral-900 text-xs font-medium text-neutral-400 hover:bg-neutral-800/50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => { setShowConfirm(false); onToggle(campaign); }}
-                className="flex-1 h-8 rounded-lg bg-gray-800 text-xs font-medium text-white hover:bg-gray-700 transition-colors"
+                className="flex-1 h-8 rounded-lg bg-neutral-800 text-xs font-medium text-white hover:bg-neutral-700 transition-colors"
               >
                 Pause Campaign
               </button>

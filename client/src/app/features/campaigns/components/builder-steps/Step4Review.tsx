@@ -19,7 +19,7 @@ export function Step4Review({
   const obj = OBJECTIVES.find((o) => o.id === objective);
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-br from-primary/5 to-violet-500/5 border border-primary/20 rounded-2xl p-4">
+      <div className="bg-gradient-to-br from-primary/5 to-brand/5 border border-primary/20 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground">Campaign Summary</h3>
@@ -60,7 +60,7 @@ export function Step4Review({
         {selectedInterests.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {selectedInterests.slice(0, 6).map((i) => (
-              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400">{i}</span>
+              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-brand/10 dark:bg-brand/15 text-brand dark:text-brand">{i}</span>
             ))}
             {selectedInterests.length > 6 && <span className="text-[10px] text-muted-foreground">+{selectedInterests.length - 6} more</span>}
           </div>

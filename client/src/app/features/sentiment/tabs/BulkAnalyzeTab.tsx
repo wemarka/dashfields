@@ -50,7 +50,7 @@ export function BulkAnalyzeTab() {
     <div className="space-y-5">
       <div className="glass rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-violet-500" /><h3 className="text-sm font-semibold text-foreground">Bulk Analysis</h3></div>
+          <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-brand" /><h3 className="text-sm font-semibold text-foreground">Bulk Analysis</h3></div>
           <span className="text-xs text-muted-foreground">Max 50 texts</span>
         </div>
         <div className="border-2 border-dashed border-border rounded-xl p-4 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileRef.current?.click()}>
@@ -81,7 +81,7 @@ export function BulkAnalyzeTab() {
           </div>
           <button onClick={() => texts.length > 0 && mutation.mutate({ texts, language, platform: platform || undefined })}
             disabled={mutation.isPending || texts.length === 0}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-blue-600 text-white text-xs font-medium hover:opacity-90 disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-brand to-blue-600 text-white text-xs font-medium hover:opacity-90 disabled:opacity-50">
             {mutation.isPending ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" />Analyzing...</> : <><Zap className="w-3.5 h-3.5" />Analyze All</>}
           </button>
         </div>

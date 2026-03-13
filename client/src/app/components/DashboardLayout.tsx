@@ -442,7 +442,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         }}
                       >
                         <div className="px-3 py-1.5 mb-0.5">
-                          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{t(item.labelKey)}</span>
+                          <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">{t(item.labelKey)}</span>
                         </div>
                         {item.subItems!.map(sub => {
                           const isSubActive = location.startsWith(sub.path);
@@ -509,7 +509,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   setLocation("/dashboard");
                   window.dispatchEvent(new CustomEvent("ai-new-chat"));
                 }}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium text-foreground/40 hover:text-violet-500 hover:bg-violet-500/8 transition-all duration-150"
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium text-foreground/40 hover:text-brand hover:bg-brand/8 transition-all duration-150"
                 title={t("aiAgent.newChat")}
               >
                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -532,15 +532,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className={[
                         "flex-1 flex items-start gap-2 px-2.5 py-1.5 rounded-lg text-[12px] transition-all duration-150",
                         isActive
-                          ? "bg-violet-500/10 text-violet-600 font-medium"
+                          ? "bg-brand/10 text-brand font-medium"
                           : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
                         isRTL ? "flex-row-reverse text-right" : "text-left",
                       ].join(" ")}
                     >
-                      <MessageSquare className={["w-3.5 h-3.5 shrink-0 mt-0.5", isActive ? "text-violet-500" : "text-foreground/30"].join(" ")} />
+                      <MessageSquare className={["w-3.5 h-3.5 shrink-0 mt-0.5", isActive ? "text-brand" : "text-foreground/30"].join(" ")} />
                       <span className="flex-1 min-w-0">
                         <span className="block truncate leading-snug">{session.title}</span>
-                        <span className={["block text-[10px] mt-0.5 leading-none", isActive ? "text-violet-400/80" : "text-foreground/30"].join(" ")}>
+                        <span className={["block text-[10px] mt-0.5 leading-none", isActive ? "text-brand/80" : "text-foreground/30"].join(" ")}>
                           {formatRelativeTime(session.timestamp, t)}
                         </span>
                       </span>

@@ -62,7 +62,7 @@ function PlatformRow({
 
   return (
     <div
-      className="flex items-center gap-4 px-6 py-4 cursor-pointer transition-colors hover:bg-gray-50 group"
+      className="flex items-center gap-4 px-6 py-4 cursor-pointer transition-colors hover:bg-neutral-800/50 group"
       style={{ borderBottom: "1px solid #f3f4f6" }}
       onClick={onClick}
     >
@@ -77,7 +77,7 @@ function PlatformRow({
       {/* Name + description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[14px] font-semibold text-gray-900">{platform.name}</span>
+          <span className="text-[14px] font-semibold text-white">{platform.name}</span>
           {isConnected && !hasExpired && (
             <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
               <CheckCircle2 className="w-3 h-3" />
@@ -91,11 +91,11 @@ function PlatformRow({
             </span>
           )}
         </div>
-        <p className="text-[12px] text-gray-400 mt-0.5 truncate">{platform.description}</p>
+        <p className="text-[12px] text-neutral-500 mt-0.5 truncate">{platform.description}</p>
       </div>
 
       {/* Chevron */}
-      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
+      <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-neutral-400 transition-colors shrink-0" />
     </div>
   );
 }
@@ -148,7 +148,7 @@ function PlatformDetail({
       <div className="px-6 pt-5 pb-4 flex items-center gap-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
         <button
           onClick={onBack}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
+          className="p-1.5 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-500 hover:text-neutral-300"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
         </button>
@@ -159,8 +159,8 @@ function PlatformDetail({
           <PlatformIcon platform={platformId} className="w-4.5 h-4.5 text-white" />
         </div>
         <div className="flex-1">
-          <h3 className="text-[15px] font-semibold text-gray-900">{platform.name}</h3>
-          <p className="text-[12px] text-gray-400">{platform.description}</p>
+          <h3 className="text-[15px] font-semibold text-white">{platform.name}</h3>
+          <p className="text-[12px] text-neutral-500">{platform.description}</p>
         </div>
       </div>
 
@@ -169,26 +169,26 @@ function PlatformDetail({
         {/* Connected accounts */}
         {isConnected && (
           <div className="mb-5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Connected Accounts</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500 mb-3">Connected Accounts</p>
             <div className="space-y-2">
               {connectedAccounts.map((acc) => {
                 const isExpired = acc.tokenExpiresAt && new Date(acc.tokenExpiresAt) < new Date();
                 return (
                   <div
                     key={acc.id}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-800/50 border border-neutral-800"
                   >
                     {acc.profilePicture ? (
                       <img src={acc.profilePicture} alt={acc.name ?? ""} className="w-8 h-8 rounded-full object-cover" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-[12px] font-bold">
+                      <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-neutral-400 text-[12px] font-bold">
                         {(acc.name ?? platform.name).charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-gray-800 truncate">{acc.name ?? acc.username ?? "Account"}</p>
+                      <p className="text-[13px] font-medium text-white truncate">{acc.name ?? acc.username ?? "Account"}</p>
                       {acc.username && acc.username !== acc.name && (
-                        <p className="text-[11px] text-gray-400 truncate">@{acc.username}</p>
+                        <p className="text-[11px] text-neutral-500 truncate">@{acc.username}</p>
                       )}
                     </div>
                     {isExpired ? (
@@ -199,7 +199,7 @@ function PlatformDetail({
                     <button
                       onClick={() => onDisconnect(acc.id)}
                       disabled={isDisconnecting}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-500 hover:text-red-500 transition-colors"
                       title="Disconnect"
                     >
                       {isDisconnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
@@ -222,10 +222,10 @@ function PlatformDetail({
 
         {/* Features */}
         <div className="mt-5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Features</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500 mb-2">Features</p>
           <div className="flex flex-wrap gap-2">
             {platform.features.map((f) => (
-              <span key={f} className="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium capitalize">
+              <span key={f} className="text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-400 font-medium capitalize">
                 {f}
               </span>
             ))}
@@ -426,14 +426,14 @@ export default function Connections() {
       <div className="flex flex-col h-full">
         {/* Modal header */}
         <div className="px-6 pt-6 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
-          <h2 className="text-[17px] font-semibold text-gray-900">Connections</h2>
+          <h2 className="text-[17px] font-semibold text-white">Connections</h2>
         </div>
 
         {/* Platform list */}
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="px-6 py-8 flex items-center justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
+              <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />
             </div>
           ) : (
             <div>
@@ -457,7 +457,7 @@ export default function Connections() {
         <div className="px-6 py-4" style={{ borderTop: "1px solid #f0f0f0" }}>
           <button
             onClick={() => toast.info("More connectors coming soon")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium border border-neutral-700 text-neutral-400 hover:bg-neutral-800/50 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add connectors
