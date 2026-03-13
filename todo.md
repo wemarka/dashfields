@@ -3008,3 +3008,8 @@
 - [x] حذف size parameter من image API call (كان يسبب 400 bad request)
 - [x] دعم b64_json response format بدلاً من URL
 - [x] 633/633 اختبار ناجح، 0 TypeScript errors
+
+## 🐛 إصلاح عرض الصور في Campaign Wizard
+- [x] إصلاح [Max Depth] في tRPC response من generateCreatives (الصور تُولَّد لكن لا تظهر)
+- [x] تبسيط الـ return type في generateCreatives لتجنب deep serialization
+- [x] إصلاح timeout: تقليل عدد الصور المتوازية لتجنب الـ 4.7 دقيقة

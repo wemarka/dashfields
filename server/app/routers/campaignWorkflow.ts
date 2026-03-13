@@ -413,96 +413,85 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         language: String(brief.language ?? "ar"),
       });
 
-      const creatives: Array<{
-        id: string;
-        platform: string;
-        format: string;
-        width: number;
-        height: number;
-        watermarkedUrl: string;
-        variant: string;
-        status: string;
-      }> = [];
-
-      // Generate images for each spec × variant
-      for (const spec of specs.slice(0, 4)) { // Limit to 4 specs to avoid timeout
-        for (const promptData of prompts) {
-          try {
-            // Generate image
-            const [generated] = await generateAdImage(
-              `${promptData.prompt}. Professional advertising photo, high quality, no text overlay.`,
-              { n: 1 }
-            );
-
-            // Handle b64_json or URL response
-            let imageBuffer: Buffer<ArrayBuffer>;
-            if (generated.imageUrl.startsWith("data:")) {
-              // b64_json response — extract base64 part
-              const base64Data = generated.imageUrl.split(",")[1];
-              imageBuffer = Buffer.from(base64Data, "base64") as Buffer<ArrayBuffer>;
-            } else {
-              // URL response — fetch it
-              const imgFetch = await fetch(generated.imageUrl);
-              const imgArrayBuffer = await imgFetch.arrayBuffer();
-              imageBuffer = Buffer.from(imgArrayBuffer as ArrayBuffer) as Buffer<ArrayBuffer>;
-            }
-
-            // Resize to exact platform dimensions
-            imageBuffer = await resizeForPlatform(imageBuffer, spec.width, spec.height);
-
-            // Apply watermark if logo available
-            if (logoUrl) {
-              const logoResponse = await fetch(logoUrl);
-              const logoArrayBuffer = await logoResponse.arrayBuffer();
-              const logoBuffer = Buffer.from(logoArrayBuffer as ArrayBuffer);
-              imageBuffer = await applyWatermark(imageBuffer, logoBuffer, {
-                position: "bottom-right",
-                sizeRatio: 0.12,
-                padding: 24,
-                opacity: 0.9,
-              });
-            }
-
-            // Upload to S3
-            const fileKey = `creatives/${ctx.user.id}-${randomSuffix()}.png`;
-            const { url: watermarkedUrl } = await storagePut(fileKey, imageBuffer, "image/png");
-
-            // Save to DB
-            const { data: creative } = await sb
-              .from("campaign_creatives")
-              .insert({
-                workflow_id: input.workflowId,
-                user_id: ctx.user.id,
-                platform: spec.platform,
-                format: spec.format,
-                width: spec.width,
-                height: spec.height,
-                watermarked_url: watermarkedUrl,
-                variant: promptData.variant,
-                prompt: promptData.prompt,
-                status: "watermarked",
-                approved: false,
-              })
-              .select()
-              .single();
-
-            if (creative) {
-              creatives.push({
-                id: creative.id,
-                platform: spec.platform,
-                format: spec.format,
-                width: spec.width,
-                height: spec.height,
-                watermarkedUrl,
-                variant: promptData.variant,
-                status: "watermarked",
-              });
-            }
-          } catch (err) {
-            console.error(`[CampaignWorkflow] Failed to generate creative for ${spec.platform}/${spec.format}:`, err);
-          }
+      // Fetch logo buffer once (if available) to reuse across all images
+      let logoBuffer: Buffer | null = null;
+      if (logoUrl) {
+        try {
+          const logoResponse = await fetch(logoUrl);
+          const logoArrayBuffer = await logoResponse.arrayBuffer();
+          logoBuffer = Buffer.from(logoArrayBuffer as ArrayBuffer);
+        } catch (err) {
+          console.error("[CampaignWorkflow] Failed to fetch logo:", err);
         }
       }
+
+      // Build task list: 1 prompt per spec (use variant A only for speed)
+      // Limit to 4 specs max to avoid timeout
+      const promptA = prompts.find(p => p.variant === "A") ?? prompts[0];
+      const tasks = specs.slice(0, 4).map(spec => ({ spec, promptData: promptA }));
+
+      // Generate all images in parallel
+      const savedIds: string[] = [];
+      await Promise.all(tasks.map(async ({ spec, promptData }) => {
+        try {
+          const [generated] = await generateAdImage(
+            `${promptData.prompt}. Professional advertising photo, high quality, no text overlay.`,
+            { n: 1 }
+          );
+
+          // Decode b64_json or fetch URL
+          let imageBuffer: Buffer<ArrayBuffer>;
+          if (generated.imageUrl.startsWith("data:")) {
+            const base64Data = generated.imageUrl.split(",")[1];
+            imageBuffer = Buffer.from(base64Data, "base64") as Buffer<ArrayBuffer>;
+          } else {
+            const imgFetch = await fetch(generated.imageUrl);
+            imageBuffer = Buffer.from(await imgFetch.arrayBuffer()) as Buffer<ArrayBuffer>;
+          }
+
+          // Resize to platform dimensions
+          imageBuffer = await resizeForPlatform(imageBuffer, spec.width, spec.height);
+
+          // Apply watermark if logo available
+          if (logoBuffer) {
+            imageBuffer = await applyWatermark(imageBuffer, logoBuffer as Buffer<ArrayBuffer>, {
+              position: "bottom-right",
+              sizeRatio: 0.12,
+              padding: 24,
+              opacity: 0.9,
+            });
+          }
+
+          // Upload to S3
+          const fileKey = `creatives/${ctx.user.id}-${randomSuffix()}.png`;
+          const { url: watermarkedUrl } = await storagePut(fileKey, imageBuffer, "image/png");
+
+          // Save to DB
+          const { data: creative } = await sb
+            .from("campaign_creatives")
+            .insert({
+              workflow_id: input.workflowId,
+              user_id: ctx.user.id,
+              platform: spec.platform,
+              format: spec.format,
+              width: spec.width,
+              height: spec.height,
+              watermarked_url: watermarkedUrl,
+              variant: promptData.variant,
+              prompt: promptData.prompt,
+              status: "watermarked",
+              approved: false,
+            })
+            .select("id")
+            .single();
+
+          if (creative?.id) savedIds.push(creative.id);
+        } catch (err) {
+          console.error(`[CampaignWorkflow] Failed to generate creative for ${spec.platform}/${spec.format}:`, err);
+        }
+      }));
+
+      const generatedCount = savedIds.length;
 
       // Update workflow step
       await sb.from("campaign_workflows").update({
@@ -510,15 +499,15 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         updated_at: new Date().toISOString(),
       }).eq("id", input.workflowId);
 
-      // Add assistant message
+      // Add assistant message (NO creatives embedded — UI reads from getCreatives)
       const workflow2 = await getWorkflow(input.workflowId, ctx.user.id);
       const messages = (workflow2.messages as Array<Record<string, unknown>>) ?? [];
       messages.push({
         role: "assistant",
-        content: `تم توليد ${creatives.length} صورة إعلانية بنجاح! 🎨\n\nراجع الصور أدناه واختر ما يناسبك. يمكنك:\n• ✅ الموافقة على صور محددة\n• 🔄 طلب إعادة توليد صور جديدة\n• ➕ إضافة المزيد من الصور`,
+        content: `تم توليد ${generatedCount} صورة إعلانية بنجاح! 🎨\n\nراجع الصور أدناه واختر ما يناسبك. يمكنك:\n• ✅ الموافقة على صور محددة\n• 🔄 طلب إعادة توليد صور جديدة\n• ➕ إضافة المزيد من الصور`,
         timestamp: Date.now(),
         type: "image_grid",
-        data: { creatives },
+        data: { count: generatedCount }, // no creatives array — avoids deep nesting
       });
 
       await sb.from("campaign_workflows").update({
@@ -526,7 +515,8 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         updated_at: new Date().toISOString(),
       }).eq("id", input.workflowId);
 
-      return { creatives, step: "creative_review" };
+      // Return only count + step — UI fetches creatives via getCreatives query
+      return { count: generatedCount, step: "creative_review" };
     }),
 
   /**

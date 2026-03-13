@@ -72,7 +72,7 @@ export default function CampaignWizardPage() {
   const confirmMutation     = trpc.campaignWorkflow.confirm.useMutation();
   const { data: creativesData, refetch: refetchCreatives } = trpc.campaignWorkflow.getCreatives.useQuery(
     { workflowId: workflowId! },
-    { enabled: !!workflowId && (currentStep === "creative_review" || currentStep === "content_plan" || currentStep === "budget_review" || currentStep === "preview"), staleTime: 5000 }
+    { enabled: !!workflowId && (currentStep === "generating" || currentStep === "creative_review" || currentStep === "content_plan" || currentStep === "budget_review" || currentStep === "preview"), staleTime: 5000 }
   );
   const { data: contentPlanData, refetch: refetchPlan } = trpc.campaignWorkflow.getContentPlan.useQuery(
     { workflowId: workflowId! },
@@ -191,7 +191,7 @@ export default function CampaignWizardPage() {
 
     const genMsg: WizardMessage = {
       role: "assistant",
-      content: "جاري توليد الصور الإعلانية بـ Gemini AI... ⏳\n\nسيتم توليد صورتين مختلفتين (Variant A + B) لكل منصة مع إضافة شعارك تلقائياً.",
+      content: "جاري توليد الصور الإعلانية... ⏳\n\nيتم توليد صورة لكل منصة بشكل متوازٍ مع إضافة شعارك تلقائياً. قد يستغرق هذا 30-60 ثانية.",
       timestamp: Date.now(),
       type: "text",
     };
@@ -199,35 +199,32 @@ export default function CampaignWizardPage() {
 
     try {
       const result = await generateCreatives.mutateAsync({ workflowId: wfId });
-      setCreatives(result.creatives.map((c: Record<string, unknown>) => ({
-        id: String(c.id),
-        platform: String(c.platform),
-        format: String(c.format),
-        width: Number(c.width),
-        height: Number(c.height),
-        watermarkedUrl: String(c.watermarkedUrl ?? c.watermarked_url),
-        variant: (c.variant === "B" ? "B" : "A") as "A" | "B",
-        status: (c.status === "approved" ? "approved" : c.status === "rejected" ? "rejected" : "watermarked") as "watermarked" | "approved" | "rejected",
-        approved: Boolean(c.approved),
-      })));
       setCurrentStep("creative_review");
 
+      // Fetch creatives from DB (not from return value to avoid serialization issues)
+      const freshCreatives = await refetchCreatives();
+
+      const count = result.count ?? 0;
       const doneMsg: WizardMessage = {
         role: "assistant",
-        content: `تم توليد ${result.creatives.length} صورة إعلانية! 🎨\n\nراجع الصور أدناه وافق على ما يناسبك أو اطلب توليد جديد.`,
+        content: `تم توليد ${count} صورة إعلانية! 🎨\n\nراجع الصور أدناه وافق على ما يناسبك أو اطلب توليد جديد.`,
         timestamp: Date.now(),
         type: "image_grid",
-        data: { creatives: result.creatives },
+        data: { count },
       };
       setMessages(prev => [...prev, doneMsg]);
+
+      if (freshCreatives.data && freshCreatives.data.length === 0) {
+        toast.error("لم يتم توليد أي صور. تحقق من إعدادات الـ API.");
+      }
     } catch (err) {
-      toast.error("فشل توليد الصور. تأكد من إعداد Google AI API Key.");
+      toast.error("فشل توليد الصور. حاول مجدداً.");
       console.error(err);
       setCurrentStep("discovery");
     } finally {
       setIsGenerating(false);
     }
-  }, [generateCreatives]);
+  }, [generateCreatives, refetchCreatives]);
 
   // ── Handle logo upload ────────────────────────────────────────────────────
   const handleLogoUpload = useCallback(async (file: File) => {
