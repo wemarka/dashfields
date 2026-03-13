@@ -3030,3 +3030,7 @@
 - [x] إضافة retry تلقائي (3 محاولات) في generateContentPlan على السيرفر
 - [x] إضافة in-Dialog error state مع زر "حاول مجدداً" بدلاً من toast
 - [x] إضافة streaming لخطة المحتوى عبر SSE endpoint
+
+## 🖼️ تحسينات Campaign Wizard (دورة 2)
+- [x] إضافة خطوة رفع صورة المنتج في الـ Dialog قبل التوليد
+- [x] إضافة progress bar يُظهر عدد الصور المُولَّدة (1/4، 2/4...)

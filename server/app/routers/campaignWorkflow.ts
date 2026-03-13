@@ -543,6 +543,50 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
     }),
 
   /**
+   * Upload a product reference image to use during creative generation.
+   */
+  uploadProductImage: protectedProcedure
+    .input(z.object({
+      workflowId: z.string().uuid(),
+      imageBase64: z.string(),
+      mimeType: z.string().default("image/jpeg"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      await getWorkflow(input.workflowId, ctx.user.id); // verify ownership
+
+      // Upload to S3
+      const ext = input.mimeType.includes("png") ? "png" : "jpg";
+      const fileKey = `product-images/${ctx.user.id}-${randomSuffix()}.${ext}`;
+      const imageBuffer = Buffer.from(input.imageBase64, "base64");
+      const { url } = await storagePut(fileKey, imageBuffer, input.mimeType);
+
+      // Save URL in workflow and advance to generating step
+      await sb.from("campaign_workflows").update({
+        product_image_url: url,
+        step: "generating",
+        updated_at: new Date().toISOString(),
+      }).eq("id", input.workflowId);
+
+      return { url, step: "generating" as const };
+    }),
+
+  /**
+   * Get the number of creatives generated so far (for progress tracking).
+   */
+  getGenerationProgress: protectedProcedure
+    .input(z.object({ workflowId: z.string().uuid(), expectedCount: z.number().default(4) }))
+    .query(async ({ ctx, input }) => {
+      await getWorkflow(input.workflowId, ctx.user.id); // verify ownership
+      const sb = getSupabase();
+      const { count } = await sb
+        .from("campaign_creatives")
+        .select("id", { count: "exact", head: true })
+        .eq("workflow_id", input.workflowId);
+      return { generated: count ?? 0, total: input.expectedCount };
+    }),
+
+  /**
    * Get all creatives for a workflow.
    */
   getCreatives: protectedProcedure

@@ -47,6 +47,7 @@ const SUGGESTED_PROMPTS = [
 
 // Steps that open the Dialog
 const DIALOG_STEPS: WizardStep[] = [
+  "product_image",
   "generating",
   "creative_review",
   "content_plan",
@@ -89,18 +90,20 @@ export default function CampaignWizardPage() {
   const [planError, setPlanError]         = useState<string | null>(null);
   const [revealedCount, setRevealedCount] = useState(0);
 
-  const scrollRef    = useRef<HTMLDivElement>(null);
-  const textareaRef  = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef          = useRef<HTMLDivElement>(null);
+  const textareaRef        = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef       = useRef<HTMLInputElement>(null);
+  const productImageRef    = useRef<HTMLInputElement>(null);
 
   // tRPC
-  const createWorkflow       = trpc.campaignWorkflow.create.useMutation();
-  const chatMutation         = trpc.campaignWorkflow.chat.useMutation();
-  const uploadLogoMutation   = trpc.campaignWorkflow.uploadLogo.useMutation();
-  const generateCreatives    = trpc.campaignWorkflow.generateCreatives.useMutation();
-  const generatePlanMutation = trpc.campaignWorkflow.generateContentPlan.useMutation();
-  const moveToPreview        = trpc.campaignWorkflow.moveToPreview.useMutation();
-  const confirmMutation      = trpc.campaignWorkflow.confirm.useMutation();
+  const createWorkflow          = trpc.campaignWorkflow.create.useMutation();
+  const chatMutation            = trpc.campaignWorkflow.chat.useMutation();
+  const uploadLogoMutation      = trpc.campaignWorkflow.uploadLogo.useMutation();
+  const uploadProductImageMut   = trpc.campaignWorkflow.uploadProductImage.useMutation();
+  const generateCreatives       = trpc.campaignWorkflow.generateCreatives.useMutation();
+  const generatePlanMutation    = trpc.campaignWorkflow.generateContentPlan.useMutation();
+  const moveToPreview           = trpc.campaignWorkflow.moveToPreview.useMutation();
+  const confirmMutation         = trpc.campaignWorkflow.confirm.useMutation();
 
   const { data: creativesData, refetch: refetchCreatives } = trpc.campaignWorkflow.getCreatives.useQuery(
     { workflowId: workflowId! },
@@ -119,6 +122,15 @@ export default function CampaignWizardPage() {
   const { data: workflowHistory } = trpc.campaignWorkflow.list.useQuery(
     { workspaceId: activeWorkspace?.id },
     { enabled: !!user, staleTime: 30000 }
+  );
+
+  // Poll generation progress while generating
+  const { data: genProgress } = trpc.campaignWorkflow.getGenerationProgress.useQuery(
+    { workflowId: workflowId!, expectedCount: brief.platforms?.length ?? 4 },
+    {
+      enabled: !!workflowId && currentStep === "generating" && isGenerating,
+      refetchInterval: 3000,
+    }
   );
 
   // Open dialog when step requires it
@@ -213,7 +225,8 @@ export default function CampaignWizardPage() {
       if (assistantMsg.data && typeof assistantMsg.data === "object") {
         const data = assistantMsg.data as Record<string, unknown>;
         if (data.readyToGenerate) {
-          setTimeout(() => void triggerGeneration(wfId), 500);
+          // Go to product_image step first (Dialog will open)
+          setCurrentStep("product_image");
         }
       }
     } catch (err) {
@@ -266,6 +279,30 @@ export default function CampaignWizardPage() {
       setIsGenerating(false);
     }
   }, [generateCreatives, refetchCreatives]);
+
+  // ── Handle product image upload ──────────────────────────────────────────
+  const handleProductImageUpload = useCallback(async (file: File | null) => {
+    if (!workflowId) return;
+    if (file) {
+      if (!file.type.startsWith("image/")) { toast.error("يرجى رفع صورة صحيحة"); return; }
+      if (file.size > 10 * 1024 * 1024) { toast.error("حجم الصورة يجب أن يكون أقل من 10MB"); return; }
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = (e.target?.result as string).split(",")[1];
+        try {
+          await uploadProductImageMut.mutateAsync({ workflowId, imageBase64: base64, mimeType: file.type });
+          toast.success("تم رفع صورة المنتج بنجاح! ✅");
+          void triggerGeneration(workflowId);
+        } catch {
+          toast.error("فشل رفع الصورة");
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Skip — go directly to generation
+      void triggerGeneration(workflowId);
+    }
+  }, [workflowId, uploadProductImageMut, triggerGeneration]);
 
   // ── Handle logo upload ────────────────────────────────────────────────────
   const handleLogoUpload = useCallback(async (file: File) => {
@@ -640,7 +677,17 @@ export default function CampaignWizardPage() {
 
           {/* Dialog Body */}
           <div className="overflow-y-auto flex-1" style={{ maxHeight: "calc(90vh - 130px)" }}>
-            {/* Generating */}
+
+            {/* Product Image Upload Step */}
+            {currentStep === "product_image" && !isGenerating && (
+              <ProductImageStep
+                onUpload={handleProductImageUpload}
+                isUploading={uploadProductImageMut.isPending}
+                productImageRef={productImageRef}
+              />
+            )}
+
+            {/* Generating — with real progress bar */}
             {(currentStep === "generating" || isGenerating) && (
               <div className="flex flex-col items-center justify-center py-16 px-6">
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
@@ -648,15 +695,40 @@ export default function CampaignWizardPage() {
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">جاري توليد الصور الإعلانية</h3>
-                <p className="text-gray-500 text-sm text-center max-w-sm">
+                <p className="text-gray-500 text-sm text-center max-w-sm mb-6">
                   يتم توليد صورة لكل منصة بشكل متوازٍ مع إضافة شعارك تلقائياً.
                   <br />قد يستغرق هذا 30-60 ثانية.
                 </p>
-                <div className="flex items-center gap-1.5 mt-6">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="w-2 h-2 rounded-full bg-red-400"
-                      style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.15}s` }} />
-                  ))}
+                {/* Real-time progress bar */}
+                <div className="w-full max-w-xs">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                    <span>الصور المُولَّدة</span>
+                    <span className="font-semibold text-red-600">
+                      {genProgress?.generated ?? 0} / {genProgress?.total ?? (brief.platforms?.length ?? 4)}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-700 ease-out"
+                      style={{
+                        width: `${Math.round(((genProgress?.generated ?? 0) / (genProgress?.total ?? (brief.platforms?.length ?? 4))) * 100)}%`,
+                        minWidth: genProgress?.generated ? "8%" : "0%",
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-1.5 justify-center mt-4">
+                    {Array.from({ length: genProgress?.total ?? (brief.platforms?.length ?? 4) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "w-2.5 h-2.5 rounded-full transition-all duration-500",
+                          i < (genProgress?.generated ?? 0)
+                            ? "bg-red-500 scale-110"
+                            : "bg-gray-200"
+                        )}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -925,6 +997,119 @@ function ThinkingBubble() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Product Image Upload Step ────────────────────────────────────────────────
+function ProductImageStep({
+  onUpload,
+  isUploading,
+  productImageRef,
+}: {
+  onUpload: (file: File | null) => void;
+  isUploading: boolean;
+  productImageRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFileChange = (file: File) => {
+    setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file?.type.startsWith("image/")) handleFileChange(file);
+  };
+
+  return (
+    <div className="p-6 flex flex-col items-center gap-6" dir="rtl">
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+          style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
+          <ImageIcon className="w-7 h-7 text-white" />
+        </div>
+        <h3 className="text-base font-semibold text-gray-800 mb-1">هل لديك صورة للمنتج؟</h3>
+        <p className="text-sm text-gray-500 max-w-sm">
+          رفع صورة المنتج يُحسّن جودة الصور الإعلانية المُولَّدة بشكل كبير.
+          يمكنك تخطي هذه الخطوة إذا أردت.
+        </p>
+      </div>
+
+      {/* Drop Zone */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => productImageRef.current?.click()}
+        className={cn(
+          "w-full max-w-sm h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200",
+          isDragging ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-gray-50",
+          preview ? "border-red-300 bg-red-50/30" : "",
+        )}
+      >
+        {preview ? (
+          <img src={preview} alt="preview" className="h-36 w-auto object-contain rounded-xl" />
+        ) : (
+          <>
+            <Upload className="w-8 h-8 text-gray-300" />
+            <div className="text-center">
+              <p className="text-sm font-medium text-gray-600">اسحب الصورة هنا أو انقر للاختيار</p>
+              <p className="text-xs text-gray-400 mt-0.5">PNG, JPG, WEBP — حتى 10MB</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      <input
+        ref={productImageRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFileChange(file);
+        }}
+      />
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 w-full max-w-sm">
+        <Button
+          onClick={() => onUpload(selectedFile)}
+          disabled={isUploading}
+          className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+        >
+          {isUploading ? (
+            <><Loader2 className="w-4 h-4 animate-spin ml-2" />جاري الرفع...</>
+          ) : selectedFile ? (
+            <><Upload className="w-4 h-4 ml-2" />رفع الصورة والمتابعة</>
+          ) : (
+            <><Sparkles className="w-4 h-4 ml-2" />متابعة بدون صورة</>
+          )}
+        </Button>
+        {selectedFile && (
+          <Button
+            variant="outline"
+            onClick={() => { setSelectedFile(null); setPreview(null); }}
+            className="px-4"
+          >
+            إلغاء
+          </Button>
+        )}
+      </div>
+
+      <button
+        onClick={() => onUpload(null)}
+        className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
+      >
+        تخطي هذه الخطوة
+      </button>
     </div>
   );
 }

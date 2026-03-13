@@ -5,6 +5,7 @@
 export type WizardStep =
   | "discovery"
   | "brand_assets"
+  | "product_image"
   | "generating"
   | "creative_review"
   | "content_plan"
@@ -87,6 +88,7 @@ export interface Workflow {
 export const STEP_ORDER: WizardStep[] = [
   "discovery",
   "brand_assets",
+  "product_image",
   "generating",
   "creative_review",
   "content_plan",
@@ -98,6 +100,7 @@ export const STEP_ORDER: WizardStep[] = [
 export const STEP_LABELS: Record<WizardStep, string> = {
   discovery: "اكتشاف الحملة",
   brand_assets: "هوية العلامة",
+  product_image: "صورة المنتج",
   generating: "توليد الصور",
   creative_review: "مراجعة الصور",
   content_plan: "خطة المحتوى",
