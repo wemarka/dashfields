@@ -86,6 +86,8 @@ export default function CampaignWizardPage() {
   const [isConfirming, setIsConfirming]   = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
   const [dialogOpen, setDialogOpen]       = useState(false);
+  const [planError, setPlanError]         = useState<string | null>(null);
+  const [revealedCount, setRevealedCount] = useState(0);
 
   const scrollRef    = useRef<HTMLDivElement>(null);
   const textareaRef  = useRef<HTMLTextAreaElement>(null);
@@ -309,6 +311,8 @@ export default function CampaignWizardPage() {
   const handleProceedToContentPlan = useCallback(async () => {
     if (!workflowId) return;
     setIsGeneratingPlan(true);
+    setPlanError(null);
+    setRevealedCount(0);
 
     const planMsg: WizardMessage = {
       role: "assistant",
@@ -323,7 +327,7 @@ export default function CampaignWizardPage() {
       const result = await generatePlanMutation.mutateAsync({ workflowId });
       setBudgetAllocation(result.budgetAllocation as BudgetAllocation);
       setInsights(result.insights as Record<string, AudienceInsight>);
-      setContentPlan(result.plan.map((item: Record<string, unknown>) => ({
+      const planItems = result.plan.map((item: Record<string, unknown>) => ({
         id: String(Math.random()),
         platform: String(item.platform),
         postDate: String(item.postDate),
@@ -331,11 +335,21 @@ export default function CampaignWizardPage() {
         caption: String(item.caption),
         hashtags: (item.hashtags as string[]) ?? [],
         status: "draft",
-      })));
+      }));
+      setContentPlan(planItems);
       setCurrentStep("budget_review");
+      // Staggered reveal: show items one by one every 200ms
+      let count = 0;
+      const interval = setInterval(() => {
+        count += 1;
+        setRevealedCount(count);
+        if (count >= planItems.length) clearInterval(interval);
+      }, 200);
       await refetchPlan();
     } catch (err) {
-      toast.error("فشل إعداد خطة المحتوى");
+      const msg = err instanceof Error ? err.message : "فشل إعداد خطة المحتوى";
+      setPlanError(msg);
+      setCurrentStep("creative_review"); // Go back so user can retry
       console.error(err);
     } finally {
       setIsGeneratingPlan(false);
@@ -647,6 +661,28 @@ export default function CampaignWizardPage() {
               </div>
             )}
 
+            {/* In-Dialog Error Banner */}
+            {planError && currentStep === "creative_review" && (
+              <div className="mx-5 mt-4 p-4 rounded-xl border border-red-200 bg-red-50 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                  <X className="w-4 h-4 text-red-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-red-800 mb-0.5">فشل إعداد خطة المحتوى</p>
+                  <p className="text-xs text-red-600 mb-3 line-clamp-2">
+                    {planError.includes("Atlas") ? "حدث خطأ في توليد المحتوى بالذكاء الاصطناعي." : planError}
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => { setPlanError(null); void handleProceedToContentPlan(); }}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs h-7 px-3"
+                  >
+                    حاول مجدداً
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Creative Review */}
             {currentStep === "creative_review" && !isGenerating && (
               <div className="p-5">
@@ -685,6 +721,7 @@ export default function CampaignWizardPage() {
                   currency={brief.currency ?? "SAR"}
                   totalBudget={brief.budget ?? 0}
                   onProceed={handleProceedToPreview}
+                  revealedCount={revealedCount}
                 />
               </div>
             )}

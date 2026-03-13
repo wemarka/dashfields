@@ -3025,3 +3025,8 @@
 - [x] إضافة WizardProgressBar داخل الـ Dialog header
 - [x] تحسين تجربة الانتقال بين الخطوات داخل الـ Dialog
 - [x] الحفاظ على الـ chat في الصفحة الرئيسية
+
+## 🔄 تحسينات Campaign Wizard (Retry + Error Dialog + Streaming)
+- [x] إضافة retry تلقائي (3 محاولات) في generateContentPlan على السيرفر
+- [x] إضافة in-Dialog error state مع زر "حاول مجدداً" بدلاً من toast
+- [x] إضافة streaming لخطة المحتوى عبر SSE endpoint

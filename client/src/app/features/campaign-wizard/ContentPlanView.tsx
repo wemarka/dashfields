@@ -15,6 +15,8 @@ interface Props {
   currency: string;
   totalBudget: number;
   onProceed: () => void;
+  /** Number of content items to reveal (for staggered animation). Defaults to all. */
+  revealedCount?: number;
 }
 
 export function ContentPlanView({
@@ -24,7 +26,9 @@ export function ContentPlanView({
   currency,
   totalBudget,
   onProceed,
+  revealedCount,
 }: Props) {
+  const visibleCount = revealedCount !== undefined ? revealedCount : items.length;
   // Group by platform
   const byPlatform = items.reduce<Record<string, ContentPlanItem[]>>((acc, item) => {
     if (!acc[item.platform]) acc[item.platform] = [];
@@ -125,20 +129,34 @@ export function ContentPlanView({
           خطة النشر ({items.length} منشور)
         </h3>
 
-        {Object.entries(byPlatform).map(([platform, platformItems]) => (
-          <div key={platform} className="border border-gray-100 rounded-xl overflow-hidden">
-            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-100">
-              <span className="text-base">{PLATFORM_ICONS[platform] ?? "📱"}</span>
-              <span className="font-medium text-gray-700 text-sm capitalize">{platform}</span>
-              <Badge variant="outline" className="text-xs mr-auto">{platformItems.length} منشور</Badge>
+        {Object.entries(byPlatform).map(([platform, platformItems]) => {
+          // Only show items up to visibleCount across all platforms (cumulative)
+          const platformStartIdx = items.findIndex(i => i.platform === platform);
+          const visiblePlatformItems = platformItems.filter((_, idx) => platformStartIdx + idx < visibleCount);
+          if (visiblePlatformItems.length === 0) return null;
+          return (
+            <div key={platform} className="border border-gray-100 rounded-xl overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-100">
+                <span className="text-base">{PLATFORM_ICONS[platform] ?? "📱"}</span>
+                <span className="font-medium text-gray-700 text-sm capitalize">{platform}</span>
+                <Badge variant="outline" className="text-xs mr-auto">{platformItems.length} منشور</Badge>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {visiblePlatformItems.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      animation: "fadeInUp 0.35s ease both",
+                      animationDelay: `${idx * 0.05}s`,
+                    }}
+                  >
+                    <ContentPlanCard item={item} />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="divide-y divide-gray-50">
-              {platformItems.map((item) => (
-                <ContentPlanCard key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Proceed button */}

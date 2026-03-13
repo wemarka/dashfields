@@ -20,6 +20,29 @@ import { applyWatermark, resizeForPlatform, base64ToBuffer } from "../services/w
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Retry an async operation up to `maxAttempts` times with exponential backoff.
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  delayMs = 1000
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Retry] Attempt ${attempt}/${maxAttempts} failed:`, (err as Error).message?.substring(0, 120));
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+      }
+    }
+  }
+  throw lastError;
+}
+
 function randomSuffix() {
   return Math.random().toString(36).substring(2, 8);
 }
@@ -569,7 +592,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
       const startDate = (brief.startDate as string) ?? today.toISOString().split("T")[0];
       const endDate = (brief.endDate as string) ?? new Date(today.getTime() + 14 * 86400000).toISOString().split("T")[0];
 
-      const plan = await generateContentPlan({
+      const plan = await withRetry(() => generateContentPlan({
         campaignName: String(brief.name ?? "Campaign"),
         product: String(brief.product ?? "product"),
         platforms: (brief.platforms as string[]) ?? ["instagram", "facebook"],
@@ -580,7 +603,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         language: String(brief.language ?? "ar"),
         budget: Number(brief.budget ?? 1000),
         currency: String(brief.currency ?? "SAR"),
-      });
+      }), 3, 1500);
 
       // Save content plan items
       const insertItems = plan.items.map(item => ({
@@ -596,7 +619,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
       await sb.from("campaign_content_plan").insert(insertItems);
 
       // Generate budget optimization
-      const budgetOpt = await optimizeBudget({
+      const budgetOpt = await withRetry(() => optimizeBudget({
         totalBudget: Number(brief.budget ?? 1000),
         currency: String(brief.currency ?? "SAR"),
         platforms: (brief.platforms as string[]) ?? ["instagram", "facebook"],
@@ -605,7 +628,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         campaignDuration: Math.ceil(
           (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000
         ),
-      });
+      }), 3, 1500);
 
       // Update workflow
       await sb.from("campaign_workflows").update({
