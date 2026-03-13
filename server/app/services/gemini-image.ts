@@ -2,28 +2,28 @@
  * gemini-image.ts
  * Ad Creative Image Generation — Atlas Cloud Native API
  *
- * Uses the Atlas Cloud native image generation endpoint:
- *   POST https://api.atlascloud.ai/api/v1/model/generateImage
+ * Exact API flow from official Atlas Cloud documentation:
  *
- * Primary:  google/nano-banana-2/text-to-image (Nano Banana 2)
- * Fallback: google/nano-banana-pro/text-to-image (Nano Banana Pro)
+ * Step 1: POST https://api.atlascloud.ai/api/v1/model/generateImage
+ *   → Response: { code: 200, data: { id: "prediction_id" } }
  *
- * CRITICAL: This is NOT the OpenAI-compatible endpoint.
- * The native endpoint accepts: model, prompt, aspect_ratio, output_format,
- * resolution, enable_base64_output, enable_sync_mode.
+ * Step 2: GET https://api.atlascloud.ai/api/v1/model/prediction/{prediction_id}
+ *   → Poll until data.status === "completed"
+ *   → Image URL in data.outputs[0]
  *
- * Flow:
- *   1. Try Primary (Nano Banana 2) with 60s timeout
- *   2. If Primary fails → try Fallback (Nano Banana Pro) with 60s timeout
- *   3. If both fail → throw with combined error details
+ * Primary:  google/nano-banana-2/text-to-image
+ * Fallback: google/nano-banana-pro/text-to-image
  */
 
-const ATLAS_NATIVE_URL = "https://api.atlascloud.ai/api/v1/model/generateImage";
+const GENERATE_URL = "https://api.atlascloud.ai/api/v1/model/generateImage";
+const PREDICTION_URL = "https://api.atlascloud.ai/api/v1/model/prediction";
 const PRIMARY_MODEL = "google/nano-banana-2/text-to-image";
 const FALLBACK_MODEL = "google/nano-banana-pro/text-to-image";
 
-/** Per-request timeout in milliseconds (60s — image generation can be slow) */
-const REQUEST_TIMEOUT_MS = 60_000;
+/** Total timeout per model attempt (generation + polling) */
+const TOTAL_TIMEOUT_MS = 90_000;
+/** Interval between poll requests */
+const POLL_INTERVAL_MS = 2_000;
 
 function getAtlasApiKey(): string {
   const key = process.env.ATLAS_API_KEY;
@@ -39,26 +39,30 @@ export interface ImageGenerationResult {
 }
 
 /**
- * Atlas Cloud native generateImage response.
- * When enable_sync_mode = true, the response contains the image directly.
- * When enable_sync_mode = false, it returns a request_id for polling.
+ * Atlas Cloud PredictionResponse (from official schema.json)
  */
-interface AtlasNativeResponse {
-  /** Direct image URL when sync mode or after async completion */
-  images?: Array<{ url: string; content_type?: string }>;
-  /** For async mode — poll this */
-  request_id?: string;
-  /** Status for async responses */
-  status?: string;
-  /** Error info */
+interface PredictionResponse {
+  created_at?: string;
+  has_nsfw_contents?: boolean[];
+  id?: string;
+  model?: string;
+  outputs?: string[];
+  status?: string; // "created" | "processing" | "completed" | "failed"
+  urls?: Record<string, string>;
   error?: string;
-  detail?: string;
-  /** Some responses return data array */
-  data?: Array<{ url?: string; b64_json?: string }>;
-  /** Direct URL field */
-  url?: string;
-  /** Output field */
-  output?: string | string[];
+}
+
+/**
+ * Atlas Cloud generateImage response wrapper
+ * The actual response is: { code: 200, data: PredictionResponse }
+ */
+interface GenerateImageResponse {
+  code?: number;
+  data?: PredictionResponse;
+  // Some responses may return the prediction directly at top level
+  id?: string;
+  status?: string;
+  outputs?: string[];
 }
 
 // ── Internal: fetch with timeout ────────────────────────────────────────────
@@ -76,24 +80,29 @@ async function fetchWithTimeout(
   }
 }
 
-// ── Internal: Poll for async result ─────────────────────────────────────────
+// ── Internal: Poll for prediction result ────────────────────────────────────
+/**
+ * Polls /api/v1/model/prediction/{predictionId} until status is completed or failed.
+ * Returns the image URL from data.outputs[0].
+ */
 async function pollForResult(
-  requestId: string,
-  maxWaitMs: number = 55_000,
+  predictionId: string,
+  apiKey: string,
+  maxWaitMs: number = 80_000,
 ): Promise<string> {
-  const pollUrl = `https://api.atlascloud.ai/api/v1/model/request/${requestId}`;
+  const pollUrl = `${PREDICTION_URL}/${predictionId}`;
   const startTime = Date.now();
-  const pollInterval = 3000; // 3 seconds between polls
 
   while (Date.now() - startTime < maxWaitMs) {
-    await new Promise(resolve => setTimeout(resolve, pollInterval));
+    // Wait before polling
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
 
     const response = await fetchWithTimeout(
       pollUrl,
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${getAtlasApiKey()}`,
+          Authorization: `Bearer ${apiKey}`,
         },
       },
       10_000,
@@ -104,55 +113,56 @@ async function pollForResult(
       throw new Error(`[Atlas Poll] ${response.status}: ${errText}`);
     }
 
-    const result = await response.json() as AtlasNativeResponse;
+    const json = await response.json() as GenerateImageResponse;
 
-    // Check various possible response formats for completed images
-    if (result.images && result.images.length > 0 && result.images[0].url) {
-      return result.images[0].url;
-    }
-    if (result.output) {
-      const outputUrl = Array.isArray(result.output) ? result.output[0] : result.output;
-      if (typeof outputUrl === "string" && outputUrl.startsWith("http")) {
-        return outputUrl;
+    // Response can be { data: PredictionResponse } or PredictionResponse directly
+    const prediction = json.data || json;
+
+    const status = prediction.status;
+    const outputs = prediction.outputs;
+
+    // Check if completed
+    if (status === "completed" || status === "succeeded") {
+      if (outputs && outputs.length > 0 && outputs[0]) {
+        return outputs[0];
       }
-    }
-    if (result.url && typeof result.url === "string") {
-      return result.url;
-    }
-    if (result.data && result.data.length > 0 && result.data[0].url) {
-      return result.data[0].url;
+      throw new Error(`[Atlas Poll] Completed but no outputs in response`);
     }
 
     // Check if failed
-    if (result.status === "failed" || result.error) {
-      throw new Error(`[Atlas Poll] Generation failed: ${result.error || result.detail || "unknown"}`);
+    if (status === "failed") {
+      const errorMsg = (json.data as PredictionResponse)?.error || "unknown error";
+      throw new Error(`[Atlas Poll] Generation failed: ${errorMsg}`);
     }
 
     // Still processing — continue polling
-    console.log(`[Image Gen] Polling... status: ${result.status || "processing"}`);
+    console.log(`[Image Gen] Polling ${predictionId}... status: ${status || "processing"}`);
   }
 
-  throw new Error("[Atlas Poll] Timed out waiting for image generation");
+  throw new Error(`[Atlas Poll] Timed out after ${Math.round(maxWaitMs / 1000)}s waiting for prediction ${predictionId}`);
 }
 
-// ── Internal: Atlas Cloud native generation ─────────────────────────────────
+// ── Internal: Generate image with a specific model ──────────────────────────
 /**
- * Calls Atlas Cloud native /api/v1/model/generateImage endpoint.
- * Payload: model, prompt, aspect_ratio, output_format, resolution,
- *          enable_base64_output, enable_sync_mode
+ * Full generation flow for a single model:
+ * 1. POST /api/v1/model/generateImage → get prediction ID
+ * 2. Poll /api/v1/model/prediction/{id} → get image URL
  */
-async function attemptAtlasNativeGeneration(
+async function attemptGeneration(
   model: string,
   prompt: string,
   aspectRatio: string = "1:1",
-): Promise<ImageGenerationResult[]> {
+): Promise<ImageGenerationResult> {
+  const apiKey = getAtlasApiKey();
+
+  // Step 1: Start generation
   const response = await fetchWithTimeout(
-    ATLAS_NATIVE_URL,
+    GENERATE_URL,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getAtlasApiKey()}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
@@ -164,71 +174,49 @@ async function attemptAtlasNativeGeneration(
         resolution: "2k",
       }),
     },
-    REQUEST_TIMEOUT_MS,
+    30_000, // 30s timeout for the initial POST
   );
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);
-    throw new Error(`[Atlas Native] ${model} → ${response.status}: ${errorText}`);
+    throw new Error(`[Atlas Generate] ${model} → ${response.status}: ${errorText}`);
   }
 
-  const data = await response.json() as AtlasNativeResponse;
+  const json = await response.json() as GenerateImageResponse;
 
-  // Case 1: Sync response with direct images
-  if (data.images && data.images.length > 0 && data.images[0].url) {
-    return [{
-      imageUrl: data.images[0].url,
-      mimeType: data.images[0].content_type || "image/png",
-      modelUsed: model,
-    }];
-  }
-
-  // Case 2: Direct URL in response
-  if (data.url && typeof data.url === "string") {
-    return [{
-      imageUrl: data.url,
+  // Extract prediction ID from response
+  // Response format: { code: 200, data: { id: "prediction_id", status: "created", ... } }
+  // Check if outputs are already available (sync mode or immediate completion)
+  const immediateOutputs = json.data?.outputs || json.outputs;
+  const immediateStatus = json.data?.status || json.status;
+  if (
+    immediateOutputs && immediateOutputs.length > 0 && immediateOutputs[0] &&
+    (immediateStatus === "completed" || immediateStatus === "succeeded")
+  ) {
+    console.log(`[Image Gen] Sync response — image available immediately`);
+    return {
+      imageUrl: immediateOutputs[0],
       mimeType: "image/png",
       modelUsed: model,
-    }];
+    };
   }
 
-  // Case 3: Output field
-  if (data.output) {
-    const outputUrl = Array.isArray(data.output) ? data.output[0] : data.output;
-    if (typeof outputUrl === "string" && outputUrl.startsWith("http")) {
-      return [{
-        imageUrl: outputUrl,
-        mimeType: "image/png",
-        modelUsed: model,
-      }];
-    }
+  const predictionId = json.data?.id || json.id;
+
+  if (!predictionId) {
+    throw new Error(`[Atlas Generate] ${model} → No prediction ID or outputs in response: ${JSON.stringify(json).slice(0, 300)}`);
   }
 
-  // Case 4: Data array (OpenAI-like format)
-  if (data.data && data.data.length > 0) {
-    const item = data.data[0];
-    if (item.url) {
-      return [{
-        imageUrl: item.url,
-        mimeType: "image/png",
-        modelUsed: model,
-      }];
-    }
-  }
+  console.log(`[Image Gen] Got prediction ID: ${predictionId} — starting polling...`);
 
-  // Case 5: Async mode — got request_id, need to poll
-  if (data.request_id) {
-    console.log(`[Image Gen] Async mode — polling request_id: ${data.request_id}`);
-    const imageUrl = await pollForResult(data.request_id);
-    return [{
-      imageUrl,
-      mimeType: "image/png",
-      modelUsed: model,
-    }];
-  }
+  // Step 2: Poll for result
+  const imageUrl = await pollForResult(predictionId, apiKey);
 
-  // No recognizable image in response
-  throw new Error(`[Atlas Native] ${model} → No image in response: ${JSON.stringify(data).slice(0, 200)}`);
+  return {
+    imageUrl,
+    mimeType: "image/png",
+    modelUsed: model,
+  };
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -239,11 +227,13 @@ async function attemptAtlasNativeGeneration(
  * Primary: google/nano-banana-2/text-to-image (Nano Banana 2)
  * Fallback: google/nano-banana-pro/text-to-image (Nano Banana Pro)
  *
- * Uses Atlas Cloud native endpoint: /api/v1/model/generateImage
+ * API Flow:
+ *   1. POST /api/v1/model/generateImage → { data: { id: "prediction_id" } }
+ *   2. GET /api/v1/model/prediction/{id} → poll until completed → data.outputs[0]
  *
  * @param prompt - Detailed text description of the image to generate
- * @param options.aspectRatio - Aspect ratio (default "1:1", options: "1:1", "16:9", "9:16", "4:3", "3:4")
- * @param options.referenceImageUrl - Optional product image URL (appended to prompt as context)
+ * @param options.aspectRatio - Aspect ratio (default "1:1")
+ * @param options.referenceImageUrl - Optional product image URL (appended to prompt)
  */
 export async function generateAdImage(
   prompt: string,
@@ -254,7 +244,7 @@ export async function generateAdImage(
 ): Promise<ImageGenerationResult[]> {
   const { aspectRatio = "1:1", referenceImageUrl } = options;
 
-  // If a reference image is provided, enhance the prompt with it
+  // If a reference image is provided, enhance the prompt
   const effectivePrompt = referenceImageUrl
     ? `${prompt}. Reference product image: ${referenceImageUrl}. Use this product as the main subject in the design.`
     : prompt;
@@ -264,9 +254,9 @@ export async function generateAdImage(
   // ── Attempt 1: Primary — Nano Banana 2 ───────────────────────────────
   try {
     console.log(`[Image Gen] Attempting PRIMARY: ${PRIMARY_MODEL}`);
-    const results = await attemptAtlasNativeGeneration(PRIMARY_MODEL, effectivePrompt, aspectRatio);
+    const result = await attemptGeneration(PRIMARY_MODEL, effectivePrompt, aspectRatio);
     console.log(`[Image Gen] PRIMARY succeeded — ${PRIMARY_MODEL}`);
-    return results;
+    return [result];
   } catch (err) {
     primaryError = err instanceof Error ? err : new Error(String(err));
     const isAbort = primaryError.name === "AbortError";
@@ -278,9 +268,9 @@ export async function generateAdImage(
   // ── Attempt 2: Fallback — Nano Banana Pro ────────────────────────────
   try {
     console.log(`[Image Gen] Attempting FALLBACK: ${FALLBACK_MODEL}`);
-    const results = await attemptAtlasNativeGeneration(FALLBACK_MODEL, effectivePrompt, aspectRatio);
+    const result = await attemptGeneration(FALLBACK_MODEL, effectivePrompt, aspectRatio);
     console.log(`[Image Gen] FALLBACK succeeded — ${FALLBACK_MODEL}`);
-    return results;
+    return [result];
   } catch (fallbackErr) {
     const fbError = fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr));
     const isAbort = fbError.name === "AbortError";

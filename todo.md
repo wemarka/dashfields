@@ -3090,3 +3090,8 @@
 - [x] Remove OpenAI-compatible /images/generations endpoint usage
 - [x] Add async polling support for request_id-based responses
 - [x] 24 tests for native endpoint + dual-model fallback + async polling (684 total passing)
+- [x] Fix: Use exact Atlas Cloud API response format — data.id for prediction ID, data.status/data.outputs for polling
+- [x] Fix: Poll URL is /api/v1/model/prediction/{id} (not /api/v1/model/request/{id})
+- [x] Match exact PredictionResponse schema from official docs
+- [x] Handle sync mode: return immediately when status=completed and outputs available
+- [x] All 678 tests passing (48 files)
