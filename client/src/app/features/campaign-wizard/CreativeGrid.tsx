@@ -3,7 +3,7 @@
  * Supports A/B variants, per-platform grouping, approve/reject actions.
  */
 import { useState } from "react";
-import { Check, X, RefreshCw, Download, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, X, RefreshCw, Download, ChevronDown, ChevronUp, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/core/components/ui/button";
 import { Badge } from "@/core/components/ui/badge";
 import { cn } from "@/core/lib/utils";
@@ -17,6 +17,7 @@ interface Props {
   creatives: Creative[];
   onApprovalChange: (creativeId: string, approved: boolean) => void;
   onRegenerateRequest: () => void;
+  onVariantBGenerated?: () => void;
   onProceed: () => void;
   isGenerating?: boolean;
 }
@@ -26,11 +27,30 @@ export function CreativeGrid({
   creatives,
   onApprovalChange,
   onRegenerateRequest,
+  onVariantBGenerated,
   onProceed,
   isGenerating = false,
 }: Props) {
   const [expandedPlatform, setExpandedPlatform] = useState<string | null>(null);
+  const [isGeneratingB, setIsGeneratingB] = useState(false);
   const reviewMutation = trpc.campaignWorkflow.reviewCreative.useMutation();
+  const generateVariantBMut = trpc.campaignWorkflow.generateVariantB.useMutation();
+
+  const hasVariantB = creatives.some(c => c.variant === "B");
+
+  const handleGenerateVariantB = async () => {
+    setIsGeneratingB(true);
+    toast.info("جاري توليد Variant B... قد يستغرق 30-60 ثانية");
+    try {
+      const result = await generateVariantBMut.mutateAsync({ workflowId });
+      toast.success(`تم توليد ${result.count} صورة Variant B بنجاح!`);
+      onVariantBGenerated?.();
+    } catch {
+      toast.error("فشل توليد Variant B، حاول مجدداً");
+    } finally {
+      setIsGeneratingB(false);
+    }
+  };
 
   // Group by platform
   const byPlatform = creatives.reduce<Record<string, Creative[]>>((acc, c) => {
@@ -112,7 +132,7 @@ export function CreativeGrid({
             </Badge>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"
@@ -122,6 +142,21 @@ export function CreativeGrid({
             <RefreshCw className="w-3 h-3" />
             توليد جديد
           </Button>
+          {!hasVariantB && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleGenerateVariantB()}
+              disabled={isGeneratingB}
+              className="text-xs gap-1.5 border-purple-200 text-purple-700 hover:bg-purple-50"
+            >
+              {isGeneratingB ? (
+                <><Loader2 className="w-3 h-3 animate-spin" />جاري التوليد...</>
+              ) : (
+                <><Sparkles className="w-3 h-3" />إضافة Variant B</>  
+              )}
+            </Button>
+          )}
           <Button
             size="sm"
             onClick={onProceed}

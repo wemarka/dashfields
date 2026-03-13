@@ -3034,3 +3034,7 @@
 ## 🖼️ تحسينات Campaign Wizard (دورة 2)
 - [x] إضافة خطوة رفع صورة المنتج في الـ Dialog قبل التوليد
 - [x] إضافة progress bar يُظهر عدد الصور المُولَّدة (1/4، 2/4...)
+
+## 🎨 تحسينات Campaign Wizard (دورة 3)
+- [x] تمرير product_image_url إلى LLM كـ reference image أثناء التوليد
+- [x] إضافة زر "توليد Variant B" في صفحة مراجعة الصور

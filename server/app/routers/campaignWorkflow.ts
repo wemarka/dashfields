@@ -453,13 +453,16 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
       const promptA = prompts.find(p => p.variant === "A") ?? prompts[0];
       const tasks = specs.slice(0, 4).map(spec => ({ spec, promptData: promptA }));
 
+      // Get product image URL if available
+      const productImageUrl = (workflow.product_image_url as string | null) ?? undefined;
+
       // Generate all images in parallel
       const savedIds: string[] = [];
       await Promise.all(tasks.map(async ({ spec, promptData }) => {
         try {
           const [generated] = await generateAdImage(
             `${promptData.prompt}. Professional advertising photo, high quality, no text overlay.`,
-            { n: 1 }
+            { n: 1, referenceImageUrl: productImageUrl }
           );
 
           // Decode b64_json or fetch URL
@@ -584,6 +587,106 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         .select("id", { count: "exact", head: true })
         .eq("workflow_id", input.workflowId);
       return { generated: count ?? 0, total: input.expectedCount };
+    }),
+
+  /**
+   * Generate Variant B creatives for A/B testing.
+   * Creates a second set of images using a different prompt variant for each platform.
+   */
+  generateVariantB: protectedProcedure
+    .input(z.object({ workflowId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      const workflow = await getWorkflow(input.workflowId, ctx.user.id);
+      const brief = (workflow.brief as Record<string, unknown>) ?? {};
+
+      const platforms = (brief.platforms as string[]) ?? ["instagram", "facebook"];
+      const specs = getSpecsForPlatforms(platforms);
+
+      // Get logo for watermark
+      const logoUrl = (workflow.logo_url as string) ?? await getDefaultLogo(workflow.workspace_id as number);
+      const productImageUrl = (workflow.product_image_url as string | null) ?? undefined;
+
+      // Generate Variant B prompts (different style/angle from A)
+      const { prompts } = await generateImagePrompts({
+        product: String(brief.product ?? "product"),
+        targetAudience: String(brief.targetAudience ?? "general audience"),
+        tone: String(brief.tone ?? "professional"),
+        brandColors: (brief.brandColors as string[]) ?? [],
+        platforms,
+        language: String(brief.language ?? "ar"),
+      });
+
+      const promptB = prompts.find(p => p.variant === "B") ?? prompts[prompts.length - 1];
+
+      // Fetch logo buffer once
+      let logoBuffer: Buffer | null = null;
+      if (logoUrl) {
+        try {
+          const logoResponse = await fetch(logoUrl);
+          const logoArrayBuffer = await logoResponse.arrayBuffer();
+          logoBuffer = Buffer.from(logoArrayBuffer as ArrayBuffer);
+        } catch (err) {
+          console.error("[VariantB] Failed to fetch logo:", err);
+        }
+      }
+
+      const savedIds: string[] = [];
+      await Promise.all(specs.slice(0, 4).map(async (spec) => {
+        try {
+          const [generated] = await generateAdImage(
+            `${promptB.prompt}. Alternative creative angle. Professional advertising photo, high quality, no text overlay.`,
+            { n: 1, referenceImageUrl: productImageUrl }
+          );
+
+          let imageBuffer: Buffer<ArrayBuffer>;
+          if (generated.imageUrl.startsWith("data:")) {
+            const base64Data = generated.imageUrl.split(",")[1];
+            imageBuffer = Buffer.from(base64Data, "base64") as Buffer<ArrayBuffer>;
+          } else {
+            const imgFetch = await fetch(generated.imageUrl);
+            imageBuffer = Buffer.from(await imgFetch.arrayBuffer()) as Buffer<ArrayBuffer>;
+          }
+
+          imageBuffer = await resizeForPlatform(imageBuffer, spec.width, spec.height);
+
+          if (logoBuffer) {
+            imageBuffer = await applyWatermark(imageBuffer, logoBuffer as Buffer<ArrayBuffer>, {
+              position: "bottom-right",
+              sizeRatio: 0.12,
+              padding: 24,
+              opacity: 0.9,
+            });
+          }
+
+          const fileKey = `creatives/${ctx.user.id}-varB-${randomSuffix()}.png`;
+          const { url: watermarkedUrl } = await storagePut(fileKey, imageBuffer, "image/png");
+
+          const { data: creative } = await sb
+            .from("campaign_creatives")
+            .insert({
+              workflow_id: input.workflowId,
+              user_id: ctx.user.id,
+              platform: spec.platform,
+              format: spec.format,
+              width: spec.width,
+              height: spec.height,
+              watermarked_url: watermarkedUrl,
+              variant: "B",
+              prompt: promptB.prompt,
+              status: "watermarked",
+              approved: false,
+            })
+            .select("id")
+            .single();
+
+          if (creative?.id) savedIds.push(creative.id);
+        } catch (err) {
+          console.error(`[VariantB] Failed for ${spec.platform}/${spec.format}:`, err);
+        }
+      }));
+
+      return { count: savedIds.length, variant: "B" };
     }),
 
   /**

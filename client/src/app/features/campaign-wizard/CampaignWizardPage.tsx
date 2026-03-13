@@ -763,6 +763,7 @@ export default function CampaignWizardPage() {
                   creatives={creatives}
                   onApprovalChange={handleApprovalChange}
                   onRegenerateRequest={() => void triggerGeneration(workflowId!)}
+                  onVariantBGenerated={() => void refetchCreatives()}
                   onProceed={handleProceedToContentPlan}
                   isGenerating={isGeneratingPlan}
                 />

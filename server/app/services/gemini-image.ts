@@ -37,17 +37,63 @@ interface AtlasImageResponse {
  * Generate an ad image via Atlas Cloud.
  * Uses gpt-image-1-developer as primary, falls back gracefully.
  * NOTE: Does NOT pass 'size' — model determines output dimensions.
+ * If referenceImageUrl is provided, uses /images/edits endpoint with the product image as reference.
  */
 export async function generateAdImage(
   prompt: string,
   options: {
     n?: number;
     useNanoBanana?: boolean; // set true when nano-banana-2 becomes stable
+    referenceImageUrl?: string; // product image URL to use as reference
   } = {}
 ): Promise<ImageGenerationResult[]> {
-  const { n = 1, useNanoBanana = false } = options;
+  const { n = 1, useNanoBanana = false, referenceImageUrl } = options;
   const model = useNanoBanana ? IMAGE_MODEL_NANO_BANANA : IMAGE_MODEL_PRIMARY;
 
+  // If a reference product image is provided, use images/edits endpoint
+  if (referenceImageUrl) {
+    try {
+      // Fetch the product image and convert to base64
+      const imgResponse = await fetch(referenceImageUrl);
+      if (imgResponse.ok) {
+        const imgBuffer = await imgResponse.arrayBuffer();
+        const base64Image = Buffer.from(imgBuffer).toString("base64");
+        const mimeType = imgResponse.headers.get("content-type") ?? "image/png";
+        const dataUrl = `data:${mimeType};base64,${base64Image}`;
+
+        const editResponse = await fetch(`${ATLAS_BASE_URL}/images/edits`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getApiKey()}`,
+          },
+          body: JSON.stringify({
+            model,
+            image: dataUrl,
+            prompt: `${prompt}. Use the provided product image as the main subject. Professional advertising photo, high quality, no text overlay.`,
+            n,
+            response_format: "b64_json",
+          }),
+        });
+
+        if (editResponse.ok) {
+          const editData = (await editResponse.json()) as AtlasImageResponse;
+          if (editData.data && editData.data.length > 0) {
+            return editData.data.map((item) => ({
+              imageUrl: item.url ?? (item.b64_json?.startsWith("data:") ? item.b64_json : `data:image/png;base64,${item.b64_json}`),
+              mimeType: "image/png",
+            }));
+          }
+        }
+        // Fall through to standard generation if edit fails
+        console.warn("[Atlas Image] Edit endpoint failed, falling back to standard generation");
+      }
+    } catch (err) {
+      console.warn("[Atlas Image] Reference image processing failed, falling back:", err);
+    }
+  }
+
+  // Standard generation (no reference image)
   const response = await fetch(`${ATLAS_BASE_URL}/images/generations`, {
     method: "POST",
     headers: {
