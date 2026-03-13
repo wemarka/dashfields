@@ -29,23 +29,30 @@ interface AtlasResponse {
   choices: Array<{ message: { content: string } }>;
 }
 
+interface AtlasResponseFormat {
+  type: "json_object";
+}
+
 async function callAtlas(
   messages: ChatMessage[],
   temperature: number,
-  maxTokens: number
+  maxTokens: number,
+  responseFormat?: AtlasResponseFormat
 ): Promise<string> {
+  const body: Record<string, unknown> = {
+    model: TEXT_MODEL,
+    messages,
+    temperature,
+    max_tokens: maxTokens,
+  };
+  if (responseFormat) body.response_format = responseFormat;
   const response = await fetch(`${ATLAS_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${getApiKey()}`,
     },
-    body: JSON.stringify({
-      model: TEXT_MODEL,
-      messages,
-      temperature,
-      max_tokens: maxTokens,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -83,26 +90,66 @@ export async function chatCompletion(
 }
 
 /**
+ * Sanitize LLM text output to extract valid JSON.
+ * Handles markdown code fences, trailing content, and common LLM quirks.
+ */
+function sanitizeJSON(text: string): string {
+  // Remove markdown code fences (```json ... ``` or ``` ... ```)
+  let cleaned = text
+    .replace(/^```(?:json)?\s*/im, "")
+    .replace(/\s*```\s*$/m, "")
+    .trim();
+
+  // Remove any text before the first { or [
+  const firstBrace = cleaned.search(/[{[]/);
+  if (firstBrace > 0) cleaned = cleaned.slice(firstBrace);
+
+  // Remove any text after the last } or ]
+  const lastBrace = Math.max(cleaned.lastIndexOf("}"), cleaned.lastIndexOf("]"));
+  if (lastBrace >= 0 && lastBrace < cleaned.length - 1) {
+    cleaned = cleaned.slice(0, lastBrace + 1);
+  }
+
+  return cleaned.trim();
+}
+
+/**
  * Generate structured JSON using Gemini Flash Lite 3.1.
+ * Uses response_format: json_object when supported to force valid JSON output.
  */
 export async function generateJSON<T = unknown>(
   prompt: string,
   options: GeminiTextOptions = {}
 ): Promise<T> {
-  const jsonPrompt = `${prompt}\n\nRespond ONLY with valid JSON. No markdown, no explanation.`;
-  const text = await generateText(jsonPrompt, { ...options, temperature: options.temperature ?? 0.3 });
+  const { systemPrompt, temperature = 0.3, maxTokens = 4096 } = options;
+  const messages: ChatMessage[] = [];
+  if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
+  messages.push({ role: "user", content: `${prompt}\n\nRespond ONLY with valid JSON. No markdown, no explanation, no extra text.` });
 
-  const cleaned = text
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```\s*$/, "")
-    .trim();
+  // Try with response_format: json_object first (forces valid JSON from the model)
+  let text: string;
+  try {
+    text = await callAtlas(messages, temperature, maxTokens, { type: "json_object" });
+  } catch {
+    // Fallback: call without response_format if the model doesn't support it
+    text = await callAtlas(messages, temperature, maxTokens);
+  }
+
+  const cleaned = sanitizeJSON(text);
 
   try {
     return JSON.parse(cleaned) as T;
   } catch {
+    // Last resort: try to extract the first valid JSON object/array
     const match = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (match) return JSON.parse(match[0]) as T;
-    throw new Error(`[Atlas] Failed to parse JSON: ${cleaned.substring(0, 200)}`);
+    if (match) {
+      try {
+        return JSON.parse(match[0]) as T;
+      } catch {
+        // ignore
+      }
+    }
+    throw new Error(`[Atlas] Failed to parse JSON response. Raw (first 300 chars): ${cleaned.substring(0, 300)}`);
   }
 }
 
