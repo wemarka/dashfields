@@ -3001,3 +3001,10 @@
 - [x] إضافة /campaign-wizard route في App.tsx
 - [x] إضافة Campaign Wizard nav item في sidebar
 - [x] Atlas Cloud API test: 633/633 اختبار ناجح، 0 TypeScript errors
+
+## ✅ Atlas Cloud Model Upgrade — Gemini 3.1
+- [x] TEXT_MODEL تحديث إلى google/gemini-3.1-flash-lite-preview (مؤكد يعمل ✅)
+- [x] IMAGE_MODEL: openai/gpt-image-1-developer كـ primary (مؤكد يعمل ✅) + google/nano-banana-2/text-to-image-developer كـ future upgrade
+- [x] حذف size parameter من image API call (كان يسبب 400 bad request)
+- [x] دعم b64_json response format بدلاً من URL
+- [x] 633/633 اختبار ناجح، 0 TypeScript errors

@@ -1,12 +1,19 @@
 /**
  * gemini-image.ts
- * Atlas Cloud → Gemini Flash Image 3 — ad creative generation.
+ * Atlas Cloud — Ad Creative Image Generation
+ * Primary model: openai/gpt-image-1-developer (confirmed working)
+ * Future upgrade: google/nano-banana-2/text-to-image-developer (Nano Banana 2)
+ *
  * Uses OpenAI-compatible /images/generations endpoint at https://api.atlascloud.ai/v1
- * Used for: generating ad creatives for social media campaigns.
+ * NOTE: gpt-image-1-developer does NOT accept 'size' parameter — omit it.
  */
 
 const ATLAS_BASE_URL = "https://api.atlascloud.ai/v1";
-const IMAGE_MODEL = "google/gemini-2.5-flash-image";
+
+// Primary model — confirmed working with b64_json output
+const IMAGE_MODEL_PRIMARY = "openai/gpt-image-1-developer";
+// Future upgrade — Nano Banana 2 (text-to-image, higher quality)
+const IMAGE_MODEL_NANO_BANANA = "google/nano-banana-2/text-to-image-developer";
 
 function getApiKey(): string {
   const key = process.env.ATLAS_API_KEY;
@@ -27,18 +34,19 @@ interface AtlasImageResponse {
 }
 
 /**
- * Generate an ad image using Gemini Flash Image 3 via Atlas Cloud.
- * Returns a URL or base64-encoded image.
+ * Generate an ad image via Atlas Cloud.
+ * Uses gpt-image-1-developer as primary, falls back gracefully.
+ * NOTE: Does NOT pass 'size' — model determines output dimensions.
  */
 export async function generateAdImage(
   prompt: string,
   options: {
-    size?: "1024x1024" | "1024x1792" | "1792x1024";
     n?: number;
-    responseFormat?: "url" | "b64_json";
+    useNanoBanana?: boolean; // set true when nano-banana-2 becomes stable
   } = {}
 ): Promise<ImageGenerationResult[]> {
-  const { size = "1024x1024", n = 1, responseFormat = "url" } = options;
+  const { n = 1, useNanoBanana = false } = options;
+  const model = useNanoBanana ? IMAGE_MODEL_NANO_BANANA : IMAGE_MODEL_PRIMARY;
 
   const response = await fetch(`${ATLAS_BASE_URL}/images/generations`, {
     method: "POST",
@@ -47,11 +55,10 @@ export async function generateAdImage(
       Authorization: `Bearer ${getApiKey()}`,
     },
     body: JSON.stringify({
-      model: IMAGE_MODEL,
+      model,
       prompt,
       n,
-      size,
-      response_format: responseFormat,
+      response_format: "b64_json",
     }),
   });
 
@@ -67,7 +74,8 @@ export async function generateAdImage(
   }
 
   return data.data.map((item) => ({
-    imageUrl: item.url ?? `data:image/png;base64,${item.b64_json}`,
+    // b64_json already includes the data:image/png;base64, prefix from Atlas
+    imageUrl: item.url ?? (item.b64_json?.startsWith("data:") ? item.b64_json : `data:image/png;base64,${item.b64_json}`),
     mimeType: "image/png",
   }));
 }
@@ -75,6 +83,8 @@ export async function generateAdImage(
 /**
  * Platform specs for social media ad images.
  * Maps platform → list of formats with dimensions.
+ * Note: dimensions are used for Sharp.js resizing AFTER generation,
+ * not passed to the image API.
  */
 export const PLATFORM_SPECS: Record<
   string,
@@ -82,35 +92,22 @@ export const PLATFORM_SPECS: Record<
     format: string;
     width: number;
     height: number;
-    size: "1024x1024" | "1024x1792" | "1792x1024";
   }>
 > = {
   instagram: [
-    { format: "feed", width: 1080, height: 1080, size: "1024x1024" },
-    { format: "story", width: 1080, height: 1920, size: "1024x1792" },
+    { format: "feed", width: 1080, height: 1080 },
+    { format: "story", width: 1080, height: 1920 },
   ],
   facebook: [
-    { format: "feed", width: 1200, height: 628, size: "1792x1024" },
-    { format: "story", width: 1080, height: 1920, size: "1024x1792" },
+    { format: "feed", width: 1200, height: 628 },
+    { format: "story", width: 1080, height: 1920 },
   ],
-  twitter: [
-    { format: "feed", width: 1200, height: 675, size: "1792x1024" },
-  ],
-  linkedin: [
-    { format: "feed", width: 1200, height: 628, size: "1792x1024" },
-  ],
-  tiktok: [
-    { format: "feed", width: 1080, height: 1920, size: "1024x1792" },
-  ],
-  snapchat: [
-    { format: "story", width: 1080, height: 1920, size: "1024x1792" },
-  ],
-  pinterest: [
-    { format: "pin", width: 1000, height: 1500, size: "1024x1792" },
-  ],
-  youtube: [
-    { format: "banner", width: 1280, height: 720, size: "1792x1024" },
-  ],
+  twitter: [{ format: "feed", width: 1200, height: 675 }],
+  linkedin: [{ format: "feed", width: 1200, height: 628 }],
+  tiktok: [{ format: "feed", width: 1080, height: 1920 }],
+  snapchat: [{ format: "story", width: 1080, height: 1920 }],
+  pinterest: [{ format: "pin", width: 1000, height: 1500 }],
+  youtube: [{ format: "banner", width: 1280, height: 720 }],
 };
 
 /**
@@ -123,14 +120,12 @@ export function getSpecsForPlatforms(
   format: string;
   width: number;
   height: number;
-  size: "1024x1024" | "1024x1792" | "1792x1024";
 }> {
   const specs: Array<{
     platform: string;
     format: string;
     width: number;
     height: number;
-    size: "1024x1024" | "1024x1792" | "1792x1024";
   }> = [];
 
   for (const platform of platforms) {

@@ -431,13 +431,21 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
             // Generate image
             const [generated] = await generateAdImage(
               `${promptData.prompt}. Professional advertising photo, high quality, no text overlay.`,
-              { size: spec.size, n: 1, responseFormat: "url" }
+              { n: 1 }
             );
 
-            // Fetch image from URL and convert to buffer
-            const imgFetch = await fetch(generated.imageUrl);
-            const imgArrayBuffer = await imgFetch.arrayBuffer();
-            let imageBuffer = Buffer.from(imgArrayBuffer as ArrayBuffer);
+            // Handle b64_json or URL response
+            let imageBuffer: Buffer<ArrayBuffer>;
+            if (generated.imageUrl.startsWith("data:")) {
+              // b64_json response — extract base64 part
+              const base64Data = generated.imageUrl.split(",")[1];
+              imageBuffer = Buffer.from(base64Data, "base64") as Buffer<ArrayBuffer>;
+            } else {
+              // URL response — fetch it
+              const imgFetch = await fetch(generated.imageUrl);
+              const imgArrayBuffer = await imgFetch.arrayBuffer();
+              imageBuffer = Buffer.from(imgArrayBuffer as ArrayBuffer) as Buffer<ArrayBuffer>;
+            }
 
             // Resize to exact platform dimensions
             imageBuffer = await resizeForPlatform(imageBuffer, spec.width, spec.height);
