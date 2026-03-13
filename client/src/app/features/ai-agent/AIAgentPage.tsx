@@ -43,7 +43,11 @@ function saveLocal(sessions: ChatSession[]) {
 }
 
 export function broadcastSessions(sessions: ChatSession[], activeId: string | null = null) {
-  window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
+  // Defer the event dispatch to avoid setState-during-render errors
+  // when called from inside a setState callback
+  queueMicrotask(() => {
+    window.dispatchEvent(new CustomEvent("ai-sessions-update", { detail: { sessions, activeId } }));
+  });
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────

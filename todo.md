@@ -3064,3 +3064,4 @@
 - [x] Vitest tests for AI Agent (19 tests passing)
 - [ ] Add image generation model config (google/gemini-3.1-flash-image-preview)
 - [ ] Prepare video generation service structure (kling-2.5-turbo)
+- [x] Fix: setState-during-render error — broadcastSessions called inside setSessions callback in AIAgentPage
