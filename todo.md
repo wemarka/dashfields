@@ -3049,5 +3049,18 @@
 - [x] Convert to full-height conversational UI (Claude/ChatGPT style)
 - [ ] Build Generative UI component renderer for custom React components in chat
 - [x] Premium chat input area with shadcn components
-- [ ] Support rendering charts, cards, tables, forms inside chat stream
+- [x] Support rendering charts, cards, tables, forms inside chat stream
 - [ ] Smooth animations and transitions for messages
+
+## 🧠 Phase 2: AI Agent Backend Integration
+- [x] Configure AI service with invokeLLM (gemini-2.5-flash)
+- [x] Inject Master AI Marketing Director system prompt with Generative UI instructions
+- [x] Wire frontend chat to backend SSE endpoint with message history
+- [x] Add campaign preview Generative UI trigger (parse ```ui-block``` JSON from AI output)
+- [x] Implement tool calling loop (get_campaigns, get_campaign_metrics, get_social_accounts, get_posts, get_marketing_overview, create_campaign, generate_ad_image, get_brand_profile)
+- [x] Add SSE status events for tool execution progress (thinking, tool:name)
+- [x] Frontend ToolStatusIndicator showing real-time tool execution status
+- [x] Rate limiting on AI agent endpoint (30 req/min)
+- [x] Vitest tests for AI Agent (19 tests passing)
+- [ ] Add image generation model config (google/gemini-3.1-flash-image-preview)
+- [ ] Prepare video generation service structure (kling-2.5-turbo)

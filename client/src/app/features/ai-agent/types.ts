@@ -115,6 +115,12 @@ export type UIBlock =
   | CampaignSummaryBlock
   | SuggestionChipsBlock;
 
+// ── Tool Status ───────────────────────────────────────────────────────────
+export interface ToolStatus {
+  type: "thinking" | "tool";
+  toolName?: string;
+}
+
 // ── Chat Message ───────────────────────────────────────────────────────────
 export interface ChatMessage {
   id: string;

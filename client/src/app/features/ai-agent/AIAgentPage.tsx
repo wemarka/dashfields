@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { trpc } from "@/core/lib/trpc";
 import { GenerativeUIRenderer } from "./GenerativeUIRenderer";
 import { parseUIBlocks } from "./types";
-import type { ChatMessage, ChatSession, UIBlock } from "./types";
+import type { ChatMessage, ChatSession, UIBlock, ToolStatus } from "./types";
 
 // ─── Local Storage ─────────────────────────────────────────────────────────
 const STORAGE_KEY        = "dashfields_ai_sessions";
@@ -58,6 +58,7 @@ export default function AIAgentPage() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(() => loadActiveSessionId());
   const [sessions, setSessions]               = useState<ChatSession[]>(() => loadLocal());
   const [showScrollBtn, setShowScrollBtn]     = useState(false);
+  const [toolStatus, setToolStatus]             = useState<ToolStatus | null>(null);
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -201,26 +202,44 @@ export default function AIAgentPage() {
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
+      let sseBuffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split("\n");
+        // Keep the last potentially incomplete line in the buffer
+        sseBuffer = lines.pop() ?? "";
+        for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           const raw = line.slice(6).trim();
           if (raw === "[DONE]") break;
           try {
-            const parsed = JSON.parse(raw) as { content?: string; error?: string };
+            const parsed = JSON.parse(raw) as { content?: string; text?: string; status?: string; error?: string };
             if (parsed.error) throw new Error(parsed.error);
-            if (parsed.content) {
-              accumulated += parsed.content;
+            // Handle status events (tool calling indicators)
+            if (parsed.status) {
+              if (parsed.status === "thinking") {
+                setToolStatus({ type: "thinking" });
+              } else if (parsed.status.startsWith("tool:")) {
+                const toolName = parsed.status.slice(5);
+                setToolStatus({ type: "tool", toolName });
+              }
+              continue;
+            }
+            // Handle content chunks (new format) or text chunks (legacy format)
+            const chunk = parsed.content ?? parsed.text;
+            if (chunk) {
+              setToolStatus(null); // Clear tool status when content starts flowing
+              accumulated += chunk;
               const finalAcc = accumulated;
               setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, content: finalAcc } : m));
             }
           } catch { /* partial JSON */ }
         }
       }
+      setToolStatus(null);
 
       // Parse UI blocks from the final content
       const { blocks } = parseUIBlocks(accumulated);
@@ -444,6 +463,7 @@ export default function AIAgentPage() {
                 />
               ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && <ThinkingIndicator />}
+              {isLoading && toolStatus && <ToolStatusIndicator status={toolStatus} />}
               <div ref={bottomRef} />
             </div>
 
@@ -679,6 +699,36 @@ function ThinkingIndicator() {
       </div>
       <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-white border border-gray-100">
         <ThinkingDots />
+      </div>
+    </div>
+  );
+}
+
+// ── Tool Status Indicator ─────────────────────────────────────────────────
+const TOOL_LABELS: Record<string, string> = {
+  get_campaigns: "Fetching campaigns",
+  get_campaign_metrics: "Loading metrics",
+  get_social_accounts: "Checking accounts",
+  get_posts: "Loading posts",
+  get_marketing_overview: "Analyzing overview",
+  create_campaign: "Creating campaign",
+  generate_ad_image: "Generating image",
+  get_brand_profile: "Loading brand profile",
+};
+
+function ToolStatusIndicator({ status }: { status: { type: string; toolName?: string } }) {
+  const label = status.type === "thinking"
+    ? "Analyzing your data..."
+    : TOOL_LABELS[status.toolName ?? ""] ?? `Running ${status.toolName ?? "tool"}...`;
+
+  return (
+    <div className="flex items-start gap-3">
+      <div className="shrink-0 w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center mt-0.5 shadow-sm">
+        <Sparkles className="w-3.5 h-3.5 text-white" />
+      </div>
+      <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-tl-md bg-white border border-gray-100">
+        <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+        <span className="text-xs text-gray-500 font-medium">{label}</span>
       </div>
     </div>
   );

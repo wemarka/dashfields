@@ -87,7 +87,7 @@ async function startServer() {
   registerPlatformOAuthRoutes(app);
 
   // AI Agent SSE streaming endpoint
-  app.post("/api/ai-agent/chat", (req, res) => { void handleAIAgentChat(req, res); });
+  app.post("/api/ai-agent/chat", aiLimiter, (req, res) => { void handleAIAgentChat(req, res); });
 
   // tRPC API
   app.use(
