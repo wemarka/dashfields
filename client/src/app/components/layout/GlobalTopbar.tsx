@@ -38,6 +38,7 @@ import {
   X,
 } from "lucide-react";
 import { CreditUsageBar } from "./CreditUsageBar";
+import { DashStudiosLogo } from "./DashStudiosLogo";
 
 // ── Nav Items ─────────────────────────────────────────────────────────────
 interface NavItem {
@@ -49,7 +50,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Home", path: "/dashboard", icon: <Home className="w-4 h-4" /> },
   { label: "Assist", path: "/assist", icon: <MessageSquare className="w-4 h-4" /> },
-  { label: "Dash Studios", path: "/studios", icon: <Palette className="w-4 h-4" /> },
 ];
 
 const MARKETING_ITEMS = [
@@ -117,6 +117,20 @@ export function GlobalTopbar() {
                 </button>
               </Link>
             ))}
+
+            {/* Dash Studios — SVG Logo */}
+            <Link href="/studios">
+              <button
+                className={cn(
+                  "flex items-center px-3 py-1.5 rounded-lg transition-all duration-200",
+                  isActive("/studios")
+                    ? "bg-white/[0.08] shadow-sm"
+                    : "hover:bg-white/[0.04]"
+                )}
+              >
+                <DashStudiosLogo />
+              </button>
+            </Link>
 
             {/* Marketing Dropdown */}
             <DropdownMenu>
@@ -212,6 +226,19 @@ export function GlobalTopbar() {
                   {item.label}
                 </button>
               ))}
+
+              {/* Dash Studios — SVG Logo (Mobile) */}
+              <button
+                onClick={() => navigateMobile("/studios")}
+                className={cn(
+                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive("/studios")
+                    ? "bg-white/[0.08] text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                )}
+              >
+                <DashStudiosLogo className="h-4" />
+              </button>
 
               {/* Marketing Section */}
               <div className="pt-2 pb-1">

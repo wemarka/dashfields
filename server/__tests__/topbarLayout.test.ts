@@ -92,8 +92,8 @@ describe("Topbar Layout Architecture", () => {
     const cssContent = fs.readFileSync(path.join(CLIENT_SRC, "index.css"), "utf-8");
 
     it("uses dark gray background (not pitch black)", () => {
-      // Background should be around oklch(0.2) — dark gray (#1A1919), not oklch(0) black
-      expect(cssContent).toMatch(/--color-background:\s+oklch\(0\.2[0-3]/);
+      // Background should be around oklch(0.215) — dark gray (#1A1919), not oklch(0) black
+      expect(cssContent).toMatch(/--color-background:\s+oklch\(0\.21/);
     });
 
     it("defines glass utility for dark mode", () => {
@@ -125,8 +125,10 @@ describe("Topbar Layout Architecture", () => {
       expect(topbarContent).toContain('"Assist"');
     });
 
-    it("has Dash Studios nav item", () => {
-      expect(topbarContent).toContain('"Dash Studios"');
+    it("has Dash Studios nav item (SVG logo)", () => {
+      // Dash Studios is now rendered as an SVG logo component, not text
+      expect(topbarContent).toContain("DashStudiosLogo");
+      expect(topbarContent).toContain("/studios");
     });
 
     it("has Marketing dropdown with sub-items", () => {

@@ -3184,3 +3184,8 @@
 - [x] Make Settings/Profile pages responsive and full-width
 - [x] Make Auth pages (Login, Register, etc.) responsive
 - [x] Make GlobalTopbar responsive with mobile hamburger menu
+
+## 🎨 Dash Studios Logo in Topbar
+- [x] Replace "Dash Studios" text with SVG logo in GlobalTopbar
+- [x] Apply white-to-gray gradient fill on logo
+- [x] Add shimmer/gleam animation on hover
