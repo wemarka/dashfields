@@ -10,9 +10,9 @@ import { storagePut } from "../../storage";
 
 export const aiAgentRouter = router({
   /**
-   * Generate an ad image using Atlas Cloud and upload to S3.
+   * Generate an ad image using Forge/Nano Banana (primary) or Atlas Cloud (fallback).
    * Called by the CampaignPreview component when it mounts.
-   * Returns a permanent CDN URL (not a base64 data URI).
+   * Returns a permanent CDN URL. Forge returns CDN URL directly; Atlas returns base64 which is uploaded to S3.
    */
   generateAdImage: protectedProcedure
     .input(

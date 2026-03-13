@@ -3071,8 +3071,10 @@
 - [x] Wire async rendering: CampaignPreview triggers image generation on mount, replaces skeleton with real image
 - [x] Update AI system prompt to use campaign_preview block instead of simulating file attachments
 - [x] Vitest tests for aiAgent router (8 tests passing)
-- [x] Remove OpenAI gpt-image-1-developer model from gemini-image.ts
-- [x] Set primary model to google/gemini-3.1-flash-image-preview (Nano Banana 2)
-- [x] Set fallback model to google/gemini-3-pro-image-preview (Nano Banana Pro)
+- [x] Remove direct Nano Banana model calls (not available on Atlas Cloud)
+- [x] Set primary provider to Forge ImageService (Nano Banana internally)
+- [x] Set fallback provider to Atlas Cloud gpt-image-1-developer
 - [x] Implement try/catch + timeout fallback mechanism (primary → fallback, 45s timeout)
-- [x] Update tests for the new dual-model fallback logic (21 tests passing)
+- [x] Fix: Nano Banana model names returning 400 from Atlas Cloud — switched to Forge helper
+- [x] Update gemini-image.ts: Primary = Forge ImageService, Fallback = Atlas Cloud gpt-image-1-developer
+- [x] Update tests for dual-provider fallback logic (19 tests passing, 679 total)

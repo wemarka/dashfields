@@ -1,10 +1,34 @@
 /**
  * Tests for server/app/services/gemini-image.ts
- * Validates the Nano Banana primary + fallback model logic with timeout handling.
+ * Validates the Forge primary + Atlas Cloud fallback logic.
+ *
+ * The source file imports from "../../_core/imageGeneration" (relative to its location).
+ * With baseUrl "." in tsconfig, vitest resolves it as "server/_core/imageGeneration".
+ * We mock both the relative path AND the resolved path to ensure coverage.
+ *
+ * Global fetch is used by:
+ *   1. The real generateImage (Forge helper) — but we mock generateImage entirely
+ *   2. Atlas Cloud fallback calls in gemini-image.ts
+ *   3. Reference image downloading in gemini-image.ts
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// ── Mock fetch globally ─────────────────────────────────────────────────────
+// ── Mock the Forge generateImage helper ─────────────────────────────────────
+// The import in gemini-image.ts is: import { generateImage } from "../../_core/imageGeneration"
+// From server/app/services/ that resolves to server/_core/imageGeneration
+// vi.mock paths are relative to the test file, so from server/__tests__/ it's ../_core/imageGeneration
+const mockForgeGenerate = vi.fn();
+
+vi.mock("../_core/imageGeneration", () => ({
+  generateImage: (...args: unknown[]) => mockForgeGenerate(...args),
+}));
+
+// Also mock the storage module that imageGeneration imports
+vi.mock("../storage", () => ({
+  storagePut: vi.fn().mockResolvedValue({ url: "https://mock-s3.com/test.png", key: "test.png" }),
+}));
+
+// ── Mock fetch for Atlas Cloud fallback ─────────────────────────────────────
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
@@ -14,288 +38,151 @@ vi.stubEnv("ATLAS_API_KEY", "test-atlas-key-123");
 import { generateAdImage, PLATFORM_SPECS, getSpecsForPlatforms } from "../app/services/gemini-image";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function mockOkResponse(b64: string = "iVBORw0KGgo=") {
+function atlasOk(b64: string = "iVBORw0KGgo=") {
   return {
     ok: true,
     status: 200,
-    json: async () => ({
-      data: [{ b64_json: b64 }],
-    }),
+    json: async () => ({ data: [{ b64_json: b64 }] }),
     text: async () => "",
-    headers: new Map(),
+    headers: new Headers(),
   };
 }
 
-function mockErrorResponse(status: number, body: string = "Error") {
+function atlasErr(status: number, body: string = "Error") {
   return {
     ok: false,
     status,
     json: async () => ({}),
     text: async () => body,
     statusText: body,
-    headers: new Map(),
+    headers: new Headers(),
   };
 }
 
-function mockEmptyResponse() {
-  return {
-    ok: true,
-    status: 200,
-    json: async () => ({ data: [] }),
-    text: async () => "",
-    headers: new Map(),
-  };
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// PRIMARY PROVIDER (Forge / Nano Banana)
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Primary provider (Forge/Nano Banana)", () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
-describe("gemini-image: Nano Banana model selection", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it("uses Forge ImageService as primary provider", async () => {
+    mockForgeGenerate.mockResolvedValueOnce({ url: "https://cdn.example.com/generated/123.png" });
+
+    const results = await generateAdImage("A beautiful sunset");
+
+    expect(mockForgeGenerate).toHaveBeenCalledTimes(1);
+    expect(mockForgeGenerate).toHaveBeenCalledWith({ prompt: "A beautiful sunset" });
+    expect(results).toHaveLength(1);
+    expect(results[0].modelUsed).toBe("forge/nano-banana");
+    expect(results[0].imageUrl).toBe("https://cdn.example.com/generated/123.png");
   });
 
-  it("uses google/gemini-3.1-flash-image-preview as primary model", async () => {
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
-
-    await generateAdImage("A beautiful sunset");
-
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [, init] = mockFetch.mock.calls[0];
-    const body = JSON.parse(init.body);
-    expect(body.model).toBe("google/gemini-3.1-flash-image-preview");
-  });
-
-  it("does NOT use any OpenAI model", async () => {
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
+  it("does NOT call Atlas Cloud when Forge succeeds", async () => {
+    mockForgeGenerate.mockResolvedValueOnce({ url: "https://cdn.example.com/ok.png" });
 
     await generateAdImage("Test prompt");
 
-    const [, init] = mockFetch.mock.calls[0];
-    const body = JSON.parse(init.body);
-    expect(body.model).not.toContain("openai");
-    expect(body.model).not.toContain("gpt");
+    expect(mockForgeGenerate).toHaveBeenCalledTimes(1);
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("returns results with modelUsed field", async () => {
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
+  it("passes reference image to Forge when provided", async () => {
+    mockForgeGenerate.mockResolvedValueOnce({ url: "https://cdn.example.com/edited.png" });
 
-    const results = await generateAdImage("Test prompt");
+    const results = await generateAdImage("Edit this product", { referenceImageUrl: "https://example.com/product.jpg" });
 
-    expect(results).toHaveLength(1);
-    expect(results[0].modelUsed).toBe("google/gemini-3.1-flash-image-preview");
-    expect(results[0].mimeType).toBe("image/png");
+    expect(mockForgeGenerate).toHaveBeenCalledWith({
+      prompt: "Edit this product",
+      originalImages: [{ url: "https://example.com/product.jpg" }],
+    });
+    expect(results[0].imageUrl).toBe("https://cdn.example.com/edited.png");
+  });
+
+  it("returns CDN URL directly from Forge", async () => {
+    mockForgeGenerate.mockResolvedValueOnce({ url: "https://cdn.example.com/direct.png" });
+
+    const results = await generateAdImage("Direct CDN test");
+
+    expect(results[0].imageUrl).toBe("https://cdn.example.com/direct.png");
+    expect(results[0].imageUrl).not.toContain("data:");
   });
 });
 
-describe("gemini-image: Fallback mechanism", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// ═══════════════════════════════════════════════════════════════════════════
+// FALLBACK TO ATLAS CLOUD
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Fallback to Atlas Cloud", () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
-  it("falls back to google/gemini-3-pro-image-preview on primary 500 error", async () => {
-    // Primary fails with 500
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(500, "Internal Server Error"));
-    // Fallback succeeds
-    mockFetch.mockResolvedValueOnce(mockOkResponse("fallback_b64_data"));
+  it("falls back to Atlas Cloud when Forge fails", async () => {
+    mockForgeGenerate.mockRejectedValueOnce(new Error("Forge service unavailable"));
+    mockFetch.mockResolvedValueOnce(atlasOk("atlas_b64_data"));
 
     const results = await generateAdImage("A product photo");
 
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    // Verify first call was primary
-    const [, init1] = mockFetch.mock.calls[0];
-    expect(JSON.parse(init1.body).model).toBe("google/gemini-3.1-flash-image-preview");
-    // Verify second call was fallback
-    const [, init2] = mockFetch.mock.calls[1];
-    expect(JSON.parse(init2.body).model).toBe("google/gemini-3-pro-image-preview");
-    // Verify result came from fallback
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
+    expect(mockForgeGenerate).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const callArgs = mockFetch.mock.calls[0];
+    const body = JSON.parse(callArgs[1].body);
+    expect(body.model).toBe("openai/gpt-image-1-developer");
+    expect(results[0].modelUsed).toBe("openai/gpt-image-1-developer");
   });
 
-  it("falls back on primary 404 error", async () => {
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(404, "Not Found"));
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
+  it("falls back when Forge returns no URL", async () => {
+    mockForgeGenerate.mockResolvedValueOnce({ url: undefined });
+    mockFetch.mockResolvedValueOnce(atlasOk());
 
     const results = await generateAdImage("Test");
 
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(results[0].modelUsed).toBe("openai/gpt-image-1-developer");
   });
 
-  it("falls back when primary returns empty data array", async () => {
-    mockFetch.mockResolvedValueOnce(mockEmptyResponse());
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
+  it("falls back on Forge timeout (AbortError)", async () => {
+    const abortErr = new Error("Forge timeout");
+    abortErr.name = "AbortError";
+    mockForgeGenerate.mockRejectedValueOnce(abortErr);
+    mockFetch.mockResolvedValueOnce(atlasOk());
 
-    const results = await generateAdImage("Test");
+    const results = await generateAdImage("Slow prompt");
 
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
+    expect(results[0].modelUsed).toBe("openai/gpt-image-1-developer");
   });
 
-  it("falls back on primary network error", async () => {
-    mockFetch.mockRejectedValueOnce(new Error("Network error"));
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
+  it("throws combined error when BOTH providers fail", async () => {
+    mockForgeGenerate.mockRejectedValueOnce(new Error("Forge down"));
+    mockFetch.mockResolvedValueOnce(atlasErr(503, "Atlas down"));
 
-    const results = await generateAdImage("Test");
-
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
+    await expect(generateAdImage("Test")).rejects.toThrow("All providers failed");
   });
 
-  it("throws combined error when BOTH models fail", async () => {
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(500, "Primary down"));
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(503, "Fallback down"));
-
-    await expect(generateAdImage("Test")).rejects.toThrow("All models failed");
-  });
-
-  it("includes both error messages when both models fail", async () => {
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(500, "Primary error details"));
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(503, "Fallback error details"));
+  it("includes both error messages when both providers fail", async () => {
+    mockForgeGenerate.mockRejectedValueOnce(new Error("Forge error details"));
+    mockFetch.mockResolvedValueOnce(atlasErr(500, "Atlas error details"));
 
     try {
       await generateAdImage("Test");
       expect.fail("Should have thrown");
     } catch (err) {
       const msg = (err as Error).message;
-      expect(msg).toContain("gemini-3.1-flash-image-preview");
-      expect(msg).toContain("gemini-3-pro-image-preview");
+      expect(msg).toContain("Forge/Nano Banana");
+      expect(msg).toContain("Forge error details");
+      expect(msg).toContain("gpt-image-1-developer");
     }
   });
 });
 
-describe("gemini-image: Timeout handling", () => {
+// ═══════════════════════════════════════════════════════════════════════════
+// ATLAS CLOUD RESPONSE FORMAT HANDLING
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Atlas Cloud response format handling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("falls back on primary timeout (AbortError)", async () => {
-    // Primary times out (simulate AbortError)
-    const abortError = new DOMException("The operation was aborted", "AbortError");
-    mockFetch.mockRejectedValueOnce(abortError);
-    // Fallback succeeds
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
-
-    const results = await generateAdImage("Slow prompt");
-
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
-  });
-});
-
-describe("gemini-image: Reference image (edit endpoint)", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("uses edit endpoint when referenceImageUrl is provided", async () => {
-    // Mock the reference image fetch
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      arrayBuffer: async () => new ArrayBuffer(10),
-      headers: new Map([["content-type", "image/jpeg"]]),
-    });
-    // Mock the edit API call
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
-
-    const results = await generateAdImage("Edit this product", {
-      referenceImageUrl: "https://example.com/product.jpg",
-    });
-
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    // First call fetches the reference image
-    expect(mockFetch.mock.calls[0][0]).toBe("https://example.com/product.jpg");
-    // Second call is to the edit endpoint
-    const editUrl = mockFetch.mock.calls[1][0];
-    expect(editUrl).toContain("/images/edits");
-  });
-
-  it("falls back to standard generation when reference image fetch fails", async () => {
-    // Reference image fetch fails
-    mockFetch.mockRejectedValueOnce(new Error("Image not found"));
-    // Standard generation succeeds
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
-
-    const results = await generateAdImage("Product photo", {
-      referenceImageUrl: "https://example.com/broken.jpg",
-    });
-
-    expect(results).toHaveLength(1);
-    // Should have used standard generation endpoint
-    const lastUrl = mockFetch.mock.calls[mockFetch.mock.calls.length - 1][0];
-    expect(lastUrl).toContain("/images/generations");
-  });
-
-  it("falls back from primary edit to fallback edit when primary edit fails", async () => {
-    // Reference image fetch succeeds
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      arrayBuffer: async () => new ArrayBuffer(10),
-      headers: new Map([["content-type", "image/png"]]),
-    });
-    // Primary edit fails
-    mockFetch.mockResolvedValueOnce(mockErrorResponse(500, "Edit failed"));
-    // Fallback edit succeeds
-    mockFetch.mockResolvedValueOnce(mockOkResponse());
-
-    const results = await generateAdImage("Edit product", {
-      referenceImageUrl: "https://example.com/product.png",
-    });
-
-    expect(mockFetch).toHaveBeenCalledTimes(3);
-    expect(results).toHaveLength(1);
-  });
-});
-
-describe("gemini-image: Platform specs", () => {
-  it("has specs for all major platforms", () => {
-    const platforms = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "snapchat", "pinterest", "youtube"];
-    for (const p of platforms) {
-      expect(PLATFORM_SPECS[p]).toBeDefined();
-      expect(PLATFORM_SPECS[p].length).toBeGreaterThan(0);
-    }
-  });
-
-  it("getSpecsForPlatforms returns correct specs", () => {
-    const specs = getSpecsForPlatforms(["instagram", "facebook"]);
-    expect(specs.length).toBeGreaterThanOrEqual(3); // instagram has 2, facebook has 2
-    expect(specs.every((s) => s.platform === "instagram" || s.platform === "facebook")).toBe(true);
-  });
-
-  it("getSpecsForPlatforms handles unknown platforms gracefully", () => {
-    const specs = getSpecsForPlatforms(["unknown_platform"]);
-    expect(specs).toHaveLength(0);
-  });
-});
-
-describe("gemini-image: API key validation", () => {
-  it("throws when ATLAS_API_KEY is not set", async () => {
-    const originalKey = process.env.ATLAS_API_KEY;
-    delete process.env.ATLAS_API_KEY;
-
-    await expect(generateAdImage("Test")).rejects.toThrow("ATLAS_API_KEY is not set");
-
-    process.env.ATLAS_API_KEY = originalKey;
-  });
-});
-
-describe("gemini-image: Response format handling", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+    mockForgeGenerate.mockRejectedValue(new Error("Forge unavailable"));
   });
 
   it("handles b64_json without data: prefix", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        data: [{ b64_json: "rawBase64DataHere" }],
-      }),
-      text: async () => "",
-      headers: new Map(),
-    });
+    mockFetch.mockResolvedValueOnce(atlasOk("rawBase64DataHere"));
 
     const results = await generateAdImage("Test");
     expect(results[0].imageUrl).toBe("data:image/png;base64,rawBase64DataHere");
@@ -305,11 +192,9 @@ describe("gemini-image: Response format handling", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: async () => ({
-        data: [{ b64_json: "data:image/png;base64,alreadyPrefixed" }],
-      }),
+      json: async () => ({ data: [{ b64_json: "data:image/png;base64,alreadyPrefixed" }] }),
       text: async () => "",
-      headers: new Map(),
+      headers: new Headers(),
     });
 
     const results = await generateAdImage("Test");
@@ -320,36 +205,115 @@ describe("gemini-image: Response format handling", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: async () => ({
-        data: [{ url: "https://cdn.atlas.ai/img.png", b64_json: "someBase64" }],
-      }),
+      json: async () => ({ data: [{ url: "https://cdn.atlas.ai/img.png", b64_json: "someBase64" }] }),
       text: async () => "",
-      headers: new Map(),
+      headers: new Headers(),
     });
 
     const results = await generateAdImage("Test");
     expect(results[0].imageUrl).toBe("https://cdn.atlas.ai/img.png");
   });
 
-  it("generates multiple images when n > 1", async () => {
+  it("generates multiple images when n > 1 via Atlas", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
       json: async () => ({
-        data: [
-          { b64_json: "img1" },
-          { b64_json: "img2" },
-          { b64_json: "img3" },
-        ],
+        data: [{ b64_json: "img1" }, { b64_json: "img2" }, { b64_json: "img3" }],
       }),
       text: async () => "",
-      headers: new Map(),
+      headers: new Headers(),
     });
 
     const results = await generateAdImage("Test", { n: 3 });
     expect(results).toHaveLength(3);
-    // Verify n was passed in the request
-    const [, init] = mockFetch.mock.calls[0];
-    expect(JSON.parse(init.body).n).toBe(3);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.n).toBe(3);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFERENCE IMAGE WITH ATLAS FALLBACK
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Reference image with Atlas fallback", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockForgeGenerate.mockRejectedValue(new Error("Forge unavailable"));
+  });
+
+  it("uses Atlas edit endpoint when reference image is provided and Forge fails", async () => {
+    // First fetch: reference image download
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(10),
+      headers: new Headers([["content-type", "image/jpeg"]]),
+    });
+    // Second fetch: Atlas edit API call
+    mockFetch.mockResolvedValueOnce(atlasOk());
+
+    const results = await generateAdImage("Edit this product", {
+      referenceImageUrl: "https://example.com/product.jpg",
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch.mock.calls[0][0]).toBe("https://example.com/product.jpg");
+    const editUrl = mockFetch.mock.calls[1][0] as string;
+    expect(editUrl).toContain("/images/edits");
+    expect(results).toHaveLength(1);
+  });
+
+  it("falls back to standard Atlas generation when reference image fetch fails", async () => {
+    // Reference image fetch fails
+    mockFetch.mockRejectedValueOnce(new Error("Image not found"));
+    // Standard generation succeeds
+    mockFetch.mockResolvedValueOnce(atlasOk());
+
+    const results = await generateAdImage("Product photo", {
+      referenceImageUrl: "https://example.com/broken.jpg",
+    });
+
+    expect(results).toHaveLength(1);
+    const lastUrl = mockFetch.mock.calls[mockFetch.mock.calls.length - 1][0] as string;
+    expect(lastUrl).toContain("/images/generations");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PLATFORM SPECS
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Platform specs", () => {
+  it("has specs for all major platforms", () => {
+    const platforms = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "snapchat", "pinterest", "youtube"];
+    for (const p of platforms) {
+      expect(PLATFORM_SPECS[p]).toBeDefined();
+      expect(PLATFORM_SPECS[p].length).toBeGreaterThan(0);
+    }
+  });
+
+  it("getSpecsForPlatforms returns correct specs", () => {
+    const specs = getSpecsForPlatforms(["instagram", "facebook"]);
+    expect(specs.length).toBeGreaterThanOrEqual(3);
+    expect(specs.every((s) => s.platform === "instagram" || s.platform === "facebook")).toBe(true);
+  });
+
+  it("getSpecsForPlatforms handles unknown platforms gracefully", () => {
+    const specs = getSpecsForPlatforms(["unknown_platform"]);
+    expect(specs).toHaveLength(0);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API KEY VALIDATION
+// ═══════════════════════════════════════════════════════════════════════════
+describe("API key validation for Atlas fallback", () => {
+  it("throws when ATLAS_API_KEY is not set and Forge also fails", async () => {
+    vi.clearAllMocks();
+    const originalKey = process.env.ATLAS_API_KEY;
+    delete process.env.ATLAS_API_KEY;
+    mockForgeGenerate.mockRejectedValueOnce(new Error("Forge down"));
+
+    await expect(generateAdImage("Test")).rejects.toThrow();
+
+    process.env.ATLAS_API_KEY = originalKey;
   });
 });
