@@ -2,22 +2,32 @@
  * CampaignWizardPage.tsx — Marketing Workflow Agent (Master).
  * Orchestrates the full campaign creation flow:
  * Discovery → Brand Assets → Generate → Creative Review → Content Plan → Budget → Preview → Launch
+ *
+ * Layout:
+ *  - Main page: chat interface only (clean, focused)
+ *  - Workflow steps (creative review, content plan, budget, preview): centered Dialog
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Plus, Bot, Sparkles, Upload, Loader2,
   Image as ImageIcon, Wand2, ChevronRight, History,
+  X, ArrowRight, ArrowLeft,
 } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { Button } from "@/core/components/ui/button";
 import { Badge } from "@/core/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/core/components/ui/dialog";
 import { cn } from "@/core/lib/utils";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import ReactMarkdown from "react-markdown";
-import { WizardProgressBar } from "./WizardProgressBar";
 import { CreativeGrid } from "./CreativeGrid";
 import { ContentPlanView } from "./ContentPlanView";
 import { CampaignPreview } from "./CampaignPreview";
@@ -25,7 +35,7 @@ import type {
   WizardStep, WizardMessage, Creative, ContentPlanItem,
   BudgetAllocation, AudienceInsight, CampaignBrief,
 } from "./types";
-import { STEP_LABELS } from "./types";
+import { STEP_LABELS, STEP_ORDER } from "./types";
 
 // ─── Suggested Prompts ────────────────────────────────────────────────────────
 const SUGGESTED_PROMPTS = [
@@ -33,6 +43,24 @@ const SUGGESTED_PROMPTS = [
   { icon: "💄", text: "أريد إطلاق حملة لمنتجات مكياج جديدة" },
   { icon: "🏪", text: "أريد حملة ترويجية لمتجر إلكتروني" },
   { icon: "🎯", text: "أريد حملة توعية بعلامتي التجارية" },
+];
+
+// Steps that open the Dialog
+const DIALOG_STEPS: WizardStep[] = [
+  "generating",
+  "creative_review",
+  "content_plan",
+  "budget_review",
+  "preview",
+  "confirmed",
+];
+
+// Progress steps shown in Dialog header
+const PROGRESS_STEPS: { step: WizardStep; label: string }[] = [
+  { step: "creative_review", label: "مراجعة الصور" },
+  { step: "budget_review",   label: "خطة المحتوى" },
+  { step: "preview",         label: "معاينة الحملة" },
+  { step: "confirmed",       label: "تم الإطلاق" },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -57,31 +85,46 @@ export default function CampaignWizardPage() {
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [isConfirming, setIsConfirming]   = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
+  const [dialogOpen, setDialogOpen]       = useState(false);
 
-  const scrollRef   = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollRef    = useRef<HTMLDivElement>(null);
+  const textareaRef  = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // tRPC
-  const createWorkflow      = trpc.campaignWorkflow.create.useMutation();
-  const chatMutation        = trpc.campaignWorkflow.chat.useMutation();
-  const uploadLogoMutation  = trpc.campaignWorkflow.uploadLogo.useMutation();
-  const generateCreatives   = trpc.campaignWorkflow.generateCreatives.useMutation();
+  const createWorkflow       = trpc.campaignWorkflow.create.useMutation();
+  const chatMutation         = trpc.campaignWorkflow.chat.useMutation();
+  const uploadLogoMutation   = trpc.campaignWorkflow.uploadLogo.useMutation();
+  const generateCreatives    = trpc.campaignWorkflow.generateCreatives.useMutation();
   const generatePlanMutation = trpc.campaignWorkflow.generateContentPlan.useMutation();
-  const moveToPreview       = trpc.campaignWorkflow.moveToPreview.useMutation();
-  const confirmMutation     = trpc.campaignWorkflow.confirm.useMutation();
+  const moveToPreview        = trpc.campaignWorkflow.moveToPreview.useMutation();
+  const confirmMutation      = trpc.campaignWorkflow.confirm.useMutation();
+
   const { data: creativesData, refetch: refetchCreatives } = trpc.campaignWorkflow.getCreatives.useQuery(
     { workflowId: workflowId! },
-    { enabled: !!workflowId && (currentStep === "generating" || currentStep === "creative_review" || currentStep === "content_plan" || currentStep === "budget_review" || currentStep === "preview"), staleTime: 5000 }
+    {
+      enabled: !!workflowId && DIALOG_STEPS.includes(currentStep),
+      staleTime: 5000,
+    }
   );
   const { data: contentPlanData, refetch: refetchPlan } = trpc.campaignWorkflow.getContentPlan.useQuery(
     { workflowId: workflowId! },
-    { enabled: !!workflowId && (currentStep === "budget_review" || currentStep === "preview"), staleTime: 5000 }
+    {
+      enabled: !!workflowId && (currentStep === "budget_review" || currentStep === "preview" || currentStep === "confirmed"),
+      staleTime: 5000,
+    }
   );
   const { data: workflowHistory } = trpc.campaignWorkflow.list.useQuery(
     { workspaceId: activeWorkspace?.id },
     { enabled: !!user, staleTime: 30000 }
   );
+
+  // Open dialog when step requires it
+  useEffect(() => {
+    if (DIALOG_STEPS.includes(currentStep)) {
+      setDialogOpen(true);
+    }
+  }, [currentStep]);
 
   // Sync creatives from server
   useEffect(() => {
@@ -115,7 +158,7 @@ export default function CampaignWizardPage() {
     }
   }, [contentPlanData]);
 
-  // Auto-scroll
+  // Auto-scroll chat
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -133,9 +176,7 @@ export default function CampaignWizardPage() {
   // ── Ensure workflow exists ────────────────────────────────────────────────
   const ensureWorkflow = useCallback(async (): Promise<string> => {
     if (workflowId) return workflowId;
-    const result = await createWorkflow.mutateAsync({
-      workspaceId: activeWorkspace?.id,
-    });
+    const result = await createWorkflow.mutateAsync({ workspaceId: activeWorkspace?.id });
     setWorkflowId(result.id);
     return result.id;
   }, [workflowId, activeWorkspace, createWorkflow]);
@@ -163,16 +204,13 @@ export default function CampaignWizardPage() {
       const assistantMsg = result.message as WizardMessage;
       setMessages(prev => [...prev, assistantMsg]);
 
-      // Update step if changed
       if (result.step && result.step !== currentStep) {
         setCurrentStep(result.step as WizardStep);
       }
 
-      // Extract brief from data
       if (assistantMsg.data && typeof assistantMsg.data === "object") {
         const data = assistantMsg.data as Record<string, unknown>;
         if (data.readyToGenerate) {
-          // Auto-trigger generation
           setTimeout(() => void triggerGeneration(wfId), 500);
         }
       }
@@ -188,6 +226,7 @@ export default function CampaignWizardPage() {
   const triggerGeneration = useCallback(async (wfId: string) => {
     setIsGenerating(true);
     setCurrentStep("generating");
+    setDialogOpen(true);
 
     const genMsg: WizardMessage = {
       role: "assistant",
@@ -201,13 +240,12 @@ export default function CampaignWizardPage() {
       const result = await generateCreatives.mutateAsync({ workflowId: wfId });
       setCurrentStep("creative_review");
 
-      // Fetch creatives from DB (not from return value to avoid serialization issues)
       const freshCreatives = await refetchCreatives();
-
       const count = result.count ?? 0;
+
       const doneMsg: WizardMessage = {
         role: "assistant",
-        content: `تم توليد ${count} صورة إعلانية! 🎨\n\nراجع الصور أدناه وافق على ما يناسبك أو اطلب توليد جديد.`,
+        content: `تم توليد ${count} صورة إعلانية! 🎨\n\nراجع الصور في النافذة وافق على ما يناسبك.`,
         timestamp: Date.now(),
         type: "image_grid",
         data: { count },
@@ -221,6 +259,7 @@ export default function CampaignWizardPage() {
       toast.error("فشل توليد الصور. حاول مجدداً.");
       console.error(err);
       setCurrentStep("discovery");
+      setDialogOpen(false);
     } finally {
       setIsGenerating(false);
     }
@@ -229,14 +268,8 @@ export default function CampaignWizardPage() {
   // ── Handle logo upload ────────────────────────────────────────────────────
   const handleLogoUpload = useCallback(async (file: File) => {
     if (!workflowId) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("يرجى رفع صورة PNG أو JPEG");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("حجم الشعار يجب أن يكون أقل من 5MB");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("يرجى رفع صورة PNG أو JPEG"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("حجم الشعار يجب أن يكون أقل من 5MB"); return; }
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -249,7 +282,6 @@ export default function CampaignWizardPage() {
           mimeType: file.type,
           setAsDefault: true,
         });
-
         const logoMsg: WizardMessage = {
           role: "assistant",
           content: "تم رفع الشعار بنجاح! ✅\n\nسيتم إضافته تلقائياً على جميع الصور الإعلانية. الآن سأبدأ توليد الصور...",
@@ -266,12 +298,14 @@ export default function CampaignWizardPage() {
     reader.readAsDataURL(file);
   }, [workflowId, activeWorkspace, uploadLogoMutation, triggerGeneration]);
 
-  // ── Handle creative approval change ──────────────────────────────────────
+  // ── Handle creative approval ──────────────────────────────────────────────
   const handleApprovalChange = useCallback((creativeId: string, approved: boolean) => {
-    setCreatives(prev => prev.map(c => c.id === creativeId ? { ...c, approved, status: approved ? "approved" : "rejected" } : c));
+    setCreatives(prev => prev.map(c =>
+      c.id === creativeId ? { ...c, approved, status: approved ? "approved" : "rejected" } : c
+    ));
   }, []);
 
-  // ── Proceed from creative review to content plan ──────────────────────────
+  // ── Proceed to content plan ───────────────────────────────────────────────
   const handleProceedToContentPlan = useCallback(async () => {
     if (!workflowId) return;
     setIsGeneratingPlan(true);
@@ -324,7 +358,6 @@ export default function CampaignWizardPage() {
     try {
       await confirmMutation.mutateAsync({ workflowId });
       setCurrentStep("confirmed");
-
       const successMsg: WizardMessage = {
         role: "assistant",
         content: "🎉 تم تأكيد الحملة بنجاح!\n\nتم حفظ الحملة وجدولة المنشورات. يمكنك متابعة أداء الحملة من قسم **التحليلات**.",
@@ -333,6 +366,8 @@ export default function CampaignWizardPage() {
       };
       setMessages(prev => [...prev, successMsg]);
       toast.success("تم إطلاق الحملة بنجاح! 🚀");
+      // Close dialog after a short delay
+      setTimeout(() => setDialogOpen(false), 1500);
     } catch {
       toast.error("فشل تأكيد الحملة");
     } finally {
@@ -349,6 +384,10 @@ export default function CampaignWizardPage() {
     if (wf.budget_allocation) setBudgetAllocation(wf.budget_allocation as BudgetAllocation);
     if (wf.audience_insights) setInsights(wf.audience_insights as Record<string, AudienceInsight>);
     setShowHistory(false);
+    // Open dialog if workflow is in a dialog step
+    if (DIALOG_STEPS.includes(wf.step as WizardStep)) {
+      setDialogOpen(true);
+    }
   }, []);
 
   const handleNewCampaign = useCallback(() => {
@@ -361,6 +400,7 @@ export default function CampaignWizardPage() {
     setBudgetAllocation({});
     setInsights({});
     setInput("");
+    setDialogOpen(false);
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -424,11 +464,8 @@ export default function CampaignWizardPage() {
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Main Content — Chat Only */}
       <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Progress Bar (only when in workflow) */}
-        {isInChat && <WizardProgressBar currentStep={currentStep} />}
 
         {/* Header bar */}
         <div className={cn(
@@ -456,13 +493,24 @@ export default function CampaignWizardPage() {
               السابقة
             </button>
             {isInChat && (
-              <button
-                onClick={handleNewCampaign}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
-              >
-                <Plus className="w-3 h-3" />
-                حملة جديدة
-              </button>
+              <>
+                {DIALOG_STEPS.includes(currentStep) && (
+                  <button
+                    onClick={() => setDialogOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-all border border-red-200"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    عرض الحملة
+                  </button>
+                )}
+                <button
+                  onClick={handleNewCampaign}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+                >
+                  <Plus className="w-3 h-3" />
+                  حملة جديدة
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -512,92 +560,151 @@ export default function CampaignWizardPage() {
           </div>
         )}
 
-        {/* ── Chat + Workflow State ── */}
+        {/* ── Chat ── */}
         {isInChat && (
-          <div className="flex flex-1 overflow-hidden">
-            {/* Chat column */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 scrollbar-none">
-                <div className="max-w-2xl mx-auto space-y-4">
-                  {messages.map((msg, idx) => (
-                    <WizardMessageBubble key={idx} msg={msg} />
-                  ))}
-                  {isLoading && <ThinkingBubble />}
-                </div>
-              </div>
-
-              {/* Input */}
-              <div className="px-4 pb-4 shrink-0">
-                <div className="max-w-2xl mx-auto">
-                  <WizardInputBox
-                    input={input} setInput={setInput} isLoading={isLoading || isGenerating}
-                    onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown}
-                    textareaRef={textareaRef}
-                    onLogoUpload={handleLogoUpload}
-                    showLogoUpload={currentStep === "brand_assets"}
-                    fileInputRef={fileInputRef}
-                  />
-                </div>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 scrollbar-none">
+              <div className="max-w-2xl mx-auto space-y-4">
+                {messages.map((msg, idx) => (
+                  <WizardMessageBubble key={idx} msg={msg} />
+                ))}
+                {isLoading && <ThinkingBubble />}
               </div>
             </div>
 
-            {/* Right panel: workflow UI */}
-            {(currentStep === "creative_review" || currentStep === "content_plan" || currentStep === "budget_review" || currentStep === "preview" || currentStep === "confirmed") && (
-              <div className="w-[420px] shrink-0 border-l border-gray-100 bg-white/50 overflow-y-auto p-4">
-                {/* Creative Review */}
-                {(currentStep === "creative_review" || currentStep === "content_plan") && (
-                  <CreativeGrid
-                    workflowId={workflowId!}
-                    creatives={creatives}
-                    onApprovalChange={handleApprovalChange}
-                    onRegenerateRequest={() => void triggerGeneration(workflowId!)}
-                    onProceed={handleProceedToContentPlan}
-                    isGenerating={isGenerating || isGeneratingPlan}
-                  />
-                )}
+            {/* Input */}
+            <div className="px-4 pb-4 shrink-0">
+              <div className="max-w-2xl mx-auto">
+                <WizardInputBox
+                  input={input} setInput={setInput} isLoading={isLoading || isGenerating}
+                  onSend={() => void sendMessage(input)} onKeyDown={handleKeyDown}
+                  textareaRef={textareaRef}
+                  onLogoUpload={handleLogoUpload}
+                  showLogoUpload={currentStep === "brand_assets"}
+                  fileInputRef={fileInputRef}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-                {/* Content Plan + Budget */}
-                {currentStep === "budget_review" && (
-                  <ContentPlanView
-                    items={contentPlan}
-                    budgetAllocation={budgetAllocation}
-                    insights={insights}
-                    currency={brief.currency ?? "SAR"}
-                    totalBudget={brief.budget ?? 0}
-                    onProceed={handleProceedToPreview}
-                  />
-                )}
+      {/* ── Workflow Dialog ── */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        // Only allow closing if not generating
+        if (!isGenerating && !isGeneratingPlan) setDialogOpen(open);
+      }}>
+        <DialogContent
+          className="max-w-4xl w-full p-0 gap-0 overflow-hidden"
+          style={{ maxHeight: "90vh" }}
+        >
+          {/* Dialog Header with Progress */}
+          <div className="px-6 pt-5 pb-4 border-b border-gray-100 bg-white shrink-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)" }}>
+                  <Wand2 className="w-3.5 h-3.5 text-white" />
+                </div>
+                <DialogTitle className="text-sm font-semibold text-gray-800 m-0">
+                  {STEP_LABELS[currentStep] ?? "Marketing Workflow"}
+                </DialogTitle>
+              </div>
+              {!isGenerating && !isGeneratingPlan && (
+                <button
+                  onClick={() => setDialogOpen(false)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
 
-                {/* Campaign Preview */}
-                {(currentStep === "preview" || currentStep === "confirmed") && (
-                  <CampaignPreview
-                    brief={brief}
-                    approvedCreatives={approvedCreatives}
-                    contentPlan={contentPlan}
-                    budgetAllocation={budgetAllocation}
-                    onConfirm={handleConfirm}
-                    isConfirming={isConfirming}
-                  />
-                )}
+            {/* Progress Steps */}
+            <WizardDialogProgress currentStep={currentStep} />
+          </div>
+
+          {/* Dialog Body */}
+          <div className="overflow-y-auto flex-1" style={{ maxHeight: "calc(90vh - 130px)" }}>
+            {/* Generating */}
+            {(currentStep === "generating" || isGenerating) && (
+              <div className="flex flex-col items-center justify-center py-16 px-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+                  style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.3)" }}>
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">جاري توليد الصور الإعلانية</h3>
+                <p className="text-gray-500 text-sm text-center max-w-sm">
+                  يتم توليد صورة لكل منصة بشكل متوازٍ مع إضافة شعارك تلقائياً.
+                  <br />قد يستغرق هذا 30-60 ثانية.
+                </p>
+                <div className="flex items-center gap-1.5 mt-6">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="w-2 h-2 rounded-full bg-red-400"
+                      style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.15}s` }} />
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Generating overlay */}
-            {isGenerating && currentStep === "generating" && (
-              <div className="w-[420px] shrink-0 border-l border-gray-100 bg-white/50 flex items-center justify-center">
+            {/* Creative Review */}
+            {currentStep === "creative_review" && !isGenerating && (
+              <div className="p-5">
                 <CreativeGrid
                   workflowId={workflowId!}
-                  creatives={[]}
-                  onApprovalChange={() => {}}
-                  onRegenerateRequest={() => {}}
-                  onProceed={() => {}}
-                  isGenerating={true}
+                  creatives={creatives}
+                  onApprovalChange={handleApprovalChange}
+                  onRegenerateRequest={() => void triggerGeneration(workflowId!)}
+                  onProceed={handleProceedToContentPlan}
+                  isGenerating={isGeneratingPlan}
+                />
+              </div>
+            )}
+
+            {/* Content Plan loading */}
+            {currentStep === "content_plan" && isGeneratingPlan && (
+              <div className="flex flex-col items-center justify-center py-16 px-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+                  style={{ background: "linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)", boxShadow: "0 0 40px rgba(220,38,38,0.3)" }}>
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">جاري إعداد خطة المحتوى</h3>
+                <p className="text-gray-500 text-sm text-center max-w-sm">
+                  يتم تحليل الجمهور المستهدف وتوزيع الميزانية وإعداد جدول النشر...
+                </p>
+              </div>
+            )}
+
+            {/* Budget Review */}
+            {currentStep === "budget_review" && !isGeneratingPlan && (
+              <div className="p-5">
+                <ContentPlanView
+                  items={contentPlan}
+                  budgetAllocation={budgetAllocation}
+                  insights={insights}
+                  currency={brief.currency ?? "SAR"}
+                  totalBudget={brief.budget ?? 0}
+                  onProceed={handleProceedToPreview}
+                />
+              </div>
+            )}
+
+            {/* Preview */}
+            {(currentStep === "preview" || currentStep === "confirmed") && (
+              <div className="p-5">
+                <CampaignPreview
+                  brief={brief}
+                  approvedCreatives={approvedCreatives}
+                  contentPlan={contentPlan}
+                  budgetAllocation={budgetAllocation}
+                  onConfirm={handleConfirm}
+                  isConfirming={isConfirming}
                 />
               </div>
             )}
           </div>
-        )}
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Hidden file input for logo */}
       <input
@@ -610,6 +717,53 @@ export default function CampaignWizardPage() {
           if (file) void handleLogoUpload(file);
         }}
       />
+    </div>
+  );
+}
+
+// ─── Dialog Progress Bar ──────────────────────────────────────────────────────
+function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
+  const currentIdx = PROGRESS_STEPS.findIndex(s => s.step === currentStep);
+  // Map generating → creative_review for progress display
+  const displayIdx = currentStep === "generating" || currentStep === "content_plan"
+    ? 0
+    : currentIdx;
+
+  return (
+    <div className="flex items-center gap-0">
+      {PROGRESS_STEPS.map((s, idx) => {
+        const isCompleted = idx < displayIdx;
+        const isCurrent   = idx === displayIdx;
+
+        return (
+          <div key={s.step} className="flex items-center flex-1">
+            <div className="flex flex-col items-center gap-1">
+              <div className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300",
+                isCompleted
+                  ? "bg-red-500 text-white"
+                  : isCurrent
+                    ? "bg-red-500 text-white ring-4 ring-red-100"
+                    : "bg-gray-100 text-gray-400 border border-gray-200",
+              )}>
+                {isCompleted ? "✓" : idx + 1}
+              </div>
+              <span className={cn(
+                "text-[10px] font-medium whitespace-nowrap",
+                isCurrent || isCompleted ? "text-red-600" : "text-gray-400",
+              )}>
+                {s.label}
+              </span>
+            </div>
+            {idx < PROGRESS_STEPS.length - 1 && (
+              <div className={cn(
+                "flex-1 h-0.5 mx-2 mb-4 transition-all duration-500",
+                isCompleted ? "bg-red-400" : "bg-gray-200",
+              )} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

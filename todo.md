@@ -3019,3 +3019,9 @@
 - [x] زيادة retry count من 1 إلى 3 مع exponential backoff (1s, 2s, 4s)
 - [x] إضافة retry خاص لـ HTML parse errors (is not valid JSON)
 - [x] إخفاء الـ console.error للأخطاء المؤقتة (502, HTML parse)
+
+## 🔄 تحويل Campaign Wizard إلى Dialog
+- [x] تحويل الـ right panel (CreativeGrid, ContentPlanView, CampaignPreview) إلى Dialog مركزي
+- [x] إضافة WizardProgressBar داخل الـ Dialog header
+- [x] تحسين تجربة الانتقال بين الخطوات داخل الـ Dialog
+- [x] الحفاظ على الـ chat في الصفحة الرئيسية
