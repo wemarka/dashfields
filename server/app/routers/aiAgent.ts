@@ -10,9 +10,11 @@ import { storagePut } from "../../storage";
 
 export const aiAgentRouter = router({
   /**
-   * Generate an ad image using Forge/Nano Banana (primary) or Atlas Cloud (fallback).
+   * Generate an ad image using Atlas Cloud Google Nano Banana models.
+   * Primary: google/gemini-3-pro-image-preview (Nano Banana Pro)
+   * Fallback: google/gemini-3.1-flash-image-preview (Nano Banana 2)
    * Called by the CampaignPreview component when it mounts.
-   * Returns a permanent CDN URL. Forge returns CDN URL directly; Atlas returns base64 which is uploaded to S3.
+   * Returns a permanent CDN URL (base64 results are uploaded to S3).
    */
   generateAdImage: protectedProcedure
     .input(
@@ -23,7 +25,7 @@ export const aiAgentRouter = router({
     .mutation(async ({ input }) => {
       try {
         // Generate image via Atlas Cloud (gemini-image service)
-        const results = await generateAdImage(input.prompt, { n: 1 });
+        const results = await generateAdImage(input.prompt);
 
         if (!results || results.length === 0) {
           return { success: false, imageUrl: null, error: "No image generated" };

@@ -462,7 +462,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         try {
           const [generated] = await generateAdImage(
             `${promptData.prompt}. Professional advertising photo, high quality, no text overlay.`,
-            { n: 1, referenceImageUrl: productImageUrl }
+            { referenceImageUrl: productImageUrl }
           );
 
           // Decode b64_json or fetch URL
@@ -636,7 +636,7 @@ Ask a friendly follow-up question to get the missing information. Be concise. Re
         try {
           const [generated] = await generateAdImage(
             `${promptB.prompt}. Alternative creative angle. Professional advertising photo, high quality, no text overlay.`,
-            { n: 1, referenceImageUrl: productImageUrl }
+            { referenceImageUrl: productImageUrl }
           );
 
           let imageBuffer: Buffer<ArrayBuffer>;

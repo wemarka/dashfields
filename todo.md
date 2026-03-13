@@ -3078,3 +3078,9 @@
 - [x] Fix: Nano Banana model names returning 400 from Atlas Cloud — switched to Forge helper
 - [x] Update gemini-image.ts: Primary = Forge ImageService, Fallback = Atlas Cloud gpt-image-1-developer
 - [x] Update tests for dual-provider fallback logic (19 tests passing, 679 total)
+- [x] Fix: Atlas Cloud Google models reject DALL-E params (size, n, response_format) — send minimal payload
+- [x] Set Primary model to google/gemini-3-pro-image-preview (Nano Banana Pro)
+- [x] Set Fallback model to google/gemini-3.1-flash-image-preview (Nano Banana 2)
+- [x] Strip all non-essential params from /images/generations payload — only model + prompt
+- [x] Fix campaignWorkflow.ts: remove deprecated `n` parameter from generateAdImage calls
+- [x] 21 tests for minimal payload validation + dual-model fallback (681 total passing)
