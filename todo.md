@@ -3013,3 +3013,9 @@
 - [x] إصلاح [Max Depth] في tRPC response من generateCreatives (الصور تُولَّد لكن لا تظهر)
 - [x] تبسيط الـ return type في generateCreatives لتجنب deep serialization
 - [x] إصلاح timeout: تقليل عدد الصور المتوازية لتجنب الـ 4.7 دقيقة
+
+## 🐛 إصلاح خطأ "Unexpected token '<'" في /campaign-wizard
+- [x] تشخيص السبب: 502 Bad Gateway عند إعادة تشغيل الـ server (sandbox hibernation)
+- [x] زيادة retry count من 1 إلى 3 مع exponential backoff (1s, 2s, 4s)
+- [x] إضافة retry خاص لـ HTML parse errors (is not valid JSON)
+- [x] إخفاء الـ console.error للأخطاء المؤقتة (502, HTML parse)

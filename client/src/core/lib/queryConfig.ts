@@ -72,14 +72,21 @@ export function createQueryClient(): QueryClient {
         // Keep inactive data in memory for 30 minutes
         gcTime: QUERY_GC_TIME.STANDARD,
 
-        // Retry once on failure (network hiccup), not on 4xx errors
+        // Retry up to 3 times for server/network errors (502, 503, network hiccups)
+        // This handles sandbox restarts where the server briefly returns HTML
         retry: (failureCount, error: unknown) => {
-          if (failureCount >= 1) return false;
+          if (failureCount >= 3) return false;
           // Don't retry on client errors (401, 403, 404)
           const status = (error as { data?: { httpStatus?: number } })?.data?.httpStatus;
           if (status && status >= 400 && status < 500) return false;
+          // Always retry on parse errors (HTML instead of JSON = server restarting)
+          const msg = (error as { message?: string })?.message ?? "";
+          if (msg.includes("<!doctype") || msg.includes("is not valid JSON")) return true;
           return true;
         },
+
+        // Exponential backoff: 1s, 2s, 4s
+        retryDelay: (failureCount) => Math.min(1000 * 2 ** failureCount, 8000),
 
         // Don't re-fetch when window regains focus (reduces unnecessary API calls)
         refetchOnWindowFocus: false,

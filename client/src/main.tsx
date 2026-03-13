@@ -40,7 +40,12 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
+    // Suppress noisy transient errors (server restarting, 502, HTML parse errors)
+    const msg = (error as { message?: string })?.message ?? "";
+    const isTransient = msg.includes("<!doctype") || msg.includes("is not valid JSON") || msg.includes("502");
+    if (!isTransient) {
+      console.error("[API Query Error]", error);
+    }
   }
 });
 
