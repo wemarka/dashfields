@@ -10,11 +10,11 @@ import { storagePut } from "../../storage";
 
 export const aiAgentRouter = router({
   /**
-   * Generate an ad image using Atlas Cloud Google Nano Banana models.
-   * Primary: google/gemini-3-pro-image-preview (Nano Banana Pro)
-   * Fallback: google/gemini-3.1-flash-image-preview (Nano Banana 2)
+   * Generate an ad image using Atlas Cloud native endpoint.
+   * Primary: google/nano-banana-2/text-to-image (Nano Banana 2)
+   * Fallback: google/nano-banana-pro/text-to-image (Nano Banana Pro)
    * Called by the CampaignPreview component when it mounts.
-   * Returns a permanent CDN URL (base64 results are uploaded to S3).
+   * Returns a permanent CDN URL. If Atlas returns base64, uploads to S3.
    */
   generateAdImage: protectedProcedure
     .input(

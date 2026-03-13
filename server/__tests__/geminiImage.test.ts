@@ -1,11 +1,10 @@
 /**
  * Tests for server/app/services/gemini-image.ts
- * Validates the Google Nano Banana dual-model fallback with minimal payload.
+ * Validates Atlas Cloud native image generation endpoint with dual-model fallback.
  *
- * Primary:  google/gemini-3-pro-image-preview (Nano Banana Pro)
- * Fallback: google/gemini-3.1-flash-image-preview (Nano Banana 2)
- *
- * CRITICAL: Only `model` + `prompt` are sent. No size, n, response_format, quality.
+ * Endpoint: POST https://api.atlascloud.ai/api/v1/model/generateImage
+ * Primary:  google/nano-banana-2/text-to-image
+ * Fallback: google/nano-banana-pro/text-to-image
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -19,11 +18,76 @@ vi.stubEnv("ATLAS_API_KEY", "test-atlas-key-123");
 import { generateAdImage, PLATFORM_SPECS, getSpecsForPlatforms } from "../app/services/gemini-image";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function atlasOk(imageData: { url?: string; b64_json?: string } = { b64_json: "iVBORw0KGgo=" }) {
+/** Simulate a successful sync response with direct image URL */
+function atlasOkSync(imageUrl: string = "https://atlas-cdn.ai/generated/img-123.png") {
   return {
     ok: true,
     status: 200,
-    json: async () => ({ data: [imageData] }),
+    json: async () => ({
+      images: [{ url: imageUrl, content_type: "image/png" }],
+    }),
+    text: async () => "",
+    headers: new Headers(),
+  };
+}
+
+/** Simulate an async response that returns request_id for polling */
+function atlasOkAsync(requestId: string = "req_abc123") {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      request_id: requestId,
+    }),
+    text: async () => "",
+    headers: new Headers(),
+  };
+}
+
+/** Simulate a poll response with completed image */
+function atlasPollComplete(imageUrl: string = "https://atlas-cdn.ai/generated/polled-img.png") {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      images: [{ url: imageUrl, content_type: "image/png" }],
+      status: "completed",
+    }),
+    text: async () => "",
+    headers: new Headers(),
+  };
+}
+
+/** Simulate a poll response still processing */
+function atlasPollProcessing() {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      status: "processing",
+    }),
+    text: async () => "",
+    headers: new Headers(),
+  };
+}
+
+/** Simulate a response with direct URL field */
+function atlasOkDirectUrl(url: string = "https://atlas-cdn.ai/direct/img.png") {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ url }),
+    text: async () => "",
+    headers: new Headers(),
+  };
+}
+
+/** Simulate a response with output field */
+function atlasOkOutput(outputUrl: string = "https://atlas-cdn.ai/output/img.png") {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ output: [outputUrl] }),
     text: async () => "",
     headers: new Headers(),
   };
@@ -41,165 +105,226 @@ function atlasErr(status: number, body: string = "Error") {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MINIMAL PAYLOAD VALIDATION
+// CORRECT ENDPOINT AND PAYLOAD
 // ═══════════════════════════════════════════════════════════════════════════
-describe("Minimal payload (model + prompt only)", () => {
+describe("Atlas Cloud native endpoint and payload", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it("sends ONLY model and prompt to Atlas Cloud — no size, n, response_format, quality", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+  it("calls the correct native endpoint /api/v1/model/generateImage", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
-    await generateAdImage("A beautiful sunset over the ocean");
+    await generateAdImage("A beautiful sunset");
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [url, init] = mockFetch.mock.calls[0];
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toBe("https://api.atlascloud.ai/api/v1/model/generateImage");
+  });
+
+  it("sends correct payload with model, prompt, aspect_ratio, output_format, resolution", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
+
+    await generateAdImage("A cyberpunk city");
+
+    const [, init] = mockFetch.mock.calls[0];
     const body = JSON.parse(init.body);
 
-    // MUST have only model + prompt
-    expect(body.model).toBe("google/gemini-3-pro-image-preview");
-    expect(body.prompt).toBe("A beautiful sunset over the ocean");
+    expect(body.model).toBe("google/nano-banana-2/text-to-image");
+    expect(body.prompt).toBe("A cyberpunk city");
+    expect(body.aspect_ratio).toBe("1:1");
+    expect(body.output_format).toBe("png");
+    expect(body.resolution).toBe("2k");
+    expect(body.enable_base64_output).toBe(false);
+    expect(body.enable_sync_mode).toBe(false);
+  });
 
-    // MUST NOT have any DALL-E specific parameters
+  it("does NOT send OpenAI-specific params (size, n, response_format, quality)", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
+
+    await generateAdImage("Test prompt");
+
+    const [, init] = mockFetch.mock.calls[0];
+    const body = JSON.parse(init.body);
+
     expect(body).not.toHaveProperty("size");
     expect(body).not.toHaveProperty("n");
     expect(body).not.toHaveProperty("response_format");
     expect(body).not.toHaveProperty("quality");
     expect(body).not.toHaveProperty("style");
-
-    // Verify only 2 keys exist
-    expect(Object.keys(body)).toEqual(["model", "prompt"]);
-  });
-
-  it("uses /images/generations endpoint", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
-
-    await generateAdImage("Test prompt");
-
-    const [url] = mockFetch.mock.calls[0];
-    expect(url).toContain("/images/generations");
   });
 
   it("sends correct Authorization header", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
-    await generateAdImage("Test prompt");
+    await generateAdImage("Test");
 
     const [, init] = mockFetch.mock.calls[0];
     expect(init.headers["Authorization"]).toBe("Bearer test-atlas-key-123");
     expect(init.headers["Content-Type"]).toBe("application/json");
   });
+
+  it("passes custom aspect_ratio when provided", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
+
+    await generateAdImage("A landscape", { aspectRatio: "16:9" });
+
+    const [, init] = mockFetch.mock.calls[0];
+    const body = JSON.parse(init.body);
+    expect(body.aspect_ratio).toBe("16:9");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PRIMARY MODEL (Nano Banana Pro)
+// PRIMARY MODEL (Nano Banana 2)
 // ═══════════════════════════════════════════════════════════════════════════
-describe("Primary model (google/gemini-3-pro-image-preview)", () => {
+describe("Primary model (google/nano-banana-2/text-to-image)", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it("uses Nano Banana Pro as primary model", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+  it("uses Nano Banana 2 as primary model", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     const results = await generateAdImage("A product photo");
 
     expect(results).toHaveLength(1);
-    expect(results[0].modelUsed).toBe("google/gemini-3-pro-image-preview");
+    expect(results[0].modelUsed).toBe("google/nano-banana-2/text-to-image");
   });
 
   it("does NOT call fallback when primary succeeds", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     await generateAdImage("Test");
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  it("handles URL response from primary", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk({ url: "https://cdn.atlas.ai/generated/img.png" }));
+  it("handles sync response with images array", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkSync("https://cdn.ai/sync-image.png"));
 
     const results = await generateAdImage("Test");
 
-    expect(results[0].imageUrl).toBe("https://cdn.atlas.ai/generated/img.png");
+    expect(results[0].imageUrl).toBe("https://cdn.ai/sync-image.png");
   });
 
-  it("handles b64_json response from primary", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk({ b64_json: "rawBase64Data" }));
+  it("handles response with direct url field", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkDirectUrl("https://cdn.ai/direct.png"));
 
     const results = await generateAdImage("Test");
 
-    expect(results[0].imageUrl).toBe("data:image/png;base64,rawBase64Data");
+    expect(results[0].imageUrl).toBe("https://cdn.ai/direct.png");
   });
 
-  it("handles b64_json with data: prefix already present", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk({ b64_json: "data:image/png;base64,alreadyPrefixed" }));
+  it("handles response with output field", async () => {
+    mockFetch.mockResolvedValueOnce(atlasOkOutput("https://cdn.ai/output.png"));
 
     const results = await generateAdImage("Test");
 
-    expect(results[0].imageUrl).toBe("data:image/png;base64,alreadyPrefixed");
-  });
-
-  it("prefers url over b64_json when both are present", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk({ url: "https://cdn.ai/img.png", b64_json: "someBase64" }));
-
-    const results = await generateAdImage("Test");
-
-    expect(results[0].imageUrl).toBe("https://cdn.ai/img.png");
+    expect(results[0].imageUrl).toBe("https://cdn.ai/output.png");
   });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FALLBACK MODEL (Nano Banana 2)
+// ASYNC POLLING
 // ═══════════════════════════════════════════════════════════════════════════
-describe("Fallback model (google/gemini-3.1-flash-image-preview)", () => {
+describe("Async polling mode", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it("falls back to Nano Banana 2 when primary fails with 500", async () => {
+  it("polls for result when async request_id is returned", async () => {
+    // First call: initial generation returns request_id
+    mockFetch.mockResolvedValueOnce(atlasOkAsync("req_test123"));
+    // Second call: poll returns completed image
+    mockFetch.mockResolvedValueOnce(atlasPollComplete("https://cdn.ai/polled.png"));
+
+    const results = await generateAdImage("Test async");
+
+    expect(results[0].imageUrl).toBe("https://cdn.ai/polled.png");
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+
+    // Verify poll URL
+    const [pollUrl] = mockFetch.mock.calls[1];
+    expect(pollUrl).toBe("https://api.atlascloud.ai/api/v1/model/request/req_test123");
+  });
+
+  it("retries polling when status is still processing", async () => {
+    vi.useFakeTimers();
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValueOnce(atlasOkAsync("req_poll"));
+    mockFetch.mockResolvedValueOnce(atlasPollProcessing());
+    mockFetch.mockResolvedValueOnce(atlasPollComplete("https://cdn.ai/after-retry.png"));
+
+    const promise = generateAdImage("Test retry");
+
+    // Advance past the first poll delay (3s)
+    await vi.advanceTimersByTimeAsync(3500);
+    // Advance past the second poll delay (3s)
+    await vi.advanceTimersByTimeAsync(3500);
+
+    const results = await promise;
+
+    expect(results[0].imageUrl).toBe("https://cdn.ai/after-retry.png");
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+
+    vi.useRealTimers();
+  }, 15000);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FALLBACK MODEL (Nano Banana Pro)
+// ═══════════════════════════════════════════════════════════════════════════
+describe("Fallback model (google/nano-banana-pro/text-to-image)", () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it("falls back to Nano Banana Pro when primary fails with 500", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(500, "Internal Server Error"));
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     const results = await generateAdImage("A product photo");
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
-    // First call = primary model
     const primaryBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(primaryBody.model).toBe("google/gemini-3-pro-image-preview");
-    // Second call = fallback model
+    expect(primaryBody.model).toBe("google/nano-banana-2/text-to-image");
     const fallbackBody = JSON.parse(mockFetch.mock.calls[1][1].body);
-    expect(fallbackBody.model).toBe("google/gemini-3.1-flash-image-preview");
-    expect(results[0].modelUsed).toBe("google/gemini-3.1-flash-image-preview");
+    expect(fallbackBody.model).toBe("google/nano-banana-pro/text-to-image");
+    expect(results[0].modelUsed).toBe("google/nano-banana-pro/text-to-image");
   });
 
   it("falls back when primary returns 400", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(400, "bad request"));
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     const results = await generateAdImage("Test");
 
-    expect(results[0].modelUsed).toBe("google/gemini-3.1-flash-image-preview");
+    expect(results[0].modelUsed).toBe("google/nano-banana-pro/text-to-image");
   });
 
   it("falls back when primary returns 404", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(404, "not found"));
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     const results = await generateAdImage("Test");
 
-    expect(results[0].modelUsed).toBe("google/gemini-3.1-flash-image-preview");
+    expect(results[0].modelUsed).toBe("google/nano-banana-pro/text-to-image");
   });
 
-  it("fallback also sends minimal payload (model + prompt only)", async () => {
+  it("fallback also uses the native endpoint with correct payload", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(500, "Primary down"));
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
-    await generateAdImage("Fallback test prompt");
+    await generateAdImage("Fallback test", { aspectRatio: "16:9" });
 
-    const [, fallbackInit] = mockFetch.mock.calls[1];
+    const [fallbackUrl, fallbackInit] = mockFetch.mock.calls[1];
+    expect(fallbackUrl).toBe("https://api.atlascloud.ai/api/v1/model/generateImage");
     const body = JSON.parse(fallbackInit.body);
-    expect(Object.keys(body)).toEqual(["model", "prompt"]);
-    expect(body.model).toBe("google/gemini-3.1-flash-image-preview");
-    expect(body.prompt).toBe("Fallback test prompt");
+    expect(body.model).toBe("google/nano-banana-pro/text-to-image");
+    expect(body.aspect_ratio).toBe("16:9");
+    expect(body.output_format).toBe("png");
+    expect(body.resolution).toBe("2k");
   });
 
   it("throws combined error when BOTH models fail", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(500, "Primary error"));
     mockFetch.mockResolvedValueOnce(atlasErr(503, "Fallback error"));
 
@@ -207,6 +332,7 @@ describe("Fallback model (google/gemini-3.1-flash-image-preview)", () => {
   });
 
   it("includes both error messages when both models fail", async () => {
+    mockFetch.mockReset();
     mockFetch.mockResolvedValueOnce(atlasErr(500, "Primary error details"));
     mockFetch.mockResolvedValueOnce(atlasErr(503, "Fallback error details"));
 
@@ -215,9 +341,9 @@ describe("Fallback model (google/gemini-3.1-flash-image-preview)", () => {
       expect.fail("Should have thrown");
     } catch (err) {
       const msg = (err as Error).message;
-      expect(msg).toContain("gemini-3-pro-image-preview");
+      expect(msg).toContain("nano-banana-2");
       expect(msg).toContain("Primary error details");
-      expect(msg).toContain("gemini-3.1-flash-image-preview");
+      expect(msg).toContain("nano-banana-pro");
       expect(msg).toContain("Fallback error details");
     }
   });
@@ -230,7 +356,8 @@ describe("Reference image handling", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it("appends reference image URL to prompt when provided", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     await generateAdImage("Design a product ad", { referenceImageUrl: "https://example.com/product.jpg" });
 
@@ -239,12 +366,11 @@ describe("Reference image handling", () => {
     expect(body.prompt).toContain("Design a product ad");
     expect(body.prompt).toContain("https://example.com/product.jpg");
     expect(body.prompt).toContain("Reference product image");
-    // Still only model + prompt keys
-    expect(Object.keys(body)).toEqual(["model", "prompt"]);
   });
 
   it("does not modify prompt when no reference image", async () => {
-    mockFetch.mockResolvedValueOnce(atlasOk());
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValueOnce(atlasOkSync());
 
     await generateAdImage("Simple prompt");
 
@@ -258,18 +384,22 @@ describe("Reference image handling", () => {
 // PLATFORM SPECS
 // ═══════════════════════════════════════════════════════════════════════════
 describe("Platform specs", () => {
-  it("has specs for all major platforms", () => {
+  it("has specs for all major platforms with aspectRatio", () => {
     const platforms = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "snapchat", "pinterest", "youtube"];
     for (const p of platforms) {
       expect(PLATFORM_SPECS[p]).toBeDefined();
       expect(PLATFORM_SPECS[p].length).toBeGreaterThan(0);
+      for (const spec of PLATFORM_SPECS[p]) {
+        expect(spec.aspectRatio).toBeDefined();
+      }
     }
   });
 
-  it("getSpecsForPlatforms returns correct specs", () => {
+  it("getSpecsForPlatforms returns correct specs with aspectRatio", () => {
     const specs = getSpecsForPlatforms(["instagram", "facebook"]);
     expect(specs.length).toBeGreaterThanOrEqual(3);
     expect(specs.every((s) => s.platform === "instagram" || s.platform === "facebook")).toBe(true);
+    expect(specs.every((s) => s.aspectRatio !== undefined)).toBe(true);
   });
 
   it("getSpecsForPlatforms handles unknown platforms gracefully", () => {

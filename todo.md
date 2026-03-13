@@ -3084,3 +3084,9 @@
 - [x] Strip all non-essential params from /images/generations payload — only model + prompt
 - [x] Fix campaignWorkflow.ts: remove deprecated `n` parameter from generateAdImage calls
 - [x] 21 tests for minimal payload validation + dual-model fallback (681 total passing)
+- [x] Fix: Use correct Atlas Cloud native endpoint /api/v1/model/generateImage (not OpenAI-compatible)
+- [x] Use model ID: google/nano-banana-2/text-to-image for primary, google/nano-banana-pro/text-to-image as fallback
+- [x] Use correct payload: model, prompt, aspect_ratio, output_format, resolution, enable_base64_output, enable_sync_mode
+- [x] Remove OpenAI-compatible /images/generations endpoint usage
+- [x] Add async polling support for request_id-based responses
+- [x] 24 tests for native endpoint + dual-model fallback + async polling (684 total passing)
