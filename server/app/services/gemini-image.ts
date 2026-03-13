@@ -21,7 +21,7 @@ const PRIMARY_MODEL = "google/nano-banana-2/text-to-image";
 const FALLBACK_MODEL = "google/nano-banana-pro/text-to-image";
 
 /** Total timeout per model attempt (generation + polling) */
-const TOTAL_TIMEOUT_MS = 90_000;
+const TOTAL_TIMEOUT_MS = 150_000;
 /** Interval between poll requests */
 const POLL_INTERVAL_MS = 2_000;
 
@@ -88,7 +88,7 @@ async function fetchWithTimeout(
 async function pollForResult(
   predictionId: string,
   apiKey: string,
-  maxWaitMs: number = 80_000,
+  maxWaitMs: number = 90_000,
 ): Promise<string> {
   const pollUrl = `${PREDICTION_URL}/${predictionId}`;
   const startTime = Date.now();
@@ -174,7 +174,7 @@ async function attemptGeneration(
         resolution: "2k",
       }),
     },
-    30_000, // 30s timeout for the initial POST
+    60_000, // 60s timeout for the initial POST (Atlas Cloud can take 30-40s)
   );
 
   if (!response.ok) {

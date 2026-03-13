@@ -3095,3 +3095,6 @@
 - [x] Match exact PredictionResponse schema from official docs
 - [x] Handle sync mode: return immediately when status=completed and outputs available
 - [x] All 678 tests passing (48 files)
+- [x] Fix: "This operation was aborted" — POST timeout increased from 30s to 60s (Atlas Cloud takes ~32s)
+- [x] Debug actual Atlas Cloud API call — confirmed working, polling completes in ~3s after POST
+- [x] Increased total timeout to 150s, poll maxWait to 90s
