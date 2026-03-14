@@ -33,7 +33,7 @@ function TrendBadge({ trend }: { trend: "up" | "down" | "stable" }) {
     );
   if (trend === "down")
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#f87171] bg-red-50 dark:bg-[#ef3735]/14 dark:text-[#f87171] px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#f87171] bg-[#ef3735]/14 px-1.5 py-0.5 rounded-full">
         <TrendingDown className="w-2.5 h-2.5" /> Down
       </span>
     );

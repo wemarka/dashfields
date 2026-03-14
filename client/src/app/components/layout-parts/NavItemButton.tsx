@@ -45,14 +45,14 @@ export function NavItemButton({
         "transition-all duration-200 group relative overflow-hidden",
         isRTL ? "flex-row-reverse text-right" : "text-left",
         isActive
-          ? "bg-foreground/[0.07] text-foreground"
+          ? "bg-muted/60 text-white"
           : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
       ].join(" ")}
     >
       <Icon
         className={[
           "w-[16px] h-[16px] shrink-0 transition-all duration-200",
-          isActive ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/60",
+          isActive ? "text-white" : "text-foreground/40 group-hover:text-foreground/60",
         ].join(" ")}
       />
       {/* Label — always rendered, animated with opacity + translate for smooth sidebar transition */}

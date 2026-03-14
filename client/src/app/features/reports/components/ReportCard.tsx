@@ -110,7 +110,7 @@ export function ReportCard({ report, onDelete, onDownload }: {
           <Download className="w-3.5 h-3.5" />Download
         </button>
         <button onClick={() => onDelete(report.id)}
-          className="p-2 rounded-xl border border-border text-muted-foreground hover:text-[#f87171] hover:border-red-200 hover:bg-red-50 transition-colors">
+          className="p-2 rounded-xl border border-border text-muted-foreground hover:text-[#f87171] hover:border-[#ef3735]/30 hover:bg-[#ef3735]/14 transition-colors">
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>

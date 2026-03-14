@@ -176,7 +176,7 @@ export function BillingPage() {
                 {isOwner && !pm.isDefault && (
                   <button
                     onClick={() => toast.info("Remove card coming soon.")}
-                    className="p-1.5 rounded-lg text-neutral-500 hover:text-[#f87171] hover:bg-red-50 transition-all"
+                    className="p-1.5 rounded-lg text-neutral-500 hover:text-[#f87171] hover:bg-[#ef3735]/14 transition-all"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -251,7 +251,7 @@ export function BillingPage() {
             <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest mb-3">Cancel Subscription</p>
 
             {!showCancelConfirm ? (
-              <div className="flex items-start gap-4 p-4 rounded-xl border border-red-100 bg-red-50/30">
+              <div className="flex items-start gap-4 p-4 rounded-xl border border-[#ef3735]/20 bg-[#ef3735]/6">
                 <div className="w-9 h-9 rounded-lg bg-[#ef3735]/14 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertTriangle className="w-4 h-4 text-[#f87171]" />
                 </div>
@@ -263,13 +263,13 @@ export function BillingPage() {
                 </div>
                 <button
                   onClick={() => setShowCancelConfirm(true)}
-                  className="px-3.5 py-2 rounded-lg text-[12px] font-semibold text-[#f87171] border border-red-200 hover:bg-red-50 transition-all shrink-0"
+                  className="px-3.5 py-2 rounded-lg text-[12px] font-semibold text-[#f87171] border border-[#ef3735]/30 hover:bg-[#ef3735]/14 transition-all shrink-0"
                 >
                   Cancel plan
                 </button>
               </div>
             ) : (
-              <div className="p-4 rounded-xl border border-red-200 bg-red-50/50">
+              <div className="p-4 rounded-xl border border-[#ef3735]/30 bg-[#ef3735]/8">
                 <p className="text-[14px] font-semibold text-white mb-1">Are you sure?</p>
                 <p className="text-[12px] text-neutral-400 mb-4">
                   This will cancel your {planConfig.name} subscription. You'll keep access until the end of your billing period.

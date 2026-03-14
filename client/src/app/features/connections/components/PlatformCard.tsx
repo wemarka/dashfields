@@ -28,7 +28,7 @@ function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
 
   if (daysLeft <= 0) {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50 flex items-center gap-1">
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] font-semibold border border-[#ef3735]/30 flex items-center gap-1">
         <AlertTriangle className="w-2.5 h-2.5" />
         Expired
       </span>
@@ -120,7 +120,7 @@ export function PlatformCard({
       "rounded-2xl border transition-all duration-300 overflow-hidden group",
       isConnected
         ? hasExpired
-          ? "border-red-200/60 dark:border-red-800/40 bg-card shadow-sm"
+          ? "border-[#ef3735]/30 bg-card shadow-sm"
           : "border-emerald-200/60 dark:border-emerald-800/40 bg-card shadow-sm hover:shadow-md"
         : "border-border/40 bg-card/50 hover:bg-card hover:border-border hover:shadow-sm",
     ].join(" ")}>
@@ -166,7 +166,7 @@ export function PlatformCard({
             <h3 className="text-sm font-semibold text-foreground">{platform.name}</h3>
             {isConnected ? (
               hasExpired ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] font-semibold border border-[#ef3735]/30">
                   Token Expired
                 </span>
               ) : (
@@ -283,7 +283,7 @@ export function PlatformCard({
                     <button
                       onClick={() => onDisconnect(acc.id)}
                       disabled={isDisconnecting}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-red-50 dark:hover:bg-[#ef3735]/14 transition-colors"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-[#ef3735]/14 transition-colors"
                       title="Disconnect"
                     >
                       <Unlink className="w-3.5 h-3.5" />

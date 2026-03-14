@@ -3507,3 +3507,8 @@
 ## 🔄 Icons & Text — Neutralize Brand Red
 - [x] Replace all non-CTA text-brand-red / text-[#ef3735] on icons and labels with text-secondary (#a1a1aa) or text-primary (#fafafa)
 - [x] Keep red strictly for: CTA buttons, Hot/New badges only — icons/text fully neutralized
+
+## 🔄 UI Consistency — Sidebar/Table/Select
+- [x] Sidebar active item → bg-muted/60 text-white (remove any red active state)
+- [x] Table row hover → hover:bg-muted/30 (replace any red hover)
+- [x] Select/Combobox selected state → text-white bg-muted/60

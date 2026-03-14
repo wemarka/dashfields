@@ -41,7 +41,7 @@ export function ContentPlanView({
   return (
     <div className="space-y-5">
       {/* Budget Allocation */}
-      <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border border-red-100">
+      <div className="bg-[#ef3735]/8 rounded-2xl p-4 border border-[#ef3735]/20">
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="w-4 h-4 text-[#f87171]" />
           <h3 className="font-semibold text-white text-sm">توزيع الميزانية</h3>

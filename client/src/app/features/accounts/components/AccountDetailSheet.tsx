@@ -147,7 +147,7 @@ export function AccountDetailSheet({ account, onClose, onRefresh }: AccountDetai
           </Button>
           <Button
             variant="outline"
-            className="w-full gap-2 text-[#f87171] border-red-200 hover:bg-red-50 dark:border-red-900 dark:hover:bg-[#ef3735]/14"
+            className="w-full gap-2 text-[#f87171] border-[#ef3735]/30 hover:bg-[#ef3735]/14"
             onClick={handleDisconnect}
             disabled={disconnect.isPending}
           >

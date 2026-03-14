@@ -391,10 +391,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     "w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium",
                     "transition-all duration-150 group relative",
                     isRTL ? "flex-row-reverse text-right" : "text-left",
-                    isSectionActive ? "text-foreground" : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
+                    isSectionActive ? "bg-muted/60 text-white" : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04]",
                     collapsed ? "justify-center" : "",
                   ].join(" ")}>
-                  <item.icon className={["w-[16px] h-[16px] shrink-0 transition-all duration-150", isSectionActive ? "text-foreground" : "text-foreground/40 group-hover:text-foreground/60"].join(" ")} />
+                  <item.icon className={["w-[16px] h-[16px] shrink-0 transition-all duration-150", isSectionActive ? "text-white" : "text-foreground/40 group-hover:text-foreground/60"].join(" ")} />
                   {/* Label + chevron — animated fade+slide for smooth sidebar transition */}
                   <span
                     className="truncate flex-1 whitespace-nowrap"
@@ -453,10 +453,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               className={[
                                 "w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium transition-all duration-150",
                                 isRTL ? "flex-row-reverse text-right" : "text-left",
-                                isSubActive ? "bg-foreground/[0.07] text-foreground" : "text-foreground/55 hover:bg-foreground/[0.04] hover:text-foreground",
+                                isSubActive ? "bg-muted/60 text-white" : "text-foreground/55 hover:bg-foreground/[0.04] hover:text-foreground",
                               ].join(" ")}
                             >
-                              <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-foreground" : "text-foreground/40"].join(" ")} />
+                              <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-white" : "text-foreground/40"].join(" ")} />
                               <span className="truncate">{t(sub.labelKey)}</span>
                             </button>
                           );
@@ -477,9 +477,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               "w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium",
                               "transition-all duration-150",
                               isRTL ? "flex-row-reverse text-right" : "text-left",
-                              isSubActive ? "bg-foreground/[0.07] text-foreground" : "text-foreground/45 hover:text-foreground hover:bg-foreground/[0.04]",
+                              isSubActive ? "bg-muted/60 text-white" : "text-foreground/45 hover:text-foreground hover:bg-foreground/[0.04]",
                             ].join(" ")}>
-                            <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-foreground" : "text-foreground/35"].join(" ")} />
+                            <sub.icon className={["w-3.5 h-3.5 shrink-0", isSubActive ? "text-white" : "text-foreground/35"].join(" ")} />
                             <span className="truncate">{t(sub.labelKey)}</span>
                           </button>
                         );

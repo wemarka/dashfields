@@ -530,7 +530,7 @@ export default function CampaignWizardPage() {
             </div>
             <span className="text-sm font-semibold text-neutral-300">Marketing Workflow</span>
             {isInChat && (
-              <Badge className="text-[10px] bg-red-50 text-[#f87171] border-red-100">
+              <Badge className="text-[10px] bg-[#ef3735]/14 text-[#f87171] border-[#ef3735]/30">
                 {STEP_LABELS[currentStep]}
               </Badge>
             )}
@@ -548,7 +548,7 @@ export default function CampaignWizardPage() {
                 {DIALOG_STEPS.includes(currentStep) && (
                   <button
                     onClick={() => setDialogOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#f87171] hover:text-[#f87171] hover:bg-red-50 transition-all border border-red-200"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#f87171] hover:text-[#f87171] hover:bg-[#ef3735]/14 transition-all border border-[#ef3735]/30"
                   >
                     <Sparkles className="w-3 h-3" />
                     عرض الحملة
@@ -600,7 +600,7 @@ export default function CampaignWizardPage() {
                 <button
                   key={p.text}
                   onClick={() => void sendMessage(p.text)}
-                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-red-200 hover:bg-red-50/30 transition-all text-left text-sm text-neutral-300 group"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-[#ef3735]/30 hover:bg-[#ef3735]/8 transition-all text-left text-sm text-neutral-300 group"
                 >
                   <span className="text-xl shrink-0">{p.icon}</span>
                   <span className="leading-snug group-hover:text-[#f87171] transition-colors">{p.text}</span>
@@ -735,7 +735,7 @@ export default function CampaignWizardPage() {
 
             {/* In-Dialog Error Banner */}
             {planError && currentStep === "creative_review" && (
-              <div className="mx-5 mt-4 p-4 rounded-xl border border-red-200 bg-red-50 flex items-start gap-3">
+              <div className="mx-5 mt-4 p-4 rounded-xl border border-[#ef3735]/30 bg-[#ef3735]/10 flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#ef3735]/14 flex items-center justify-center shrink-0 mt-0.5">
                   <X className="w-4 h-4 text-[#f87171]" />
                 </div>
@@ -915,7 +915,7 @@ function WizardInputBox({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-[#f87171] hover:bg-[#ef3735]/14 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#ef3735]/14 text-[#f87171] hover:bg-[#ef3735]/20 transition-all"
             >
               <Upload className="w-3 h-3" />
               رفع الشعار
@@ -1051,8 +1051,8 @@ function ProductImageStep({
         onClick={() => productImageRef.current?.click()}
         className={cn(
           "w-full max-w-sm h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200",
-          isDragging ? "border-red-400 bg-red-50" : "border-neutral-700 hover:border-red-300 hover:bg-neutral-800/50",
-          preview ? "border-red-300 bg-red-50/30" : "",
+          isDragging ? "border-[#ef3735]/60 bg-[#ef3735]/10" : "border-neutral-700 hover:border-[#ef3735]/40 hover:bg-neutral-800/50",
+          preview ? "border-[#ef3735]/40 bg-[#ef3735]/8" : "",
         )}
       >
         {preview ? (
