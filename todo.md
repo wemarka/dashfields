@@ -3272,4 +3272,4 @@
 - [x] Change logo icon: white bg + black text default → brand-red bg + white text on hover
 
 ## 🔄 Replace Zap with Dashfields Icon
-- [ ] Replace Zap icon in Topbar with actual Dashfields SVG icon paths
+- [x] Replace Zap icon in Topbar with actual Dashfields SVG icon paths
