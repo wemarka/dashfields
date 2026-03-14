@@ -41,9 +41,9 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-  owner: "text-amber-500 bg-amber-500/10",
-  admin: "text-blue-500 bg-blue-500/10",
-  member: "text-emerald-500 bg-emerald-500/10",
+  owner: "text-brand bg-brand/10",
+  admin: "text-muted-foreground bg-muted",
+  member: "text-foreground bg-muted",
   viewer: "text-muted-foreground bg-muted",
 };
 

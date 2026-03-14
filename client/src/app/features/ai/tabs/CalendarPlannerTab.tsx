@@ -60,11 +60,11 @@ export function CalendarPlannerTab() {
   };
 
   const typeColors: Record<string, string> = {
-    image:    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    video:    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-    story:    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-    reel:     "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
-    carousel: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    image:    "bg-muted text-foreground",
+    video:    "bg-brand/10 text-brand",
+    story:    "bg-muted/60 text-muted-foreground",
+    reel:     "bg-brand/5 text-brand",
+    carousel: "bg-muted text-muted-foreground",
     text:     "bg-muted text-muted-foreground",
   };
 
@@ -72,7 +72,7 @@ export function CalendarPlannerTab() {
     <div className="space-y-5">
       <div className="bg-card border border-border rounded-2xl p-5">
         <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-emerald-500" />
+          <Calendar className="w-4 h-4 text-muted-foreground" />
           AI Content Calendar Planner
         </h3>
         <p className="text-xs text-muted-foreground mb-4">
@@ -224,7 +224,7 @@ export function CalendarPlannerTab() {
           {result.campaignIdeas.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
               <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
                 Campaign Ideas
               </p>
               <ul className="space-y-1.5">

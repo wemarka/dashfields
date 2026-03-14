@@ -96,8 +96,8 @@ export function HashtagPanel({ platform }: { platform: string }) {
 
   const categoryColors: Record<string, string> = {
     niche:    "bg-brand/10 text-brand dark:bg-brand/15 dark:text-brand",
-    broad:    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    trending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    broad:    "bg-muted text-muted-foreground",
+    trending: "bg-brand/10 text-brand",
   };
 
   return (

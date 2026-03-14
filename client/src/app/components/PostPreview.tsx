@@ -53,8 +53,8 @@ function formatContent(content: string, platform: PreviewPlatform) {
   const truncated = truncate(content, max);
   // Highlight hashtags and mentions
   return truncated.split(/(\s+)/).map((word, i) => {
-    if (word.startsWith("#")) return <span key={i} className="text-blue-500 cursor-pointer hover:underline">{word}</span>;
-    if (word.startsWith("@")) return <span key={i} className="text-blue-500 cursor-pointer hover:underline">{word}</span>;
+    if (word.startsWith("#")) return <span key={i} className="text-brand cursor-pointer hover:underline">{word}</span>;
+    if (word.startsWith("@")) return <span key={i} className="text-brand cursor-pointer hover:underline">{word}</span>;
     return word;
   });
 }
@@ -191,7 +191,7 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
       <div className="px-4 py-2 border-b border-neutral-800 dark:border-neutral-700 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <div className="flex -space-x-1">
-            <span className="w-4.5 h-4.5 rounded-full bg-blue-500 flex items-center justify-center text-[9px]">👍</span>
+            <span className="w-4.5 h-4.5 rounded-full bg-neutral-700 flex items-center justify-center text-[9px]">👍</span>
             <span className="w-4.5 h-4.5 rounded-full bg-red-500 flex items-center justify-center text-[9px]">❤️</span>
           </div>
           <span className="text-xs text-neutral-400 dark:text-[#b0b3b8] ml-1">1.2K</span>
@@ -209,7 +209,7 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
           <button
             key={label}
             onClick={onClick}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors text-xs font-semibold ${active ? "text-blue-500" : "text-neutral-400 dark:text-[#b0b3b8]"}`}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors text-xs font-semibold ${active ? "text-brand" : "text-neutral-400 dark:text-[#b0b3b8]"}`}
           >
             <Icon className="w-4 h-4" />
             {label}
@@ -237,7 +237,7 @@ function TwitterPreview({ content, mediaUrl, mediaType, accountName, accountHand
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="text-sm font-bold text-white dark:text-white truncate">{name}</p>
-              <svg className="w-4 h-4 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4 text-muted-foreground shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1.01-2.52-1.27-3.91-.81C14.67 2.88 13.43 2 12 2s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81-1.01 1.01-1.27 2.52-.81 3.91C2.88 9.33 2 10.57 2 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91 1.01 1.01 2.52 1.27 3.91.81C9.33 21.12 10.57 22 12 22s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81 1.01-1.01 1.27-2.52.81-3.91C21.12 14.67 22 13.43 22 12h.25z" />
               </svg>
               <p className="text-sm text-neutral-400 dark:text-neutral-500 truncate">@{handle}</p>
@@ -271,9 +271,8 @@ function TwitterPreview({ content, mediaUrl, mediaType, accountName, accountHand
                 <button
                   key={i}
                   onClick={onClick}
-                  className={`flex items-center gap-1 text-xs hover:text-blue-500 transition-colors group ${active ? "text-pink-500" : ""}`}
-                >
-                  <div className="p-1.5 rounded-full group-hover:bg-blue-500/10 transition-colors">
+                                  className={`flex items-center gap-1 text-xs hover:text-brand transition-colors group ${active ? "text-brand" : ""}`}>
+                  <div className="p-1.5 rounded-full group-hover:bg-brand/10 transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   {count}
@@ -310,7 +309,7 @@ function LinkedInPreview({ content, mediaUrl, mediaType, accountName, accountAva
             </div>
           </div>
         </div>
-        <button className="text-[#0A66C2] text-sm font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1 rounded-full transition-colors">
+        <button className="text-foreground text-sm font-semibold hover:bg-muted px-3 py-1 rounded-full transition-colors">
           + Follow
         </button>
       </div>

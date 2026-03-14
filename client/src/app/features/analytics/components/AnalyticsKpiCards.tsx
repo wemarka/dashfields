@@ -18,7 +18,7 @@ function PeriodChangeChip({ current, previous }: { current: number; previous: nu
   const pct = ((current - previous) / previous) * 100;
   const up = pct > 0;
   return (
-    <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? "text-emerald-500" : "text-red-500"}`}>
+    <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? "text-foreground" : "text-brand"}`}>
       {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
       {Math.abs(pct).toFixed(1)}%
     </span>
@@ -50,20 +50,20 @@ export function AnalyticsKpiCards({ insights, prevData, comparePrevPreset }: Ana
   const { fmt: fmtMoney } = useCurrency();
 
   const mainKpis = [
-    { label: "Total Spend",  value: fmtMoney(insights.spend),           rawVal: insights.spend,        icon: DollarSign,        color: "bg-blue-50 text-blue-600",     prev: prevData?.spend },
-    { label: "Impressions",  value: fmtNum(insights.impressions),        rawVal: insights.impressions,  icon: Eye,               color: "bg-purple-50 text-purple-600", prev: prevData?.impressions },
-    { label: "Clicks (all)", value: fmtNum(insights.clicks),             rawVal: insights.clicks,       icon: MousePointerClick, color: "bg-amber-50 text-amber-600",   prev: prevData?.clicks },
-    { label: "Reach",        value: fmtNum(insights.reach),              rawVal: insights.reach,        icon: Users,             color: "bg-emerald-50 text-emerald-600", prev: prevData?.reach },
-    { label: "CTR",          value: insights.ctr.toFixed(2) + "%",       rawVal: insights.ctr,          icon: TrendingUp,        color: "bg-rose-50 text-rose-600",     prev: prevData?.ctr },
-    { label: "CPC",          value: fmtMoney(insights.cpc),              rawVal: insights.cpc,          icon: DollarSign,        color: "bg-cyan-50 text-cyan-600",     prev: prevData?.cpc },
-    { label: "CPM",          value: fmtMoney(insights.cpm),              rawVal: insights.cpm,          icon: Eye,               color: "bg-brand/10 text-brand", prev: prevData?.cpm },
-    { label: "Frequency",    value: insights.frequency.toFixed(2) + "x", rawVal: insights.frequency,    icon: Users,             color: "bg-orange-50 text-orange-600", prev: null },
+    { label: "Total Spend",  value: fmtMoney(insights.spend),           rawVal: insights.spend,        icon: DollarSign,        color: "bg-brand/10 text-brand",        prev: prevData?.spend },
+    { label: "Impressions",  value: fmtNum(insights.impressions),        rawVal: insights.impressions,  icon: Eye,               color: "bg-muted text-foreground",      prev: prevData?.impressions },
+    { label: "Clicks (all)", value: fmtNum(insights.clicks),             rawVal: insights.clicks,       icon: MousePointerClick, color: "bg-muted text-muted-foreground", prev: prevData?.clicks },
+    { label: "Reach",        value: fmtNum(insights.reach),              rawVal: insights.reach,        icon: Users,             color: "bg-muted text-muted-foreground", prev: prevData?.reach },
+    { label: "CTR",          value: insights.ctr.toFixed(2) + "%",       rawVal: insights.ctr,          icon: TrendingUp,        color: "bg-brand/5 text-brand",         prev: prevData?.ctr },
+    { label: "CPC",          value: fmtMoney(insights.cpc),              rawVal: insights.cpc,          icon: DollarSign,        color: "bg-muted text-muted-foreground", prev: prevData?.cpc },
+    { label: "CPM",          value: fmtMoney(insights.cpm),              rawVal: insights.cpm,          icon: Eye,               color: "bg-muted text-muted-foreground", prev: prevData?.cpm },
+    { label: "Frequency",    value: insights.frequency.toFixed(2) + "x", rawVal: insights.frequency,    icon: Users,             color: "bg-muted text-muted-foreground", prev: null },
   ];
 
   const conversionKpis = [
-    { label: "Leads",    value: fmtNum(insights.leads),    icon: TrendingUp,    color: "bg-emerald-50 text-emerald-600" },
-    { label: "Calls",    value: fmtNum(insights.calls),    icon: Phone,         color: "bg-blue-50 text-blue-600" },
-    { label: "Messages", value: fmtNum(insights.messages), icon: MessageCircle, color: "bg-purple-50 text-purple-600" },
+    { label: "Leads",    value: fmtNum(insights.leads),    icon: TrendingUp,    color: "bg-brand/10 text-brand" },
+    { label: "Calls",    value: fmtNum(insights.calls),    icon: Phone,         color: "bg-muted text-muted-foreground" },
+    { label: "Messages", value: fmtNum(insights.messages), icon: MessageCircle, color: "bg-muted text-muted-foreground" },
   ];
 
   const hasConversions = insights.leads > 0 || insights.calls > 0 || insights.messages > 0;

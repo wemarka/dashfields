@@ -44,7 +44,7 @@ export const PLATFORM_ICONS: Record<string, React.ElementType> = {
   twitter: Twitter, youtube: Youtube,
 };
 export const PLATFORM_COLORS: Record<string, string> = {
-  facebook: "text-blue-500", instagram: "text-pink-500",
-  linkedin: "text-blue-600", twitter: "text-sky-400",
-  youtube: "text-red-500",
+  facebook: "text-muted-foreground", instagram: "text-muted-foreground",
+  linkedin: "text-muted-foreground", twitter: "text-muted-foreground",
+  youtube: "text-brand",
 };

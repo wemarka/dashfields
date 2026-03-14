@@ -10,7 +10,7 @@ const EVENTS = [
     title: "Ramadan 2026",
     date: "Mar 17 – Apr 15",
     tag: "Seasonal",
-    tagColor: "bg-emerald-500/15 text-emerald-400",
+    tagColor: "bg-muted text-foreground",
   },
   {
     icon: Star,
@@ -24,7 +24,7 @@ const EVENTS = [
     title: "Summer Sale Season",
     date: "Jun 1 – Jul 31",
     tag: "Peak",
-    tagColor: "bg-amber-500/15 text-amber-400",
+    tagColor: "bg-brand/10 text-brand",
   },
   {
     icon: CalendarDays,
@@ -39,7 +39,7 @@ export function TrendingNewsWidget() {
   return (
     <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Flame className="w-4 h-4 text-amber-400" />
+        <Flame className="w-4 h-4 text-brand" />
         <h2 className="text-sm font-semibold text-white">Trending & Upcoming</h2>
       </div>
       <div className="space-y-3">

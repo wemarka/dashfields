@@ -93,8 +93,8 @@ export default function DashStudiosPage() {
 
   const tabs = [
     { id: "generate" as Tab, label: "Image Generator", icon: ImagePlus, color: "text-brand" },
-    { id: "video" as Tab, label: "Video Creator", icon: Video, color: "text-pink-400" },
-    { id: "brand" as Tab, label: "Brand Kit", icon: Wand2, color: "text-amber-400" },
+    { id: "video" as Tab, label: "Video Creator", icon: Video, color: "text-muted-foreground" },
+    { id: "brand" as Tab, label: "Brand Kit", icon: Wand2, color: "text-muted-foreground" },
   ];
 
   return (

@@ -163,14 +163,14 @@ function UnifiedCampaignTableInner({
           <div className="min-w-0">
             <p
               className="truncate leading-tight"
-              style={{ fontSize: 13, fontWeight: 500, color: "#111827", cursor: onOpenDrawer ? "pointer" : "default" }}
+              style={{ fontSize: 13, fontWeight: 500, color: "#ffffff", cursor: onOpenDrawer ? "pointer" : "default" }}
               onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
-              onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#2563eb"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
-              onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#111827"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
+              onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#e62020"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
+              onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ffffff"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
             >
               {c.name}
             </p>
-            {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#9ca3af" }}>{c.objective}</p>}
+            {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#737373" }}>{c.objective}</p>}
           </div>
         );
       case "status":
@@ -183,11 +183,11 @@ function UnifiedCampaignTableInner({
                   <button onClick={(e) => { e.stopPropagation(); onStatusToggle(c); }} disabled={isToggling}
                     className="p-0.5 rounded transition-colors disabled:opacity-50"
                     style={{ color: "#9ca3af" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}>
                     {isToggling ? <Loader2 className="w-3 h-3 animate-spin" /> :
-                      isActive ? <Pause className="w-3 h-3" style={{ color: "#f59e0b" }} /> :
-                        <Play className="w-3 h-3" style={{ color: "#10b981" }} />}
+                      isActive ? <Pause className="w-3 h-3" style={{ color: "#a3a3a3" }} /> :
+                        <Play className="w-3 h-3" style={{ color: "#e62020" }} />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">{isActive ? "Pause campaign" : "Activate campaign"}</TooltipContent>
@@ -199,29 +199,29 @@ function UnifiedCampaignTableInner({
         return (
           <div className="flex items-center gap-1.5">
             <PlatformIcon platform={c.platform} className="w-3.5 h-3.5 shrink-0" />
-            <span style={{ fontSize: 12, color: "#6b7280" }}>{getPlatformName(c.platform)}</span>
+            <span style={{ fontSize: 12, color: "#737373" }}>{getPlatformName(c.platform)}</span>
           </div>
         );
       case "spend":
-        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#111827", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
+        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#ffffff", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
       case "dailyBudget":
         if (onBudgetUpdate) return <InlineBudgetEditor value={c.dailyBudget} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
-        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.dailyBudget != null ? fmtMoney(c.dailyBudget, 0) : "—"}</span>;
-      case "impressions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
-      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
-      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;
-      case "reach":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.reach)}</span>;
-      case "conversions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{fmtNum(c.conversions)}</span>;
-      case "cpc":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
-      case "cpm":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
-      case "leads":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
-      case "calls":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
-      case "messages":    return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#374151", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
+        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.dailyBudget != null ? fmtMoney(c.dailyBudget, 0) : "—"}</span>;
+      case "impressions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
+      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
+      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;
+      case "reach":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.reach)}</span>;
+      case "conversions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.conversions)}</span>;
+      case "cpc":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
+      case "cpm":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
+      case "leads":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
+      case "calls":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
+      case "messages":    return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
       case "score": {
-        if (c.score == null) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
+        if (c.score == null) return <span style={{ fontSize: 12, color: "#525252" }}>—</span>;
         const s = c.score;
-        const arcColor = s >= 70 ? "#10b981" : s >= 40 ? "#f59e0b" : "#ef4444";
-        const textColor = s >= 70 ? "#059669" : s >= 40 ? "#d97706" : "#dc2626";
+        const arcColor = s >= 70 ? "#a3a3a3" : s >= 40 ? "#737373" : "#e62020";
+        const textColor = s >= 70 ? "#a3a3a3" : s >= 40 ? "#737373" : "#e62020";
         // SVG circle arc: r=14, circumference=2πr≈87.96, dasharray = (s/100)*87.96
         const r = 14;
         const circ = 2 * Math.PI * r;

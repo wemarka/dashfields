@@ -69,7 +69,7 @@ export function InlineBudgetEditor({ value, onSave, fmtMoney }: {
         className="w-24 h-7 px-2 text-sm font-mono border border-input rounded-md bg-background text-foreground outline-none focus:ring-1 focus:ring-ring"
         type="number" min={0} step={1}
       />
-      <button onClick={handleSave} className="text-emerald-500 hover:text-emerald-600"><Check className="w-4 h-4" /></button>
+      <button onClick={handleSave} className="text-foreground hover:text-muted-foreground"><Check className="w-4 h-4" /></button>
       <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
     </div>
   );

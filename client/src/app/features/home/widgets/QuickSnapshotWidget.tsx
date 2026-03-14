@@ -62,7 +62,7 @@ export function QuickSnapshotWidget() {
     {
       label: "Total Spend",
       value: data ? formatCurrency(data.totalSpend) : "$0.00",
-      icon: <DollarSign className="w-3.5 h-3.5 text-emerald-400" />,
+      icon: <DollarSign className="w-3.5 h-3.5 text-foreground" />,
     },
     {
       label: "Impressions",
@@ -72,7 +72,7 @@ export function QuickSnapshotWidget() {
     {
       label: "Click Rate",
       value: data ? `${data.clickRate}%` : "0%",
-      icon: <MousePointerClick className="w-3.5 h-3.5 text-amber-400" />,
+      icon: <MousePointerClick className="w-3.5 h-3.5 text-brand" />,
     },
   ];
 

@@ -41,7 +41,7 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
   );
 
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-foreground" : "text-red-500"}`}>
       {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
       {isPositive ? "+" : ""}{delta.toFixed(2)}
     </span>
@@ -50,14 +50,14 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 60 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+  const color = score >= 60 ? "#a3a3a3" : score >= 40 ? "#737373" : "#e62020";
   const label = score >= 60 ? "Outperforming" : score >= 40 ? "On par" : "Underperforming";
 
   return (
     <div className="flex flex-col items-center gap-1">
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white"
-        style={{ background: `conic-gradient(${color} ${score}%, #e5e7eb ${score}%)` }}
+        style={{ background: `conic-gradient(${color} ${score}%, #262626 ${score}%)` }}
       >
         <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
           <span className="text-xs font-bold" style={{ color }}>{score}</span>
@@ -254,7 +254,7 @@ export default function Competitors() {
                 });
               }}
               disabled={generateSwot.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
             >
               {generateSwot.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Shield className="w-3.5 h-3.5" />}
               SWOT
@@ -301,7 +301,7 @@ export default function Competitors() {
                 {/* Competitive Score */}
                 <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#10b981' : swotData.competitiveScore >= 40 ? '#f59e0b' : '#ef4444'} ${swotData.competitiveScore}%, #e5e7eb ${swotData.competitiveScore}%)` }}>
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#a3a3a3' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #262626 ${swotData.competitiveScore}%)` }}>
                     <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
                       <span className="text-xs font-bold">{swotData.competitiveScore}</span>
                     </div>
@@ -310,10 +310,10 @@ export default function Competitors() {
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
-                    { title: "Strengths",     items: swotData.strengths,     color: "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-800", titleColor: "text-emerald-700 dark:text-emerald-400", icon: "💪" },
-                    { title: "Weaknesses",    items: swotData.weaknesses,    color: "border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800",             titleColor: "text-red-700 dark:text-red-400",     icon: "⚠️" },
-                    { title: "Opportunities", items: swotData.opportunities, color: "border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800",         titleColor: "text-blue-700 dark:text-blue-400",   icon: "🚀" },
-                    { title: "Threats",       items: swotData.threats,       color: "border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800",     titleColor: "text-amber-700 dark:text-amber-400", icon: "🔴" },
+                    { title: "Strengths",     items: swotData.strengths,     color: "border-border bg-muted/30",  titleColor: "text-foreground",          icon: "💪" },
+                    { title: "Weaknesses",    items: swotData.weaknesses,    color: "border-brand/20 bg-brand/5", titleColor: "text-brand",               icon: "⚠️" },
+                    { title: "Opportunities", items: swotData.opportunities, color: "border-border bg-muted/20",  titleColor: "text-muted-foreground",    icon: "🚀" },
+                    { title: "Threats",       items: swotData.threats,       color: "border-border bg-muted/10",  titleColor: "text-muted-foreground",    icon: "🔴" },
                   ].map((q) => (
                     <div key={q.title} className={`border rounded-xl p-3 ${q.color}`}>
                       <p className={`text-xs font-bold mb-2 ${q.titleColor}`}>{q.icon} {q.title}</p>
@@ -357,8 +357,8 @@ export default function Competitors() {
         {summary && (
           <div className="grid grid-cols-4 gap-4 mb-6">
             {[
-              { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-blue-500 bg-blue-500/10" },
-              { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-emerald-500 bg-emerald-500/10" },
+              { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-muted-foreground bg-muted" },
+              { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-foreground bg-muted" },
               { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-red-500 bg-red-500/10" },
               { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-brand bg-brand/10" },
             ].map((stat) => (

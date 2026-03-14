@@ -67,11 +67,11 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
 ];
 
 const STATUS_DOTS: Record<string, string> = {
-  active: "bg-emerald-500",
-  paused: "bg-amber-500",
+  active: "bg-muted",
+  paused: "bg-brand/10",
   draft: "bg-neutral-400",
   ended: "bg-neutral-300",
-  scheduled: "bg-blue-400",
+  scheduled: "bg-muted",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

@@ -98,8 +98,8 @@ export function AccountDetailSheet({ account, onClose, onRefresh }: AccountDetai
               <span className={cn(
                 "text-xs font-semibold px-2 py-0.5 rounded-full",
                 account.isActive
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                  : "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                  ? "bg-muted/40 text-foreground"
+                  : "bg-brand/10 text-brand"
               )}>
                 {account.isActive ? "Connected" : "Disconnected"}
               </span>
@@ -119,7 +119,7 @@ export function AccountDetailSheet({ account, onClose, onRefresh }: AccountDetai
               {account.followersChange !== undefined && account.followersChange !== 0 && (
                 <p className={cn(
                   "text-sm font-medium",
-                  account.followersChange > 0 ? "text-emerald-600" : "text-red-500"
+                  account.followersChange > 0 ? "text-muted-foreground" : "text-brand"
                 )}>
                   {account.followersChange > 0 ? "+" : ""}
                   {formatFollowers(Math.abs(account.followersChange))} this month

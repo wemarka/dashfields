@@ -46,10 +46,10 @@ type NotifGroup = {
 // ─── Icon map ─────────────────────────────────────────────────────────────────
 
 const TYPE_ICONS = {
-  info:    <Info className="h-3.5 w-3.5 text-blue-500" />,
-  warning: <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />,
-  error:   <XCircle className="h-3.5 w-3.5 text-red-500" />,
-  success: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />,
+  info:    <Info className="h-3.5 w-3.5 text-muted-foreground" />,
+  warning: <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground" />,
+  error:   <XCircle className="h-3.5 w-3.5 text-brand" />,
+  success: <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />,
 };
 
 const PAGE_SIZE = 15;
@@ -89,7 +89,7 @@ function GroupRow({ group, onMarkRead }: {
       {/* Group header */}
       <div
         className={`flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer ${
-          group.unreadCount > 0 ? "bg-amber-500/5 hover:bg-amber-500/8" : "hover:bg-foreground/[0.03]"
+          group.unreadCount > 0 ? "bg-brand/5 hover:bg-brand/8" : "hover:bg-foreground/[0.03]"
         }`}
         onClick={() => isMulti && setExpanded((e) => !e)}
       >
@@ -116,13 +116,13 @@ function GroupRow({ group, onMarkRead }: {
           {!isMulti && group.unreadCount > 0 && (
             <button
               onClick={(e) => { e.stopPropagation(); onMarkRead(group.items[0].id); }}
-              className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 hover:bg-blue-700 transition-colors"
+              className="w-1.5 h-1.5 rounded-full bg-brand mt-1.5 hover:bg-brand/80 transition-colors"
               title="Mark as read"
             />
           )}
           {/* Unread count for groups */}
           {isMulti && group.unreadCount > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-[10px] font-bold text-white">
+            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand text-[10px] font-bold text-white">
               {group.unreadCount}
             </span>
           )}
@@ -142,7 +142,7 @@ function GroupRow({ group, onMarkRead }: {
             <div
               key={n.id}
               className={`flex items-start gap-3 pl-10 pr-4 py-2.5 border-b border-[#f0f0f0] last:border-0 transition-colors ${
-                !n.is_read ? "bg-amber-500/5" : "hover:bg-foreground/[0.03]"
+                !n.is_read ? "bg-brand/5" : "hover:bg-foreground/[0.03]"
               }`}
             >
               <div className="flex-1 min-w-0">
@@ -154,7 +154,7 @@ function GroupRow({ group, onMarkRead }: {
               {!n.is_read && (
                 <button
                   onClick={() => onMarkRead(n.id)}
-                  className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 hover:bg-blue-700 transition-colors"
+                  className="shrink-0 w-1.5 h-1.5 rounded-full bg-brand mt-1.5 hover:bg-brand/80 transition-colors"
                   title="Mark as read"
                 />
               )}
@@ -394,7 +394,7 @@ export function NotificationBell() {
                 View all in Alerts →
               </button>
               <span className="text-xs text-muted-foreground/50 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-brand inline-block" />
                 Live
               </span>
             </div>

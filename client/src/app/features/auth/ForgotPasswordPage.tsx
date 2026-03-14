@@ -67,8 +67,8 @@ export default function ForgotPasswordPage() {
           {sent ? (
             <div className="text-center py-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-foreground" />
                 </div>
               </div>
               <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>

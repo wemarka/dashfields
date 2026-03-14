@@ -221,9 +221,9 @@ export function ExportReportModal({ onClose }: ExportReportModalProps) {
                 <strong className="text-foreground">{preview.rowCount}</strong> platform{preview.rowCount !== 1 ? "s" : ""} ·{" "}
                 <strong className="text-foreground">${preview.totalSpend.toFixed(2)}</strong> total spend ·{" "}
                 {preview.hasLiveData ? (
-                  <span className="text-emerald-600">includes live data</span>
+                  <span className="text-foreground">includes live data</span>
                 ) : (
-                  <span className="text-amber-600">estimated data only</span>
+                  <span className="text-brand">estimated data only</span>
                 )}
               </span>
             </div>

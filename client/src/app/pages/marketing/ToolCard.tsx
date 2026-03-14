@@ -56,7 +56,7 @@ export function ToolCard({
             <span className="h-5 w-16 rounded-full bg-neutral-700 animate-pulse inline-block" />
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 bg-neutral-900/70 border border-neutral-700 rounded-full px-2.5 py-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+              <span className="w-1.5 h-1.5 rounded-full bg-brand inline-block" />
               <span className="tabular-nums">{statValue ?? 0}</span>
               <span>{statLabel}</span>
             </span>

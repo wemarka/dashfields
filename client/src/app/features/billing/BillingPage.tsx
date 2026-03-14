@@ -19,10 +19,10 @@ const PLAN_ICONS: Record<WorkspacePlan, React.ElementType> = {
   free: Sparkles, pro: Zap, agency: Building2, enterprise: Crown,
 };
 const PLAN_ICON_COLOR: Record<WorkspacePlan, string> = {
-  free: "text-neutral-500", pro: "text-blue-500", agency: "text-purple-500", enterprise: "text-amber-500",
+  free: "text-neutral-500", pro: "text-brand", agency: "text-muted-foreground", enterprise: "text-brand",
 };
 const PLAN_ICON_BG: Record<WorkspacePlan, string> = {
-  free: "bg-neutral-800", pro: "bg-blue-50", agency: "bg-purple-50", enterprise: "bg-amber-50",
+  free: "bg-neutral-800", pro: "bg-muted", agency: "bg-muted", enterprise: "bg-brand/10",
 };
 const PLAN_ORDER: WorkspacePlan[] = ["free", "pro", "agency"];
 
@@ -43,7 +43,7 @@ const MOCK_INVOICES = [
 
 function CardBrandIcon({ brand }: { brand: string }) {
   const colors: Record<string, string> = {
-    Visa: "bg-blue-600", Mastercard: "bg-red-500", Amex: "bg-green-600",
+    Visa: "bg-muted", Mastercard: "bg-red-500", Amex: "bg-muted",
   };
   return (
     <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-neutral-800/500"}`}>
@@ -93,7 +93,7 @@ export function BillingPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[15px] font-bold text-white">{planConfig.name}</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200 flex items-center gap-0.5">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-muted text-foreground border border-green-200 flex items-center gap-0.5">
                     <Check className="w-2.5 h-2.5" /> Active
                   </span>
                 </div>
@@ -115,7 +115,7 @@ export function BillingPage() {
                     <button
                       onClick={() => handleUpgrade(nextPlan)}
                       className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}
+                      style={{ background: "#e62020" }}
                     >
                       Upgrade
                     </button>
@@ -129,8 +129,8 @@ export function BillingPage() {
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 {planConfig.features.map((feature, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5 text-green-500" />
+                    <div className="w-4 h-4 rounded-full bg-muted border border-green-200 flex items-center justify-center shrink-0">
+                      <Check className="w-2.5 h-2.5 text-foreground" />
                     </div>
                     <span className="text-[12px] text-neutral-400">{feature}</span>
                   </div>
@@ -149,7 +149,7 @@ export function BillingPage() {
             {isOwner && (
               <button
                 onClick={() => toast.info("Payment method management coming soon.")}
-                className="flex items-center gap-1 text-[12px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                className="flex items-center gap-1 text-[12px] font-medium text-brand hover:text-brand transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" /> Add card
               </button>
@@ -202,7 +202,7 @@ export function BillingPage() {
             <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest">Recent Invoices</p>
             <button
               onClick={() => toast.info("Full invoice history coming soon.")}
-              className="text-[12px] font-medium text-blue-500 hover:text-blue-600 transition-colors"
+              className="text-[12px] font-medium text-brand hover:text-brand transition-colors"
             >
               View all →
             </button>
@@ -234,7 +234,7 @@ export function BillingPage() {
                 <span className="text-[12px] text-neutral-500 text-right whitespace-nowrap">{inv.date}</span>
                 <span className="text-[13px] font-semibold text-white text-right">{inv.amount}</span>
                 <span className="flex items-center justify-end">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-600 border border-green-200">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-muted text-foreground border border-green-200">
                     {inv.status}
                   </span>
                 </span>

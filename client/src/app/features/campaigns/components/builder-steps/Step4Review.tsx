@@ -80,9 +80,9 @@ export function Step4Review({
           </div>
         </div>
       )}
-      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-3 flex items-start gap-2">
-        <Info className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-        <p className="text-[11px] text-amber-700 dark:text-amber-400">
+      <div className="bg-brand/10 dark:bg-brand/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-3 flex items-start gap-2">
+        <Info className="w-3.5 h-3.5 text-brand mt-0.5 shrink-0" />
+        <p className="text-[11px] text-brand dark:text-brand">
           Campaign will be saved as <strong>Draft</strong>. You can activate it from the Campaigns page after connecting your ad account.
         </p>
       </div>

@@ -83,15 +83,15 @@ export const ALL_COLUMNS: ColumnDef[] = [
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  active:      { dot: "bg-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", label: "Active" },
-  paused:      { dot: "bg-amber-500",   bg: "bg-amber-500/10",   text: "text-amber-700 dark:text-amber-400",     label: "Paused" },
+  active:      { dot: "bg-muted", bg: "bg-muted", text: "text-foreground dark:text-foreground", label: "Active" },
+  paused:      { dot: "bg-brand/10",   bg: "bg-brand/10",   text: "text-brand dark:text-brand",     label: "Paused" },
   draft:       { dot: "bg-neutral-400",   bg: "bg-neutral-400/10",   text: "text-neutral-600 dark:text-neutral-400",     label: "Draft" },
   ended:       { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Ended" },
-  scheduled:   { dot: "bg-blue-400",    bg: "bg-blue-400/10",    text: "text-blue-700 dark:text-blue-400",       label: "Scheduled" },
+  scheduled:   { dot: "bg-muted",    bg: "bg-muted",    text: "text-muted-foreground dark:text-muted-foreground",       label: "Scheduled" },
   archived:    { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Archived" },
   deleted:     { dot: "bg-red-400",     bg: "bg-red-400/10",     text: "text-red-600 dark:text-red-400",         label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
-  in_process:  { dot: "bg-blue-400",    bg: "bg-blue-400/10",    text: "text-blue-700 dark:text-blue-400",       label: "In Review" },
+  in_process:  { dot: "bg-muted",    bg: "bg-muted",    text: "text-muted-foreground dark:text-muted-foreground",       label: "In Review" },
   with_issues: { dot: "bg-orange-400",  bg: "bg-orange-400/10",  text: "text-orange-700 dark:text-orange-400",   label: "With Issues" },
 };
 

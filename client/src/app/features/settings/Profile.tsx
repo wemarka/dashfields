@@ -118,7 +118,7 @@ export default function Profile() {
           <div className="relative group shrink-0">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+              style={{ background: "linear-gradient(135deg, #e62020, #c41a1a)" }}
             >
               {currentAvatarUrl ? (
                 <img src={currentAvatarUrl} alt="avatar" className="w-full h-full object-cover" />
@@ -136,7 +136,7 @@ export default function Profile() {
             </button>
             <div
               className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#3b82f6", border: "2px solid #fff" }}
+              style={{ backgroundColor: "#e62020", border: "2px solid #0a0a0a" }}
             >
               <span className="text-white text-[10px] font-bold leading-none">+</span>
             </div>
@@ -154,7 +154,7 @@ export default function Profile() {
                   onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setIsEditingName(false); }}
                   autoFocus
                 />
-                <button onClick={handleSaveName} disabled={isSavingName} className="p-1 rounded text-emerald-600 hover:text-emerald-700 transition-colors">
+                <button onClick={handleSaveName} disabled={isSavingName} className="p-1 rounded text-foreground hover:text-muted-foreground transition-colors">
                   {isSavingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 </button>
                 <button onClick={() => { setIsEditingName(false); setDisplayName(user?.name ?? ""); }} className="p-1 rounded text-neutral-500 hover:text-neutral-400 transition-colors">

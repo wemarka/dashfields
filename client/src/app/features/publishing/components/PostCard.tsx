@@ -6,15 +6,15 @@ const PLATFORM_ICON: Record<string, React.ElementType> = {
   facebook: Facebook, instagram: Instagram, linkedin: Linkedin, twitter: Twitter,
 };
 const PLATFORM_COLOR: Record<string, string> = {
-  facebook:  "text-blue-600 bg-blue-50",
-  instagram: "text-pink-600 bg-pink-50",
-  linkedin:  "text-blue-700 bg-blue-50",
+  facebook:  "text-muted-foreground bg-muted",
+  instagram: "text-muted-foreground bg-muted",
+  linkedin:  "text-muted-foreground bg-muted",
   twitter:   "text-neutral-800 bg-neutral-100",
 };
 
 const STATUS_STYLE: Record<string, string> = {
-  published: "bg-emerald-50 text-emerald-700",
-  scheduled: "bg-blue-50 text-blue-700",
+  published: "bg-muted text-foreground",
+  scheduled: "bg-brand/10 text-brand",
   draft:     "bg-neutral-100 text-neutral-600",
 };
 

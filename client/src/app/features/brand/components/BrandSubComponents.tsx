@@ -14,7 +14,7 @@ export function ColorSwatch({ color, onRemove, canAdmin }: { color: string; onRe
       <span className="text-[10px] font-mono text-muted-foreground">{color.toUpperCase()}</span>
       <div className="absolute -top-1 -right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button onClick={copy} className="w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center hover:bg-accent">
-          {copied ? <Check className="w-2.5 h-2.5 text-green-500" /> : <Copy className="w-2.5 h-2.5" />}
+          {copied ? <Check className="w-2.5 h-2.5 text-brand" /> : <Copy className="w-2.5 h-2.5" />}
         </button>
         {canAdmin && (
           <button onClick={onRemove} className="w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10 hover:text-destructive">

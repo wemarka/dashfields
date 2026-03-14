@@ -129,7 +129,7 @@ export default function Settings() {
                     <div
                       className="w-full rounded-xl overflow-hidden transition-all"
                       style={{
-                        border: isActive ? "2px solid #3b82f6" : "2px solid #e5e7eb",
+                        border: isActive ? "2px solid #e62020" : "2px solid #262626",
                         padding: 2,
                       }}
                     >
@@ -137,7 +137,7 @@ export default function Settings() {
                     </div>
                     <span
                       className="text-[12px] font-medium"
-                      style={{ color: isActive ? "#1d4ed8" : "#9ca3af" }}
+                      style={{ color: isActive ? "#e62020" : "#737373" }}
                     >
                       {opt.label}
                     </span>

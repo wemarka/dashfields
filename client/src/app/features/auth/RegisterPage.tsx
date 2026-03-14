@@ -89,8 +89,8 @@ export default function RegisterPage() {
           {success ? (
             <div className="text-center py-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-foreground" />
                 </div>
               </div>
               <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
@@ -200,7 +200,7 @@ function getPasswordStrength(password: string): { score: number; color: string }
   if (password.length >= 12) score++;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
-  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-emerald-500"];
+  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-muted"];
   return { score, color: colors[score - 1] ?? "bg-neutral-900/[0.06]" };
 }
 

@@ -26,10 +26,10 @@ interface Notification {
 }
 
 const TYPE_CONFIG: Record<NotifType, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
-  info:    { icon: <Info className="h-4 w-4" />,          color: "text-blue-600 dark:text-blue-400",       bg: "bg-blue-500/10",    label: "Info"    },
-  warning: { icon: <AlertTriangle className="h-4 w-4" />, color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-500/10",   label: "Warning" },
+  info:    { icon: <Info className="h-4 w-4" />,          color: "text-muted-foreground",       bg: "bg-muted",    label: "Info"    },
+  warning: { icon: <AlertTriangle className="h-4 w-4" />, color: "text-brand",     bg: "bg-brand/10",   label: "Warning" },
   error:   { icon: <XCircle className="h-4 w-4" />,       color: "text-red-600 dark:text-red-400",         bg: "bg-red-500/10",     label: "Alert"   },
-  success: { icon: <CheckCircle className="h-4 w-4" />,   color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10", label: "Success" },
+  success: { icon: <CheckCircle className="h-4 w-4" />,   color: "text-foreground", bg: "bg-muted/60", label: "Success" },
 };
 
 const CATEGORY_KEYWORDS: Record<Exclude<NotifCategory, "all">, string[]> = {
@@ -316,8 +316,8 @@ export default function Notifications() {
             {/* Toggles */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Email Digest", desc: "Daily summary email", icon: Mail, color: "text-blue-500", state: emailDigest, toggle: () => setEmailDigest(v => !v) },
-                { label: "Push Alerts",  desc: "Real-time notifications", icon: Smartphone, color: "text-green-500", state: pushAlerts, toggle: () => setPushAlerts(v => !v) },
+                { label: "Email Digest", desc: "Daily summary email", icon: Mail, color: "text-muted-foreground", state: emailDigest, toggle: () => setEmailDigest(v => !v) },
+                { label: "Push Alerts",  desc: "Real-time notifications", icon: Smartphone, color: "text-foreground", state: pushAlerts, toggle: () => setPushAlerts(v => !v) },
               ].map(item => (
                 <div key={item.label} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
@@ -338,9 +338,9 @@ export default function Notifications() {
             </div>
             {/* Smart alert types */}
             <div className="grid grid-cols-2 gap-3">
-              <SmartAlertCard title="Budget Overspend Alert" description="Triggered when daily spend exceeds 110% of limit" icon={DollarSign} colorClass="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" />
+              <SmartAlertCard title="Budget Overspend Alert" description="Triggered when daily spend exceeds 110% of limit" icon={DollarSign} colorClass="bg-brand/10 text-brand border-amber-500/20" />
               <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" />
-              <SmartAlertCard title="Campaign Milestone" description="Triggered at 50%, 75%, 100% of budget" icon={BarChart3} colorClass="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" />
+              <SmartAlertCard title="Campaign Milestone" description="Triggered at 50%, 75%, 100% of budget" icon={BarChart3} colorClass="bg-muted text-muted-foreground border-border" />
               <SmartAlertCard title="Scheduled Report Ready" description="Triggered when a scheduled report is generated" icon={Star} colorClass="bg-brand/10 text-brand dark:text-brand border-brand/20" />
             </div>
           </div>

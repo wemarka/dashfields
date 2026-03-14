@@ -35,7 +35,7 @@ function CountdownBadge({ nextRun }: { nextRun: Date }) {
   }, [nextRun]);
 
   return (
-    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-brand bg-brand/10 px-2 py-1 rounded-full">
       <Timer className="w-3 h-3" />Next in {remaining}
     </div>
   );
@@ -48,7 +48,7 @@ export function ReportCard({ report, onDelete, onDownload }: {
 }) {
   const scheduleColors: Record<Schedule, string> = {
     none:    "bg-neutral-800 text-neutral-400",
-    weekly:  "bg-blue-100 text-blue-700",
+    weekly:  "bg-muted text-muted-foreground",
     monthly: "bg-brand/10 text-brand",
   };
 

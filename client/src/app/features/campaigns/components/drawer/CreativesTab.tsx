@@ -80,7 +80,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
       isSelected
         ? "border-primary ring-1 ring-primary/30 shadow-sm"
         : isBest
-          ? "border-amber-500/40 shadow-sm"
+          ? "border-brand/20 shadow-sm"
           : "border-border hover:border-border/80 hover:shadow-sm"
     }`}>
       {/* Card Header */}
@@ -119,7 +119,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
             )}
           </div>
           {isBest && (
-            <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow-md z-10 border-2 border-background">
+            <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center shadow-md z-10 border-2 border-background">
               <Trophy className="w-2.5 h-2.5 text-white" />
             </div>
           )}
@@ -130,7 +130,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <p className="text-sm font-semibold text-foreground truncate">{ad.name}</p>
             {isFatigued && (
-              <div className="flex-shrink-0 flex items-center gap-1 text-[9px] text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+              <div className="flex-shrink-0 flex items-center gap-1 text-[9px] text-brand dark:text-brand bg-brand/10 px-1.5 py-0.5 rounded-md">
                 <AlertTriangle className="w-2.5 h-2.5" />
                 Fatigue
               </div>
@@ -145,7 +145,7 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
               <TypeIcon className="w-2.5 h-2.5" /> {typeLabel}
             </Badge>
             {isBest && ad.insights && (
-              <span className="text-[9px] text-amber-600 dark:text-amber-400 font-medium">
+              <span className="text-[9px] text-brand dark:text-brand font-medium">
                 {fmtPct(ad.insights.ctr)} CTR
               </span>
             )}
@@ -156,8 +156,8 @@ function AdCreativeCard({ ad, fmtCurrency, isBest, showCompareCheckbox, isSelect
               {resolvedAvatarUrl ? (
                 <img src={resolvedAvatarUrl} alt={resolvedPageName} className="w-3.5 h-3.5 rounded-full object-cover" />
               ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <span className="text-[6px] font-bold text-blue-600">{resolvedPageName[0]?.toUpperCase()}</span>
+                <div className="w-3.5 h-3.5 rounded-full bg-muted flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-muted-foreground">{resolvedPageName[0]?.toUpperCase()}</span>
                 </div>
               )}
               <span className="text-[9px] text-muted-foreground truncate">{resolvedPageName}</span>
@@ -260,7 +260,7 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
       <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
         {[adA, adB].map((ad, idx) => (
           <div key={ad.id} className="p-3 flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-brand"}`} />
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-muted" : "bg-brand"}`} />
             <div className="w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-muted">
               {(ad.thumbnailUrl || ad.imageUrl) ? (
                 <img src={ad.thumbnailUrl ?? ad.imageUrl ?? ""} alt={ad.name} className="w-full h-full object-cover" />
@@ -288,26 +288,26 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
             <div key={m.label} className="px-4 py-2.5">
               <p className="text-[9px] text-muted-foreground text-center mb-1.5 font-medium">{m.label}</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className={`text-right ${aIsBetter ? "text-emerald-500" : "text-muted-foreground"}`}>
+                <div className={`text-right ${aIsBetter ? "text-foreground" : "text-muted-foreground"}`}>
                   <div className="flex items-center justify-end gap-1 mb-1">
-                    {aIsBetter && <Trophy className="w-2.5 h-2.5 text-amber-500" />}
+                    {aIsBetter && <Trophy className="w-2.5 h-2.5 text-brand" />}
                     <span className="text-xs font-semibold">{m.fmt(m.a)}</span>
                   </div>
                   <div className="h-1 rounded-full bg-muted overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${aIsBetter ? "bg-emerald-500" : "bg-blue-400"}`}
+                      className={`h-full rounded-full ${aIsBetter ? "bg-neutral-400" : "bg-brand"}`}
                       style={{ width: `${(m.a / maxVal) * 100}%`, marginLeft: "auto" }}
                     />
                   </div>
                 </div>
-                <div className={`text-left ${bIsBetter ? "text-emerald-500" : "text-muted-foreground"}`}>
+                <div className={`text-left ${bIsBetter ? "text-foreground" : "text-muted-foreground"}`}>
                   <div className="flex items-center gap-1 mb-1">
                     <span className="text-xs font-semibold">{m.fmt(m.b)}</span>
-                    {bIsBetter && <Trophy className="w-2.5 h-2.5 text-amber-500" />}
+                    {bIsBetter && <Trophy className="w-2.5 h-2.5 text-brand" />}
                   </div>
                   <div className="h-1 rounded-full bg-muted overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${bIsBetter ? "bg-emerald-500" : "bg-brand"}`}
+                      className={`h-full rounded-full ${bIsBetter ? "bg-neutral-400" : "bg-brand"}`}
                       style={{ width: `${(m.b / maxVal) * 100}%` }}
                     />
                   </div>
@@ -331,7 +331,7 @@ function ABComparisonPanel({ adA, adB, fmtCurrency, onClose }: {
             {[{ ad: adA, color: "blue" }, { ad: adB, color: "red" }].map(({ ad, color }, idx) => (
               <div key={ad.id} className="flex flex-col items-center p-3 gap-2">
                 <div className={`flex items-center gap-1.5 self-start`}>
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-blue-500" : "bg-brand"}`} />
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${idx === 0 ? "bg-muted" : "bg-brand"}`} />
                   <span className="text-[9px] font-semibold text-muted-foreground">{idx === 0 ? "Ad A" : "Ad B"}</span>
                 </div>
                 <div className="w-full flex justify-center overflow-x-auto">
@@ -444,9 +444,9 @@ export function CreativesTab({
 
       {/* Best Performer Banner */}
       {!compareMode && bestCtr?.insights && bestCtr.insights.ctr > 0 && (
-        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-          <Trophy className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          <p className="text-[10px] text-amber-600 dark:text-amber-400">
+        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-brand/10 border border-brand/20">
+          <Trophy className="w-4 h-4 text-brand flex-shrink-0" />
+          <p className="text-[10px] text-brand dark:text-brand">
             Best performer: <span className="font-semibold">{bestCtr.name}</span>
             {" "}&mdash; <span className="font-semibold">{fmtPct(bestCtr.insights.ctr)}</span> CTR
           </p>

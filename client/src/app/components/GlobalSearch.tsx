@@ -331,7 +331,7 @@ export function GlobalSearch() {
             <div className="flex items-center flex-1 min-w-0 pr-2">
               {/* Active scope badge */}
               {activeScope && (
-                <span className="shrink-0 flex items-center gap-1 text-[11px] font-medium text-blue-600 bg-blue-50 rounded px-1.5 py-0.5 mr-1.5">
+                <span className="shrink-0 flex items-center gap-1 text-[11px] font-medium text-brand bg-brand/10 rounded px-1.5 py-0.5 mr-1.5">
                   <AtSign className="w-2.5 h-2.5" />{activeScope}
                 </span>
               )}
@@ -371,8 +371,8 @@ export function GlobalSearch() {
                       onMouseEnter={() => setInlineIdx(i)}
                       className={["w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors", isSelected ? "bg-[#f0f0f0]" : "hover:bg-[#f7f7f8]"].join(" ")}
                     >
-                      <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isSelected ? "bg-blue-100" : "bg-foreground/5"}`}>
-                        <s.icon className={`w-3.5 h-3.5 ${isSelected ? "text-blue-600" : "text-foreground/40"}`} />
+                      <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isSelected ? "bg-brand/10" : "bg-foreground/5"}`}>
+                        <s.icon className={`w-3.5 h-3.5 ${isSelected ? "text-brand" : "text-foreground/40"}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[13px] font-medium text-foreground/80">@{s.key}</div>
@@ -436,7 +436,7 @@ export function GlobalSearch() {
               <div>
                 {activeScope && (
                   <div className="px-3 pt-2.5 pb-1 flex items-center gap-1">
-                    <span className="text-[10px] font-semibold tracking-widest uppercase text-blue-500 flex items-center gap-1">
+                    <span className="text-[10px] font-semibold tracking-widest uppercase text-brand flex items-center gap-1">
                       <AtSign className="w-3 h-3" />{activeScope}
                     </span>
                   </div>

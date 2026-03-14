@@ -162,7 +162,7 @@ export function TeamTab() {
                 .filter((i: Record<string, unknown>) => i.status === "pending")
                 .map((inv: Record<string, unknown>) => (
                   <div key={inv.id as number} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/30">
-                    <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <Clock className="w-3.5 h-3.5 text-brand shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{inv.email as string}</p>
                       <p className="text-[11px] text-muted-foreground">Expires {new Date(inv.expires_at as string).toLocaleDateString()}</p>

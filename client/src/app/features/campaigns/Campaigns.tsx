@@ -505,15 +505,15 @@ export default function Campaigns() {
         {/* ── Connect Banner ──────────────────────────────────────────────── */}
         {!hasAnyConnection && (
           <div className="mx-7 mt-5 rounded-xl px-5 py-4 flex items-center justify-between gap-4"
-            style={{ backgroundColor: "#f9fafb", border: "1px solid #e5e7eb" }}>
+            style={{ backgroundColor: "#171717", border: "1px solid #262626" }}>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "#eff6ff" }}>
-                <Link2 className="w-4 h-4" style={{ color: "#3b82f6" }} />
+                style={{ backgroundColor: "rgba(230,32,32,.08)" }}>
+                <Link2 className="w-4 h-4" style={{ color: "#e62020" }} />
               </div>
               <div>
-                <p className="text-[13px] font-semibold" style={{ color: "#111827" }}>Connect your ad platforms</p>
-                <p className="text-[12px] mt-0.5" style={{ color: "#9ca3af" }}>
+                <p className="text-[13px] font-semibold" style={{ color: "#ffffff" }}>Connect your ad platforms</p>
+                <p className="text-[12px] mt-0.5" style={{ color: "#a3a3a3" }}>
                   Link your Meta, TikTok, LinkedIn, or other ad accounts to see real campaign data here.
                 </p>
               </div>
@@ -521,8 +521,8 @@ export default function Campaigns() {
             <Link href="/connections">
               <button
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-colors"
-                style={{ backgroundColor: "#111827", color: "#ffffff" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f2937"; }}
+                style={{ backgroundColor: "#e62020", color: "#ffffff" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#c41a1a"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#111827"; }}
               >
                 Connect Now
@@ -645,8 +645,8 @@ export default function Campaigns() {
               <button
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] transition-colors"
                 style={{
-                  backgroundColor: datePreset !== "last_30d" ? "#eff6ff" : "#f3f4f6",
-                  color: datePreset !== "last_30d" ? "#2563eb" : "#374151",
+                  backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#262626",
+                  color: datePreset !== "last_30d" ? "#e62020" : "#a3a3a3",
                   border: "none",
                 }}
               >
@@ -657,8 +657,8 @@ export default function Campaigns() {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <div className="flex">
-                <div className="border-r p-2 space-y-0.5 min-w-[130px]" style={{ borderColor: "#f0f0f0" }}>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest px-2 py-1" style={{ color: "#9ca3af" }}>
+                <div className="border-r p-2 space-y-0.5 min-w-[130px]" style={{ borderColor: "#262626" }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest px-2 py-1" style={{ color: "#737373" }}>
                     Quick Select
                   </p>
                   {DATE_PRESETS.map((d) => (
@@ -671,21 +671,21 @@ export default function Campaigns() {
                       }}
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                       style={{
-                        backgroundColor: datePreset === d.value ? "#eff6ff" : "transparent",
-                        color: datePreset === d.value ? "#2563eb" : "#374151",
+                        backgroundColor: datePreset === d.value ? "rgba(230,32,32,.08)" : "transparent",
+                        color: datePreset === d.value ? "#e62020" : "#a3a3a3",
                         fontWeight: datePreset === d.value ? 500 : 400,
                       }}
                     >
                       {d.label}
                     </button>
                   ))}
-                  <div style={{ borderTop: "1px solid #f0f0f0", margin: "4px 0" }} />
+                  <div style={{ borderTop: "1px solid #262626", margin: "4px 0" }} />
                   <button
                     onClick={() => setDatePreset("custom")}
                     className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                     style={{
-                      backgroundColor: datePreset === "custom" ? "#eff6ff" : "transparent",
-                      color: datePreset === "custom" ? "#2563eb" : "#374151",
+                      backgroundColor: datePreset === "custom" ? "rgba(230,32,32,.08)" : "transparent",
+                      color: datePreset === "custom" ? "#e62020" : "#a3a3a3",
                     }}
                   >
                     Custom Range

@@ -22,15 +22,15 @@ import {
 } from "@/core/components/ui/alert-dialog";
 
 const statusDot: Record<string, string> = {
-  active: "bg-emerald-500", paused: "bg-amber-500",
-  draft: "bg-neutral-400", ended: "bg-neutral-300", scheduled: "bg-blue-400",
+  active: "bg-neutral-300", paused: "bg-brand",
+  draft: "bg-neutral-500", ended: "bg-neutral-600", scheduled: "bg-neutral-400",
 };
 const statusBadge: Record<string, string> = {
-  active:    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  paused:    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  active:    "bg-muted text-foreground",
+  paused:    "bg-brand/10 text-brand",
   draft:     "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
   ended:     "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500",
-  scheduled: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  scheduled: "bg-muted text-muted-foreground",
 };
 
 interface LocalCampaign {
@@ -345,14 +345,14 @@ export function LocalCampaignTable({ campaigns, loading, onStatusChange, onCreat
                       </td>
                     )}
                     {visibleCols.has("spend") && (
-                      <td className="px-4 py-3.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                      <td className="px-4 py-3.5 text-sm font-medium text-brand">
                         {(c.totalSpend ?? 0) > 0 ? fmt(c.totalSpend, "currency") : <span className="text-muted-foreground text-xs">—</span>}
                       </td>
                     )}
                     {visibleCols.has("ctr") && (
                       <td className="px-4 py-3.5 text-sm">
                         {(c.avgCtr ?? 0) > 0 ? (
-                          <span className={`font-medium ${(c.avgCtr ?? 0) >= 3 ? "text-emerald-600 dark:text-emerald-400" : (c.avgCtr ?? 0) >= 1.5 ? "text-amber-600" : "text-red-500"}`}>
+                          <span className={`font-medium ${(c.avgCtr ?? 0) >= 3 ? "text-foreground" : (c.avgCtr ?? 0) >= 1.5 ? "text-muted-foreground" : "text-brand"}`}>
                             {fmt(c.avgCtr, "percent")}
                           </span>
                         ) : <span className="text-muted-foreground text-xs">—</span>}
@@ -361,7 +361,7 @@ export function LocalCampaignTable({ campaigns, loading, onStatusChange, onCreat
                     {visibleCols.has("roas") && (
                       <td className="px-4 py-3.5 text-sm">
                         {(c.avgRoas ?? 0) > 0 ? (
-                          <span className={`font-medium ${(c.avgRoas ?? 0) >= 4 ? "text-emerald-600 dark:text-emerald-400" : (c.avgRoas ?? 0) >= 2 ? "text-amber-600" : "text-red-500"}`}>
+                          <span className={`font-medium ${(c.avgRoas ?? 0) >= 4 ? "text-foreground" : (c.avgRoas ?? 0) >= 2 ? "text-muted-foreground" : "text-brand"}`}>
                             {(c.avgRoas ?? 0).toFixed(2)}x
                           </span>
                         ) : <span className="text-muted-foreground text-xs">—</span>}
@@ -382,7 +382,7 @@ export function LocalCampaignTable({ campaigns, loading, onStatusChange, onCreat
                         )}
                         {c.status === "draft" && (
                           <button onClick={() => onStatusChange(c.id, "active")} className="p-1.5 rounded-lg hover:bg-foreground/8 transition-colors" title={t("campaigns.activate", "Activate")}>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />
                           </button>
                         )}
                         <DropdownMenu>

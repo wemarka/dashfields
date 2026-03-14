@@ -160,7 +160,7 @@ export function CreativeGrid({
               <span>{totalCount} صورة</span>
             </span>
             {approvedCount > 0 && (
-              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-medium px-2.5 py-0.5">
+              <Badge className="bg-muted text-foreground border border-emerald-100 text-xs font-medium px-2.5 py-0.5">
                 {Math.round((approvedCount / totalCount) * 100)}% موافق عليها
               </Badge>
             )}
@@ -221,7 +221,7 @@ export function CreativeGrid({
               size="sm"
               onClick={() => void handleGenerateVariantB()}
               disabled={isGeneratingB}
-              className="gap-1.5 text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-50"
+              className="gap-1.5 text-xs h-8 border-purple-200 text-muted-foreground hover:bg-muted"
             >
               {isGeneratingB
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />جاري التوليد...</>
@@ -293,7 +293,7 @@ export function CreativeGrid({
                     {platformCreatives.length} صورة
                   </Badge>
                   {platformApproved > 0 && (
-                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-medium">
+                    <Badge className="bg-muted text-foreground border border-emerald-100 text-xs font-medium">
                       {platformApproved} موافق
                     </Badge>
                   )}
@@ -375,7 +375,7 @@ function CreativeCard({
 
         {/* Approved checkmark */}
         {isApproved && (
-          <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+          <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-muted flex items-center justify-center shadow-lg">
             <Check className="w-4 h-4 text-white" />
           </div>
         )}
@@ -385,8 +385,8 @@ function CreativeCard({
           <span className={cn(
             "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold",
             creative.variant === "A"
-              ? "bg-blue-500/90 text-white"
-              : "bg-purple-500/90 text-white",
+              ? "bg-muted text-white"
+              : "bg-muted text-white",
           )}>
             {creative.variant}
           </span>
@@ -406,8 +406,8 @@ function CreativeCard({
             className={cn(
               "flex-1 py-2 rounded-xl text-xs font-semibold transition-all duration-150",
               isApproved
-                ? "bg-emerald-50 text-emerald-600 cursor-default"
-                : "bg-neutral-800/50 hover:bg-emerald-50 hover:text-emerald-700 text-neutral-400",
+                ? "bg-muted text-foreground cursor-default"
+                : "bg-neutral-800/50 hover:bg-muted hover:text-foreground text-neutral-400",
             )}
           >
             <Check className="w-3 h-3 inline mr-1" />
@@ -423,7 +423,7 @@ function CreativeCard({
           </button>
           <button
             onClick={onDownload}
-            className="w-9 h-9 rounded-xl bg-neutral-800/50 hover:bg-blue-50 hover:text-blue-600 text-neutral-500 flex items-center justify-center transition-all duration-150"
+            className="w-9 h-9 rounded-xl bg-neutral-800/50 hover:bg-muted hover:text-muted-foreground text-neutral-500 flex items-center justify-center transition-all duration-150"
             title="تحميل"
           >
             <Download className="w-3.5 h-3.5" />

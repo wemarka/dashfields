@@ -6,7 +6,7 @@ import { SENTIMENT_CONFIG, type SentimentResult } from "./constants";
 
 export function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(((score + 1) / 2) * 100);
-  const color = score > 0.3 ? "bg-emerald-500" : score < -0.3 ? "bg-red-500" : "bg-blue-500";
+  const color = score > 0.3 ? "bg-muted" : score < -0.3 ? "bg-red-500" : "bg-muted";
   return (
     <div className="relative w-full h-2.5 bg-muted rounded-full overflow-hidden">
       <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${pct}%` }} />
@@ -52,7 +52,7 @@ export function ResultCard({ result, compact = false }: { result: SentimentResul
           <div className="flex flex-wrap gap-1.5">
             {result.keywords.slice(0, 10).map((kw, i) => (
               <span key={i} className={`text-xs px-2 py-0.5 rounded-full border capitalize font-medium ${
-                kw.impact === "positive" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" :
+                kw.impact === "positive" ? "bg-muted border-border text-foreground dark:text-foreground" :
                 kw.impact === "negative" ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400" :
                 "bg-muted border-border text-muted-foreground"
               }`}>{kw.word}</span>
@@ -63,12 +63,12 @@ export function ResultCard({ result, compact = false }: { result: SentimentResul
       {!compact && result.suggestions.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Improvement Suggestions
+            <Lightbulb className="w-3.5 h-3.5 text-brand" /> Improvement Suggestions
           </p>
           <ul className="space-y-1">
             {result.suggestions.map((s, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-foreground">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />{s}
+                <CheckCircle2 className="w-3.5 h-3.5 text-foreground mt-0.5 shrink-0" />{s}
               </li>
             ))}
           </ul>

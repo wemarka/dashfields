@@ -54,11 +54,12 @@ const METRICS: Metric[] = [
   { key: "cpm",         label: "CPM",           format: "currency",  higherIsBetter: false },
 ];
 
+// Brand palette comparison colors — red, white, neutral-400, neutral-600
 const COLORS = [
-  { main: "#E62020", light: "bg-brand/10", text: "text-brand", border: "border-brand", dot: "bg-brand", name: "A" },
-  { main: "#3b82f6", light: "bg-blue-50",   text: "text-blue-600",   border: "border-blue-400",   dot: "bg-blue-500",   name: "B" },
-  { main: "#10b981", light: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-400", dot: "bg-emerald-500", name: "C" },
-  { main: "#f59e0b", light: "bg-amber-50",  text: "text-amber-600",  border: "border-amber-400",  dot: "bg-amber-500",  name: "D" },
+  { main: "#e62020", light: "bg-brand/10",    text: "text-brand",            border: "border-brand",    dot: "bg-brand",    name: "A" },
+  { main: "#ffffff", light: "bg-white/5",     text: "text-foreground",       border: "border-border",   dot: "bg-white",    name: "B" },
+  { main: "#a3a3a3", light: "bg-neutral-400/10", text: "text-neutral-400",  border: "border-neutral-400", dot: "bg-neutral-400", name: "C" },
+  { main: "#737373", light: "bg-neutral-500/10", text: "text-neutral-500",  border: "border-neutral-500", dot: "bg-neutral-500", name: "D" },
 ];
 
 const MAX_CAMPAIGNS = 4;
@@ -394,7 +395,7 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
                     key={c.id}
                     className={`rounded-xl border p-3 text-center transition-all ${
                       overallWinnerIdx === idx
-                        ? "border-amber-300 bg-amber-50 ring-1 ring-amber-200"
+                        ? "border-brand/30 bg-brand/5 ring-1 ring-brand/20"
                         : "border-border bg-card"
                     }`}
                   >
@@ -405,7 +406,7 @@ export function CampaignCompareDrawer({ onClose }: CampaignCompareDrawerProps) {
                     <div className="text-2xl font-bold text-foreground">{winnerCounts[idx]}</div>
                     <div className="text-[10px] text-muted-foreground mt-0.5">
                       {overallWinnerIdx === idx ? (
-                        <span className="flex items-center justify-center gap-0.5 text-amber-600 font-bold">
+                        <span className="flex items-center justify-center gap-0.5 text-brand font-bold">
                           <Trophy className="w-3 h-3" /> Winner
                         </span>
                       ) : (

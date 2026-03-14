@@ -94,7 +94,7 @@ export function ContentPlanView({
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1.5 text-neutral-400">
-                      <Users className="w-3 h-3 text-blue-500" />
+                      <Users className="w-3 h-3 text-muted-foreground" />
                       <span>{insight.ageRange}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
@@ -102,7 +102,7 @@ export function ContentPlanView({
                       <span>{insight.estimatedReach?.toLocaleString()} وصول</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
-                      <Clock className="w-3 h-3 text-green-500" />
+                      <Clock className="w-3 h-3 text-foreground" />
                       <span>{insight.bestTimes?.slice(0, 2).join(", ")}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
@@ -190,7 +190,7 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
         <Badge
           className={cn(
             "text-[10px] border-0",
-            item.status === "draft" ? "bg-neutral-800 text-neutral-400" : "bg-green-100 text-green-700",
+            item.status === "draft" ? "bg-neutral-800 text-neutral-400" : "bg-muted text-foreground",
           )}
         >
           {item.status === "draft" ? "مسودة" : "جاهز"}
@@ -202,7 +202,7 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
       {item.hashtags?.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {item.hashtags.slice(0, 5).map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-0.5 text-[10px] text-blue-600 bg-blue-50 rounded px-1.5 py-0.5">
+            <span key={tag} className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground bg-muted rounded px-1.5 py-0.5">
               <Hash className="w-2.5 h-2.5" />
               {tag.replace(/^#/, "")}
             </span>

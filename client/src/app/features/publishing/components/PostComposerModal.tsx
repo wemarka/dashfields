@@ -320,7 +320,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
             />
             <span className={
               "absolute bottom-2 right-3 text-xs font-medium " +
-              (isOverLimit ? "text-red-500" : remaining < 50 ? "text-amber-500" : "text-muted-foreground")
+              (isOverLimit ? "text-brand" : remaining < 50 ? "text-muted-foreground" : "text-muted-foreground")
             }>
               {remaining}
             </span>
@@ -328,7 +328,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
           {/* Twitter warning */}
           {showTwitterWarning && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted border border-border text-xs text-muted-foreground">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               Twitter/X has a 280 character limit. Your post will be truncated for Twitter.
             </div>
@@ -352,7 +352,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                   </div>
                 )}
                 {imageUrl && !isUploadingImage && (
-                  <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                  <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full">
                     Uploaded ✓
                   </div>
                 )}
@@ -401,7 +401,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                 <button
                   onClick={handleImproveContent}
                   disabled={isAiLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-600 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-muted-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
                 >
                   {improveContent.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
                   Improve
@@ -409,7 +409,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                 <button
                   onClick={handleGenerateHashtags}
                   disabled={isAiLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted border border-border text-xs font-medium text-muted-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
                 >
                   {generateHashtags.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Hash className="w-3.5 h-3.5" />}
                   Hashtags
@@ -458,14 +458,14 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
 
           {/* Suggested Hashtags */}
           {suggestedHashtags.length > 0 && (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 space-y-2">
-              <p className="text-xs font-semibold text-emerald-700">Suggested Hashtags — click to add</p>
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <p className="text-xs font-semibold text-foreground">Suggested Hashtags — click to add</p>
               <div className="flex flex-wrap gap-1.5">
                 {suggestedHashtags.map((tag) => (
                   <button
                     key={tag}
                     onClick={() => appendHashtag(tag)}
-                    className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium hover:bg-emerald-200 transition-colors border border-emerald-200"
+                    className="px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors border border-border"
                   >
                     {tag}
                   </button>
@@ -497,7 +497,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                     <PlatformIcon platform={p.id} className="w-3.5 h-3.5" />
                     {p.name}
                     {isConnected && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" title="Connected" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" title="Connected" />
                     )}
                   </button>
                 );
@@ -558,9 +558,9 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
             const bestTime = getBestTime(selectedPlatforms);
             if (!bestTime) return null;
             return (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <TrendingUp className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                <p className="text-xs text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand/5 border border-brand/20">
+                <TrendingUp className="w-3.5 h-3.5 text-brand shrink-0" />
+                <p className="text-xs text-brand">
                   <span className="font-semibold">Best time to post</span> on {selectedPlatforms[0]}: <span className="font-semibold">{bestTime}</span>
                 </p>
                 <button
@@ -579,7 +579,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
                       toast.success(`Scheduled for ${bestTime}!`);
                     }
                   }}
-                  className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-700 text-[10px] font-medium hover:bg-amber-500/30 transition-colors whitespace-nowrap"
+                  className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-lg bg-brand/20 text-brand text-[10px] font-medium hover:bg-brand/30 transition-colors whitespace-nowrap"
                 >
                   <Zap className="w-3 h-3" />
                   Use this time

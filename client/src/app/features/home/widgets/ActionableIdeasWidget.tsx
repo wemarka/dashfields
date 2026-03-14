@@ -15,14 +15,14 @@ const IDEAS = [
   {
     icon: TrendingUp,
     label: "Analyze last week's performance and suggest optimizations",
-    iconColor: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
+    iconColor: "text-foreground",
+    bgColor: "bg-muted",
   },
   {
     icon: Target,
     label: "Build a retargeting audience from website visitors",
-    iconColor: "text-amber-400",
-    bgColor: "bg-amber-500/10",
+    iconColor: "text-brand",
+    bgColor: "bg-brand/10",
   },
   {
     icon: Megaphone,

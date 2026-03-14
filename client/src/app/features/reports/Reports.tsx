@@ -126,7 +126,7 @@ export default function Reports() {
         {cronStatus && (
           <div className="mb-5 flex items-center justify-between bg-card border border-border rounded-2xl px-5 py-3">
             <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${cronStatus.running ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40"}`} />
+              <div className={`w-2 h-2 rounded-full ${cronStatus.running ? "bg-muted animate-pulse" : "bg-muted-foreground/40"}`} />
               <div>
                 <p className="text-xs font-medium text-foreground">Auto-Scheduler {cronStatus.running ? "Active" : "Inactive"}</p>
                 <p className="text-xs text-muted-foreground">
@@ -145,8 +145,8 @@ export default function Reports() {
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
             { label: "Total Reports", value: reports.length, icon: FileText, color: "text-brand bg-brand/10" },
-            { label: "Scheduled", value: scheduledCount, icon: Calendar, color: "text-blue-500 bg-blue-500/10" },
-            { label: "Generated Today", value: reports.filter(r => r.last_sent_at && new Date(r.last_sent_at).toDateString() === new Date().toDateString()).length, icon: CheckCircle2, color: "text-green-500 bg-green-500/10" },
+            { label: "Scheduled", value: scheduledCount, icon: Calendar, color: "text-muted-foreground bg-muted" },
+            { label: "Generated Today", value: reports.filter(r => r.last_sent_at && new Date(r.last_sent_at).toDateString() === new Date().toDateString()).length, icon: CheckCircle2, color: "text-foreground bg-muted" },
           ].map((stat) => (
             <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}><stat.icon className="w-5 h-5" /></div>

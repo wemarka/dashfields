@@ -84,21 +84,21 @@ const AI_INSIGHTS = [
 ];
 
 const IMPACT_COLORS: Record<string, string> = {
-  High:   "bg-red-50 text-red-700",
-  Medium: "bg-amber-50 text-amber-700",
-  Low:    "bg-emerald-50 text-emerald-700",
+  High:   "bg-brand/10 text-brand",
+  Medium: "bg-muted text-muted-foreground",
+  Low:    "bg-muted/60 text-muted-foreground",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  opportunity: "border-blue-100 bg-blue-50/40",
-  warning:     "border-amber-100 bg-amber-50/40",
-  success:     "border-emerald-100 bg-emerald-50/40",
+  opportunity: "border-brand/20 bg-brand/5",
+  warning:     "border-border bg-muted/40",
+  success:     "border-border bg-muted/30",
 };
 
 const ICON_COLORS: Record<string, string> = {
-  opportunity: "text-blue-600",
-  warning:     "text-amber-600",
-  success:     "text-emerald-600",
+  opportunity: "text-brand",
+  warning:     "text-muted-foreground",
+  success:     "text-muted-foreground",
 };
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
@@ -258,9 +258,9 @@ export default function Insights() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: Eye,          label: "Total Impressions", value: totalImpressions.toLocaleString(), color: "text-brand" },
-                { icon: MousePointer, label: "Total Clicks",      value: totalClicks.toLocaleString(),      color: "text-blue-500" },
-                { icon: DollarSign,   label: "Total Spend",       value: fmt(totalSpend),       color: "text-emerald-500" },
-                { icon: Users,        label: "Engagements",       value: totalEngagements.toLocaleString(), color: "text-pink-500" },
+                { icon: MousePointer, label: "Total Clicks",      value: totalClicks.toLocaleString(),      color: "text-muted-foreground" },
+                { icon: DollarSign,   label: "Total Spend",       value: fmt(totalSpend),       color: "text-brand" },
+                { icon: Users,        label: "Engagements",       value: totalEngagements.toLocaleString(), color: "text-muted-foreground" },
               ].map((kpi) => (
                 <div key={kpi.label} className="glass rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -286,7 +286,7 @@ export default function Insights() {
                       {getPlatform(bestPlatform.platform).name} — Best Performing Platform
                     </span>
                     {bestPlatform.isLive && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-medium">Live</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-brand/10 text-brand font-medium">Live</span>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">{bestPlatform.accountName}</p>
@@ -415,31 +415,31 @@ export default function Insights() {
                         <tr key={row.platform} className="hover:bg-neutral-900/3 transition-colors">
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-2">
-                              {i === 0 && <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                              {i === 0 && <Trophy className="w-3.5 h-3.5 text-brand shrink-0" />}
                               <div className={"w-6 h-6 rounded-lg flex items-center justify-center shrink-0 " + p.bgLight}>
                                 <PlatformIcon platform={row.platform} className={"w-3.5 h-3.5 " + p.textColor} />
                               </div>
                               <span className="font-medium text-foreground">{row.name}</span>
                               {row.isLive && (
-                                <span className="text-[10px] px-1 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Live</span>
+                                <span className="text-[10px] px-1 py-0.5 rounded-full bg-brand/10 text-brand">Live</span>
                               )}
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right text-foreground font-medium">${row.spend.toFixed(2)}</td>
                           <td className="px-4 py-3 text-right">
-                            <span className={"flex items-center justify-end gap-1 " + (row.ctr >= 2 ? "text-emerald-600" : "text-muted-foreground")}>
+                            <span className={"flex items-center justify-end gap-1 " + (row.ctr >= 2 ? "text-foreground" : "text-muted-foreground")}>
                               {row.ctr >= 2 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                               {row.ctr.toFixed(2)}%
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className={"flex items-center justify-end gap-1 " + (row.cpc <= 1 ? "text-emerald-600" : row.cpc <= 2 ? "text-amber-600" : "text-red-500")}>
+                            <span className={"flex items-center justify-end gap-1 " + (row.cpc <= 1 ? "text-foreground" : row.cpc <= 2 ? "text-muted-foreground" : "text-brand")}>
                               ${row.cpc.toFixed(2)}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right text-muted-foreground">${row.cpm.toFixed(2)}</td>
                           <td className="px-5 py-3 text-right">
-                            <span className={"font-semibold " + (i === 0 ? "text-amber-600" : "text-foreground")}>
+                            <span className={"font-semibold " + (i === 0 ? "text-brand" : "text-foreground")}>
                               {row.roas.toFixed(2)}x
                             </span>
                           </td>
@@ -456,7 +456,7 @@ export default function Insights() {
         {/* ── AI Recommendations ────────────────────────────────────────────── */}
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-amber-500" />
+            <Lightbulb className="w-4 h-4 text-muted-foreground" />
             AI Recommendations
           </h2>
           <div className="space-y-3">

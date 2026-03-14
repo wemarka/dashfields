@@ -19,7 +19,7 @@ export function StepIndicator({ step }: { step: Step }) {
           <div className="flex flex-col items-center gap-1">
             <div className={[
               "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all",
-              step > s.n  ? "bg-emerald-500 text-white" :
+              step > s.n  ? "bg-primary text-primary-foreground" :
               step === s.n ? "bg-primary text-primary-foreground ring-2 ring-primary/30" :
               "bg-muted text-muted-foreground",
             ].join(" ")}>
@@ -30,7 +30,7 @@ export function StepIndicator({ step }: { step: Step }) {
             </span>
           </div>
           {i < steps.length - 1 && (
-            <div className={`flex-1 h-0.5 mx-1 mb-4 rounded-full transition-all ${step > s.n ? "bg-emerald-500" : "bg-muted"}`} />
+            <div className={`flex-1 h-0.5 mx-1 mb-4 rounded-full transition-all ${step > s.n ? "bg-primary" : "bg-muted"}`} />
           )}
         </div>
       ))}

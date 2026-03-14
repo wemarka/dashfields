@@ -82,8 +82,8 @@ export default function AcceptInvite() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-              <CheckCircle2 className="h-8 w-8 text-green-500" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <CheckCircle2 className="h-8 w-8 text-foreground" />
             </div>
             <CardTitle>Already Accepted</CardTitle>
             <CardDescription>This invitation has already been accepted.</CardDescription>
@@ -124,8 +124,8 @@ export default function AcceptInvite() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-              <CheckCircle2 className="h-8 w-8 text-green-500" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <CheckCircle2 className="h-8 w-8 text-foreground" />
             </div>
             <CardTitle>Welcome aboard!</CardTitle>
             <CardDescription>
@@ -184,7 +184,7 @@ export default function AcceptInvite() {
 
           {/* Auth notice if not logged in */}
           {!user && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+            <div className="rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm text-brand">
               You need to sign in to accept this invitation. You'll be redirected back after login.
             </div>
           )}

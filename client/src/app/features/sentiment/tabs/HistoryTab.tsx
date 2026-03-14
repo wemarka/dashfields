@@ -77,7 +77,7 @@ export function HistoryTab() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${item.score > 0.3 ? "bg-emerald-500" : item.score < -0.3 ? "bg-red-500" : "bg-blue-500"}`}
+                            <div className={`h-full rounded-full ${item.score > 0.3 ? "bg-neutral-300" : item.score < -0.3 ? "bg-brand" : "bg-neutral-500"}`}
                               style={{ width: `${Math.round(((item.score + 1) / 2) * 100)}%` }} />
                           </div>
                           <span className="text-xs text-muted-foreground">{Math.round(((item.score + 1) / 2) * 100)}</span>

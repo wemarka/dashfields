@@ -67,7 +67,7 @@ export function SentimentTab() {
           {/* Score bar */}
           <div className="w-full h-2 bg-muted rounded-full mb-4 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${result.score > 0.3 ? "bg-emerald-500" : result.score < -0.3 ? "bg-red-500" : "bg-blue-500"}`}
+              className={`h-full rounded-full transition-all duration-500 ${result.score > 0.3 ? "bg-neutral-400" : result.score < -0.3 ? "bg-brand" : "bg-neutral-600"}`}
               style={{ width: `${scorePercent}%` }}
             />
           </div>
@@ -91,7 +91,7 @@ export function SentimentTab() {
           {result.suggestions.length > 0 && (
             <div>
               <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <Lightbulb className="w-3.5 h-3.5 text-muted-foreground" />
                 Improvement Suggestions
               </p>
               <ul className="space-y-1.5">

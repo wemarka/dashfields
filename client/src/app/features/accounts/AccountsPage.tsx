@@ -120,7 +120,7 @@ export default function AccountsPage() {
               total accounts
             </div>
             {activeCount > 0 && (
-              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Wifi className="w-3.5 h-3.5" />
                 <span className="font-medium">{activeCount}</span> connected
               </div>

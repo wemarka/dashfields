@@ -80,8 +80,8 @@ export const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 
 // ─── Status Config ──────────────────────────────────────────────────────────
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  active:    { dot: "bg-emerald-500", bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", label: "Active" },
-  paused:    { dot: "bg-amber-500",   bg: "bg-amber-500/10",   text: "text-amber-700 dark:text-amber-400",     label: "Paused" },
+  active:    { dot: "bg-neutral-300", bg: "bg-muted", text: "text-foreground", label: "Active" },
+  paused:    { dot: "bg-brand",   bg: "bg-brand/10",   text: "text-brand",     label: "Paused" },
   draft:     { dot: "bg-neutral-400",   bg: "bg-neutral-400/10",   text: "text-neutral-600 dark:text-neutral-400",     label: "Draft" },
   ended:     { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Ended" },
   archived:  { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Archived" },

@@ -157,8 +157,8 @@ function TopPostsTable({ posts, sortBy, onSortChange }: {
                 </td>
                 <td className="text-right py-3 px-3">
                   <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
-                    post.engagementRate >= 5 ? "bg-emerald-100 text-emerald-700" :
-                    post.engagementRate >= 2 ? "bg-blue-100 text-blue-700" :
+                    post.engagementRate >= 5 ? "bg-muted text-foreground" :
+                    post.engagementRate >= 2 ? "bg-muted text-muted-foreground" :
                     "bg-muted text-muted-foreground"
                   }`}>
                     {post.engagementRate.toFixed(1)}%
@@ -195,11 +195,11 @@ export default function PostAnalytics() {
 
   const kpis = [
     { label: "Total Posts",      value: summary?.totalPosts ?? 0,        icon: BarChart2, color: "text-brand bg-brand/10", format: "number" },
-    { label: "Total Engagement", value: summary?.totalEngagement ?? 0,   icon: TrendingUp, color: "text-blue-500 bg-blue-500/10",   format: "number" },
-    { label: "Avg Engagement",   value: summary?.avgEngagementPerPost ?? 0, icon: Heart,  color: "text-pink-500 bg-pink-500/10",    format: "number" },
-    { label: "Total Reach",      value: summary?.totalReach ?? 0,        icon: Users,     color: "text-emerald-500 bg-emerald-500/10", format: "number" },
+    { label: "Total Engagement", value: summary?.totalEngagement ?? 0,   icon: TrendingUp, color: "text-muted-foreground bg-muted",   format: "number" },
+    { label: "Avg Engagement",   value: summary?.avgEngagementPerPost ?? 0, icon: Heart,  color: "text-brand bg-brand/10",    format: "number" },
+    { label: "Total Reach",      value: summary?.totalReach ?? 0,        icon: Users,     color: "text-foreground bg-muted", format: "number" },
     { label: "Total Likes",      value: summary?.totalLikes ?? 0,        icon: Heart,     color: "text-red-500 bg-red-500/10",      format: "number" },
-    { label: "Avg ER%",          value: summary?.avgEngagementRate ?? 0, icon: TrendingUp, color: "text-amber-500 bg-amber-500/10", format: "percent" },
+    { label: "Avg ER%",          value: summary?.avgEngagementRate ?? 0, icon: TrendingUp, color: "text-brand bg-brand/10", format: "percent" },
   ];
 
   const tabs = [
@@ -364,8 +364,8 @@ export default function PostAnalytics() {
                         <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -374,8 +374,8 @@ export default function PostAnalytics() {
                     <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
                     <Legend />
                     <Area type="monotone" dataKey="engagement" stroke="#E62020" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
-                    <Area type="monotone" dataKey="reach" stroke="#06b6d4" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
-                    <Area type="monotone" dataKey="likes" stroke="#f43f5e" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
+                    <Area type="monotone" dataKey="reach" stroke="#a3a3a3" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
+                    <Area type="monotone" dataKey="likes" stroke="#737373" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (

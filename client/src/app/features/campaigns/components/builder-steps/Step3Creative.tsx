@@ -165,7 +165,7 @@ export function Step3Creative({
         <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Describe your offer, product, or message..."
           rows={4} maxLength={charLimit}
           className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
-        <p className={`text-[10px] mt-1 text-right ${body.length > charLimit * 0.9 ? "text-amber-500" : "text-muted-foreground"}`}>
+        <p className={`text-[10px] mt-1 text-right ${body.length > charLimit * 0.9 ? "text-brand" : "text-muted-foreground"}`}>
           {body.length}/{charLimit}
         </p>
       </div>

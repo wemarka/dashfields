@@ -27,8 +27,8 @@ function formatBytes(bytes: number) {
 }
 
 function getMimeIcon(mime: string) {
-  if (mime.startsWith("image/")) return <ImageIcon className="w-5 h-5 text-emerald-400" />;
-  if (mime.startsWith("video/")) return <Film className="w-5 h-5 text-blue-400" />;
+  if (mime.startsWith("image/")) return <ImageIcon className="w-5 h-5 text-muted-foreground" />;
+  if (mime.startsWith("video/")) return <Film className="w-5 h-5 text-brand" />;
   return <FileText className="w-5 h-5 text-neutral-400" />;
 }
 

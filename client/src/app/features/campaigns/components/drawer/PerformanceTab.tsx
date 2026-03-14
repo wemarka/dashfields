@@ -82,7 +82,7 @@ function TrendIndicator({ pct }: { pct: number }) {
   }
   const isUp = pct > 0;
   return (
-    <span className={`flex items-center gap-0.5 text-[10px] font-medium ${isUp ? "text-emerald-500" : "text-red-500"}`}>
+    <span className={`flex items-center gap-0.5 text-[10px] font-medium ${isUp ? "text-foreground" : "text-brand"}`}>
       {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
       {Math.abs(pct).toFixed(1)}%
     </span>
@@ -102,7 +102,7 @@ function VsPrevBadge({ current, prev, fmt }: { current: number; prev: number | n
         isNeutral
           ? "bg-muted text-muted-foreground"
           : isUp
-            ? "bg-emerald-500/10 text-emerald-600"
+            ? "bg-muted text-foreground"
             : "bg-red-500/10 text-red-500"
       }`}>
         {isNeutral ? (
@@ -171,9 +171,9 @@ function SparklineKpiCard({
 type ChartMetric = "impressions" | "clicks" | "spend";
 
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
-  { key: "impressions", label: "Impressions", color: "#3b82f6" },
-  { key: "clicks",      label: "Clicks",      color: "#10b981" },
-  { key: "spend",       label: "Spend",       color: "#E62020" },
+  { key: "impressions", label: "Impressions", color: "#a3a3a3" },
+  { key: "clicks",      label: "Clicks",      color: "#737373" },
+  { key: "spend",       label: "Spend",       color: "#e62020" },
 ];
 
 // --- Main Component ---
@@ -214,8 +214,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               icon={Eye} label="Impressions"
               value={fmtNum(campaignInsight.impressions)}
               sub={`Reach: ${fmtNum(campaignInsight.reach)}`}
-              color="text-blue-500" bgColor="bg-blue-500/10"
-              sparkData={sparkImpressions} sparkColor="#3b82f6"
+              color="text-muted-foreground" bgColor="bg-muted/30"
+              sparkData={sparkImpressions} sparkColor="#a3a3a3"
               trend={trendOf(sparkImpressions)}
               currentVal={campaignInsight.impressions}
               prevVal={prevPeriodInsight?.impressions ?? null}
@@ -224,8 +224,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               icon={MousePointerClick} label="Clicks"
               value={fmtNum(campaignInsight.clicks)}
               sub={`CPC: ${fmtCurrency(campaignInsight.cpc)}`}
-              color="text-emerald-500" bgColor="bg-emerald-500/10"
-              sparkData={sparkClicks} sparkColor="#10b981"
+              color="text-muted-foreground" bgColor="bg-muted/30"
+              sparkData={sparkClicks} sparkColor="#737373"
               trend={trendOf(sparkClicks)}
               currentVal={campaignInsight.clicks}
               prevVal={prevPeriodInsight?.clicks ?? null}
@@ -245,7 +245,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               icon={Target} label="CPM"
               value={fmtCurrency(campaignInsight.cpm)}
               sub="Cost per 1,000 impressions"
-              color="text-amber-500" bgColor="bg-amber-500/10"
+              color="text-muted-foreground" bgColor="bg-muted/30"
               currentVal={campaignInsight.cpm}
               prevVal={prevPeriodInsight?.cpm ?? null}
               fmtPrevVal={fmtCurrency}
@@ -254,11 +254,11 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               icon={TrendingUp} label="CTR"
               value={fmtPct(campaignInsight.ctr)}
               sub="Click-through rate"
-              color="text-sky-500" bgColor="bg-sky-500/10"
+              color="text-brand" bgColor="bg-brand/10"
               sparkData={sparkClicks.map((c, i) =>
                 sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
               )}
-              sparkColor="#0ea5e9"
+              sparkColor="#e62020"
               trend={trendOf(sparkClicks.map((c, i) =>
                 sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
               ))}
@@ -297,7 +297,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             {(campaignInsight?.messages ?? 0) > 0 && (
               <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30 border border-border/40">
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <MessageCircle className="w-3.5 h-3.5 text-blue-500" />
+                  <MessageCircle className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>Conversations Started</span>
                 </div>
                 <span className="text-lg font-bold text-foreground">{fmtNum(campaignInsight?.messages ?? 0)}</span>
@@ -316,7 +316,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             {(campaignInsight?.calls ?? 0) > 0 && (
               <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30 border border-border/40">
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Phone className="w-3.5 h-3.5 text-emerald-500" />
+                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>Calls</span>
                 </div>
                 <span className="text-lg font-bold text-foreground">{fmtNum(campaignInsight?.calls ?? 0)}</span>
@@ -362,12 +362,12 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             <AreaChart data={daily} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
               <defs>
                 <linearGradient id="gI2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gC2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#737373" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#737373" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gS2" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#E62020" stopOpacity={0.18} />
@@ -409,11 +409,11 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               />
               {activeMetrics.has("impressions") && (
                 <Area yAxisId="left" type="monotone" dataKey="impressions"
-                  stroke="#3b82f6" strokeWidth={2} fill="url(#gI2)" name="Impressions" />
+                  stroke="#a3a3a3" strokeWidth={2} fill="url(#gI2)" name="Impressions" />
               )}
               {activeMetrics.has("clicks") && (
                 <Area yAxisId="left" type="monotone" dataKey="clicks"
-                  stroke="#10b981" strokeWidth={2} fill="url(#gC2)" name="Clicks" />
+                  stroke="#737373" strokeWidth={2} fill="url(#gC2)" name="Clicks" />
               )}
               {activeMetrics.has("spend") && (
                 <Area yAxisId="right" type="monotone" dataKey="spend"

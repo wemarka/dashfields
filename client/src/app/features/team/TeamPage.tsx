@@ -75,7 +75,7 @@ export default function TeamPage() {
       </div>
 
       {isAtLimit && canAdmin && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-brand/10 border border-brand/20 text-brand">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <p className="text-sm">You've reached the <strong>{memberLimit}-member</strong> limit on your {planLimits.name} plan. <a href="/billing" className="underline underline-offset-2 font-medium">Upgrade to add more members.</a></p>
         </div>
@@ -85,8 +85,8 @@ export default function TeamPage() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Members", value: members.length, icon: Users, color: "text-brand", bg: "bg-brand/10" },
-          { label: "Pending Invites", value: pendingInvitations.filter((i) => i.status === "pending").length, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
-          { label: "Plan Limit", value: memberLimit === Infinity ? "\u221E" : `${members.length}/${memberLimit}`, icon: Shield, color: "text-purple-500", bg: "bg-purple-500/10" },
+          { label: "Pending Invites", value: pendingInvitations.filter((i) => i.status === "pending").length, icon: Clock, color: "text-brand", bg: "bg-brand/10" },
+          { label: "Plan Limit", value: memberLimit === Infinity ? "\u221E" : `${members.length}/${memberLimit}`, icon: Shield, color: "text-muted-foreground", bg: "bg-muted" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <Card key={label} className="glass">
             <CardContent className="p-4 flex items-center gap-3">
@@ -155,8 +155,8 @@ export default function TeamPage() {
         <Card className="glass">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" /> Pending Invitations
-              <Badge variant="secondary" className="ml-auto font-normal bg-amber-500/10 text-amber-600 border-amber-500/20">{pendingInvitations.filter((i) => i.status === "pending").length}</Badge>
+              <Clock className="w-4 h-4 text-brand" /> Pending Invitations
+              <Badge variant="secondary" className="ml-auto font-normal bg-brand/10 text-brand border-brand/20">{pendingInvitations.filter((i) => i.status === "pending").length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -168,7 +168,7 @@ export default function TeamPage() {
                 const isExpired = expiresAt ? expiresAt < new Date() : false;
                 return (
                   <div key={inv.id} className="flex items-center gap-3 p-4 group">
-                    <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0"><Mail className="w-4 h-4 text-amber-500" /></div>
+                    <div className="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center shrink-0"><Mail className="w-4 h-4 text-brand" /></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{inv.email}</p>
                       <p className="text-xs text-muted-foreground">{isExpired ? <span className="text-red-500">Expired</span> : expiresAt ? `Expires ${expiresAt.toLocaleDateString()}` : "Pending"}</p>
@@ -216,7 +216,7 @@ export default function TeamPage() {
                   <tr key={perm as string}>
                     <td className="py-2.5 pr-4 text-sm text-muted-foreground">{perm}</td>
                     {(values as boolean[]).map((v, i) => (
-                      <td key={i} className="text-center py-2.5 px-3">{v ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}</td>
+                      <td key={i} className="text-center py-2.5 px-3">{v ? <CheckCircle2 className="w-4 h-4 text-foreground mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}</td>
                     ))}
                   </tr>
                 ))}

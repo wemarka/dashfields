@@ -20,8 +20,8 @@ const ROLE_ICONS: Record<string, React.ElementType> = {
   owner: Crown, admin: Shield, member: UserCheck, viewer: Eye,
 };
 const ROLE_BADGE: Record<string, string> = {
-  owner:  "bg-amber-50  text-amber-600  border border-amber-200",
-  admin:  "bg-blue-50   text-blue-600   border border-blue-200",
+  owner:  "bg-brand/10 text-brand border border-brand/20",
+  admin:  "bg-muted text-muted-foreground border border-border",
   member: "bg-neutral-800  text-neutral-400   border border-neutral-700",
   viewer: "bg-neutral-800/50   text-neutral-500   border border-neutral-700",
 };
@@ -61,7 +61,7 @@ export default function WorkspaceSettings() {
               <button
                 onClick={() => setShowCreate(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#3b82f6" }}
+                style={{ backgroundColor: "#e62020" }}
               >
                 <Plus className="w-4 h-4" /> Create Workspace
               </button>
@@ -72,13 +72,13 @@ export default function WorkspaceSettings() {
                   onChange={(e) => setCreateName(e.target.value)}
                   placeholder="Workspace name..."
                   autoFocus
-                  className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-neutral-700 focus:outline-none focus:ring-1 focus:ring-blue-400/40 bg-neutral-900 text-white"
+                  className="flex-1 px-3 py-2 rounded-xl text-[13px] border border-neutral-700 focus:outline-none focus:ring-1 focus:ring-brand/40 bg-neutral-900 text-white"
                 />
                 <button
                   onClick={() => createMutation.mutate({ name: createName })}
                   disabled={!createName.trim() || createMutation.isPending}
                   className="px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
-                  style={{ backgroundColor: "#3b82f6" }}
+                  style={{ backgroundColor: "#e62020" }}
                 >
                   {createMutation.isPending ? "..." : "Create"}
                 </button>
@@ -149,7 +149,7 @@ function WorkspaceNameSection({
             onClick={() => updateMutation.mutate({ workspaceId: workspace.id, name })}
             disabled={updateMutation.isPending || name === workspace.name || !name.trim()}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#3b82f6" }}
+            style={{ backgroundColor: "#e62020" }}
           >
             <Save className="w-3.5 h-3.5" />
             {updateMutation.isPending ? "Saving..." : "Save"}
@@ -162,8 +162,8 @@ function WorkspaceNameSection({
         <span className="text-[12px] text-neutral-500">Plan:</span>
         <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
           workspace.plan === "free" ? "bg-neutral-800 text-neutral-400" :
-          workspace.plan === "pro"  ? "bg-blue-50 text-blue-600 border border-blue-200" :
-          "bg-amber-50 text-amber-600 border border-amber-200"
+          workspace.plan === "pro"  ? "bg-brand/10 text-brand border border-brand/20" :
+          "bg-muted/40 text-foreground border border-border"
         }`}>
           {workspace.plan}
         </span>
@@ -231,7 +231,7 @@ function TeamMembersSection({
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-800/50 transition-colors group"
               >
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0 text-[13px] font-semibold text-blue-600">
+                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0 text-[13px] font-semibold text-muted-foreground">
                   {initials}
                 </div>
 
@@ -343,7 +343,7 @@ function InvitesSection({
               })}
               disabled={!email || inviteMutation.isPending}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 transition-opacity hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "#3b82f6" }}
+              style={{ backgroundColor: "#e62020" }}
             >
               <MailPlus className="w-3.5 h-3.5" />
               {inviteMutation.isPending ? "Generating..." : "Send Invite"}
@@ -352,12 +352,12 @@ function InvitesSection({
 
           {/* Generated link */}
           {generatedLink && (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-blue-50 border border-blue-100 mb-4 max-w-lg">
-              <Link2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-              <span className="flex-1 text-[12px] font-mono text-blue-600 truncate">{generatedLink}</span>
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-brand/5 border border-brand/20 mb-4 max-w-lg">
+              <Link2 className="w-3.5 h-3.5 text-brand shrink-0" />
+              <span className="flex-1 text-[12px] font-mono text-muted-foreground truncate">{generatedLink}</span>
               <button
                 onClick={() => { navigator.clipboard.writeText(generatedLink); toast.success("Link copied!"); }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500 text-white text-[11px] font-medium hover:opacity-90 transition-opacity shrink-0"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand text-white text-[11px] font-medium hover:opacity-90 transition-opacity shrink-0"
               >
                 <Copy className="w-3 h-3" /> Copy
               </button>
@@ -376,8 +376,8 @@ function InvitesSection({
                     key={inv.id as number}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-800/50 transition-colors group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
+                      <Clock className="w-3.5 h-3.5 text-brand" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium text-white truncate">{inv.email as string}</p>

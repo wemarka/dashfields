@@ -125,7 +125,7 @@ export function CampaignPreview({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                   <CheckCircle2 className="w-3 h-3 text-white" />
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-1.5 py-1">
@@ -145,12 +145,12 @@ export function CampaignPreview({
             <div key={check.label} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {check.ok
-                  ? <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                  : <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  ? <CheckCircle2 className="w-4 h-4 text-foreground shrink-0" />
+                  : <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
                 }
                 <span className="text-sm text-neutral-300">{check.label}</span>
               </div>
-              <span className={cn("text-xs", check.ok ? "text-neutral-400" : "text-amber-600")}>
+              <span className={cn("text-xs", check.ok ? "text-neutral-400" : "text-brand")}>
                 {check.value}
               </span>
             </div>
@@ -182,9 +182,9 @@ export function CampaignPreview({
       {/* Launch Button */}
       <div className="space-y-3">
         {!allChecked && (
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700">بعض البيانات غير مكتملة. يمكنك المتابعة لكن تأكد من مراجعتها.</p>
+          <div className="flex items-start gap-2 bg-muted border border-border rounded-xl p-3">
+            <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">بعض البيانات غير مكتملة. يمكنك المتابعة لكن تأكد من مراجعتها.</p>
           </div>
         )}
 
@@ -194,7 +194,7 @@ export function CampaignPreview({
           className={cn(
             "w-full py-4 rounded-2xl font-bold text-base shadow-xl transition-all duration-300",
             confirmed
-              ? "bg-green-500 text-white shadow-green-200"
+              ? "bg-primary text-primary-foreground shadow-primary/20"
               : "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-red-200 hover:shadow-red-300 hover:scale-[1.01]",
           )}
         >

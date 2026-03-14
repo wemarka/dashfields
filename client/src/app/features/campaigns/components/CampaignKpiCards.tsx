@@ -59,7 +59,7 @@ function TrendBadge({
   return (
     <span
       className="inline-flex items-center gap-0.5"
-      style={{ fontSize: 10, fontWeight: 600, color: isGood ? "#10b981" : "#ef4444" }}
+      style={{ fontSize: 10, fontWeight: 600, color: isGood ? "#a3a3a3" : "#e62020" }}
     >
       {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
       {absChange > 999 ? "999+" : absChange.toFixed(1)}%

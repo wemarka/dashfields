@@ -18,15 +18,16 @@ const SORT_OPTIONS = [
   { value: "totalReach",    label: "Total Reach" },
 ] as const;
 
+// Brand palette chart colors
 const CHART_COLORS = [
-  "#c41919", "#E62020", "#ec4899", "#f59e0b",
-  "#10b981", "#3b82f6", "#ef4444", "#14b8a6",
+  "#e62020", "#c41a1a", "#ffffff", "#a3a3a3",
+  "#737373", "#525252", "#f87171", "#404040",
 ];
 
 function TrendBadge({ trend }: { trend: "up" | "down" | "stable" }) {
   if (trend === "up")
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
         <TrendingUp className="w-2.5 h-2.5" /> Up
       </span>
     );
@@ -299,9 +300,9 @@ export default function HashtagAnalytics() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#10b981" },
-                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#c41919" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef4444" },
+                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a3a3a3" },
+                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#e62020" },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -311,9 +312,9 @@ export default function HashtagAnalytics() {
                       dataKey="value"
                     >
                       {[
-                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#10b981" },
-                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#c41919" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef4444" },
+                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a3a3a3" },
+                        { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#e62020" },
                       ].map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
                       ))}

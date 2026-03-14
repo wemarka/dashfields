@@ -134,7 +134,7 @@ export function GeneralTab() {
             <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize ${
               activeWorkspace.plan === "free" ? "bg-muted text-muted-foreground" :
               activeWorkspace.plan === "pro" ? "bg-brand/10 text-brand" :
-              "bg-amber-500/10 text-amber-500"
+              "bg-brand/10 text-brand"
             }`}>
               {activeWorkspace.plan}
             </span>

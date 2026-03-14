@@ -3316,3 +3316,10 @@
 - [x] Align all neutral shades to brand palette (Dark Neutral only)
 - [x] Fix gradient-text: red → white (not red → orange)
 - [x] Ensure card backgrounds, borders, and text use only brand neutrals
+
+## 🎨 Full App Color Audit — All Pages
+- [ ] Scan all pages/components for non-brand colors
+- [ ] Fix Analytics page colors
+- [ ] Fix Campaigns page colors
+- [ ] Fix Dashboard page colors
+- [ ] Fix all other pages and shared components

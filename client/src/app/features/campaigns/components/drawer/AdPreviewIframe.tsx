@@ -110,8 +110,8 @@ function CacheBadge({ fromCache, cachedAt, expiresAt }: {
       }
       className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded-md border ${
         fromCache
-          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400"
-          : "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400"
+          ? "bg-muted text-foreground border-border dark:text-foreground"
+          : "bg-muted text-muted-foreground border-border dark:text-muted-foreground"
       }`}
     >
       {fromCache ? <Database className="w-2.5 h-2.5" /> : <Zap className="w-2.5 h-2.5" />}
@@ -175,7 +175,7 @@ export function AdPreviewIframe({
   if (!creativeId) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
-        <AlertTriangle className="w-5 h-5 text-amber-500" />
+        <AlertTriangle className="w-5 h-5 text-brand" />
         <p className="text-xs text-center">No creative ID available for this ad.</p>
         {fallback}
       </div>
@@ -205,7 +205,7 @@ export function AdPreviewIframe({
         className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-muted/20 p-4"
         style={{ width: dims.width, minHeight: 200 }}
       >
-        <AlertTriangle className="w-5 h-5 text-amber-500" />
+        <AlertTriangle className="w-5 h-5 text-brand" />
         <p className="text-[11px] text-muted-foreground text-center">
           {isError
             ? `Preview unavailable: ${errMsg}`

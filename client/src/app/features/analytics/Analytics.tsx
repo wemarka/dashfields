@@ -159,11 +159,11 @@ export default function Analytics() {
 
   // Compare metrics
   const compareMetrics = [
-    { label: "Spend", icon: DollarSign, curr: kpiData?.spend ?? 0, prev: kpiData?.prevSpend ?? 0, fmt: fmtMoney, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Impressions", icon: Eye, curr: kpiData?.impressions ?? 0, prev: kpiData?.prevImpressions ?? 0, fmt: fmtNum, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Clicks", icon: MousePointer, curr: kpiData?.clicks ?? 0, prev: kpiData?.prevClicks ?? 0, fmt: fmtNum, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "CTR", icon: Target, curr: kpiData?.ctr ?? 0, prev: kpiData?.prevCtr ?? 0, fmt: (n: number) => n.toFixed(2) + "%", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "CPC", icon: DollarSign, curr: kpiData?.cpc ?? 0, prev: kpiData?.prevCpc ?? 0, fmt: fmtMoney, color: "text-rose-500", bg: "bg-rose-500/10" },
+    { label: "Spend", icon: DollarSign, curr: kpiData?.spend ?? 0, prev: kpiData?.prevSpend ?? 0, fmt: fmtMoney, color: "text-brand", bg: "bg-brand/10" },
+    { label: "Impressions", icon: Eye, curr: kpiData?.impressions ?? 0, prev: kpiData?.prevImpressions ?? 0, fmt: fmtNum, color: "text-foreground", bg: "bg-muted" },
+    { label: "Clicks", icon: MousePointer, curr: kpiData?.clicks ?? 0, prev: kpiData?.prevClicks ?? 0, fmt: fmtNum, color: "text-muted-foreground", bg: "bg-muted/60" },
+    { label: "CTR", icon: Target, curr: kpiData?.ctr ?? 0, prev: kpiData?.prevCtr ?? 0, fmt: (n: number) => n.toFixed(2) + "%", color: "text-brand", bg: "bg-brand/5" },
+    { label: "CPC", icon: DollarSign, curr: kpiData?.cpc ?? 0, prev: kpiData?.prevCpc ?? 0, fmt: fmtMoney, color: "text-muted-foreground", bg: "bg-muted/40" },
     { label: "Reach", icon: Users, curr: kpiData?.reach ?? 0, prev: kpiData?.prevReach ?? 0, fmt: fmtNum, color: "text-brand", bg: "bg-brand/10" },
   ];
 
@@ -339,7 +339,7 @@ export default function Analytics() {
                             <td className="px-4 py-3 text-end text-xs">{fmtMoney(ins.cpc)}</td>
                             <td className="px-4 py-3 text-center">
                               {ins.isLive
-                                ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">Live</span>
+                                ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-brand/10 text-brand font-medium">Live</span>
                                 : <span className="text-xs px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-500 font-medium">Demo</span>
                               }
                             </td>
@@ -371,14 +371,14 @@ export default function Analytics() {
             {/* AI Recommendations */}
             <div className="glass rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
+                <Lightbulb className="w-4 h-4 text-muted-foreground" />
                 <h3 className="text-sm font-semibold">AI Recommendations</h3>
               </div>
               <div className="space-y-2.5">
                 {recommendations.map((rec, idx) => (
                   <div key={idx} className={`flex items-start gap-2.5 p-3 rounded-xl text-xs ${
-                    rec.type === "warning" ? "bg-amber-500/8 text-amber-700 dark:text-amber-400" :
-                    rec.type === "success" ? "bg-emerald-500/8 text-emerald-700 dark:text-emerald-400" :
+                    rec.type === "warning" ? "bg-muted/60 text-muted-foreground" :
+                    rec.type === "success" ? "bg-muted/40 text-foreground" :
                     "bg-primary/8 text-primary"
                   }`}>
                     {rec.type === "warning" ? <TrendingDown className="w-3.5 h-3.5 shrink-0 mt-0.5" /> :
@@ -394,7 +394,7 @@ export default function Analytics() {
             {allInsights.length > 0 && (
               <div className="glass rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Trophy className="w-4 h-4 text-amber-500" />
+                  <Trophy className="w-4 h-4 text-brand" />
                   <h3 className="text-sm font-semibold">Platform Performance Ranking</h3>
                 </div>
                 <div className="space-y-3">
@@ -451,7 +451,7 @@ export default function Analytics() {
                           <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center`}>
                             <Icon className={`w-4 h-4 ${color}`} />
                           </div>
-                          <span className={`flex items-center gap-0.5 text-xs font-semibold ${isUp ? "text-emerald-500" : "text-red-500"}`}>
+                          <span className={`flex items-center gap-0.5 text-xs font-semibold ${isUp ? "text-foreground" : "text-brand"}`}>
                             {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(diff).toFixed(1)}%
                           </span>

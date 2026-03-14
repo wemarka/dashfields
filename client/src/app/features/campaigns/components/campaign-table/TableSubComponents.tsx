@@ -103,7 +103,7 @@ export function InlineBudgetEditor({
         onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }}
         className="w-20 h-6 px-1.5 text-xs font-mono border border-input rounded bg-background text-foreground outline-none focus:ring-1 focus:ring-ring"
         type="number" min={0} step={1} />
-      <button onClick={handleSave} className="text-emerald-500 hover:text-emerald-600"><Check className="w-3.5 h-3.5" /></button>
+      <button onClick={handleSave} className="text-foreground hover:text-muted-foreground"><Check className="w-3.5 h-3.5" /></button>
       <button onClick={() => setEditing(false)} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
     </div>
   );
@@ -188,7 +188,7 @@ export function CampaignSwitch({
           border: "none",
           cursor: isDisabled ? "not-allowed" : "pointer",
           transition: "background-color 0.2s",
-          backgroundColor: pending ? "#d1d5db" : isActive ? "#10b981" : "#d1d5db",
+          backgroundColor: pending ? "#404040" : isActive ? "#e62020" : "#404040",
           opacity: isDisabled && !pending ? 0.5 : 1,
           flexShrink: 0,
         }}

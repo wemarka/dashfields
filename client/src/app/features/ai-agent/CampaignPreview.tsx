@@ -25,14 +25,14 @@ import type { CampaignPreviewBlock } from "./types";
 
 // ── Platform Icons (simple text badges) ──────────────────────────────────────
 const PLATFORM_COLORS: Record<string, string> = {
-  instagram: "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
-  facebook: "bg-blue-600 text-white",
+  instagram: "bg-neutral-700 text-white border border-neutral-600",
+  facebook: "bg-neutral-800 text-white border border-neutral-700",
   tiktok: "bg-neutral-800 text-white border border-neutral-700",
-  twitter: "bg-sky-500 text-white",
-  linkedin: "bg-blue-700 text-white",
-  snapchat: "bg-yellow-400 text-neutral-900",
-  youtube: "bg-brand-red text-white",
-  pinterest: "bg-red-500 text-white",
+  twitter: "bg-neutral-800 text-white border border-neutral-700",
+  linkedin: "bg-neutral-800 text-white border border-neutral-700",
+  snapchat: "bg-neutral-700 text-white border border-neutral-600",
+  youtube: "bg-brand text-white",
+  pinterest: "bg-brand text-white",
 };
 
 // ── Image States ─────────────────────────────────────────────────────────────

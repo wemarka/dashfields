@@ -17,10 +17,10 @@ interface UpgradeModalProps {
 }
 
 const PLAN_ICONS: Record<WorkspacePlan, React.ReactNode> = {
-  free: <Sparkles className="w-5 h-5 text-neutral-400" />,
-  pro: <Zap className="w-5 h-5 text-blue-600" />,
-  agency: <Building2 className="w-5 h-5 text-purple-600" />,
-  enterprise: <Building2 className="w-5 h-5 text-amber-600" />,
+  free: <Sparkles className="w-5 h-5 text-muted-foreground" />,
+  pro: <Zap className="w-5 h-5 text-brand" />,
+  agency: <Building2 className="w-5 h-5 text-foreground" />,
+  enterprise: <Building2 className="w-5 h-5 text-foreground" />,
 };
 
 const PLAN_ORDER: WorkspacePlan[] = ["free", "pro", "agency"];
@@ -82,8 +82,8 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
       <Dialog open={open} onOpenChange={(v: boolean) => !v && handleClose()}>
         <DialogContent className="max-w-md text-center p-8">
           <div className="flex flex-col items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center animate-bounce">
-              <PartyPopper className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 rounded-full bg-brand/10 flex items-center justify-center animate-bounce">
+              <PartyPopper className="w-10 h-10 text-brand" />
             </div>
             <div>
               <h2 className="text-2xl font-bold mb-2">You're all set! 🎉</h2>
@@ -99,7 +99,7 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
               <div className="rounded-lg bg-muted/50 p-4 text-left space-y-2">
                 {PLAN_LIMITS[upgradedTo]?.features?.slice(0, 4).map((feat) => (
                   <div key={feat} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 shrink-0" />
+                    <Check className="w-4 h-4 text-foreground shrink-0" />
                     <span>{feat}</span>
                   </div>
                 ))}
@@ -134,13 +134,13 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
             <span className={`text-sm font-medium ${billing === "monthly" ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
             <button
               onClick={() => setBilling(b => b === "monthly" ? "annual" : "monthly")}
-              className={`relative w-12 h-6 rounded-full transition-colors ${billing === "annual" ? "bg-blue-600" : "bg-neutral-700"}`}
+              className={`relative w-12 h-6 rounded-full transition-colors ${billing === "annual" ? "bg-brand" : "bg-neutral-700"}`}
             >
               <span className={`absolute top-1 w-4 h-4 bg-neutral-900 rounded-full shadow transition-transform ${billing === "annual" ? "translate-x-7" : "translate-x-1"}`} />
             </button>
             <span className={`text-sm font-medium ${billing === "annual" ? "text-foreground" : "text-muted-foreground"}`}>
               Annual
-              <Badge variant="secondary" className="ml-2 text-xs bg-green-100 text-green-700">Save 20%</Badge>
+              <Badge variant="secondary" className="ml-2 text-xs bg-brand/10 text-brand">Save 20%</Badge>
             </span>
           </div>
         </DialogHeader>
@@ -157,11 +157,11 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
             return (
               <div
                 key={plan}
-                className={`p-6 flex flex-col gap-4 relative ${isPro ? "bg-blue-50/50" : ""}`}
+                className={`p-6 flex flex-col gap-4 relative ${isPro ? "bg-brand/5" : ""}`}
               >
                 {isPro && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <Badge className="bg-blue-600 text-white text-xs px-3">Most Popular</Badge>
+                    <Badge className="bg-brand text-white text-xs px-3">Most Popular</Badge>
                   </div>
                 )}
 
@@ -190,14 +190,14 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
                 <ul className="space-y-2 flex-1">
                   {config.features.map((feat) => (
                     <li key={feat} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                      <Check className="w-4 h-4 text-foreground mt-0.5 shrink-0" />
                       <span>{feat}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Button
-                  className={`w-full mt-2 ${isPro ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+                  className={`w-full mt-2 ${isPro ? "bg-brand hover:bg-brand/90 text-white" : ""}`}
                   variant={isPro ? "default" : "outline"}
                   disabled={isCurrent || isAnyLoading}
                   onClick={() => !isCurrent && handleUpgrade(plan)}
@@ -223,7 +223,7 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
         <div className="px-6 py-4 bg-muted/30 border-t text-center">
           <p className="text-xs text-muted-foreground">
             Need a custom plan for large teams?{" "}
-            <a href="mailto:sales@dashfields.com" className="text-blue-600 hover:underline font-medium">
+            <a href="mailto:sales@dashfields.com" className="text-brand hover:underline font-medium">
               Contact Sales
             </a>
           </p>

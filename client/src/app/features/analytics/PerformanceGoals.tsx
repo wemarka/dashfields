@@ -61,8 +61,8 @@ const STATUSES = ["active", "completed", "paused", "failed"];
 const PLATFORMS = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "youtube", "all"];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  active:    { label: "Active",    color: "text-blue-500",  icon: TrendingUp   },
-  completed: { label: "Completed", color: "text-green-500", icon: CheckCircle2 },
+  active:    { label: "Active",    color: "text-brand",  icon: TrendingUp   },
+  completed: { label: "Completed", color: "text-foreground", icon: CheckCircle2 },
   paused:    { label: "Paused",    color: "text-yellow-500",icon: Pause        },
   failed:    { label: "Failed",    color: "text-red-500",   icon: XCircle      },
 };
@@ -136,7 +136,7 @@ function GoalCard({
       <div className="space-y-2 mb-4">
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Progress</span>
-          <span className={`font-bold ${pct >= 100 ? "text-green-500" : pct >= 70 ? "text-primary" : "text-muted-foreground"}`}>
+          <span className={`font-bold ${pct >= 100 ? "text-brand" : pct >= 70 ? "text-primary" : "text-muted-foreground"}`}>
             {pct}%
           </span>
         </div>
@@ -378,8 +378,8 @@ export default function PerformanceGoals() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Goals",    value: stats.total,     icon: BarChart3,   color: "text-primary"       },
-          { label: "Active",         value: stats.active,    icon: TrendingUp,  color: "text-blue-500"      },
-          { label: "Completed",      value: stats.completed, icon: Trophy,      color: "text-green-500"     },
+          { label: "Active",         value: stats.active,    icon: TrendingUp,  color: "text-brand"      },
+          { label: "Completed",      value: stats.completed, icon: Trophy,      color: "text-foreground"     },
           { label: "Avg Progress",   value: `${stats.avgPct}%`, icon: Target,  color: "text-orange-500"    },
         ].map(stat => {
           const Icon = stat.icon;

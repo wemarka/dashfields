@@ -34,12 +34,12 @@ const AI_TOOLS = [
     title: "AI Content Calendar",
     description: "Generate a complete 4-week content calendar with post ideas, captions, and optimal timing.",
     icon: Calendar,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/ai-content",
     badge: "New",
-    badgeColor: "bg-emerald-500/10 text-emerald-600",
+    badgeColor: "bg-brand/10 text-brand",
     features: ["4-week planning", "Platform-specific timing", "Downloadable calendar"],
   },
   {
@@ -47,9 +47,9 @@ const AI_TOOLS = [
     title: "Sentiment Analysis",
     description: "Analyze the emotional tone of your content before publishing to maximize engagement.",
     icon: MessageSquare,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/ai-content",
     badge: null,
     badgeColor: "",
@@ -60,9 +60,9 @@ const AI_TOOLS = [
     title: "Best Time to Post",
     description: "AI-powered timing recommendations based on your industry, region, and platform.",
     icon: Clock,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/ai-content",
     badge: null,
     badgeColor: "",
@@ -86,9 +86,9 @@ const AI_TOOLS = [
     title: "Ad Copy Tools",
     description: "Generate high-converting ad copy, audience segments, and creative briefs for any platform.",
     icon: Target,
-    color: "text-pink-500",
-    bg: "bg-pink-500/10",
-    border: "border-pink-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/ai-content",
     badge: null,
     badgeColor: "",
@@ -99,9 +99,9 @@ const AI_TOOLS = [
     title: "Smart Recommendations",
     description: "AI-powered performance insights and actionable recommendations for your campaigns.",
     icon: Lightbulb,
-    color: "text-yellow-500",
-    bg: "bg-yellow-500/10",
-    border: "border-yellow-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/dashboard",
     badge: null,
     badgeColor: "",
@@ -112,9 +112,9 @@ const AI_TOOLS = [
     title: "Hashtag Research",
     description: "Discover trending and relevant hashtags to boost your content's organic reach.",
     icon: Hash,
-    color: "text-cyan-500",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
     href: "/hashtags",
     badge: null,
     badgeColor: "",
@@ -213,7 +213,7 @@ function AIStatsWidget() {
       {[
         { label: "AI Recommendations", value: recs.length, icon: Lightbulb, color: "text-brand", bg: "bg-brand/10" },
         { label: "High Priority", value: highPriority, icon: Zap, color: "text-red-500", bg: "bg-red-500/10" },
-        { label: "Opportunities", value: opportunities, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+        { label: "Opportunities", value: opportunities, icon: TrendingUp, color: "text-brand", bg: "bg-brand/10" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <Card key={label} className="glass">
           <CardContent className="p-4 flex items-center gap-3">
@@ -314,7 +314,7 @@ export default function AIInsightsHub() {
       <Card className="glass border-brand/20">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-amber-500" />
+            <Lightbulb className="w-4 h-4 text-muted-foreground" />
             AI Best Practices
           </CardTitle>
         </CardHeader>

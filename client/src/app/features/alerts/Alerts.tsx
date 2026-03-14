@@ -36,10 +36,10 @@ const OPERATOR_LABELS: Record<Operator, string> = {
 };
 
 const NOTIFICATION_ICONS = {
-  info:    <Info className="h-4 w-4 text-blue-400" />,
-  warning: <AlertTriangle className="h-4 w-4 text-amber-400" />,
+  info:    <Info className="h-4 w-4 text-muted-foreground" />,
+  warning: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
   error:   <XCircle className="h-4 w-4 text-red-400" />,
-  success: <CheckCircle2 className="h-4 w-4 text-emerald-400" />,
+  success: <CheckCircle2 className="h-4 w-4 text-muted-foreground" />,
 };
 
 // ─── Create Alert Form ────────────────────────────────────────────────────────
@@ -347,9 +347,9 @@ export default function Alerts() {
               Run Check
             </button>
             {unreadCount > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
-                <BellRing className="h-4 w-4 text-amber-500" />
-                <span className="text-xs font-medium text-amber-600">{unreadCount} unread</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 border border-brand/20">
+                <BellRing className="h-4 w-4 text-brand" />
+                <span className="text-xs font-medium text-brand">{unreadCount} unread</span>
               </div>
             )}
           </div>
@@ -445,7 +445,7 @@ export default function Alerts() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold text-foreground">Notification History</h2>
             {unreadCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+              <span className="px-1.5 py-0.5 rounded-full bg-brand text-white text-xs font-bold">
                 {unreadCount}
               </span>
             )}
@@ -496,7 +496,7 @@ export default function Alerts() {
               {filteredNotifications.map(n => (
                 <div
                   key={n.id}
-                  className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-amber-500/5" : "hover:bg-neutral-900/3"}`}
+                  className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${!n.is_read ? "bg-brand/5" : "hover:bg-neutral-900/3"}`}
                 >
                   <div className="mt-0.5 shrink-0">
                     {NOTIFICATION_ICONS[n.type as keyof typeof NOTIFICATION_ICONS] ?? NOTIFICATION_ICONS.info}

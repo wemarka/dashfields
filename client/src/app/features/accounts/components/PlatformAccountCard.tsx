@@ -16,7 +16,7 @@ export interface PlatformConfig {
 
 const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: string; icon: React.ReactNode }> = {
   facebook: {
-    color: "bg-blue-600",
+    color: "bg-neutral-800",
     textColor: "text-white",
     label: "Facebook",
     icon: (
@@ -26,7 +26,7 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   instagram: {
-    color: "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400",
+    color: "bg-neutral-700",
     textColor: "text-white",
     label: "Instagram",
     icon: (
@@ -46,7 +46,7 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   linkedin: {
-    color: "bg-blue-700",
+    color: "bg-neutral-800",
     textColor: "text-white",
     label: "LinkedIn",
     icon: (
@@ -179,8 +179,8 @@ export function PlatformAccountCard({ account, onClick }: PlatformAccountCardPro
         <div className={cn(
           "flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
           account.isActive
-            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-            : "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+            ? "bg-muted/40 text-foreground"
+            : "bg-brand/10 text-brand"
         )}>
           {account.isActive
             ? <CheckCircle2 className="w-3 h-3" />
@@ -202,8 +202,8 @@ export function PlatformAccountCard({ account, onClick }: PlatformAccountCardPro
           {/* Trend indicator */}
           <div className={cn(
             "flex items-center gap-1 text-sm font-semibold px-2.5 py-1 rounded-xl",
-            trendUp   && "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
-            trendDown && "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400",
+            trendUp   && "bg-muted/40 text-muted-foreground",
+            trendDown && "bg-brand/10 text-brand",
             trendFlat && "bg-muted text-muted-foreground"
           )}>
             {trendUp   && <TrendingUp  className="w-4 h-4" />}
@@ -228,7 +228,7 @@ export function PlatformAccountCard({ account, onClick }: PlatformAccountCardPro
       {account.followersChange !== undefined && account.followersChange !== 0 && (
         <p className={cn(
           "text-xs font-medium",
-          account.followersChange > 0 ? "text-emerald-600" : "text-red-500"
+          account.followersChange > 0 ? "text-muted-foreground" : "text-brand"
         )}>
           {account.followersChange > 0 ? "+" : ""}
           {formatFollowers(Math.abs(account.followersChange))} this month

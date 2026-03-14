@@ -31,11 +31,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 const COLOR_MAP: Record<string, string> = {
   red: "text-brand bg-brand/10",
-  blue:   "text-blue-500 bg-blue-500/10",
-  emerald: "text-emerald-500 bg-emerald-500/10",
+  blue:   "text-brand bg-brand/10",
+  emerald: "text-foreground bg-muted",
   orange: "text-orange-500 bg-orange-500/10",
-  pink:   "text-pink-500 bg-pink-500/10",
-  amber:  "text-amber-500 bg-amber-500/10",
+  pink:   "text-muted-foreground bg-muted/60",
+  amber:  "text-brand bg-brand/5",
 };
 
 // ─── KPI Comparison Card ───────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ function ComparisonKpiCard({ kpi }: {
             0%
           </div>
         ) : isPositive ? (
-          <div className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1 text-xs text-foreground bg-muted px-2 py-1 rounded-full">
             <TrendingUp className="w-3 h-3" />
             +{Math.abs(kpi.delta)}%
           </div>

@@ -16,7 +16,7 @@ import type { ConnectedAccount } from "./types";
 // ─── Token Expiry Badge ──────────────────────────────────────────────────────
 function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   if (!expiresAt) return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50 flex items-center gap-1">
+    <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground font-semibold border border-border flex items-center gap-1">
       <CheckCircle2 className="w-2.5 h-2.5" />
       Active
     </span>
@@ -36,14 +36,14 @@ function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   }
   if (daysLeft <= 7) {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-200/50 dark:border-amber-800/50 flex items-center gap-1">
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand/10 text-brand font-semibold border border-brand/20 flex items-center gap-1">
         <Clock className="w-2.5 h-2.5" />
         {daysLeft}d left
       </span>
     );
   }
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50 flex items-center gap-1">
+    <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground font-semibold border border-border flex items-center gap-1">
       <CheckCircle2 className="w-2.5 h-2.5" />
       Active
     </span>
@@ -151,7 +151,7 @@ export function PlatformCard({
           {isConnected && (
             <span className={[
               "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card flex items-center justify-center",
-              hasExpired ? "bg-red-500" : "bg-emerald-500",
+              hasExpired ? "bg-brand" : "bg-neutral-300",
             ].join(" ")}>
               {hasExpired
                 ? <AlertTriangle className="w-2 h-2 text-white" />
@@ -170,7 +170,7 @@ export function PlatformCard({
                   Token Expired
                 </span>
               ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/50 dark:border-emerald-800/50">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground font-semibold border border-border">
                   Connected
                 </span>
               )
@@ -180,7 +180,7 @@ export function PlatformCard({
               </span>
             )}
             {isOAuth && !isConnected && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium border border-blue-200/50 dark:border-blue-800/50 flex items-center gap-1">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium border border-border flex items-center gap-1">
                 <Shield className="w-2.5 h-2.5" />
                 OAuth 2.0
               </span>

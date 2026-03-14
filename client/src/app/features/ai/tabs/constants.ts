@@ -31,16 +31,16 @@ export const TONES: { value: Tone; label: string; emoji: string }[] = [
 ];
 
 export const ENGAGEMENT_COLORS: Record<string, string> = {
-  high:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  medium: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  high:   "bg-muted text-foreground",
+  medium: "bg-muted text-muted-foreground",
   low:    "bg-muted text-muted-foreground",
 };
 
 export const SENTIMENT_CONFIG: Record<string, { color: string; bg: string; emoji: string }> = {
-  positive: { color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800", emoji: "😊" },
-  negative: { color: "text-red-600 dark:text-red-400",         bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",             emoji: "😟" },
-  neutral:  { color: "text-blue-600 dark:text-blue-400",       bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",         emoji: "😐" },
-  mixed:    { color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800",     emoji: "😕" },
+  positive: { color: "text-foreground", bg: "bg-muted border-border", emoji: "😊" },
+  negative: { color: "text-brand",      bg: "bg-brand/10 border-brand/20",  emoji: "😟" },
+  neutral:  { color: "text-muted-foreground", bg: "bg-muted/60 border-border", emoji: "😐" },
+  mixed:    { color: "text-brand",      bg: "bg-brand/5 border-brand/20",   emoji: "😕" },
 };
 
 export const STUDIO_TABS: { id: StudioTab; label: string; icon: React.ElementType; desc: string }[] = [

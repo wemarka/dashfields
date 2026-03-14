@@ -18,18 +18,18 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
 const statusDot: Record<string, string> = {
-  active: "bg-emerald-500", ACTIVE: "bg-emerald-500",
-  paused: "bg-amber-500",  PAUSED: "bg-amber-500",
-  draft: "bg-neutral-400",   DELETED: "bg-red-400",
-  ended: "bg-neutral-300",   ARCHIVED: "bg-neutral-300",
-  scheduled: "bg-blue-400",
+  active: "bg-neutral-300", ACTIVE: "bg-neutral-300",
+  paused: "bg-brand",  PAUSED: "bg-brand",
+  draft: "bg-neutral-500",   DELETED: "bg-brand",
+  ended: "bg-neutral-600",   ARCHIVED: "bg-neutral-600",
+  scheduled: "bg-neutral-400",
 };
 const statusText: Record<string, string> = {
-  active: "text-emerald-700", ACTIVE: "text-emerald-700",
-  paused: "text-amber-700",  PAUSED: "text-amber-700",
-  draft: "text-neutral-600",   DELETED: "text-red-600",
-  ended: "text-neutral-500",   ARCHIVED: "text-neutral-500",
-  scheduled: "text-blue-700",
+  active: "text-foreground", ACTIVE: "text-foreground",
+  paused: "text-brand",  PAUSED: "text-brand",
+  draft: "text-muted-foreground",   DELETED: "text-brand",
+  ended: "text-muted-foreground",   ARCHIVED: "text-muted-foreground",
+  scheduled: "text-muted-foreground",
 };
 
 function fmtNum(n: number) {
@@ -125,7 +125,7 @@ function CampaignSwitch({ campaign, onToggled }: { campaign: MetaCampaign; onTog
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
           "disabled:cursor-wait",
           optimisticActive
-            ? "bg-emerald-500 hover:bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.15)]"
+            ? "bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500"
             : "bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-700 dark:hover:bg-neutral-600",
         ].join(" ")}
       >
@@ -146,7 +146,7 @@ function CampaignSwitch({ campaign, onToggled }: { campaign: MetaCampaign; onTog
       {/* Label */}
       <span className={[
         "text-xs font-semibold min-w-[22px] select-none",
-        optimisticActive ? "text-emerald-600" : "text-neutral-400 dark:text-neutral-500",
+        optimisticActive ? "text-foreground" : "text-neutral-400 dark:text-neutral-500",
       ].join(" ")}>
         {optimisticActive ? "On" : "Off"}
       </span>
@@ -185,7 +185,7 @@ function BulkActionBar({ selectedIds, campaigns, onDone }: {
         <button
           onClick={() => bulkToggle.mutate({ campaignIds: ids, status: "ACTIVE" })}
           disabled={isPending}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground text-xs font-medium transition-colors disabled:opacity-50"
         >
           {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
           Activate all
@@ -193,7 +193,7 @@ function BulkActionBar({ selectedIds, campaigns, onDone }: {
         <button
           onClick={() => bulkToggle.mutate({ campaignIds: ids, status: "PAUSED" })}
           disabled={isPending}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand hover:bg-brand/90 text-white text-xs font-medium transition-colors disabled:opacity-50"
         >
           {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
           Pause all
@@ -256,7 +256,7 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
           <p className="text-xs text-muted-foreground mt-1">Link your ad account to see real campaign data</p>
         </div>
         <Link href="/connections">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
             <Link2 className="w-4 h-4" />
             {t("connections.connect")}
           </button>
@@ -385,7 +385,7 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
                     <div className="flex flex-col">
                       <span className="text-sm font-medium max-w-[180px] truncate" title={c.name}>{c.name}</span>
                       <span className="text-[10px] text-muted-foreground font-mono">{c.id}</span>
-                      {c.accountName && <span className="text-[10px] text-blue-400">{c.accountName}</span>}
+                      {c.accountName && <span className="text-[10px] text-muted-foreground">{c.accountName}</span>}
                     </div>
                   </td>
 

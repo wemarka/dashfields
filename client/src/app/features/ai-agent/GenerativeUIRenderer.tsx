@@ -115,8 +115,8 @@ function MetricCard({ block, isRtl }: { block: MetricCardBlock; isRtl?: boolean 
     <Minus className="w-3.5 h-3.5" />;
 
   const changeColor =
-    block.changeType === "positive" ? "text-emerald-500" :
-    block.changeType === "negative" ? "text-brand-red" :
+    block.changeType === "positive" ? "text-neutral-400" :
+    block.changeType === "negative" ? "text-brand" :
     "text-neutral-500";
 
   return (
@@ -282,8 +282,8 @@ function ImageGallery({ block, isRtl }: { block: ImageGalleryBlock; isRtl?: bool
 // ── Status List ────────────────────────────────────────────────────────────
 function StatusList({ block, isRtl }: { block: StatusListBlock; isRtl?: boolean }) {
   const statusIcon = {
-    success: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-    warning: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+    success: <CheckCircle2 className="w-4 h-4 text-neutral-400" />,
+    warning: <AlertTriangle className="w-4 h-4 text-neutral-500" />,
     error: <XCircle className="w-4 h-4 text-brand-red" />,
     pending: <Clock className="w-4 h-4 text-neutral-500" />,
   };

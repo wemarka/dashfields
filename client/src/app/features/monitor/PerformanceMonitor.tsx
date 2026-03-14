@@ -84,8 +84,8 @@ function MetricCard({ metric, isLive }: { metric: LiveMetric; isLive: boolean })
             <metric.icon className="w-4 h-4 text-white" />
           </div>
           {isLive && (
-            <span className="flex items-center gap-1 text-[10px] text-green-500 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="flex items-center gap-1 text-[10px] text-foreground font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-muted animate-pulse" />
               LIVE
             </span>
           )}
@@ -93,7 +93,7 @@ function MetricCard({ metric, isLive }: { metric: LiveMetric; isLive: boolean })
         <p className="text-xs text-muted-foreground font-medium mb-1">{metric.label}</p>
         <p className="text-2xl font-bold tracking-tight">{metric.format(metric.value)}</p>
         {metric.prev > 0 && (
-          <div className={`flex items-center gap-1 mt-1.5 text-xs font-medium ${isGood ? "text-green-500" : "text-red-500"}`}>
+          <div className={`flex items-center gap-1 mt-1.5 text-xs font-medium ${isGood ? "text-foreground" : "text-brand"}`}>
             {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {Math.abs(change).toFixed(1)}% vs previous
           </div>
@@ -254,7 +254,7 @@ export function PerformanceMonitor() {
         </div>
         <div className="flex items-center gap-3">
           {/* Connection status */}
-          <div className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border ${isConnected ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-red-500/30 bg-red-500/10 text-red-600"}`}>
+          <div className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border ${isConnected ? "border-green-500/30 bg-muted text-foreground dark:text-foreground" : "border-red-500/30 bg-brand/10 text-brand"}`}>
             {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
             {isConnected ? "Connected" : "Offline"}
           </div>
@@ -332,8 +332,8 @@ export function PerformanceMonitor() {
                       <stop offset="95%" stopColor="#c41919" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="clkGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -341,7 +341,7 @@ export function PerformanceMonitor() {
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
                   <Area type="monotone" dataKey="impressions" stroke="#c41919" fill="url(#impGrad)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="clicks" stroke="#10b981" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="clicks" stroke="#a3a3a3" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -352,7 +352,7 @@ export function PerformanceMonitor() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-500" />
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
               Spend & CTR Trend
             </CardTitle>
           </CardHeader>
@@ -370,7 +370,7 @@ export function PerformanceMonitor() {
                   <YAxis yAxisId="left" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
-                  <Line yAxisId="left" type="monotone" dataKey="spend" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                  <Line yAxisId="left" type="monotone" dataKey="spend" stroke="#737373" strokeWidth={2} dot={false} />
                   <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#E62020" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
@@ -385,7 +385,7 @@ export function PerformanceMonitor() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
+              <Zap className="w-4 h-4 text-brand" />
               Top Performing Campaign
             </CardTitle>
           </CardHeader>
@@ -407,15 +407,15 @@ export function PerformanceMonitor() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-sm truncate max-w-[70%]">{topCampaignQuery.data.name}</p>
-                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs">
+                  <Badge className="bg-muted text-foreground dark:bg-muted dark:text-foreground text-xs">
                     Top Spender
                   </Badge>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: "Spend", value: fmt.currency(topCampaignQuery.data.spend), icon: DollarSign, color: "text-amber-500" },
-                    { label: "Impressions", value: fmt.number(topCampaignQuery.data.impressions), icon: Eye, color: "text-blue-500" },
-                    { label: "CTR", value: fmt.percent(topCampaignQuery.data.ctr), icon: Target, color: "text-purple-500" },
+                    { label: "Spend", value: fmt.currency(topCampaignQuery.data.spend), icon: DollarSign, color: "text-brand" },
+                    { label: "Impressions", value: fmt.number(topCampaignQuery.data.impressions), icon: Eye, color: "text-muted-foreground" },
+                    { label: "CTR", value: fmt.percent(topCampaignQuery.data.ctr), icon: Target, color: "text-muted-foreground" },
                   ].map((stat, i) => (
                     <div key={i} className="bg-muted/40 rounded-xl p-3 text-center">
                       <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-1`} />
@@ -433,10 +433,10 @@ export function PerformanceMonitor() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Bell className="w-4 h-4 text-red-500" />
+              <Bell className="w-4 h-4 text-brand" />
               Active Alert Rules
               {alertsQuery.data && alertsQuery.data.length > 0 && (
-                <Badge className="ml-auto bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs">
+                <Badge className="ml-auto bg-red-100 text-brand dark:bg-brand/10 dark:text-brand text-xs">
                   {alertsQuery.data.length}
                 </Badge>
               )}
@@ -449,7 +449,7 @@ export function PerformanceMonitor() {
               </div>
             ) : !alertsQuery.data?.length ? (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
-                <CheckCircle2 className="w-8 h-8 opacity-30 text-green-500" />
+                <CheckCircle2 className="w-8 h-8 opacity-30 text-foreground" />
                 <p className="text-sm">No active alert rules</p>
                 <p className="text-xs opacity-70">Set up alerts in the Alerts section</p>
               </div>
@@ -457,13 +457,13 @@ export function PerformanceMonitor() {
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {alertsQuery.data.map((alert: { id: number; metric: string; operator: string; threshold: string }) => (
                   <div key={alert.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 border border-border/40">
-                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                    <AlertTriangle className="w-4 h-4 text-brand shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium capitalize">
                         {alert.metric.toUpperCase()} {alert.operator === "gt" ? ">" : alert.operator === "lt" ? "<" : alert.operator === "gte" ? "≥" : "≤"} {alert.threshold}
                       </p>
                     </div>
-                    <Badge className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <Badge className="text-[10px] bg-brand/10 text-brand dark:bg-brand/10 dark:text-brand">
                       Active
                     </Badge>
                   </div>
@@ -490,7 +490,7 @@ export function PerformanceMonitor() {
             <div className="flex flex-wrap gap-2">
               {summary.platforms.map((p: string) => (
                 <div key={p} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 border border-border/40 text-xs font-medium capitalize">
-                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="w-2 h-2 rounded-full bg-muted" />
                   {p}
                 </div>
               ))}

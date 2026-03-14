@@ -13,14 +13,14 @@ interface ConnectPlatformDialogProps {
 }
 
 const PLATFORMS = [
-  { id: "facebook",  label: "Facebook",    color: "bg-blue-600",      textColor: "text-white" },
-  { id: "instagram", label: "Instagram",   color: "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400", textColor: "text-white" },
-  { id: "twitter",   label: "X (Twitter)", color: "bg-black",         textColor: "text-white" },
-  { id: "linkedin",  label: "LinkedIn",    color: "bg-blue-700",      textColor: "text-white" },
-  { id: "youtube",   label: "YouTube",     color: "bg-red-600",       textColor: "text-white" },
-  { id: "tiktok",    label: "TikTok",      color: "bg-black",         textColor: "text-white" },
-  { id: "snapchat",  label: "Snapchat",    color: "bg-yellow-400",    textColor: "text-black" },
-  { id: "pinterest", label: "Pinterest",   color: "bg-red-700",       textColor: "text-white" },
+  { id: "facebook",  label: "Facebook",    color: "bg-neutral-800 border border-neutral-700", textColor: "text-white" },
+  { id: "instagram", label: "Instagram",   color: "bg-neutral-700 border border-neutral-600", textColor: "text-white" },
+  { id: "twitter",   label: "X (Twitter)", color: "bg-neutral-900 border border-neutral-700", textColor: "text-white" },
+  { id: "linkedin",  label: "LinkedIn",    color: "bg-neutral-800 border border-neutral-700", textColor: "text-white" },
+  { id: "youtube",   label: "YouTube",     color: "bg-brand",                                 textColor: "text-white" },
+  { id: "tiktok",    label: "TikTok",      color: "bg-neutral-900 border border-neutral-700", textColor: "text-white" },
+  { id: "snapchat",  label: "Snapchat",    color: "bg-neutral-700 border border-neutral-600", textColor: "text-white" },
+  { id: "pinterest", label: "Pinterest",   color: "bg-brand",                                 textColor: "text-white" },
 ] as const;
 
 export function ConnectPlatformDialog({ onClose }: ConnectPlatformDialogProps) {

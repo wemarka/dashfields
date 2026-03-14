@@ -111,7 +111,7 @@ export function CreateReportModal({ onClose, onCreated }: { onClose: () => void;
               {emailList.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {emailList.map(email => (
-                    <span key={email} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium">
+                    <span key={email} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
                       {email}
                       <button onClick={() => setEmailList(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors"><X className="w-3 h-3" /></button>
                     </span>

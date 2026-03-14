@@ -18,8 +18,8 @@ export interface CalendarPost {
 
 export const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
   draft:     { bg: "bg-muted",          text: "text-muted-foreground", dot: "bg-muted-foreground" },
-  scheduled: { bg: "bg-blue-500/10",    text: "text-blue-600",         dot: "bg-blue-500" },
-  published: { bg: "bg-emerald-500/10", text: "text-emerald-600",      dot: "bg-emerald-500" },
+  scheduled: { bg: "bg-brand/10",    text: "text-brand",         dot: "bg-brand" },
+  published: { bg: "bg-muted", text: "text-foreground",      dot: "bg-neutral-300" },
   failed:    { bg: "bg-red-500/10",     text: "text-red-600",          dot: "bg-red-500" },
 };
 

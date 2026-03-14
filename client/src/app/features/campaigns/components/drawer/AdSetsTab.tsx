@@ -21,9 +21,9 @@ import { AdSetInfo, AdSetInsightInfo, STATUS_CONFIG, fmtNum, fmtPct } from "./ty
 
 // ─── Platform Icons ──────────────────────────────────────────────────────────
 const PLATFORM_COLORS: Record<string, string> = {
-  facebook:  "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  instagram: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
-  messenger: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  facebook:  "bg-muted text-muted-foreground",
+  instagram: "bg-muted text-muted-foreground",
+  messenger: "bg-muted text-muted-foreground",
   audience_network: "bg-brand/10 text-brand dark:text-brand",
   tiktok:    "bg-neutral-500/10 text-neutral-600 dark:text-neutral-400",
 };
@@ -35,8 +35,8 @@ function BudgetPacingBar({ budget, spent, fmtCurrency }: {
   const pct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const isOver = pct >= 90;
   const isMid  = pct >= 60;
-  const barColor = isOver ? "bg-red-500" : isMid ? "bg-amber-500" : "bg-emerald-500";
-  const textColor = isOver ? "text-red-500" : isMid ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400";
+  const barColor = isOver ? "bg-brand" : isMid ? "bg-neutral-400" : "bg-neutral-300";
+  const textColor = isOver ? "text-brand" : isMid ? "text-muted-foreground" : "text-foreground";
 
   return (
     <div className="space-y-1.5">
@@ -136,7 +136,7 @@ function AdSetCard({ adset, insight, fmtCurrency }: {
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground">CTR</p>
-              <p className={`text-sm font-semibold ${insight.ctr >= 2 ? "text-emerald-500" : insight.ctr >= 1 ? "text-amber-500" : "text-foreground"}`}>
+              <p className={`text-sm font-semibold ${insight.ctr >= 2 ? "text-foreground" : insight.ctr >= 1 ? "text-muted-foreground" : "text-brand"}`}>
                 {fmtPct(insight.ctr)}
               </p>
             </div>

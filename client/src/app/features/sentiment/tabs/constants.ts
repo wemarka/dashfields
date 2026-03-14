@@ -4,13 +4,14 @@
 import { Smile, Frown, Meh, AlertCircle } from "lucide-react";
 
 export const SENTIMENT_CONFIG: Record<string, { emoji: string; color: string; bg: string; icon: React.ElementType; label: string }> = {
-  positive: { emoji: "\u{1F60A}", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20", icon: Smile,  label: "Positive" },
-  negative: { emoji: "\u{1F61E}", color: "text-red-500",     bg: "bg-red-500/10 border-red-500/20",         icon: Frown,  label: "Negative" },
-  neutral:  { emoji: "\u{1F610}", color: "text-blue-500",    bg: "bg-blue-500/10 border-blue-500/20",        icon: Meh,    label: "Neutral"  },
-  mixed:    { emoji: "\u{1F914}", color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20",      icon: AlertCircle, label: "Mixed" },
+  positive: { emoji: "\u{1F60A}", color: "text-foreground",      bg: "bg-muted/40 border-border",                icon: Smile,       label: "Positive" },
+  negative: { emoji: "\u{1F61E}", color: "text-brand",           bg: "bg-brand/10 border-brand/20",              icon: Frown,       label: "Negative" },
+  neutral:  { emoji: "\u{1F610}", color: "text-muted-foreground", bg: "bg-muted/30 border-border",               icon: Meh,         label: "Neutral"  },
+  mixed:    { emoji: "\u{1F914}", color: "text-muted-foreground", bg: "bg-muted/20 border-border",               icon: AlertCircle, label: "Mixed"    },
 };
 
-export const SENTIMENT_COLORS = { positive: "#10b981", negative: "#ef4444", neutral: "#3b82f6", mixed: "#f59e0b" };
+// Brand palette sentiment colors
+export const SENTIMENT_COLORS = { positive: "#a3a3a3", negative: "#e62020", neutral: "#737373", mixed: "#525252" };
 
 export const PLATFORMS = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "youtube"];
 

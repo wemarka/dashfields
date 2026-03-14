@@ -64,11 +64,11 @@ export function ManualConnectModal({ platformId, onClose, onConnected }: ManualC
 
         <div className="p-5 space-y-4">
           {/* Token hint */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/40 p-3 flex gap-2">
-            <Key className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-amber-200 bg-brand/10 dark:bg-brand/10 dark:border-brand/20 p-3 flex gap-2">
+            <Key className="w-4 h-4 text-brand dark:text-brand shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-amber-800 dark:text-amber-300">API Token Required</p>
-              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+              <p className="text-xs font-medium text-brand dark:text-brand">API Token Required</p>
+              <p className="text-xs text-brand/80 dark:text-brand/80 mt-0.5">
                 Get your API token from {platform.name} developer settings.
                 {platform.docsUrl && (
                   <a href={platform.docsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline ml-1">

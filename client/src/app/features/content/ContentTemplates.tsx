@@ -62,10 +62,10 @@ const PLATFORM_ICONS: Record<string, React.ElementType> = {
 };
 
 const PLATFORM_COLORS: Record<string, string> = {
-  instagram: "text-pink-500",
-  facebook:  "text-blue-600",
-  linkedin:  "text-blue-700",
-  twitter:   "text-sky-500",
+  instagram: "text-muted-foreground",
+  facebook:  "text-muted-foreground",
+  linkedin:  "text-muted-foreground",
+  twitter:   "text-muted-foreground",
   youtube:   "text-red-600",
   tiktok:    "text-black dark:text-white",
 };
@@ -109,7 +109,7 @@ function TemplateCard({
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           {template.is_public && (
-            <Badge variant="outline" className="text-xs text-green-600 border-green-300">Public</Badge>
+            <Badge variant="outline" className="text-xs text-brand border-brand/30">Public</Badge>
           )}
           <button onClick={() => onEdit(template)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <Edit3 className="w-3.5 h-3.5" />

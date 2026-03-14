@@ -38,7 +38,7 @@ export function TimingTab() {
     <div className="space-y-5">
       <div className="bg-card border border-border rounded-2xl p-5">
         <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-blue-500" />
+          <Clock className="w-4 h-4 text-muted-foreground" />
           Best Time to Post
         </h3>
         <p className="text-xs text-muted-foreground mb-4">
@@ -90,12 +90,12 @@ export function TimingTab() {
           {result.peakDays.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
               <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+                <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
                 Peak Days This Week
               </p>
               <div className="flex flex-wrap gap-2">
                 {result.peakDays.map((d, i) => (
-                  <span key={i} className="text-xs font-medium px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">{d}</span>
+                  <span key={i} className="text-xs font-medium px-3 py-1 rounded-full bg-muted text-foreground">{d}</span>
                 ))}
               </div>
             </div>
@@ -107,7 +107,7 @@ export function TimingTab() {
               <div className="flex items-center gap-2 mb-3">
                 <PlatformIcon platform={rec.platform} className="w-4 h-4" />
                 <span className="text-sm font-semibold text-foreground capitalize">{rec.platform}</span>
-                <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">{rec.engagementBoost}</span>
+                <span className="ml-auto text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{rec.engagementBoost}</span>
               </div>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
@@ -122,7 +122,7 @@ export function TimingTab() {
                   <p className="text-xs text-muted-foreground mb-1">Best Times</p>
                   <div className="flex flex-wrap gap-1">
                     {rec.bestTimes.map((t, j) => (
-                      <span key={j} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">{t}</span>
+                      <span key={j} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{t}</span>
                     ))}
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export function TimingTab() {
           {result.generalTips.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-4">
               <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <Lightbulb className="w-3.5 h-3.5 text-muted-foreground" />
                 General Tips
               </p>
               <ul className="space-y-1.5">

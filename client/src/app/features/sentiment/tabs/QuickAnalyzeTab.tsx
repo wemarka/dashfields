@@ -38,7 +38,7 @@ export function QuickAnalyzeTab() {
             <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, charLimit))}
               placeholder="Paste your content here... e.g., 'Excited to announce our new product launch! 🚀 Join us for an exclusive preview...'"
               rows={8} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
-            <span className={`absolute bottom-2 right-3 text-[10px] ${charCount > charLimit * 0.9 ? "text-amber-500" : "text-muted-foreground"}`}>
+            <span className={`absolute bottom-2 right-3 text-[10px] ${charCount > charLimit * 0.9 ? "text-brand" : "text-muted-foreground"}`}>
               {charCount}/{charLimit}
             </span>
           </div>
