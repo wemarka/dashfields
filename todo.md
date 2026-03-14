@@ -3310,3 +3310,9 @@
 - [x] Replace mock campaign stats with real tRPC data
 - [x] Replace mock Recent Creations with real campaign/studio data
 - [x] Replace mock What's New with real data or remove static content
+
+## 🎨 Home Page — Color Audit & Fix
+- [x] Remove all blue colors from Home page
+- [x] Align all neutral shades to brand palette (Dark Neutral only)
+- [x] Fix gradient-text: red → white (not red → orange)
+- [x] Ensure card backgrounds, borders, and text use only brand neutrals
