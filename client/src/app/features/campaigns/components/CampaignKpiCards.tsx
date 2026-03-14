@@ -41,6 +41,7 @@ export interface CampaignKpiCardsProps {
   prevClicks?: number | null;
   prevCtr?: number | null;
   dailyData?: SparklinePoint[];
+  comparisonLabel?: string;
   onKpiClick?: (metric: string) => void;
   activeMetric?: string | null;
 }
@@ -286,6 +287,7 @@ export function CampaignKpiCards({
   totalCampaigns, activeCampaigns, conversions, loading,
   prevSpend, prevImpressions, prevClicks, prevCtr,
   dailyData = [],
+  comparisonLabel,
   onKpiClick, activeMetric,
 }: CampaignKpiCardsProps) {
   const { fmt: fmtMoney } = useCurrency();
@@ -372,23 +374,36 @@ export function CampaignKpiCards({
   ];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
-      {cards.map(card => (
-        <KpiCard
-          key={card.key}
-          label={card.label}
-          value={card.value}
-          sub={card.sub}
-          icon={card.icon}
-          current={card.current}
-          previous={card.previous}
-          higherIsBetter={card.higherIsBetter}
-          isSelected={activeMetric === card.key}
-          onClick={onKpiClick ? () => onKpiClick(card.key) : undefined}
-          accentColor={card.accent}
-          sparkData={card.spark}
-        />
-      ))}
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+        {cards.map(card => (
+          <KpiCard
+            key={card.key}
+            label={card.label}
+            value={card.value}
+            sub={card.sub}
+            icon={card.icon}
+            current={card.current}
+            previous={card.previous}
+            higherIsBetter={card.higherIsBetter}
+            isSelected={activeMetric === card.key}
+            onClick={onKpiClick ? () => onKpiClick(card.key) : undefined}
+            accentColor={card.accent}
+            sparkData={card.spark}
+          />
+        ))}
+      </div>
+      {comparisonLabel && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 2 }}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M6 1v5l3 2" stroke="#737373" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="6" cy="6" r="5" stroke="#737373" strokeWidth="1.2" />
+          </svg>
+          <span style={{ fontSize: 11, color: "#737373", fontWeight: 400 }}>
+            Trend badges comparing {comparisonLabel}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

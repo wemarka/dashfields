@@ -214,14 +214,27 @@ export default function Campaigns() {
       { enabled: isMetaConnected }
     );
 
-  // ── Sparkline daily data ───────────────────────────────────────────────────
-  const sparklinePreset = (datePreset === "custom" || datePreset === "today" || datePreset === "yesterday")
+  // ── Sparkline & period comparison ──────────────────────────────────────────
+  const comparisonPreset = (datePreset === "custom" || datePreset === "today" || datePreset === "yesterday" || datePreset === "this_month" || datePreset === "last_month")
     ? "last_30d"
-    : datePreset as "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month";
+    : datePreset as "last_7d" | "last_14d" | "last_30d" | "last_90d";
   const { data: sparklineData = [] } = trpc.campaigns.dailySparkline.useQuery(
-    { datePreset: sparklinePreset, workspaceId: activeWorkspace?.id },
+    { datePreset: comparisonPreset, workspaceId: activeWorkspace?.id },
     { staleTime: 5 * 60 * 1000 }
   );
+  const { data: periodData } = trpc.periodComparison.compare.useQuery(
+    { dateRange: comparisonPreset },
+    { staleTime: 5 * 60 * 1000 }
+  );
+  // Extract previous period values for trend badges
+  const prevSpend       = periodData?.kpis.find(k => k.key === "spend")?.previous ?? null;
+  const prevImpressions = periodData?.kpis.find(k => k.key === "impressions")?.previous ?? null;
+  const prevClicks      = periodData?.kpis.find(k => k.key === "clicks")?.previous ?? null;
+  const prevCtr         = periodData?.kpis.find(k => k.key === "ctr")?.previous ?? null;
+  // Human-readable comparison label (e.g. "vs previous 30 days")
+  const comparisonLabel = periodData?.period
+    ? `vs ${periodData.period.previous.since} – ${periodData.period.previous.until}`
+    : null;
 
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateLocalStatus = trpc.campaigns.updateStatus.useMutation({
@@ -553,6 +566,11 @@ export default function Campaigns() {
               totalCampaigns={kpis.totalCampaigns}
               loading={isLoading}
               dailyData={sparklineData}
+              prevSpend={prevSpend}
+              prevImpressions={prevImpressions}
+              prevClicks={prevClicks}
+              prevCtr={prevCtr}
+              comparisonLabel={comparisonLabel ?? undefined}
             />
           </div>
         )}
