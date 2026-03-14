@@ -29,6 +29,7 @@ export interface UnifiedCampaign {
   cpm?: number | null;
   score?: number | null;       // OpportunityScore 0-100 (calcPerformanceScore: CTR+CPC+ROAS+Spend)
   stopTime?: string | null;    // ISO date string from Meta stop_time
+  publisherPlatforms?: string[] | null; // Meta placements: ['facebook','instagram','audience_network','messenger']
 }
 
 export interface UnifiedCampaignTableProps {

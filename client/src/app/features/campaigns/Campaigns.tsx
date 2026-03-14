@@ -322,6 +322,7 @@ export default function Campaigns() {
     const meta: UnifiedCampaign[] = metaCampaigns.map((mc: {
       id: string; name: string; status: string; objective?: string | null;
       dailyBudget?: number | null; adAccountId?: string | null;
+      publisherPlatforms?: string[] | null;
     }) => {
       const ins = insightsMap[mc.id];
       return {
@@ -333,6 +334,7 @@ export default function Campaigns() {
         dailyBudget: mc.dailyBudget ?? undefined,
         adAccountId: mc.adAccountId ?? undefined,
         stopTime: (mc as any).stopTime ?? null,
+        publisherPlatforms: mc.publisherPlatforms ?? null,
         spend: ins?.spend, impressions: ins?.impressions,
         clicks: ins?.clicks, ctr: ins?.ctr, reach: ins?.reach,
         cpc: ins?.cpc, cpm: ins?.cpm, conversions: ins?.conversions,

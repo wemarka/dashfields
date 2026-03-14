@@ -3387,3 +3387,8 @@
 - [x] Facebook rows with numeric platform_account_id → account_type = 'ad_account'
 - [x] Instagram rows → account_type = 'business'
 - [x] Facebook rows with non-numeric ID → account_type = 'page'
+
+## 🔄 Campaign Platform Detection Fix
+- [x] Show Instagram icon when campaign runs on Instagram placements
+- [x] Show both FB+IG icons when campaign runs on both platforms
+- [x] Use publisher_platforms from Meta API to determine actual platform

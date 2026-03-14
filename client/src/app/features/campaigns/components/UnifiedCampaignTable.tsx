@@ -195,13 +195,38 @@ function UnifiedCampaignTableInner({
             )}
           </div>
         );
-      case "platform":
+      case "platform": {
+        // Determine actual platforms from publisherPlatforms (Meta ad sets targeting)
+        const pp = c.publisherPlatforms ?? [];
+        const hasIG = pp.includes("instagram");
+        const hasFB = pp.includes("facebook") || pp.length === 0; // fallback to FB if no data
+        const bothMeta = hasIG && hasFB;
+        if (c.platform === "facebook" && pp.length > 0) {
+          if (bothMeta) {
+            return (
+              <div className="flex items-center gap-1">
+                <PlatformIcon platform="facebook" className="w-3.5 h-3.5 shrink-0" />
+                <PlatformIcon platform="instagram" className="w-3.5 h-3.5 shrink-0" />
+                <span style={{ fontSize: 12, color: "#737373" }}>Meta</span>
+              </div>
+            );
+          }
+          if (hasIG) {
+            return (
+              <div className="flex items-center gap-1.5">
+                <PlatformIcon platform="instagram" className="w-3.5 h-3.5 shrink-0" />
+                <span style={{ fontSize: 12, color: "#737373" }}>Instagram</span>
+              </div>
+            );
+          }
+        }
         return (
           <div className="flex items-center gap-1.5">
             <PlatformIcon platform={c.platform} className="w-3.5 h-3.5 shrink-0" />
             <span style={{ fontSize: 12, color: "#737373" }}>{getPlatformName(c.platform)}</span>
           </div>
         );
+      }
       case "spend":
         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#ffffff", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
       case "dailyBudget":
