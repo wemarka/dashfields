@@ -263,8 +263,6 @@ export function AdAccountSelector({
           <div style={{ maxHeight: 340, overflowY: "auto" }}>
             {metaGroups.map((grp) => {
               const selected = isGroupSelected(grp);
-              const fb = grp.members.find(m => m.platform === "facebook");
-              const ig = grp.members.find(m => m.platform === "instagram");
 
               return (
                 <button
@@ -306,30 +304,9 @@ export function AdAccountSelector({
                     }}>
                       {grp.displayName}
                     </p>
-                    {/* Platform pills */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
-                      {fb && (
-                        <span style={{
-                          fontSize: 9, fontWeight: 600, color: "#1877F2",
-                          backgroundColor: "rgba(24,119,242,0.1)",
-                          borderRadius: 3, padding: "1px 5px",
-                        }}>
-                          FB
-                        </span>
-                      )}
-                      {ig && (
-                        <span style={{
-                          fontSize: 9, fontWeight: 600, color: "#E1306C",
-                          backgroundColor: "rgba(225,48,108,0.1)",
-                          borderRadius: 3, padding: "1px 5px",
-                        }}>
-                          IG
-                        </span>
-                      )}
-                      <span style={{ fontSize: 10, color: "#525252" }}>
-                        {grp.members.length} account{grp.members.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
+                    <p style={{ fontSize: 10, color: "#525252", margin: 0, marginTop: 2 }}>
+                      Meta Ads
+                    </p>
                   </div>
 
                   {/* Status + check */}
