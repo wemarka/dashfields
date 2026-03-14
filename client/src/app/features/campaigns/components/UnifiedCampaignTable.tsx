@@ -69,6 +69,11 @@ function UnifiedCampaignTableInner({
   const sorted = useMemo(() => {
     const arr = [...campaigns];
     arr.sort((a, b) => {
+      // Pinned campaigns always come first, regardless of sort
+      const aPinned = pinnedIds?.has(a.id) ? 0 : 1;
+      const bPinned = pinnedIds?.has(b.id) ? 0 : 1;
+      if (aPinned !== bPinned) return aPinned - bPinned;
+
       let cmp = 0;
       switch (sortKey) {
         case "name":        cmp = (a.name ?? "").localeCompare(b.name ?? ""); break;
@@ -91,7 +96,7 @@ function UnifiedCampaignTableInner({
       return sortDir === "asc" ? cmp : -cmp;
     });
     return arr;
-  }, [campaigns, sortKey, sortDir]);
+  }, [campaigns, sortKey, sortDir, pinnedIds]);
 
   const totalPages = Math.ceil(sorted.length / pageSize);
   const paginated = sorted.slice(page * pageSize, (page + 1) * pageSize);
