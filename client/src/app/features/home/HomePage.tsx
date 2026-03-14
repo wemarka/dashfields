@@ -138,7 +138,7 @@ const P = {
   card:      "#1e1e1e",   // neutral-900
   border:    "#303030",   // neutral-800
   dim:       "#737373",   // neutral-500
-  muted:     "#b8b8b8",   // neutral-400
+  muted:     "#C8C8C8",   // neutral-400
   white:     "#ffffff",
   red:       "#e62020",
   redAlpha8: "rgba(230,32,32,.08)",

@@ -11,7 +11,7 @@ const P = {
   card:   "#1e1e1e",
   border: "#303030",
   text:   "#ffffff",
-  muted:  "#b8b8b8",
+  muted:  "#C8C8C8",
   subtle: "#737373",
   dim:    "#404040",
   brand:  "#e62020",
@@ -332,7 +332,7 @@ export function CampaignKpiCards({
       previous: prevImpressions,
       higherIsBetter: true,
       sub: totalImpressions > 0 ? "Reach across all platforms" : "No data yet",
-      accent: "#b8b8b8",
+      accent: "#C8C8C8",
       spark: impressionsSpark,
     },
     {

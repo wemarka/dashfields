@@ -332,8 +332,8 @@ export function PerformanceMonitor() {
                       <stop offset="95%" stopColor="#c41919" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="clkGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#b8b8b8" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#b8b8b8" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#C8C8C8" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#C8C8C8" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
@@ -341,7 +341,7 @@ export function PerformanceMonitor() {
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
                   <Area type="monotone" dataKey="impressions" stroke="#E62020" fill="url(#impGrad)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="clicks" stroke="#b8b8b8" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="clicks" stroke="#B3B3B3" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             )}

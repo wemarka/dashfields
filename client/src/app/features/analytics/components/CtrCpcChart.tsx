@@ -6,10 +6,10 @@ import {
 } from "recharts";
 
 // Design Token chart palette — matches --color-chart-1…5 in index.css
-const CHART_COLORS = ["#ffffff", "#b8b8b8", "#787878", "#484848", "#E62020"];
+const CHART_COLORS = ["#ffffff", "#C8C8C8", "#787878", "#484848", "#E62020"];
 
 const TOOLTIP_STYLE = {
-  background: "#1e1e1e",
+  background: "#242424",
   border: "1px solid #303030",
   borderRadius: "10px",
   fontSize: "12px",
@@ -40,13 +40,13 @@ export function CtrCpcChart({ ctrData, pieData }: CtrCpcChartProps) {
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={ctrData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
-            <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#b8b8b8" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "#b8b8b8" }} axisLine={false} tickLine={false} unit="%" />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#B3B3B3" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: "#B3B3B3" }} axisLine={false} tickLine={false} unit="%" />
             <Tooltip
               contentStyle={TOOLTIP_STYLE}
               formatter={(v: number) => [v.toFixed(2) + "%", "CTR"]}
             />
-            <Bar dataKey="ctr" fill="#b8b8b8" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="ctr" fill="#B3B3B3" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -76,7 +76,7 @@ export function CtrCpcChart({ ctrData, pieData }: CtrCpcChartProps) {
             <Legend
               iconType="circle"
               iconSize={8}
-              formatter={(value) => <span style={{ fontSize: "11px", color: "#b8b8b8" }}>{value}</span>}
+              formatter={(value) => <span style={{ fontSize: "11px", color: "#C8C8C8" }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

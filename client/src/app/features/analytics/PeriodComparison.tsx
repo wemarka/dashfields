@@ -237,7 +237,7 @@ export default function PeriodComparison() {
                   formatter={(value) => value === "current" ? "Current Period" : "Previous Period"}
                 />
                 <Line type="monotone" dataKey="current"  stroke="#E62020" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="previous" stroke="#787878" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                <Line type="monotone" dataKey="previous" stroke="#666666" strokeWidth={2} dot={false} strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>
           )}

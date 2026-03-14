@@ -5,7 +5,7 @@ import {
 } from "recharts";
 
 const TOOLTIP_STYLE = {
-  background: "#1e1e1e",
+  background: "#242424",
   border: "1px solid #303030",
   borderRadius: "10px",
   fontSize: "12px",
@@ -37,13 +37,13 @@ export function SpendByCampaignChart({ data, periodLabel }: SpendByCampaignChart
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#b8b8b8" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: "#b8b8b8" }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#B3B3B3" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "#B3B3B3" }} axisLine={false} tickLine={false} />
           <Tooltip
             contentStyle={TOOLTIP_STYLE}
             formatter={(v: number) => ["$" + v.toFixed(2), "Spend"]}
           />
-          <Bar dataKey="spend" fill="#ffffff" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="spend" fill="#FFFFFF" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

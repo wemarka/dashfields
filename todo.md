@@ -3463,3 +3463,8 @@
 - [x] Apply btn-cta to all primary buttons across campaigns, publishing, modals
 - [x] Update all Recharts charts to use --color-chart-1…5 token palette
 - [x] Remove remaining blue/purple colors from chart stroke/fill props
+
+## 🔄 Precise Color System from Reference Image
+- [x] Extract exact bg-base hex from attached image → #131313 (RGB 19,19,19)
+- [x] Derive bg-surface #1B1B1B, bg-elevated #242424, typography, brand-red, chart palette
+- [x] Apply full color system to index.css and all components

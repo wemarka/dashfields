@@ -477,7 +477,7 @@ export default function Analytics() {
                       <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} formatter={(v: unknown) => (v as number).toLocaleString()} />
                       <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
                       <Bar dataKey="Current" fill="#E62020" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Previous" fill="#484848" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Previous" fill="#3D3D3D" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

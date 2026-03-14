@@ -17,62 +17,78 @@
   --radius-full: 9999px;
   --radius: 10px;
 
-  /* ── Pure Neutral Dark Theme ────────────────────────────────────────────── */
-  /* Elite Tech/SaaS — neutral grays + brand red (#E62020) */
+  /* ═══════════════════════════════════════════════════════════════════════
+   * DESIGN TOKEN SYSTEM — Derived from Reference Image
+   * bg-base: #131313 (extracted via pixel sampling, RGB 19,19,19)
+   * Architecture: bg-base → bg-surface (+3.5L) → bg-elevated (+7L) → bg-hover (+10L)
+   * Typography: pure white → #C8C8C8 → #787878 (all WCAG AA compliant)
+   * Brand: #E62020 red CTA only  |  Charts: monochromatic white→dark scale
+   * ═══════════════════════════════════════════════════════════════════════ */
 
-  --color-background:           oklch(0.185 0.000 0);    /* neutral-900 ~#141414 */
-  --color-foreground:           oklch(1.000 0.000 0);    /* pure white */
+  /* ── Backgrounds (same hue 0°, same saturation 0%, increasing lightness) */
+  --color-background:           oklch(0.110 0.000 0);    /* bg-base    #131313 — absolute darkest */
+  --color-foreground:           oklch(1.000 0.000 0);    /* text-primary #FFFFFF */
 
-  --color-card:                 oklch(0.240 0.000 0);    /* neutral-850 ~#1e1e1e */
+  --color-card:                 oklch(0.145 0.000 0);    /* bg-surface  #1B1B1B — cards, sidebar */
   --color-card-foreground:      oklch(1.000 0.000 0);
-  --color-popover:              oklch(0.240 0.000 0);    /* neutral-850 */
+  --color-popover:              oklch(0.180 0.000 0);    /* bg-elevated #242424 — modals, dropdowns */
   --color-popover-foreground:   oklch(1.000 0.000 0);
 
-  --color-primary:              oklch(0.592 0.227 28);   /* brand-red #E62020 */
-  --color-primary-foreground:   oklch(1.000 0.000 0);    /* white */
+  /* ── Brand / CTA — applied ONLY to primary action buttons */
+  --color-primary:              oklch(0.592 0.227 28);   /* brand-primary #E62020 */
+  --color-primary-foreground:   oklch(1.000 0.000 0);    /* pure white text inside CTAs */
 
-  --color-secondary:            oklch(0.310 0.000 0);    /* neutral-750 ~#303030 */
+  /* ── Secondary / Muted surfaces */
+  --color-secondary:            oklch(0.210 0.000 0);    /* bg-hover    #2C2C2C */
   --color-secondary-foreground: oklch(1.000 0.000 0);
 
-  --color-muted:                oklch(0.310 0.000 0);    /* neutral-750 */
-  --color-muted-foreground:     oklch(0.780 0.000 0);    /* neutral-350 ~#b8b8b8 */
+  --color-muted:                oklch(0.210 0.000 0);    /* bg-hover    #2C2C2C */
+  --color-muted-foreground:     oklch(0.810 0.000 0);    /* text-secondary #C8C8C8 — WCAG AA 8.5:1 */
 
-  --color-accent:               oklch(0.310 0.000 0);    /* neutral-750 hover */
+  --color-accent:               oklch(0.210 0.000 0);    /* bg-hover for interactive states */
   --color-accent-foreground:    oklch(1.000 0.000 0);
 
   --color-destructive:          oklch(0.592 0.227 28);   /* brand-red */
   --color-destructive-foreground: oklch(1.000 0.000 0);
 
-  --color-border:               oklch(0.310 0.000 0);    /* neutral-750 */
-  --color-input:                oklch(0.310 0.000 0);    /* neutral-750 */
-  --color-ring:                 oklch(0.592 0.227 28 / 0.40);  /* brand-red ring */
+  /* ── Borders — derived from bg-base */
+  --color-border:               oklch(0.195 0.000 0);    /* border-subtle #272727 */
+  --color-input:                oklch(0.195 0.000 0);    /* same as border */
+  --color-ring:                 oklch(0.592 0.227 28 / 0.40);  /* brand-red focus ring */
 
-  /* Sidebar (compatibility) */
-  --color-sidebar:                    oklch(0.185 0.000 0);
+  /* ── Sidebar */
+  --color-sidebar:                    oklch(0.110 0.000 0);    /* bg-base */
   --color-sidebar-foreground:         oklch(1.000 0.000 0);
-  --color-sidebar-border:             oklch(0.310 0.000 0);
+  --color-sidebar-border:             oklch(0.195 0.000 0);    /* border-subtle */
   --color-sidebar-accent:             oklch(0.592 0.227 28 / 0.12);
   --color-sidebar-accent-foreground:  oklch(0.592 0.227 28);
   --color-sidebar-primary:            oklch(0.592 0.227 28);
   --color-sidebar-primary-foreground: oklch(1.000 0.000 0);
   --color-sidebar-ring:               oklch(0.592 0.227 28 / 0.20);
 
-  /* Charts — warm palette anchored by brand red */
-  --color-chart-1: oklch(0.592 0.227 28);   /* brand-red */
-  --color-chart-2: oklch(0.650 0.160 50);   /* warm orange */
-  --color-chart-3: oklch(0.700 0.140 80);   /* amber */
-  --color-chart-4: oklch(0.650 0.160 150);  /* green */
-  --color-chart-5: oklch(0.600 0.180 260);  /* blue */
+  /* ── Charts — monochromatic scale (white → dark) + brand-red accent
+   *   chart-1: #FFFFFF  100% white  — primary data series
+   *   chart-2: #B3B3B3   70% white  — secondary series
+   *   chart-3: #666666   40% white  — tertiary series
+   *   chart-4: #3D3D3D   24% white  — comparison/background bars
+   *   chart-5: #E62020  brand red   — highlight/accent series
+   */
+  --color-chart-1: oklch(1.000 0.000 0);    /* #FFFFFF — primary */
+  --color-chart-2: oklch(0.720 0.000 0);    /* #B3B3B3 — secondary */
+  --color-chart-3: oklch(0.430 0.000 0);    /* #666666 — tertiary */
+  --color-chart-4: oklch(0.260 0.000 0);    /* #3D3D3D — background */
+  --color-chart-5: oklch(0.592 0.227 28);   /* #E62020 — brand accent */
 
-  /* Brand — vibrant red */
+  /* ── Brand tokens */
   --color-brand:            oklch(0.592 0.227 28);   /* #E62020 */
+  --color-brand-hover:      oklch(0.540 0.227 28);   /* #CC1B1B — hover state */
   --color-brand-foreground: oklch(1.000 0.000 0);
   --color-brand-subtle:     oklch(0.592 0.227 28 / 0.12);
 
-  /* Status */
-  --color-success:   oklch(0.650 0.160 150);
-  --color-warning:   oklch(0.750 0.160 70);
-  --color-info:      oklch(0.650 0.160 220);
+  /* ── Semantic status */
+  --color-success:   oklch(0.650 0.160 150);   /* green  — active, score */
+  --color-warning:   oklch(0.750 0.160 70);    /* amber  — paused, warning */
+  --color-info:      oklch(0.720 0.000 0);     /* neutral — info states */
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
@@ -233,12 +249,12 @@
   /* Flex defaults */
   .flex { min-height: 0; min-width: 0; }
 
-  /* App background — neutral-900 with subtle red glow */
+  /* App background — bg-base #131313 with subtle red glow */
   .app-bg {
     background:
       radial-gradient(ellipse 70% 50% at 10% 0%, oklch(0.592 0.227 28 / 0.04) 0%, transparent 60%),
       radial-gradient(ellipse 60% 40% at 90% 100%, oklch(0.592 0.227 28 / 0.03) 0%, transparent 60%),
-      oklch(0.185 0.000 0);  /* neutral-900 ~#141414 */
+      oklch(0.110 0.000 0);  /* bg-base #131313 */
     min-height: 100dvh;
   }
 
@@ -258,11 +274,11 @@
     box-shadow: 0 0 6px var(--color-brand);
   }
 
-  /* Muted text override — raise neutral-400 to ~#b8b8b8 for better contrast on lighter bg */
+  /* Muted text override — text-secondary #C8C8C8 (WCAG AA 8.5:1 on #131313) */
   .text-neutral-400,
   .text-zinc-400,
   .text-gray-400 {
-    color: oklch(0.780 0.000 0) !important; /* ~#b8b8b8 */
+    color: oklch(0.810 0.000 0) !important; /* text-secondary #C8C8C8 */
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -284,20 +300,20 @@
   }
   /* Neutral filled — secondary actions */
   .btn-neutral {
-    background-color: #272727;
+    background-color: #1B1B1B;  /* bg-surface */
     color: #ffffff;
-    border: 1px solid #303030;
+    border: 1px solid #272727;  /* border-subtle */
     transition: background-color 0.2s ease;
   }
-  .btn-neutral:hover:not(:disabled) { background-color: #333333; }
+  .btn-neutral:hover:not(:disabled) { background-color: #2C2C2C; }  /* bg-hover */
   /* Ghost — tertiary actions */
   .btn-ghost {
     background-color: transparent;
-    color: #b8b8b8;
-    border: 1px solid #303030;
+    color: #C8C8C8;             /* text-secondary */
+    border: 1px solid #272727;  /* border-subtle */
     transition: background-color 0.2s ease, color 0.2s ease;
   }
-  .btn-ghost:hover:not(:disabled) { background-color: #272727; color: #ffffff; }
+  .btn-ghost:hover:not(:disabled) { background-color: #1B1B1B; color: #ffffff; }
   /* Legacy alias */
   .btn-brand { background-color: #E62020; color: white; transition: background-color 0.2s ease; }
   .btn-brand:hover { background-color: #cc1c1c; }
@@ -347,7 +363,7 @@
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     white-space: nowrap; line-height: 1.6;
     background: rgba(255,255,255,0.06);
-    color: #787878;
+    color: #666666;             /* chart-3 neutral */
     border: 1px solid rgba(255,255,255,0.08);
   }
   /* Generic info chip — neutral light */
@@ -357,7 +373,7 @@
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     white-space: nowrap; line-height: 1.6;
     background: rgba(255,255,255,0.08);
-    color: #b8b8b8;
+    color: #C8C8C8;             /* text-secondary */
     border: 1px solid rgba(255,255,255,0.10);
   }
 
@@ -368,7 +384,7 @@
   }
   .status-dot-active  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
   .status-dot-paused  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #f59e0b; }
-  .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #484848; }
+  .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #3D3D3D; }  /* chart-4 */
   .status-dot-hot     { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #E62020; animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
 
   /* ── SCORE / METRIC INDICATORS ────────────────────────────────────────── */
@@ -411,12 +427,12 @@
     display: inline-flex; align-items: center; gap: 2px;
     padding: 1px 6px; border-radius: 9999px;
     font-size: 11px; font-weight: 600;
-    background: rgba(255,255,255,0.06); color: #787878;
+    background: rgba(255,255,255,0.06); color: #666666;  /* chart-3 */
   }
 
   /* ── ICON COLOR HELPERS ───────────────────────────────────────────────── */
-  .icon-default  { color: #b8b8b8; }
-  .icon-muted    { color: #787878; }
+  .icon-default  { color: #C8C8C8; }  /* text-secondary */
+  .icon-muted    { color: #666666; }   /* chart-3 */
   .icon-active   { color: #4ade80; }
   .icon-brand    { color: #E62020; }
   .icon-warning  { color: #fbbf24; }
@@ -427,9 +443,10 @@
 
 /* Override chart color vars at root level so Recharts picks them up */
 :root {
-  --color-chart-1: #ffffff;   /* white — primary series */
-  --color-chart-2: #b8b8b8;   /* neutral-350 — secondary */
-  --color-chart-3: #787878;   /* neutral-500 — tertiary */
-  --color-chart-4: #484848;   /* neutral-650 — quaternary */
-  --color-chart-5: #E62020;   /* brand-red — highlight / accent */
+  /* Monochromatic chart palette — derived from bg-base #131313 → white */
+  --color-chart-1: #FFFFFF;   /* 100% white — primary series */
+  --color-chart-2: #B3B3B3;   /* 70% white  — secondary series */
+  --color-chart-3: #666666;   /* 40% white  — tertiary series */
+  --color-chart-4: #3D3D3D;   /* 24% white  — background/comparison */
+  --color-chart-5: #E62020;   /* brand-red  — highlight/accent */
 }

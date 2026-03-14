@@ -15,7 +15,7 @@ function FacebookLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" rx="6" fill="#1e1e1e" />
-      <path d="M13.5 8H12C11.448 8 11 8.448 11 9V11H13.5L13 14H11V20H8.5V14H7V11H8.5V9C8.5 7.343 9.843 6 11.5 6H13.5V8Z" fill="#b8b8b8" />
+      <path d="M13.5 8H12C11.448 8 11 8.448 11 9V11H13.5L13 14H11V20H8.5V14H7V11H8.5V9C8.5 7.343 9.843 6 11.5 6H13.5V8Z" fill="#B3B3B3" />
     </svg>
   );
 }
@@ -42,8 +42,8 @@ function MetaLogo({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width="24" height="24" rx="6" fill="#1e1e1e" />
-      <path d="M4 14.5C4 16.433 5.12 18 6.5 18C7.5 18 8.2 17.4 9 16.2L11 13L9 9.8C8.2 8.6 7.5 8 6.5 8C5.12 8 4 9.567 4 11.5V14.5Z" fill="#b8b8b8" />
-      <path d="M12 13L14 16.2C14.8 17.4 15.5 18 16.5 18C17.88 18 19 16.433 19 14.5V11.5C19 9.567 17.88 8 16.5 8C15.5 8 14.8 8.6 14 9.8L12 13Z" fill="#b8b8b8" opacity="0.6" />
+      <path d="M4 14.5C4 16.433 5.12 18 6.5 18C7.5 18 8.2 17.4 9 16.2L11 13L9 9.8C8.2 8.6 7.5 8 6.5 8C5.12 8 4 9.567 4 11.5V14.5Z" fill="#B3B3B3" />
+      <path d="M12 13L14 16.2C14.8 17.4 15.5 18 16.5 18C17.88 18 19 16.433 19 14.5V11.5C19 9.567 17.88 8 16.5 8C15.5 8 14.8 8.6 14 9.8L12 13Z" fill="#B3B3B3" opacity="0.6" />
     </svg>
   );
 }
@@ -125,7 +125,7 @@ export function DrawerHeader({
               className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
               style={{
                 background: "#303030",
-                color: "#b8b8b8",
+                color: "#C8C8C8",
                 borderRadius: 4,
                 padding: "3px 6px",
               }}

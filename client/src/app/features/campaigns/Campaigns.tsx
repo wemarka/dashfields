@@ -141,7 +141,7 @@ function StatsBar({
         <Fragment key={s.key}>
           <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
             {/* Icon */}
-            <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#404040", display: "flex", alignItems: "center", justifyContent: "center", color: "#b8b8b8", flexShrink: 0 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#404040", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8C8C8", flexShrink: 0 }}>
               {s.icon}
             </div>
             {/* Text */}
@@ -565,7 +565,7 @@ export default function Campaigns() {
               <button
                 onClick={handleRefresh}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-                style={{ backgroundColor: "#303030", color: "#b8b8b8", border: "1px solid #404040" }}
+                style={{ backgroundColor: "#303030", color: "#C8C8C8", border: "1px solid #404040" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
               >
@@ -577,7 +577,7 @@ export default function Campaigns() {
               onClick={handleExportCsv}
               disabled={exportCsv.isPending || filteredCampaigns.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
-              style={{ backgroundColor: "#303030", color: "#b8b8b8", border: "1px solid #404040" }}
+              style={{ backgroundColor: "#303030", color: "#C8C8C8", border: "1px solid #404040" }}
               onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
@@ -587,7 +587,7 @@ export default function Campaigns() {
             <button
               onClick={() => setShowCompare(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-              style={{ backgroundColor: "#303030", color: "#b8b8b8", border: "1px solid #404040" }}
+              style={{ backgroundColor: "#303030", color: "#C8C8C8", border: "1px solid #404040" }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
@@ -618,7 +618,7 @@ export default function Campaigns() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold" style={{ color: "#ffffff" }}>Connect your ad platforms</p>
-                <p className="text-[12px] mt-0.5" style={{ color: "#b8b8b8" }}>
+                <p className="text-[12px] mt-0.5" style={{ color: "#C8C8C8" }}>
                   Link your Meta, TikTok, LinkedIn, or other ad accounts to see real campaign data here.
                 </p>
               </div>
@@ -691,7 +691,7 @@ export default function Campaigns() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger
               className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-              style={{ backgroundColor: "#303030", color: "#b8b8b8", minWidth: 130 }}
+              style={{ backgroundColor: "#303030", color: "#C8C8C8", minWidth: 130 }}
             >
               <SelectValue />
             </SelectTrigger>
@@ -709,7 +709,7 @@ export default function Campaigns() {
             <Select value={platformFilter} onValueChange={setPlatformFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#303030", color: "#b8b8b8", minWidth: 130 }}
+                style={{ backgroundColor: "#303030", color: "#C8C8C8", minWidth: 130 }}
               >
                 <SelectValue />
               </SelectTrigger>
@@ -736,7 +736,7 @@ export default function Campaigns() {
             <Select value={tagFilter} onValueChange={setTagFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#303030", color: "#b8b8b8", minWidth: 120 }}
+                style={{ backgroundColor: "#303030", color: "#C8C8C8", minWidth: 120 }}
               >
                 <SelectValue placeholder="All Tags" />
               </SelectTrigger>
@@ -756,7 +756,7 @@ export default function Campaigns() {
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] transition-colors"
                 style={{
                   backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#303030",
-                  color: datePreset !== "last_30d" ? "#e62020" : "#b8b8b8",
+                  color: datePreset !== "last_30d" ? "#e62020" : "#C8C8C8",
                   border: "none",
                 }}
               >
@@ -782,7 +782,7 @@ export default function Campaigns() {
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                       style={{
                         backgroundColor: datePreset === d.value ? "rgba(230,32,32,.08)" : "transparent",
-                        color: datePreset === d.value ? "#e62020" : "#b8b8b8",
+                        color: datePreset === d.value ? "#e62020" : "#C8C8C8",
                         fontWeight: datePreset === d.value ? 500 : 400,
                       }}
                     >
@@ -795,7 +795,7 @@ export default function Campaigns() {
                     className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                     style={{
                       backgroundColor: datePreset === "custom" ? "rgba(230,32,32,.08)" : "transparent",
-                      color: datePreset === "custom" ? "#e62020" : "#b8b8b8",
+                      color: datePreset === "custom" ? "#e62020" : "#C8C8C8",
                     }}
                   >
                     Custom Range

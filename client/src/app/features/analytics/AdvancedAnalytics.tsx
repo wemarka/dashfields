@@ -374,8 +374,8 @@ export default function AdvancedAnalytics() {
                       <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
                       <Bar dataKey="Last Click"  fill="#E62020" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="First Click" fill="#E62020" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Linear"      fill="#b8b8b8" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Time Decay"  fill="#787878" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Linear"      fill="#B3B3B3" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Time Decay"  fill="#666666" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
