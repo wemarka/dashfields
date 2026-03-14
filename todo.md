@@ -3362,3 +3362,9 @@
 - [x] Selecting an account updates metaAccountFilter and refetches campaigns/insights
 - [x] Integrated into Campaigns page header toolbar (visible when Meta is connected)
 - [x] 0 TypeScript errors
+
+## 🔄 AdAccountSelector Redesign
+- [x] Remove "All Accounts Combined" option
+- [x] Group Facebook + Instagram accounts with same name under one Meta-branded group
+- [x] Show profile_picture avatar for each account (or initial fallback)
+- [x] Meta group label shows Meta logo SVG icon

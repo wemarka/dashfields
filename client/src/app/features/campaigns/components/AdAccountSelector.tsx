@@ -1,47 +1,29 @@
 /**
  * AdAccountSelector.tsx
- * A dropdown that lets the user pick which connected ad account (or "All Accounts")
- * to use as the data source for the Campaigns page.
+ * Dropdown to select a connected ad account.
+ * - Facebook + Instagram accounts with the same name are merged into one Meta group
+ * - Each group shows a Meta logo badge
+ * - Profile pictures are shown when available
+ * - No "All Accounts" option
  */
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, Layers, Wifi, WifiOff } from "lucide-react";
+import { ChevronDown, Check, Wifi, WifiOff } from "lucide-react";
 
-// ─── Platform icon map ────────────────────────────────────────────────────────
-const PLATFORM_COLORS: Record<string, string> = {
-  facebook:  "#1877F2",
-  instagram: "#E1306C",
-  tiktok:    "#010101",
-  linkedin:  "#0A66C2",
-  twitter:   "#1DA1F2",
-  youtube:   "#FF0000",
-  snapchat:  "#FFFC00",
-  pinterest: "#E60023",
-};
-
-const PLATFORM_LABELS: Record<string, string> = {
-  facebook:  "Facebook",
-  instagram: "Instagram",
-  tiktok:    "TikTok",
-  linkedin:  "LinkedIn",
-  twitter:   "X / Twitter",
-  youtube:   "YouTube",
-  snapchat:  "Snapchat",
-  pinterest: "Pinterest",
-};
-
-function PlatformDot({ platform }: { platform: string }) {
-  const color = PLATFORM_COLORS[platform] ?? "#737373";
+// ─── Meta SVG logo ────────────────────────────────────────────────────────────
+function MetaLogo({ size = 14 }: { size?: number }) {
   return (
-    <span
-      style={{
-        display: "inline-block",
-        width: 8,
-        height: 8,
-        borderRadius: "50%",
-        backgroundColor: color,
-        flexShrink: 0,
-      }}
-    />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M2.5 16.5C2.5 18.985 4.515 21 7 21c1.38 0 2.63-.56 3.535-1.465L12 18.07l1.465 1.465A4.99 4.99 0 0 0 17 21c2.485 0 4.5-2.015 4.5-4.5 0-1.38-.56-2.63-1.465-3.535L12 5.93 3.965 12.965A4.99 4.99 0 0 0 2.5 16.5Z"
+        fill="url(#meta-grad)"
+      />
+      <defs>
+        <linearGradient id="meta-grad" x1="2.5" y1="5.93" x2="21.5" y2="21" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#0082FB" />
+          <stop offset="1" stopColor="#A033FF" />
+        </linearGradient>
+      </defs>
+    </svg>
   );
 }
 
@@ -69,6 +51,73 @@ interface AdAccountSelectorProps {
   onChange: (value: AdAccountSelection) => void;
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const META_PLATFORMS = new Set(["facebook", "instagram"]);
+
+/**
+ * Build "Meta groups" by merging FB + IG accounts that share the same name.
+ * Each group has a representative name, a list of member accounts, and a
+ * combined "active" flag.
+ */
+function buildMetaGroups(accounts: AdAccount[]) {
+  const metaAccounts = accounts.filter(a => META_PLATFORMS.has(a.platform));
+  const otherAccounts = accounts.filter(a => !META_PLATFORMS.has(a.platform));
+
+  // Group by normalised name
+  const byName = new Map<string, AdAccount[]>();
+  for (const acc of metaAccounts) {
+    const key = (acc.name ?? acc.username ?? `#${acc.id}`).trim().toLowerCase();
+    if (!byName.has(key)) byName.set(key, []);
+    byName.get(key)!.push(acc);
+  }
+
+  const metaGroups = Array.from(byName.entries()).map(([, members]) => {
+    // Prefer FB account for the display name / picture
+    const fb = members.find(m => m.platform === "facebook") ?? members[0];
+    const ig = members.find(m => m.platform === "instagram");
+    return {
+      id: `meta-${fb.id}`,
+      displayName: fb.name ?? fb.username ?? `Account #${fb.id}`,
+      picture: fb.profile_picture ?? ig?.profile_picture ?? null,
+      isActive: members.some(m => m.is_active),
+      members,
+      accountIds: members.map(m => m.id),
+      // Primary account ID for single-account queries
+      primaryId: fb.id,
+    };
+  });
+
+  return { metaGroups, otherAccounts };
+}
+
+// ─── Avatar component ─────────────────────────────────────────────────────────
+function Avatar({ src, name, size = 28 }: { src?: string | null; name: string; size?: number }) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        style={{
+          width: size, height: size, borderRadius: size / 4,
+          objectFit: "cover", flexShrink: 0,
+          border: "1px solid #262626",
+        }}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+      />
+    );
+  }
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: size / 4,
+      background: "linear-gradient(135deg, #0082FB 0%, #A033FF 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0, fontSize: size * 0.38, color: "#fff", fontWeight: 700,
+    }}>
+      {name[0]?.toUpperCase() ?? "?"}
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export function AdAccountSelector({
   accounts,
@@ -79,292 +128,294 @@ export function AdAccountSelector({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     if (open) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  // Derive label for the trigger button
-  const triggerLabel = (() => {
-    if (value.type === "all") return "All Accounts";
+  const { metaGroups, otherAccounts } = buildMetaGroups(accounts);
+
+  // Resolve trigger display
+  const triggerInfo = (() => {
+    if (value.type === "all" || value.type === "group") {
+      // Find the group that matches
+      const grp = metaGroups.find(g =>
+        value.type === "group" && g.accountIds.every(id => (value as { accountIds: number[] }).accountIds.includes(id))
+      ) ?? metaGroups[0] ?? null;
+      if (grp) return { name: grp.displayName, picture: grp.picture, isActive: grp.isActive };
+    }
     if (value.type === "single") {
       const acc = accounts.find(a => a.id === value.accountId);
-      return acc ? (acc.name ?? acc.username ?? `Account #${acc.id}`) : "Select Account";
+      if (acc) return { name: acc.name ?? acc.username ?? `#${acc.id}`, picture: acc.profile_picture ?? null, isActive: acc.is_active };
     }
-    if (value.type === "group") return `${value.accountIds.length} Accounts`;
-    return "Select Account";
+    // Default: first Meta group
+    const first = metaGroups[0];
+    if (first) return { name: first.displayName, picture: first.picture, isActive: first.isActive };
+    return { name: "Select Account", picture: null, isActive: false };
   })();
 
-  const triggerAccount = value.type === "single"
-    ? accounts.find(a => a.id === value.accountId) ?? null
-    : null;
+  // Auto-select first group on mount if nothing selected
+  useEffect(() => {
+    if (value.type === "all" && metaGroups.length > 0) {
+      const first = metaGroups[0];
+      onChange({ type: "group", accountIds: first.accountIds });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metaGroups.length]);
 
-  const isAllSelected = value.type === "all";
+  const isGroupSelected = (grp: ReturnType<typeof buildMetaGroups>["metaGroups"][0]) => {
+    if (value.type === "group") {
+      return grp.accountIds.length === value.accountIds.length &&
+        grp.accountIds.every(id => (value as { accountIds: number[] }).accountIds.includes(id));
+    }
+    if (value.type === "single") return grp.accountIds.includes(value.accountId);
+    return false;
+  };
 
-  // Group accounts by platform
-  const grouped = accounts.reduce<Record<string, AdAccount[]>>((acc, a) => {
-    const key = a.platform;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(a);
-    return acc;
-  }, {});
+  const totalGroups = metaGroups.length + otherAccounts.length;
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      {/* ── Trigger button ── */}
+      {/* ── Trigger ── */}
       <button
         onClick={() => setOpen(o => !o)}
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          height: 34,
-          paddingLeft: 10,
-          paddingRight: 10,
+          display: "flex", alignItems: "center", gap: 8,
+          height: 34, paddingLeft: 10, paddingRight: 10,
           borderRadius: 8,
           border: open ? "1px solid #404040" : "1px solid #262626",
           backgroundColor: open ? "#1f1f1f" : "#171717",
-          cursor: "pointer",
-          transition: "background-color 0.15s, border-color 0.15s",
-          minWidth: 160,
-          maxWidth: 260,
+          cursor: "pointer", transition: "background-color 0.15s, border-color 0.15s",
+          minWidth: 170, maxWidth: 270,
         }}
-        onMouseEnter={e => {
-          if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f";
-        }}
-        onMouseLeave={e => {
-          if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#171717";
-        }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#171717"; }}
       >
-        {/* Icon */}
         {isLoading ? (
-          <div style={{ width: 18, height: 18, borderRadius: 4, backgroundColor: "#262626", flexShrink: 0 }} />
-        ) : isAllSelected ? (
-          <div style={{
-            width: 18, height: 18, borderRadius: 4,
-            backgroundColor: "rgba(230,32,32,0.12)",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <Layers style={{ width: 10, height: 10, color: "#e62020" }} />
-          </div>
-        ) : triggerAccount ? (
-          triggerAccount.profile_picture ? (
-            <img
-              src={triggerAccount.profile_picture}
-              alt=""
-              style={{ width: 18, height: 18, borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
-            />
-          ) : (
-            <div style={{
-              width: 18, height: 18, borderRadius: 4,
-              backgroundColor: PLATFORM_COLORS[triggerAccount.platform] ?? "#262626",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>
-                {(triggerAccount.name ?? triggerAccount.platform ?? "?")[0].toUpperCase()}
-              </span>
-            </div>
-          )
+          <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: "#262626", flexShrink: 0 }} />
         ) : (
-          <div style={{
-            width: 18, height: 18, borderRadius: 4, backgroundColor: "#262626", flexShrink: 0,
-          }} />
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <Avatar src={triggerInfo.picture} name={triggerInfo.name} size={20} />
+            {/* Meta badge */}
+            <div style={{
+              position: "absolute", bottom: -3, right: -3,
+              width: 12, height: 12, borderRadius: "50%",
+              backgroundColor: "#0a0a0a",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <MetaLogo size={10} />
+            </div>
+          </div>
         )}
 
-        {/* Label */}
         <span style={{
           fontSize: 12, fontWeight: 500, color: "#e5e5e5",
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "left",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          flex: 1, textAlign: "left",
         }}>
-          {isLoading ? "Loading..." : triggerLabel}
+          {isLoading ? "Loading..." : triggerInfo.name}
         </span>
 
-        {/* Status dot */}
-        {!isAllSelected && triggerAccount && (
-          <span style={{
-            width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-            backgroundColor: triggerAccount.is_active ? "#22c55e" : "#737373",
-          }} />
-        )}
+        <span style={{
+          width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+          backgroundColor: triggerInfo.isActive ? "#22c55e" : "#737373",
+        }} />
 
-        <ChevronDown
-          style={{
-            width: 13, height: 13, color: "#737373", flexShrink: 0,
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s",
-          }}
-        />
+        <ChevronDown style={{
+          width: 13, height: 13, color: "#737373", flexShrink: 0,
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s",
+        }} />
       </button>
 
-      {/* ── Dropdown panel ── */}
+      {/* ── Dropdown ── */}
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            left: 0,
-            zIndex: 9999,
-            minWidth: 240,
-            maxWidth: 320,
-            backgroundColor: "#171717",
-            border: "1px solid #262626",
-            borderRadius: 10,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-            overflow: "hidden",
-          }}
-        >
-          {/* "All Accounts" option */}
-          <button
-            onClick={() => { onChange({ type: "all" }); setOpen(false); }}
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "9px 12px",
-              backgroundColor: isAllSelected ? "rgba(230,32,32,0.08)" : "transparent",
-              border: "none",
-              borderBottom: "1px solid #1f1f1f",
-              cursor: "pointer",
-              transition: "background-color 0.12s",
-            }}
-            onMouseEnter={e => {
-              if (!isAllSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = isAllSelected ? "rgba(230,32,32,0.08)" : "transparent";
-            }}
-          >
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 9999,
+          minWidth: 260, maxWidth: 340,
+          backgroundColor: "#171717",
+          border: "1px solid #262626",
+          borderRadius: 10,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
+          overflow: "hidden",
+        }}>
+          {/* ── Meta section header ── */}
+          {metaGroups.length > 0 && (
             <div style={{
-              width: 28, height: 28, borderRadius: 6,
-              backgroundColor: isAllSelected ? "rgba(230,32,32,0.15)" : "#262626",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              padding: "7px 12px 4px",
+              display: "flex", alignItems: "center", gap: 6,
+              borderBottom: "1px solid #1f1f1f",
             }}>
-              <Layers style={{ width: 13, height: 13, color: isAllSelected ? "#e62020" : "#a3a3a3" }} />
+              <MetaLogo size={12} />
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: "#737373",
+                textTransform: "uppercase", letterSpacing: "0.07em",
+              }}>
+                Meta Ads
+              </span>
+              <span style={{
+                marginLeft: "auto", fontSize: 10, color: "#525252",
+              }}>
+                {metaGroups.length} account{metaGroups.length !== 1 ? "s" : ""}
+              </span>
             </div>
-            <div style={{ flex: 1, textAlign: "left" }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#ffffff", margin: 0 }}>All Accounts</p>
-              <p style={{ fontSize: 10, color: "#737373", margin: 0, marginTop: 1 }}>
-                {accounts.length} account{accounts.length !== 1 ? "s" : ""} combined
-              </p>
-            </div>
-            {isAllSelected && (
-              <Check style={{ width: 13, height: 13, color: "#e62020", flexShrink: 0 }} />
-            )}
-          </button>
+          )}
 
-          {/* Grouped by platform */}
-          <div style={{ maxHeight: 320, overflowY: "auto" }}>
-            {Object.entries(grouped).map(([platform, accts]) => (
-              <div key={platform}>
-                {/* Platform group header */}
+          {/* ── Meta groups ── */}
+          <div style={{ maxHeight: 340, overflowY: "auto" }}>
+            {metaGroups.map((grp) => {
+              const selected = isGroupSelected(grp);
+              const fb = grp.members.find(m => m.platform === "facebook");
+              const ig = grp.members.find(m => m.platform === "instagram");
+
+              return (
+                <button
+                  key={grp.id}
+                  onClick={() => {
+                    onChange({ type: "group", accountIds: grp.accountIds });
+                    setOpen(false);
+                  }}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", gap: 10,
+                    padding: "9px 12px",
+                    backgroundColor: selected ? "rgba(230,32,32,0.07)" : "transparent",
+                    border: "none", borderBottom: "1px solid #1a1a1a",
+                    cursor: "pointer", transition: "background-color 0.12s",
+                    textAlign: "left",
+                  }}
+                  onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
+                >
+                  {/* Avatar with Meta badge */}
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <Avatar src={grp.picture} name={grp.displayName} size={32} />
+                    <div style={{
+                      position: "absolute", bottom: -3, right: -3,
+                      width: 14, height: 14, borderRadius: "50%",
+                      backgroundColor: "#171717",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      border: "1px solid #262626",
+                    }}>
+                      <MetaLogo size={10} />
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      fontSize: 12, fontWeight: 600, color: "#ffffff",
+                      margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {grp.displayName}
+                    </p>
+                    {/* Platform pills */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
+                      {fb && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 600, color: "#1877F2",
+                          backgroundColor: "rgba(24,119,242,0.1)",
+                          borderRadius: 3, padding: "1px 5px",
+                        }}>
+                          FB
+                        </span>
+                      )}
+                      {ig && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 600, color: "#E1306C",
+                          backgroundColor: "rgba(225,48,108,0.1)",
+                          borderRadius: 3, padding: "1px 5px",
+                        }}>
+                          IG
+                        </span>
+                      )}
+                      <span style={{ fontSize: 10, color: "#525252" }}>
+                        {grp.members.length} account{grp.members.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status + check */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                    {grp.isActive
+                      ? <Wifi style={{ width: 12, height: 12, color: "#22c55e" }} />
+                      : <WifiOff style={{ width: 12, height: 12, color: "#737373" }} />
+                    }
+                    {selected && <Check style={{ width: 13, height: 13, color: "#e62020" }} />}
+                  </div>
+                </button>
+              );
+            })}
+
+            {/* ── Other platforms ── */}
+            {otherAccounts.length > 0 && (
+              <>
                 <div style={{
-                  padding: "6px 12px 4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
+                  padding: "7px 12px 4px",
+                  display: "flex", alignItems: "center", gap: 6,
+                  borderTop: "1px solid #262626",
                 }}>
-                  <PlatformDot platform={platform} />
                   <span style={{
                     fontSize: 10, fontWeight: 700, color: "#737373",
-                    textTransform: "uppercase", letterSpacing: "0.06em",
+                    textTransform: "uppercase", letterSpacing: "0.07em",
                   }}>
-                    {PLATFORM_LABELS[platform] ?? platform}
+                    Other Platforms
                   </span>
                 </div>
-
-                {/* Account rows */}
-                {accts.map(acc => {
-                  const isSelected = value.type === "single" && value.accountId === acc.id;
+                {otherAccounts.map(acc => {
+                  const selected = value.type === "single" && value.accountId === acc.id;
                   return (
                     <button
                       key={acc.id}
                       onClick={() => { onChange({ type: "single", accountId: acc.id }); setOpen(false); }}
                       style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "7px 12px 7px 24px",
-                        backgroundColor: isSelected ? "rgba(230,32,32,0.08)" : "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        transition: "background-color 0.12s",
+                        width: "100%", display: "flex", alignItems: "center", gap: 10,
+                        padding: "8px 12px",
+                        backgroundColor: selected ? "rgba(230,32,32,0.07)" : "transparent",
+                        border: "none", borderBottom: "1px solid #1a1a1a",
+                        cursor: "pointer", transition: "background-color 0.12s",
+                        textAlign: "left",
                       }}
-                      onMouseEnter={e => {
-                        if (!isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f";
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = isSelected ? "rgba(230,32,32,0.08)" : "transparent";
-                      }}
+                      onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
                     >
-                      {/* Avatar */}
-                      {acc.profile_picture ? (
-                        <img
-                          src={acc.profile_picture}
-                          alt=""
-                          style={{ width: 26, height: 26, borderRadius: 5, objectFit: "cover", flexShrink: 0 }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: 26, height: 26, borderRadius: 5,
-                          backgroundColor: PLATFORM_COLORS[acc.platform] ?? "#262626",
-                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                        }}>
-                          <span style={{ fontSize: 10, color: "#fff", fontWeight: 700 }}>
-                            {(acc.name ?? acc.platform ?? "?")[0].toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      <Avatar src={acc.profile_picture} name={acc.name ?? acc.platform} size={30} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{
                           fontSize: 12, fontWeight: 500, color: "#e5e5e5",
                           margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>
                           {acc.name ?? acc.username ?? `Account #${acc.id}`}
                         </p>
-                        {acc.platform_account_id && (
-                          <p style={{ fontSize: 10, color: "#737373", margin: 0, marginTop: 1 }}>
-                            ID: {acc.platform_account_id}
-                          </p>
-                        )}
+                        <p style={{ fontSize: 10, color: "#737373", margin: 0, marginTop: 1, textTransform: "capitalize" }}>
+                          {acc.platform}
+                        </p>
                       </div>
-
-                      {/* Status */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        {acc.is_active ? (
-                          <Wifi style={{ width: 11, height: 11, color: "#22c55e" }} />
-                        ) : (
-                          <WifiOff style={{ width: 11, height: 11, color: "#737373" }} />
-                        )}
-                        {isSelected && (
-                          <Check style={{ width: 12, height: 12, color: "#e62020" }} />
-                        )}
+                        {acc.is_active
+                          ? <Wifi style={{ width: 12, height: 12, color: "#22c55e" }} />
+                          : <WifiOff style={{ width: 12, height: 12, color: "#737373" }} />
+                        }
+                        {selected && <Check style={{ width: 13, height: 13, color: "#e62020" }} />}
                       </div>
                     </button>
                   );
                 })}
-              </div>
-            ))}
-          </div>
+              </>
+            )}
 
-          {/* Empty state */}
-          {accounts.length === 0 && (
-            <div style={{ padding: "20px 16px", textAlign: "center" }}>
-              <p style={{ fontSize: 12, color: "#737373", margin: 0 }}>No accounts connected</p>
-              <p style={{ fontSize: 11, color: "#525252", margin: "4px 0 0" }}>
-                Connect your ad accounts in Connections
-              </p>
-            </div>
-          )}
+            {/* Empty state */}
+            {totalGroups === 0 && (
+              <div style={{ padding: "20px 16px", textAlign: "center" }}>
+                <p style={{ fontSize: 12, color: "#737373", margin: 0 }}>No accounts connected</p>
+                <p style={{ fontSize: 11, color: "#525252", margin: "4px 0 0" }}>
+                  Connect your ad accounts in Connections
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
