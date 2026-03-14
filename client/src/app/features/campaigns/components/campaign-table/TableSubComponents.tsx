@@ -80,7 +80,7 @@ export function InlineBudgetEditor({
             fontSize: 12,
             fontFamily: "Inter, sans-serif",
             fontVariantNumeric: "tabular-nums",
-            color: "#a3a3a3",
+            color: "#b8b8b8",
             fontWeight: 500,
           }}
         >

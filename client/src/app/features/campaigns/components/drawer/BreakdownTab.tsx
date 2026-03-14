@@ -10,7 +10,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 // ─── Donut Colors ────────────────────────────────────────────────────────────
 const DONUT_COLORS = [
   "#e62020", // brand-red
-  "#a3a3a3", // neutral-400
+  "#b8b8b8", // neutral-400
   "#c41a1a", // brand-red dark
   "#737373", // neutral-500
   "#ef4444", // red-500
@@ -40,7 +40,7 @@ function DonutTooltip({
       <p className="font-semibold" style={{ color: "#ffffff" }}>
         {item.name}
       </p>
-      <p style={{ color: "#a3a3a3" }}>
+      <p style={{ color: "#b8b8b8" }}>
         {item.payload.pct}% · {item.value.toLocaleString()} imp
       </p>
     </div>
@@ -213,7 +213,7 @@ function BreakdownSection({
                   />
                   <span
                     className="text-[11px] truncate flex-1"
-                    style={{ color: "#a3a3a3" }}
+                    style={{ color: "#b8b8b8" }}
                     title={item.label}
                   >
                     {item.label}
@@ -310,21 +310,21 @@ function BreakdownSection({
 
                 {/* Impressions */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                  <span className="text-[11px]" style={{ color: "#b8b8b8" }}>
                     {fmtNum(item.impressions)}
                   </span>
                 </div>
 
                 {/* Clicks */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                  <span className="text-[11px]" style={{ color: "#b8b8b8" }}>
                     {fmtNum(item.clicks)}
                   </span>
                 </div>
 
                 {/* CTR */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                  <span className="text-[11px]" style={{ color: "#b8b8b8" }}>
                     {ctr(item.clicks, item.impressions)}
                   </span>
                 </div>

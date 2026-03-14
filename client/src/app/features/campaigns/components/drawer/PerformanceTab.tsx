@@ -171,7 +171,7 @@ function SparklineKpiCard({
 type ChartMetric = "impressions" | "clicks" | "spend";
 
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
-  { key: "impressions", label: "Impressions", color: "#a3a3a3" },
+  { key: "impressions", label: "Impressions", color: "#b8b8b8" },
   { key: "clicks",      label: "Clicks",      color: "#737373" },
   { key: "spend",       label: "Spend",       color: "#e62020" },
 ];
@@ -215,7 +215,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               value={fmtNum(campaignInsight.impressions)}
               sub={`Reach: ${fmtNum(campaignInsight.reach)}`}
               color="text-muted-foreground" bgColor="bg-muted/30"
-              sparkData={sparkImpressions} sparkColor="#a3a3a3"
+              sparkData={sparkImpressions} sparkColor="#b8b8b8"
               trend={trendOf(sparkImpressions)}
               currentVal={campaignInsight.impressions}
               prevVal={prevPeriodInsight?.impressions ?? null}
@@ -362,8 +362,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             <AreaChart data={daily} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
               <defs>
                 <linearGradient id="gI2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#b8b8b8" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#b8b8b8" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gC2" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#737373" stopOpacity={0.15} />
@@ -409,7 +409,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               />
               {activeMetrics.has("impressions") && (
                 <Area yAxisId="left" type="monotone" dataKey="impressions"
-                  stroke="#a3a3a3" strokeWidth={2} fill="url(#gI2)" name="Impressions" />
+                  stroke="#b8b8b8" strokeWidth={2} fill="url(#gI2)" name="Impressions" />
               )}
               {activeMetrics.has("clicks") && (
                 <Area yAxisId="left" type="monotone" dataKey="clicks"

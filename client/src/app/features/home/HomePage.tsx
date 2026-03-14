@@ -6,7 +6,7 @@
  *  Card bg:     #1e1e1e  (neutral-900)
  *  Border:      #303030  (neutral-800)
  *  Text dim:    #737373  (neutral-500)
- *  Text muted:  #a3a3a3  (neutral-400)
+ *  Text muted:  #b8b8b8  (neutral-400)
  *  Text bright: #ffffff  (white)
  *  Brand red:   #e62020
  *  Gradient:    #e62020 → #ffffff  (red to white, never orange/blue)
@@ -138,7 +138,7 @@ const P = {
   card:      "#1e1e1e",   // neutral-900
   border:    "#303030",   // neutral-800
   dim:       "#737373",   // neutral-500
-  muted:     "#a3a3a3",   // neutral-400
+  muted:     "#b8b8b8",   // neutral-400
   white:     "#ffffff",
   red:       "#e62020",
   redAlpha8: "rgba(230,32,32,.08)",

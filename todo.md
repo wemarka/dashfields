@@ -3441,3 +3441,10 @@
 - [x] Auth pages (Login, Register, ForgotPassword, ResetPassword) lightened
 - [x] Settings.tsx dark swatches updated
 - [x] 0 TypeScript errors
+
+## ✅ Muted Text Contrast Improvement
+- [x] --color-muted-foreground raised from oklch(0.715) to oklch(0.780) (~#b8b8b8)
+- [x] .page-subtitle and .stat-label utility colors updated to match
+- [x] Global CSS override for .text-neutral-400, .text-zinc-400, .text-gray-400 → oklch(0.780)
+- [x] Hardcoded #a3a3a3 replaced with #b8b8b8 across all components
+- [x] 0 TypeScript errors

@@ -125,7 +125,7 @@ export function DrawerHeader({
               className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
               style={{
                 background: "#303030",
-                color: "#a3a3a3",
+                color: "#b8b8b8",
                 borderRadius: 4,
                 padding: "3px 6px",
               }}

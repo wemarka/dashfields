@@ -92,7 +92,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
         <div className="space-y-4 py-2">
           {/* Campaign Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#a3a3a3" }}>Campaign Name</Label>
+            <Label className="text-xs font-medium" style={{ color: "#b8b8b8" }}>Campaign Name</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -104,7 +104,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
 
           {/* Status */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#a3a3a3" }}>Status</Label>
+            <Label className="text-xs font-medium" style={{ color: "#b8b8b8" }}>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as "ACTIVE" | "PAUSED")}>
               <SelectTrigger className="h-8 text-sm" style={{ background: "#1e1e1e", border: "1px solid #333", color: "#fff" }}>
                 <SelectValue placeholder="Select status" />
@@ -128,7 +128,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
 
           {/* Daily Budget */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#a3a3a3" }}>Daily Budget</Label>
+            <Label className="text-xs font-medium" style={{ color: "#b8b8b8" }}>Daily Budget</Label>
             <div className="relative">
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: "#737373" }}>$</span>
               <Input
@@ -154,7 +154,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
             size="sm"
             onClick={onClose}
             className="text-xs h-7"
-            style={{ background: "transparent", border: "1px solid #333", color: "#a3a3a3" }}
+            style={{ background: "transparent", border: "1px solid #333", color: "#b8b8b8" }}
           >
             Cancel
           </Button>

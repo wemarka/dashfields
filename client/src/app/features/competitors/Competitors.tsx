@@ -50,7 +50,7 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 60 ? "#a3a3a3" : score >= 40 ? "#737373" : "#e62020";
+  const color = score >= 60 ? "#b8b8b8" : score >= 40 ? "#737373" : "#e62020";
   const label = score >= 60 ? "Outperforming" : score >= 40 ? "On par" : "Underperforming";
 
   return (
@@ -301,7 +301,7 @@ export default function Competitors() {
                 {/* Competitive Score */}
                 <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#a3a3a3' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #303030 ${swotData.competitiveScore}%)` }}>
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #303030 ${swotData.competitiveScore}%)` }}>
                     <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
                       <span className="text-xs font-bold">{swotData.competitiveScore}</span>
                     </div>

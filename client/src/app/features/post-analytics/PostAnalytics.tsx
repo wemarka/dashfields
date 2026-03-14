@@ -364,8 +364,8 @@ export default function PostAnalytics() {
                         <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#b8b8b8" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#b8b8b8" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -374,7 +374,7 @@ export default function PostAnalytics() {
                     <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
                     <Legend />
                     <Area type="monotone" dataKey="engagement" stroke="#E62020" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
-                    <Area type="monotone" dataKey="reach" stroke="#a3a3a3" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
+                    <Area type="monotone" dataKey="reach" stroke="#b8b8b8" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
                     <Area type="monotone" dataKey="likes" stroke="#737373" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
                   </AreaChart>
                 </ResponsiveContainer>

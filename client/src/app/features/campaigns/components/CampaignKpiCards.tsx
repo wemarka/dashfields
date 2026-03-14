@@ -11,7 +11,7 @@ const P = {
   card:   "#1e1e1e",
   border: "#303030",
   text:   "#ffffff",
-  muted:  "#a3a3a3",
+  muted:  "#b8b8b8",
   subtle: "#737373",
   dim:    "#404040",
   brand:  "#e62020",
