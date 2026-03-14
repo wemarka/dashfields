@@ -48,9 +48,9 @@ export function WizardProgressBar({ currentStep }: Props) {
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
                     isCompleted
-                      ? "bg-red-500 text-white shadow-md shadow-red-200"
+                      ? "bg-[#E62020]/14 text-white shadow-md shadow-red-200"
                       : isCurrent
-                        ? "bg-red-500 text-white shadow-lg shadow-red-300 scale-110"
+                        ? "bg-[#E62020]/14 text-white shadow-lg shadow-red-300 scale-110"
                         : "bg-neutral-800 text-neutral-500 border border-neutral-700",
                   )}
                 >
@@ -65,7 +65,7 @@ export function WizardProgressBar({ currentStep }: Props) {
                 <span
                   className={cn(
                     "text-[10px] font-medium text-center leading-tight max-w-[60px] hidden sm:block",
-                    isActive ? "text-red-600" : "text-neutral-500",
+                    isActive ? "text-[#f87171]" : "text-neutral-500",
                   )}
                 >
                   {STEP_LABELS[step]}

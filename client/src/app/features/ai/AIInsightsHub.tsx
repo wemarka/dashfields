@@ -73,8 +73,8 @@ const AI_TOOLS = [
     title: "Competitor SWOT Analysis",
     description: "Get AI-generated SWOT analysis comparing your performance against competitors.",
     icon: Shield,
-    color: "text-red-500",
-    bg: "bg-red-500/10",
+    color: "text-[#f87171]",
+    bg: "bg-[#E62020]/14",
     border: "border-red-500/20",
     href: "/competitors",
     badge: null,
@@ -212,7 +212,7 @@ function AIStatsWidget() {
     <div className="grid grid-cols-3 gap-4">
       {[
         { label: "AI Recommendations", value: recs.length, icon: Lightbulb, color: "text-brand", bg: "bg-brand/10" },
-        { label: "High Priority", value: highPriority, icon: Zap, color: "text-red-500", bg: "bg-red-500/10" },
+        { label: "High Priority", value: highPriority, icon: Zap, color: "text-[#f87171]", bg: "bg-[#E62020]/14" },
         { label: "Opportunities", value: opportunities, icon: TrendingUp, color: "text-brand", bg: "bg-brand/10" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <Card key={label} className="glass">

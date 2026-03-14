@@ -38,7 +38,7 @@ const OPERATOR_LABELS: Record<Operator, string> = {
 const NOTIFICATION_ICONS = {
   info:    <Info className="h-4 w-4 text-muted-foreground" />,
   warning: <AlertTriangle className="h-4 w-4 text-muted-foreground" />,
-  error:   <XCircle className="h-4 w-4 text-red-400" />,
+  error:   <XCircle className="h-4 w-4 text-[#f87171]" />,
   success: <CheckCircle2 className="h-4 w-4 text-muted-foreground" />,
 };
 
@@ -402,7 +402,7 @@ export default function Alerts() {
                   <button
                     onClick={() => deleteRule.mutate({ id: rule.id })}
                     disabled={deleteRule.isPending}
-                    className="ml-4 p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                    className="ml-4 p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-[#E62020]/14 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

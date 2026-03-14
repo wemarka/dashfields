@@ -78,7 +78,7 @@ function ComparisonKpiCard({ kpi }: {
             +{Math.abs(kpi.delta)}%
           </div>
         ) : (
-          <div className="flex items-center gap-1 text-xs text-red-700 bg-red-100 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1 text-xs text-[#f87171] bg-[#E62020]/14 px-2 py-1 rounded-full">
             <TrendingDown className="w-3 h-3" />
             -{Math.abs(kpi.delta)}%
           </div>

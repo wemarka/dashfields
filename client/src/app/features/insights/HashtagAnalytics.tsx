@@ -33,7 +33,7 @@ function TrendBadge({ trend }: { trend: "up" | "down" | "stable" }) {
     );
   if (trend === "down")
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400 px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#f87171] bg-red-50 dark:bg-[#E62020]/14 dark:text-[#f87171] px-1.5 py-0.5 rounded-full">
         <TrendingDown className="w-2.5 h-2.5" /> Down
       </span>
     );
@@ -153,7 +153,7 @@ export default function HashtagAnalytics() {
             <button
               onClick={() => aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
               disabled={generateHashtags.isPending || !aiTopic.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-[#E62020]/14 transition-colors disabled:opacity-50"
             >
               {generateHashtags.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Generate

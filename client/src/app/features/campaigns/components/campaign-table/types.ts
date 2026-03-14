@@ -96,18 +96,26 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: "stopTime",    label: "End Date",    sortKey: "stopTime",    width: "w-[110px]",     defaultVisible: false, align: "left" },
 ];
 
-// ─── Status helpers ───────────────────────────────────────────────────────────
+// ─── Status helpers ────────────────────────────────────────────────────────────────────────────────═
+// Design Token alignment:
+//   active     → GREEN  (token: badge-active / status-dot-active)
+//   paused     → AMBER  (token: badge-paused / status-dot-paused)
+//   scheduled  → AMBER  (token: badge-paused)
+//   in_process → AMBER  (token: badge-paused)
+//   draft/ended/archived → NEUTRAL (token: badge-inactive)
+//   deleted    → NEUTRAL dark
+//   with_issues → RED gradient (token: badge-hot)
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  active:      { dot: "bg-[#22c55e]",      bg: "bg-[#22c55e]/15",   text: "text-[#22c55e]",       label: "Active" },
-  paused:      { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "Paused" },
-  draft:       { dot: "bg-neutral-500",    bg: "bg-neutral-500/15", text: "text-neutral-400",     label: "Draft" },
-  ended:       { dot: "bg-neutral-600",    bg: "bg-neutral-600/15", text: "text-neutral-400",     label: "Ended" },
-  scheduled:   { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/15",   text: "text-[#f59e0b]",       label: "Scheduled" },
-  archived:    { dot: "bg-neutral-600",    bg: "bg-neutral-600/15", text: "text-neutral-400",     label: "Archived" },
-  deleted:     { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "Deleted" },
+  active:      { dot: "bg-[#22c55e]",      bg: "bg-[#22c55e]/14",   text: "text-[#4ade80]",       label: "Active" },
+  paused:      { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "Paused" },
+  draft:       { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Draft" },
+  ended:       { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Ended" },
+  scheduled:   { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "Scheduled" },
+  archived:    { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Archived" },
+  deleted:     { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
-  in_process:  { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/15",   text: "text-[#f59e0b]",       label: "In Review" },
-  with_issues: { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "With Issues" },
+  in_process:  { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "In Review" },
+  with_issues: { dot: "bg-[#E62020]",      bg: "bg-[#E62020]/14",   text: "text-[#f87171]",       label: "With Issues" },
 };
 
 export function getStatusConfig(status: string) {

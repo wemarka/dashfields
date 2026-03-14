@@ -114,9 +114,9 @@ export default function RegisterPage() {
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-5">
-                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                  <p className="text-red-400 text-sm">{error}</p>
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-[#E62020]/14 border border-red-500/20 mb-5">
+                  <AlertCircle className="w-4 h-4 text-[#f87171] mt-0.5 shrink-0" />
+                  <p className="text-[#f87171] text-sm">{error}</p>
                 </div>
               )}
 
@@ -200,7 +200,7 @@ function getPasswordStrength(password: string): { score: number; color: string }
   if (password.length >= 12) score++;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
-  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-muted"];
+  const colors = ["bg-[#E62020]/14", "bg-orange-400", "bg-[#f59e0b]/14", "bg-muted"];
   return { score, color: colors[score - 1] ?? "bg-neutral-900/[0.06]" };
 }
 

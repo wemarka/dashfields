@@ -101,7 +101,7 @@ export function PostDetailModal({ post, onClose, onDelete, onReschedule, onPubli
         {/* Actions */}
         <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
           <button onClick={() => onDelete(post.id)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 transition-colors">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-[#f87171] text-xs font-medium hover:bg-red-50 transition-colors">
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
           {(post.status === "draft" || post.status === "scheduled") && post.platforms.includes("facebook") && (

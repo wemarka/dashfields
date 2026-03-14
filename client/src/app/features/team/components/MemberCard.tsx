@@ -75,7 +75,7 @@ export function MemberCard({ member, currentUserId, canAdmin, workspaceId }: Pro
               );
             })}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => removeMutation.mutate({ workspaceId, userId: member.id })} className="text-red-500 focus:text-red-500 flex items-center gap-2">
+            <DropdownMenuItem onClick={() => removeMutation.mutate({ workspaceId, userId: member.id })} className="text-[#f87171] focus:text-[#f87171] flex items-center gap-2">
               <Trash2 className="w-3.5 h-3.5" /> Remove Member
             </DropdownMenuItem>
           </DropdownMenuContent>

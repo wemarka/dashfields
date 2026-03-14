@@ -69,9 +69,9 @@ function RoiCalculator() {
   const breakEven = spend > 0 ? parseFloat((spend / (revenue / spend)).toFixed(2)) : 0;
 
   const metrics = [
-    { label: "ROI",            value: roi + "%",          color: roi >= 0 ? "text-foreground" : "text-red-500", icon: TrendingUp },
-    { label: "ROAS",           value: roas + "x",          color: roas >= 2 ? "text-foreground" : roas >= 1 ? "text-brand" : "text-red-500", icon: Zap },
-    { label: "LTV:CAC",        value: ltvCacRatio + "x",   color: ltvCacRatio >= 3 ? "text-foreground" : ltvCacRatio >= 1 ? "text-brand" : "text-red-500", icon: Target },
+    { label: "ROI",            value: roi + "%",          color: roi >= 0 ? "text-foreground" : "text-[#f87171]", icon: TrendingUp },
+    { label: "ROAS",           value: roas + "x",          color: roas >= 2 ? "text-foreground" : roas >= 1 ? "text-brand" : "text-[#f87171]", icon: Zap },
+    { label: "LTV:CAC",        value: ltvCacRatio + "x",   color: ltvCacRatio >= 3 ? "text-foreground" : ltvCacRatio >= 1 ? "text-brand" : "text-[#f87171]", icon: Target },
     { label: "Break-even Rev", value: fmtMoney(breakEven), color: "text-foreground", icon: DollarSign },
   ];
 
@@ -124,7 +124,7 @@ function RoiCalculator() {
       <div className="space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Campaign Health</span>
-          <span className={roi >= 100 ? "text-foreground font-semibold" : roi >= 0 ? "text-brand font-semibold" : "text-red-500 font-semibold"}>
+          <span className={roi >= 100 ? "text-foreground font-semibold" : roi >= 0 ? "text-brand font-semibold" : "text-[#f87171] font-semibold"}>
             {roi >= 200 ? "Excellent" : roi >= 100 ? "Good" : roi >= 0 ? "Break-even" : "Loss"}
           </span>
         </div>
@@ -307,7 +307,7 @@ export default function AdvancedAnalytics() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Total Spend",     value: fmtMoney(funnel?.totalSpend ?? 0), icon: DollarSign, color: "text-brand",    bg: "bg-brand/10" },
-                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-red-500",     bg: "bg-red-500/10" },
+                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-[#f87171]",     bg: "bg-[#E62020]/14" },
                   { label: "Conv. Rate",      value: (funnel?.conversionRate ?? 0) + "%", icon: Target,   color: "text-foreground", bg: "bg-muted" },
                   { label: "Funnel Stages",   value: String(funnel?.stages?.length ?? 0), icon: Layers,   color: "text-muted-foreground",  bg: "bg-muted/60" },
                 ].map(({ label, value, icon: Icon, color, bg }) => (

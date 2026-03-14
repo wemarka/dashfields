@@ -41,7 +41,7 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
   );
 
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-foreground" : "text-red-500"}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-foreground" : "text-[#f87171]"}`}>
       {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
       {isPositive ? "+" : ""}{delta.toFixed(2)}
     </span>
@@ -359,7 +359,7 @@ export default function Competitors() {
             {[
               { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-muted-foreground bg-muted" },
               { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-foreground bg-muted" },
-              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-red-500 bg-red-500/10" },
+              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-[#f87171] bg-[#E62020]/14" },
               { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-brand bg-brand/10" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">

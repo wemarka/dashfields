@@ -204,7 +204,7 @@ export default function AssetsPage() {
           />
           <Button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white"
             disabled={uploadingCount > 0}
           >
             {uploadingCount > 0 ? (
@@ -294,7 +294,7 @@ export default function AssetsPage() {
               variant="outline"
               size="sm"
               onClick={() => deleteMut.mutate({ ids: selectedIds })}
-              className="bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30"
+              className="bg-[#E62020]/14 border-red-600/50 text-[#f87171] hover:bg-[#E62020]/14"
             >
               <Trash2 className="w-4 h-4 mr-1" /> Delete
             </Button>
@@ -306,7 +306,7 @@ export default function AssetsPage() {
       {isDragging && (
         <div className="fixed inset-0 z-50 bg-neutral-950/80 flex items-center justify-center pointer-events-none">
           <div className="border-2 border-dashed border-red-500 rounded-2xl p-16 text-center">
-            <Upload className="w-12 h-12 text-red-400 mx-auto mb-4" />
+            <Upload className="w-12 h-12 text-[#f87171] mx-auto mb-4" />
             <p className="text-xl font-semibold text-white">Drop files to upload</p>
             <p className="text-neutral-400 mt-1">Images, videos, and documents</p>
           </div>
@@ -325,7 +325,7 @@ export default function AssetsPage() {
           </p>
           <Button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white"
           >
             <Upload className="w-4 h-4 mr-2" /> Upload Your First Asset
           </Button>
@@ -373,7 +373,7 @@ export default function AssetsPage() {
                   onClick={(e) => { e.stopPropagation(); toggleSelect(asset.id); }}
                   className={`absolute top-2 left-2 w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
                     isSelected
-                      ? "bg-red-600 border-red-600 text-white"
+                      ? "bg-[#E62020]/14 border-red-600 text-white"
                       : "bg-neutral-900/80 border-neutral-600 text-transparent group-hover:text-neutral-400"
                   }`}
                 >
@@ -459,14 +459,14 @@ export default function AssetsPage() {
                   <tr
                     key={asset.id}
                     className={`border-b border-neutral-800/50 transition-colors ${
-                      isSelected ? "bg-red-600/10" : "hover:bg-neutral-900/50"
+                      isSelected ? "bg-[#E62020]/14" : "hover:bg-neutral-900/50"
                     }`}
                   >
                     <td className="px-4 py-3">
                       <button
                         onClick={() => toggleSelect(asset.id)}
                         className={`w-5 h-5 rounded border flex items-center justify-center ${
-                          isSelected ? "bg-red-600 border-red-600 text-white" : "border-neutral-600 text-transparent hover:border-neutral-400"
+                          isSelected ? "bg-[#E62020]/14 border-red-600 text-white" : "border-neutral-600 text-transparent hover:border-neutral-400"
                         }`}
                       >
                         <Check className="w-3 h-3" />
@@ -577,7 +577,7 @@ export default function AssetsPage() {
                     className="bg-neutral-800 text-neutral-200 border-neutral-700 pr-1 flex items-center gap-1"
                   >
                     {tag}
-                    <button onClick={() => removeTag(tag)} className="ml-1 hover:text-red-400">
+                    <button onClick={() => removeTag(tag)} className="ml-1 hover:text-[#f87171]">
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
@@ -594,7 +594,7 @@ export default function AssetsPage() {
                   onKeyDown={(e) => e.key === "Enter" && addTag()}
                   className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
                 />
-                <Button onClick={addTag} className="bg-red-600 hover:bg-red-700 text-white">
+                <Button onClick={addTag} className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>

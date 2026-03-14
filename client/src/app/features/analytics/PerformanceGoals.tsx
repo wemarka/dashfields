@@ -63,8 +63,8 @@ const PLATFORMS = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "yo
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   active:    { label: "Active",    color: "text-brand",  icon: TrendingUp   },
   completed: { label: "Completed", color: "text-foreground", icon: CheckCircle2 },
-  paused:    { label: "Paused",    color: "text-yellow-500",icon: Pause        },
-  failed:    { label: "Failed",    color: "text-red-500",   icon: XCircle      },
+  paused:    { label: "Paused",    color: "text-[#fbbf24]",icon: Pause        },
+  failed:    { label: "Failed",    color: "text-[#f87171]",   icon: XCircle      },
 };
 
 function formatMetricValue(metric: string, value: number): string {

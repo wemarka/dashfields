@@ -12,7 +12,7 @@ interface Props {
 const PLATFORMS = [
   { id: "facebook",  label: "Facebook",  icon: Facebook,  color: "text-muted-foreground",  bg: "bg-muted" },
   { id: "instagram", label: "Instagram", icon: Instagram, color: "text-muted-foreground",  bg: "bg-muted" },
-  { id: "youtube",   label: "YouTube",   icon: Youtube,   color: "text-red-600",   bg: "bg-red-50" },
+  { id: "youtube",   label: "YouTube",   icon: Youtube,   color: "text-[#f87171]",   bg: "bg-red-50" },
   { id: "twitter",   label: "X (Twitter)", icon: Twitter, color: "text-neutral-800", bg: "bg-neutral-100" },
   { id: "linkedin",  label: "LinkedIn",  icon: Linkedin,  color: "text-muted-foreground",  bg: "bg-muted" },
 ];

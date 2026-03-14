@@ -103,7 +103,7 @@ function VsPrevBadge({ current, prev, fmt }: { current: number; prev: number | n
           ? "bg-muted text-muted-foreground"
           : isUp
             ? "bg-muted text-foreground"
-            : "bg-red-500/10 text-red-500"
+            : "bg-[#E62020]/14 text-[#f87171]"
       }`}>
         {isNeutral ? (
           <Minus className="w-2.5 h-2.5" />

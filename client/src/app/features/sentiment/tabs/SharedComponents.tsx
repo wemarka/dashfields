@@ -6,7 +6,7 @@ import { SENTIMENT_CONFIG, type SentimentResult } from "./constants";
 
 export function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(((score + 1) / 2) * 100);
-  const color = score > 0.3 ? "bg-muted" : score < -0.3 ? "bg-red-500" : "bg-muted";
+  const color = score > 0.3 ? "bg-muted" : score < -0.3 ? "bg-[#E62020]/14" : "bg-muted";
   return (
     <div className="relative w-full h-2.5 bg-muted rounded-full overflow-hidden">
       <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${pct}%` }} />
@@ -53,7 +53,7 @@ export function ResultCard({ result, compact = false }: { result: SentimentResul
             {result.keywords.slice(0, 10).map((kw, i) => (
               <span key={i} className={`text-xs px-2 py-0.5 rounded-full border capitalize font-medium ${
                 kw.impact === "positive" ? "bg-muted border-border text-foreground dark:text-foreground" :
-                kw.impact === "negative" ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400" :
+                kw.impact === "negative" ? "bg-[#E62020]/14 border-red-500/30 text-[#f87171] dark:text-[#f87171]" :
                 "bg-muted border-border text-muted-foreground"
               }`}>{kw.word}</span>
             ))}

@@ -43,7 +43,7 @@ const MOCK_INVOICES = [
 
 function CardBrandIcon({ brand }: { brand: string }) {
   const colors: Record<string, string> = {
-    Visa: "bg-muted", Mastercard: "bg-red-500", Amex: "bg-muted",
+    Visa: "bg-muted", Mastercard: "bg-[#E62020]/14", Amex: "bg-muted",
   };
   return (
     <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-neutral-800/500"}`}>
@@ -176,7 +176,7 @@ export function BillingPage() {
                 {isOwner && !pm.isDefault && (
                   <button
                     onClick={() => toast.info("Remove card coming soon.")}
-                    className="p-1.5 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-all"
+                    className="p-1.5 rounded-lg text-neutral-500 hover:text-[#f87171] hover:bg-red-50 transition-all"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -252,8 +252,8 @@ export function BillingPage() {
 
             {!showCancelConfirm ? (
               <div className="flex items-start gap-4 p-4 rounded-xl border border-red-100 bg-red-50/30">
-                <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                <div className="w-9 h-9 rounded-lg bg-[#E62020]/14 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertTriangle className="w-4 h-4 text-[#f87171]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold text-white">Cancel your {planConfig.name} plan</p>
@@ -263,7 +263,7 @@ export function BillingPage() {
                 </div>
                 <button
                   onClick={() => setShowCancelConfirm(true)}
-                  className="px-3.5 py-2 rounded-lg text-[12px] font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all shrink-0"
+                  className="px-3.5 py-2 rounded-lg text-[12px] font-semibold text-[#f87171] border border-red-200 hover:bg-red-50 transition-all shrink-0"
                 >
                   Cancel plan
                 </button>
@@ -280,7 +280,7 @@ export function BillingPage() {
                       toast.error("Subscription cancellation coming soon. Please contact support.");
                       setShowCancelConfirm(false);
                     }}
-                    className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-red-500 text-white hover:bg-red-600 transition-all"
+                    className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-[#E62020]/14 text-white hover:bg-[#E62020]/14 transition-all"
                   >
                     Yes, cancel subscription
                   </button>

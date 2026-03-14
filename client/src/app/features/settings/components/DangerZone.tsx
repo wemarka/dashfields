@@ -23,7 +23,7 @@ export function DangerZone() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-300 dark:border-red-800 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-300 dark:border-red-800 text-sm font-medium text-[#f87171] dark:text-[#f87171] hover:bg-red-50 dark:hover:bg-[#E62020]/14 transition-colors"
       >
         <Trash2 className="w-3.5 h-3.5" /> Delete Account
       </button>
@@ -31,8 +31,8 @@ export function DangerZone() {
   }
 
   return (
-    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-4 space-y-3 max-w-md">
-      <p className="text-xs font-medium text-red-700 dark:text-red-400">
+    <div className="bg-red-50 dark:bg-[#E62020]/14 border border-red-200 dark:border-red-800 rounded-xl p-4 space-y-3 max-w-md">
+      <p className="text-xs font-medium text-[#f87171] dark:text-[#f87171]">
         Type <strong>DELETE</strong> to confirm account deletion:
       </p>
       <input
@@ -46,7 +46,7 @@ export function DangerZone() {
         <button
           onClick={() => deleteAccountMutation?.mutate?.({ confirmation: "DELETE" })}
           disabled={confirm !== "DELETE" || deleteAccountMutation?.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E62020]/14 text-white text-sm font-medium hover:bg-[#E62020]/14 transition-colors disabled:opacity-50"
         >
           {deleteAccountMutation?.isPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

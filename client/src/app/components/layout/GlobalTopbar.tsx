@@ -375,7 +375,7 @@ function UserMenu({
         {/* Sign Out */}
         <DropdownMenuItem
           onClick={signOut}
-          className="mx-1 mb-1 rounded-md cursor-pointer text-red-400 focus:text-red-400"
+          className="mx-1 mb-1 rounded-md cursor-pointer text-[#f87171] focus:text-[#f87171]"
         >
           <LogOut className="w-4 h-4 mr-2" />
           <span className="text-[13px]">Sign Out</span>

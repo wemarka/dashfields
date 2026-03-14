@@ -191,9 +191,9 @@ export default function DashStudiosPage() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteMutation.mutate({ id: item.id }); }}
-                            className="p-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 transition-colors ml-auto"
+                            className="p-1.5 rounded-md bg-[#E62020]/14 hover:bg-[#E62020]/14 transition-colors ml-auto"
                           >
-                            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                            <Trash2 className="w-3.5 h-3.5 text-[#f87171]" />
                           </button>
                         </div>
                       </div>
@@ -244,7 +244,7 @@ export default function DashStudiosPage() {
                   className="min-h-[120px] bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 resize-none focus:border-brand/50"
                 />
                 <div className="flex justify-end mt-1">
-                  <span className={`text-[10px] ${prompt.length > 1800 ? "text-red-400" : "text-muted-foreground/40"}`}>
+                  <span className={`text-[10px] ${prompt.length > 1800 ? "text-[#f87171]" : "text-muted-foreground/40"}`}>
                     {prompt.length}/2000
                   </span>
                 </div>
@@ -301,7 +301,7 @@ export default function DashStudiosPage() {
               <Button
                 onClick={handleGenerate}
                 disabled={generateMutation.isPending || !prompt.trim()}
-                className="w-full h-11 bg-brand hover:bg-red-700 text-white font-medium rounded-xl transition-colors"
+                className="w-full h-11 bg-brand hover:bg-[#E62020]/14 text-white font-medium rounded-xl transition-colors"
               >
                 {generateMutation.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generating...</>

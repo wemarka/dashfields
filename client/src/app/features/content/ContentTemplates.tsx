@@ -66,7 +66,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   facebook:  "text-muted-foreground",
   linkedin:  "text-muted-foreground",
   twitter:   "text-muted-foreground",
-  youtube:   "text-red-600",
+  youtube:   "text-[#f87171]",
   tiktok:    "text-black dark:text-white",
 };
 
@@ -357,7 +357,7 @@ export default function ContentTemplates() {
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-sm font-semibold text-foreground truncate">{topTemplate?.name ?? "—"}</p>
           <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-            <Star className="w-3 h-3 text-yellow-500" />
+            <Star className="w-3 h-3 text-[#fbbf24]" />
             Most Used
           </p>
         </div>

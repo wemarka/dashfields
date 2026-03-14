@@ -288,7 +288,7 @@ export function BulkActionBar({
           <Play className="w-3 h-3" /> Activate
         </Button>
         <div className="w-px h-4 bg-background/20" />
-        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-400 hover:bg-red-500/20 hover:text-red-300 gap-1" onClick={() => onAction("delete")}>
+        <Button size="sm" variant="ghost" className="h-7 text-xs text-[#f87171] hover:bg-[#E62020]/14 hover:text-[#f87171] gap-1" onClick={() => onAction("delete")}>
           <Trash2 className="w-3 h-3" /> Delete
         </Button>
         <div className="w-px h-4 bg-background/20" />

@@ -28,7 +28,7 @@ interface Notification {
 const TYPE_CONFIG: Record<NotifType, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
   info:    { icon: <Info className="h-4 w-4" />,          color: "text-muted-foreground",       bg: "bg-muted",    label: "Info"    },
   warning: { icon: <AlertTriangle className="h-4 w-4" />, color: "text-brand",     bg: "bg-brand/10",   label: "Warning" },
-  error:   { icon: <XCircle className="h-4 w-4" />,       color: "text-red-600 dark:text-red-400",         bg: "bg-red-500/10",     label: "Alert"   },
+  error:   { icon: <XCircle className="h-4 w-4" />,       color: "text-[#f87171] dark:text-[#f87171]",         bg: "bg-[#E62020]/14",     label: "Alert"   },
   success: { icon: <CheckCircle className="h-4 w-4" />,   color: "text-foreground", bg: "bg-muted/60", label: "Success" },
 };
 
@@ -143,7 +143,7 @@ function NotificationItem({
             )}
             <button
               onClick={() => onDelete(notif.id)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#f87171] hover:bg-[#E62020]/14 transition-colors"
               title="Delete"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -339,7 +339,7 @@ export default function Notifications() {
             {/* Smart alert types */}
             <div className="grid grid-cols-2 gap-3">
               <SmartAlertCard title="Budget Overspend Alert" description="Triggered when daily spend exceeds 110% of limit" icon={DollarSign} colorClass="bg-brand/10 text-brand border-amber-500/20" />
-              <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" />
+              <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-[#E62020]/14 text-[#f87171] dark:text-[#f87171] border-red-500/20" />
               <SmartAlertCard title="Campaign Milestone" description="Triggered at 50%, 75%, 100% of budget" icon={BarChart3} colorClass="bg-muted text-muted-foreground border-border" />
               <SmartAlertCard title="Scheduled Report Ready" description="Triggered when a scheduled report is generated" icon={Star} colorClass="bg-brand/10 text-brand dark:text-brand border-brand/20" />
             </div>
@@ -413,7 +413,7 @@ export default function Notifications() {
               <button onClick={bulkMarkRead} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors">
                 <Check className="w-3.5 h-3.5" /> Mark read
               </button>
-              <button onClick={bulkDelete} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 transition-colors">
+              <button onClick={bulkDelete} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E62020]/14 text-[#f87171] text-xs font-medium hover:bg-[#E62020]/14 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
               <button onClick={() => setSelectedIds(new Set())} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors">

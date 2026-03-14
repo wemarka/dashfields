@@ -126,7 +126,7 @@ export default function AccountsPage() {
               </div>
             )}
             {inactiveCount > 0 && (
-              <div className="flex items-center gap-1.5 text-red-500">
+              <div className="flex items-center gap-1.5 text-[#f87171]">
                 <WifiOff className="w-3.5 h-3.5" />
                 <span className="font-medium">{inactiveCount}</span> disconnected
               </div>

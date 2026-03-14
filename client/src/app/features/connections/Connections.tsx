@@ -85,7 +85,7 @@ function PlatformRow({
             </span>
           )}
           {isConnected && hasExpired && (
-            <span className="flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 text-[11px] font-medium text-[#f87171] bg-red-50 px-1.5 py-0.5 rounded-full">
               <AlertTriangle className="w-3 h-3" />
               Expired
             </span>
@@ -192,14 +192,14 @@ function PlatformDetail({
                       )}
                     </div>
                     {isExpired ? (
-                      <span className="text-[11px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Expired</span>
+                      <span className="text-[11px] font-medium text-[#f87171] bg-red-50 px-2 py-0.5 rounded-full">Expired</span>
                     ) : (
                       <span className="text-[11px] font-medium text-foreground bg-muted px-2 py-0.5 rounded-full">Active</span>
                     )}
                     <button
                       onClick={() => onDisconnect(acc.id)}
                       disabled={isDisconnecting}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-500 hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-500 hover:text-[#f87171] transition-colors"
                       title="Disconnect"
                     >
                       {isDisconnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}

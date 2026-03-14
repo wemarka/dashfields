@@ -135,7 +135,7 @@ function InstagramPreview({ content, mediaUrl, mediaType, accountName, accountHa
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3.5">
             <button onClick={() => setLiked(!liked)}>
-              <Heart className={`w-6 h-6 transition-colors ${liked ? "fill-red-500 text-red-500" : "text-white dark:text-white"}`} />
+              <Heart className={`w-6 h-6 transition-colors ${liked ? "fill-red-500 text-[#f87171]" : "text-white dark:text-white"}`} />
             </button>
             <MessageCircle className="w-6 h-6 text-white dark:text-white" />
             <Send className="w-6 h-6 text-white dark:text-white -rotate-12" />
@@ -192,7 +192,7 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
         <div className="flex items-center gap-1">
           <div className="flex -space-x-1">
             <span className="w-4.5 h-4.5 rounded-full bg-neutral-700 flex items-center justify-center text-[9px]">👍</span>
-            <span className="w-4.5 h-4.5 rounded-full bg-red-500 flex items-center justify-center text-[9px]">❤️</span>
+            <span className="w-4.5 h-4.5 rounded-full bg-[#E62020]/14 flex items-center justify-center text-[9px]">❤️</span>
           </div>
           <span className="text-xs text-neutral-400 dark:text-[#b0b3b8] ml-1">1.2K</span>
         </div>
@@ -245,11 +245,11 @@ function TwitterPreview({ content, mediaUrl, mediaType, accountName, accountHand
             </div>
 
             {/* Content */}
-            <p className={`text-sm mt-1 leading-relaxed ${isOverLimit ? "text-red-500" : "text-white dark:text-white"}`}>
+            <p className={`text-sm mt-1 leading-relaxed ${isOverLimit ? "text-[#f87171]" : "text-white dark:text-white"}`}>
               {formatContent(content, "twitter")}
             </p>
             {isOverLimit && (
-              <p className="text-xs text-red-500 mt-1">⚠️ Exceeds 280 character limit ({charCount}/280)</p>
+              <p className="text-xs text-[#f87171] mt-1">⚠️ Exceeds 280 character limit ({charCount}/280)</p>
             )}
 
             {/* Media */}
@@ -397,7 +397,7 @@ function TikTokPreview({ content, mediaUrl, accountName, accountHandle, accountA
         </div>
         <div className="flex flex-col items-center gap-0.5">
           <button onClick={() => setLiked(!liked)}>
-            <Heart className={`w-7 h-7 ${liked ? "fill-red-500 text-red-500" : "text-white"}`} />
+            <Heart className={`w-7 h-7 ${liked ? "fill-red-500 text-[#f87171]" : "text-white"}`} />
           </button>
           <span className="text-white text-[10px] font-semibold">{liked ? "12.4K" : "12.3K"}</span>
         </div>
@@ -493,7 +493,7 @@ export function MultiPlatformPreview(props: Omit<PostPreviewProps, "platform"> &
           {props.content.length} / {PLATFORM_CONFIG[active].maxChars} characters
         </span>
         {props.content.length > PLATFORM_CONFIG[active].maxChars && (
-          <span className="text-xs text-red-500 font-medium">⚠️ Exceeds limit</span>
+          <span className="text-xs text-[#f87171] font-medium">⚠️ Exceeds limit</span>
         )}
       </div>
     </div>

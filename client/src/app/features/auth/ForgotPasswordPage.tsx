@@ -95,9 +95,9 @@ export default function ForgotPasswordPage() {
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-5">
-                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                  <p className="text-red-400 text-sm">{error}</p>
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-[#E62020]/14 border border-red-500/20 mb-5">
+                  <AlertCircle className="w-4 h-4 text-[#f87171] mt-0.5 shrink-0" />
+                  <p className="text-[#f87171] text-sm">{error}</p>
                 </div>
               )}
 

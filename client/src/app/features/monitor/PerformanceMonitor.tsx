@@ -436,7 +436,7 @@ export function PerformanceMonitor() {
               <Bell className="w-4 h-4 text-brand" />
               Active Alert Rules
               {alertsQuery.data && alertsQuery.data.length > 0 && (
-                <Badge className="ml-auto bg-red-100 text-brand dark:bg-brand/10 dark:text-brand text-xs">
+                <Badge className="ml-auto bg-[#E62020]/14 text-brand dark:bg-brand/10 dark:text-brand text-xs">
                   {alertsQuery.data.length}
                 </Badge>
               )}

@@ -3448,3 +3448,13 @@
 - [x] Global CSS override for .text-neutral-400, .text-zinc-400, .text-gray-400 → oklch(0.780)
 - [x] Hardcoded #a3a3a3 replaced with #b8b8b8 across all components
 - [x] 0 TypeScript errors
+
+## 🔄 Design Token System — Centralized Color Contract
+- [x] shared/design-tokens.ts — single source of truth for all color roles
+- [x] index.css — CSS variables + utility classes for every token role
+- [x] Neutral palette: backgrounds, cards, borders, icons, text (white ↔ dark)
+- [x] Brand/CTA: red #E62020 for primary buttons and CTA only
+- [x] Hot/New badges: brand-red gradient (red → orange-red)
+- [x] Active/Score/Success: green palette
+- [x] Charts & data: white/neutral-light/neutral-dark only
+- [x] Sweep all badge, status, icon, button, chart components to use token classes

@@ -43,9 +43,9 @@ export function ContentPlanView({
       {/* Budget Allocation */}
       <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border border-red-100">
         <div className="flex items-center gap-2 mb-3">
-          <DollarSign className="w-4 h-4 text-red-600" />
+          <DollarSign className="w-4 h-4 text-[#f87171]" />
           <h3 className="font-semibold text-white text-sm">توزيع الميزانية</h3>
-          <Badge className="bg-red-100 text-red-700 border-0 text-xs mr-auto">
+          <Badge className="bg-[#E62020]/14 text-[#f87171] border-0 text-xs mr-auto">
             {totalBudget.toLocaleString()} {currency}
           </Badge>
         </div>
@@ -79,7 +79,7 @@ export function ContentPlanView({
       {Object.keys(insights).length > 0 && (
         <div className="space-y-2">
           <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-red-600" />
+            <TrendingUp className="w-4 h-4 text-[#f87171]" />
             تحليل الجمهور لكل منصة
           </h3>
           <div className="grid grid-cols-1 gap-2">
@@ -98,7 +98,7 @@ export function ContentPlanView({
                       <span>{insight.ageRange}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
-                      <Zap className="w-3 h-3 text-yellow-500" />
+                      <Zap className="w-3 h-3 text-[#fbbf24]" />
                       <span>{insight.estimatedReach?.toLocaleString()} وصول</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
@@ -106,7 +106,7 @@ export function ContentPlanView({
                       <span>{insight.bestTimes?.slice(0, 2).join(", ")}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-neutral-400">
-                      <DollarSign className="w-3 h-3 text-red-500" />
+                      <DollarSign className="w-3 h-3 text-[#f87171]" />
                       <span>CPM: {insight.cpm} {currency}</span>
                     </div>
                   </div>
@@ -125,7 +125,7 @@ export function ContentPlanView({
       {/* Content Calendar */}
       <div className="space-y-2">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-red-600" />
+          <Calendar className="w-4 h-4 text-[#f87171]" />
           خطة النشر ({items.length} منشور)
         </h3>
 

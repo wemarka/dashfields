@@ -264,7 +264,7 @@ function TeamMembersSection({
                     </select>
                     <button
                       onClick={() => removeMutation.mutate({ workspaceId: workspace.id, userId })}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-colors"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-[#f87171] hover:bg-red-50 transition-colors"
                       title="Remove member"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -390,7 +390,7 @@ function InvitesSection({
                     </span>
                     <button
                       onClick={() => revokeMutation.mutate({ invitationId: inv.id as number, workspaceId: workspace.id })}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-500 hover:text-[#f87171] hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
                       title="Revoke invitation"
                     >
                       <Ban className="w-3.5 h-3.5" />
@@ -429,10 +429,10 @@ function DangerSection({
         className="flex items-center justify-between w-full text-left"
       >
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400" />
-          <span className="text-[14px] font-semibold text-red-500">Danger Zone</span>
+          <AlertTriangle className="w-4 h-4 text-[#f87171]" />
+          <span className="text-[14px] font-semibold text-[#f87171]">Danger Zone</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-red-300 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-[#f87171] transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
@@ -454,7 +454,7 @@ function DangerSection({
           <button
             onClick={() => deleteMutation.mutate({ workspaceId: workspace.id })}
             disabled={confirm !== workspace.name || deleteMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white bg-[#E62020]/14 hover:bg-[#E62020]/14 disabled:opacity-40 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
             {deleteMutation.isPending ? "Deleting..." : "Delete Workspace"}

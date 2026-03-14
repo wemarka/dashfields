@@ -69,8 +69,8 @@ export function PerformanceBadge({
       className={cn(
         "inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
         isGood
-          ? "bg-emerald-500/10 text-emerald-400"
-          : "bg-red-500/10 text-red-400",
+          ? "bg-[#22c55e]/14 text-[#4ade80]"
+          : "bg-[#E62020]/14 text-[#f87171]",
         className
       )}
       title={

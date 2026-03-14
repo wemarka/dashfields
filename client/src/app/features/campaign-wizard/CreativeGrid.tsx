@@ -129,7 +129,7 @@ export function CreativeGrid({
           {[0, 1, 2, 3].map(i => (
             <div
               key={i}
-              className="w-2.5 h-2.5 rounded-full bg-red-300"
+              className="w-2.5 h-2.5 rounded-full bg-[#E62020]/14"
               style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }}
             />
           ))}
@@ -416,7 +416,7 @@ function CreativeCard({
           <button
             onClick={onReject}
             disabled={isLoading}
-            className="flex-1 py-2 rounded-xl text-xs font-semibold bg-neutral-800/50 hover:bg-red-50 hover:text-red-600 text-neutral-400 transition-all duration-150"
+            className="flex-1 py-2 rounded-xl text-xs font-semibold bg-neutral-800/50 hover:bg-red-50 hover:text-[#f87171] text-neutral-400 transition-all duration-150"
           >
             <X className="w-3 h-3 inline mr-1" />
             رفض

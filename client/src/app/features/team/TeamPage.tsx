@@ -171,10 +171,10 @@ export default function TeamPage() {
                     <div className="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center shrink-0"><Mail className="w-4 h-4 text-brand" /></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{inv.email}</p>
-                      <p className="text-xs text-muted-foreground">{isExpired ? <span className="text-red-500">Expired</span> : expiresAt ? `Expires ${expiresAt.toLocaleDateString()}` : "Pending"}</p>
+                      <p className="text-xs text-muted-foreground">{isExpired ? <span className="text-[#f87171]">Expired</span> : expiresAt ? `Expires ${expiresAt.toLocaleDateString()}` : "Pending"}</p>
                     </div>
                     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${roleCfg.bg} ${roleCfg.border} ${roleCfg.color}`}><RoleIcon className="w-3 h-3" /> {roleCfg.label}</div>
-                    <button onClick={() => revokeMutation.mutate({ invitationId: inv.id, workspaceId: activeWorkspace.id })} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-all" title="Revoke invitation">
+                    <button onClick={() => revokeMutation.mutate({ invitationId: inv.id, workspaceId: activeWorkspace.id })} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-[#E62020]/14 text-muted-foreground hover:text-[#f87171] transition-all" title="Revoke invitation">
                       <XCircle className="w-4 h-4" />
                     </button>
                   </div>

@@ -112,13 +112,13 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
               <SelectContent style={{ background: "#212121", border: "1px solid #383838" }}>
                 <SelectItem value="ACTIVE" className="text-xs">
                   <span className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]/14 inline-block" />
                     Active
                   </span>
                 </SelectItem>
                 <SelectItem value="PAUSED" className="text-xs">
                   <span className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]/14 inline-block" />
                     Paused
                   </span>
                 </SelectItem>

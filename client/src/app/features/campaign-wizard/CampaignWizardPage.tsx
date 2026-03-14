@@ -507,7 +507,7 @@ export default function CampaignWizardPage() {
             ))}
           </div>
           <div className="p-3 border-t border-neutral-800">
-            <Button onClick={handleNewCampaign} className="w-full bg-red-600 hover:bg-red-700 text-white text-xs">
+            <Button onClick={handleNewCampaign} className="w-full bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-xs">
               <Plus className="w-3 h-3 mr-1" />
               حملة جديدة
             </Button>
@@ -530,7 +530,7 @@ export default function CampaignWizardPage() {
             </div>
             <span className="text-sm font-semibold text-neutral-300">Marketing Workflow</span>
             {isInChat && (
-              <Badge className="text-[10px] bg-red-50 text-red-600 border-red-100">
+              <Badge className="text-[10px] bg-red-50 text-[#f87171] border-red-100">
                 {STEP_LABELS[currentStep]}
               </Badge>
             )}
@@ -548,7 +548,7 @@ export default function CampaignWizardPage() {
                 {DIALOG_STEPS.includes(currentStep) && (
                   <button
                     onClick={() => setDialogOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-all border border-red-200"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#f87171] hover:text-[#f87171] hover:bg-red-50 transition-all border border-red-200"
                   >
                     <Sparkles className="w-3 h-3" />
                     عرض الحملة
@@ -603,8 +603,8 @@ export default function CampaignWizardPage() {
                   className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-red-200 hover:bg-red-50/30 transition-all text-left text-sm text-neutral-300 group"
                 >
                   <span className="text-xl shrink-0">{p.icon}</span>
-                  <span className="leading-snug group-hover:text-red-700 transition-colors">{p.text}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-red-400 mr-auto shrink-0" />
+                  <span className="leading-snug group-hover:text-[#f87171] transition-colors">{p.text}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#f87171] mr-auto shrink-0" />
                 </button>
               ))}
             </div>
@@ -703,7 +703,7 @@ export default function CampaignWizardPage() {
                 <div className="w-full max-w-xs">
                   <div className="flex justify-between text-xs text-neutral-400 mb-1.5">
                     <span>الصور المُولَّدة</span>
-                    <span className="font-semibold text-red-600">
+                    <span className="font-semibold text-[#f87171]">
                       {genProgress?.generated ?? 0} / {genProgress?.total ?? (brief.platforms?.length ?? 4)}
                     </span>
                   </div>
@@ -723,7 +723,7 @@ export default function CampaignWizardPage() {
                         className={cn(
                           "w-2.5 h-2.5 rounded-full transition-all duration-500",
                           i < (genProgress?.generated ?? 0)
-                            ? "bg-red-500 scale-110"
+                            ? "bg-[#E62020]/14 scale-110"
                             : "bg-neutral-700"
                         )}
                       />
@@ -736,18 +736,18 @@ export default function CampaignWizardPage() {
             {/* In-Dialog Error Banner */}
             {planError && currentStep === "creative_review" && (
               <div className="mx-5 mt-4 p-4 rounded-xl border border-red-200 bg-red-50 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <X className="w-4 h-4 text-red-600" />
+                <div className="w-8 h-8 rounded-lg bg-[#E62020]/14 flex items-center justify-center shrink-0 mt-0.5">
+                  <X className="w-4 h-4 text-[#f87171]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-red-800 mb-0.5">فشل إعداد خطة المحتوى</p>
-                  <p className="text-xs text-red-600 mb-3 line-clamp-2">
+                  <p className="text-sm font-semibold text-[#f87171] mb-0.5">فشل إعداد خطة المحتوى</p>
+                  <p className="text-xs text-[#f87171] mb-3 line-clamp-2">
                     {planError.includes("Atlas") ? "حدث خطأ في توليد المحتوى بالذكاء الاصطناعي." : planError}
                   </p>
                   <Button
                     size="sm"
                     onClick={() => { setPlanError(null); void handleProceedToContentPlan(); }}
-                    className="bg-red-600 hover:bg-red-700 text-white text-xs h-7 px-3"
+                    className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-xs h-7 px-3"
                   >
                     حاول مجدداً
                   </Button>
@@ -851,16 +851,16 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
               <div className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300",
                 isCompleted
-                  ? "bg-red-500 text-white"
+                  ? "bg-[#E62020]/14 text-white"
                   : isCurrent
-                    ? "bg-red-500 text-white ring-4 ring-red-100"
+                    ? "bg-[#E62020]/14 text-white ring-4 ring-red-100"
                     : "bg-neutral-800 text-neutral-500 border border-neutral-700",
               )}>
                 {isCompleted ? "✓" : idx + 1}
               </div>
               <span className={cn(
                 "text-[10px] font-medium whitespace-nowrap",
-                isCurrent || isCompleted ? "text-red-600" : "text-neutral-500",
+                isCurrent || isCompleted ? "text-[#f87171]" : "text-neutral-500",
               )}>
                 {s.label}
               </span>
@@ -868,7 +868,7 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
             {idx < PROGRESS_STEPS.length - 1 && (
               <div className={cn(
                 "flex-1 h-0.5 mx-2 mb-4 transition-all duration-500",
-                isCompleted ? "bg-red-400" : "bg-neutral-700",
+                isCompleted ? "bg-[#E62020]/14" : "bg-neutral-700",
               )} />
             )}
           </div>
@@ -915,7 +915,7 @@ function WizardInputBox({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-[#f87171] hover:bg-[#E62020]/14 transition-all"
             >
               <Upload className="w-3 h-3" />
               رفع الشعار
@@ -993,7 +993,7 @@ function ThinkingBubble() {
       <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-neutral-700 bg-neutral-900">
         <div className="flex items-center gap-1 py-1">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="w-2 h-2 rounded-full bg-red-400"
+            <div key={i} className="w-2 h-2 rounded-full bg-[#E62020]/14"
               style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }} />
           ))}
         </div>
@@ -1084,7 +1084,7 @@ function ProductImageStep({
         <Button
           onClick={() => onUpload(selectedFile)}
           disabled={isUploading}
-          className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+          className="flex-1 bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white"
         >
           {isUploading ? (
             <><Loader2 className="w-4 h-4 animate-spin ml-2" />جاري الرفع...</>

@@ -56,7 +56,7 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   youtube: {
-    color: "bg-red-600",
+    color: "bg-[#E62020]/14",
     textColor: "text-white",
     label: "YouTube",
     icon: (
@@ -76,7 +76,7 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   snapchat: {
-    color: "bg-yellow-400",
+    color: "bg-[#f59e0b]/14",
     textColor: "text-black",
     label: "Snapchat",
     icon: (
@@ -86,7 +86,7 @@ const PLATFORM_ICONS: Record<string, { color: string; textColor: string; label: 
     ),
   },
   pinterest: {
-    color: "bg-red-700",
+    color: "bg-[#E62020]/14",
     textColor: "text-white",
     label: "Pinterest",
     icon: (
