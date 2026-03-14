@@ -291,7 +291,7 @@ export default function AdvancedAnalytics() {
                     <FunnelChart>
                       <Tooltip
                         formatter={(value: number) => fmtNum(value)}
-                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }}
+                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "10px", color: "#ffffff", fontSize: "12px" }}
                       />
                       <Funnel dataKey="value" data={funnel.stages} isAnimationActive>
                         {funnel.stages.map((stage) => (
@@ -369,13 +369,13 @@ export default function AdvancedAnalytics() {
                       <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                       <Tooltip
                         formatter={(value: number) => fmtMoney(value)}
-                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }}
+                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "10px", color: "#ffffff", fontSize: "12px" }}
                       />
                       <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="Last Click"  fill="#c41919" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Last Click"  fill="#E62020" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="First Click" fill="#E62020" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Linear"      fill="#a78bfa" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Time Decay"  fill="#c4b5fd" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Linear"      fill="#b8b8b8" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Time Decay"  fill="#787878" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -388,10 +388,10 @@ export default function AdvancedAnalytics() {
                       <PolarGrid stroke="var(--border)" />
                       <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                       <PolarRadiusAxis tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
-                      <Radar name="Avg Value" dataKey="value" stroke="#c41919" fill="#c41919" fillOpacity={0.3} />
+                      <Radar name="Avg Value" dataKey="value" stroke="#E62020" fill="#E62020" fillOpacity={0.3} />
                       <Tooltip
                         formatter={(value: number) => fmtMoney(value)}
-                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", fontSize: "12px" }}
+                        contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "10px", color: "#ffffff", fontSize: "12px" }}
                       />
                     </RadarChart>
                   </ResponsiveContainer>

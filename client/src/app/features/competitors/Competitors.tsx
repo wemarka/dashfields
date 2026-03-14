@@ -425,8 +425,8 @@ export default function Competitors() {
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
                     <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                     <Legend />
-                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#c41919" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="benchCtr" name="Industry Avg"   fill="#e2e8f0" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#E62020" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="benchCtr" name="Industry Avg"   fill="#484848" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -450,8 +450,8 @@ export default function Competitors() {
                         <PolarGrid stroke="var(--border)" />
                         <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis angle={90} domain={[0, 200]} tick={{ fontSize: 9 }} />
-                        <Radar name="Your Performance" dataKey="yours"     fill="#c41919" fillOpacity={0.3} stroke="#c41919" />
-                        <Radar name="Industry Avg"     dataKey="benchmark" fill="#e2e8f0" fillOpacity={0.2} stroke="#94a3b8" strokeDasharray="4 4" />
+                        <Radar name="Your Performance" dataKey="yours"     fill="#E62020" fillOpacity={0.3} stroke="#E62020" />
+                        <Radar name="Industry Avg"     dataKey="benchmark" fill="#484848" fillOpacity={0.2} stroke="#787878" strokeDasharray="4 4" />
                         <Legend />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -478,8 +478,8 @@ export default function Competitors() {
                         <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                         <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                         <Legend />
-                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#c41919" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#E62020" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#787878" strokeWidth={2} strokeDasharray="4 4" dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}

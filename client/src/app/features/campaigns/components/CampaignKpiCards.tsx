@@ -332,7 +332,7 @@ export function CampaignKpiCards({
       previous: prevImpressions,
       higherIsBetter: true,
       sub: totalImpressions > 0 ? "Reach across all platforms" : "No data yet",
-      accent: "#a78bfa",
+      accent: "#b8b8b8",
       spark: impressionsSpark,
     },
     {

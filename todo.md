@@ -3458,3 +3458,8 @@
 - [x] Active/Score/Success: green palette
 - [x] Charts & data: white/neutral-light/neutral-dark only
 - [x] Sweep all badge, status, icon, button, chart components to use token classes
+
+## 🔄 btn-cta + Chart Token Application
+- [x] Apply btn-cta to all primary buttons across campaigns, publishing, modals
+- [x] Update all Recharts charts to use --color-chart-1…5 token palette
+- [x] Remove remaining blue/purple colors from chart stroke/fill props

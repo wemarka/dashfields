@@ -340,7 +340,7 @@ export function PerformanceMonitor() {
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="impressions" stroke="#c41919" fill="url(#impGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="impressions" stroke="#E62020" fill="url(#impGrad)" strokeWidth={2} dot={false} />
                   <Area type="monotone" dataKey="clicks" stroke="#b8b8b8" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>

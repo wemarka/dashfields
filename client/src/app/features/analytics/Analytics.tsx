@@ -471,13 +471,13 @@ export default function Analytics() {
                   <h3 className="text-sm font-semibold mb-4">Current vs Previous Period</h3>
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={compareMetrics.map(m => ({ name: m.label, Current: m.curr, Previous: m.prev }))} barGap={4}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
                       <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} formatter={(v: unknown) => (v as number).toLocaleString()} />
                       <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="Current" fill="#c41919" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Previous" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Current" fill="#E62020" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Previous" fill="#484848" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

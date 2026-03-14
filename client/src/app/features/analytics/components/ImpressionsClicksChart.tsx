@@ -6,10 +6,11 @@ import {
 } from "recharts";
 
 const TOOLTIP_STYLE = {
-  background: "rgba(255,255,255,0.95)",
-  border: "1px solid rgba(0,0,0,0.08)",
-  borderRadius: "12px",
+  background: "#1e1e1e",
+  border: "1px solid #303030",
+  borderRadius: "10px",
   fontSize: "12px",
+  color: "#ffffff",
 };
 
 interface ChartRow {
@@ -28,13 +29,13 @@ export function ImpressionsClicksChart({ data }: ImpressionsClicksChartProps) {
       <h2 className="text-sm font-semibold mb-4">Impressions vs Clicks by Campaign</h2>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-          <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#b8b8b8" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "#b8b8b8" }} axisLine={false} tickLine={false} />
           <Tooltip contentStyle={TOOLTIP_STYLE} />
           <Legend iconType="circle" iconSize={8} />
-          <Bar dataKey="impressions" fill="#374151" radius={[4, 4, 0, 0]} name="Impressions" />
-          <Bar dataKey="clicks" fill="#9CA3AF" radius={[4, 4, 0, 0]} name="Clicks (all)" />
+          <Bar dataKey="impressions" fill="#ffffff" radius={[4, 4, 0, 0]} name="Impressions" />
+          <Bar dataKey="clicks" fill="#b8b8b8" radius={[4, 4, 0, 0]} name="Clicks (all)" />
         </BarChart>
       </ResponsiveContainer>
     </div>

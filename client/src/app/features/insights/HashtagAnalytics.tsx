@@ -358,7 +358,7 @@ export default function HashtagAnalytics() {
                         <Tooltip
                           contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
                         />
-                        <Bar dataKey="engagement" fill="#c41919" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="engagement" fill="#E62020" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
