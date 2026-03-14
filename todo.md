@@ -3512,3 +3512,8 @@
 - [x] Sidebar active item → bg-muted/60 text-white (remove any red active state)
 - [x] Table row hover → hover:bg-muted/30 (replace any red hover)
 - [x] Select/Combobox selected state → text-white bg-muted/60
+
+## 🔄 UI Consistency — Dropdown/Tabs/Focus
+- [x] DropdownMenuItem focus/selected → bg-muted/60 text-white
+- [x] TabsTrigger active → bg-muted/60 text-white
+- [x] Checkbox and Radio focus ring → focus-visible:ring-[#ef3735]/40
