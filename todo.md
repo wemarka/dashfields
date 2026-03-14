@@ -3247,3 +3247,8 @@
 - [x] Refactor chat input, message bubbles, session sidebar to dark neutral
 - [x] Ensure brand-red accent on primary actions
 - [x] Verify consistent look with rest of app
+
+## 🔧 Assist RTL Fixes
+- [x] Fix RTL in AI assistant message bubble (text alignment, avatar position)
+- [x] Fix RTL in GenerativeUIRenderer (stat cards, bar charts, chip buttons)
+- [x] Pass dir prop from MessageBubble to GenerativeUIRenderer

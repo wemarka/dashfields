@@ -38,14 +38,16 @@ interface GenerativeUIRendererProps {
   onChipClick?: (chip: string) => void;
   /** Called when a block is updated (e.g., image generated) — parent persists the change */
   onBlockUpdate?: (blockIndex: number, updatedBlock: UIBlock) => void;
+  /** Text direction — inherited from the parent message language */
+  dir?: "rtl" | "ltr";
 }
 
-export function GenerativeUIRenderer({ blocks, onAction, onChipClick, onBlockUpdate }: GenerativeUIRendererProps) {
+export function GenerativeUIRenderer({ blocks, onAction, onChipClick, onBlockUpdate, dir = "ltr" }: GenerativeUIRendererProps) {
   if (!blocks.length) return null;
   return (
-    <div className="flex flex-col gap-3 mt-3">
+    <div className="flex flex-col gap-3 mt-3" dir={dir}>
       {blocks.map((block, i) => (
-        <BlockRenderer key={i} block={block} blockIndex={i} onAction={onAction} onChipClick={onChipClick} onBlockUpdate={onBlockUpdate} />
+        <BlockRenderer key={i} block={block} blockIndex={i} onAction={onAction} onChipClick={onChipClick} onBlockUpdate={onBlockUpdate} dir={dir} />
       ))}
     </div>
   );
@@ -57,38 +59,42 @@ function BlockRenderer({
   onAction,
   onChipClick,
   onBlockUpdate,
+  dir = "ltr",
 }: {
   block: UIBlock;
   blockIndex: number;
   onAction?: (a: string) => void;
   onChipClick?: (c: string) => void;
   onBlockUpdate?: (blockIndex: number, updatedBlock: UIBlock) => void;
+  dir?: "rtl" | "ltr";
 }) {
+  const isRtl = dir === "rtl";
   switch (block.type) {
     case "metric_card":
-      return <MetricCard block={block} />;
+      return <MetricCard block={block} isRtl={isRtl} />;
     case "data_table":
-      return <DataTable block={block} />;
+      return <DataTable block={block} isRtl={isRtl} />;
     case "bar_chart":
-      return <SimpleBarChart block={block} />;
+      return <SimpleBarChart block={block} isRtl={isRtl} />;
     case "progress_card":
-      return <ProgressCard block={block} />;
+      return <ProgressCard block={block} isRtl={isRtl} />;
     case "action_buttons":
-      return <ActionButtons block={block} onAction={onAction} />;
+      return <ActionButtons block={block} onAction={onAction} isRtl={isRtl} />;
     case "info_card":
-      return <InfoCard block={block} />;
+      return <InfoCard block={block} isRtl={isRtl} />;
     case "image_gallery":
-      return <ImageGallery block={block} />;
+      return <ImageGallery block={block} isRtl={isRtl} />;
     case "status_list":
-      return <StatusList block={block} />;
+      return <StatusList block={block} isRtl={isRtl} />;
     case "campaign_summary":
-      return <CampaignSummary block={block} />;
+      return <CampaignSummary block={block} isRtl={isRtl} />;
     case "suggestion_chips":
-      return <SuggestionChips block={block} onChipClick={onChipClick} />;
+      return <SuggestionChips block={block} onChipClick={onChipClick} isRtl={isRtl} />;
     case "campaign_preview":
       return (
         <CampaignPreview
           block={block}
+          dir={dir}
           onImageGenerated={(imageUrl) => {
             if (onBlockUpdate) {
               onBlockUpdate(blockIndex, { ...block, generated_image_url: imageUrl });
@@ -102,7 +108,7 @@ function BlockRenderer({
 }
 
 // ── Metric Card ────────────────────────────────────────────────────────────
-function MetricCard({ block }: { block: MetricCardBlock }) {
+function MetricCard({ block, isRtl }: { block: MetricCardBlock; isRtl?: boolean }) {
   const changeIcon =
     block.changeType === "positive" ? <TrendingUp className="w-3.5 h-3.5" /> :
     block.changeType === "negative" ? <TrendingDown className="w-3.5 h-3.5" /> :
@@ -114,11 +120,11 @@ function MetricCard({ block }: { block: MetricCardBlock }) {
     "text-neutral-500";
 
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4" dir={isRtl ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-medium text-neutral-400 uppercase tracking-wide">{block.title}</span>
       </div>
-      <div className="flex items-end gap-2">
+      <div className={cn("flex items-end gap-2", isRtl && "flex-row-reverse justify-end")}>
         <span className="text-2xl font-bold text-white">{block.value}</span>
         {block.change && (
           <span className={cn("flex items-center gap-0.5 text-xs font-medium pb-0.5", changeColor)}>
@@ -132,9 +138,9 @@ function MetricCard({ block }: { block: MetricCardBlock }) {
 }
 
 // ── Data Table ─────────────────────────────────────────────────────────────
-function DataTable({ block }: { block: DataTableBlock }) {
+function DataTable({ block, isRtl }: { block: DataTableBlock; isRtl?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
       {block.title && (
         <div className="px-4 py-2.5 border-b border-neutral-800">
           <span className="text-sm font-semibold text-neutral-300">{block.title}</span>
@@ -145,7 +151,7 @@ function DataTable({ block }: { block: DataTableBlock }) {
           <thead>
             <tr className="bg-neutral-800/60">
               {block.columns.map((col, i) => (
-                <th key={i} className="px-4 py-2.5 text-start text-xs font-medium text-neutral-400 uppercase tracking-wide">
+                <th key={i} className={cn("px-4 py-2.5 text-xs font-medium text-neutral-400 uppercase tracking-wide", isRtl ? "text-right" : "text-start")}>
                   {col}
                 </th>
               ))}
@@ -167,16 +173,16 @@ function DataTable({ block }: { block: DataTableBlock }) {
 }
 
 // ── Simple Bar Chart ───────────────────────────────────────────────────────
-function SimpleBarChart({ block }: { block: BarChartBlock }) {
+function SimpleBarChart({ block, isRtl }: { block: BarChartBlock; isRtl?: boolean }) {
   const max = Math.max(...block.values, 1);
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4" dir={isRtl ? "rtl" : "ltr"}>
       {block.title && <span className="text-sm font-semibold text-neutral-300 mb-3 block">{block.title}</span>}
       <div className="space-y-2.5">
         {block.labels.map((label, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className="text-xs text-neutral-400 w-24 shrink-0 truncate">{label}</span>
-            <div className="flex-1 h-6 bg-neutral-800 rounded-full overflow-hidden">
+          <div key={i} className={cn("flex items-center gap-3", isRtl && "flex-row-reverse")}>
+            <span className={cn("text-xs text-neutral-400 w-24 shrink-0 truncate", isRtl && "text-right")}>{label}</span>
+            <div className="flex-1 h-6 bg-neutral-800 rounded-full overflow-hidden" style={{ direction: "ltr" }}>
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
@@ -185,7 +191,7 @@ function SimpleBarChart({ block }: { block: BarChartBlock }) {
                 }}
               />
             </div>
-            <span className="text-xs font-medium text-neutral-300 w-12 text-end">{block.values[i]}</span>
+            <span className={cn("text-xs font-medium text-neutral-300 w-12", isRtl ? "text-start" : "text-end")}>{block.values[i]}</span>
           </div>
         ))}
       </div>
@@ -194,15 +200,15 @@ function SimpleBarChart({ block }: { block: BarChartBlock }) {
 }
 
 // ── Progress Card ──────────────────────────────────────────────────────────
-function ProgressCard({ block }: { block: ProgressCardBlock }) {
+function ProgressCard({ block, isRtl }: { block: ProgressCardBlock; isRtl?: boolean }) {
   const pct = block.total > 0 ? Math.round((block.current / block.total) * 100) : 0;
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4" dir={isRtl ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-semibold text-neutral-300">{block.title}</span>
         <span className="text-xs font-medium text-neutral-400">{pct}%</span>
       </div>
-      <Progress value={pct} className="h-2" />
+      <Progress value={pct} className="h-2" style={{ direction: "ltr" }} />
       <span className="text-xs text-neutral-500 mt-1.5 block">
         {block.current} / {block.total} {block.unit || ""}
       </span>
@@ -211,9 +217,9 @@ function ProgressCard({ block }: { block: ProgressCardBlock }) {
 }
 
 // ── Action Buttons ─────────────────────────────────────────────────────────
-function ActionButtons({ block, onAction }: { block: ActionButtonsBlock; onAction?: (a: string) => void }) {
+function ActionButtons({ block, onAction, isRtl }: { block: ActionButtonsBlock; onAction?: (a: string) => void; isRtl?: boolean }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap gap-2", isRtl && "flex-row-reverse")}>
       {block.buttons.map((btn, i) => (
         <Button
           key={i}
@@ -233,9 +239,9 @@ function ActionButtons({ block, onAction }: { block: ActionButtonsBlock; onActio
 }
 
 // ── Info Card ──────────────────────────────────────────────────────────────
-function InfoCard({ block }: { block: InfoCardBlock }) {
+function InfoCard({ block, isRtl }: { block: InfoCardBlock; isRtl?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
       {block.image && (
         <div className="h-36 overflow-hidden">
           <img src={block.image} alt={block.title} className="w-full h-full object-cover" />
@@ -257,9 +263,9 @@ function InfoCard({ block }: { block: InfoCardBlock }) {
 }
 
 // ── Image Gallery ──────────────────────────────────────────────────────────
-function ImageGallery({ block }: { block: ImageGalleryBlock }) {
+function ImageGallery({ block, isRtl }: { block: ImageGalleryBlock; isRtl?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4" dir={isRtl ? "rtl" : "ltr"}>
       {block.title && <span className="text-sm font-semibold text-neutral-300 mb-3 block">{block.title}</span>}
       <div className="grid grid-cols-2 gap-2">
         {block.images.map((img, i) => (
@@ -274,7 +280,7 @@ function ImageGallery({ block }: { block: ImageGalleryBlock }) {
 }
 
 // ── Status List ────────────────────────────────────────────────────────────
-function StatusList({ block }: { block: StatusListBlock }) {
+function StatusList({ block, isRtl }: { block: StatusListBlock; isRtl?: boolean }) {
   const statusIcon = {
     success: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
     warning: <AlertTriangle className="w-4 h-4 text-amber-500" />,
@@ -282,7 +288,7 @@ function StatusList({ block }: { block: StatusListBlock }) {
     pending: <Clock className="w-4 h-4 text-neutral-500" />,
   };
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900" dir={isRtl ? "rtl" : "ltr"}>
       {block.title && (
         <div className="px-4 py-2.5 border-b border-neutral-800">
           <span className="text-sm font-semibold text-neutral-300">{block.title}</span>
@@ -290,7 +296,7 @@ function StatusList({ block }: { block: StatusListBlock }) {
       )}
       <div className="divide-y divide-neutral-800">
         {block.items.map((item, i) => (
-          <div key={i} className="flex items-center gap-3 px-4 py-3">
+          <div key={i} className={cn("flex items-center gap-3 px-4 py-3", isRtl && "flex-row-reverse")}>
             {statusIcon[item.status]}
             <div className="flex-1 min-w-0">
               <span className="text-sm text-neutral-300 block">{item.label}</span>
@@ -304,9 +310,9 @@ function StatusList({ block }: { block: StatusListBlock }) {
 }
 
 // ── Campaign Summary ───────────────────────────────────────────────────────
-function CampaignSummary({ block }: { block: CampaignSummaryBlock }) {
+function CampaignSummary({ block, isRtl }: { block: CampaignSummaryBlock; isRtl?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4" dir={isRtl ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-semibold text-white">{block.name}</h4>
         <Badge variant="secondary" className="text-[10px] bg-neutral-800 text-neutral-300 border-neutral-700">{block.status}</Badge>
@@ -361,9 +367,9 @@ function CampaignSummary({ block }: { block: CampaignSummaryBlock }) {
 }
 
 // ── Suggestion Chips ───────────────────────────────────────────────────────
-function SuggestionChips({ block, onChipClick }: { block: SuggestionChipsBlock; onChipClick?: (c: string) => void }) {
+function SuggestionChips({ block, onChipClick, isRtl }: { block: SuggestionChipsBlock; onChipClick?: (c: string) => void; isRtl?: boolean }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap gap-2", isRtl && "flex-row-reverse")}>
       {block.chips.map((chip, i) => (
         <button
           key={i}

@@ -912,6 +912,7 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
             onChipClick={onChipClick}
             onAction={onAction}
             onBlockUpdate={onBlockUpdate}
+            dir={msgIsRtl ? "rtl" : "ltr"}
           />
         )}
 

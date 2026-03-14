@@ -46,9 +46,12 @@ interface CampaignPreviewProps {
   block: CampaignPreviewBlock;
   /** Called when image is generated for the first time — parent persists the URL */
   onImageGenerated?: (imageUrl: string) => void;
+  /** Text direction — inherited from the parent message language */
+  dir?: "rtl" | "ltr";
 }
 
-export function CampaignPreview({ block, onImageGenerated }: CampaignPreviewProps) {
+export function CampaignPreview({ block, onImageGenerated, dir = "ltr" }: CampaignPreviewProps) {
+  const isRtl = dir === "rtl";
   // ── Guard: if URL already exists, skip generation entirely ────────────────
   const alreadyHasImage = !!block.generated_image_url;
 
@@ -105,10 +108,10 @@ export function CampaignPreview({ block, onImageGenerated }: CampaignPreviewProp
     PLATFORM_COLORS[block.platform?.toLowerCase() ?? ""] ?? "bg-neutral-700 text-white";
 
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden max-w-md">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 overflow-hidden max-w-md" dir={isRtl ? "rtl" : "ltr"}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="px-4 py-3 border-b border-neutral-800 flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className={cn("px-4 py-3 border-b border-neutral-800 flex items-center justify-between", isRtl && "flex-row-reverse")}>
+        <div className={cn("flex items-center gap-2 min-w-0", isRtl && "flex-row-reverse")}>
           <Sparkles className="w-4 h-4 text-brand-red shrink-0" />
           <span className="text-sm font-semibold text-white truncate">
             {block.campaign_name || "Campaign Preview"}
@@ -162,7 +165,7 @@ export function CampaignPreview({ block, onImageGenerated }: CampaignPreviewProp
         )}
 
         {/* Meta Info Grid */}
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800">
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800" dir={isRtl ? "rtl" : "ltr"}>
           {block.objective && (
             <MetaItem
               icon={<Target className="w-3.5 h-3.5" />}
