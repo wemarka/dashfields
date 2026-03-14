@@ -38,6 +38,7 @@ import { DemoModeProvider } from "./core/contexts/DemoModeContext";
   "/monitor",
   "/performance-goals",
   "/campaign-wizard",
+  "/marketing/dashboard",
 ];
 
 // ─── Redirect helper ──────────────────────────────────────────────────────────
@@ -69,6 +70,8 @@ const Profile            = lazy(() => import("./app/features/settings/Profile"))
 const AcceptInvite       = lazy(() => import("./app/features/workspace/AcceptInvite"));
 const PerformanceMonitor = lazy(() => import("./app/features/monitor/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
 const PerformanceGoals   = lazy(() => import("./app/features/analytics/PerformanceGoals"));
+// Marketing
+const MarketingDashboard = lazy(() => import("./app/features/marketing/MarketingDashboard"));
 // Ads
 const CampaignsPage      = lazy(() => import("./app/pages/ads/CampaignsPage"));
 // Content
@@ -161,6 +164,9 @@ function AppRouter() {
                 <Route path="/studios"                component={DashStudiosPage} />
                 <Route path="/assets"                 component={AssetsPage} />
                 <Route path="/campaign-wizard"        component={CampaignWizardPage} />
+                {/* ── Marketing ────────────────────────────────────────── */}
+                <Route path="/marketing"              component={() => <Redirect to="/marketing/dashboard" />} />
+                <Route path="/marketing/dashboard"    component={MarketingDashboard} />
                 {/* ── Ads ──────────────────────────────────────────────── */}
                 <Route path="/ads"                    component={() => <Redirect to="/ads/campaigns" />} />
                 <Route path="/ads/campaigns"          component={CampaignsPage} />

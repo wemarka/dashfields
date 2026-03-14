@@ -52,6 +52,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const MARKETING_ITEMS = [
+  { label: "Dashboard", path: "/marketing/dashboard", icon: <BarChart3 className="w-4 h-4" /> },
   { label: "Campaigns", path: "/ads/campaigns", icon: <Megaphone className="w-4 h-4" /> },
   { label: "Content", path: "/content/planner", icon: <PenTool className="w-4 h-4" /> },
   { label: "Analytics", path: "/analytics/overview", icon: <BarChart3 className="w-4 h-4" /> },
