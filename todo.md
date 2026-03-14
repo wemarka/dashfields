@@ -3577,3 +3577,9 @@
 - [x] MetaCampaignTable loading → LoadingState variant="skeleton" rows={5}
 - [x] FieldError in GeneralTab and TeamTab settings forms
 - [x] EmptyState in PerformanceMonitor alerts and reports sections
+
+## 🔄 Resizable Drawer Component
+- [x] Create ResizableDrawer component with drag-to-resize handle (right side, left side, bottom)
+- [x] Support min/max width constraints with smooth animation
+- [x] Persist width in localStorage across sessions
+- [x] Integrate into design system with proper TypeScript types
