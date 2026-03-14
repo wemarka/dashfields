@@ -9,21 +9,16 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Wifi, WifiOff } from "lucide-react";
 
-// ─── Meta SVG logo ────────────────────────────────────────────────────────────
+// ─── Meta official logo ───────────────────────────────────────────────────────
+const META_LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/meta-icon_d38aa588.png";
+
 function MetaLogo({ size = 14 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path
-        d="M2.5 16.5C2.5 18.985 4.515 21 7 21c1.38 0 2.63-.56 3.535-1.465L12 18.07l1.465 1.465A4.99 4.99 0 0 0 17 21c2.485 0 4.5-2.015 4.5-4.5 0-1.38-.56-2.63-1.465-3.535L12 5.93 3.965 12.965A4.99 4.99 0 0 0 2.5 16.5Z"
-        fill="url(#meta-grad)"
-      />
-      <defs>
-        <linearGradient id="meta-grad" x1="2.5" y1="5.93" x2="21.5" y2="21" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#0082FB" />
-          <stop offset="1" stopColor="#A033FF" />
-        </linearGradient>
-      </defs>
-    </svg>
+    <img
+      src={META_LOGO_URL}
+      alt="Meta"
+      style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
+    />
   );
 }
 
