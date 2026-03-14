@@ -244,9 +244,27 @@
     background-color: oklch(0.165 0.000 0);
   }
 
-  /* Scrollbar */
+  /* Scrollbar — unified dark theme */
   .scrollbar-none { scrollbar-width: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* Global custom scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.210 0.000 0) transparent;
+  }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: oklch(0.210 0.000 0);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.280 0.000 0);
+  }
+  *::-webkit-scrollbar-corner { background: transparent; }
 
   /* Container */
   .container {

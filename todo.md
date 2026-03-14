@@ -3532,3 +3532,8 @@
 - [x] Popover and Tooltip → bg-card border-border
 - [x] Skeleton → bg-muted/60
 - [x] Progress indicator → bg-[#ef3735]
+
+## 🔄 UI Consistency — Dialog/Calendar/Scrollbar
+- [x] Dialog and Sheet overlay → bg-background/60 backdrop-blur-sm
+- [x] Calendar → bg-card border-border, selected day bg-[#ef3735]
+- [x] Scrollbar → custom scrollbar-color in index.css
