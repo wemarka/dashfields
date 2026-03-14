@@ -3517,3 +3517,8 @@
 - [x] DropdownMenuItem focus/selected → bg-muted/60 text-white
 - [x] TabsTrigger active → bg-muted/60 text-white
 - [x] Checkbox and Radio focus ring → focus-visible:ring-[#ef3735]/40
+
+## 🔄 UI Consistency — Switch/Input/Badge
+- [x] Switch focus ring → focus-visible:ring-[#ef3735]/40
+- [x] Input and Textarea focus → focus-visible:ring-[#ef3735]/40 focus-visible:border-[#ef3735]
+- [x] Badge neutral variant → bg-muted/60 text-white
