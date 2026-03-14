@@ -507,7 +507,7 @@ export default function CampaignWizardPage() {
             ))}
           </div>
           <div className="p-3 border-t border-neutral-800">
-            <Button onClick={handleNewCampaign} className="w-full bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-xs">
+            <Button onClick={handleNewCampaign} className="w-full bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white text-xs">
               <Plus className="w-3 h-3 mr-1" />
               حملة جديدة
             </Button>
@@ -723,7 +723,7 @@ export default function CampaignWizardPage() {
                         className={cn(
                           "w-2.5 h-2.5 rounded-full transition-all duration-500",
                           i < (genProgress?.generated ?? 0)
-                            ? "bg-[#E62020]/14 scale-110"
+                            ? "bg-[#ef3735]/14 scale-110"
                             : "bg-neutral-700"
                         )}
                       />
@@ -736,7 +736,7 @@ export default function CampaignWizardPage() {
             {/* In-Dialog Error Banner */}
             {planError && currentStep === "creative_review" && (
               <div className="mx-5 mt-4 p-4 rounded-xl border border-red-200 bg-red-50 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#E62020]/14 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-lg bg-[#ef3735]/14 flex items-center justify-center shrink-0 mt-0.5">
                   <X className="w-4 h-4 text-[#f87171]" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -747,7 +747,7 @@ export default function CampaignWizardPage() {
                   <Button
                     size="sm"
                     onClick={() => { setPlanError(null); void handleProceedToContentPlan(); }}
-                    className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-xs h-7 px-3"
+                    className="bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white text-xs h-7 px-3"
                   >
                     حاول مجدداً
                   </Button>
@@ -851,9 +851,9 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
               <div className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300",
                 isCompleted
-                  ? "bg-[#E62020]/14 text-white"
+                  ? "bg-[#ef3735]/14 text-white"
                   : isCurrent
-                    ? "bg-[#E62020]/14 text-white ring-4 ring-red-100"
+                    ? "bg-[#ef3735]/14 text-white ring-4 ring-red-100"
                     : "bg-neutral-800 text-neutral-500 border border-neutral-700",
               )}>
                 {isCompleted ? "✓" : idx + 1}
@@ -868,7 +868,7 @@ function WizardDialogProgress({ currentStep }: { currentStep: WizardStep }) {
             {idx < PROGRESS_STEPS.length - 1 && (
               <div className={cn(
                 "flex-1 h-0.5 mx-2 mb-4 transition-all duration-500",
-                isCompleted ? "bg-[#E62020]/14" : "bg-neutral-700",
+                isCompleted ? "bg-[#ef3735]/14" : "bg-neutral-700",
               )} />
             )}
           </div>
@@ -915,7 +915,7 @@ function WizardInputBox({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-[#f87171] hover:bg-[#E62020]/14 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-[#f87171] hover:bg-[#ef3735]/14 transition-all"
             >
               <Upload className="w-3 h-3" />
               رفع الشعار
@@ -993,7 +993,7 @@ function ThinkingBubble() {
       <div className="px-4 py-3 rounded-2xl rounded-tr-md border border-neutral-700 bg-neutral-900">
         <div className="flex items-center gap-1 py-1">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="w-2 h-2 rounded-full bg-[#E62020]/14"
+            <div key={i} className="w-2 h-2 rounded-full bg-[#ef3735]/14"
               style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }} />
           ))}
         </div>
@@ -1084,7 +1084,7 @@ function ProductImageStep({
         <Button
           onClick={() => onUpload(selectedFile)}
           disabled={isUploading}
-          className="flex-1 bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white"
+          className="flex-1 bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white"
         >
           {isUploading ? (
             <><Loader2 className="w-4 h-4 animate-spin ml-2" />جاري الرفع...</>

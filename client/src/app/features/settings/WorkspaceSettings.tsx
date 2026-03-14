@@ -61,7 +61,7 @@ export default function WorkspaceSettings() {
               <button
                 onClick={() => setShowCreate(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#e62020" }}
+                style={{ backgroundColor: "#ef3735" }}
               >
                 <Plus className="w-4 h-4" /> Create Workspace
               </button>
@@ -78,7 +78,7 @@ export default function WorkspaceSettings() {
                   onClick={() => createMutation.mutate({ name: createName })}
                   disabled={!createName.trim() || createMutation.isPending}
                   className="px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
-                  style={{ backgroundColor: "#e62020" }}
+                  style={{ backgroundColor: "#ef3735" }}
                 >
                   {createMutation.isPending ? "..." : "Create"}
                 </button>
@@ -149,7 +149,7 @@ function WorkspaceNameSection({
             onClick={() => updateMutation.mutate({ workspaceId: workspace.id, name })}
             disabled={updateMutation.isPending || name === workspace.name || !name.trim()}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#e62020" }}
+            style={{ backgroundColor: "#ef3735" }}
           >
             <Save className="w-3.5 h-3.5" />
             {updateMutation.isPending ? "Saving..." : "Save"}
@@ -343,7 +343,7 @@ function InvitesSection({
               })}
               disabled={!email || inviteMutation.isPending}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 transition-opacity hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "#e62020" }}
+              style={{ backgroundColor: "#ef3735" }}
             >
               <MailPlus className="w-3.5 h-3.5" />
               {inviteMutation.isPending ? "Generating..." : "Send Invite"}
@@ -454,7 +454,7 @@ function DangerSection({
           <button
             onClick={() => deleteMutation.mutate({ workspaceId: workspace.id })}
             disabled={confirm !== workspace.name || deleteMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white bg-[#E62020]/14 hover:bg-[#E62020]/14 disabled:opacity-40 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white bg-[#ef3735]/14 hover:bg-[#ef3735]/14 disabled:opacity-40 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
             {deleteMutation.isPending ? "Deleting..." : "Delete Workspace"}

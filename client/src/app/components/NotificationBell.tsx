@@ -301,7 +301,7 @@ export function NotificationBell() {
         <Bell className={`w-[18px] h-[18px] transition-transform ${newBadge ? "scale-125" : ""}`} />
         {unreadCount > 0 && (
           <span
-            className={`absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#E62020]/14 text-white text-[10px] font-bold flex items-center justify-center leading-none transition-transform ${newBadge ? "scale-125" : ""}`}
+            className={`absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#ef3735]/14 text-white text-[10px] font-bold flex items-center justify-center leading-none transition-transform ${newBadge ? "scale-125" : ""}`}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
@@ -320,7 +320,7 @@ export function NotificationBell() {
               <Bell className="w-4 h-4 text-foreground/60" />
               <span className="text-sm font-semibold">Notifications</span>
               {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-[#E62020]/14 text-white text-xs font-bold">
+                <span className="px-1.5 py-0.5 rounded-full bg-[#ef3735]/14 text-white text-xs font-bold">
                   {unreadCount}
                 </span>
               )}

@@ -81,7 +81,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
       <DialogContent className="max-w-md" style={{ background: "#212121", border: "1px solid #383838" }}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-white">
-            <Pencil className="w-4 h-4" style={{ color: "#e62020" }} />
+            <Pencil className="w-4 h-4" style={{ color: "#ef3735" }} />
             Edit Campaign
           </DialogTitle>
           <p className="text-xs mt-1" style={{ color: "#737373" }}>
@@ -163,7 +163,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
             onClick={handleSave}
             disabled={editMutation.isPending}
             className="text-xs h-7"
-            style={{ background: "#e62020", color: "#fff", border: "none" }}
+            style={{ background: "#ef3735", color: "#fff", border: "none" }}
           >
             {editMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save Changes"}
           </Button>

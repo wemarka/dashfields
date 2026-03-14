@@ -62,7 +62,7 @@ export function DashboardTab() {
         {[
           { label: "Total Analyzed", value: stats.total, icon: Brain, color: "text-brand", bg: "bg-brand/10" },
           { label: "Positive Rate", value: `${stats.total > 0 ? Math.round((stats.positive / stats.total) * 100) : 0}%`, icon: TrendingUp, color: "text-foreground", bg: "bg-muted" },
-          { label: "Negative Rate", value: `${stats.total > 0 ? Math.round((stats.negative / stats.total) * 100) : 0}%`, icon: TrendingDown, color: "text-[#f87171]", bg: "bg-[#E62020]/14" },
+          { label: "Negative Rate", value: `${stats.total > 0 ? Math.round((stats.negative / stats.total) * 100) : 0}%`, icon: TrendingDown, color: "text-[#f87171]", bg: "bg-[#ef3735]/14" },
           { label: "Avg Score", value: `${Math.round(((stats.avgScore + 1) / 2) * 100)}`, icon: Minus, color: cfg.color, bg: cfg.bg.split(" ")[0] },
         ].map((kpi) => (
           <div key={kpi.label} className="glass rounded-2xl p-4">
@@ -159,7 +159,7 @@ export function DashboardTab() {
                 <span key={i} style={{ fontSize: `${size}px` }}
                   className={`px-2.5 py-1 rounded-full border font-medium capitalize cursor-default transition-transform hover:scale-105 ${
                     kw.impact === "positive" ? "bg-muted border-border text-foreground dark:text-foreground" :
-                    kw.impact === "negative" ? "bg-[#E62020]/14 border-red-500/30 text-[#f87171] dark:text-[#f87171]" :
+                    kw.impact === "negative" ? "bg-[#ef3735]/14 border-red-500/30 text-[#f87171] dark:text-[#f87171]" :
                     "bg-muted border-border text-muted-foreground"
                   }`} title={`${kw.count} occurrences`}>
                   {kw.word}

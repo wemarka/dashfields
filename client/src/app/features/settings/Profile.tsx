@@ -118,7 +118,7 @@ export default function Profile() {
           <div className="relative group shrink-0">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #e62020, #c41a1a)" }}
+              style={{ background: "linear-gradient(135deg, #ef3735, #c41a1a)" }}
             >
               {currentAvatarUrl ? (
                 <img src={currentAvatarUrl} alt="avatar" className="w-full h-full object-cover" />
@@ -136,7 +136,7 @@ export default function Profile() {
             </button>
             <div
               className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#e62020", border: "2px solid #433F3A" }}
+              style={{ backgroundColor: "#ef3735", border: "2px solid #433F3A" }}
             >
               <span className="text-white text-[10px] font-bold leading-none">+</span>
             </div>

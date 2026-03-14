@@ -20,7 +20,7 @@ const SORT_OPTIONS = [
 
 // Brand palette chart colors
 const CHART_COLORS = [
-  "#e62020", "#c41a1a", "#ffffff", "#C8C8C8",
+  "#ef3735", "#c41a1a", "#ffffff", "#C8C8C8",
   "#737373", "#525252", "#f87171", "#404040",
 ];
 
@@ -33,7 +33,7 @@ function TrendBadge({ trend }: { trend: "up" | "down" | "stable" }) {
     );
   if (trend === "down")
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#f87171] bg-red-50 dark:bg-[#E62020]/14 dark:text-[#f87171] px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#f87171] bg-red-50 dark:bg-[#ef3735]/14 dark:text-[#f87171] px-1.5 py-0.5 rounded-full">
         <TrendingDown className="w-2.5 h-2.5" /> Down
       </span>
     );
@@ -153,7 +153,7 @@ export default function HashtagAnalytics() {
             <button
               onClick={() => aiTopic.trim() && generateHashtags.mutate({ topic: aiTopic.trim(), platform: platform === "all" ? "instagram" : platform, count: 20 })}
               disabled={generateHashtags.isPending || !aiTopic.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-[#E62020]/14 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-[#ef3735]/14 transition-colors disabled:opacity-50"
             >
               {generateHashtags.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Generate
@@ -302,7 +302,7 @@ export default function HashtagAnalytics() {
                       data={[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#C8C8C8" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#e62020" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -314,7 +314,7 @@ export default function HashtagAnalytics() {
                       {[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#C8C8C8" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#e62020" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
                       ].map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
                       ))}
@@ -358,7 +358,7 @@ export default function HashtagAnalytics() {
                         <Tooltip
                           contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
                         />
-                        <Bar dataKey="engagement" fill="#E62020" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="engagement" fill="#ef3735" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

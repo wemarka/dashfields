@@ -21,12 +21,12 @@
    * DESIGN TOKEN SYSTEM — Stone Palette (extracted from reference image)
    *
    * SINGLE SOURCE OF TRUTH: edit ONLY these 3 lines to retheme the entire app:
-   *   --color-background  = stone-700 #433F3A (bg-base — darkest surface)
-   *   --color-card        = stone-600 #56524C (bg-surface — cards, sidebar)
-   *   --color-popover     = stone-500 #76706C (bg-elevated — modals, dropdowns)
+ *   --color-background  = #171717 (bg-base — darkest surface)
+ *   --color-card        = #262626 (bg-surface — cards, sidebar)
+ *   --color-popover     = #1e1e1e (bg-elevated — modals, dropdowns)
    *
    * All other tokens are derived from these three values.
-   * Brand: #E62020 red — CTA buttons only.
+   * Brand: #ef3735 red — CTA buttons only.
    * Charts: monochromatic white→stone scale + brand-red accent.
    * ═══════════════════════════════════════════════════════════════════════ */
 
@@ -34,16 +34,16 @@
    * BACKGROUND HIERARCHY — Stone palette (warm gray with slight brown undertone)
    * Extracted via pixel sampling: stone-700=#433F3A, stone-600=#56524C, stone-500=#76706C
    * ─────────────────────────────────────────────────────────────────────── */
-  --color-background:           oklch(0.370 0.010 73.6);  /* stone-700 #433F3A — bg-base, page bg */
+  --color-background:           oklch(0.130 0.000 0);     /* #171717 — bg-base, page bg */
   --color-foreground:           oklch(1.000 0.000 0);      /* #FFFFFF — text-primary */
 
-  --color-card:                 oklch(0.440 0.011 78.2);  /* stone-600 #56524C — cards, sidebar */
+  --color-card:                 oklch(0.185 0.000 0);     /* #262626 — cards, sidebar */
   --color-card-foreground:      oklch(1.000 0.000 0);
-  --color-popover:              oklch(0.549 0.010 56.1);  /* stone-500 #76706C — modals, dropdowns */
+  --color-popover:              oklch(0.155 0.000 0);     /* #1e1e1e — modals, dropdowns */
   --color-popover-foreground:   oklch(1.000 0.000 0);
 
   /* ── Brand / CTA — applied ONLY to primary action buttons */
-  --color-primary:              oklch(0.592 0.227 28);     /* brand-primary #E62020 */
+  --color-primary:              oklch(0.601 0.231 27.3);  /* brand-primary #ef3735 */
   --color-primary-foreground:   oklch(1.000 0.000 0);      /* pure white text inside CTAs */
 
   /* ── Secondary / Muted surfaces — derived from stone-600 */
@@ -79,17 +79,17 @@
    *   chart-2: #C8C8C8  warm light gray   — secondary series
    *   chart-3: stone-500 #76706C          — tertiary series
    *   chart-4: stone-600 #56524C          — comparison/background bars
-   *   chart-5: #E62020  brand red         — highlight/accent series
+   *   chart-5: #ef3735  brand red         — highlight/accent series
    */
   --color-chart-1: oklch(1.000 0.000 0);    /* #FFFFFF — primary */
   --color-chart-2: oklch(0.810 0.000 0);    /* #C8C8C8 — secondary */
   --color-chart-3: oklch(0.549 0.010 56.1); /* stone-500 — tertiary */
   --color-chart-4: oklch(0.440 0.011 78.2); /* stone-600 — background bars */
-  --color-chart-5: oklch(0.592 0.227 28);   /* #E62020 — brand accent */
+  --color-chart-5: oklch(0.601 0.231 27.3); /* #ef3735 — brand accent */
 
   /* ── Brand tokens */
-  --color-brand:            oklch(0.592 0.227 28);   /* #E62020 */
-  --color-brand-hover:      oklch(0.540 0.227 28);   /* #CC1B1B — hover state */
+  --color-brand:            oklch(0.601 0.231 27.3); /* #ef3735 */
+  --color-brand-hover:      oklch(0.550 0.231 27.3); /* #d42e2c — hover state */
   --color-brand-foreground: oklch(1.000 0.000 0);
   --color-brand-subtle:     oklch(0.592 0.227 28 / 0.12);
 
@@ -297,7 +297,7 @@
   /* ── BUTTONS ──────────────────────────────────────────────────────────── */
   /* CTA: brand-red — use ONLY for the primary call-to-action */
   .btn-cta {
-    background-color: #E62020;
+    background-color: #ef3735;
     color: #ffffff;
     border: none;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
@@ -323,7 +323,7 @@
   }
   .btn-ghost:hover:not(:disabled) { background-color: #56524C; color: #ffffff; }
   /* Legacy alias */
-  .btn-brand { background-color: #E62020; color: white; transition: background-color 0.2s ease; }
+  .btn-brand { background-color: #ef3735; color: white; transition: background-color 0.2s ease; }
   .btn-brand:hover { background-color: #cc1c1c; }
 
   /* ── BADGES ───────────────────────────────────────────────────────────── */
@@ -340,7 +340,7 @@
     padding: 2px 8px; border-radius: 9999px;
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     white-space: nowrap; line-height: 1.6;
-    background: linear-gradient(135deg, #E62020 0%, #ff5533 100%);
+    background: linear-gradient(135deg, #ef3735 0%, #ff5533 100%);
     color: #ffffff;
     box-shadow: 0 1px 8px rgba(230,32,32,0.30);
   }
@@ -393,7 +393,7 @@
   .status-dot-active  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
   .status-dot-paused  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #f59e0b; }
   .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #76706C; }  /* stone-500 */
-  .status-dot-hot     { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #E62020; animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
+  .status-dot-hot     { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #ef3735; animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
 
   /* ── SCORE / METRIC INDICATORS ────────────────────────────────────────── */
   .score-good {
@@ -442,7 +442,7 @@
   .icon-default  { color: #C8C8C8; }  /* text-secondary */
   .icon-muted    { color: #666666; }   /* chart-3 */
   .icon-active   { color: #4ade80; }
-  .icon-brand    { color: #E62020; }
+  .icon-brand    { color: #ef3735; }
   .icon-warning  { color: #fbbf24; }
 
   /* ── CHART COLORS (CSS vars for Recharts / Chart.js) ─────────────────── */
@@ -456,5 +456,5 @@
   --color-chart-2: #C8C8C8;   /* warm light    — secondary series */
   --color-chart-3: #76706C;   /* stone-500     — tertiary series */
   --color-chart-4: #56524C;   /* stone-600     — background/comparison */
-  --color-chart-5: #E62020;   /* brand-red     — highlight/accent */
+  --color-chart-5: #ef3735;   /* brand-red     — highlight/accent */
 }

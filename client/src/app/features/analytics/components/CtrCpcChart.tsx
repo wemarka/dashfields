@@ -6,7 +6,7 @@ import {
 } from "recharts";
 
 // Design Token chart palette — matches --color-chart-1…5 in index.css
-const CHART_COLORS = ["#ffffff", "#C8C8C8", "#787878", "#484848", "#E62020"];
+const CHART_COLORS = ["#ffffff", "#C8C8C8", "#787878", "#484848", "#ef3735"];
 
 const TOOLTIP_STYLE = {
   background: "#56524C",

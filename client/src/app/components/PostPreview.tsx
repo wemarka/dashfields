@@ -192,7 +192,7 @@ function FacebookPreview({ content, mediaUrl, mediaType, accountName, accountAva
         <div className="flex items-center gap-1">
           <div className="flex -space-x-1">
             <span className="w-4.5 h-4.5 rounded-full bg-neutral-700 flex items-center justify-center text-[9px]">👍</span>
-            <span className="w-4.5 h-4.5 rounded-full bg-[#E62020]/14 flex items-center justify-center text-[9px]">❤️</span>
+            <span className="w-4.5 h-4.5 rounded-full bg-[#ef3735]/14 flex items-center justify-center text-[9px]">❤️</span>
           </div>
           <span className="text-xs text-neutral-400 dark:text-[#b0b3b8] ml-1">1.2K</span>
         </div>

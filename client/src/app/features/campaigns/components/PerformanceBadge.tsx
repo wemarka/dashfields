@@ -70,7 +70,7 @@ export function PerformanceBadge({
         "inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
         isGood
           ? "bg-[#22c55e]/14 text-[#4ade80]"
-          : "bg-[#E62020]/14 text-[#f87171]",
+          : "bg-[#ef3735]/14 text-[#f87171]",
         className
       )}
       title={

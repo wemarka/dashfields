@@ -3473,3 +3473,8 @@
 - [x] Extract stone-500, stone-600, stone-700 hex from image → #76706C / #56524C / #433F3A
 - [x] Rebuild CSS variables: bg-base=stone-700, bg-surface=stone-600, bg-elevated=stone-500
 - [x] Apply globally — replace all hardcoded bg colors with CSS vars
+
+## 🔄 Color System Final Unification
+- [x] Update --color-background to #171717 and --color-card to #262626 in index.css
+- [x] Unify --color-brand / --color-primary to #ef3735 across index.css (all TSX files updated)
+- [x] Update Login page background to #171717 (left panel #1e1e1e)

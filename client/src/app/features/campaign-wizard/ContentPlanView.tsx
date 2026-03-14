@@ -45,7 +45,7 @@ export function ContentPlanView({
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="w-4 h-4 text-[#f87171]" />
           <h3 className="font-semibold text-white text-sm">توزيع الميزانية</h3>
-          <Badge className="bg-[#E62020]/14 text-[#f87171] border-0 text-xs mr-auto">
+          <Badge className="bg-[#ef3735]/14 text-[#f87171] border-0 text-xs mr-auto">
             {totalBudget.toLocaleString()} {currency}
           </Badge>
         </div>

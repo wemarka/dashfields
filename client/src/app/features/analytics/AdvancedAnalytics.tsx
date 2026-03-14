@@ -307,7 +307,7 @@ export default function AdvancedAnalytics() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Total Spend",     value: fmtMoney(funnel?.totalSpend ?? 0), icon: DollarSign, color: "text-brand",    bg: "bg-brand/10" },
-                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-[#f87171]",     bg: "bg-[#E62020]/14" },
+                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-[#f87171]",     bg: "bg-[#ef3735]/14" },
                   { label: "Conv. Rate",      value: (funnel?.conversionRate ?? 0) + "%", icon: Target,   color: "text-foreground", bg: "bg-muted" },
                   { label: "Funnel Stages",   value: String(funnel?.stages?.length ?? 0), icon: Layers,   color: "text-muted-foreground",  bg: "bg-muted/60" },
                 ].map(({ label, value, icon: Icon, color, bg }) => (
@@ -372,8 +372,8 @@ export default function AdvancedAnalytics() {
                         contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "10px", color: "#ffffff", fontSize: "12px" }}
                       />
                       <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="Last Click"  fill="#E62020" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="First Click" fill="#E62020" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Last Click"  fill="#ef3735" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="First Click" fill="#ef3735" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Linear"      fill="#B3B3B3" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Time Decay"  fill="#666666" radius={[4, 4, 0, 0]} />
                     </BarChart>
@@ -388,7 +388,7 @@ export default function AdvancedAnalytics() {
                       <PolarGrid stroke="var(--border)" />
                       <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                       <PolarRadiusAxis tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
-                      <Radar name="Avg Value" dataKey="value" stroke="#E62020" fill="#E62020" fillOpacity={0.3} />
+                      <Radar name="Avg Value" dataKey="value" stroke="#ef3735" fill="#ef3735" fillOpacity={0.3} />
                       <Tooltip
                         formatter={(value: number) => fmtMoney(value)}
                         contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "10px", color: "#ffffff", fontSize: "12px" }}

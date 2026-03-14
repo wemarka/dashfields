@@ -14,7 +14,7 @@ const P = {
   muted:  "#C8C8C8",
   subtle: "#737373",
   dim:    "#404040",
-  brand:  "#e62020",
+  brand:  "#ef3735",
   green:  "#22c55e",
 };
 

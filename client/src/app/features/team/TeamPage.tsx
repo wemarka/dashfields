@@ -174,7 +174,7 @@ export default function TeamPage() {
                       <p className="text-xs text-muted-foreground">{isExpired ? <span className="text-[#f87171]">Expired</span> : expiresAt ? `Expires ${expiresAt.toLocaleDateString()}` : "Pending"}</p>
                     </div>
                     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${roleCfg.bg} ${roleCfg.border} ${roleCfg.color}`}><RoleIcon className="w-3 h-3" /> {roleCfg.label}</div>
-                    <button onClick={() => revokeMutation.mutate({ invitationId: inv.id, workspaceId: activeWorkspace.id })} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-[#E62020]/14 text-muted-foreground hover:text-[#f87171] transition-all" title="Revoke invitation">
+                    <button onClick={() => revokeMutation.mutate({ invitationId: inv.id, workspaceId: activeWorkspace.id })} className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-[#ef3735]/14 text-muted-foreground hover:text-[#f87171] transition-all" title="Revoke invitation">
                       <XCircle className="w-4 h-4" />
                     </button>
                   </div>

@@ -88,7 +88,7 @@ export function HistoryTab() {
                       <td className="px-4 py-3"><span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString()}</span></td>
                       <td className="px-4 py-3">
                         <button onClick={() => deleteMutation.mutate({ id: item.id })}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-[#E62020]/14 transition-all">
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-[#ef3735]/14 transition-all">
                           <Trash2 className="w-3.5 h-3.5 text-[#f87171]" />
                         </button>
                       </td>

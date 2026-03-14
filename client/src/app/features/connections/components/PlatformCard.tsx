@@ -28,7 +28,7 @@ function TokenExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
 
   if (daysLeft <= 0) {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E62020]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50 flex items-center gap-1">
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50 flex items-center gap-1">
         <AlertTriangle className="w-2.5 h-2.5" />
         Expired
       </span>
@@ -166,7 +166,7 @@ export function PlatformCard({
             <h3 className="text-sm font-semibold text-foreground">{platform.name}</h3>
             {isConnected ? (
               hasExpired ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E62020]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ef3735]/14 text-[#f87171] dark:text-[#f87171] font-semibold border border-red-200/50 dark:border-red-800/50">
                   Token Expired
                 </span>
               ) : (
@@ -283,7 +283,7 @@ export function PlatformCard({
                     <button
                       onClick={() => onDisconnect(acc.id)}
                       disabled={isDisconnecting}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-red-50 dark:hover:bg-[#E62020]/14 transition-colors"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-red-50 dark:hover:bg-[#ef3735]/14 transition-colors"
                       title="Disconnect"
                     >
                       <Unlink className="w-3.5 h-3.5" />

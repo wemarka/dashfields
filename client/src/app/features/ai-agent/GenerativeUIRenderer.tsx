@@ -187,7 +187,7 @@ function SimpleBarChart({ block, isRtl }: { block: BarChartBlock; isRtl?: boolea
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${(block.values[i] / max) * 100}%`,
-                  background: block.color || "linear-gradient(90deg, #E62020, #ff4444)",
+                  background: block.color || "linear-gradient(90deg, #ef3735, #ff4444)",
                 }}
               />
             </div>

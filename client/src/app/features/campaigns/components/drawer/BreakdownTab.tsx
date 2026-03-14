@@ -9,7 +9,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 // ─── Donut Colors ────────────────────────────────────────────────────────────
 const DONUT_COLORS = [
-  "#e62020", // brand-red
+  "#ef3735", // brand-red
   "#C8C8C8", // neutral-400
   "#c41a1a", // brand-red dark
   "#737373", // neutral-500
@@ -161,7 +161,7 @@ function BreakdownSection({
           className="w-7 h-7 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: "rgba(230,32,32,0.12)" }}
         >
-          <Icon className="w-3.5 h-3.5" style={{ color: "#e62020" }} />
+          <Icon className="w-3.5 h-3.5" style={{ color: "#ef3735" }} />
         </div>
         <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>
           {label}

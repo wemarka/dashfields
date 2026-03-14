@@ -448,7 +448,7 @@ export default function PostComposerModal({ open, onClose, onCreated }: Props) {
               <button
                 onClick={handleGenerateCaption}
                 disabled={generateCaption.isPending}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-[#E62020]/14 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-[#ef3735]/14 transition-colors disabled:opacity-50"
               >
                 {generateCaption.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {generateCaption.isPending ? "Generating..." : "Generate Caption"}

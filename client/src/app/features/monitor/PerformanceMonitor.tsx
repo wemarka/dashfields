@@ -340,7 +340,7 @@ export function PerformanceMonitor() {
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="impressions" stroke="#E62020" fill="url(#impGrad)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="impressions" stroke="#ef3735" fill="url(#impGrad)" strokeWidth={2} dot={false} />
                   <Area type="monotone" dataKey="clicks" stroke="#B3B3B3" fill="url(#clkGrad)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -371,7 +371,7 @@ export function PerformanceMonitor() {
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip content={<ChartTooltip />} />
                   <Line yAxisId="left" type="monotone" dataKey="spend" stroke="#737373" strokeWidth={2} dot={false} />
-                  <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#E62020" strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="ctr" stroke="#ef3735" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -436,7 +436,7 @@ export function PerformanceMonitor() {
               <Bell className="w-4 h-4 text-brand" />
               Active Alert Rules
               {alertsQuery.data && alertsQuery.data.length > 0 && (
-                <Badge className="ml-auto bg-[#E62020]/14 text-brand dark:bg-brand/10 dark:text-brand text-xs">
+                <Badge className="ml-auto bg-[#ef3735]/14 text-brand dark:bg-brand/10 dark:text-brand text-xs">
                   {alertsQuery.data.length}
                 </Badge>
               )}

@@ -9,7 +9,7 @@
  *   │  - Session list   │  - Pinned input bar at bottom    │
  *   └──────────────────────────────────────────────────────┘
  *
- * Design: Dark Neutral (neutral-950) + Brand Red (#E62020)
+ * Design: Dark Neutral (neutral-950) + Brand Red (#ef3735)
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -943,7 +943,7 @@ function ChatInput({
               <button onClick={() => onRemoveAttachment(att.id)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-neutral-800 border border-neutral-600 flex items-center justify-center opacity-0 group-hover/att:opacity-100 hover:bg-brand-red hover:border-brand-red transition-all">
                 <X className="w-3 h-3 text-white" />
               </button>
-              {att.status === "error" && <div className="absolute inset-0 rounded-lg bg-[#E62020]/14 border border-red-500/30 flex items-center justify-center"><span className="text-[10px] text-[#f87171] font-medium">Failed</span></div>}
+              {att.status === "error" && <div className="absolute inset-0 rounded-lg bg-[#ef3735]/14 border border-red-500/30 flex items-center justify-center"><span className="text-[10px] text-[#f87171] font-medium">Failed</span></div>}
             </div>
           ))}
         </div>

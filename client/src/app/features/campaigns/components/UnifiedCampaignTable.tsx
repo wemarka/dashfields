@@ -174,13 +174,13 @@ function UnifiedCampaignTableInner({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               {isPinned && (
-                <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#e62020" }} />
+                <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#ef3735" }} />
               )}
               <p
                 className="truncate leading-tight"
                 style={{ fontSize: 13, fontWeight: 500, color: "#ffffff", cursor: onOpenDrawer ? "pointer" : "default" }}
                 onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
-                onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#e62020"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
+                onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ef3735"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
                 onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ffffff"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
               >
                 {c.name}
@@ -210,9 +210,9 @@ function UnifiedCampaignTableInner({
                         <button
                           onClick={(e) => { e.stopPropagation(); onPin(c); }}
                           className="flex items-center justify-center w-5 h-5 rounded transition-colors"
-                          style={{ color: isPinned ? "#e62020" : "#737373", backgroundColor: "transparent" }}
+                          style={{ color: isPinned ? "#ef3735" : "#737373", backgroundColor: "transparent" }}
                           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#ff4444" : "#ffffff"; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#e62020" : "#737373"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#ef3735" : "#737373"; }}
                         >
                           {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
                         </button>
@@ -241,7 +241,7 @@ function UnifiedCampaignTableInner({
                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}>
                     {isToggling ? <Loader2 className="w-3 h-3 animate-spin" /> :
                       isActive ? <Pause className="w-3 h-3" style={{ color: "#C8C8C8" }} /> :
-                        <Play className="w-3 h-3" style={{ color: "#e62020" }} />}
+                        <Play className="w-3 h-3" style={{ color: "#ef3735" }} />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">{isActive ? "Pause campaign" : "Activate campaign"}</TooltipContent>
@@ -354,8 +354,8 @@ function UnifiedCampaignTableInner({
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#525252" }}>—</span>;
         const s = c.score;
-        const arcColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#e62020";
-        const textColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#e62020";
+        const arcColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#ef3735";
+        const textColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#ef3735";
         // SVG circle arc: r=14, circumference=2πr≈87.96, dasharray = (s/100)*87.96
         const r = 14;
         const circ = 2 * Math.PI * r;
@@ -616,7 +616,7 @@ function UnifiedCampaignTableInner({
                   onClick={() => setPage(pageNum)}
                   className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
                   style={{
-                    backgroundColor: page === pageNum ? "#e62020" : "#6b6660",
+                    backgroundColor: page === pageNum ? "#ef3735" : "#6b6660",
                     color: page === pageNum ? "#ffffff" : "#C8C8C8",
                     fontSize: 12,
                     fontWeight: page === pageNum ? 600 : 400,

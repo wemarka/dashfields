@@ -347,7 +347,7 @@ export function AdAccountSelector({
                       ? <Wifi style={{ width: 12, height: 12, color: "#22c55e" }} />
                       : <WifiOff style={{ width: 12, height: 12, color: "#737373" }} />
                     }
-                    {selected && <Check style={{ width: 13, height: 13, color: "#e62020" }} />}
+                    {selected && <Check style={{ width: 13, height: 13, color: "#ef3735" }} />}
                   </div>
                 </button>
               );
@@ -402,7 +402,7 @@ export function AdAccountSelector({
                           ? <Wifi style={{ width: 12, height: 12, color: "#22c55e" }} />
                           : <WifiOff style={{ width: 12, height: 12, color: "#737373" }} />
                         }
-                        {selected && <Check style={{ width: 13, height: 13, color: "#e62020" }} />}
+                        {selected && <Check style={{ width: 13, height: 13, color: "#ef3735" }} />}
                       </div>
                     </button>
                   );

@@ -78,7 +78,7 @@ export function ApiKeysSection() {
               onClick={() => upsertMutation.mutate({ platform, keyName, apiKey })}
               disabled={upsertMutation.isPending || !apiKey.trim()}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
-              style={{ backgroundColor: "#e62020", color: "#fff" }}
+              style={{ backgroundColor: "#ef3735", color: "#fff" }}
             >
               <Save className="w-3.5 h-3.5" /> {upsertMutation.isPending ? "Saving..." : "Save Key"}
             </button>
@@ -120,7 +120,7 @@ export function ApiKeysSection() {
                   className="text-[11px] px-2 py-1 rounded-lg transition-colors"
                   style={{
                     backgroundColor: k.is_active ? "rgba(230,32,32,0.12)" : "rgba(255,255,255,0.06)",
-                    color: k.is_active ? "#e62020" : "rgba(255,255,255,0.35)",
+                    color: k.is_active ? "#ef3735" : "rgba(255,255,255,0.35)",
                   }}
                 >
                   {k.is_active ? "Active" : "Inactive"}

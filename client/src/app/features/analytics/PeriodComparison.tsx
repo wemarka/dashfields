@@ -78,7 +78,7 @@ function ComparisonKpiCard({ kpi }: {
             +{Math.abs(kpi.delta)}%
           </div>
         ) : (
-          <div className="flex items-center gap-1 text-xs text-[#f87171] bg-[#E62020]/14 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1 text-xs text-[#f87171] bg-[#ef3735]/14 px-2 py-1 rounded-full">
             <TrendingDown className="w-3 h-3" />
             -{Math.abs(kpi.delta)}%
           </div>
@@ -236,7 +236,7 @@ export default function PeriodComparison() {
                 <Legend
                   formatter={(value) => value === "current" ? "Current Period" : "Previous Period"}
                 />
-                <Line type="monotone" dataKey="current"  stroke="#E62020" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="current"  stroke="#ef3735" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="previous" stroke="#666666" strokeWidth={2} dot={false} strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>

@@ -635,7 +635,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowSignOutConfirm(true)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-[#f87171]/60 hover:text-[#f87171] hover:bg-[#E62020]/14 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-[#f87171]/60 hover:text-[#f87171] hover:bg-[#ef3735]/14 transition-colors"
                 >
                   <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -786,7 +786,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setShowSignOutConfirm(false)} />
           <div className="relative bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-xs mx-4 p-6 flex flex-col items-center gap-4">
             {/* Icon */}
-            <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-[#E62020]/14 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-[#ef3735]/14 flex items-center justify-center">
               <svg className="w-6 h-6 text-[#f87171]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
@@ -808,7 +808,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
               <button
                 onClick={() => { setShowSignOutConfirm(false); signOut(); }}
-                className="flex-1 py-2 rounded-xl bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-sm font-medium transition-colors"
+                className="flex-1 py-2 rounded-xl bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white text-sm font-medium transition-colors"
               >
                 Sign Out
               </button>

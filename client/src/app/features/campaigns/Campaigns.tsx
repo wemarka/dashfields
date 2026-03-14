@@ -597,9 +597,9 @@ export default function Campaigns() {
             <button
               onClick={() => setShowBuilder(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-              style={{ backgroundColor: "#e62020", color: "#ffffff" }}
+              style={{ backgroundColor: "#ef3735", color: "#ffffff" }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#c41a1a"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e62020"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#ef3735"; }}
             >
               <Plus className="w-3.5 h-3.5" />
               {t("campaigns.newCampaign")}
@@ -614,7 +614,7 @@ export default function Campaigns() {
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: "rgba(230,32,32,.08)" }}>
-                <Link2 className="w-4 h-4" style={{ color: "#e62020" }} />
+                <Link2 className="w-4 h-4" style={{ color: "#ef3735" }} />
               </div>
               <div>
                 <p className="text-[13px] font-semibold" style={{ color: "#ffffff" }}>Connect your ad platforms</p>
@@ -626,7 +626,7 @@ export default function Campaigns() {
             <Link href="/connections">
               <button
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-colors"
-                style={{ backgroundColor: "#e62020", color: "#ffffff" }}
+                style={{ backgroundColor: "#ef3735", color: "#ffffff" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#c41a1a"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#56524C"; }}
               >
@@ -756,7 +756,7 @@ export default function Campaigns() {
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] transition-colors"
                 style={{
                   backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#6b6660",
-                  color: datePreset !== "last_30d" ? "#e62020" : "#C8C8C8",
+                  color: datePreset !== "last_30d" ? "#ef3735" : "#C8C8C8",
                   border: "none",
                 }}
               >
@@ -782,7 +782,7 @@ export default function Campaigns() {
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                       style={{
                         backgroundColor: datePreset === d.value ? "rgba(230,32,32,.08)" : "transparent",
-                        color: datePreset === d.value ? "#e62020" : "#C8C8C8",
+                        color: datePreset === d.value ? "#ef3735" : "#C8C8C8",
                         fontWeight: datePreset === d.value ? 500 : 400,
                       }}
                     >
@@ -795,7 +795,7 @@ export default function Campaigns() {
                     className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                     style={{
                       backgroundColor: datePreset === "custom" ? "rgba(230,32,32,.08)" : "transparent",
-                      color: datePreset === "custom" ? "#e62020" : "#C8C8C8",
+                      color: datePreset === "custom" ? "#ef3735" : "#C8C8C8",
                     }}
                   >
                     Custom Range

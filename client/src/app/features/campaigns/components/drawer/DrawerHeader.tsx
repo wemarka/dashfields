@@ -292,7 +292,7 @@ export function DrawerHeader({
                   fontSize: 11,
                   fontWeight: active ? 600 : 400,
                   color: active ? "#ffffff" : "#737373",
-                  background: active ? "#e62020" : "transparent",
+                  background: active ? "#ef3735" : "transparent",
                   boxShadow: active ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
                   border: "none",
                   cursor: "pointer",

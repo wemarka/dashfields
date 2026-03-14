@@ -50,7 +50,7 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 60 ? "#C8C8C8" : score >= 40 ? "#737373" : "#e62020";
+  const color = score >= 60 ? "#C8C8C8" : score >= 40 ? "#737373" : "#ef3735";
   const label = score >= 60 ? "Outperforming" : score >= 40 ? "On par" : "Underperforming";
 
   return (
@@ -301,7 +301,7 @@ export default function Competitors() {
                 {/* Competitive Score */}
                 <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #6b6660 ${swotData.competitiveScore}%)` }}>
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#ef3735'} ${swotData.competitiveScore}%, #6b6660 ${swotData.competitiveScore}%)` }}>
                     <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
                       <span className="text-xs font-bold">{swotData.competitiveScore}</span>
                     </div>
@@ -359,7 +359,7 @@ export default function Competitors() {
             {[
               { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-muted-foreground bg-muted" },
               { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-foreground bg-muted" },
-              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-[#f87171] bg-[#E62020]/14" },
+              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-[#f87171] bg-[#ef3735]/14" },
               { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-brand bg-brand/10" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
@@ -425,7 +425,7 @@ export default function Competitors() {
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
                     <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                     <Legend />
-                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#E62020" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="yourCtr"  name="Your CTR"       fill="#ef3735" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="benchCtr" name="Industry Avg"   fill="#3D3D3D" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -450,7 +450,7 @@ export default function Competitors() {
                         <PolarGrid stroke="var(--border)" />
                         <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis angle={90} domain={[0, 200]} tick={{ fontSize: 9 }} />
-                        <Radar name="Your Performance" dataKey="yours"     fill="#E62020" fillOpacity={0.3} stroke="#E62020" />
+                        <Radar name="Your Performance" dataKey="yours"     fill="#ef3735" fillOpacity={0.3} stroke="#ef3735" />
                         <Radar name="Industry Avg"     dataKey="benchmark" fill="#3D3D3D" fillOpacity={0.2} stroke="#666666" strokeDasharray="4 4" />
                         <Legend />
                       </RadarChart>
@@ -478,7 +478,7 @@ export default function Competitors() {
                         <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                         <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                         <Legend />
-                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#E62020" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#ef3735" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#666666" strokeWidth={2} strokeDasharray="4 4" dot={false} />
                       </LineChart>
                     </ResponsiveContainer>

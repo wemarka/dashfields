@@ -129,7 +129,7 @@ export function CreativeGrid({
           {[0, 1, 2, 3].map(i => (
             <div
               key={i}
-              className="w-2.5 h-2.5 rounded-full bg-[#E62020]/14"
+              className="w-2.5 h-2.5 rounded-full bg-[#ef3735]/14"
               style={{ animation: "bounce 1.2s ease-in-out infinite", animationDelay: `${i * 0.2}s` }}
             />
           ))}

@@ -191,7 +191,7 @@ export default function DashStudiosPage() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteMutation.mutate({ id: item.id }); }}
-                            className="p-1.5 rounded-md bg-[#E62020]/14 hover:bg-[#E62020]/14 transition-colors ml-auto"
+                            className="p-1.5 rounded-md bg-[#ef3735]/14 hover:bg-[#ef3735]/14 transition-colors ml-auto"
                           >
                             <Trash2 className="w-3.5 h-3.5 text-[#f87171]" />
                           </button>
@@ -301,7 +301,7 @@ export default function DashStudiosPage() {
               <Button
                 onClick={handleGenerate}
                 disabled={generateMutation.isPending || !prompt.trim()}
-                className="w-full h-11 bg-brand hover:bg-[#E62020]/14 text-white font-medium rounded-xl transition-colors"
+                className="w-full h-11 bg-brand hover:bg-[#ef3735]/14 text-white font-medium rounded-xl transition-colors"
               >
                 {generateMutation.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generating...</>

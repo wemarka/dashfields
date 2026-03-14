@@ -402,7 +402,7 @@ export default function Alerts() {
                   <button
                     onClick={() => deleteRule.mutate({ id: rule.id })}
                     disabled={deleteRule.isPending}
-                    className="ml-4 p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-[#E62020]/14 transition-colors"
+                    className="ml-4 p-1.5 rounded-lg text-muted-foreground hover:text-[#f87171] hover:bg-[#ef3735]/14 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

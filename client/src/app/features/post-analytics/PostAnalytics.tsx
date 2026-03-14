@@ -198,7 +198,7 @@ export default function PostAnalytics() {
     { label: "Total Engagement", value: summary?.totalEngagement ?? 0,   icon: TrendingUp, color: "text-muted-foreground bg-muted",   format: "number" },
     { label: "Avg Engagement",   value: summary?.avgEngagementPerPost ?? 0, icon: Heart,  color: "text-brand bg-brand/10",    format: "number" },
     { label: "Total Reach",      value: summary?.totalReach ?? 0,        icon: Users,     color: "text-foreground bg-muted", format: "number" },
-    { label: "Total Likes",      value: summary?.totalLikes ?? 0,        icon: Heart,     color: "text-[#f87171] bg-[#E62020]/14",      format: "number" },
+    { label: "Total Likes",      value: summary?.totalLikes ?? 0,        icon: Heart,     color: "text-[#f87171] bg-[#ef3735]/14",      format: "number" },
     { label: "Avg ER%",          value: summary?.avgEngagementRate ?? 0, icon: TrendingUp, color: "text-brand bg-brand/10", format: "percent" },
   ];
 
@@ -332,7 +332,7 @@ export default function PostAnalytics() {
                       <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={2} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(v: number) => [v.toLocaleString(), "Avg Engagement"]} />
-                      <Bar dataKey="avgEngagement" fill="#E62020" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="avgEngagement" fill="#ef3735" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </>
@@ -360,8 +360,8 @@ export default function PostAnalytics() {
                   <AreaChart data={trendData.trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="engGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#E62020" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#ef3735" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#ef3735" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="reachGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#C8C8C8" stopOpacity={0.3} />
@@ -373,7 +373,7 @@ export default function PostAnalytics() {
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
                     <Legend />
-                    <Area type="monotone" dataKey="engagement" stroke="#E62020" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
+                    <Area type="monotone" dataKey="engagement" stroke="#ef3735" fill="url(#engGrad)" strokeWidth={2} name="Engagement" />
                     <Area type="monotone" dataKey="reach" stroke="#B3B3B3" fill="url(#reachGrad)" strokeWidth={2} name="Reach" />
                     <Area type="monotone" dataKey="likes" stroke="#737373" fill="none" strokeWidth={1.5} strokeDasharray="4 2" name="Likes" />
                   </AreaChart>

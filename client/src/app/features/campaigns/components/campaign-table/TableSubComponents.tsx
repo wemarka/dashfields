@@ -188,7 +188,7 @@ export function CampaignSwitch({
           border: "none",
           cursor: isDisabled ? "not-allowed" : "pointer",
           transition: "background-color 0.2s",
-          backgroundColor: pending ? "#404040" : isActive ? "#e62020" : "#404040",
+          backgroundColor: pending ? "#404040" : isActive ? "#ef3735" : "#404040",
           opacity: isDisabled && !pending ? 0.5 : 1,
           flexShrink: 0,
         }}
@@ -288,7 +288,7 @@ export function BulkActionBar({
           <Play className="w-3 h-3" /> Activate
         </Button>
         <div className="w-px h-4 bg-background/20" />
-        <Button size="sm" variant="ghost" className="h-7 text-xs text-[#f87171] hover:bg-[#E62020]/14 hover:text-[#f87171] gap-1" onClick={() => onAction("delete")}>
+        <Button size="sm" variant="ghost" className="h-7 text-xs text-[#f87171] hover:bg-[#ef3735]/14 hover:text-[#f87171] gap-1" onClick={() => onAction("delete")}>
           <Trash2 className="w-3 h-3" /> Delete
         </Button>
         <div className="w-px h-4 bg-background/20" />

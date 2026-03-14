@@ -103,7 +103,7 @@ function VsPrevBadge({ current, prev, fmt }: { current: number; prev: number | n
           ? "bg-muted text-muted-foreground"
           : isUp
             ? "bg-muted text-foreground"
-            : "bg-[#E62020]/14 text-[#f87171]"
+            : "bg-[#ef3735]/14 text-[#f87171]"
       }`}>
         {isNeutral ? (
           <Minus className="w-2.5 h-2.5" />
@@ -173,7 +173,7 @@ type ChartMetric = "impressions" | "clicks" | "spend";
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
   { key: "impressions", label: "Impressions", color: "#C8C8C8" },
   { key: "clicks",      label: "Clicks",      color: "#737373" },
-  { key: "spend",       label: "Spend",       color: "#e62020" },
+  { key: "spend",       label: "Spend",       color: "#ef3735" },
 ];
 
 // --- Main Component ---
@@ -235,7 +235,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               value={fmtCurrency(campaignInsight.spend)}
               sub={`CPM: ${fmtCurrency(campaignInsight.cpm)}`}
               color="text-brand" bgColor="bg-brand/10"
-              sparkData={sparkSpend} sparkColor="#E62020"
+              sparkData={sparkSpend} sparkColor="#ef3735"
               trend={trendOf(sparkSpend)}
               currentVal={campaignInsight.spend}
               prevVal={prevPeriodInsight?.spend ?? null}
@@ -258,7 +258,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               sparkData={sparkClicks.map((c, i) =>
                 sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
               )}
-              sparkColor="#e62020"
+              sparkColor="#ef3735"
               trend={trendOf(sparkClicks.map((c, i) =>
                 sparkImpressions[i] > 0 ? (c / sparkImpressions[i]) * 100 : 0
               ))}
@@ -370,8 +370,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
                   <stop offset="95%" stopColor="#737373" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gS2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#E62020" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ef3735" stopOpacity={0.18} />
+                  <stop offset="95%" stopColor="#ef3735" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#76706C" strokeOpacity={0.6} />
@@ -417,7 +417,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               )}
               {activeMetrics.has("spend") && (
                 <Area yAxisId="right" type="monotone" dataKey="spend"
-                  stroke="#E62020" strokeWidth={2} fill="url(#gS2)" name="Spend" />
+                  stroke="#ef3735" strokeWidth={2} fill="url(#gS2)" name="Spend" />
               )}
             </AreaChart>
           </ResponsiveContainer>

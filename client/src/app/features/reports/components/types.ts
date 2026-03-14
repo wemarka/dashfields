@@ -28,7 +28,7 @@ export interface BrandingOptions {
 export const DEFAULT_BRANDING: BrandingOptions = {
   companyName: "",
   primaryColor: "#c41919",
-  accentColor: "#E62020",
+  accentColor: "#ef3735",
   logoUrl: "",
   footerText: "",
   preparedBy: "",

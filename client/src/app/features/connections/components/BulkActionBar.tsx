@@ -46,7 +46,7 @@ export function BulkActionBar({ selectedCount, onClearSelection, onBulkDisconnec
           <AlertDialogTrigger asChild>
             <button
               disabled={isDisconnecting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white text-xs font-semibold transition-colors disabled:opacity-50"
             >
               {isDisconnecting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -67,7 +67,7 @@ export function BulkActionBar({ selectedCount, onClearSelection, onBulkDisconnec
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => { setShowConfirm(false); onBulkDisconnect(); }}
-                className="bg-[#E62020]/14 hover:bg-[#E62020]/14 text-white"
+                className="bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white"
               >
                 {isDisconnecting ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-1" />

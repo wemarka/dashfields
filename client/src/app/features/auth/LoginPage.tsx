@@ -50,16 +50,16 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#141418]">
+      <div className="min-h-screen flex items-center justify-center bg-[#171717]">
         <Loader2 className="w-8 h-8 animate-spin text-brand" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-[#141418]">
+    <div className="min-h-screen flex bg-[#171717]">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#1a1a22] border-r border-white/[0.06]">
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#1e1e1e] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
           <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#E62020]/14 border border-red-500/20 mb-5">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#ef3735]/14 border border-red-500/20 mb-5">
               <AlertCircle className="w-4 h-4 text-[#f87171] mt-0.5 shrink-0" />
               <p className="text-[#f87171] text-sm">{error}</p>
             </div>

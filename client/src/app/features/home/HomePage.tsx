@@ -8,8 +8,8 @@
  *  Text dim:    #737373  (neutral-500)
  *  Text muted:  #b8b8b8  (neutral-400)
  *  Text bright: #ffffff  (white)
- *  Brand red:   #e62020
- *  Gradient:    #e62020 → #ffffff  (red to white, never orange/blue)
+ *  Brand red:   #ef3735
+ *  Gradient:    #ef3735 → #ffffff  (red to white, never orange/blue)
  * ──────────────────────────────────────────────────────────────────────────
  */
 import { useEffect } from "react";
@@ -140,7 +140,7 @@ const P = {
   dim:       "#737373",   // neutral-500
   muted:     "#C8C8C8",   // neutral-400
   white:     "#ffffff",
-  red:       "#e62020",
+  red:       "#ef3735",
   redAlpha8: "rgba(230,32,32,.08)",
   redAlpha12:"rgba(230,32,32,.12)",
   redAlpha18:"rgba(230,32,32,.18)",
@@ -208,7 +208,7 @@ export default function HomePage() {
 
         /* ── Gradient text: brand-red → white ── */
         .gradient-text {
-          background: linear-gradient(135deg, #e62020 0%, #ffffff 100%);
+          background: linear-gradient(135deg, #ef3735 0%, #ffffff 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -224,7 +224,7 @@ export default function HomePage() {
           border-color: rgba(230,32,32,.25) !important;
           box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(230,32,32,.1);
         }
-        .tool-card:hover .arrow-icon { color: #e62020 !important; transform: translateX(4px); }
+        .tool-card:hover .arrow-icon { color: #ef3735 !important; transform: translateX(4px); }
         .arrow-icon { transition: color 200ms ease, transform 200ms cubic-bezier(.165,.84,.44,1); }
 
         /* ── News card hover ── */
@@ -270,7 +270,7 @@ export default function HomePage() {
           background: linear-gradient(90deg,
             transparent,
             #6b6660 20%,
-            #e62020 50%,
+            #ef3735 50%,
             #6b6660 80%,
             transparent);
           opacity: .35;

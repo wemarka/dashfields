@@ -43,7 +43,7 @@ const MOCK_INVOICES = [
 
 function CardBrandIcon({ brand }: { brand: string }) {
   const colors: Record<string, string> = {
-    Visa: "bg-muted", Mastercard: "bg-[#E62020]/14", Amex: "bg-muted",
+    Visa: "bg-muted", Mastercard: "bg-[#ef3735]/14", Amex: "bg-muted",
   };
   return (
     <div className={`w-9 h-6 rounded flex items-center justify-center text-white text-[9px] font-bold ${colors[brand] ?? "bg-neutral-800/500"}`}>
@@ -115,7 +115,7 @@ export function BillingPage() {
                     <button
                       onClick={() => handleUpgrade(nextPlan)}
                       className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
-                      style={{ background: "#e62020" }}
+                      style={{ background: "#ef3735" }}
                     >
                       Upgrade
                     </button>
@@ -252,7 +252,7 @@ export function BillingPage() {
 
             {!showCancelConfirm ? (
               <div className="flex items-start gap-4 p-4 rounded-xl border border-red-100 bg-red-50/30">
-                <div className="w-9 h-9 rounded-lg bg-[#E62020]/14 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-lg bg-[#ef3735]/14 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertTriangle className="w-4 h-4 text-[#f87171]" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -280,7 +280,7 @@ export function BillingPage() {
                       toast.error("Subscription cancellation coming soon. Please contact support.");
                       setShowCancelConfirm(false);
                     }}
-                    className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-[#E62020]/14 text-white hover:bg-[#E62020]/14 transition-all"
+                    className="px-4 py-2 rounded-lg text-[12px] font-semibold bg-[#ef3735]/14 text-white hover:bg-[#ef3735]/14 transition-all"
                   >
                     Yes, cancel subscription
                   </button>
