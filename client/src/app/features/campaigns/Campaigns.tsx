@@ -26,6 +26,7 @@ import {
 } from "@/core/components/ui/popover";
 import { Calendar } from "@/core/components/ui/calendar";
 import { UnifiedCampaignTable, type UnifiedCampaign } from "@/app/features/campaigns/components/UnifiedCampaignTable";
+import { CampaignKpiCards } from "@/app/features/campaigns/components/CampaignKpiCards";
 import { CampaignDetailDrawer } from "@/app/features/campaigns/components/CampaignDetailDrawer";
 import { CampaignCompareDrawer } from "@/app/features/campaigns/components/CampaignCompareDrawer";
 import { CampaignBuilder } from "@/app/features/campaigns/components/CampaignBuilder";
@@ -531,10 +532,10 @@ export default function Campaigns() {
           </div>
         )}
 
-        {/* ── Stats Bar ───────────────────────────────────────────────────── */}
+        {/* ── KPI Cards ───────────────────────────────────────────────────── */}
         {(hasAnyConnection || localCampaigns.length > 0) && (
-          <div className="px-7">
-            <StatsBar
+          <div className="px-7 py-4">
+            <CampaignKpiCards
               totalSpend={kpis.totalSpend}
               totalImpressions={kpis.totalImpressions}
               totalClicks={kpis.totalClicks}
@@ -542,7 +543,6 @@ export default function Campaigns() {
               activeCampaigns={kpis.activeCampaigns}
               totalCampaigns={kpis.totalCampaigns}
               loading={isLoading}
-              fmtMoney={fmtMoney}
             />
           </div>
         )}

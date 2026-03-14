@@ -1,27 +1,27 @@
-// CampaignKpiCards.tsx
-// Elegant minimal KPI summary bar — single-row pill design with subtle icons.
+/**
+ * CampaignKpiCards.tsx — Redesigned KPI cards grid.
+ * 5 individual elevated cards, large numbers, trend badges, subtle icons.
+ */
 import { useMemo } from "react";
-import {
-  TrendingUp, TrendingDown, Minus,
-} from "lucide-react";
-import { KpiCardSkeleton } from "@/core/components/ui/skeleton-cards";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
-// Brand palette constants
+// ─── Brand palette ────────────────────────────────────────────────────────────
 const P = {
-  bg:        "#0a0a0a",   // neutral-950
-  card:      "#171717",   // neutral-900
-  border:    "#262626",   // neutral-800
-  text:      "#ffffff",
-  muted:     "#a3a3a3",   // neutral-400
-  subtle:    "#737373",   // neutral-500
-  icon:      "#404040",   // neutral-700
-  brand:     "#e62020",
-  divider:   "#1f1f1f",
+  bg:     "#0a0a0a",
+  card:   "#171717",
+  card2:  "#1a1a1a",
+  border: "#262626",
+  text:   "#ffffff",
+  muted:  "#a3a3a3",
+  subtle: "#737373",
+  dim:    "#404040",
+  brand:  "#e62020",
+  green:  "#22c55e",
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface CampaignKpiCardsProps {
+export interface CampaignKpiCardsProps {
   totalSpend: number;
   totalImpressions: number;
   totalClicks: number;
@@ -36,48 +36,9 @@ interface CampaignKpiCardsProps {
   prevImpressions?: number | null;
   prevClicks?: number | null;
   prevCtr?: number | null;
-  dailyData?: Array<{
-    date: string;
-    spend: number;
-    impressions: number;
-    clicks: number;
-    ctr: number;
-  }>;
+  dailyData?: Array<{ date: string; spend: number; impressions: number; clicks: number; ctr: number }>;
   onKpiClick?: (metric: string) => void;
   activeMetric?: string | null;
-}
-
-// ─── Trend Badge ──────────────────────────────────────────────────────────────
-function TrendBadge({
-  current,
-  previous,
-  higherIsBetter = true,
-}: {
-  current: number;
-  previous: number | null | undefined;
-  higherIsBetter?: boolean;
-}) {
-  if (previous == null || previous === 0) return null;
-  const change = ((current - previous) / previous) * 100;
-  const isPositive = change > 0;
-  const isGood = higherIsBetter ? isPositive : !isPositive;
-  const absChange = Math.abs(change);
-  if (absChange < 0.1) {
-    return (
-      <span className="inline-flex items-center gap-0.5" style={{ fontSize: 10, color: P.subtle, fontWeight: 500 }}>
-        <Minus className="w-2.5 h-2.5" />0%
-      </span>
-    );
-  }
-  return (
-    <span
-      className="inline-flex items-center gap-0.5"
-      style={{ fontSize: 10, fontWeight: 600, color: isGood ? P.muted : P.brand }}
-    >
-      {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-      {absChange > 999 ? "999+" : absChange.toFixed(1)}%
-    </span>
-  );
 }
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
@@ -87,154 +48,171 @@ function fmtCompact(n: number): string {
   return n.toLocaleString();
 }
 
-// ─── Minimal SVG Icons ────────────────────────────────────────────────────────
-const SpendIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M7 4v6M5.5 8.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S8 7 7 7s-1.5-.67-1.5-1.5S6.17 4 7 4s1.5.67 1.5 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-  </svg>
-);
-
-const ImpressionsIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M1 7c0 0 2.5-4 6-4s6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-    <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2" />
-  </svg>
-);
-
-const ClicksIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M3 3l8 4-4 1-1 4-3-9z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
-  </svg>
-);
-
-const CtrIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 10L5 6.5l2.5 2L9.5 5 12 7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M10 4h2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CampaignsIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <rect x="1.5" y="3.5" width="11" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M4.5 7h5M4.5 9h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-  </svg>
-);
-
-// ─── Single KPI Item ──────────────────────────────────────────────────────────
-function KpiItem({
-  label,
-  value,
-  sub,
-  icon,
-  current,
-  previous,
-  higherIsBetter,
-  isSelected,
-  onClick,
-  isLast,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  icon: React.ReactNode;
-  current: number;
-  previous?: number | null;
-  higherIsBetter?: boolean;
-  isSelected?: boolean;
-  onClick?: () => void;
-  isLast?: boolean;
+// ─── Trend Badge ──────────────────────────────────────────────────────────────
+function TrendBadge({ current, previous, higherIsBetter = true }: {
+  current: number; previous: number | null | undefined; higherIsBetter?: boolean;
 }) {
+  if (previous == null || previous === 0) return null;
+  const change = ((current - previous) / previous) * 100;
+  const isPositive = change > 0;
+  const isGood = higherIsBetter ? isPositive : !isPositive;
+  const absChange = Math.abs(change);
+  if (absChange < 0.1) {
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, color: P.subtle, fontWeight: 500, backgroundColor: "#1f1f1f", padding: "2px 6px", borderRadius: 6 }}>
+        <Minus style={{ width: 10, height: 10 }} />0%
+      </span>
+    );
+  }
+  const color = isGood ? P.green : P.brand;
+  const bg = isGood ? "rgba(34,197,94,0.10)" : "rgba(230,32,32,0.10)";
   return (
-    <>
-      <button
-        onClick={onClick}
-        className="flex items-center gap-3 py-3 px-4 transition-all group"
-        style={{
-          background: isSelected ? "#1f1f1f" : "transparent",
-          borderRadius: isSelected ? 8 : 0,
-          cursor: onClick ? "pointer" : "default",
-          outline: "none",
-          border: "none",
-          minWidth: 0,
-          flex: 1,
-        }}
-      >
-        {/* Icon */}
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            backgroundColor: P.icon,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: P.muted,
-            flexShrink: 0,
-            transition: "background 0.15s",
-          }}
-          className="group-hover:!bg-neutral-600"
-        >
-          {icon}
-        </div>
-
-        {/* Text */}
-        <div className="min-w-0 text-left">
-          <p style={{ fontSize: 11, color: P.subtle, fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
-            {label}
-          </p>
-          <div className="flex items-baseline gap-2">
-            <span style={{ fontSize: 17, fontWeight: 700, color: P.text, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
-              {value}
-            </span>
-            <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
-          </div>
-          {sub && (
-            <p style={{ fontSize: 10.5, color: P.subtle, marginTop: 2, fontFamily: "Inter, sans-serif" }}>
-              {sub}
-            </p>
-          )}
-        </div>
-      </button>
-
-      {/* Divider */}
-      {!isLast && (
-        <div style={{ width: 1, backgroundColor: P.border, alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
-      )}
-    </>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, fontWeight: 600, color, backgroundColor: bg, padding: "2px 7px", borderRadius: 6 }}>
+      {isPositive ? <TrendingUp style={{ width: 10, height: 10 }} /> : <TrendingDown style={{ width: 10, height: 10 }} />}
+      {absChange > 999 ? "999+" : absChange.toFixed(1)}%
+    </span>
   );
 }
 
+// ─── Skeleton Card ────────────────────────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div style={{ backgroundColor: P.card, border: `1px solid ${P.border}`, borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#262626" }} />
+        <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#262626" }} />
+      </div>
+      <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#1f1f1f" }} />
+      <div style={{ height: 9, width: 100, borderRadius: 4, backgroundColor: "#1a1a1a" }} />
+    </div>
+  );
+}
+
+// ─── Single KPI Card ──────────────────────────────────────────────────────────
+function KpiCard({
+  label, value, sub, icon, current, previous, higherIsBetter,
+  isSelected, onClick, accentColor,
+}: {
+  label: string; value: string; sub?: string;
+  icon: React.ReactNode; current: number;
+  previous?: number | null; higherIsBetter?: boolean;
+  isSelected?: boolean; onClick?: () => void;
+  accentColor?: string;
+}) {
+  const accent = accentColor ?? P.dim;
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        backgroundColor: isSelected ? "#1f1f1f" : P.card,
+        border: isSelected ? `1px solid ${P.brand}` : `1px solid ${P.border}`,
+        borderRadius: 14,
+        padding: "18px 20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        cursor: onClick ? "pointer" : "default",
+        outline: "none",
+        textAlign: "left",
+        width: "100%",
+        transition: "background 0.15s, border-color 0.15s",
+      }}
+      onMouseEnter={e => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1c1c1c";
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#333333";
+        }
+      }}
+      onMouseLeave={e => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = P.card;
+          (e.currentTarget as HTMLButtonElement).style.borderColor = P.border;
+        }
+      }}
+    >
+      {/* Top row: label + icon */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 11, color: P.subtle, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          {label}
+        </span>
+        <div style={{
+          width: 34, height: 34, borderRadius: 10,
+          backgroundColor: `${accent}18`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: accent, flexShrink: 0,
+        }}>
+          {icon}
+        </div>
+      </div>
+
+      {/* Value */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 26, fontWeight: 700, color: P.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+          {value}
+        </span>
+        <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
+      </div>
+
+      {/* Sub */}
+      {sub && (
+        <span style={{ fontSize: 11, color: P.subtle, lineHeight: 1.3 }}>
+          {sub}
+        </span>
+      )}
+    </button>
+  );
+}
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const SpendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
+    <path d="M8 4.5v7M6.5 9.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S9 8 8 8s-1.5-.67-1.5-1.5S7.17 5 8 5s1.5.67 1.5 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+const ImpressionsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8s-2.5 4.5-6.5 4.5S1.5 8 1.5 8z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
+const ClicksIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M3.5 3.5l9 4.5-4.5 1-1 4.5-3.5-10z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
+  </svg>
+);
+const CtrIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2 11.5L5.5 7.5l3 2.5 3.5-5L15 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M11.5 4.5h3v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const CampaignsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <rect x="1.5" y="4" width="13" height="8.5" rx="2" stroke="currentColor" strokeWidth="1.3" />
+    <path d="M5 8h6M5 10.5h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M5.5 4V3a2.5 2.5 0 0 1 5 0v1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function CampaignKpiCards({
-  totalSpend,
-  totalImpressions,
-  totalClicks,
-  avgCtr,
-  totalCampaigns,
-  activeCampaigns,
-  conversions,
-  loading,
-  prevSpend,
-  prevImpressions,
-  prevClicks,
-  prevCtr,
-  onKpiClick,
-  activeMetric,
+  totalSpend, totalImpressions, totalClicks, avgCtr,
+  totalCampaigns, activeCampaigns, conversions, loading,
+  prevSpend, prevImpressions, prevClicks, prevCtr,
+  onKpiClick, activeMetric,
 }: CampaignKpiCardsProps) {
   const { fmt: fmtMoney } = useCurrency();
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+        {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
       </div>
     );
   }
 
-  const kpis = [
+  const cards = [
     {
       key: "spend",
       label: "Spend",
@@ -243,7 +221,10 @@ export function CampaignKpiCards({
       current: totalSpend,
       previous: prevSpend,
       higherIsBetter: false,
-      sub: `${activeCampaigns} active / ${totalCampaigns}`,
+      sub: totalSpend > 0 && totalImpressions > 0
+        ? `CPM ${fmtMoney(totalSpend / (totalImpressions / 1000), 2)}`
+        : `${activeCampaigns} active / ${totalCampaigns}`,
+      accent: P.brand,
     },
     {
       key: "impressions",
@@ -253,7 +234,8 @@ export function CampaignKpiCards({
       current: totalImpressions,
       previous: prevImpressions,
       higherIsBetter: true,
-      sub: totalImpressions > 0 ? `CPM ${fmtMoney(totalSpend / (totalImpressions / 1000), 2)}` : undefined,
+      sub: totalImpressions > 0 ? `Reach across all platforms` : "No data yet",
+      accent: "#a78bfa",
     },
     {
       key: "clicks",
@@ -263,7 +245,8 @@ export function CampaignKpiCards({
       current: totalClicks,
       previous: prevClicks,
       higherIsBetter: true,
-      sub: totalClicks > 0 ? `CPC ${fmtMoney(totalSpend / totalClicks, 2)}` : undefined,
+      sub: totalClicks > 0 ? `CPC ${fmtMoney(totalSpend / totalClicks, 2)}` : "No clicks yet",
+      accent: "#38bdf8",
     },
     {
       key: "ctr",
@@ -273,44 +256,37 @@ export function CampaignKpiCards({
       current: avgCtr,
       previous: prevCtr,
       higherIsBetter: true,
-      sub: conversions != null ? `${fmtCompact(conversions)} conv.` : undefined,
+      sub: conversions != null ? `${fmtCompact(conversions)} conversions` : "Click-through rate",
+      accent: P.green,
     },
     {
       key: "campaigns",
       label: "Campaigns",
-      value: `${activeCampaigns} active`,
+      value: String(activeCampaigns),
       icon: <CampaignsIcon />,
       current: activeCampaigns,
       previous: null,
       higherIsBetter: true,
-      sub: `of ${totalCampaigns} total`,
+      sub: `${activeCampaigns} active of ${totalCampaigns} total`,
+      accent: "#fb923c",
     },
   ];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "stretch",
-        backgroundColor: P.card,
-        border: `1px solid ${P.border}`,
-        borderRadius: 12,
-        overflow: "hidden",
-      }}
-    >
-      {kpis.map((kpi, i) => (
-        <KpiItem
-          key={kpi.key}
-          label={kpi.label}
-          value={kpi.value}
-          sub={kpi.sub}
-          icon={kpi.icon}
-          current={kpi.current}
-          previous={kpi.previous}
-          higherIsBetter={kpi.higherIsBetter}
-          isSelected={activeMetric === kpi.key}
-          onClick={onKpiClick ? () => onKpiClick(kpi.key) : undefined}
-          isLast={i === kpis.length - 1}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+      {cards.map(card => (
+        <KpiCard
+          key={card.key}
+          label={card.label}
+          value={card.value}
+          sub={card.sub}
+          icon={card.icon}
+          current={card.current}
+          previous={card.previous}
+          higherIsBetter={card.higherIsBetter}
+          isSelected={activeMetric === card.key}
+          onClick={onKpiClick ? () => onKpiClick(card.key) : undefined}
+          accentColor={card.accent}
         />
       ))}
     </div>
