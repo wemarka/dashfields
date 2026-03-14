@@ -90,8 +90,8 @@ export function GlobalTopbar() {
           </button>
 
           {/* ── Logo ──────────────────────────────────────────────────── */}
-          <Link href="/dashboard" className="group/logo flex items-center mr-2 shrink-0">
-            <svg viewBox="0 0 5504 3072" className="w-7 h-7 transition-transform duration-300 ease-out hover:scale-110" aria-label="Dashfields icon">
+          <Link href="/dashboard" className="group/logo flex items-center mr-3 shrink-0">
+            <svg viewBox="0 0 5504 3072" className="w-10 h-10 transition-transform duration-300 ease-out hover:scale-110" aria-label="Dashfields icon">
               <path className="fill-white group-hover/logo:fill-brand transition-[fill] duration-300 ease-out" d="M820.93,2705.08c145.31-177.32,317.52-332.5,481.07-493.35l949.38-8.15,1430.87-1391.02h-1030.75l-405.54,416.81H629.42l128.93-135.79,1031.16-16.49,830.49-847.99s1654.12-2.78,1654.12-2.78c311.83,50.91,413.84,408.84,197.12,637.4-642.55,606.59-1270.6,1230.84-1909.88,1841.37H820.93Z" />
               <polygon className="fill-white group-hover/logo:fill-brand transition-[fill] duration-300 ease-out" points="2420.56 1477.19 2167.1 1736.28 1153.25 1736.28 1141.87 1713.75 1378.55 1477.19 2420.56 1477.19" />
             </svg>
