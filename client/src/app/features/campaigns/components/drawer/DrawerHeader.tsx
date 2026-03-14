@@ -6,7 +6,7 @@
  *  Row 2: Budget pill  ·  Date preset tabs
  */
 
-import { Loader2, Copy, FileDown, Activity, TableIcon } from "lucide-react";
+import { Loader2, Copy, FileDown, Activity, TableIcon, X } from "lucide-react";
 import { InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
 
@@ -76,6 +76,7 @@ interface DrawerHeaderProps {
   onClone: () => void;
   onExport: () => void;
   onExportCsv?: () => void;
+  onClose?: () => void;
   onBudgetSave: (v: number) => void;
   fmtCurrency: (n: number) => string;
 }
@@ -84,7 +85,7 @@ interface DrawerHeaderProps {
 export function DrawerHeader({
   campaign, datePreset, onDatePresetChange,
   isTogglingStatus, isExporting, isExportingCsv,
-  onToggleStatus, onClone, onExport, onExportCsv, onBudgetSave, fmtCurrency,
+  onToggleStatus, onClone, onExport, onExportCsv, onClose, onBudgetSave, fmtCurrency,
 }: DrawerHeaderProps) {
   const isActive  = campaign?.status?.toLowerCase() === "active";
   const isPaused  = campaign?.status?.toLowerCase() === "paused";
@@ -243,6 +244,28 @@ export function DrawerHeader({
             }
             <span>{isExporting ? "..." : "Report"}</span>
           </button>
+
+          {/* Close button */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Close"
+              aria-label="Close campaign drawer"
+              className="flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                border: "1px solid #404040",
+                background: "transparent",
+                cursor: "pointer",
+                flexShrink: 0,
+                marginLeft: 4,
+              }}
+            >
+              <X style={{ width: 14, height: 14 }} />
+            </button>
+          )}
         </div>
       </div>
 

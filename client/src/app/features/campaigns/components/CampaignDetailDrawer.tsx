@@ -512,6 +512,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             onClone={() => toast.info("Clone feature coming soon")}
             onExport={handleDownloadReport}
             onExportCsv={handleDownloadCsv}
+            onClose={onClose}
             onBudgetSave={(v) => {
               if (campaign) updateBudget.mutate({ campaignId: campaign.id, dailyBudget: v });
             }}
