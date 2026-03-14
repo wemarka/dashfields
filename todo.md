@@ -3278,3 +3278,7 @@
 - [x] Remove background box from logo icon
 - [x] Remove "Dashfields" text from Topbar
 - [x] Apply white→brand-red color animation on SVG icon hover
+
+## 🔖 Favicon
+- [x] Generate favicon.ico and favicon.png from Dashfields SVG icon
+- [x] Update index.html with correct favicon link tags
