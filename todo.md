@@ -3412,3 +3412,6 @@
 - [x] Add EditCampaignModal component with name, status, daily budget fields
 - [x] Add editMetaCampaign tRPC mutation (calls Meta API)
 - [x] Wire Edit button in MoreHorizontal dropdown to open EditCampaignModal
+
+## 🐛 Fix Pin Persistence After Refresh
+- [x] Pinned campaigns disappear after page refresh — fixed by creating pinned_campaigns table in Supabase
