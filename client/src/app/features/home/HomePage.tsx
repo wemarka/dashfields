@@ -1,365 +1,704 @@
 /**
  * HomePage — Creative hub landing page.
- * Inspired by Higgsfield-style layout: hero banner, creation tools, what's new, recent creations.
+ * Faithful React port of the reference "Dash Studios Home" design.
+ * Brand colors: #E62020 (brand-red) replaces #c8ff00 (lime accent).
+ * Fonts: Syne (headings) + Inter (body).
+ * Sections: Hero (What would you create today?) → What's New → Recent Creations
  */
-import { useAuth } from "@/shared/hooks/useAuth";
+import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { trpc } from "@/core/lib/trpc";
-import {
-  Sparkles,
-  Image as ImageIcon,
-  Video,
-  PenTool,
-  BarChart3,
-  Megaphone,
-  Calendar,
-  ArrowRight,
-  Play,
-  Zap,
-  TrendingUp,
-  Star,
-  Clock,
-} from "lucide-react";
-import { useMemo } from "react";
+
+// ─── Scroll Reveal Hook ──────────────────────────────────────────────────────
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>(".sr-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).classList.add("sr-visible");
+            observer.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
 
 // ─── Tool Card Data ──────────────────────────────────────────────────────────
 const CREATE_TOOLS = [
   {
+    id: "assist",
+    label: "AI Assist",
+    description: "Chat with your AI marketing co-pilot",
+    path: "/assist",
+    badge: null,
+    img: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&q=80",
+  },
+  {
     id: "campaign",
     label: "Create Campaign",
-    description: "Launch a new ad campaign across platforms",
-    icon: Megaphone,
+    description: "Launch ads across all platforms at once",
     path: "/campaign-wizard",
-    gradient: "from-brand/20 to-red-900/20",
-    iconColor: "text-brand",
+    badge: "NEW",
+    img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&q=80",
   },
   {
-    id: "image",
-    label: "Generate Image",
-    description: "AI-powered visuals for your brand",
-    icon: ImageIcon,
+    id: "studios",
+    label: "Dash Studios",
+    description: "Generate images, videos & creatives",
     path: "/studios",
-    gradient: "from-violet-500/20 to-purple-900/20",
-    iconColor: "text-violet-400",
-  },
-  {
-    id: "video",
-    label: "Create Video",
-    description: "Cinematic ads and social content",
-    icon: Video,
-    path: "/studios",
-    gradient: "from-blue-500/20 to-cyan-900/20",
-    iconColor: "text-blue-400",
-  },
-  {
-    id: "content",
-    label: "Write Content",
-    description: "AI copywriting for posts and ads",
-    icon: PenTool,
-    path: "/assist",
-    gradient: "from-emerald-500/20 to-green-900/20",
-    iconColor: "text-emerald-400",
-  },
-  {
-    id: "schedule",
-    label: "Schedule Post",
-    description: "Plan and publish across channels",
-    icon: Calendar,
-    path: "/content/planner",
-    gradient: "from-amber-500/20 to-orange-900/20",
-    iconColor: "text-amber-400",
+    badge: "HOT",
+    img: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=400&q=80",
   },
   {
     id: "analytics",
-    label: "View Analytics",
-    description: "Track performance and ROI",
-    icon: BarChart3,
+    label: "Analytics",
+    description: "Deep insights on every campaign",
     path: "/analytics/overview",
-    gradient: "from-cyan-500/20 to-teal-900/20",
-    iconColor: "text-cyan-400",
+    badge: null,
+    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80",
+  },
+  {
+    id: "content",
+    label: "Content Planner",
+    description: "Schedule and publish across channels",
+    path: "/content/planner",
+    badge: null,
+    img: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80",
   },
 ];
 
-const WHATS_NEW = [
+// ─── What's New Data ─────────────────────────────────────────────────────────
+const NEWS_ITEMS = [
   {
-    id: "1",
-    badge: "NEW",
-    title: "AI Video Generation",
-    description: "Create cinematic video ads with Dash Studios using AI-powered generation.",
-    icon: Video,
-    badgeColor: "bg-brand text-white",
+    id: 1,
+    tag: "Feature",
+    tagColor: "bg-[#e62020] text-white",
+    title: "AI Assist 2.0 — Generative UI & Rich Responses",
+    excerpt:
+      "Your marketing co-pilot now generates live campaign previews, charts, and actionable insights directly inside the chat.",
+    date: "Mar 14, 2026",
+    category: "Product Update",
+    img: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&q=80",
   },
   {
-    id: "2",
-    badge: "IMPROVED",
-    title: "Smart Campaign Builder",
-    description: "Our campaign wizard now suggests optimal budgets and targeting automatically.",
-    icon: Zap,
-    badgeColor: "bg-emerald-500/20 text-emerald-400",
+    id: 2,
+    tag: "Update",
+    tagColor: "bg-[#3b8eff] text-white",
+    title: "Dash Studios — Video Generation with Kling 2.5",
+    excerpt:
+      "Create cinematic ad videos from a single text prompt. Powered by Kling 2.5 Turbo for ultra-realistic motion.",
+    date: "Mar 10, 2026",
+    category: "Model Release",
+    img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&q=80",
   },
   {
-    id: "3",
-    badge: "NEW",
-    title: "Multi-Platform Analytics",
-    description: "Compare performance across Facebook, Instagram, TikTok, and LinkedIn in one view.",
-    icon: TrendingUp,
-    badgeColor: "bg-blue-500/20 text-blue-400",
+    id: 3,
+    tag: "Update",
+    tagColor: "bg-[#3b8eff] text-white",
+    title: "Multi-Platform Campaign Wizard — Now with TikTok",
+    excerpt:
+      "Launch campaigns across Facebook, Instagram, TikTok, and LinkedIn simultaneously with one unified workflow.",
+    date: "Mar 5, 2026",
+    category: "Platform Update",
+    img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=80",
+  },
+  {
+    id: 4,
+    tag: "Feature",
+    tagColor: "bg-[#e62020] text-white",
+    title: "Smart Budget Optimizer — AI-Powered Spend Allocation",
+    excerpt:
+      "Let the AI redistribute your ad budget in real-time based on live performance signals across all connected accounts.",
+    date: "Feb 28, 2026",
+    category: "AI Feature",
+    img: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80",
   },
 ];
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
+// ─── Recent Creations Data ───────────────────────────────────────────────────
+const CREATIONS = [
+  {
+    id: 1,
+    featured: true,
+    title: "Summer Sale — TikTok Video Campaign",
+    type: "video",
+    author: "A",
+    platform: "TikTok",
+    views: "24.3K",
+    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+  },
+  {
+    id: 2,
+    featured: false,
+    title: "Brand Awareness — Instagram Carousel",
+    type: "image",
+    author: "A",
+    platform: "Instagram",
+    views: "8.1K",
+    img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&q=80",
+  },
+  {
+    id: 3,
+    featured: false,
+    title: "Product Launch — Facebook Ad",
+    type: "image",
+    author: "A",
+    platform: "Facebook",
+    views: "12.7K",
+    img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&q=80",
+  },
+  {
+    id: 4,
+    featured: false,
+    title: "Retargeting — LinkedIn Sponsored",
+    type: "image",
+    author: "A",
+    platform: "LinkedIn",
+    views: "5.4K",
+    img: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80",
+  },
+  {
+    id: 5,
+    featured: false,
+    title: "Flash Sale — Story Ad",
+    type: "video",
+    author: "A",
+    platform: "Instagram",
+    views: "19.2K",
+    img: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&q=80",
+  },
+];
 
-// ─── Tool Card Component ─────────────────────────────────────────────────────
-function ToolCard({
-  tool,
-  onClick,
-}: {
-  tool: (typeof CREATE_TOOLS)[number];
-  onClick: () => void;
-}) {
-  const Icon = tool.icon;
-  return (
-    <button
-      onClick={onClick}
-      className="group relative flex flex-col items-start p-5 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:border-neutral-700 hover:bg-neutral-800/50 transition-all duration-300 text-left cursor-pointer"
-    >
-      <div
-        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}
-      >
-        <Icon className={`w-5 h-5 ${tool.iconColor}`} />
-      </div>
-      <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-brand transition-colors">
-        {tool.label}
-      </h3>
-      <p className="text-xs text-neutral-500 leading-relaxed">{tool.description}</p>
-      <ArrowRight className="absolute top-5 right-5 w-4 h-4 text-neutral-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />
-    </button>
-  );
-}
-
-// ─── Main Page ───────────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────────────
 export default function HomePage() {
-  const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  useScrollReveal();
+
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
-  const { data: creations, isLoading: creationsLoading } =
-    trpc.homeStats.recentCreations.useQuery(undefined, {
-      staleTime: 60_000,
-      refetchOnWindowFocus: false,
-    });
-
-  const hasCreations = creations && creations.length > 0;
-
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fade-in">
-      {/* ── Hero Section ──────────────────────────────────────────── */}
-      <div className="relative rounded-2xl overflow-hidden mb-8 border border-neutral-800 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800">
-        {/* Subtle grid pattern */}
+    <>
+      {/* ── Inline styles for Syne font + animations ── */}
+      <style>{`
+        .syne { font-family: 'Syne', sans-serif; }
+
+        /* Scroll reveal */
+        .sr-reveal {
+          opacity: 0;
+          transform: translateY(36px);
+          transition: opacity 700ms cubic-bezier(.19,1,.22,1),
+                      transform 700ms cubic-bezier(.19,1,.22,1);
+        }
+        .sr-reveal.sr-visible { opacity: 1; transform: translateY(0); }
+        .sr-d1 { transition-delay: 0ms; }
+        .sr-d2 { transition-delay: 80ms; }
+        .sr-d3 { transition-delay: 160ms; }
+        .sr-d4 { transition-delay: 240ms; }
+        .sr-d5 { transition-delay: 320ms; }
+        .sr-d6 { transition-delay: 400ms; }
+
+        /* Pulsing dot */
+        @keyframes pulse-dot {
+          0%,100% { opacity:1; transform:scale(1); }
+          50%      { opacity:.4; transform:scale(.7); }
+        }
+        .pulse-dot { animation: pulse-dot 2s ease infinite; }
+
+        /* Card shimmer sweep */
+        @keyframes shimmer-sweep { to { left: 130%; } }
+        .shimmer-host { position:relative; overflow:hidden; }
+        .shimmer-host::before {
+          content:'';
+          position:absolute; top:0; left:-100%; width:60%; height:100%;
+          background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.06) 45%, rgba(255,255,255,.13) 50%, rgba(255,255,255,.06) 55%, transparent 70%);
+          transform: skewX(-15deg);
+          z-index:2;
+        }
+        .shimmer-host:hover::before { animation: shimmer-sweep .8s ease forwards; }
+
+        /* Gradient text */
+        .gradient-text {
+          background: linear-gradient(135deg, #e62020 0%, #ff6b35 50%, #e62020 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        /* Tool card hover */
+        .tool-card {
+          transition: transform 300ms cubic-bezier(.165,.84,.44,1),
+                      border-color 300ms ease,
+                      box-shadow 300ms ease;
+        }
+        .tool-card:hover {
+          transform: translateY(-6px) scale(1.02);
+          border-color: rgba(230,32,32,.25) !important;
+          box-shadow: 0 16px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(230,32,32,.1);
+        }
+        .tool-card:hover .arrow-icon {
+          color: #e62020 !important;
+          transform: translateX(4px);
+        }
+        .arrow-icon { transition: color 200ms ease, transform 200ms cubic-bezier(.165,.84,.44,1); }
+
+        /* News card hover */
+        .news-card {
+          transition: transform 300ms cubic-bezier(.165,.84,.44,1),
+                      border-color 300ms ease,
+                      box-shadow 300ms ease;
+        }
+        .news-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(230,32,32,.18) !important;
+          box-shadow: 0 20px 60px rgba(0,0,0,.55);
+        }
+
+        /* Creation card hover */
+        .creation-card {
+          transition: transform 300ms cubic-bezier(.165,.84,.44,1),
+                      border-color 300ms ease,
+                      box-shadow 300ms ease;
+        }
+        .creation-card:hover {
+          transform: scale(1.03);
+          border-color: rgba(230,32,32,.18) !important;
+          box-shadow: 0 16px 48px rgba(0,0,0,.55);
+          z-index: 2;
+        }
+        .creation-card:hover .play-btn {
+          opacity: 1 !important;
+          transform: translate(-50%,-50%) scale(1) !important;
+        }
+
+        /* Browse btn */
+        .browse-btn {
+          transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+        }
+        .browse-btn:hover {
+          color: #e8eaed !important;
+          border-color: #555d68 !important;
+          background: rgba(255,255,255,.03) !important;
+        }
+
+        /* Gradient divider */
+        .gradient-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #222830 20%, #e62020 50%, #222830 80%, transparent);
+          opacity: .35;
+          margin: 0 60px;
+        }
+
+        /* Noise overlay */
+        .noise-overlay {
+          position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        }
+      `}</style>
+
+      {/* Noise overlay */}
+      <div className="noise-overlay" aria-hidden />
+
+      {/* ══════ HERO ══════ */}
+      <section
+        className="relative overflow-hidden"
+        style={{ padding: "72px 60px 80px", minHeight: "90vh", display: "flex", flexDirection: "column", justifyContent: "center" }}
+      >
+        {/* Glow blobs */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          aria-hidden
           style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
+            position: "absolute", top: "-20%", right: "-10%",
+            width: 800, height: 800, pointerEvents: "none",
+            background: "radial-gradient(circle, rgba(230,32,32,.07) 0%, transparent 60%)",
           }}
         />
-        {/* Glow accent */}
-        <div className="absolute -top-20 -right-20 w-60 h-60 bg-brand/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-violet-500/5 rounded-full blur-3xl" />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute", bottom: "-30%", left: "-15%",
+            width: 700, height: 700, pointerEvents: "none",
+            background: "radial-gradient(circle, rgba(59,142,255,.04) 0%, transparent 60%)",
+          }}
+        />
 
-        <div className="relative px-6 sm:px-10 py-10 sm:py-14">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-brand" />
-            </div>
-            <span className="text-xs font-medium text-brand uppercase tracking-wider">
-              Creative Hub
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-2">
-            {getGreeting()}, {firstName}
-          </h1>
-          <p className="text-base text-neutral-400 max-w-lg">
-            What would you like to create today? Jump into campaigns, generate visuals, or let AI
-            handle the heavy lifting.
-          </p>
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={() => setLocation("/assist")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand hover:bg-brand/90 text-white text-sm font-medium transition-colors"
-            >
-              <Sparkles className="w-4 h-4" />
-              Ask AI Assist
-            </button>
-            <button
-              onClick={() => setLocation("/studios")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 text-neutral-300 text-sm font-medium transition-colors"
-            >
-              <Play className="w-4 h-4" />
-              Open Studios
-            </button>
-          </div>
+        {/* Label */}
+        <div
+          className="sr-reveal sr-d1"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(230,32,32,.08)", border: "1px solid rgba(230,32,32,.18)",
+            color: "#e62020", fontSize: 12, fontWeight: 600,
+            letterSpacing: "1.5px", textTransform: "uppercase",
+            padding: "6px 16px", borderRadius: 50, marginBottom: 28, width: "fit-content",
+          }}
+        >
+          <span
+            className="pulse-dot"
+            style={{ width: 6, height: 6, background: "#e62020", borderRadius: "50%", display: "inline-block" }}
+          />
+          Explore All Tools
         </div>
-      </div>
 
-      {/* ── What Would You Create Today? ──────────────────────────── */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-lg font-bold text-white">
-              What would you create today?
-            </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Quick-launch your favorite tools
-            </p>
-          </div>
-          <button
-            onClick={() => setLocation("/studios")}
-            className="text-xs text-neutral-400 hover:text-brand flex items-center gap-1 transition-colors"
-          >
-            Explore all tools
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {CREATE_TOOLS.map((tool) => (
-            <ToolCard
+        {/* Headline */}
+        <h1
+          className="syne sr-reveal sr-d2"
+          style={{
+            fontWeight: 800,
+            fontSize: "clamp(48px, 6vw, 82px)",
+            lineHeight: 1.05,
+            letterSpacing: "-2px",
+            marginBottom: 24,
+            maxWidth: 800,
+            color: "#e8eaed",
+          }}
+        >
+          Hello, {firstName}.<br />
+          <span className="gradient-text">What would you create today?</span>
+        </h1>
+
+        {/* Sub */}
+        <p
+          className="sr-reveal sr-d3"
+          style={{
+            fontSize: 17, color: "#8a919a", maxWidth: 520,
+            lineHeight: 1.6, marginBottom: 52, fontWeight: 300,
+          }}
+        >
+          Your AI-powered marketing workspace. Create campaigns, generate visuals,
+          analyze performance — all in one place.
+        </p>
+
+        {/* Tool Cards Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: 16,
+            maxWidth: 1100,
+          }}
+        >
+          {CREATE_TOOLS.map((tool, i) => (
+            <div
               key={tool.id}
-              tool={tool}
+              className={`tool-card shimmer-host sr-reveal sr-d${Math.min(i + 2, 6)}`}
               onClick={() => setLocation(tool.path)}
-            />
+              style={{
+                background: "#131619",
+                border: "1px solid #222830",
+                borderRadius: 14,
+                overflow: "hidden",
+                cursor: "pointer",
+                position: "relative",
+              }}
+            >
+              {/* Badge */}
+              {tool.badge && (
+                <div
+                  style={{
+                    position: "absolute", top: 12, right: 12, zIndex: 5,
+                    background: tool.badge === "HOT" ? "#e62020" : "#e62020",
+                    color: "#fff", fontSize: 10, fontWeight: 700,
+                    padding: "3px 8px", borderRadius: 4,
+                    letterSpacing: "0.5px", textTransform: "uppercase",
+                  }}
+                >
+                  {tool.badge}
+                </div>
+              )}
+              {/* Image */}
+              <div
+                style={{
+                  width: "100%", height: 160,
+                  backgroundImage: `url('${tool.img}')`,
+                  backgroundSize: "cover", backgroundPosition: "center",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(to top, #131619 0%, transparent 60%)",
+                  }}
+                />
+              </div>
+              {/* Body */}
+              <div style={{ padding: "16px 18px 18px" }}>
+                <div
+                  className="syne"
+                  style={{
+                    fontWeight: 700, fontSize: 15, marginBottom: 4,
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    color: "#e8eaed",
+                  }}
+                >
+                  {tool.label}
+                  <span className="arrow-icon" style={{ fontSize: 18, color: "#555d68" }}>→</span>
+                </div>
+                <div style={{ fontSize: 12.5, color: "#555d68", lineHeight: 1.45 }}>
+                  {tool.description}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ── Bottom Grid: What's New + Recent Creations ────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* What's New — 7/12 */}
-        <section className="lg:col-span-7">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-amber-400" />
-              <h2 className="text-sm font-semibold text-white">What's New</h2>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {WHATS_NEW.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:border-neutral-700 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-neutral-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${item.badgeColor}`}
-                      >
-                        {item.badge}
-                      </span>
-                      <h3 className="text-sm font-medium text-white">{item.title}</h3>
-                    </div>
-                    <p className="text-xs text-neutral-500 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+      {/* Gradient divider */}
+      <div className="gradient-divider" />
 
-        {/* Recent Creations — 5/12 */}
-        <section className="lg:col-span-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-neutral-400" />
-              <h2 className="text-sm font-semibold text-white">Recent Creations</h2>
-            </div>
-            {hasCreations && (
-              <button
-                onClick={() => setLocation("/assets")}
-                className="text-xs text-neutral-400 hover:text-brand flex items-center gap-1 transition-colors"
+      {/* ══════ WHAT'S NEW ══════ */}
+      <section style={{ padding: "80px 60px" }}>
+        {/* Header */}
+        <div
+          className="sr-reveal"
+          style={{
+            display: "flex", alignItems: "flex-end",
+            justifyContent: "space-between", marginBottom: 40,
+          }}
+        >
+          <h2
+            className="syne"
+            style={{
+              fontWeight: 800,
+              fontSize: "clamp(32px, 4vw, 48px)",
+              letterSpacing: "-1px",
+              lineHeight: 1.1,
+              color: "#e8eaed",
+            }}
+          >
+            What's <span style={{ color: "#e62020" }}>New</span>
+          </h2>
+          <button
+            className="browse-btn"
+            onClick={() => setLocation("/analytics/reports")}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              color: "#8a919a", background: "transparent",
+              border: "1px solid #222830", borderRadius: 50,
+              padding: "8px 18px", fontSize: 14, fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            Browse all →
+          </button>
+        </div>
+
+        {/* Horizontal scroll */}
+        <div
+          style={{
+            display: "flex", gap: 20,
+            overflowX: "auto", paddingBottom: 16,
+            scrollSnapType: "x mandatory",
+            msOverflowStyle: "none", scrollbarWidth: "none",
+          }}
+        >
+          {NEWS_ITEMS.map((item, i) => (
+            <div
+              key={item.id}
+              className={`news-card shimmer-host sr-reveal sr-d${Math.min(i + 1, 6)}`}
+              style={{
+                minWidth: 380, maxWidth: 380,
+                background: "#131619", border: "1px solid #222830",
+                borderRadius: 14, overflow: "hidden",
+                scrollSnapAlign: "start", flexShrink: 0,
+                cursor: "pointer",
+              }}
+            >
+              {/* Image */}
+              <div
+                style={{
+                  width: "100%", height: 210,
+                  backgroundImage: `url('${item.img}')`,
+                  backgroundSize: "cover", backgroundPosition: "center",
+                  position: "relative",
+                }}
               >
-                View all
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-
-          {creationsLoading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map((i) => (
                 <div
-                  key={i}
-                  className="aspect-[4/3] rounded-xl bg-neutral-800 border border-neutral-700 animate-pulse"
+                  style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
+                    background: "linear-gradient(to top, #131619, transparent)",
+                  }}
                 />
-              ))}
-            </div>
-          ) : hasCreations ? (
-            <div className="grid grid-cols-2 gap-3">
-              {creations.slice(0, 4).map((item) => (
-                <div
-                  key={item.id}
-                  className="group relative aspect-[4/3] rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-700 transition-all cursor-pointer"
+                <span
+                  style={{
+                    position: "absolute", top: 14, left: 14, zIndex: 2,
+                    fontSize: 10, fontWeight: 700, letterSpacing: 1,
+                    textTransform: "uppercase", padding: "4px 10px", borderRadius: 4,
+                  }}
+                  className={item.tagColor}
                 >
-                  {item.url ? (
-                    <img
-                      src={item.url}
-                      alt={item.label}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 bg-neutral-800/50" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {item.type === "video" ? (
-                          <div className="w-10 h-10 rounded-full bg-neutral-700 flex items-center justify-center group-hover:bg-neutral-600 transition-colors">
-                            <Play className="w-4 h-4 text-neutral-300 ml-0.5" />
-                          </div>
-                        ) : (
-                          <ImageIcon className="w-6 h-6 text-neutral-600" />
-                        )}
-                      </div>
-                    </>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-black/70 to-transparent">
-                    <span className="text-[11px] text-white/90 font-medium line-clamp-1">
-                      {item.label}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-neutral-800 bg-neutral-900/50">
-              <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-brand" />
+                  {item.tag}
+                </span>
               </div>
-              <p className="text-sm text-neutral-400 mb-1 font-medium">No creations yet</p>
-              <p className="text-xs text-neutral-500 max-w-[200px]">
-                Use AI Assist or Dash Studios to generate your first campaign visuals
-              </p>
-              <button
-                onClick={() => setLocation("/studios")}
-                className="mt-4 text-xs text-brand hover:text-brand/80 flex items-center gap-1 transition-colors"
-              >
-                Start creating
-                <ArrowRight className="w-3 h-3" />
-              </button>
+              {/* Body */}
+              <div style={{ padding: "18px 22px 22px" }}>
+                <div
+                  className="syne"
+                  style={{ fontWeight: 700, fontSize: 18, marginBottom: 8, lineHeight: 1.3, color: "#e8eaed" }}
+                >
+                  {item.title}
+                </div>
+                <div style={{ fontSize: 13, color: "#8a919a", lineHeight: 1.55, marginBottom: 14 }}>
+                  {item.excerpt}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 12, color: "#555d68" }}>
+                  <span>{item.date}</span>
+                  <span style={{ color: "#222830" }}>•</span>
+                  <span>{item.category}</span>
+                </div>
+              </div>
             </div>
-          )}
-        </section>
-      </div>
-    </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Gradient divider */}
+      <div className="gradient-divider" />
+
+      {/* ══════ RECENT CREATIONS ══════ */}
+      <section style={{ padding: "80px 60px 100px" }}>
+        {/* Header */}
+        <div
+          className="sr-reveal"
+          style={{
+            display: "flex", alignItems: "flex-end",
+            justifyContent: "space-between", marginBottom: 40,
+          }}
+        >
+          <h2
+            className="syne"
+            style={{
+              fontWeight: 800,
+              fontSize: "clamp(32px, 4vw, 48px)",
+              letterSpacing: "-1px",
+              lineHeight: 1.1,
+              color: "#e8eaed",
+            }}
+          >
+            Recent <span style={{ color: "#e62020" }}>Creations</span>
+          </h2>
+          <button
+            className="browse-btn"
+            onClick={() => setLocation("/studios")}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              color: "#8a919a", background: "transparent",
+              border: "1px solid #222830", borderRadius: 50,
+              padding: "8px 18px", fontSize: 14, fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            View all →
+          </button>
+        </div>
+
+        {/* Masonry grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateRows: "auto auto",
+            gap: 16,
+          }}
+        >
+          {CREATIONS.map((c, i) => (
+            <div
+              key={c.id}
+              className={`creation-card shimmer-host sr-reveal sr-d${Math.min(i + 1, 6)}`}
+              style={{
+                background: "#131619", border: "1px solid #222830",
+                borderRadius: 14, overflow: "hidden",
+                cursor: "pointer", position: "relative",
+                gridColumn: c.featured ? "span 2" : undefined,
+                gridRow: c.featured ? "span 2" : undefined,
+              }}
+            >
+              {/* Image */}
+              <div
+                style={{
+                  width: "100%", height: "100%",
+                  minHeight: c.featured ? 430 : 200,
+                  backgroundImage: `url('${c.img}')`,
+                  backgroundSize: "cover", backgroundPosition: "center",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(to top, rgba(11,13,15,.9) 0%, rgba(11,13,15,.1) 40%, transparent 60%)",
+                  }}
+                />
+              </div>
+
+              {/* Play button (video) */}
+              {c.type === "video" && (
+                <div
+                  className="play-btn"
+                  style={{
+                    position: "absolute", top: "50%", left: "50%",
+                    transform: "translate(-50%,-50%) scale(.85)",
+                    width: 52, height: 52,
+                    background: "rgba(255,255,255,.12)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: "50%",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    zIndex: 3, opacity: 0,
+                    transition: "opacity 300ms ease, transform 300ms cubic-bezier(.165,.84,.44,1)",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "white", marginLeft: 3 }}>
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              )}
+
+              {/* Overlay info */}
+              <div
+                style={{
+                  position: "absolute", bottom: 0, left: 0, right: 0,
+                  padding: 20, zIndex: 2,
+                }}
+              >
+                <div
+                  className="syne"
+                  style={{
+                    fontWeight: 700,
+                    fontSize: c.featured ? 22 : 15,
+                    marginBottom: c.featured ? 6 : 4,
+                    color: "#e8eaed",
+                  }}
+                >
+                  {c.title}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: "#555d68" }}>
+                  <div
+                    style={{
+                      width: 22, height: 22, borderRadius: "50%",
+                      background: "#1a1e22", display: "flex",
+                      alignItems: "center", justifyContent: "center",
+                      fontSize: 10, fontWeight: 700, color: "#e62020",
+                    }}
+                  >
+                    {c.author}
+                  </div>
+                  <span>{c.platform}</span>
+                  <span style={{ color: "#222830" }}>•</span>
+                  <span>{c.views} views</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
