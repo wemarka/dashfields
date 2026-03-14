@@ -359,7 +359,7 @@ export default function Competitors() {
             {[
               { label: "Platforms Tracked",  value: summary.totalPlatforms, icon: BarChart2, color: "text-muted-foreground bg-muted" },
               { label: "Outperforming",       value: summary.outperforming,  icon: Award,    color: "text-foreground bg-muted" },
-              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-[#f87171] bg-[#ef3735]/14" },
+              { label: "Underperforming",     value: summary.underperforming, icon: AlertTriangle, color: "text-[#a1a1aa] bg-muted/40" },
               { label: "Avg. Score",          value: `${summary.avgScore ?? 0}%`, icon: Target, color: "text-brand bg-brand/10" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">

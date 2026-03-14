@@ -307,7 +307,7 @@ export default function AdvancedAnalytics() {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Total Spend",     value: fmtMoney(funnel?.totalSpend ?? 0), icon: DollarSign, color: "text-brand",    bg: "bg-brand/10" },
-                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-[#f87171]",     bg: "bg-[#ef3735]/14" },
+                  { label: "Drop-off Rate",   value: (funnel?.dropoffRate ?? 0) + "%",  icon: TrendingUp, color: "text-[#a1a1aa]",     bg: "bg-muted/40" },
                   { label: "Conv. Rate",      value: (funnel?.conversionRate ?? 0) + "%", icon: Target,   color: "text-foreground", bg: "bg-muted" },
                   { label: "Funnel Stages",   value: String(funnel?.stages?.length ?? 0), icon: Layers,   color: "text-muted-foreground",  bg: "bg-muted/60" },
                 ].map(({ label, value, icon: Icon, color, bg }) => (

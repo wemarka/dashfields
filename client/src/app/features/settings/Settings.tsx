@@ -137,7 +137,7 @@ export default function Settings() {
                     </div>
                     <span
                       className="text-[12px] font-medium"
-                      style={{ color: isActive ? "#ef3735" : "#737373" }}
+                      style={{ color: isActive ? "#fafafa" : "#737373" }}
                     >
                       {opt.label}
                     </span>

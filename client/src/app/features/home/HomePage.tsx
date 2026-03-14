@@ -224,7 +224,7 @@ export default function HomePage() {
           border-color: rgba(230,32,32,.25) !important;
           box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(230,32,32,.1);
         }
-        .tool-card:hover .arrow-icon { color: #ef3735 !important; transform: translateX(4px); }
+        .tool-card:hover .arrow-icon { color: #a1a1aa !important; transform: translateX(4px); }
         .arrow-icon { transition: color 200ms ease, transform 200ms cubic-bezier(.165,.84,.44,1); }
 
         /* ── News card hover ── */
@@ -453,7 +453,7 @@ export default function HomePage() {
                 {stat.val}
               </div>
               <div style={{ fontSize: 11, color: P.dim, marginTop: 4 }}>{stat.sub}</div>
-              <div style={{ fontSize: 10, color: "#ef3735", fontWeight: 600, marginTop: 2, letterSpacing: "0.5px" }}>
+              <div style={{ fontSize: 10, color: "#a1a1aa", fontWeight: 600, marginTop: 2, letterSpacing: "0.5px" }}>
                 {stat.label}
               </div>
             </div>
@@ -494,7 +494,7 @@ export default function HomePage() {
             style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 background: P.redAlpha8, border: `1px solid ${P.redAlpha18}`,
-                color: "#ef3735", fontSize: 12, fontWeight: 600,
+                color: "#a1a1aa", fontSize: 12, fontWeight: 600,
             letterSpacing: "1.5px", textTransform: "uppercase",
             padding: "6px 16px", borderRadius: 50,
             marginBottom: 28, width: "fit-content",

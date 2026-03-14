@@ -614,7 +614,7 @@ export default function Campaigns() {
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: "rgba(230,32,32,.08)" }}>
-                <Link2 className="w-4 h-4" style={{ color: "#ef3735" }} />
+                <Link2 className="w-4 h-4" style={{ color: "#a1a1aa" }} />
               </div>
               <div>
                 <p className="text-[13px] font-semibold" style={{ color: "#ffffff" }}>Connect your ad platforms</p>
@@ -756,7 +756,7 @@ export default function Campaigns() {
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] transition-colors"
                 style={{
                   backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#2e2e2e",
-                  color: datePreset !== "last_30d" ? "#ef3735" : "#a1a1aa",
+                  color: datePreset !== "last_30d" ? "#fafafa" : "#a1a1aa",
                   border: "none",
                 }}
               >
@@ -782,7 +782,7 @@ export default function Campaigns() {
                       className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                       style={{
                         backgroundColor: datePreset === d.value ? "rgba(230,32,32,.08)" : "transparent",
-                        color: datePreset === d.value ? "#ef3735" : "#a1a1aa",
+                        color: datePreset === d.value ? "#fafafa" : "#a1a1aa",
                         fontWeight: datePreset === d.value ? 500 : 400,
                       }}
                     >
@@ -795,7 +795,7 @@ export default function Campaigns() {
                     className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
                     style={{
                       backgroundColor: datePreset === "custom" ? "rgba(230,32,32,.08)" : "transparent",
-                      color: datePreset === "custom" ? "#ef3735" : "#a1a1aa",
+                      color: datePreset === "custom" ? "#fafafa" : "#a1a1aa",
                     }}
                   >
                     Custom Range

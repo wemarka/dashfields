@@ -302,7 +302,7 @@ export default function HashtagAnalytics() {
                       data={[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a1a1aa" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#737373" },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -314,7 +314,7 @@ export default function HashtagAnalytics() {
                       {[
                         { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a1a1aa" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
-                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
+                        { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#737373" },
                       ].map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
                       ))}

@@ -161,7 +161,7 @@ function BreakdownSection({
           className="w-7 h-7 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: "rgba(230,32,32,0.12)" }}
         >
-          <Icon className="w-3.5 h-3.5" style={{ color: "#ef3735" }} />
+          <Icon className="w-3.5 h-3.5" style={{ color: "#a1a1aa" }} />
         </div>
         <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>
           {label}

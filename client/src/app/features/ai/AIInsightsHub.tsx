@@ -212,7 +212,7 @@ function AIStatsWidget() {
     <div className="grid grid-cols-3 gap-4">
       {[
         { label: "AI Recommendations", value: recs.length, icon: Lightbulb, color: "text-brand", bg: "bg-brand/10" },
-        { label: "High Priority", value: highPriority, icon: Zap, color: "text-[#f87171]", bg: "bg-[#ef3735]/14" },
+        { label: "High Priority", value: highPriority, icon: Zap, color: "text-[#a1a1aa]", bg: "bg-muted/40" },
         { label: "Opportunities", value: opportunities, icon: TrendingUp, color: "text-brand", bg: "bg-brand/10" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <Card key={label} className="glass">

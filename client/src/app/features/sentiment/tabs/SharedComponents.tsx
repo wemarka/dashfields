@@ -6,7 +6,7 @@ import { SENTIMENT_CONFIG, type SentimentResult } from "./constants";
 
 export function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(((score + 1) / 2) * 100);
-  const color = score > 0.3 ? "bg-muted" : score < -0.3 ? "bg-[#ef3735]/14" : "bg-muted";
+  const color = score > 0.3 ? "bg-muted" : score < -0.3 ? "bg-muted/60" : "bg-muted";
   return (
     <div className="relative w-full h-2.5 bg-muted rounded-full overflow-hidden">
       <div className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${pct}%` }} />

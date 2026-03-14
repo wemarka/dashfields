@@ -120,7 +120,7 @@ export function ApiKeysSection() {
                   className="text-[11px] px-2 py-1 rounded-lg transition-colors"
                   style={{
                     backgroundColor: k.is_active ? "rgba(230,32,32,0.12)" : "rgba(255,255,255,0.06)",
-                    color: k.is_active ? "#ef3735" : "rgba(255,255,255,0.35)",
+                    color: k.is_active ? "#fafafa" : "rgba(255,255,255,0.20)",
                   }}
                 >
                   {k.is_active ? "Active" : "Inactive"}

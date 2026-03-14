@@ -28,7 +28,7 @@ interface Notification {
 const TYPE_CONFIG: Record<NotifType, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
   info:    { icon: <Info className="h-4 w-4" />,          color: "text-muted-foreground",       bg: "bg-muted",    label: "Info"    },
   warning: { icon: <AlertTriangle className="h-4 w-4" />, color: "text-brand",     bg: "bg-brand/10",   label: "Warning" },
-  error:   { icon: <XCircle className="h-4 w-4" />,       color: "text-[#f87171] dark:text-[#f87171]",         bg: "bg-[#ef3735]/14",     label: "Alert"   },
+  error:   { icon: <XCircle className="h-4 w-4" />,       color: "text-[#a1a1aa]",         bg: "bg-muted/40",     label: "Alert"   },
   success: { icon: <CheckCircle className="h-4 w-4" />,   color: "text-foreground", bg: "bg-muted/60", label: "Success" },
 };
 
@@ -339,7 +339,7 @@ export default function Notifications() {
             {/* Smart alert types */}
             <div className="grid grid-cols-2 gap-3">
               <SmartAlertCard title="Budget Overspend Alert" description="Triggered when daily spend exceeds 110% of limit" icon={DollarSign} colorClass="bg-brand/10 text-brand border-amber-500/20" />
-              <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-[#ef3735]/14 text-[#f87171] dark:text-[#f87171] border-red-500/20" />
+              <SmartAlertCard title="ROAS Drop Alert" description="Triggered when ROAS falls below 2.0x" icon={TrendingDown} colorClass="bg-muted/40 text-[#a1a1aa] border-border" />
               <SmartAlertCard title="Campaign Milestone" description="Triggered at 50%, 75%, 100% of budget" icon={BarChart3} colorClass="bg-muted text-muted-foreground border-border" />
               <SmartAlertCard title="Scheduled Report Ready" description="Triggered when a scheduled report is generated" icon={Star} colorClass="bg-brand/10 text-brand dark:text-brand border-brand/20" />
             </div>

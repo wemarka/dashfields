@@ -174,13 +174,13 @@ function UnifiedCampaignTableInner({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               {isPinned && (
-                <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#ef3735" }} />
+                <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#a1a1aa" }} />
               )}
               <p
                 className="truncate leading-tight"
                 style={{ fontSize: 13, fontWeight: 500, color: "#ffffff", cursor: onOpenDrawer ? "pointer" : "default" }}
                 onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
-                onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ef3735"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
+                onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#fafafa"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
                 onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ffffff"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
               >
                 {c.name}
@@ -210,7 +210,7 @@ function UnifiedCampaignTableInner({
                         <button
                           onClick={(e) => { e.stopPropagation(); onPin(c); }}
                           className="flex items-center justify-center w-5 h-5 rounded transition-colors"
-                          style={{ color: isPinned ? "#ef3735" : "#737373", backgroundColor: "transparent" }}
+                          style={{ color: isPinned ? "#fafafa" : "#737373", backgroundColor: "transparent" }}
                           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#ff4444" : "#ffffff"; }}
                           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#ef3735" : "#737373"; }}
                         >
@@ -241,7 +241,7 @@ function UnifiedCampaignTableInner({
                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}>
                     {isToggling ? <Loader2 className="w-3 h-3 animate-spin" /> :
                       isActive ? <Pause className="w-3 h-3" style={{ color: "#a1a1aa" }} /> :
-                        <Play className="w-3 h-3" style={{ color: "#ef3735" }} />}
+                        <Play className="w-3 h-3" style={{ color: "#a1a1aa" }} />}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">{isActive ? "Pause campaign" : "Activate campaign"}</TooltipContent>

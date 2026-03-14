@@ -198,7 +198,7 @@ export default function PostAnalytics() {
     { label: "Total Engagement", value: summary?.totalEngagement ?? 0,   icon: TrendingUp, color: "text-muted-foreground bg-muted",   format: "number" },
     { label: "Avg Engagement",   value: summary?.avgEngagementPerPost ?? 0, icon: Heart,  color: "text-brand bg-brand/10",    format: "number" },
     { label: "Total Reach",      value: summary?.totalReach ?? 0,        icon: Users,     color: "text-foreground bg-muted", format: "number" },
-    { label: "Total Likes",      value: summary?.totalLikes ?? 0,        icon: Heart,     color: "text-[#f87171] bg-[#ef3735]/14",      format: "number" },
+    { label: "Total Likes",      value: summary?.totalLikes ?? 0,        icon: Heart,     color: "text-[#a1a1aa] bg-muted/40",      format: "number" },
     { label: "Avg ER%",          value: summary?.avgEngagementRate ?? 0, icon: TrendingUp, color: "text-brand bg-brand/10", format: "percent" },
   ];
 
