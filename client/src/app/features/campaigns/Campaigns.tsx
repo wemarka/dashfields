@@ -2,7 +2,7 @@
  * Campaigns page — Clean, minimal design inspired by Settings Dialog.
  * Light, airy layout with compact stats row and simple filter bar.
  */
-import { useState, useMemo, useCallback, Fragment } from "react";
+import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
 import {
   Plus, RefreshCw, GitCompare, Link2, FileDown, Search, X,
   CalendarIcon, ChevronDown,
@@ -190,6 +190,14 @@ export default function Campaigns() {
   const [tagFilter, setTagFilter] = useState("all");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [adAccountSelection, setAdAccountSelection] = useState<AdAccountSelection>({ type: "all" });
+
+  // ── Fix account_type for legacy rows (runs once on mount) ─────────────────
+  const fixAccountTypesMutation = trpc.meta.fixAccountTypes.useMutation();
+  useEffect(() => {
+    // Silently fix any old rows that have wrong account_type (e.g. NULL or 'business' for ad accounts)
+    fixAccountTypesMutation.mutate({ workspaceId: activeWorkspace?.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWorkspace?.id]);
 
   // ── Data ───────────────────────────────────────────────────────────────────
   const { data: localCampaigns = [], isLoading: localLoading } =

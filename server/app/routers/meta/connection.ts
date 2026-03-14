@@ -21,6 +21,13 @@ async function uploadPictureToS3(imageUrl: string, key: string): Promise<string 
   }
 }
 
+/** Helper: an account ID that is purely numeric (or act_numeric) is a Meta Ad Account */
+function isAdAccountId(platformAccountId: string | null): boolean {
+  if (!platformAccountId) return false;
+  const stripped = platformAccountId.replace(/^act_/, "");
+  return /^\d+$/.test(stripped);
+}
+
 export const metaConnectionRouter = router({
   /** Check if user has a connected Meta ad account */
   connectionStatus: protectedProcedure
@@ -97,6 +104,48 @@ export const metaConnectionRouter = router({
           });
       }
       return { success: true, accountName };
+    }),
+
+  /**
+   * Fix account_type for existing rows:
+   * - Facebook rows with a numeric platform_account_id → account_type = 'ad_account'
+   * - Instagram rows → account_type = 'business' (pages/profiles, not ad accounts)
+   * - Facebook rows with a non-numeric ID (page IDs) → account_type = 'page'
+   */
+  fixAccountTypes: protectedProcedure
+    .input(z.object({ workspaceId: z.number().int().positive().optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      let query = sb
+        .from("social_accounts")
+        .select("id, platform, platform_account_id, account_type")
+        .eq("user_id", ctx.user.id)
+        .in("platform", ["facebook", "instagram"]);
+      if (input?.workspaceId != null) query = query.eq("workspace_id", input.workspaceId);
+      const { data: rows } = await query;
+      if (!rows || rows.length === 0) return { fixed: 0, details: [] };
+
+      const details: { id: number; platform: string; oldType: string | null; newType: string }[] = [];
+
+      for (const row of rows as { id: number; platform: string; platform_account_id: string | null; account_type: string | null }[]) {
+        let newType: string;
+        if (row.platform === "facebook") {
+          newType = isAdAccountId(row.platform_account_id) ? "ad_account" : "page";
+        } else {
+          // Instagram rows are always business pages, not ad accounts
+          newType = "business";
+        }
+
+        if (row.account_type !== newType) {
+          await sb
+            .from("social_accounts")
+            .update({ account_type: newType, updated_at: new Date().toISOString() })
+            .eq("id", row.id);
+          details.push({ id: row.id, platform: row.platform, oldType: row.account_type, newType });
+        }
+      }
+
+      return { fixed: details.length, details };
     }),
 
   /** Disconnect Meta ad account */

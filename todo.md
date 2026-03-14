@@ -3380,3 +3380,10 @@
 - [x] Display Ad Account ID under each account name in dropdown
 - [x] Remove black background behind Meta badge on avatar
 - [x] Add platform_account_id to AdAccount type and tRPC social.list response
+
+## ✅ Fix account_type in DB
+- [x] Add fixAccountTypes tRPC mutation to metaConnectionRouter
+- [x] Auto-run fixAccountTypes on Campaigns page mount to correct legacy rows
+- [x] Facebook rows with numeric platform_account_id → account_type = 'ad_account'
+- [x] Instagram rows → account_type = 'business'
+- [x] Facebook rows with non-numeric ID → account_type = 'page'
