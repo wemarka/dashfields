@@ -18,65 +18,73 @@
   --radius: 10px;
 
   /* ═══════════════════════════════════════════════════════════════════════
-   * DESIGN TOKEN SYSTEM — Derived from Reference Image
-   * bg-base: #131313 (extracted via pixel sampling, RGB 19,19,19)
-   * Architecture: bg-base → bg-surface (+3.5L) → bg-elevated (+7L) → bg-hover (+10L)
-   * Typography: pure white → #C8C8C8 → #787878 (all WCAG AA compliant)
-   * Brand: #E62020 red CTA only  |  Charts: monochromatic white→dark scale
+   * DESIGN TOKEN SYSTEM — Stone Palette (extracted from reference image)
+   *
+   * SINGLE SOURCE OF TRUTH: edit ONLY these 3 lines to retheme the entire app:
+   *   --color-background  = stone-700 #433F3A (bg-base — darkest surface)
+   *   --color-card        = stone-600 #56524C (bg-surface — cards, sidebar)
+   *   --color-popover     = stone-500 #76706C (bg-elevated — modals, dropdowns)
+   *
+   * All other tokens are derived from these three values.
+   * Brand: #E62020 red — CTA buttons only.
+   * Charts: monochromatic white→stone scale + brand-red accent.
    * ═══════════════════════════════════════════════════════════════════════ */
 
-  /* ── Backgrounds (same hue 0°, same saturation 0%, increasing lightness) */
-  --color-background:           oklch(0.110 0.000 0);    /* bg-base    #131313 — absolute darkest */
-  --color-foreground:           oklch(1.000 0.000 0);    /* text-primary #FFFFFF */
+  /* ───────────────────────────────────────────────────────────────────────
+   * BACKGROUND HIERARCHY — Stone palette (warm gray with slight brown undertone)
+   * Extracted via pixel sampling: stone-700=#433F3A, stone-600=#56524C, stone-500=#76706C
+   * ─────────────────────────────────────────────────────────────────────── */
+  --color-background:           oklch(0.370 0.010 73.6);  /* stone-700 #433F3A — bg-base, page bg */
+  --color-foreground:           oklch(1.000 0.000 0);      /* #FFFFFF — text-primary */
 
-  --color-card:                 oklch(0.145 0.000 0);    /* bg-surface  #1B1B1B — cards, sidebar */
+  --color-card:                 oklch(0.440 0.011 78.2);  /* stone-600 #56524C — cards, sidebar */
   --color-card-foreground:      oklch(1.000 0.000 0);
-  --color-popover:              oklch(0.180 0.000 0);    /* bg-elevated #242424 — modals, dropdowns */
+  --color-popover:              oklch(0.549 0.010 56.1);  /* stone-500 #76706C — modals, dropdowns */
   --color-popover-foreground:   oklch(1.000 0.000 0);
 
   /* ── Brand / CTA — applied ONLY to primary action buttons */
-  --color-primary:              oklch(0.592 0.227 28);   /* brand-primary #E62020 */
-  --color-primary-foreground:   oklch(1.000 0.000 0);    /* pure white text inside CTAs */
+  --color-primary:              oklch(0.592 0.227 28);     /* brand-primary #E62020 */
+  --color-primary-foreground:   oklch(1.000 0.000 0);      /* pure white text inside CTAs */
 
-  /* ── Secondary / Muted surfaces */
-  --color-secondary:            oklch(0.210 0.000 0);    /* bg-hover    #2C2C2C */
+  /* ── Secondary / Muted surfaces — derived from stone-600 */
+  --color-secondary:            oklch(0.589 0.010 56.1);  /* stone-500 + slight lift — hover */
   --color-secondary-foreground: oklch(1.000 0.000 0);
 
-  --color-muted:                oklch(0.210 0.000 0);    /* bg-hover    #2C2C2C */
-  --color-muted-foreground:     oklch(0.810 0.000 0);    /* text-secondary #C8C8C8 — WCAG AA 8.5:1 */
+  --color-muted:                oklch(0.589 0.010 56.1);  /* stone hover surface */
+  --color-muted-foreground:     oklch(0.880 0.005 73.6);  /* warm light gray — WCAG AA on stone-700 */
 
-  --color-accent:               oklch(0.210 0.000 0);    /* bg-hover for interactive states */
+  --color-accent:               oklch(0.589 0.010 56.1);  /* stone hover */
   --color-accent-foreground:    oklch(1.000 0.000 0);
 
-  --color-destructive:          oklch(0.592 0.227 28);   /* brand-red */
+  --color-destructive:          oklch(0.592 0.227 28);     /* brand-red */
   --color-destructive-foreground: oklch(1.000 0.000 0);
 
-  /* ── Borders — derived from bg-base */
-  --color-border:               oklch(0.195 0.000 0);    /* border-subtle #272727 */
-  --color-input:                oklch(0.195 0.000 0);    /* same as border */
+  /* ── Borders — between stone-700 and stone-600 */
+  --color-border:               oklch(0.405 0.010 75.9);  /* border-subtle — between base & surface */
+  --color-input:                oklch(0.405 0.010 75.9);  /* same as border */
   --color-ring:                 oklch(0.592 0.227 28 / 0.40);  /* brand-red focus ring */
 
-  /* ── Sidebar */
-  --color-sidebar:                    oklch(0.110 0.000 0);    /* bg-base */
+  /* ── Sidebar — same as bg-base (stone-700) */
+  --color-sidebar:                    oklch(0.370 0.010 73.6);  /* stone-700 */
   --color-sidebar-foreground:         oklch(1.000 0.000 0);
-  --color-sidebar-border:             oklch(0.195 0.000 0);    /* border-subtle */
+  --color-sidebar-border:             oklch(0.405 0.010 75.9);  /* border-subtle */
   --color-sidebar-accent:             oklch(0.592 0.227 28 / 0.12);
   --color-sidebar-accent-foreground:  oklch(0.592 0.227 28);
   --color-sidebar-primary:            oklch(0.592 0.227 28);
   --color-sidebar-primary-foreground: oklch(1.000 0.000 0);
   --color-sidebar-ring:               oklch(0.592 0.227 28 / 0.20);
 
-  /* ── Charts — monochromatic scale (white → dark) + brand-red accent
-   *   chart-1: #FFFFFF  100% white  — primary data series
-   *   chart-2: #B3B3B3   70% white  — secondary series
-   *   chart-3: #666666   40% white  — tertiary series
-   *   chart-4: #3D3D3D   24% white  — comparison/background bars
-   *   chart-5: #E62020  brand red   — highlight/accent series
+  /* ── Charts — monochromatic white→stone scale + brand-red accent
+   *   chart-1: #FFFFFF  pure white        — primary data series
+   *   chart-2: #C8C8C8  warm light gray   — secondary series
+   *   chart-3: stone-500 #76706C          — tertiary series
+   *   chart-4: stone-600 #56524C          — comparison/background bars
+   *   chart-5: #E62020  brand red         — highlight/accent series
    */
   --color-chart-1: oklch(1.000 0.000 0);    /* #FFFFFF — primary */
-  --color-chart-2: oklch(0.720 0.000 0);    /* #B3B3B3 — secondary */
-  --color-chart-3: oklch(0.430 0.000 0);    /* #666666 — tertiary */
-  --color-chart-4: oklch(0.260 0.000 0);    /* #3D3D3D — background */
+  --color-chart-2: oklch(0.810 0.000 0);    /* #C8C8C8 — secondary */
+  --color-chart-3: oklch(0.549 0.010 56.1); /* stone-500 — tertiary */
+  --color-chart-4: oklch(0.440 0.011 78.2); /* stone-600 — background bars */
   --color-chart-5: oklch(0.592 0.227 28);   /* #E62020 — brand accent */
 
   /* ── Brand tokens */
@@ -88,7 +96,7 @@
   /* ── Semantic status */
   --color-success:   oklch(0.650 0.160 150);   /* green  — active, score */
   --color-warning:   oklch(0.750 0.160 70);    /* amber  — paused, warning */
-  --color-info:      oklch(0.720 0.000 0);     /* neutral — info states */
+  --color-info:      oklch(0.880 0.005 73.6);  /* warm light gray — info */
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
@@ -249,12 +257,12 @@
   /* Flex defaults */
   .flex { min-height: 0; min-width: 0; }
 
-  /* App background — bg-base #131313 with subtle red glow */
+  /* App background — stone-700 #433F3A with subtle red glow */
   .app-bg {
     background:
       radial-gradient(ellipse 70% 50% at 10% 0%, oklch(0.592 0.227 28 / 0.04) 0%, transparent 60%),
       radial-gradient(ellipse 60% 40% at 90% 100%, oklch(0.592 0.227 28 / 0.03) 0%, transparent 60%),
-      oklch(0.110 0.000 0);  /* bg-base #131313 */
+      oklch(0.370 0.010 73.6);  /* stone-700 #433F3A */
     min-height: 100dvh;
   }
 
@@ -274,11 +282,11 @@
     box-shadow: 0 0 6px var(--color-brand);
   }
 
-  /* Muted text override — text-secondary #C8C8C8 (WCAG AA 8.5:1 on #131313) */
+  /* Muted text override — warm light gray (WCAG AA on stone-700 #433F3A) */
   .text-neutral-400,
   .text-zinc-400,
   .text-gray-400 {
-    color: oklch(0.810 0.000 0) !important; /* text-secondary #C8C8C8 */
+    color: oklch(0.880 0.005 73.6) !important; /* warm light gray on stone bg */
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -300,20 +308,20 @@
   }
   /* Neutral filled — secondary actions */
   .btn-neutral {
-    background-color: #1B1B1B;  /* bg-surface */
+    background-color: #56524C;  /* stone-600 bg-surface */
     color: #ffffff;
-    border: 1px solid #272727;  /* border-subtle */
+    border: 1px solid #6b6660;  /* stone border */
     transition: background-color 0.2s ease;
   }
-  .btn-neutral:hover:not(:disabled) { background-color: #2C2C2C; }  /* bg-hover */
+  .btn-neutral:hover:not(:disabled) { background-color: #76706C; }  /* stone-500 hover */
   /* Ghost — tertiary actions */
   .btn-ghost {
     background-color: transparent;
-    color: #C8C8C8;             /* text-secondary */
-    border: 1px solid #272727;  /* border-subtle */
+    color: #e8e4e0;             /* warm light text */
+    border: 1px solid #6b6660;  /* stone border */
     transition: background-color 0.2s ease, color 0.2s ease;
   }
-  .btn-ghost:hover:not(:disabled) { background-color: #1B1B1B; color: #ffffff; }
+  .btn-ghost:hover:not(:disabled) { background-color: #56524C; color: #ffffff; }
   /* Legacy alias */
   .btn-brand { background-color: #E62020; color: white; transition: background-color 0.2s ease; }
   .btn-brand:hover { background-color: #cc1c1c; }
@@ -362,9 +370,9 @@
     padding: 2px 8px; border-radius: 9999px;
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(255,255,255,0.06);
-    color: #666666;             /* chart-3 neutral */
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.08);
+    color: #b8b2ac;             /* stone-400 warm neutral */
+    border: 1px solid rgba(255,255,255,0.12);
   }
   /* Generic info chip — neutral light */
   .badge-neutral {
@@ -372,9 +380,9 @@
     padding: 2px 8px; border-radius: 9999px;
     font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(255,255,255,0.08);
-    color: #C8C8C8;             /* text-secondary */
-    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.10);
+    color: #e8e4e0;             /* warm white text */
+    border: 1px solid rgba(255,255,255,0.14);
   }
 
   /* ── STATUS DOTS ──────────────────────────────────────────────────────── */
@@ -384,7 +392,7 @@
   }
   .status-dot-active  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
   .status-dot-paused  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #f59e0b; }
-  .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #3D3D3D; }  /* chart-4 */
+  .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #76706C; }  /* stone-500 */
   .status-dot-hot     { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #E62020; animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
 
   /* ── SCORE / METRIC INDICATORS ────────────────────────────────────────── */
@@ -443,10 +451,10 @@
 
 /* Override chart color vars at root level so Recharts picks them up */
 :root {
-  /* Monochromatic chart palette — derived from bg-base #131313 → white */
-  --color-chart-1: #FFFFFF;   /* 100% white — primary series */
-  --color-chart-2: #B3B3B3;   /* 70% white  — secondary series */
-  --color-chart-3: #666666;   /* 40% white  — tertiary series */
-  --color-chart-4: #3D3D3D;   /* 24% white  — background/comparison */
-  --color-chart-5: #E62020;   /* brand-red  — highlight/accent */
+  /* Stone-derived chart palette — white → stone scale + brand-red accent */
+  --color-chart-1: #FFFFFF;   /* pure white    — primary series */
+  --color-chart-2: #C8C8C8;   /* warm light    — secondary series */
+  --color-chart-3: #76706C;   /* stone-500     — tertiary series */
+  --color-chart-4: #56524C;   /* stone-600     — background/comparison */
+  --color-chart-5: #E62020;   /* brand-red     — highlight/accent */
 }

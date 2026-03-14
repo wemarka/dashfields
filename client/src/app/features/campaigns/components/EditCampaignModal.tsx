@@ -98,7 +98,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
               onChange={(e) => setName(e.target.value)}
               placeholder="Campaign name"
               className="text-sm h-8"
-              style={{ background: "#242424", border: "1px solid #333", color: "#fff" }}
+              style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}
             />
           </div>
 
@@ -106,7 +106,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
           <div className="space-y-1.5">
             <Label className="text-xs font-medium" style={{ color: "#C8C8C8" }}>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as "ACTIVE" | "PAUSED")}>
-              <SelectTrigger className="h-8 text-sm" style={{ background: "#242424", border: "1px solid #333", color: "#fff" }}>
+              <SelectTrigger className="h-8 text-sm" style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent style={{ background: "#212121", border: "1px solid #383838" }}>
@@ -139,7 +139,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
                 min="1"
                 step="0.01"
                 className="text-sm h-8 pl-6"
-                style={{ background: "#242424", border: "1px solid #333", color: "#fff" }}
+                style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}
               />
             </div>
             <p className="text-xs" style={{ color: "#525252" }}>

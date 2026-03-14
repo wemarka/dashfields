@@ -7,9 +7,9 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
 const P = {
-  bg:     "#141414",
-  card:   "#1e1e1e",
-  border: "#303030",
+  bg:     "#433F3A",
+  card:   "#56524C",
+  border: "#6b6660",
   text:   "#ffffff",
   muted:  "#C8C8C8",
   subtle: "#737373",
@@ -139,7 +139,7 @@ function TrendBadge({ current, previous, higherIsBetter = true }: {
   const absChange = Math.abs(change);
   if (absChange < 0.1) {
     return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, color: P.subtle, fontWeight: 500, backgroundColor: "#272727", padding: "2px 6px", borderRadius: 6 }}>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, color: P.subtle, fontWeight: 500, backgroundColor: "#6b6660", padding: "2px 6px", borderRadius: 6 }}>
         <Minus style={{ width: 10, height: 10 }} />0%
       </span>
     );
@@ -159,10 +159,10 @@ function SkeletonCard() {
   return (
     <div style={{ backgroundColor: P.card, border: `1px solid ${P.border}`, borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#303030" }} />
-        <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#303030" }} />
+        <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#6b6660" }} />
+        <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#6b6660" }} />
       </div>
-      <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#272727" }} />
+      <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#6b6660" }} />
       <div style={{ height: 9, width: 100, borderRadius: 4, backgroundColor: "#212121" }} />
       <div style={{ height: 40, borderRadius: 6, backgroundColor: "#212121" }} />
     </div>
@@ -217,7 +217,7 @@ function KpiCard({
     <button
       onClick={onClick}
       style={{
-        backgroundColor: isSelected ? "#272727" : P.card,
+        backgroundColor: isSelected ? "#6b6660" : P.card,
         border: isSelected ? `1px solid ${P.brand}` : `1px solid ${P.border}`,
         borderRadius: 14,
         padding: "16px 18px 12px",

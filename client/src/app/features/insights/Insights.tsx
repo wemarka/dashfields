@@ -318,7 +318,7 @@ export default function Insights() {
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={comparisonData} barGap={4}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#76706C" strokeOpacity={0.6} />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip content={<CustomTooltip />} />
@@ -345,7 +345,7 @@ export default function Insights() {
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={comparisonData} layout="vertical" barSize={20}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} horizontal={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#76706C" strokeOpacity={0.6} horizontal={false} />
                     <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={70} />
                     <Tooltip content={<CustomTooltip />} />

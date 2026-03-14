@@ -3468,3 +3468,8 @@
 - [x] Extract exact bg-base hex from attached image → #131313 (RGB 19,19,19)
 - [x] Derive bg-surface #1B1B1B, bg-elevated #242424, typography, brand-red, chart palette
 - [x] Apply full color system to index.css and all components
+
+## 🔄 Stone Palette — Unified Background System
+- [x] Extract stone-500, stone-600, stone-700 hex from image → #76706C / #56524C / #433F3A
+- [x] Rebuild CSS variables: bg-base=stone-700, bg-surface=stone-600, bg-elevated=stone-500
+- [x] Apply globally — replace all hardcoded bg colors with CSS vars

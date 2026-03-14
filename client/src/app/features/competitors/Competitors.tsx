@@ -57,7 +57,7 @@ function ScoreRing({ score }: { score: number }) {
     <div className="flex flex-col items-center gap-1">
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white"
-        style={{ background: `conic-gradient(${color} ${score}%, #303030 ${score}%)` }}
+        style={{ background: `conic-gradient(${color} ${score}%, #6b6660 ${score}%)` }}
       >
         <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
           <span className="text-xs font-bold" style={{ color }}>{score}</span>
@@ -301,7 +301,7 @@ export default function Competitors() {
                 {/* Competitive Score */}
                 <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #303030 ${swotData.competitiveScore}%)` }}>
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#e62020'} ${swotData.competitiveScore}%, #6b6660 ${swotData.competitiveScore}%)` }}>
                     <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
                       <span className="text-xs font-bold">{swotData.competitiveScore}</span>
                     </div>
