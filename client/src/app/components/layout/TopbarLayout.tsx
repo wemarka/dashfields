@@ -50,7 +50,8 @@ export default function TopbarLayout({ children }: TopbarLayoutProps) {
   return (
     <div className="h-screen flex flex-col app-bg overflow-hidden">
       <GlobalTopbar />
-      <main className="flex-1 overflow-y-auto h-full">
+      {/* تغير لون الـ Background للتطبيق */}
+      <main className="flex-1 overflow-y-auto h-full" style={{ backgroundColor: "#171717" }}>
         {children}
       </main>
     </div>

@@ -134,9 +134,9 @@ function fmtNumber(n: number): string {
 
 // ─── Palette constants (single source of truth) ──────────────────────────────
 const P = {
-  bg:        "#433F3A",   // neutral-950
-  card:      "#56524C",   // neutral-900
-  border:    "#6b6660",   // neutral-800
+  bg:        "#171717",   // app base bg
+  card:      "#262626",   // card/surface bg
+  border:    "#333333",   // border
   dim:       "#737373",   // neutral-500
   muted:     "#C8C8C8",   // neutral-400
   white:     "#ffffff",
@@ -365,7 +365,7 @@ export default function HomePage() {
             className="banner-badge"
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              background: P.red, color: P.white,
+              background: "#ef3735", color: P.white,
               fontSize: 10, fontWeight: 700,
               letterSpacing: "1.5px", textTransform: "uppercase",
               padding: "4px 12px", borderRadius: 4,
@@ -401,7 +401,7 @@ export default function HomePage() {
             <button
               className="banner-cta-btn"
               style={{
-                background: P.red, color: P.white,
+                background: "#ef3735", color: P.white,
                 border: "none", borderRadius: 8,
                 padding: "10px 22px", fontSize: 14, fontWeight: 600,
                 cursor: "pointer",
@@ -453,7 +453,7 @@ export default function HomePage() {
                 {stat.val}
               </div>
               <div style={{ fontSize: 11, color: P.dim, marginTop: 4 }}>{stat.sub}</div>
-              <div style={{ fontSize: 10, color: P.red, fontWeight: 600, marginTop: 2, letterSpacing: "0.5px" }}>
+              <div style={{ fontSize: 10, color: "#ef3735", fontWeight: 600, marginTop: 2, letterSpacing: "0.5px" }}>
                 {stat.label}
               </div>
             </div>
@@ -491,10 +491,10 @@ export default function HomePage() {
         {/* Label pill */}
         <div
           className="sr-reveal sr-d1"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: P.redAlpha8, border: `1px solid ${P.redAlpha18}`,
-            color: P.red, fontSize: 12, fontWeight: 600,
+            style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: P.redAlpha8, border: `1px solid ${P.redAlpha18}`,
+                color: "#ef3735", fontSize: 12, fontWeight: 600,
             letterSpacing: "1.5px", textTransform: "uppercase",
             padding: "6px 16px", borderRadius: 50,
             marginBottom: 28, width: "fit-content",

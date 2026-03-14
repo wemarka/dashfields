@@ -79,7 +79,7 @@ export function GlobalTopbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="glass-strong border-b border-neutral-800">
+      <div className="glass-strong border-b border-neutral-800" style={{ backgroundColor: "#262626" }}>
         <div className="flex items-center h-14 px-4 lg:px-6 gap-2">
           {/* ── Mobile Hamburger ──────────────────────────────────────── */}
           <button
