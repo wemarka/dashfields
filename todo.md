@@ -3572,3 +3572,8 @@
 - [x] Apply FieldError to RegisterPage, Profile, WorkspaceSettings forms
 - [x] Replace Loader2 with LoadingState in Campaigns, Analytics, Connections
 - [x] EmptyState in PostList with "Schedule a Post" action
+
+## 🔄 UI Consistency — MetaCampaignTable/FieldError/PerformanceMonitor
+- [x] MetaCampaignTable loading → LoadingState variant="skeleton" rows={5}
+- [x] FieldError in GeneralTab and TeamTab settings forms
+- [x] EmptyState in PerformanceMonitor alerts and reports sections

@@ -9,10 +9,12 @@ import {
   Building2, Trash2, ChevronDown, Save, AlertTriangle,
   Upload, ImageIcon,
 } from "lucide-react";
+import { FieldError } from "@/core/components/ui/field-error";
 
 export function GeneralTab() {
   const { activeWorkspace, refetch, canAdmin } = useWorkspace();
   const [name, setName] = useState(activeWorkspace?.name ?? "");
+  const [nameError, setNameError] = useState<string | null>(null);
   const [showDanger, setShowDanger] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | null>(activeWorkspace?.logo_url ?? null);
@@ -116,10 +118,13 @@ export function GeneralTab() {
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground font-medium">Workspace Name</label>
           <input
-            value={name} onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-background border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+            value={name}
+            onChange={(e) => { setName(e.target.value); if (e.target.value.trim()) setNameError(null); }}
+            aria-invalid={!!nameError}
+            className="w-full px-3 py-2 rounded-xl bg-background border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 aria-[invalid=true]:border-[#ef3735] aria-[invalid=true]:ring-[#ef3735]/40"
             placeholder="My Workspace"
           />
+          {nameError && <FieldError message={nameError} />}
         </div>
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground font-medium">Slug</label>
@@ -142,7 +147,11 @@ export function GeneralTab() {
           </div>
         </div>
         <button
-          onClick={() => updateMutation.mutate({ workspaceId: activeWorkspace.id, name })}
+          onClick={() => {
+            if (!name.trim()) { setNameError("Workspace name cannot be empty"); return; }
+            setNameError(null);
+            updateMutation.mutate({ workspaceId: activeWorkspace.id, name });
+          }}
           disabled={updateMutation.isPending || name === activeWorkspace.name}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
         >

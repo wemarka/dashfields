@@ -10,6 +10,7 @@ import {
   MailPlus, Clock, Ban, ArrowRightLeft,
 } from "lucide-react";
 import { ROLE_LABELS, ROLE_COLORS } from "./constants";
+import { FieldError } from "@/core/components/ui/field-error";
 
 const ROLE_ICONS: Record<string, React.ElementType> = {
   owner: Crown, admin: Shield, member: UserCheck, viewer: Eye,
@@ -20,6 +21,7 @@ export function TeamTab() {
   const isOwner = activeWorkspace?.role === "owner";
   const [addEmail, setAddEmail] = useState("");
   const [addRole, setAddRole] = useState<"admin" | "member" | "viewer">("member");
+  const [addEmailError, setAddEmailError] = useState<string | null>(null);
   const [showTransfer, setShowTransfer] = useState(false);
   const [transferTargetId, setTransferTargetId] = useState<number | null>(null);
   const [transferConfirm, setTransferConfirm] = useState("");
@@ -102,13 +104,21 @@ export function TeamTab() {
               <option value="viewer">Viewer</option>
             </select>
             <button
-              onClick={() => addMutation.mutate({ workspaceId: activeWorkspace.id, email: addEmail, role: addRole })}
+              onClick={() => {
+                if (!addEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addEmail)) {
+                  setAddEmailError("Please enter a valid email address");
+                  return;
+                }
+                setAddEmailError(null);
+                addMutation.mutate({ workspaceId: activeWorkspace.id, email: addEmail, role: addRole });
+              }}
               disabled={!addEmail || addMutation.isPending}
               className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {addMutation.isPending ? "Adding..." : "Add"}
             </button>
           </div>
+          {addEmailError && <FieldError message={addEmailError} />}
           <p className="text-[11px] text-muted-foreground/60">The user must already have a Dashfields account.</p>
         </div>
       )}

@@ -7,7 +7,7 @@
  * - Bulk Actions: select multiple campaigns → Activate / Pause all at once
  */
 import { Link2, LayoutGrid, ExternalLink, Loader2, Play, Pause, CheckSquare } from "lucide-react";
-import { CampaignRowSkeleton } from "@/core/components/ui/skeleton-cards";
+import { LoadingState } from "@/core/components/ui/loading-state";
 import { Link } from "wouter";
 import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
@@ -269,21 +269,8 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
   // ── Loading skeleton ──
   if (loading) {
     return (
-      <div className="glass rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-foreground/5">
-                {["", "", "Campaign", "Status", "Objective", "Budget", "Spend", "Impressions", "Clicks", "CTR"].map((h, i) => (
-                  <th key={i} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: 5 }).map((_, i) => <CampaignRowSkeleton key={i} />)}
-            </tbody>
-          </table>
-        </div>
+      <div className="glass rounded-2xl py-12">
+        <LoadingState variant="skeleton" rows={5} size="md" />
       </div>
     );
   }

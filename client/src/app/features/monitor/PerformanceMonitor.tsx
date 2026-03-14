@@ -7,6 +7,8 @@ import {
   Wifi, WifiOff, BarChart3, Target, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { EmptyState } from "@/core/components/ui/empty-state";
+import { LoadingState } from "@/core/components/ui/loading-state";
 import { Badge } from "@/core/components/ui/badge";
 import { Button } from "@/core/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
@@ -444,15 +446,14 @@ export function PerformanceMonitor() {
           </CardHeader>
           <CardContent>
             {alertsQuery.isLoading ? (
-              <div className="space-y-2 animate-pulse">
-                {[1, 2, 3].map(i => <div key={i} className="h-10 bg-muted rounded-xl" />)}
-              </div>
+              <LoadingState variant="skeleton" rows={3} size="sm" />
             ) : !alertsQuery.data?.length ? (
-              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
-                <CheckCircle2 className="w-8 h-8 opacity-30 text-foreground" />
-                <p className="text-sm">No active alert rules</p>
-                <p className="text-xs opacity-70">Set up alerts in the Alerts section</p>
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="No active alert rules"
+                description="Set up alerts in the Alerts section"
+                size="sm"
+              />
             ) : (
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {alertsQuery.data.map((alert: { id: number; metric: string; operator: string; threshold: string }) => (
