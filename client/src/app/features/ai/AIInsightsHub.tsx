@@ -150,7 +150,7 @@ function QuickCaptionWidget() {
         <CardTitle className="text-base flex items-center gap-2">
           <Zap className="w-4 h-4 text-brand" />
           Quick Caption Generator
-          <Badge className="ml-auto text-xs bg-brand/10 text-brand border-brand/20">AI-Powered</Badge>
+          <Badge variant="neutral" className="ml-auto text-xs">AI-Powered</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">

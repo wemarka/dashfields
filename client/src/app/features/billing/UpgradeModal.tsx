@@ -161,7 +161,7 @@ export function UpgradeModal({ open, onClose, currentPlan = "free", reason }: Up
               >
                 {isPro && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <Badge className="bg-brand text-white text-xs px-3">Most Popular</Badge>
+                    <Badge variant="default" className="text-xs px-3">Most Popular</Badge>
                   </div>
                 )}
 

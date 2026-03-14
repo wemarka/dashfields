@@ -310,7 +310,7 @@ export function PerformanceMonitor() {
               <BarChart3 className="w-4 h-4 text-brand" />
               Impressions & Clicks Trend
               {history.length > 1 && (
-                <Badge className="ml-auto text-[10px] bg-brand/10 text-brand border-brand/20">
+                <Badge variant="neutral" className="ml-auto text-[10px]">
                   {history.length} data points
                 </Badge>
               )}
@@ -407,7 +407,7 @@ export function PerformanceMonitor() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-sm truncate max-w-[70%]">{topCampaignQuery.data.name}</p>
-                  <Badge className="bg-muted text-foreground dark:bg-muted dark:text-foreground text-xs">
+                  <Badge variant="neutral" className="text-xs">
                     Top Spender
                   </Badge>
                 </div>
@@ -436,7 +436,7 @@ export function PerformanceMonitor() {
               <Bell className="w-4 h-4 text-brand" />
               Active Alert Rules
               {alertsQuery.data && alertsQuery.data.length > 0 && (
-                <Badge className="ml-auto bg-[#ef3735]/14 text-brand dark:bg-brand/10 dark:text-brand text-xs">
+                <Badge variant="neutral" className="ml-auto text-xs">
                   {alertsQuery.data.length}
                 </Badge>
               )}
@@ -463,7 +463,7 @@ export function PerformanceMonitor() {
                         {alert.metric.toUpperCase()} {alert.operator === "gt" ? ">" : alert.operator === "lt" ? "<" : alert.operator === "gte" ? "≥" : "≤"} {alert.threshold}
                       </p>
                     </div>
-                    <Badge className="text-[10px] bg-brand/10 text-brand dark:bg-brand/10 dark:text-brand">
+                    <Badge variant="neutral" className="text-[10px]">
                       Active
                     </Badge>
                   </div>
@@ -481,7 +481,7 @@ export function PerformanceMonitor() {
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <Activity className="w-4 h-4 text-brand" />
               Connected Platforms
-              <Badge className="ml-auto text-[10px] bg-brand/10 text-brand border-brand/20">
+              <Badge variant="neutral" className="ml-auto text-[10px]">
                 {summary.connectedPlatforms} active
               </Badge>
             </CardTitle>

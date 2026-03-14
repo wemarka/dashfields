@@ -59,7 +59,7 @@ export function CampaignPreview({
             <h2 className="text-lg font-bold">{brief.name ?? "حملة إعلانية جديدة"}</h2>
             <p className="text-neutral-500 text-sm mt-0.5">{brief.product}</p>
           </div>
-          <Badge className="bg-[#ef3735]/14 text-[#f87171] border border-red-500/30 text-xs">
+          <Badge variant="destructive" className="text-xs bg-[#ef3735]/14 text-[#f87171] border-[#ef3735]/30">
             {brief.campaignType ?? "حملة"}
           </Badge>
         </div>

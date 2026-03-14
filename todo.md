@@ -3522,3 +3522,8 @@
 - [x] Switch focus ring → focus-visible:ring-[#ef3735]/40
 - [x] Input and Textarea focus → focus-visible:ring-[#ef3735]/40 focus-visible:border-[#ef3735]
 - [x] Badge neutral variant → bg-muted/60 text-white
+
+## 🔄 UI Consistency — Slider/Badges/Toast
+- [x] Slider focus ring → focus-visible:ring-[#ef3735]/40
+- [x] Audit and migrate inline Badge classNames to proper variants (neutral/outline)
+- [x] Sonner toast styling → bg-card, border-border, text-foreground

@@ -45,7 +45,7 @@ export function ContentPlanView({
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="w-4 h-4 text-[#f87171]" />
           <h3 className="font-semibold text-white text-sm">توزيع الميزانية</h3>
-          <Badge className="bg-[#ef3735]/14 text-[#f87171] border-0 text-xs mr-auto">
+          <Badge variant="destructive" className="text-xs mr-auto bg-[#ef3735]/14 text-[#f87171] border-0">
             {totalBudget.toLocaleString()} {currency}
           </Badge>
         </div>
@@ -188,10 +188,8 @@ function ContentPlanCard({ item }: { item: ContentPlanItem }) {
           </div>
         </div>
         <Badge
-          className={cn(
-            "text-[10px] border-0",
-            item.status === "draft" ? "bg-neutral-800 text-neutral-400" : "bg-muted text-foreground",
-          )}
+          variant={item.status === "draft" ? "neutral" : "secondary"}
+          className="text-[10px] border-0"
         >
           {item.status === "draft" ? "مسودة" : "جاهز"}
         </Badge>

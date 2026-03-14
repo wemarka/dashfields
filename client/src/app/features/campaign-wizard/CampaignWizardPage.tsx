@@ -496,7 +496,7 @@ export default function CampaignWizardPage() {
                   {(wf.brief as CampaignBrief)?.name ?? "حملة جديدة"}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Badge className="text-[10px] bg-neutral-800 text-neutral-400 border-0">
+                  <Badge variant="neutral" className="text-[10px]">
                     {STEP_LABELS[wf.step as WizardStep] ?? wf.step}
                   </Badge>
                   <span className="text-[10px] text-neutral-500">

@@ -160,7 +160,7 @@ export function CreativeGrid({
               <span>{totalCount} صورة</span>
             </span>
             {approvedCount > 0 && (
-              <Badge className="bg-muted text-foreground border border-emerald-100 text-xs font-medium px-2.5 py-0.5">
+              <Badge variant="neutral" className="text-xs font-medium px-2.5 py-0.5">
                 {Math.round((approvedCount / totalCount) * 100)}% موافق عليها
               </Badge>
             )}
@@ -293,7 +293,7 @@ export function CreativeGrid({
                     {platformCreatives.length} صورة
                   </Badge>
                   {platformApproved > 0 && (
-                    <Badge className="bg-muted text-foreground border border-emerald-100 text-xs font-medium">
+                    <Badge variant="neutral" className="text-xs font-medium">
                       {platformApproved} موافق
                     </Badge>
                   )}
