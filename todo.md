@@ -3537,3 +3537,8 @@
 - [x] Dialog and Sheet overlay → bg-background/60 backdrop-blur-sm
 - [x] Calendar → bg-card border-border, selected day bg-[#ef3735]
 - [x] Scrollbar → custom scrollbar-color in index.css
+
+## 🔄 UI Consistency — AlertDialog/ContextMenu/NavigationMenu
+- [x] AlertDialog overlay → bg-background/60 backdrop-blur-sm
+- [x] ContextMenu → bg-card border-border, focus:bg-muted/60 text-white
+- [x] NavigationMenu → bg-card border-border
