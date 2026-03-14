@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { DashboardKpiSkeleton, ChartSkeleton } from "@/core/components/ui/skeleton-cards";
 import { useCurrency } from "@/shared/hooks/useCurrency";
+import { EmptyState } from "@/core/components/ui/empty-state";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_30d" | "this_month" | "last_month";
@@ -245,13 +246,11 @@ export default function Insights() {
             <ChartSkeleton height={180} />
           </div>
         ) : insights.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-12 text-center">
-            <BarChart2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-sm font-semibold text-foreground mb-2">No platform data yet</h3>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              Connect your social media accounts in Connections to see cross-platform insights here.
-            </p>
-          </div>
+          <EmptyState
+            icon={BarChart2}
+            title="No platform data yet"
+            description="Connect your social media accounts in Connections to see cross-platform insights here."
+          />
         ) : (
           <>
             {/* ── Summary KPIs ─────────────────────────────────────────────── */}

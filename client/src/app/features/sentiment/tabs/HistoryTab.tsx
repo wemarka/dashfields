@@ -6,6 +6,7 @@ import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { RefreshCw, History, Trash2, Filter, X } from "lucide-react";
 import { SENTIMENT_CONFIG, PLATFORMS } from "./constants";
+import { EmptyState } from "@/core/components/ui/empty-state";
 
 export function HistoryTab() {
   const [filterSentiment, setFilterSentiment] = useState("");
@@ -48,10 +49,7 @@ export function HistoryTab() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" /></div>
         ) : !history?.length ? (
-          <div className="py-12 text-center">
-            <History className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No analysis history yet</p>
-          </div>
+          <EmptyState icon={History} title="No analysis history yet" description="Run a sentiment analysis to see results here." size="sm" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">

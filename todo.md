@@ -3557,3 +3557,8 @@
 - [x] Separator → bg-muted/40
 - [x] AvatarFallback → bg-muted/60 text-white
 - [x] Apply CardElevated to key cards in Billing, Insights, AI Hub pages
+
+## 🔄 UI Consistency — Pagination/Validation/EmptyState
+- [x] Pagination active → bg-muted/60 text-white, hover → hover:bg-muted/30
+- [x] Input and Textarea aria-invalid error styling → border-[#ef3735] ring-[#ef3735]/40
+- [x] Create reusable EmptyState component → bg-muted/20 border-dashed border-border

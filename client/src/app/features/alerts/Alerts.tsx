@@ -13,6 +13,7 @@ import { useWorkspace } from "@/core/contexts/WorkspaceContext";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/core/components/ui/empty-state";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Metric   = "ctr" | "cpc" | "cpm" | "spend" | "impressions" | "clicks" | "roas";
@@ -374,10 +375,7 @@ export default function Alerts() {
               <span className="text-sm">Loading rules...</span>
             </div>
           ) : rules.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <Bell className="h-8 w-8 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No alert rules yet. Create one above.</p>
-            </div>
+            <EmptyState icon={Bell} title="No alert rules yet" description="Create one above to start monitoring your campaigns." size="sm" />
           ) : (
             <div className="divide-y divide-white/5">
               {rules.map(rule => (
@@ -487,10 +485,7 @@ export default function Alerts() {
               <span className="text-sm">Loading notifications...</span>
             </div>
           ) : filteredNotifications.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <CheckCircle2 className="h-8 w-8 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No notifications yet. Alerts will appear here when triggered.</p>
-            </div>
+            <EmptyState icon={CheckCircle2} title="No notifications yet" description="Alerts will appear here when triggered." size="sm" />
           ) : (
             <div className="divide-y divide-white/5">
               {filteredNotifications.map(n => (

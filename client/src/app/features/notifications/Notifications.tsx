@@ -11,6 +11,7 @@ import {
   TrendingDown, DollarSign, Zap, BarChart3, Clock, Star,
   X, Mail, Smartphone,
 } from "lucide-react";
+import { EmptyState } from "@/core/components/ui/empty-state";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type NotifType = "info" | "warning" | "error" | "success";
@@ -429,15 +430,11 @@ export default function Notifications() {
             {[1, 2, 3, 4].map(i => <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />)}
           </div>
         ) : displayed.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-border rounded-2xl bg-muted/20">
-            <BellOff className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-foreground">
-              {filter === "unread" ? "No unread notifications" : "No notifications"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {filter === "unread" ? "You're all caught up!" : "Budget alerts and campaign updates will appear here."}
-            </p>
-          </div>
+          <EmptyState
+            icon={BellOff}
+            title={filter === "unread" ? "No unread notifications" : "No notifications"}
+            description={filter === "unread" ? "You're all caught up!" : "Budget alerts and campaign updates will appear here."}
+          />
         ) : (
           <>
             <div className="flex items-center gap-2 px-1">

@@ -13,6 +13,7 @@ import { trpc } from "@/core/lib/trpc";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/core/components/ui/empty-state";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -439,10 +440,12 @@ export function MetaCampaignTable({ campaigns, loading, isConnected, onRowClick 
         </table>
 
         {campaigns.length === 0 && (
-          <div className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">No campaigns found for this filter.</p>
-            <p className="text-xs text-muted-foreground mt-1">Try changing the date range or status filter.</p>
-          </div>
+          <EmptyState
+            icon={LayoutGrid}
+            title="No campaigns found"
+            description="Try changing the date range or status filter."
+            size="sm"
+          />
         )}
       </div>
     </div>
