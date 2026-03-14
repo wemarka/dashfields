@@ -3499,3 +3499,7 @@
 - [x] Swept all hardcoded colors across all 25+ component files
 - [x] Updated GlobalTopbar, TopbarLayout, LoginPage, AuthCallbackPage
 - [x] 0 TypeScript errors
+
+## 🔄 Input Focus + Shimmer Polish
+- [x] Add focus:border-brand + focus:ring-1 focus:ring-brand/30 to all input fields globally (Input + Textarea components)
+- [x] Update shimmer animation gradient from #2e2e2e to #1c1c1c → #242424 (Skeleton + @keyframes pulse override)
