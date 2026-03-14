@@ -3252,3 +3252,13 @@
 - [x] Fix RTL in AI assistant message bubble (text alignment, avatar position)
 - [x] Fix RTL in GenerativeUIRenderer (stat cards, bar charts, chip buttons)
 - [x] Pass dir prop from MessageBubble to GenerativeUIRenderer
+
+## 📎 Assist Chat — Image & File Attachments
+- [x] Add server-side file upload tRPC procedure (storagePut to S3)
+- [x] Add ChatAttachment type to message model
+- [x] Add attachment button in ChatInput with file picker
+- [x] Add image/file preview strip above input before sending
+- [x] Render image thumbnails in user message bubbles
+- [x] Render file links/icons for non-image attachments in message bubbles
+- [x] Support drag-and-drop file upload
+- [x] Support paste image from clipboard

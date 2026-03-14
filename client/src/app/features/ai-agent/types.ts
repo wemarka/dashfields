@@ -139,6 +139,19 @@ export interface ToolStatus {
   toolName?: string;
 }
 
+// ── Chat Attachment ──────────────────────────────────────────────────────
+export interface ChatAttachment {
+  id: string;
+  fileName: string;
+  url: string;
+  mimeType: string;
+  fileSize: number;
+  /** Local preview URL (blob:) before upload completes */
+  previewUrl?: string;
+  /** Upload status */
+  status: "uploading" | "done" | "error";
+}
+
 // ── Chat Message ───────────────────────────────────────────────────────────
 export interface ChatMessage {
   id: string;
@@ -147,6 +160,7 @@ export interface ChatMessage {
   uiBlocks?: UIBlock[];
   isStreaming?: boolean;
   timestamp?: number;
+  attachments?: ChatAttachment[];
 }
 
 export interface ChatSession {

@@ -15,6 +15,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, Plus, Loader2, Sparkles, Copy, Mic, Paperclip,
   ArrowDown, StopCircle, MessageSquare, Trash2, ChevronLeft, ChevronRight,
+  X, FileText, Image as ImageIcon,
 } from "lucide-react";
 import { Textarea } from "@/core/components/ui/textarea";
 import { Button } from "@/core/components/ui/button";
@@ -27,7 +28,7 @@ import { useTranslation } from "react-i18next";
 import { trpc } from "@/core/lib/trpc";
 import { GenerativeUIRenderer } from "./GenerativeUIRenderer";
 import { parseUIBlocks } from "./types";
-import type { ChatMessage, ChatSession, UIBlock, ToolStatus } from "./types";
+import type { ChatMessage, ChatSession, UIBlock, ToolStatus, ChatAttachment } from "./types";
 
 // ─── Local Storage ─────────────────────────────────────────────────────────
 const STORAGE_KEY        = "dashfields_ai_sessions";
@@ -120,6 +121,7 @@ export default function AIAgentPage() {
   const [sidebarOpen, setSidebarOpen]         = useState(true);
   const [lastLang, setLastLang]               = useState<"ar" | "en">("en");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<ChatAttachment[]>([]);
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -231,12 +233,106 @@ export default function AIAgentPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // ── File upload helpers ─────────────────────────────────────────────────────
+  const ALLOWED_TYPES = [
+    "image/png", "image/jpeg", "image/gif", "image/webp",
+    "application/pdf", "text/plain", "text/csv",
+    "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const uploadMutation = trpc.aiAgent.uploadChatAttachment.useMutation();
+
+  const addFiles = useCallback(async (files: FileList | File[]) => {
+    const fileArr = Array.from(files);
+    for (const file of fileArr) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast.error(`Unsupported file type: ${file.name}`);
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File too large (max 10MB): ${file.name}`);
+        continue;
+      }
+      const id = crypto.randomUUID();
+      const previewUrl = file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined;
+      const attachment: ChatAttachment = {
+        id,
+        fileName: file.name,
+        url: "",
+        mimeType: file.type,
+        fileSize: file.size,
+        previewUrl,
+        status: "uploading",
+      };
+      setPendingAttachments((prev) => [...prev, attachment]);
+
+      // Read file as base64 and upload
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64 = (reader.result as string).split(",")[1];
+          const result = await uploadMutation.mutateAsync({
+            fileName: file.name,
+            fileData: base64,
+            mimeType: file.type,
+            fileSize: file.size,
+          });
+          if (result.success && result.url) {
+            setPendingAttachments((prev) =>
+              prev.map((a) => a.id === id ? { ...a, url: result.url!, status: "done" as const } : a)
+            );
+          } else {
+            setPendingAttachments((prev) =>
+              prev.map((a) => a.id === id ? { ...a, status: "error" as const } : a)
+            );
+            toast.error(`Upload failed: ${file.name}`);
+          }
+        } catch {
+          setPendingAttachments((prev) =>
+            prev.map((a) => a.id === id ? { ...a, status: "error" as const } : a)
+          );
+          toast.error(`Upload failed: ${file.name}`);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const removeAttachment = useCallback((id: string) => {
+    setPendingAttachments((prev) => {
+      const removed = prev.find((a) => a.id === id);
+      if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
+  }, []);
+
   // ── Send message ───────────────────────────────────────────────────────────
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed && pendingAttachments.length === 0) return;
+    if (isLoading) return;
 
-    const userMsg: ChatMessage      = { id: Date.now().toString(), role: "user", content: trimmed, timestamp: Date.now() };
+    // Collect done attachments
+    const doneAttachments = pendingAttachments.filter((a) => a.status === "done");
+    const uploading = pendingAttachments.filter((a) => a.status === "uploading");
+    if (uploading.length > 0) {
+      toast.info("Please wait for uploads to finish...");
+      return;
+    }
+
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: trimmed,
+      timestamp: Date.now(),
+      attachments: doneAttachments.length > 0 ? doneAttachments : undefined,
+    };
+    // Clear pending attachments
+    pendingAttachments.forEach((a) => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
+    setPendingAttachments([]);
     const assistantId               = (Date.now() + 1).toString();
     const assistantMsg: ChatMessage = { id: assistantId, role: "assistant", content: "", isStreaming: true, timestamp: Date.now() };
 
@@ -368,7 +464,7 @@ export default function AIAgentPage() {
       setIsLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, input, isLoading, activeSessionId, sessions, user, getToken, persistSession]);
+  }, [messages, input, isLoading, activeSessionId, sessions, user, getToken, persistSession, pendingAttachments]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -645,6 +741,9 @@ export default function AIAgentPage() {
                   isRtl={isRtl}
                   t={t}
                   lastLang={lastLang}
+                  pendingAttachments={pendingAttachments}
+                  onAddFiles={addFiles}
+                  onRemoveAttachment={removeAttachment}
                 />
                 <p className="text-center text-[11px] text-neutral-600 mt-2">
                   {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
@@ -706,6 +805,9 @@ export default function AIAgentPage() {
                   isRtl={isRtl}
                   t={t}
                   lastLang={lastLang}
+                  pendingAttachments={pendingAttachments}
+                  onAddFiles={addFiles}
+                  onRemoveAttachment={removeAttachment}
                 />
                 <p className="text-center text-[11px] text-neutral-600 mt-2">
                   {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
@@ -754,35 +856,109 @@ function SessionItem({
 }
 
 // ─── Chat Input ────────────────────────────────────────────────────────────
-function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, textareaRef, isRtl, t, lastLang }: {
+function ChatInput({
+  input, setInput, isLoading, onSend, onKeyDown, onStop, textareaRef, isRtl, t, lastLang,
+  pendingAttachments, onAddFiles, onRemoveAttachment,
+}: {
   input: string; setInput: (v: string) => void; isLoading: boolean;
   onSend: () => void; onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onStop: () => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>; isRtl: boolean; t: (k: string) => string;
   lastLang?: "ar" | "en";
+  pendingAttachments: ChatAttachment[];
+  onAddFiles: (files: FileList | File[]) => void;
+  onRemoveAttachment: (id: string) => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const hasText = input.trim().length > 0;
+  const hasAttachments = pendingAttachments.length > 0;
+  const canSend = hasText || hasAttachments;
   // Smart placeholder: detect from current input first, then fall back to lastLang
   const inputDir = input.trim() ? detectDir(input) : (lastLang === "ar" ? "rtl" : "ltr");
   const effectiveRtl = inputDir === "rtl";
   const placeholder = effectiveRtl
     ? "اسألني عن حملاتك، إعلاناتك، أو استراتيجيتك التسويقية..."
     : (t("aiAgent.placeholder") || "Ask me about your campaigns, ads, or marketing strategy...");
+  // Drag & drop handlers
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); };
+  const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsDragOver(false);
+    if (e.dataTransfer.files?.length) onAddFiles(e.dataTransfer.files);
+  };
+  // Paste handler for images
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === "file") { const f = items[i].getAsFile(); if (f) files.push(f); }
+    }
+    if (files.length > 0) { e.preventDefault(); onAddFiles(files); }
+  };
+  const fmtSize = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+
   return (
     <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       className={cn(
         "relative flex flex-col rounded-2xl transition-all duration-200",
-        "border border-neutral-800 bg-neutral-900",
-        "hover:border-neutral-700",
+        isDragOver ? "border border-brand-red/50 shadow-[0_0_0_3px_rgba(230,32,32,0.15)]" : "border border-neutral-800 hover:border-neutral-700",
+        "bg-neutral-900",
         "focus-within:border-neutral-600 focus-within:shadow-[0_0_0_3px_rgba(230,32,32,0.08)]",
       )}
     >
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 z-10 rounded-2xl bg-brand-red/5 border-2 border-dashed border-brand-red/30 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-brand-red text-sm font-medium">
+            <Paperclip className="w-4 h-4" /> Drop files here
+          </div>
+        </div>
+      )}
+
+      {/* Attachment preview strip */}
+      {hasAttachments && (
+        <div className="flex gap-2 px-3 pt-3 pb-1 overflow-x-auto">
+          {pendingAttachments.map((att) => (
+            <div key={att.id} className="relative shrink-0 group/att">
+              {att.mimeType.startsWith("image/") ? (
+                <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-700 bg-neutral-800">
+                  <img src={att.previewUrl || att.url} alt={att.fileName} className={cn("w-full h-full object-cover", att.status === "uploading" && "opacity-50")} />
+                  {att.status === "uploading" && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="w-4 h-4 text-white animate-spin" /></div>}
+                </div>
+              ) : (
+                <div className={cn("w-36 h-16 rounded-lg border border-neutral-700 bg-neutral-800 flex items-center gap-2 px-2", att.status === "uploading" && "opacity-50")}>
+                  <FileText className="w-5 h-5 text-neutral-400 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] text-neutral-300 truncate">{att.fileName}</p>
+                    <p className="text-[10px] text-neutral-500">{fmtSize(att.fileSize)}</p>
+                  </div>
+                  {att.status === "uploading" && <Loader2 className="w-3 h-3 text-neutral-400 animate-spin shrink-0" />}
+                </div>
+              )}
+              <button onClick={() => onRemoveAttachment(att.id)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-neutral-800 border border-neutral-600 flex items-center justify-center opacity-0 group-hover/att:opacity-100 hover:bg-brand-red hover:border-brand-red transition-all">
+                <X className="w-3 h-3 text-white" />
+              </button>
+              {att.status === "error" && <div className="absolute inset-0 rounded-lg bg-red-900/30 border border-red-500/30 flex items-center justify-center"><span className="text-[10px] text-red-400 font-medium">Failed</span></div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input ref={fileInputRef} type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx" className="hidden" onChange={(e) => { if (e.target.files?.length) { onAddFiles(e.target.files); e.target.value = ""; } }} />
+
       {/* Textarea */}
       <Textarea
         ref={textareaRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={onKeyDown}
+        onPaste={handlePaste}
         placeholder={placeholder}
         disabled={isLoading}
         rows={1}
@@ -804,7 +980,7 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
             type="button"
             className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition-colors"
             title="Attach file"
-            onClick={() => toast.info("Feature coming soon")}
+            onClick={() => fileInputRef.current?.click()}
           >
             <Paperclip className="w-4 h-4" />
           </button>
@@ -832,10 +1008,10 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
         ) : (
           <button
             onClick={onSend}
-            disabled={!hasText}
+            disabled={!canSend}
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
-              hasText
+              canSend
                 ? "bg-brand-red text-white hover:bg-brand-red/90 active:scale-95 shadow-sm shadow-brand-red/20"
                 : "bg-neutral-800 text-neutral-600 cursor-not-allowed",
             )}
@@ -864,18 +1040,51 @@ function MessageBubble({ msg, t, isRtl, onChipClick, onAction, onBlockUpdate }: 
   const msgDir = detectDir(msg.content);
   const msgIsRtl = msgDir === "rtl";
 
+  const fmtSize = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+
   if (isUser) {
+    const atts = msg.attachments ?? [];
+    const images = atts.filter((a) => a.mimeType.startsWith("image/"));
+    const files = atts.filter((a) => !a.mimeType.startsWith("image/"));
     return (
       <div className={cn("flex", msgIsRtl ? "justify-start" : "justify-end")}>
         <div
           className={cn(
-            "max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed",
+            "max-w-[75%] rounded-2xl text-sm leading-relaxed",
             "bg-brand-red/10 border border-brand-red/20 text-white",
             msgIsRtl ? "rounded-bl-md" : "rounded-br-md",
+            (images.length > 0 || files.length > 0) ? "overflow-hidden" : "",
           )}
           dir={msgDir}
         >
-          <p className="whitespace-pre-wrap">{msg.content}</p>
+          {/* Image attachments */}
+          {images.length > 0 && (
+            <div className={cn("flex gap-1 p-2", images.length === 1 ? "" : "flex-wrap")}>
+              {images.map((img) => (
+                <a key={img.id} href={img.url} target="_blank" rel="noopener noreferrer" className={cn("block rounded-lg overflow-hidden", images.length === 1 ? "w-full" : "w-28 h-28")}>
+                  <img src={img.url} alt={img.fileName} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
+                </a>
+              ))}
+            </div>
+          )}
+          {/* File attachments */}
+          {files.length > 0 && (
+            <div className="flex flex-col gap-1 px-3 pt-2 pb-1">
+              {files.map((f) => (
+                <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                  <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
+                  <span className="text-xs text-neutral-300 truncate flex-1">{f.fileName}</span>
+                  <span className="text-[10px] text-neutral-500 shrink-0">{fmtSize(f.fileSize)}</span>
+                </a>
+              ))}
+            </div>
+          )}
+          {/* Text content */}
+          {msg.content && (
+            <div className="px-4 py-3">
+              <p className="whitespace-pre-wrap">{msg.content}</p>
+            </div>
+          )}
         </div>
       </div>
     );

@@ -10,6 +10,42 @@ import { storagePut } from "../../storage";
 
 export const aiAgentRouter = router({
   /**
+   * Upload a file attachment for the AI chat.
+   * Accepts base64-encoded file data, uploads to S3, returns permanent CDN URL.
+   * Supports images (png, jpg, gif, webp) and documents (pdf, doc, docx, txt, csv, xlsx).
+   */
+  uploadChatAttachment: protectedProcedure
+    .input(
+      z.object({
+        fileName: z.string().min(1).max(255),
+        fileData: z.string().min(1),   // base64 encoded
+        mimeType: z.string().min(1),
+        fileSize: z.number().max(10 * 1024 * 1024), // 10MB max
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const buffer = Buffer.from(input.fileData, "base64");
+        const ext = input.fileName.split(".").pop() || "bin";
+        const randomSuffix = Math.random().toString(36).slice(2, 10);
+        const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const fileKey = `ai-chat/${ctx.user.id}/${Date.now()}-${randomSuffix}-${safeFileName}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+        return {
+          success: true,
+          url,
+          fileName: input.fileName,
+          mimeType: input.mimeType,
+          fileSize: input.fileSize,
+        };
+      } catch (err) {
+        console.error("[AIAgent] File upload failed:", err);
+        const message = err instanceof Error ? err.message : "File upload failed";
+        return { success: false, url: null, fileName: input.fileName, mimeType: input.mimeType, fileSize: input.fileSize, error: message };
+      }
+    }),
+
+  /**
    * Generate an ad image using Atlas Cloud native endpoint.
    * Primary: google/nano-banana-2/text-to-image (Nano Banana 2)
    * Fallback: google/nano-banana-pro/text-to-image (Nano Banana Pro)
