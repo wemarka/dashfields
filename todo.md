@@ -3583,3 +3583,9 @@
 - [x] Support min/max width constraints with smooth animation
 - [x] Persist width in localStorage across sessions
 - [x] Integrate into design system with proper TypeScript types
+
+## 🔄 Campaign Detail Drawer
+- [ ] Build CampaignDetailDrawer with resizable left edge, internal sidebar nav, top bar
+- [ ] Performance tab: KPI cards (Spend, CPM, CTR, Impressions), Conversions Detail, Daily Performance chart
+- [ ] Ad Sets / Creatives / Heatmap / Breakdown / Notes tabs (placeholder content)
+- [ ] Integrate into Campaigns page (click row → open drawer)

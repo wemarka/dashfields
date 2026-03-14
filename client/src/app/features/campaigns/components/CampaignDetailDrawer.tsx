@@ -16,8 +16,7 @@
  *   └────────────┴─────────────────────────────────────────────┘
  */
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Sheet, SheetContent, SheetHeader } from "@/core/components/ui/sheet";
-import { Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp, RefreshCw } from "lucide-react";
+import { Layers, Image, Grid2x2, PieChart, StickyNote, TrendingUp, RefreshCw, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -120,6 +119,20 @@ function ContentStatusBar({
   );
 }
 
+// ─── Resize constants ────────────────────────────────────────────────────────
+const DRAWER_MIN_WIDTH = 480;
+const DRAWER_MAX_WIDTH_RATIO = 0.95;
+const DRAWER_DEFAULT_WIDTH = 900;
+const STORAGE_KEY = "campaign-drawer-width";
+
+function readDrawerWidth(): number {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    if (v) return Math.max(DRAWER_MIN_WIDTH, Number(v));
+  } catch {}
+  return DRAWER_DEFAULT_WIDTH;
+}
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface Props {
   campaign: MetaCampaign | null;
@@ -134,6 +147,58 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
   const fmtCurrency = (n: number) => fmtCurrencyHook(n);
   const utils = trpc.useUtils();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Resizable drawer width ────────────────────────────────────────────
+  const [drawerWidth, setDrawerWidth] = useState<number>(readDrawerWidth);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(0);
+
+  const maxWidth = typeof window !== "undefined"
+    ? Math.floor(window.innerWidth * DRAWER_MAX_WIDTH_RATIO)
+    : 1400;
+
+  const onResizePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = drawerWidth;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [drawerWidth]);
+
+  const onResizePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
+    const delta = dragStartX.current - e.clientX; // drag left = grow
+    const next = Math.min(Math.max(dragStartWidth.current + delta, DRAWER_MIN_WIDTH), maxWidth);
+    setDrawerWidth(next);
+  }, [maxWidth]);
+
+  const onResizePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    const delta = dragStartX.current - e.clientX;
+    const final = Math.min(Math.max(dragStartWidth.current + delta, DRAWER_MIN_WIDTH), maxWidth);
+    try { localStorage.setItem(STORAGE_KEY, String(final)); } catch {}
+  }, [maxWidth]);
+
+  // Re-clamp on viewport resize
+  useEffect(() => {
+    const handler = () => {
+      const max = Math.floor(window.innerWidth * DRAWER_MAX_WIDTH_RATIO);
+      setDrawerWidth(w => Math.min(w, max));
+    };
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
 
   const [activeTab, setActiveTab]           = useState<DetailTab>("performance");
   const [datePreset, setDatePreset]         = useState<DatePreset>("last_30d");
@@ -386,13 +451,42 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
 
   // ── Render ────────────────────────────────────────────────────────────
   return (
-    <Sheet open={open} onOpenChange={v => !v && onClose()}>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-4xl flex flex-col overflow-hidden border-l border-border/50 bg-neutral-900 p-0"
+    <>
+      {/* Overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Drawer panel */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={[
+          "fixed top-0 right-0 h-full z-50 flex flex-col",
+          "bg-neutral-900 border-l border-border/50 shadow-2xl shadow-black/40",
+          "transition-transform duration-300 ease-in-out",
+          open ? "translate-x-0" : "translate-x-full",
+        ].join(" ")}
+        style={{ width: drawerWidth }}
       >
+        {/* ── Resize handle (left edge) ──────────────────────────────── */}
+        <div
+          className="absolute left-0 top-0 h-full w-1.5 z-10 cursor-col-resize flex items-center justify-center group select-none touch-none"
+          onPointerDown={onResizePointerDown}
+          onPointerMove={onResizePointerMove}
+          onPointerUp={onResizePointerUp}
+          title="Drag to resize"
+        >
+          <div className="h-full w-full transition-colors duration-150 group-hover:bg-[#ef3735]/40 group-active:bg-[#ef3735]/60 rounded-r" />
+          <GripVertical className="absolute w-3 h-3 text-muted-foreground/30 group-hover:text-[#ef3735]/60 pointer-events-none" />
+        </div>
+
         {/* ── Header ──────────────────────────────────────────────────── */}
-        <SheetHeader className="p-0 shrink-0">
+        <div className="p-0 shrink-0">
           <DrawerHeader
             campaign={campaign}
             datePreset={datePreset}
@@ -423,7 +517,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             }}
             fmtCurrency={fmtCurrency}
           />
-        </SheetHeader>
+        </div>
 
         {/* ── Body: Vertical Side Nav + Content ───────────────────────── */}
         <div className="flex flex-1 overflow-hidden">
@@ -571,7 +665,7 @@ export function CampaignDetailDrawer({ campaign, open, onClose }: Props) {
             </div>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </>
   );
 }
