@@ -31,6 +31,7 @@ import { CampaignDetailDrawer } from "@/app/features/campaigns/components/Campai
 import { CampaignCompareDrawer } from "@/app/features/campaigns/components/CampaignCompareDrawer";
 import { CampaignBuilder } from "@/app/features/campaigns/components/CampaignBuilder";
 import CreateCampaignModal from "@/app/features/campaigns/components/CreateCampaignModal";
+import { EditCampaignModal } from "@/app/features/campaigns/components/EditCampaignModal";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { AdAccountSelector, type AdAccountSelection } from "@/app/features/campaigns/components/AdAccountSelector";
@@ -190,6 +191,8 @@ export default function Campaigns() {
   const [tagFilter, setTagFilter] = useState("all");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [adAccountSelection, setAdAccountSelection] = useState<AdAccountSelection>({ type: "all" });
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [editingCampaign, setEditingCampaign] = useState<UnifiedCampaign | null>(null);
 
   // ── Fix account_type for legacy rows (runs once on mount) ─────────────────
   const fixAccountTypesMutation = trpc.meta.fixAccountTypes.useMutation();
@@ -280,6 +283,24 @@ export default function Campaigns() {
     onSuccess: () => { refetchMeta(); toast.success("Campaign status updated"); },
     onError: () => toast.error("Failed to update Meta campaign status"),
   });
+  // ── Pin / Unpin ────────────────────────────────────────────────────────────
+  const pinCampaign = trpc.meta.pinCampaign.useMutation({
+    onSuccess: (_, vars) => {
+      setPinnedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(vars.campaignId)) { next.delete(vars.campaignId); toast.success("Campaign unpinned"); }
+        else { next.add(vars.campaignId); toast.success("Campaign pinned to top"); }
+        return next;
+      });
+    },
+    onError: () => toast.error("Failed to pin campaign"),
+  });
+  // Load pinned IDs on mount
+  const { data: pinnedData } = trpc.meta.getPinnedCampaigns.useQuery();
+  useEffect(() => {
+    if (pinnedData) setPinnedIds(new Set(pinnedData.map((p: { campaignId: string }) => p.campaignId)));
+  }, [pinnedData]);
+
   const exportCsv = trpc.export.campaignsCsv.useMutation({
     onSuccess: (data) => {
       const blob = new Blob([data.csv], { type: "text/csv" });
@@ -437,6 +458,13 @@ export default function Campaigns() {
       updateLocalBudget.mutate({ campaignId: Number(campaign.id), dailyBudget: newBudget });
     }
   }, [updateMetaBudget, updateLocalBudget]);
+  const handlePin = useCallback((campaign: UnifiedCampaign) => {
+    pinCampaign.mutate({ campaignId: campaign.id, source: campaign.source });
+  }, [pinCampaign]);
+  const handleEdit = useCallback((campaign: UnifiedCampaign) => {
+    setEditingCampaign(campaign);
+  }, []);
+
   const handleBulkAction = useCallback((action: "pause" | "activate" | "delete", ids: string[]) => {
     const count = ids.length;
     switch (action) {
@@ -795,6 +823,9 @@ export default function Campaigns() {
             onBulkAction={handleBulkAction}
             onBudgetUpdate={handleBudgetUpdate}
             statusTogglePending={statusTogglePending}
+            onPin={handlePin}
+            onEdit={handleEdit}
+            pinnedIds={pinnedIds}
           />
         </div>
       </div>
@@ -812,6 +843,13 @@ export default function Campaigns() {
         } : null}
         open={!!selectedCampaign}
         onClose={() => setSelectedCampaign(null)}
+      />
+      <EditCampaignModal
+        campaign={editingCampaign}
+        open={!!editingCampaign}
+        onClose={() => setEditingCampaign(null)}
+        onSuccess={() => { refetchMeta(); refetchInsights(); }}
+        accountId={adAccountSelection.type === "single" ? adAccountSelection.accountId : undefined}
       />
       {showCompare && <CampaignCompareDrawer onClose={() => setShowCompare(false)} />}
       {showBuilder && (

@@ -138,6 +138,15 @@ export const campaigns = pgTable("campaigns", {
   updatedAt:           timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── Pinned Campaigns ───────────────────────────────────────────────────────────
+export const pinnedCampaigns = pgTable("pinned_campaigns", {
+  id:           serial("id").primaryKey(),
+  userId:       integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  campaignId:   varchar("campaign_id", { length: 128 }).notNull(), // can be local numeric id or Meta campaign id
+  source:       varchar("source", { length: 16 }).notNull().default("api"), // 'api' | 'local'
+  pinnedAt:     timestamp("pinned_at").defaultNow().notNull(),
+}, (t) => [uniqueIndex("pinned_campaigns_user_campaign_idx").on(t.userId, t.campaignId)]);
+
 // ─── Campaign Metrics (daily snapshots) ───────────────────────────────────────
 export const campaignMetrics = pgTable("campaign_metrics", {
   id:           serial("id").primaryKey(),

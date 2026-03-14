@@ -30,6 +30,7 @@ export interface UnifiedCampaign {
   score?: number | null;       // OpportunityScore 0-100 (calcPerformanceScore: CTR+CPC+ROAS+Spend)
   stopTime?: string | null;    // ISO date string from Meta stop_time
   publisherPlatforms?: string[] | null; // Meta placements: ['facebook','instagram','audience_network','messenger']
+  pinned?: boolean; // Whether this campaign is pinned by the user
 }
 
 export interface UnifiedCampaignTableProps {
@@ -47,6 +48,9 @@ export interface UnifiedCampaignTableProps {
   pageSize?: number;
   onFilterByAdSets?: (campaign: UnifiedCampaign) => void;
   onFilterByCreatives?: (campaign: UnifiedCampaign) => void;
+  onPin?: (campaign: UnifiedCampaign) => void;
+  onEdit?: (campaign: UnifiedCampaign) => void;
+  pinnedIds?: Set<string>;
 }
 
 export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "leads" | "calls" | "messages" | "cpc" | "cpm" | "score" | "stopTime";

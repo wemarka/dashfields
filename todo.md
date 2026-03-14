@@ -3392,3 +3392,23 @@
 - [x] Show Instagram icon when campaign runs on Instagram placements
 - [x] Show both FB+IG icons when campaign runs on both platforms
 - [x] Use publisher_platforms from Meta API to determine actual platform
+
+## 🔄 Edit Campaign + Pin Feature
+- [ ] Add `is_pinned` column to local campaigns table in Supabase
+- [ ] Add `pinCampaign` tRPC mutation (toggle pin for local campaigns)
+- [ ] Add pin icon button in campaign table row actions
+- [ ] Pinned campaigns always appear at top of list (sorted first)
+- [ ] Add Edit Campaign modal with form: name, status, budget, objective
+- [ ] Add `editCampaign` tRPC mutation for local campaigns
+- [ ] Add Edit button in campaign row context menu (MoreHorizontal dropdown)
+- [ ] Meta campaigns: Edit opens name/budget/status fields via Meta API
+
+## ✅ Edit Campaign + Pin Feature
+- [x] Add pinned_campaigns table to schema (campaignId, source, userId, pinnedAt)
+- [x] Add pinCampaign / unpinCampaign tRPC mutation
+- [x] Add getPinnedCampaigns tRPC query
+- [x] Add Pin toggle button in table row MoreHorizontal dropdown
+- [x] Show pin indicator (red pin icon) next to campaign name when pinned
+- [x] Add EditCampaignModal component with name, status, daily budget fields
+- [x] Add editMetaCampaign tRPC mutation (calls Meta API)
+- [x] Wire Edit button in MoreHorizontal dropdown to open EditCampaignModal

@@ -961,6 +961,86 @@ export const metaCampaignsRouter = router({
       return { succeeded, failed, total: results.length };
     }),
 
+  /** Toggle pin status for a campaign (works for both Meta API and local campaigns) */
+  pinCampaign: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      source: z.enum(["api", "local"]).default("api"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const sb = getSupabase();
+      // Check if already pinned
+      const { data: existing } = await sb
+        .from("pinned_campaigns")
+        .select("id")
+        .eq("user_id", ctx.user.id)
+        .eq("campaign_id", input.campaignId)
+        .maybeSingle();
+
+      if (existing) {
+        // Unpin
+        await sb.from("pinned_campaigns").delete().eq("id", existing.id);
+        return { pinned: false };
+      } else {
+        // Pin
+        await sb.from("pinned_campaigns").insert({
+          user_id: ctx.user.id,
+          campaign_id: input.campaignId,
+          source: input.source,
+          pinned_at: new Date().toISOString(),
+        });
+        return { pinned: true };
+      }
+    }),
+
+  /** Get all pinned campaign IDs for the current user */
+  getPinnedCampaigns: protectedProcedure
+    .query(async ({ ctx }) => {
+      const sb = getSupabase();
+      const { data } = await sb
+        .from("pinned_campaigns")
+        .select("campaign_id, source, pinned_at")
+        .eq("user_id", ctx.user.id)
+        .order("pinned_at", { ascending: false });
+      return (data ?? []).map(r => ({ campaignId: r.campaign_id, source: r.source, pinnedAt: r.pinned_at }));
+    }),
+
+  /** Edit a Meta campaign: update name, status, daily budget via Meta API */
+  editMetaCampaign: protectedProcedure
+    .input(z.object({
+      campaignId: z.string().min(1),
+      name: z.string().min(1).max(256).optional(),
+      status: z.enum(["ACTIVE", "PAUSED"]).optional(),
+      dailyBudget: z.number().positive().optional(), // in account currency (not cents)
+      accountId: z.number().optional(),
+      workspaceId: z.number().int().positive().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+      if (!conn) throw new Error("No Meta connection found");
+
+      const body: Record<string, string | number> = {};
+      if (input.name)        body.name = input.name;
+      if (input.status)      body.status = input.status;
+      if (input.dailyBudget) body.daily_budget = Math.round(input.dailyBudget * 100); // cents
+
+      if (!Object.keys(body).length) throw new Error("Nothing to update");
+
+      body.access_token = conn.token;
+
+      const res = await fetch(`https://graph.facebook.com/v19.0/${input.campaignId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json() as { success?: boolean; error?: { message: string } };
+      if (json.error) throw new Error(json.error.message);
+
+      // Invalidate cache
+      metaCache.invalidatePrefix(`campaignInsights:${ctx.user.id}`);
+      return { success: true };
+    }),
+
   /** Get video source URL from Meta Graph API for a given video_id */
   videoSource: protectedProcedure
     .input(z.object({

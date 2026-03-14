@@ -7,6 +7,7 @@ import {
   MoreHorizontal, Play, Pause, ExternalLink, Copy, Trash2, Eye,
   Loader2, ChevronLeft, ChevronRight, Megaphone,
   Settings2, Square, CheckSquare, MinusSquare, Layers, LayoutGrid,
+  Pin, PinOff, Pencil,
 } from "lucide-react";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import {
@@ -44,6 +45,7 @@ function UnifiedCampaignTableInner({
   campaigns, loading, onRowClick, onOpenDrawer, selectedCampaignId,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
   onFilterByAdSets, onFilterByCreatives, statusTogglePending,
+  onPin, onEdit, pinnedIds,
   pageSize = 25,
 }: UnifiedCampaignTableProps) {
   const { fmt: fmtMoney } = useCurrency();
@@ -161,15 +163,20 @@ function UnifiedCampaignTableInner({
       case "name":
         return (
           <div className="min-w-0">
-            <p
-              className="truncate leading-tight"
-              style={{ fontSize: 13, fontWeight: 500, color: "#ffffff", cursor: onOpenDrawer ? "pointer" : "default" }}
-              onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
-              onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#e62020"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
-              onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ffffff"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
-            >
-              {c.name}
-            </p>
+            <div className="flex items-center gap-1.5">
+              {pinnedIds?.has(c.id) && (
+                <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#e62020" }} />
+              )}
+              <p
+                className="truncate leading-tight"
+                style={{ fontSize: 13, fontWeight: 500, color: "#ffffff", cursor: onOpenDrawer ? "pointer" : "default" }}
+                onClick={onOpenDrawer ? (e) => { e.stopPropagation(); onOpenDrawer(c); } : undefined}
+                onMouseEnter={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#e62020"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "underline"; } : undefined}
+                onMouseLeave={onOpenDrawer ? (e) => { (e.currentTarget as HTMLParagraphElement).style.color = "#ffffff"; (e.currentTarget as HTMLParagraphElement).style.textDecoration = "none"; } : undefined}
+              >
+                {c.name}
+              </p>
+            </div>
             {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#737373" }}>{c.objective}</p>}
           </div>
         );
@@ -434,29 +441,38 @@ function UnifiedCampaignTableInner({
                             <MoreHorizontal className="w-3.5 h-3.5" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem onClick={() => onOpenDrawer?.(c)} className="text-xs gap-2"><Eye className="w-3.5 h-3.5" /> View Details</DropdownMenuItem>
-                          {c.source === "api" && onFilterByAdSets && (
-                            <DropdownMenuItem onClick={() => onFilterByAdSets(c)} className="text-xs gap-2"><Layers className="w-3.5 h-3.5" /> View Ad Sets</DropdownMenuItem>
-                          )}
-                          {c.source === "api" && onFilterByCreatives && (
-                            <DropdownMenuItem onClick={() => onFilterByCreatives(c)} className="text-xs gap-2"><LayoutGrid className="w-3.5 h-3.5" /> View Creatives</DropdownMenuItem>
-                          )}
-                          {c.source === "local" && onClone && (
-                            <DropdownMenuItem onClick={() => onClone(c)} className="text-xs gap-2"><Copy className="w-3.5 h-3.5" /> Clone</DropdownMenuItem>
-                          )}
-                          {c.source === "api" && (
-                            <DropdownMenuItem className="text-xs gap-2" onClick={() => {
-                              window.open(`https://www.facebook.com/adsmanager/manage/campaigns?act=${c.adAccountId?.replace("act_", "")}`, "_blank");
-                            }}><ExternalLink className="w-3.5 h-3.5" /> Open in Ads Manager</DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          {c.source === "local" && onDelete && (
-                            <DropdownMenuItem onClick={() => onDelete(c)} className="text-xs gap-2 text-destructive focus:text-destructive">
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
+                         <DropdownMenuContent align="end" className="w-48">
+                           <DropdownMenuItem onClick={() => onOpenDrawer?.(c)} className="text-xs gap-2"><Eye className="w-3.5 h-3.5" /> View Details</DropdownMenuItem>
+                           {onEdit && (
+                             <DropdownMenuItem onClick={() => onEdit(c)} className="text-xs gap-2"><Pencil className="w-3.5 h-3.5" /> Edit Campaign</DropdownMenuItem>
+                           )}
+                           {onPin && (
+                             <DropdownMenuItem onClick={() => onPin(c)} className="text-xs gap-2">
+                               {pinnedIds?.has(c.id) ? <><PinOff className="w-3.5 h-3.5" /> Unpin</> : <><Pin className="w-3.5 h-3.5" /> Pin to Top</>}
+                             </DropdownMenuItem>
+                           )}
+                           <DropdownMenuSeparator />
+                           {c.source === "api" && onFilterByAdSets && (
+                             <DropdownMenuItem onClick={() => onFilterByAdSets(c)} className="text-xs gap-2"><Layers className="w-3.5 h-3.5" /> View Ad Sets</DropdownMenuItem>
+                           )}
+                           {c.source === "api" && onFilterByCreatives && (
+                             <DropdownMenuItem onClick={() => onFilterByCreatives(c)} className="text-xs gap-2"><LayoutGrid className="w-3.5 h-3.5" /> View Creatives</DropdownMenuItem>
+                           )}
+                           {c.source === "local" && onClone && (
+                             <DropdownMenuItem onClick={() => onClone(c)} className="text-xs gap-2"><Copy className="w-3.5 h-3.5" /> Clone</DropdownMenuItem>
+                           )}
+                           {c.source === "api" && (
+                             <DropdownMenuItem className="text-xs gap-2" onClick={() => {
+                               window.open(`https://www.facebook.com/adsmanager/manage/campaigns?act=${c.adAccountId?.replace("act_", "")}`, "_blank");
+                             }}><ExternalLink className="w-3.5 h-3.5" /> Open in Ads Manager</DropdownMenuItem>
+                           )}
+                           <DropdownMenuSeparator />
+                           {c.source === "local" && onDelete && (
+                             <DropdownMenuItem onClick={() => onDelete(c)} className="text-xs gap-2 text-destructive focus:text-destructive">
+                               <Trash2 className="w-3.5 h-3.5" /> Delete
+                             </DropdownMenuItem>
+                           )}
+                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
                   </tr>
