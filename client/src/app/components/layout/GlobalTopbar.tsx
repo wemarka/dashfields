@@ -118,17 +118,17 @@ export function GlobalTopbar() {
               </Link>
             ))}
 
-            {/* Dash Studios — SVG Logo */}
+            {/* Dash Studios — SVG Logo with cinematic animation */}
             <Link href="/studios">
               <button
                 className={cn(
-                  "flex items-center px-3 py-1.5 rounded-lg transition-all duration-200",
+                  "flex items-center px-3 py-2 rounded-lg transition-all duration-300 ease-out",
                   isActive("/studios")
-                    ? "bg-neutral-800 shadow-sm"
-                    : "hover:bg-neutral-800/60"
+                    ? "bg-neutral-800/80 shadow-sm shadow-brand-red/10"
+                    : "hover:bg-neutral-800/40"
                 )}
               >
-                <DashStudiosLogo />
+                <DashStudiosLogo className="h-5" />
               </button>
             </Link>
 

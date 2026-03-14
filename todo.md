@@ -3262,3 +3262,8 @@
 - [x] Render file links/icons for non-image attachments in message bubbles
 - [x] Support drag-and-drop file upload
 - [x] Support paste image from clipboard
+
+## 🎬 Dash Studios Logo Animation in Topbar
+- [x] Create DashStudiosLogo React component with SVG + cinematic lens flare
+- [x] Integrate into Topbar with hover-to-scale and smooth animation
+- [x] Ensure proper alignment and organization with rest of Topbar

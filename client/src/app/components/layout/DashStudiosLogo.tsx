@@ -1,7 +1,10 @@
 /**
- * DashStudiosLogo.tsx — Inline SVG logo for the Topbar nav.
- * White-to-gray gradient fill with a CSS shimmer/gleam animation on hover.
+ * DashStudiosLogo.tsx — Cinematic SVG logo for the Topbar nav.
+ * White-to-gray gradient fill with red shimmer sweep, lens flare core,
+ * anamorphic streaks, ghost rings, chromatic aberration, and hexagonal bokeh.
+ * All effects are triggered on hover and follow the mouse within the logo.
  */
+import { useRef, useEffect, useCallback } from "react";
 import { cn } from "@/core/lib/utils";
 
 interface DashStudiosLogoProps {
@@ -23,17 +26,225 @@ const PATHS = [
   "M2989.49,628.91c3.91,3.68-8,26.03-8,30v112c0,9.21,36.57,4.05,39.48-4.52,1.01-46.23,3.34-92.41-7.48-137.48h88c-5.35,18.61-10.73,33.97-12.17,53.83-4.4,60.75-6.36,181.19.15,240.2,1.55,14.04,8.64,26.13,11.7,39.66l-87.63,38.32c12.46-55.13,6.92-111.71,7.96-168.01l-36.08,5.93c-4.51,2.9-3.58,7.48-4.13,11.87-3.49,27.88-2.2,91.18.05,120.38,1.04,13.52,6.44,22.49,7.77,35.21l-87.57,38.62c1.08-14.54,6.97-26.98,8.1-41.86,6.99-91.93,6.23-239.9.03-332.31-1.03-15.35-4.45-27.3-8.17-41.83h88Z",
 ];
 
+// SVG viewBox center
+const CX = 2752;
+const CY = 1536;
+const VW = 5504;
+const VH = 3072;
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
 export function DashStudiosLogo({ className }: DashStudiosLogoProps) {
+  const sceneRef = useRef<HTMLSpanElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const rafRef = useRef<number>(0);
+
+  // Animation state refs (avoid re-renders)
+  const hoveringRef = useRef(false);
+  const mouseXRef = useRef(0);
+  const mouseYRef = useRef(0);
+  const targetSvgXRef = useRef(CX);
+  const targetSvgYRef = useRef(CY);
+  const curSvgXRef = useRef(CX);
+  const curSvgYRef = useRef(CY);
+  const shimmerXRef = useRef(-2000);
+  const shimmerActiveRef = useRef(false);
+  const shimmerOpRef = useRef(0);
+  const flareOpRef = useRef(0);
+
+  // SVG element refs
+  const shimmerBarRef = useRef<SVGRectElement>(null);
+  const flareGlowRef = useRef<SVGCircleElement>(null);
+  const flareCoreRef = useRef<SVGCircleElement>(null);
+  const flareStreakRef = useRef<SVGRectElement>(null);
+  const flareStreakWideRef = useRef<SVGRectElement>(null);
+  const ghostRing1Ref = useRef<SVGCircleElement>(null);
+  const ghostRing2Ref = useRef<SVGCircleElement>(null);
+  const ghostRing3Ref = useRef<SVGCircleElement>(null);
+  const chromaRRef = useRef<SVGCircleElement>(null);
+  const chromaGRef = useRef<SVGCircleElement>(null);
+  const chromaBRef = useRef<SVGCircleElement>(null);
+  const hex1Ref = useRef<SVGPolygonElement>(null);
+  const hex2Ref = useRef<SVGPolygonElement>(null);
+  const hex3Ref = useRef<SVGPolygonElement>(null);
+
+  const toSvg = useCallback((clientX: number, clientY: number) => {
+    const r = sceneRef.current?.getBoundingClientRect();
+    if (!r) return { x: CX, y: CY };
+    return {
+      x: ((clientX - r.left) / r.width) * VW,
+      y: ((clientY - r.top) / r.height) * VH,
+    };
+  }, []);
+
+  const animate = useCallback(() => {
+    const hovering = hoveringRef.current;
+
+    // Opacity transitions
+    shimmerOpRef.current = hovering
+      ? Math.min(1, shimmerOpRef.current + 0.04)
+      : Math.max(0, shimmerOpRef.current - 0.06);
+    flareOpRef.current = hovering
+      ? Math.min(0.9, flareOpRef.current + 0.03)
+      : Math.max(0, flareOpRef.current - 0.06);
+
+    // Smooth SVG coordinates
+    curSvgXRef.current = lerp(curSvgXRef.current, targetSvgXRef.current, 0.06);
+    curSvgYRef.current = lerp(curSvgYRef.current, targetSvgYRef.current, 0.06);
+
+    const so = shimmerOpRef.current;
+    const fo = flareOpRef.current;
+    const sx = curSvgXRef.current;
+    const sy = curSvgYRef.current;
+
+    // ── Red Shimmer inside logo ──
+    if (shimmerActiveRef.current || so > 0) {
+      shimmerXRef.current += 55;
+      if (shimmerXRef.current > 7500) {
+        shimmerXRef.current = -2000;
+        if (!hovering) shimmerActiveRef.current = false;
+      }
+      const bar = shimmerBarRef.current;
+      if (bar) {
+        bar.setAttribute("x", String(shimmerXRef.current));
+        bar.setAttribute("opacity", String(so));
+        bar.setAttribute("transform", "skewX(-12)");
+      }
+    }
+
+    // ── SVG Lens Flare (inside logo) ──
+    if (flareGlowRef.current) {
+      flareGlowRef.current.setAttribute("cx", String(sx));
+      flareGlowRef.current.setAttribute("cy", String(sy));
+      flareGlowRef.current.setAttribute("opacity", String(fo * 0.5));
+    }
+    if (flareCoreRef.current) {
+      flareCoreRef.current.setAttribute("cx", String(sx));
+      flareCoreRef.current.setAttribute("cy", String(sy));
+      flareCoreRef.current.setAttribute("opacity", String(fo * 0.7));
+    }
+    if (flareStreakRef.current) {
+      flareStreakRef.current.setAttribute("x", String(sx - 1750));
+      flareStreakRef.current.setAttribute("y", String(sy - 20));
+      flareStreakRef.current.setAttribute("opacity", String(fo * 0.6));
+    }
+    if (flareStreakWideRef.current) {
+      flareStreakWideRef.current.setAttribute("x", String(sx - 2500));
+      flareStreakWideRef.current.setAttribute("y", String(sy - 8));
+      flareStreakWideRef.current.setAttribute("opacity", String(fo * 0.4));
+    }
+
+    // Ghost rings — mirrored offsets from center
+    const dx = sx - CX;
+    const dy = sy - CY;
+
+    if (ghostRing1Ref.current) {
+      ghostRing1Ref.current.setAttribute("cx", String(CX - dx * 0.4));
+      ghostRing1Ref.current.setAttribute("cy", String(CY - dy * 0.4));
+      ghostRing1Ref.current.setAttribute("opacity", String(fo * 0.4));
+    }
+    if (ghostRing2Ref.current) {
+      ghostRing2Ref.current.setAttribute("cx", String(CX - dx * 0.7));
+      ghostRing2Ref.current.setAttribute("cy", String(CY - dy * 0.7));
+      ghostRing2Ref.current.setAttribute("opacity", String(fo * 0.3));
+    }
+    if (ghostRing3Ref.current) {
+      ghostRing3Ref.current.setAttribute("cx", String(CX - dx * 0.2));
+      ghostRing3Ref.current.setAttribute("cy", String(CY - dy * 0.2));
+      ghostRing3Ref.current.setAttribute("opacity", String(fo * 0.2));
+    }
+
+    // Chromatic aberration — slight offsets from core
+    if (chromaRRef.current) {
+      chromaRRef.current.setAttribute("cx", String(sx + 80));
+      chromaRRef.current.setAttribute("cy", String(sy - 40));
+      chromaRRef.current.setAttribute("opacity", String(fo * 0.5));
+    }
+    if (chromaGRef.current) {
+      chromaGRef.current.setAttribute("cx", String(sx - 60));
+      chromaGRef.current.setAttribute("cy", String(sy + 50));
+      chromaGRef.current.setAttribute("opacity", String(fo * 0.4));
+    }
+    if (chromaBRef.current) {
+      chromaBRef.current.setAttribute("cx", String(sx + 30));
+      chromaBRef.current.setAttribute("cy", String(sy + 70));
+      chromaBRef.current.setAttribute("opacity", String(fo * 0.5));
+    }
+
+    // Hexagonal bokeh — scattered around
+    if (hex1Ref.current) {
+      hex1Ref.current.setAttribute("transform", `translate(${CX - dx * 0.5}, ${CY - dy * 0.3})`);
+      hex1Ref.current.setAttribute("opacity", String(fo * 0.35));
+    }
+    if (hex2Ref.current) {
+      hex2Ref.current.setAttribute("transform", `translate(${CX - dx * 0.8}, ${CY - dy * 0.6})`);
+      hex2Ref.current.setAttribute("opacity", String(fo * 0.25));
+    }
+    if (hex3Ref.current) {
+      hex3Ref.current.setAttribute("transform", `translate(${CX + dx * 0.3}, ${CY + dy * 0.2})`);
+      hex3Ref.current.setAttribute("opacity", String(fo * 0.3));
+    }
+
+    // Continue animation if any effect is still visible
+    if (so > 0.001 || fo > 0.001 || hovering) {
+      rafRef.current = requestAnimationFrame(animate);
+    } else {
+      rafRef.current = 0;
+    }
+  }, []);
+
+  const startAnimation = useCallback(() => {
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(animate);
+    }
+  }, [animate]);
+
+  const handleMouseEnter = useCallback(() => {
+    hoveringRef.current = true;
+    shimmerActiveRef.current = true;
+    shimmerXRef.current = -2000;
+    startAnimation();
+  }, [startAnimation]);
+
+  const handleMouseLeave = useCallback(() => {
+    hoveringRef.current = false;
+    // Animation loop continues until effects fade out
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      mouseXRef.current = e.clientX;
+      mouseYRef.current = e.clientY;
+      const s = toSvg(e.clientX, e.clientY);
+      targetSvgXRef.current = s.x;
+      targetSvgYRef.current = s.y;
+    },
+    [toSvg]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   return (
     <span
+      ref={sceneRef}
       className={cn(
-        "group/ds relative inline-flex items-center cursor-pointer",
+        "relative inline-flex items-center cursor-pointer transition-transform duration-500 ease-[cubic-bezier(0.165,0.84,0.44,1)] hover:scale-110",
         className
       )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
     >
-      {/* The SVG logo */}
       <svg
-        viewBox="0 0 5504 3072"
+        ref={svgRef}
+        viewBox={`0 0 ${VW} ${VH}`}
         className="h-6 w-auto"
         aria-label="Dash Studios"
         role="img"
@@ -42,45 +253,181 @@ export function DashStudiosLogo({ className }: DashStudiosLogoProps) {
           {/* White → Gray gradient */}
           <linearGradient id="ds-base-grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="45%" stopColor="#a1a1aa" />
-            <stop offset="100%" stopColor="#e4e4e7" />
+            <stop offset="25%" stopColor="#e8e8e8" />
+            <stop offset="50%" stopColor="#f5f5f5" />
+            <stop offset="75%" stopColor="#c0c0c0" />
+            <stop offset="100%" stopColor="#d8d8d8" />
           </linearGradient>
+
+          {/* RED shimmer gradient */}
+          <linearGradient id="ds-shimmer-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(255,0,0,0)" />
+            <stop offset="30%" stopColor="rgba(255,0,0,0)" />
+            <stop offset="40%" stopColor="rgba(255,40,40,0.08)" />
+            <stop offset="46%" stopColor="rgba(255,60,60,0.25)" />
+            <stop offset="50%" stopColor="rgba(255,80,60,0.55)" />
+            <stop offset="54%" stopColor="rgba(255,60,60,0.25)" />
+            <stop offset="60%" stopColor="rgba(255,40,40,0.08)" />
+            <stop offset="70%" stopColor="rgba(255,0,0,0)" />
+            <stop offset="100%" stopColor="rgba(255,0,0,0)" />
+          </linearGradient>
+
+          {/* Lens flare gradients */}
+          <radialGradient id="ds-flare-core-grad">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+            <stop offset="25%" stopColor="rgba(230,240,255,0.5)" />
+            <stop offset="55%" stopColor="rgba(180,210,255,0.15)" />
+            <stop offset="100%" stopColor="rgba(150,190,255,0)" />
+          </radialGradient>
+
+          <linearGradient id="ds-flare-streak-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(140,180,255,0)" />
+            <stop offset="15%" stopColor="rgba(140,180,255,0.08)" />
+            <stop offset="40%" stopColor="rgba(180,210,255,0.3)" />
+            <stop offset="50%" stopColor="rgba(220,235,255,0.6)" />
+            <stop offset="60%" stopColor="rgba(180,210,255,0.3)" />
+            <stop offset="85%" stopColor="rgba(140,180,255,0.08)" />
+            <stop offset="100%" stopColor="rgba(140,180,255,0)" />
+          </linearGradient>
+
+          <linearGradient id="ds-flare-streak-wide-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(100,150,255,0)" />
+            <stop offset="20%" stopColor="rgba(100,150,255,0.04)" />
+            <stop offset="50%" stopColor="rgba(140,180,255,0.15)" />
+            <stop offset="80%" stopColor="rgba(100,150,255,0.04)" />
+            <stop offset="100%" stopColor="rgba(100,150,255,0)" />
+          </linearGradient>
+
+          {/* Clip path = logo shape */}
+          <clipPath id="ds-logo-clip">
+            {PATHS.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+          </clipPath>
         </defs>
 
-        {/* Logo paths with gradient fill */}
+        {/* ═══ Base logo paths ═══ */}
         <g fill="url(#ds-base-grad)">
           {PATHS.map((d, i) => (
             <path key={i} d={d} />
           ))}
         </g>
+
+        {/* ═══ ALL EFFECTS — clipped inside logo ═══ */}
+        <g clipPath="url(#ds-logo-clip)">
+          {/* RED shimmer bar */}
+          <rect
+            ref={shimmerBarRef}
+            x="-2000"
+            y="0"
+            width="1800"
+            height="3072"
+            fill="url(#ds-shimmer-grad)"
+            opacity="0"
+          />
+
+          {/* Lens flare core glow */}
+          <circle
+            ref={flareGlowRef}
+            cx={CX}
+            cy={CY}
+            r="600"
+            fill="url(#ds-flare-core-grad)"
+            opacity="0"
+          />
+
+          {/* Anamorphic horizontal streak (main) */}
+          <rect
+            ref={flareStreakRef}
+            x="0"
+            y="1520"
+            width="3500"
+            height="40"
+            fill="url(#ds-flare-streak-grad)"
+            opacity="0"
+            rx="20"
+          />
+
+          {/* Anamorphic wide subtle streak */}
+          <rect
+            ref={flareStreakWideRef}
+            x="0"
+            y="1528"
+            width="5000"
+            height="16"
+            fill="url(#ds-flare-streak-wide-grad)"
+            opacity="0"
+            rx="8"
+          />
+
+          {/* Bright core dot */}
+          <circle
+            ref={flareCoreRef}
+            cx={CX}
+            cy={CY}
+            r="80"
+            fill="white"
+            opacity="0"
+          />
+
+          {/* Ghost ring reflections */}
+          <circle
+            ref={ghostRing1Ref}
+            cx={CX}
+            cy={CY}
+            r="250"
+            fill="none"
+            stroke="rgba(140,180,255,0.15)"
+            strokeWidth="6"
+            opacity="0"
+          />
+          <circle
+            ref={ghostRing2Ref}
+            cx={CX}
+            cy={CY}
+            r="140"
+            fill="none"
+            stroke="rgba(255,200,140,0.1)"
+            strokeWidth="4"
+            opacity="0"
+          />
+          <circle
+            ref={ghostRing3Ref}
+            cx={CX}
+            cy={CY}
+            r="380"
+            fill="none"
+            stroke="rgba(140,255,200,0.06)"
+            strokeWidth="5"
+            opacity="0"
+          />
+
+          {/* Chromatic aberration dots */}
+          <circle ref={chromaRRef} cx={CX} cy={CY} r="40" fill="rgba(255,100,80,0.2)" opacity="0" />
+          <circle ref={chromaGRef} cx={CX} cy={CY} r="30" fill="rgba(80,255,120,0.15)" opacity="0" />
+          <circle ref={chromaBRef} cx={CX} cy={CY} r="50" fill="rgba(80,140,255,0.2)" opacity="0" />
+
+          {/* Hexagonal bokeh shapes */}
+          <polygon
+            ref={hex1Ref}
+            points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30"
+            fill="rgba(180,210,255,0.08)"
+            opacity="0"
+          />
+          <polygon
+            ref={hex2Ref}
+            points="0,-40 35,-20 35,20 0,40 -35,20 -35,-20"
+            fill="rgba(200,220,255,0.06)"
+            opacity="0"
+          />
+          <polygon
+            ref={hex3Ref}
+            points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25"
+            fill="rgba(160,200,255,0.07)"
+            opacity="0"
+          />
+        </g>
       </svg>
-
-      {/* CSS shimmer overlay — sweeps across on hover */}
-      <span
-        className="absolute inset-0 overflow-hidden rounded pointer-events-none"
-        aria-hidden="true"
-      >
-        <span className="ds-shimmer-beam absolute inset-y-0 w-[40%] -translate-x-[200%] group-hover/ds:animate-[ds_shimmer_0.8s_ease-in-out]" />
-      </span>
-
-      {/* Scoped keyframes */}
-      <style>{`
-        @keyframes ds_shimmer {
-          0%   { transform: translateX(-200%); }
-          100% { transform: translateX(400%); }
-        }
-        .ds-shimmer-beam {
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(255,255,255,0.05) 25%,
-            rgba(255,255,255,0.35) 50%,
-            rgba(255,255,255,0.05) 75%,
-            transparent 100%
-          );
-          mix-blend-mode: overlay;
-        }
-      `}</style>
     </span>
   );
 }
