@@ -3547,3 +3547,8 @@
 - [x] Menubar → bg-card border-border, items focus:bg-muted/60 text-white
 - [x] HoverCard → bg-card border-border
 - [x] Accordion trigger → hover:bg-muted/30 (remove hover:underline)
+
+## 🔄 UI Consistency — Resizable/Collapsible/Card
+- [x] ResizableHandle → bg-muted/40 hover:bg-[#ef3735]/40
+- [x] CollapsibleContent → duration-200 ease-in-out transition
+- [x] Card → add elevated variant (bg-popover border-border shadow-lg)
