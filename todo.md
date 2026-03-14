@@ -3527,3 +3527,8 @@
 - [x] Slider focus ring → focus-visible:ring-[#ef3735]/40
 - [x] Audit and migrate inline Badge classNames to proper variants (neutral/outline)
 - [x] Sonner toast styling → bg-card, border-border, text-foreground
+
+## 🔄 UI Consistency — Popover/Skeleton/Progress
+- [x] Popover and Tooltip → bg-card border-border
+- [x] Skeleton → bg-muted/60
+- [x] Progress indicator → bg-[#ef3735]
