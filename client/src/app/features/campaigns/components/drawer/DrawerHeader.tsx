@@ -5,7 +5,7 @@
  *  Row 1: [Platform] Campaign Name  ·  Objective badge  ·  Status toggle  ·  [spacer]  CSV  Report
  *  Row 2: Budget pill  ·  Date preset tabs
  */
-import { SheetTitle, SheetDescription } from "@/core/components/ui/sheet";
+
 import { Loader2, Copy, FileDown, Activity, TableIcon } from "lucide-react";
 import { InlineBudgetEditor } from "./SharedComponents";
 import type { MetaCampaign, DatePreset } from "./types";
@@ -111,16 +111,15 @@ export function DrawerHeader({
         </div>
 
         {/* Campaign name */}
-        <SheetTitle
+        <h2
           className="text-sm font-semibold text-white truncate leading-none"
           style={{ maxWidth: 240 }}
         >
           {campaign?.name ?? "Campaign"}
-        </SheetTitle>
+        </h2>
 
         {/* Objective badge */}
         {objectiveLabel && (
-          <SheetDescription asChild>
             <span
               className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
               style={{
@@ -132,7 +131,6 @@ export function DrawerHeader({
             >
               {objectiveLabel}
             </span>
-          </SheetDescription>
         )}
 
         {/* Status toggle */}
