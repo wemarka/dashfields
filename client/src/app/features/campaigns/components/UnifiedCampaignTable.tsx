@@ -220,8 +220,8 @@ function UnifiedCampaignTableInner({
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#525252" }}>—</span>;
         const s = c.score;
-        const arcColor = s >= 70 ? "#a3a3a3" : s >= 40 ? "#737373" : "#e62020";
-        const textColor = s >= 70 ? "#a3a3a3" : s >= 40 ? "#737373" : "#e62020";
+        const arcColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#e62020";
+        const textColor = s >= 70 ? "#22c55e" : s >= 40 ? "#f59e0b" : "#e62020";
         // SVG circle arc: r=14, circumference=2πr≈87.96, dasharray = (s/100)*87.96
         const r = 14;
         const circ = 2 * Math.PI * r;

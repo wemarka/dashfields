@@ -83,16 +83,16 @@ export const ALL_COLUMNS: ColumnDef[] = [
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  active:      { dot: "bg-muted", bg: "bg-muted", text: "text-foreground dark:text-foreground", label: "Active" },
-  paused:      { dot: "bg-brand/10",   bg: "bg-brand/10",   text: "text-brand dark:text-brand",     label: "Paused" },
-  draft:       { dot: "bg-neutral-400",   bg: "bg-neutral-400/10",   text: "text-neutral-600 dark:text-neutral-400",     label: "Draft" },
-  ended:       { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Ended" },
-  scheduled:   { dot: "bg-muted",    bg: "bg-muted",    text: "text-muted-foreground dark:text-muted-foreground",       label: "Scheduled" },
-  archived:    { dot: "bg-neutral-300",   bg: "bg-neutral-300/10",   text: "text-neutral-500 dark:text-neutral-400",     label: "Archived" },
-  deleted:     { dot: "bg-red-400",     bg: "bg-red-400/10",     text: "text-red-600 dark:text-red-400",         label: "Deleted" },
+  active:      { dot: "bg-[#22c55e]",      bg: "bg-[#22c55e]/15",   text: "text-[#22c55e]",       label: "Active" },
+  paused:      { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "Paused" },
+  draft:       { dot: "bg-neutral-500",    bg: "bg-neutral-500/15", text: "text-neutral-400",     label: "Draft" },
+  ended:       { dot: "bg-neutral-600",    bg: "bg-neutral-600/15", text: "text-neutral-400",     label: "Ended" },
+  scheduled:   { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/15",   text: "text-[#f59e0b]",       label: "Scheduled" },
+  archived:    { dot: "bg-neutral-600",    bg: "bg-neutral-600/15", text: "text-neutral-400",     label: "Archived" },
+  deleted:     { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
-  in_process:  { dot: "bg-muted",    bg: "bg-muted",    text: "text-muted-foreground dark:text-muted-foreground",       label: "In Review" },
-  with_issues: { dot: "bg-brand",  bg: "bg-brand/10",  text: "text-brand",   label: "With Issues" },
+  in_process:  { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/15",   text: "text-[#f59e0b]",       label: "In Review" },
+  with_issues: { dot: "bg-[#e62020]",      bg: "bg-[#e62020]/15",   text: "text-[#e62020]",       label: "With Issues" },
 };
 
 export function getStatusConfig(status: string) {

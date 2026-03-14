@@ -559,14 +559,14 @@ export default function Campaigns() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search campaigns..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg text-[13px] outline-none transition-all"
+              className="w-full h-8 pl-8 pr-3 rounded-lg text-[13px] outline-none transition-all placeholder:text-neutral-500 text-white"
               style={{
-                backgroundColor: "#f3f4f6",
-                border: "1px solid transparent",
-                color: "#111827",
+                backgroundColor: "#171717",
+                border: "1px solid #262626",
+                color: "#ffffff",
               }}
-              onFocus={e => { e.currentTarget.style.border = "1px solid #d1d5db"; e.currentTarget.style.backgroundColor = "#ffffff"; }}
-              onBlur={e => { e.currentTarget.style.border = "1px solid transparent"; e.currentTarget.style.backgroundColor = "#f3f4f6"; }}
+              onFocus={e => { e.currentTarget.style.borderColor = "#404040"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "#262626"; }}
             />
             {search && (
               <button onClick={() => setSearch("")}
