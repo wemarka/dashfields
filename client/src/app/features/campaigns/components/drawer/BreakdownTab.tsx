@@ -1,6 +1,6 @@
 /**
  * drawer/BreakdownTab.tsx — Age, gender, region, device breakdown sections.
- * Each section shows a Donut Chart (Recharts PieChart) + a legend table.
+ * Each section shows a Donut Chart (Recharts PieChart) + a full detailed table.
  */
 import { useMemo } from "react";
 import { Loader2, Users, MapPin, Monitor } from "lucide-react";
@@ -8,7 +8,6 @@ import { trpc } from "@/core/lib/trpc";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 // ─── Donut Colors ────────────────────────────────────────────────────────────
-// Brand palette chart colors — no blue, no orange
 const DONUT_COLORS = [
   "#e62020", // brand-red
   "#a3a3a3", // neutral-400
@@ -24,33 +23,81 @@ const DONUT_COLORS = [
 ];
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
-function DonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { pct: number } }> }) {
+function DonutTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; payload: { pct: number } }>;
+}) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
-      <p className="font-semibold text-foreground">{item.name}</p>
-      <p className="text-muted-foreground">{item.payload.pct}% · {item.value.toLocaleString()} impressions</p>
+    <div
+      style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+      className="rounded-lg px-3 py-2 shadow-lg text-xs"
+    >
+      <p className="font-semibold" style={{ color: "#ffffff" }}>
+        {item.name}
+      </p>
+      <p style={{ color: "#a3a3a3" }}>
+        {item.payload.pct}% · {item.value.toLocaleString()} imp
+      </p>
     </div>
   );
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function fmtNum(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
+  return n.toLocaleString();
+}
+
+function ctr(clicks: number, impressions: number) {
+  if (!impressions) return "0.00%";
+  return ((clicks / impressions) * 100).toFixed(2) + "%";
+}
+
 // ─── Breakdown Section ──────────────────────────────────────────────────────
-function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, fmtMoney }: {
+function BreakdownSection({
+  type,
+  campaignId,
+  datePreset,
+  workspaceId,
+  enabled,
+  fmtMoney,
+}: {
   type: "age" | "gender" | "region" | "device";
-  campaignId: string; datePreset: string; workspaceId?: number; enabled: boolean;
+  campaignId: string;
+  datePreset: string;
+  workspaceId?: number;
+  enabled: boolean;
   fmtMoney: (n: number) => string;
 }) {
   const config = {
-    age:    { icon: Users,   label: "Age Distribution",    apiBreakdown: "age" as const },
-    gender: { icon: Users,   label: "Gender Distribution",  apiBreakdown: "gender" as const },
-    region: { icon: MapPin,  label: "Top Regions",          apiBreakdown: "country" as const },
-    device: { icon: Monitor, label: "Device Distribution",  apiBreakdown: "impression_device" as const },
+    age: { icon: Users, label: "Age Distribution", apiBreakdown: "age" as const },
+    gender: { icon: Users, label: "Gender Distribution", apiBreakdown: "gender" as const },
+    region: { icon: MapPin, label: "Top Regions", apiBreakdown: "country" as const },
+    device: { icon: Monitor, label: "Device Distribution", apiBreakdown: "impression_device" as const },
   };
   const { icon: Icon, label, apiBreakdown } = config[type];
 
   const { data: rawData, isLoading } = trpc.meta.campaignBreakdown.useQuery(
-    { campaignId, breakdown: apiBreakdown, datePreset: datePreset as "last_7d" | "last_14d" | "last_30d" | "last_90d" | "today" | "yesterday" | "this_month" | "last_month", workspaceId },
+    {
+      campaignId,
+      breakdown: apiBreakdown,
+      datePreset: datePreset as
+        | "last_7d"
+        | "last_14d"
+        | "last_30d"
+        | "last_90d"
+        | "today"
+        | "yesterday"
+        | "this_month"
+        | "last_month",
+      workspaceId,
+    },
     { enabled }
   );
 
@@ -71,9 +118,10 @@ function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, 
   }, [rawData]);
 
   const totalImpressions = aggregated.reduce((s, r) => s + r.impressions, 0);
+  const totalClicks = aggregated.reduce((s, r) => s + r.clicks, 0);
+  const totalSpend = aggregated.reduce((s, r) => s + r.spend, 0);
   const hasData = aggregated.length > 0 && totalImpressions > 0;
 
-  // For region/device, show top 6 + "Other"
   const displayRows = useMemo(() => {
     if (!hasData) return [];
     const maxRows = type === "age" || type === "gender" ? aggregated.length : 6;
@@ -103,89 +151,223 @@ function BreakdownSection({ type, campaignId, datePreset, workspaceId, enabled, 
     return rows;
   }, [aggregated, hasData, totalImpressions, type]);
 
-  const pieData = displayRows.map(r => ({ name: r.label, value: r.impressions, pct: r.pct }));
+  const pieData = displayRows.map((r) => ({ name: r.label, value: r.impressions, pct: r.pct }));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Section header */}
       <div className="flex items-center gap-2">
-        <Icon className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm font-semibold text-foreground">{label}</span>
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: "rgba(230,32,32,0.12)" }}
+        >
+          <Icon className="w-3.5 h-3.5" style={{ color: "#e62020" }} />
+        </div>
+        <span className="text-sm font-semibold" style={{ color: "#ffffff" }}>
+          {label}
+        </span>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <Loader2 className="h-5 w-5 animate-spin" style={{ color: "#737373" }} />
         </div>
       ) : !hasData ? (
-        <div className="text-xs text-muted-foreground text-center py-8">
+        <div className="text-xs text-center py-8" style={{ color: "#737373" }}>
           No breakdown data available for this period.
         </div>
       ) : (
-        <div className="flex items-center gap-4">
-          {/* Donut Chart */}
-          <div className="shrink-0 w-28 h-28">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={28}
-                  outerRadius={52}
-                  paddingAngle={2}
-                  dataKey="value"
-                  strokeWidth={0}
-                >
-                  {pieData.map((_, i) => (
-                    <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<DonutTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+        <>
+          {/* ── Donut + Legend row ── */}
+          <div className="flex items-center gap-5">
+            {/* Donut */}
+            <div className="shrink-0 w-[110px] h-[110px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={32}
+                    outerRadius={52}
+                    paddingAngle={2}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<DonutTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Compact legend */}
+            <div className="flex-1 min-w-0 space-y-1.5">
+              {displayRows.map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span
+                    className="text-[11px] truncate flex-1"
+                    style={{ color: "#a3a3a3" }}
+                    title={item.label}
+                  >
+                    {item.label}
+                  </span>
+                  <span className="text-[11px] font-semibold shrink-0" style={{ color: "#ffffff" }}>
+                    {item.pct}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Legend */}
-          <div className="flex-1 space-y-1.5 min-w-0">
-            {displayRows.map((item) => (
-              <div key={item.label} className="flex items-center gap-2 group">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="text-[11px] text-muted-foreground truncate flex-1" title={item.label}>
-                  {item.label}
-                </span>
-                <span className="text-[11px] font-semibold text-foreground shrink-0">
-                  {item.pct}%
-                </span>
+          {/* ── Detailed Table ── */}
+          <div
+            className="rounded-lg overflow-hidden"
+            style={{ border: "1px solid #262626" }}
+          >
+            {/* Table header */}
+            <div
+              className="grid text-[10px] font-semibold uppercase tracking-wider px-3 py-2"
+              style={{
+                gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+                backgroundColor: "#1f1f1f",
+                color: "#737373",
+                borderBottom: "1px solid #262626",
+              }}
+            >
+              <span>Segment</span>
+              <span className="text-right">Share</span>
+              <span className="text-right">Impressions</span>
+              <span className="text-right">Clicks</span>
+              <span className="text-right">CTR</span>
+              <span className="text-right">Spend</span>
+            </div>
+
+            {/* Table rows */}
+            {displayRows.map((item, idx) => (
+              <div
+                key={item.label}
+                className="grid items-center px-3 py-2.5 transition-colors"
+                style={{
+                  gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+                  backgroundColor: idx % 2 === 0 ? "#171717" : "#1a1a1a",
+                  borderBottom: idx < displayRows.length - 1 ? "1px solid #1f1f1f" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.backgroundColor = "#222222";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                    idx % 2 === 0 ? "#171717" : "#1a1a1a";
+                }}
+              >
+                {/* Segment label + progress bar */}
+                <div className="flex flex-col gap-1 min-w-0 pr-2">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span
+                      className="text-[11px] truncate"
+                      style={{ color: "#e5e5e5" }}
+                      title={item.label}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div
+                    className="h-1 rounded-full overflow-hidden"
+                    style={{ backgroundColor: "#262626" }}
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${item.pct}%`,
+                        backgroundColor: item.color,
+                        opacity: 0.8,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Share % */}
+                <div className="text-right">
+                  <span
+                    className="text-[11px] font-bold"
+                    style={{ color: item.color }}
+                  >
+                    {item.pct}%
+                  </span>
+                </div>
+
+                {/* Impressions */}
+                <div className="text-right">
+                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                    {fmtNum(item.impressions)}
+                  </span>
+                </div>
+
+                {/* Clicks */}
+                <div className="text-right">
+                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                    {fmtNum(item.clicks)}
+                  </span>
+                </div>
+
+                {/* CTR */}
+                <div className="text-right">
+                  <span className="text-[11px]" style={{ color: "#a3a3a3" }}>
+                    {ctr(item.clicks, item.impressions)}
+                  </span>
+                </div>
+
+                {/* Spend */}
+                <div className="text-right">
+                  <span className="text-[11px] font-medium" style={{ color: "#ffffff" }}>
+                    {fmtMoney(item.spend)}
+                  </span>
+                </div>
               </div>
             ))}
-            <p className="text-[9px] text-muted-foreground/50 pt-1">
-              {totalImpressions.toLocaleString()} impressions total
-            </p>
-          </div>
-        </div>
-      )}
 
-      {/* Hover detail table */}
-      {hasData && (
-        <div className="mt-2 space-y-1">
-          {displayRows.map((item) => (
-            <div key={item.label} className="flex items-center justify-between text-[10px] text-muted-foreground hover:text-foreground transition-colors py-0.5 px-1 rounded hover:bg-muted/40">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="truncate max-w-[100px]">{item.label}</span>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span>{item.impressions.toLocaleString()} imp</span>
-                <span>{item.clicks.toLocaleString()} clicks</span>
-                <span className="font-medium">{fmtMoney(item.spend)}</span>
-              </div>
+            {/* Totals row */}
+            <div
+              className="grid items-center px-3 py-2.5"
+              style={{
+                gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+                backgroundColor: "#1f1f1f",
+                borderTop: "1px solid #262626",
+              }}
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+                Total
+              </span>
+              <span className="text-right text-[11px] font-bold" style={{ color: "#ffffff" }}>
+                100%
+              </span>
+              <span className="text-right text-[11px] font-semibold" style={{ color: "#ffffff" }}>
+                {fmtNum(totalImpressions)}
+              </span>
+              <span className="text-right text-[11px] font-semibold" style={{ color: "#ffffff" }}>
+                {fmtNum(totalClicks)}
+              </span>
+              <span className="text-right text-[11px] font-semibold" style={{ color: "#ffffff" }}>
+                {ctr(totalClicks, totalImpressions)}
+              </span>
+              <span className="text-right text-[11px] font-semibold" style={{ color: "#ffffff" }}>
+                {fmtMoney(totalSpend)}
+              </span>
             </div>
-          ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
@@ -200,21 +382,67 @@ interface BreakdownTabProps {
   fmtCurrency: (n: number) => string;
 }
 
-export function BreakdownTab({ campaignId, datePreset, workspaceId, enabled, fmtCurrency }: BreakdownTabProps) {
+export function BreakdownTab({
+  campaignId,
+  datePreset,
+  workspaceId,
+  enabled,
+  fmtCurrency,
+}: BreakdownTabProps) {
   return (
     <div className="p-5 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <BreakdownSection type="age" campaignId={campaignId} datePreset={datePreset} workspaceId={workspaceId} enabled={enabled} fmtMoney={fmtCurrency} />
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+        >
+          <BreakdownSection
+            type="age"
+            campaignId={campaignId}
+            datePreset={datePreset}
+            workspaceId={workspaceId}
+            enabled={enabled}
+            fmtMoney={fmtCurrency}
+          />
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <BreakdownSection type="gender" campaignId={campaignId} datePreset={datePreset} workspaceId={workspaceId} enabled={enabled} fmtMoney={fmtCurrency} />
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+        >
+          <BreakdownSection
+            type="gender"
+            campaignId={campaignId}
+            datePreset={datePreset}
+            workspaceId={workspaceId}
+            enabled={enabled}
+            fmtMoney={fmtCurrency}
+          />
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <BreakdownSection type="region" campaignId={campaignId} datePreset={datePreset} workspaceId={workspaceId} enabled={enabled} fmtMoney={fmtCurrency} />
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+        >
+          <BreakdownSection
+            type="region"
+            campaignId={campaignId}
+            datePreset={datePreset}
+            workspaceId={workspaceId}
+            enabled={enabled}
+            fmtMoney={fmtCurrency}
+          />
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <BreakdownSection type="device" campaignId={campaignId} datePreset={datePreset} workspaceId={workspaceId} enabled={enabled} fmtMoney={fmtCurrency} />
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+        >
+          <BreakdownSection
+            type="device"
+            campaignId={campaignId}
+            datePreset={datePreset}
+            workspaceId={workspaceId}
+            enabled={enabled}
+            fmtMoney={fmtCurrency}
+          />
         </div>
       </div>
     </div>

@@ -3343,3 +3343,12 @@
 - [ ] Fix BreakdownTab: chart and table colors
 - [ ] Fix NotesTab: input and note card colors
 - [ ] Fix Drawer wrapper: header, nav sidebar, budget bar colors
+
+## ✅ Breakdown Tab Enhancement
+- [x] Replaced simple hover-detail with a full detailed table below each Donut chart
+- [x] Table columns: Segment (with color dot + progress bar), Share %, Impressions, Clicks, CTR, Spend
+- [x] Alternating row backgrounds (#171717 / #1a1a1a) with hover highlight (#222222)
+- [x] Totals row at the bottom showing aggregate values
+- [x] Progress bar inside each row showing visual proportion of the segment
+- [x] Dark theme enforced with direct hex values throughout
+- [x] 0 TypeScript errors
