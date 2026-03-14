@@ -107,17 +107,17 @@ function StatsBar({
 }) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
+      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#171717", borderTop: "1px solid #262626", borderBottom: "1px solid #262626" }}>
         {[1,2,3,4,5].map((i, idx) => (
           <Fragment key={i}>
             <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6" }} />
+              <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#404040" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#f3f4f6" }} />
-                <div style={{ height: 14, width: 56, borderRadius: 4, backgroundColor: "#f0f0f0" }} />
+                <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#262626" }} />
+                <div style={{ height: 14, width: 56, borderRadius: 4, backgroundColor: "#1f1f1f" }} />
               </div>
             </div>
-            {idx < 4 && <div style={{ width: 1, backgroundColor: "#f0f0f0", margin: "10px 0", flexShrink: 0 }} />}
+            {idx < 4 && <div style={{ width: 1, backgroundColor: "#262626", margin: "10px 0", flexShrink: 0 }} />}
           </Fragment>
         ))}
       </div>
@@ -133,12 +133,12 @@ function StatsBar({
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#fff", borderTop: "1px solid #f0f0f0", borderBottom: "1px solid #f0f0f0" }}>
+    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#171717", borderTop: "1px solid #262626", borderBottom: "1px solid #262626" }}>
       {stats.map((s, i) => (
         <Fragment key={s.key}>
           <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
             {/* Icon */}
-            <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", flexShrink: 0 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#404040", display: "flex", alignItems: "center", justifyContent: "center", color: "#a3a3a3", flexShrink: 0 }}>
               {s.icon}
             </div>
             {/* Text */}
@@ -444,12 +444,12 @@ export default function Campaigns() {
 
         {/* ── Page Header ─────────────────────────────────────────────────── */}
         <div className="px-7 pt-6 pb-4 flex items-center justify-between gap-4 flex-wrap shrink-0"
-          style={{ borderBottom: "1px solid #f0f0f0" }}>
+          style={{ borderBottom: "1px solid #262626" }}>
           <div>
-            <h2 className="text-[17px] font-semibold" style={{ color: "#111827" }}>
+            <h2 className="text-[17px] font-semibold" style={{ color: "#ffffff" }}>
               {t("campaigns.title")}
             </h2>
-            <p className="text-[12px] mt-0.5" style={{ color: "#9ca3af" }}>
+            <p className="text-[12px] mt-0.5" style={{ color: "#737373" }}>
               {hasAnyConnection
                 ? `${unifiedCampaigns.length} campaigns across ${connectedPlatforms.length} platform${connectedPlatforms.length !== 1 ? "s" : ""}`
                 : "Manage and monitor all your ad campaigns"}
@@ -460,9 +460,9 @@ export default function Campaigns() {
               <button
                 onClick={handleRefresh}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-                style={{ backgroundColor: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+                style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Refresh
@@ -472,9 +472,9 @@ export default function Campaigns() {
               onClick={handleExportCsv}
               disabled={exportCsv.isPending || filteredCampaigns.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
-              style={{ backgroundColor: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb" }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
+              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
             >
               <FileDown className="w-3.5 h-3.5" />
               {exportCsv.isPending ? "Exporting..." : "Export CSV"}
@@ -482,9 +482,9 @@ export default function Campaigns() {
             <button
               onClick={() => setShowCompare(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-              style={{ backgroundColor: "#f3f4f6", color: "#374151", border: "1px solid #e5e7eb" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
             >
               <GitCompare className="w-3.5 h-3.5" />
               {t("campaigns.compare")}
@@ -492,9 +492,9 @@ export default function Campaigns() {
             <button
               onClick={() => setShowBuilder(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-              style={{ backgroundColor: "#111827", color: "#ffffff" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f2937"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#111827"; }}
+              style={{ backgroundColor: "#e62020", color: "#ffffff" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#c41a1a"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e62020"; }}
             >
               <Plus className="w-3.5 h-3.5" />
               {t("campaigns.newCampaign")}
@@ -549,7 +549,7 @@ export default function Campaigns() {
 
         {/* ── Filter Bar ──────────────────────────────────────────────────── */}
         <div className="px-7 py-3 flex items-center gap-2.5 flex-wrap shrink-0"
-          style={{ borderBottom: "1px solid #f0f0f0" }}>
+          style={{ borderBottom: "1px solid #262626" }}>
 
           {/* Search */}
           <div className="relative flex-1 min-w-[180px] max-w-xs">
@@ -581,7 +581,7 @@ export default function Campaigns() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger
               className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-              style={{ backgroundColor: "#f3f4f6", color: "#374151", minWidth: 130 }}
+              style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 130 }}
             >
               <SelectValue />
             </SelectTrigger>
@@ -599,7 +599,7 @@ export default function Campaigns() {
             <Select value={platformFilter} onValueChange={setPlatformFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#f3f4f6", color: "#374151", minWidth: 130 }}
+                style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 130 }}
               >
                 <SelectValue />
               </SelectTrigger>
@@ -626,7 +626,7 @@ export default function Campaigns() {
             <Select value={tagFilter} onValueChange={setTagFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#f3f4f6", color: "#374151", minWidth: 120 }}
+                style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 120 }}
               >
                 <SelectValue placeholder="All Tags" />
               </SelectTrigger>

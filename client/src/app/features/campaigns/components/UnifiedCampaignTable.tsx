@@ -117,18 +117,18 @@ function UnifiedCampaignTableInner({
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="overflow-x-auto" style={{ border: "1px solid #f0f0f0", borderRadius: 10 }}>
+      <div className="overflow-x-auto" style={{ border: "1px solid #262626", borderRadius: 10 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #f0f0f0", backgroundColor: "#fafafa" }}>
+            <tr style={{ borderBottom: "1px solid #262626", backgroundColor: "#171717" }}>
               <th style={{ width: 36, padding: "8px 12px" }} />
-              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Campaign</th>
-              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Status</th>
-              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Platform</th>
-              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Spend</th>
-              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Impressions</th>
-              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>Clicks</th>
-              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>CTR</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Campaign</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Status</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Platform</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Spend</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Impressions</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Clicks</th>
+              <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>CTR</th>
               <th style={{ width: 40 }} />
             </tr>
           </thead>
@@ -296,13 +296,13 @@ function UnifiedCampaignTableInner({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto" style={{ border: "1px solid #f0f0f0", borderRadius: 10 }}>
+      <div className="overflow-x-auto" style={{ border: "1px solid #262626", borderRadius: 10 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #f0f0f0", backgroundColor: "#fafafa" }}>
+            <tr style={{ borderBottom: "1px solid #262626", backgroundColor: "#171717" }}>
               {/* Switch — first column on the left */}
               {onStatusToggle && (
-                <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   On/Off
                 </th>
               )}

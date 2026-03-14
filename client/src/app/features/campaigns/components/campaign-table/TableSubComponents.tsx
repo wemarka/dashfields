@@ -80,13 +80,13 @@ export function InlineBudgetEditor({
             fontSize: 12,
             fontFamily: "Inter, sans-serif",
             fontVariantNumeric: "tabular-nums",
-            color: "#374151",
+            color: "#a3a3a3",
             fontWeight: 500,
           }}
         >
           {value != null ? fmtMoney(value, 0) : "—"}
         </span>
-        <Pencil className="w-3 h-3 opacity-0 group-hover/edit:opacity-60 transition-opacity" style={{ color: "#9ca3af" }} />
+        <Pencil className="w-3 h-3 opacity-0 group-hover/edit:opacity-60 transition-opacity" style={{ color: "#737373" }} />
       </button>
     );
   }

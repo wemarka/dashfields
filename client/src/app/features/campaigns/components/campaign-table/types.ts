@@ -92,7 +92,7 @@ export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: stri
   deleted:     { dot: "bg-red-400",     bg: "bg-red-400/10",     text: "text-red-600 dark:text-red-400",         label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
   in_process:  { dot: "bg-muted",    bg: "bg-muted",    text: "text-muted-foreground dark:text-muted-foreground",       label: "In Review" },
-  with_issues: { dot: "bg-orange-400",  bg: "bg-orange-400/10",  text: "text-orange-700 dark:text-orange-400",   label: "With Issues" },
+  with_issues: { dot: "bg-brand",  bg: "bg-brand/10",  text: "text-brand",   label: "With Issues" },
 };
 
 export function getStatusConfig(status: string) {

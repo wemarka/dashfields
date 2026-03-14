@@ -7,6 +7,19 @@ import {
 import { KpiCardSkeleton } from "@/core/components/ui/skeleton-cards";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
+// Brand palette constants
+const P = {
+  bg:        "#0a0a0a",   // neutral-950
+  card:      "#171717",   // neutral-900
+  border:    "#262626",   // neutral-800
+  text:      "#ffffff",
+  muted:     "#a3a3a3",   // neutral-400
+  subtle:    "#737373",   // neutral-500
+  icon:      "#404040",   // neutral-700
+  brand:     "#e62020",
+  divider:   "#1f1f1f",
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface CampaignKpiCardsProps {
   totalSpend: number;
@@ -51,7 +64,7 @@ function TrendBadge({
   const absChange = Math.abs(change);
   if (absChange < 0.1) {
     return (
-      <span className="inline-flex items-center gap-0.5" style={{ fontSize: 10, color: "#9ca3af", fontWeight: 500 }}>
+      <span className="inline-flex items-center gap-0.5" style={{ fontSize: 10, color: P.subtle, fontWeight: 500 }}>
         <Minus className="w-2.5 h-2.5" />0%
       </span>
     );
@@ -59,7 +72,7 @@ function TrendBadge({
   return (
     <span
       className="inline-flex items-center gap-0.5"
-      style={{ fontSize: 10, fontWeight: 600, color: isGood ? "#a3a3a3" : "#e62020" }}
+      style={{ fontSize: 10, fontWeight: 600, color: isGood ? P.muted : P.brand }}
     >
       {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
       {absChange > 999 ? "999+" : absChange.toFixed(1)}%
@@ -139,7 +152,7 @@ function KpiItem({
         onClick={onClick}
         className="flex items-center gap-3 py-3 px-4 transition-all group"
         style={{
-          background: isSelected ? "#f9fafb" : "transparent",
+          background: isSelected ? "#1f1f1f" : "transparent",
           borderRadius: isSelected ? 8 : 0,
           cursor: onClick ? "pointer" : "default",
           outline: "none",
@@ -154,32 +167,32 @@ function KpiItem({
             width: 30,
             height: 30,
             borderRadius: 8,
-            backgroundColor: "#f3f4f6",
+            backgroundColor: P.icon,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#6b7280",
+            color: P.muted,
             flexShrink: 0,
             transition: "background 0.15s",
           }}
-          className="group-hover:bg-neutral-700/70"
+          className="group-hover:!bg-neutral-600"
         >
           {icon}
         </div>
 
         {/* Text */}
         <div className="min-w-0 text-left">
-          <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
+          <p style={{ fontSize: 11, color: P.subtle, fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
             {label}
           </p>
           <div className="flex items-baseline gap-2">
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#111827", fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+            <span style={{ fontSize: 17, fontWeight: 700, color: P.text, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
               {value}
             </span>
             <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
           </div>
           {sub && (
-            <p style={{ fontSize: 10.5, color: "#9ca3af", marginTop: 2, fontFamily: "Inter, sans-serif" }}>
+            <p style={{ fontSize: 10.5, color: P.subtle, marginTop: 2, fontFamily: "Inter, sans-serif" }}>
               {sub}
             </p>
           )}
@@ -188,7 +201,7 @@ function KpiItem({
 
       {/* Divider */}
       {!isLast && (
-        <div style={{ width: 1, backgroundColor: "#f0f0f0", alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
+        <div style={{ width: 1, backgroundColor: P.border, alignSelf: "stretch", margin: "10px 0", flexShrink: 0 }} />
       )}
     </>
   );
@@ -279,11 +292,10 @@ export function CampaignKpiCards({
       style={{
         display: "flex",
         alignItems: "stretch",
-        backgroundColor: "#ffffff",
-        border: "1px solid #f0f0f0",
+        backgroundColor: P.card,
+        border: `1px solid ${P.border}`,
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
       }}
     >
       {kpis.map((kpi, i) => (
