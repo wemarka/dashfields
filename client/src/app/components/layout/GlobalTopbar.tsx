@@ -91,11 +91,11 @@ export function GlobalTopbar() {
           </button>
 
           {/* ── Logo ──────────────────────────────────────────────────── */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 mr-2 shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-brand flex items-center justify-center shadow-lg shadow-[oklch(0.592_0.227_28/0.25)]">
-              <Zap className="w-3.5 h-3.5 text-white" />
+          <Link href="/dashboard" className="group/logo flex items-center gap-2.5 mr-2 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-white group-hover/logo:bg-brand flex items-center justify-center shadow-lg transition-all duration-300 ease-out group-hover/logo:shadow-[oklch(0.592_0.227_28/0.25)]">
+              <Zap className="w-3.5 h-3.5 text-neutral-950 group-hover/logo:text-white transition-colors duration-300" />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-foreground hidden sm:block">
+            <span className="text-sm font-semibold tracking-tight text-white transition-colors duration-300 hidden sm:block">
               Dashfields
             </span>
           </Link>

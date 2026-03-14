@@ -3267,3 +3267,9 @@
 - [x] Create DashStudiosLogo React component with SVG + cinematic lens flare
 - [x] Integrate into Topbar with hover-to-scale and smooth animation
 - [x] Ensure proper alignment and organization with rest of Topbar
+
+## 🔄 Dashfields Logo Hover Update
+- [x] Change logo icon: white bg + black text default → brand-red bg + white text on hover
+
+## 🔄 Replace Zap with Dashfields Icon
+- [ ] Replace Zap icon in Topbar with actual Dashfields SVG icon paths
