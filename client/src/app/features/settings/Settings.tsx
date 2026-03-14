@@ -26,13 +26,13 @@ function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
     </div>
   );
   if (mode === "dark") return (
-    <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#1a1a1a" }}>
+    <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#212121" }}>
       <div className="flex h-full">
-        <div className="w-8 h-full" style={{ backgroundColor: "#111" }} />
+        <div className="w-8 h-full" style={{ backgroundColor: "#1e1e1e" }} />
         <div className="flex-1 p-1.5 space-y-1">
           <div className="h-2 rounded" style={{ backgroundColor: "#333", width: "60%" }} />
-          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "80%" }} />
-          <div className="h-1.5 rounded" style={{ backgroundColor: "#2a2a2a", width: "50%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#383838", width: "80%" }} />
+          <div className="h-1.5 rounded" style={{ backgroundColor: "#383838", width: "50%" }} />
         </div>
       </div>
     </div>
@@ -40,7 +40,7 @@ function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
   return (
     <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#e8e8e8" }}>
       <div className="flex h-full">
-        <div className="w-8 h-full" style={{ background: "linear-gradient(to bottom, #111 50%, #e0e0e0 50%)" }} />
+        <div className="w-8 h-full" style={{ background: "linear-gradient(to bottom, #1e1e1e 50%, #e0e0e0 50%)" }} />
         <div className="flex-1 p-1.5 space-y-1">
           <div className="h-2 rounded" style={{ background: "linear-gradient(to right, #333 50%, #d0d0d0 50%)", width: "60%" }} />
           <div className="h-1.5 rounded" style={{ backgroundColor: "#d0d0d0", width: "80%" }} />
@@ -129,7 +129,7 @@ export default function Settings() {
                     <div
                       className="w-full rounded-xl overflow-hidden transition-all"
                       style={{
-                        border: isActive ? "2px solid #e62020" : "2px solid #262626",
+                        border: isActive ? "2px solid #e62020" : "2px solid #303030",
                         padding: 2,
                       }}
                     >

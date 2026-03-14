@@ -45,7 +45,7 @@ export default function AuthCallbackPage() {
       {/* Left panel — branding */}
       <div
         className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10"
-        style={{ backgroundColor: "#111827" }}
+        style={{ backgroundColor: "#1e1e1e" }}
       >
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>

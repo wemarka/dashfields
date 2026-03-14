@@ -126,10 +126,10 @@ function UnifiedCampaignTableInner({
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="overflow-x-auto" style={{ border: "1px solid #262626", borderRadius: 10 }}>
+      <div className="overflow-x-auto" style={{ border: "1px solid #303030", borderRadius: 10 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #262626", backgroundColor: "#1f1f1f" }}>
+            <tr style={{ borderBottom: "1px solid #303030", backgroundColor: "#272727" }}>
               <th style={{ width: 36, padding: "8px 12px" }} />
               <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Campaign</th>
               <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>Status</th>
@@ -151,7 +151,7 @@ function UnifiedCampaignTableInner({
   if (campaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-2"
-        style={{ border: "1px solid #262626", borderRadius: 10, backgroundColor: "#171717" }}>
+        style={{ border: "1px solid #303030", borderRadius: 10, backgroundColor: "#1e1e1e" }}>
         <Megaphone className="w-8 h-8" style={{ color: "#404040" }} />
         <p className="text-[13px] font-medium" style={{ color: "#a3a3a3" }}>No campaigns found</p>
         <p className="text-[12px]" style={{ color: "#737373" }}>Try adjusting your filters or create a new campaign.</p>
@@ -237,7 +237,7 @@ function UnifiedCampaignTableInner({
                   <button onClick={(e) => { e.stopPropagation(); onStatusToggle(c); }} disabled={isToggling}
                     className="p-0.5 rounded transition-colors disabled:opacity-50"
                     style={{ color: "#9ca3af" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}>
                     {isToggling ? <Loader2 className="w-3 h-3 animate-spin" /> :
                       isActive ? <Pause className="w-3 h-3" style={{ color: "#a3a3a3" }} /> :
@@ -366,7 +366,7 @@ function UnifiedCampaignTableInner({
           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative", width: size, height: size }}>
             <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
               {/* Track */}
-              <circle cx={cx} cy={cx} r={r} fill="none" stroke="#262626" strokeWidth={3} />
+              <circle cx={cx} cy={cx} r={r} fill="none" stroke="#303030" strokeWidth={3} />
               {/* Arc */}
               <circle
                 cx={cx} cy={cx} r={r}
@@ -409,9 +409,9 @@ function UnifiedCampaignTableInner({
           <DropdownMenuTrigger asChild>
             <button
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] transition-colors"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "none" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "none" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
               <Settings2 className="w-3 h-3" />
               Columns
@@ -430,10 +430,10 @@ function UnifiedCampaignTableInner({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto" style={{ border: "1px solid #262626", borderRadius: 10 }}>
+      <div className="overflow-x-auto" style={{ border: "1px solid #303030", borderRadius: 10 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #262626", backgroundColor: "#1f1f1f" }}>
+            <tr style={{ borderBottom: "1px solid #303030", backgroundColor: "#272727" }}>
               {/* Switch — first column on the left */}
               {onStatusToggle && (
                 <th style={{ width: 52, padding: "9px 8px", fontSize: 11, fontWeight: 600, color: "#737373", textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -485,8 +485,8 @@ function UnifiedCampaignTableInner({
                   <tr
                     onClick={() => onRowClick(c)}
                     style={{
-                      borderBottom: isLast ? "none" : "1px solid #1f1f1f",
-                      backgroundColor: isCampaignSelected ? "rgba(230,32,32,0.10)" : isSelected ? "#262626" : "#171717",
+                      borderBottom: isLast ? "none" : "1px solid #272727",
+                      backgroundColor: isCampaignSelected ? "rgba(230,32,32,0.10)" : isSelected ? "#303030" : "#1e1e1e",
                       cursor: "pointer",
                       transition: "background-color 0.1s",
                     }}
@@ -498,7 +498,7 @@ function UnifiedCampaignTableInner({
                     onMouseLeave={e => {
                       setHoveredRowId(null);
                       if (!isCampaignSelected && !isSelected)
-                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#171717";
+                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#1e1e1e";
                     }}
                   >
                     {/* Switch — first column on the left */}
@@ -539,7 +539,7 @@ function UnifiedCampaignTableInner({
                           <button
                             className="flex items-center justify-center w-6 h-6 rounded transition-colors opacity-0 group-hover:opacity-100"
                             style={{ color: "#737373" }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
                             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                           >
                             <MoreHorizontal className="w-3.5 h-3.5" />
@@ -598,9 +598,9 @@ function UnifiedCampaignTableInner({
               onClick={() => setPage(p => p - 1)}
               disabled={page === 0}
               className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-30"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "none" }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "none" }}
               onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333333"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -616,7 +616,7 @@ function UnifiedCampaignTableInner({
                   onClick={() => setPage(pageNum)}
                   className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
                   style={{
-                    backgroundColor: page === pageNum ? "#e62020" : "#262626",
+                    backgroundColor: page === pageNum ? "#e62020" : "#303030",
                     color: page === pageNum ? "#ffffff" : "#a3a3a3",
                     fontSize: 12,
                     fontWeight: page === pageNum ? 600 : 400,
@@ -631,9 +631,9 @@ function UnifiedCampaignTableInner({
               onClick={() => setPage(p => p + 1)}
               disabled={page >= totalPages - 1}
               className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-30"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "none" }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "none" }}
               onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333333"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

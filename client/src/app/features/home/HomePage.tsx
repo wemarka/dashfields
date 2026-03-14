@@ -2,9 +2,9 @@
  * HomePage — Creative hub landing page.
  *
  * ── Brand Palette (ONLY these values allowed) ──────────────────────────────
- *  Background:  #0a0a0a  (neutral-950)
- *  Card bg:     #171717  (neutral-900)
- *  Border:      #262626  (neutral-800)
+ *  Background:  #141414  (neutral-950)
+ *  Card bg:     #1e1e1e  (neutral-900)
+ *  Border:      #303030  (neutral-800)
  *  Text dim:    #737373  (neutral-500)
  *  Text muted:  #a3a3a3  (neutral-400)
  *  Text bright: #ffffff  (white)
@@ -134,9 +134,9 @@ function fmtNumber(n: number): string {
 
 // ─── Palette constants (single source of truth) ──────────────────────────────
 const P = {
-  bg:        "#0a0a0a",   // neutral-950
-  card:      "#171717",   // neutral-900
-  border:    "#262626",   // neutral-800
+  bg:        "#141414",   // neutral-950
+  card:      "#1e1e1e",   // neutral-900
+  border:    "#303030",   // neutral-800
   dim:       "#737373",   // neutral-500
   muted:     "#a3a3a3",   // neutral-400
   white:     "#ffffff",
@@ -269,9 +269,9 @@ export default function HomePage() {
           height: 1px;
           background: linear-gradient(90deg,
             transparent,
-            #262626 20%,
+            #303030 20%,
             #e62020 50%,
-            #262626 80%,
+            #303030 80%,
             transparent);
           opacity: .35;
           margin: 0 60px;

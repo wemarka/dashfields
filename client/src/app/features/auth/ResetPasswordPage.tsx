@@ -57,9 +57,9 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0f]">
+    <div className="min-h-screen flex bg-[#141418]">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#0f0f17] border-r border-white/[0.06]">
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#1a1a22] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
           <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">

@@ -98,7 +98,7 @@ export function DrawerHeader({
   return (
     <div
       className="shrink-0 bg-neutral-900"
-      style={{ borderBottom: "1px solid #262626" }}
+      style={{ borderBottom: "1px solid #303030" }}
     >
       {/* ── Row 1: Name + Status + Actions ── */}
       <div
@@ -124,7 +124,7 @@ export function DrawerHeader({
             <span
               className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
               style={{
-                background: "#262626",
+                background: "#303030",
                 color: "#a3a3a3",
                 borderRadius: 4,
                 padding: "3px 6px",
@@ -214,7 +214,7 @@ export function DrawerHeader({
                 padding: "5px 10px",
                 borderRadius: 6,
                 border: "1px solid #404040",
-                background: "#262626",
+                background: "#303030",
                 cursor: isExportingCsv ? "wait" : "pointer",
               }}
             >
@@ -235,7 +235,7 @@ export function DrawerHeader({
               padding: "5px 10px",
               borderRadius: 6,
               border: "1px solid #404040",
-              background: "#262626",
+              background: "#303030",
               cursor: isExporting ? "wait" : "pointer",
             }}
           >
@@ -251,7 +251,7 @@ export function DrawerHeader({
       {/* ── Row 2: Budget + Date presets ── */}
       <div
         className="flex items-center justify-between px-5"
-        style={{ height: 38, borderTop: "1px solid #262626" }}
+        style={{ height: 38, borderTop: "1px solid #303030" }}
       >
         {/* Budget */}
         <div className="flex items-center gap-1.5">
@@ -274,7 +274,7 @@ export function DrawerHeader({
         <div
           className="flex items-center"
           style={{
-            background: "#1f1f1f",
+            background: "#272727",
             borderRadius: 7,
             padding: 2,
             gap: 1,

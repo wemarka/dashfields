@@ -3432,3 +3432,12 @@
 - [x] Passed `prevInsights={prevInsightsMap}` to `UnifiedCampaignTable`
 - [x] server/__tests__/performanceBadge.test.ts — 13 tests (delta %, previous period, badge direction)
 - [x] 0 TypeScript errors
+
+## ✅ Background Lightening — App-wide
+- [x] CSS variables: background #0a0a0a → #141414, card #171717 → #1e1e1e, secondary/muted/border #262626 → #303030
+- [x] .app-bg gradient updated to oklch(0.185)
+- [x] Glass utilities lightened (glass, glass-strong, glass-subtle)
+- [x] Hardcoded hex in Campaigns.tsx, UnifiedCampaignTable, CampaignFilters, CampaignKpiCards, AdAccountSelector, BreakdownTab, PerformanceTab, DrawerHeader, EditCampaignModal updated
+- [x] Auth pages (Login, Register, ForgotPassword, ResetPassword) lightened
+- [x] Settings.tsx dark swatches updated
+- [x] 0 TypeScript errors

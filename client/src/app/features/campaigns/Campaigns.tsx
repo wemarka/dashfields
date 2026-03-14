@@ -110,17 +110,17 @@ function StatsBar({
 }) {
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#171717", borderTop: "1px solid #262626", borderBottom: "1px solid #262626" }}>
+      <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#1e1e1e", borderTop: "1px solid #303030", borderBottom: "1px solid #303030" }}>
         {[1,2,3,4,5].map((i, idx) => (
           <Fragment key={i}>
             <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: "#404040" }} />
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#262626" }} />
-                <div style={{ height: 14, width: 56, borderRadius: 4, backgroundColor: "#1f1f1f" }} />
+                <div style={{ height: 9, width: 48, borderRadius: 4, backgroundColor: "#303030" }} />
+                <div style={{ height: 14, width: 56, borderRadius: 4, backgroundColor: "#272727" }} />
               </div>
             </div>
-            {idx < 4 && <div style={{ width: 1, backgroundColor: "#262626", margin: "10px 0", flexShrink: 0 }} />}
+            {idx < 4 && <div style={{ width: 1, backgroundColor: "#303030", margin: "10px 0", flexShrink: 0 }} />}
           </Fragment>
         ))}
       </div>
@@ -136,7 +136,7 @@ function StatsBar({
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#171717", borderTop: "1px solid #262626", borderBottom: "1px solid #262626" }}>
+    <div style={{ display: "flex", alignItems: "stretch", backgroundColor: "#1e1e1e", borderTop: "1px solid #303030", borderBottom: "1px solid #303030" }}>
       {stats.map((s, i) => (
         <Fragment key={s.key}>
           <div style={{ flex: 1, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
@@ -149,7 +149,7 @@ function StatsBar({
               <p style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>
                 {s.label}
               </p>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "#111827", fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: 0 }}>
+              <p style={{ fontSize: 15, fontWeight: 700, color: "#1e1e1e", fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: 0 }}>
                 {s.value}
               </p>
               {s.sub && (
@@ -536,7 +536,7 @@ export default function Campaigns() {
 
         {/* ── Page Header ─────────────────────────────────────────────────── */}
         <div className="px-7 pt-6 pb-4 flex items-center justify-between gap-4 flex-wrap shrink-0"
-          style={{ borderBottom: "1px solid #262626" }}>
+          style={{ borderBottom: "1px solid #303030" }}>
           <div>
             <h2 className="text-[17px] font-semibold" style={{ color: "#ffffff" }}>
               {t("campaigns.title")}
@@ -565,9 +565,9 @@ export default function Campaigns() {
               <button
                 onClick={handleRefresh}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-                style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+                style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "1px solid #404040" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Refresh
@@ -577,9 +577,9 @@ export default function Campaigns() {
               onClick={handleExportCsv}
               disabled={exportCsv.isPending || filteredCampaigns.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "1px solid #404040" }}
+              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
               <FileDown className="w-3.5 h-3.5" />
               {exportCsv.isPending ? "Exporting..." : "Export CSV"}
@@ -587,9 +587,9 @@ export default function Campaigns() {
             <button
               onClick={() => setShowCompare(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "1px solid #404040" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", border: "1px solid #404040" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#303030"; }}
             >
               <GitCompare className="w-3.5 h-3.5" />
               {t("campaigns.compare")}
@@ -610,7 +610,7 @@ export default function Campaigns() {
         {/* ── Connect Banner ──────────────────────────────────────────────── */}
         {!hasAnyConnection && (
           <div className="mx-7 mt-5 rounded-xl px-5 py-4 flex items-center justify-between gap-4"
-            style={{ backgroundColor: "#171717", border: "1px solid #262626" }}>
+            style={{ backgroundColor: "#1e1e1e", border: "1px solid #303030" }}>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: "rgba(230,32,32,.08)" }}>
@@ -628,7 +628,7 @@ export default function Campaigns() {
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-colors"
                 style={{ backgroundColor: "#e62020", color: "#ffffff" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#c41a1a"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#111827"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1e1e1e"; }}
               >
                 Connect Now
               </button>
@@ -659,7 +659,7 @@ export default function Campaigns() {
 
         {/* ── Filter Bar ──────────────────────────────────────────────────── */}
         <div className="px-7 py-3 flex items-center gap-2.5 flex-wrap shrink-0"
-          style={{ borderBottom: "1px solid #262626" }}>
+          style={{ borderBottom: "1px solid #303030" }}>
 
           {/* Search */}
           <div className="relative flex-1 min-w-[180px] max-w-xs">
@@ -671,12 +671,12 @@ export default function Campaigns() {
               placeholder="Search campaigns..."
               className="w-full h-8 pl-8 pr-3 rounded-lg text-[13px] outline-none transition-all placeholder:text-neutral-500 text-white"
               style={{
-                backgroundColor: "#171717",
-                border: "1px solid #262626",
+                backgroundColor: "#1e1e1e",
+                border: "1px solid #303030",
                 color: "#ffffff",
               }}
               onFocus={e => { e.currentTarget.style.borderColor = "#404040"; }}
-              onBlur={e => { e.currentTarget.style.borderColor = "#262626"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "#303030"; }}
             />
             {search && (
               <button onClick={() => setSearch("")}
@@ -691,7 +691,7 @@ export default function Campaigns() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger
               className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-              style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 130 }}
+              style={{ backgroundColor: "#303030", color: "#a3a3a3", minWidth: 130 }}
             >
               <SelectValue />
             </SelectTrigger>
@@ -709,7 +709,7 @@ export default function Campaigns() {
             <Select value={platformFilter} onValueChange={setPlatformFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 130 }}
+                style={{ backgroundColor: "#303030", color: "#a3a3a3", minWidth: 130 }}
               >
                 <SelectValue />
               </SelectTrigger>
@@ -736,7 +736,7 @@ export default function Campaigns() {
             <Select value={tagFilter} onValueChange={setTagFilter}>
               <SelectTrigger
                 className="h-8 text-[13px] gap-1.5 border-0 rounded-lg"
-                style={{ backgroundColor: "#262626", color: "#a3a3a3", minWidth: 120 }}
+                style={{ backgroundColor: "#303030", color: "#a3a3a3", minWidth: 120 }}
               >
                 <SelectValue placeholder="All Tags" />
               </SelectTrigger>
@@ -755,7 +755,7 @@ export default function Campaigns() {
               <button
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] transition-colors"
                 style={{
-                  backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#262626",
+                  backgroundColor: datePreset !== "last_30d" ? "rgba(230,32,32,.08)" : "#303030",
                   color: datePreset !== "last_30d" ? "#e62020" : "#a3a3a3",
                   border: "none",
                 }}
@@ -767,7 +767,7 @@ export default function Campaigns() {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <div className="flex">
-                <div className="border-r p-2 space-y-0.5 min-w-[130px]" style={{ borderColor: "#262626" }}>
+                <div className="border-r p-2 space-y-0.5 min-w-[130px]" style={{ borderColor: "#303030" }}>
                   <p className="text-[10px] font-semibold uppercase tracking-widest px-2 py-1" style={{ color: "#737373" }}>
                     Quick Select
                   </p>
@@ -789,7 +789,7 @@ export default function Campaigns() {
                       {d.label}
                     </button>
                   ))}
-                  <div style={{ borderTop: "1px solid #262626", margin: "4px 0" }} />
+                  <div style={{ borderTop: "1px solid #303030", margin: "4px 0" }} />
                   <button
                     onClick={() => setDatePreset("custom")}
                     className="w-full text-left px-2.5 py-1.5 rounded-md text-[13px] transition-colors"

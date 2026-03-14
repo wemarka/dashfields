@@ -78,7 +78,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-md" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+      <DialogContent className="max-w-md" style={{ background: "#212121", border: "1px solid #383838" }}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-white">
             <Pencil className="w-4 h-4" style={{ color: "#e62020" }} />
@@ -98,7 +98,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
               onChange={(e) => setName(e.target.value)}
               placeholder="Campaign name"
               className="text-sm h-8"
-              style={{ background: "#111", border: "1px solid #333", color: "#fff" }}
+              style={{ background: "#1e1e1e", border: "1px solid #333", color: "#fff" }}
             />
           </div>
 
@@ -106,10 +106,10 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
           <div className="space-y-1.5">
             <Label className="text-xs font-medium" style={{ color: "#a3a3a3" }}>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as "ACTIVE" | "PAUSED")}>
-              <SelectTrigger className="h-8 text-sm" style={{ background: "#111", border: "1px solid #333", color: "#fff" }}>
+              <SelectTrigger className="h-8 text-sm" style={{ background: "#1e1e1e", border: "1px solid #333", color: "#fff" }}>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+              <SelectContent style={{ background: "#212121", border: "1px solid #383838" }}>
                 <SelectItem value="ACTIVE" className="text-xs">
                   <span className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
@@ -139,7 +139,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
                 min="1"
                 step="0.01"
                 className="text-sm h-8 pl-6"
-                style={{ background: "#111", border: "1px solid #333", color: "#fff" }}
+                style={{ background: "#1e1e1e", border: "1px solid #333", color: "#fff" }}
               />
             </div>
             <p className="text-xs" style={{ color: "#525252" }}>

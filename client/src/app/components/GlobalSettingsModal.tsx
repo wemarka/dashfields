@@ -191,7 +191,7 @@ export function GlobalSettingsModal({ open, onOpenChange, initialTab = "account"
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all mb-0.5"
                   style={{
                     backgroundColor: isActive ? "#e8e8ea" : "transparent",
-                    color: isActive ? "#111827" : "#6b7280",
+                    color: isActive ? "#1e1e1e" : "#6b7280",
                     fontWeight: isActive ? 500 : 400,
                   }}
                   onMouseEnter={e => {

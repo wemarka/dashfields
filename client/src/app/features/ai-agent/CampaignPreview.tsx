@@ -5,7 +5,7 @@
  * - If `block.generated_image_url` exists → render the image immediately (no API call)
  * - Otherwise → show loading skeleton → call Atlas Cloud → persist the URL via callback
  *
- * Design: Dark Neutral (#0a0a0a) + Brand Red (#E62020)
+ * Design: Dark Neutral (#141414) + Brand Red (#E62020)
  */
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/core/lib/utils";

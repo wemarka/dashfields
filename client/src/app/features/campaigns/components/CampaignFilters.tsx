@@ -172,9 +172,9 @@ export function CampaignFilters({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search campaigns..."
             className="w-full h-9 pl-9 pr-3 rounded-lg text-sm outline-none transition-all placeholder:text-neutral-500 text-white"
-            style={{ backgroundColor: "#171717", border: "1px solid #262626" }}
+            style={{ backgroundColor: "#1e1e1e", border: "1px solid #303030" }}
             onFocus={e => { e.currentTarget.style.borderColor = "#404040"; }}
-            onBlur={e => { e.currentTarget.style.borderColor = "#262626"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#303030"; }}
           />
           {search && (
             <button

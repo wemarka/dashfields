@@ -134,7 +134,7 @@ function Avatar({ src, name, size = 28 }: { src?: string | null; name: string; s
         style={{
           width: size, height: size, borderRadius: size / 4,
           objectFit: "cover", flexShrink: 0,
-          border: "1px solid #262626",
+          border: "1px solid #303030",
         }}
         onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
       />
@@ -219,16 +219,16 @@ export function AdAccountSelector({
           display: "flex", alignItems: "center", gap: 8,
           height: 34, paddingLeft: 10, paddingRight: 10,
           borderRadius: 8,
-          border: open ? "1px solid #404040" : "1px solid #262626",
-          backgroundColor: open ? "#1f1f1f" : "#171717",
+          border: open ? "1px solid #404040" : "1px solid #303030",
+          backgroundColor: open ? "#272727" : "#1e1e1e",
           cursor: "pointer", transition: "background-color 0.15s, border-color 0.15s",
           minWidth: 170, maxWidth: 270,
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#171717"; }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1e1e1e"; }}
       >
         {isLoading ? (
-          <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: "#262626", flexShrink: 0 }} />
+          <div style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: "#303030", flexShrink: 0 }} />
         ) : (
           <div style={{ position: "relative", flexShrink: 0 }}>
             <Avatar src={triggerInfo.picture} name={triggerInfo.name} size={20} />
@@ -268,8 +268,8 @@ export function AdAccountSelector({
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 9999,
           minWidth: 280, maxWidth: 360,
-          backgroundColor: "#171717",
-          border: "1px solid #262626",
+          backgroundColor: "#1e1e1e",
+          border: "1px solid #303030",
           borderRadius: 10,
           boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
           overflow: "hidden",
@@ -279,7 +279,7 @@ export function AdAccountSelector({
             <div style={{
               padding: "7px 12px 4px",
               display: "flex", alignItems: "center", gap: 6,
-              borderBottom: "1px solid #1f1f1f",
+              borderBottom: "1px solid #272727",
             }}>
               <MetaLogo size={12} />
               <span style={{
@@ -309,11 +309,11 @@ export function AdAccountSelector({
                     width: "100%", display: "flex", alignItems: "center", gap: 10,
                     padding: "9px 12px",
                     backgroundColor: selected ? "rgba(230,32,32,0.07)" : "transparent",
-                    border: "none", borderBottom: "1px solid #1a1a1a",
+                    border: "none", borderBottom: "1px solid #212121",
                     cursor: "pointer", transition: "background-color 0.12s",
                     textAlign: "left",
                   }}
-                  onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+                  onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
                 >
                   {/* Avatar with Meta badge — no background circle */}
@@ -359,7 +359,7 @@ export function AdAccountSelector({
                 <div style={{
                   padding: "7px 12px 4px",
                   display: "flex", alignItems: "center", gap: 6,
-                  borderTop: "1px solid #262626",
+                  borderTop: "1px solid #303030",
                 }}>
                   <span style={{
                     fontSize: 10, fontWeight: 700, color: "#737373",
@@ -378,11 +378,11 @@ export function AdAccountSelector({
                         width: "100%", display: "flex", alignItems: "center", gap: 10,
                         padding: "8px 12px",
                         backgroundColor: selected ? "rgba(230,32,32,0.07)" : "transparent",
-                        border: "none", borderBottom: "1px solid #1a1a1a",
+                        border: "none", borderBottom: "1px solid #212121",
                         cursor: "pointer", transition: "background-color 0.12s",
                         textAlign: "left",
                       }}
-                      onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+                      onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#272727"; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
                     >
                       <Avatar src={acc.profile_picture} name={acc.name ?? acc.platform} size={36} />

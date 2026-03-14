@@ -345,7 +345,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ background: activeMetrics.has(m.key) ? m.color : "#262626" }}
+                  style={{ background: activeMetrics.has(m.key) ? m.color : "#303030" }}
                 />
                 {m.label}
               </button>
@@ -374,7 +374,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
                   <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#262626" strokeOpacity={0.6} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#303030" strokeOpacity={0.6} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: "#737373" }}
@@ -395,8 +395,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               />
               <RechartsTooltip
                 contentStyle={{
-                  background: "#171717",
-                  border: "1px solid #262626",
+                  background: "#1e1e1e",
+                  border: "1px solid #303030",
                   borderRadius: "8px",
                   fontSize: "12px",
                   color: "#ffffff",

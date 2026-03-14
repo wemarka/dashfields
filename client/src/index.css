@@ -20,37 +20,37 @@
   /* ── Pure Neutral Dark Theme ────────────────────────────────────────────── */
   /* Elite Tech/SaaS — neutral grays + brand red (#E62020) */
 
-  --color-background:           oklch(0.145 0.000 0);    /* neutral-950 #0a0a0a */
+  --color-background:           oklch(0.185 0.000 0);    /* neutral-900 ~#141414 */
   --color-foreground:           oklch(1.000 0.000 0);    /* pure white */
 
-  --color-card:                 oklch(0.205 0.000 0);    /* neutral-900 #171717 */
+  --color-card:                 oklch(0.240 0.000 0);    /* neutral-850 ~#1e1e1e */
   --color-card-foreground:      oklch(1.000 0.000 0);
-  --color-popover:              oklch(0.205 0.000 0);    /* neutral-900 */
+  --color-popover:              oklch(0.240 0.000 0);    /* neutral-850 */
   --color-popover-foreground:   oklch(1.000 0.000 0);
 
   --color-primary:              oklch(0.592 0.227 28);   /* brand-red #E62020 */
   --color-primary-foreground:   oklch(1.000 0.000 0);    /* white */
 
-  --color-secondary:            oklch(0.269 0.000 0);    /* neutral-800 #262626 */
+  --color-secondary:            oklch(0.310 0.000 0);    /* neutral-750 ~#303030 */
   --color-secondary-foreground: oklch(1.000 0.000 0);
 
-  --color-muted:                oklch(0.269 0.000 0);    /* neutral-800 */
+  --color-muted:                oklch(0.310 0.000 0);    /* neutral-750 */
   --color-muted-foreground:     oklch(0.715 0.000 0);    /* neutral-400 #a3a3a3 */
 
-  --color-accent:               oklch(0.269 0.000 0);    /* neutral-800 hover */
+  --color-accent:               oklch(0.310 0.000 0);    /* neutral-750 hover */
   --color-accent-foreground:    oklch(1.000 0.000 0);
 
   --color-destructive:          oklch(0.592 0.227 28);   /* brand-red */
   --color-destructive-foreground: oklch(1.000 0.000 0);
 
-  --color-border:               oklch(0.269 0.000 0);    /* neutral-800 */
-  --color-input:                oklch(0.269 0.000 0);    /* neutral-800 */
+  --color-border:               oklch(0.310 0.000 0);    /* neutral-750 */
+  --color-input:                oklch(0.310 0.000 0);    /* neutral-750 */
   --color-ring:                 oklch(0.592 0.227 28 / 0.40);  /* brand-red ring */
 
   /* Sidebar (compatibility) */
-  --color-sidebar:                    oklch(0.145 0.000 0);
+  --color-sidebar:                    oklch(0.185 0.000 0);
   --color-sidebar-foreground:         oklch(1.000 0.000 0);
-  --color-sidebar-border:             oklch(0.269 0.000 0);
+  --color-sidebar-border:             oklch(0.310 0.000 0);
   --color-sidebar-accent:             oklch(0.592 0.227 28 / 0.12);
   --color-sidebar-accent-foreground:  oklch(0.592 0.227 28);
   --color-sidebar-primary:            oklch(0.592 0.227 28);
@@ -131,24 +131,24 @@
 @layer utilities {
   /* Glass morphism — neutral dark */
   .glass {
-    background: oklch(0.205 0.000 0 / 0.75);  /* neutral-900 */
+    background: oklch(0.240 0.000 0 / 0.80);  /* neutral-850 */
     backdrop-filter: blur(24px) saturate(1.4);
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border: 1px solid oklch(0.371 0.000 0 / 0.25); /* neutral-700 */
-    box-shadow: 0 4px 24px oklch(0 0 0 / 0.25);
+    border: 1px solid oklch(0.400 0.000 0 / 0.25);
+    box-shadow: 0 4px 24px oklch(0 0 0 / 0.20);
   }
   .glass-strong {
-    background: oklch(0.205 0.000 0 / 0.92);
+    background: oklch(0.240 0.000 0 / 0.94);
     backdrop-filter: blur(32px) saturate(1.6);
     -webkit-backdrop-filter: blur(32px) saturate(1.6);
-    border: 1px solid oklch(0.371 0.000 0 / 0.30);
-    box-shadow: 0 8px 40px oklch(0 0 0 / 0.35), 0 1px 0 oklch(1 0 0 / 0.03) inset;
+    border: 1px solid oklch(0.400 0.000 0 / 0.30);
+    box-shadow: 0 8px 40px oklch(0 0 0 / 0.28), 0 1px 0 oklch(1 0 0 / 0.04) inset;
   }
   .glass-subtle {
-    background: oklch(0.205 0.000 0 / 0.50);
+    background: oklch(0.240 0.000 0 / 0.55);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.269 0.000 0 / 0.40);
+    border: 1px solid oklch(0.310 0.000 0 / 0.40);
   }
 
   /* Animations */
@@ -233,12 +233,12 @@
   /* Flex defaults */
   .flex { min-height: 0; min-width: 0; }
 
-  /* App background — premium neutral-950 with subtle red glow */
+  /* App background — neutral-900 with subtle red glow */
   .app-bg {
     background:
-      radial-gradient(ellipse 70% 50% at 10% 0%, oklch(0.592 0.227 28 / 0.03) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 90% 100%, oklch(0.592 0.227 28 / 0.02) 0%, transparent 60%),
-      oklch(0.145 0.000 0);  /* neutral-950 */
+      radial-gradient(ellipse 70% 50% at 10% 0%, oklch(0.592 0.227 28 / 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, oklch(0.592 0.227 28 / 0.03) 0%, transparent 60%),
+      oklch(0.185 0.000 0);  /* neutral-900 ~#141414 */
     min-height: 100dvh;
   }
 
