@@ -7,7 +7,7 @@ import {
   Clock, Target, BarChart3, Zap, ArrowRight, ChevronRight,
   Lightbulb, Shield, FileText, Wand2, Users, Star,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
+import { Card, CardElevated, CardContent, CardHeader, CardTitle } from "@/core/components/ui/card";
 import { Badge } from "@/core/components/ui/badge";
 import { trpc } from "@/core/lib/trpc";
 import { useWorkspace } from "@/core/contexts/WorkspaceContext";
@@ -145,7 +145,7 @@ function QuickCaptionWidget() {
   };
 
   return (
-    <Card className="glass border-brand/20">
+    <CardElevated className="border-brand/20">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Zap className="w-4 h-4 text-brand" />
@@ -192,7 +192,7 @@ function QuickCaptionWidget() {
           </div>
         )}
       </CardContent>
-    </Card>
+    </CardElevated>
   );
 }
 
@@ -311,7 +311,7 @@ export default function AIInsightsHub() {
       </div>
 
       {/* AI Tips Section */}
-      <Card className="glass border-brand/20">
+      <CardElevated className="border-brand/20">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-muted-foreground" />
@@ -345,7 +345,7 @@ export default function AIInsightsHub() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </CardElevated>
     </div>
   );
 }

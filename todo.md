@@ -3552,3 +3552,8 @@
 - [x] ResizableHandle → bg-muted/40 hover:bg-[#ef3735]/40
 - [x] CollapsibleContent → duration-200 ease-in-out transition
 - [x] Card → add elevated variant (bg-popover border-border shadow-lg)
+
+## 🔄 UI Consistency — Separator/Avatar/CardElevated
+- [x] Separator → bg-muted/40
+- [x] AvatarFallback → bg-muted/60 text-white
+- [x] Apply CardElevated to key cards in Billing, Insights, AI Hub pages
