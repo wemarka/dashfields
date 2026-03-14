@@ -6,6 +6,7 @@ import {
   Loader2, Plus, Play, Pause, ArrowUpRight, Copy, Trash2, MoreHorizontal,
   CheckSquare, Square, ChevronDown, Eye, EyeOff, Settings2,
 } from "lucide-react";
+import { LoadingState } from "@/core/components/ui/loading-state";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { getPlatform } from "@shared/platforms";
 import { trpc } from "@/core/lib/trpc";
@@ -148,9 +149,8 @@ export function LocalCampaignTable({ campaigns, loading, onStatusChange, onCreat
 
   if (loading) {
     return (
-      <div className="glass rounded-2xl flex items-center justify-center py-16 gap-2 text-muted-foreground">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm">{t("common.loading")}</span>
+      <div className="glass rounded-2xl py-12">
+        <LoadingState label={t("common.loading")} size="md" />
       </div>
     );
   }

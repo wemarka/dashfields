@@ -11,7 +11,8 @@ import { Button } from "@/core/components/ui/button";
 import { Input } from "@/core/components/ui/input";
 import { Label } from "@/core/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { FieldError } from "@/core/components/ui/field-error";
 import { supabase } from "@/core/lib/supabase";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663380599885/KXbJ95iGQTQDrViqhuR8ny/Dashfileds_ICON_SVG_b923b2b0.svg";
@@ -105,9 +106,8 @@ export default function ResetPasswordPage() {
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-[#ef3735]/14 border border-red-500/20 mb-5">
-                  <AlertCircle className="w-4 h-4 text-[#a1a1aa] mt-0.5 shrink-0" />
-                  <p className="text-[#a1a1aa] text-sm">{error}</p>
+                <div className="p-3 rounded-xl bg-[#ef3735]/14 border border-[#ef3735]/20 mb-5">
+                  <FieldError message={error} />
                 </div>
               )}
 

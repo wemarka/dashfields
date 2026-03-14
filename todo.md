@@ -3567,3 +3567,8 @@
 - [x] Expand EmptyState to Reports, Publishing, Media Library pages
 - [x] Create reusable LoadingState component (spinner + skeleton variants)
 - [x] Create FieldError component → text-[#ef3735] text-xs with aria-invalid link
+
+## 🔄 UI Consistency — FieldError/LoadingState/PostList
+- [x] Apply FieldError to RegisterPage, Profile, WorkspaceSettings forms
+- [x] Replace Loader2 with LoadingState in Campaigns, Analytics, Connections
+- [x] EmptyState in PostList with "Schedule a Post" action

@@ -11,6 +11,7 @@ import { PLATFORMS, getPlatform } from "@shared/platforms";
 import type { PlatformId } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
 import { Loader2, ChevronRight, Plus, CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { LoadingState } from "@/core/components/ui/loading-state";
 import { ManualConnectModal } from "./components";
 import type { ConnectedAccount } from "./components/types";
 
@@ -432,8 +433,8 @@ export default function Connections() {
         {/* Platform list */}
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
-            <div className="px-6 py-8 flex items-center justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />
+            <div className="px-6 py-8">
+              <LoadingState size="md" />
             </div>
           ) : (
             <div>

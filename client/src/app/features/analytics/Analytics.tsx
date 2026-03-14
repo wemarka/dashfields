@@ -12,6 +12,7 @@ import {
   TrendingUp, TrendingDown, Lightbulb, Trophy, Target,
   DollarSign, Eye, MousePointer, Users, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
+import { LoadingState } from "@/core/components/ui/loading-state";
 import { ExportReportModal } from "@/app/features/reports/ExportReportModal";
 import { trpc } from "@/core/lib/trpc";
 import { Link } from "wouter";
@@ -279,9 +280,8 @@ export default function Analytics() {
 
             {/* Loading */}
             {insightsLoading && (
-              <div className="glass rounded-2xl flex items-center justify-center py-20 gap-2 text-muted-foreground">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm">{t("common.loading")}</span>
+              <div className="glass rounded-2xl py-12">
+                <LoadingState label={t("common.loading")} size="md" />
               </div>
             )}
 
