@@ -136,7 +136,7 @@ export default function Profile() {
             </button>
             <div
               className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#ef3735", border: "2px solid #433F3A" }}
+              style={{ backgroundColor: "#ef3735", border: "2px solid #171717" }}
             >
               <span className="text-white text-[10px] font-bold leading-none">+</span>
             </div>

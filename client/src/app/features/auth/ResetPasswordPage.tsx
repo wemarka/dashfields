@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
                 <Button
                   type="submit"
                   disabled={submitting || !password || !confirmPassword || !sessionReady}
-                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors"
+                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand-hover text-white transition-colors"
                 >
                   {submitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin mr-2" />Updating...</>

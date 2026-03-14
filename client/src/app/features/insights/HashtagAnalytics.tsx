@@ -20,7 +20,7 @@ const SORT_OPTIONS = [
 
 // Brand palette chart colors
 const CHART_COLORS = [
-  "#ef3735", "#c41a1a", "#ffffff", "#C8C8C8",
+  "#ef3735", "#c41a1a", "#ffffff", "#a1a1aa",
   "#737373", "#525252", "#f87171", "#404040",
 ];
 
@@ -300,7 +300,7 @@ export default function HashtagAnalytics() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#C8C8C8" },
+                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a1a1aa" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
                         { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
                       ]}
@@ -312,7 +312,7 @@ export default function HashtagAnalytics() {
                       dataKey="value"
                     >
                       {[
-                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#C8C8C8" },
+                        { name: "Trending Up", value: hashtags.filter(h => h.trend === "up").length, color: "#a1a1aa" },
                         { name: "Stable", value: hashtags.filter(h => h.trend === "stable").length, color: "#525252" },
                         { name: "Trending Down", value: hashtags.filter(h => h.trend === "down").length, color: "#ef3735" },
                       ].map((entry, i) => (

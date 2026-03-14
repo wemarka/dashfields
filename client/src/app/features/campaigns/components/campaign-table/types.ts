@@ -108,11 +108,11 @@ export const ALL_COLUMNS: ColumnDef[] = [
 export const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; label: string }> = {
   active:      { dot: "bg-[#22c55e]",      bg: "bg-[#22c55e]/14",   text: "text-[#4ade80]",       label: "Active" },
   paused:      { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "Paused" },
-  draft:       { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Draft" },
-  ended:       { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Ended" },
+  draft:       { dot: "bg-[#3f3f46]",      bg: "bg-white/[0.06]",   text: "text-[#71717a]",       label: "Draft" },
+  ended:       { dot: "bg-[#3f3f46]",      bg: "bg-white/[0.06]",   text: "text-[#71717a]",       label: "Ended" },
   scheduled:   { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "Scheduled" },
-  archived:    { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Archived" },
-  deleted:     { dot: "bg-[#484848]",      bg: "bg-white/[0.06]",   text: "text-[#787878]",       label: "Deleted" },
+  archived:    { dot: "bg-[#3f3f46]",      bg: "bg-white/[0.06]",   text: "text-[#71717a]",       label: "Archived" },
+  deleted:     { dot: "bg-[#3f3f46]",      bg: "bg-white/[0.06]",   text: "text-[#71717a]",       label: "Deleted" },
   // Meta effective_status values (server normalizes these to lowercase)
   in_process:  { dot: "bg-[#f59e0b]",      bg: "bg-[#f59e0b]/14",   text: "text-[#fbbf24]",       label: "In Review" },
   with_issues: { dot: "bg-[#ef3735]",      bg: "bg-[#ef3735]/14",   text: "text-[#f87171]",       label: "With Issues" },

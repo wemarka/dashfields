@@ -7,11 +7,11 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
 const P = {
-  bg:     "#433F3A",
-  card:   "#56524C",
-  border: "#6b6660",
+  bg:     "#171717",
+  card:   "#1c1c1c",
+  border: "#2e2e2e",
   text:   "#ffffff",
-  muted:  "#C8C8C8",
+  muted:  "#a1a1aa",
   subtle: "#737373",
   dim:    "#404040",
   brand:  "#ef3735",
@@ -139,7 +139,7 @@ function TrendBadge({ current, previous, higherIsBetter = true }: {
   const absChange = Math.abs(change);
   if (absChange < 0.1) {
     return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, color: P.subtle, fontWeight: 500, backgroundColor: "#6b6660", padding: "2px 6px", borderRadius: 6 }}>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, color: P.subtle, fontWeight: 500, backgroundColor: "#2e2e2e", padding: "2px 6px", borderRadius: 6 }}>
         <Minus style={{ width: 10, height: 10 }} />0%
       </span>
     );
@@ -159,10 +159,10 @@ function SkeletonCard() {
   return (
     <div style={{ backgroundColor: P.card, border: `1px solid ${P.border}`, borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#6b6660" }} />
-        <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#6b6660" }} />
+        <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#2e2e2e" }} />
+        <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#2e2e2e" }} />
       </div>
-      <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#6b6660" }} />
+      <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#2e2e2e" }} />
       <div style={{ height: 9, width: 100, borderRadius: 4, backgroundColor: "#212121" }} />
       <div style={{ height: 40, borderRadius: 6, backgroundColor: "#212121" }} />
     </div>
@@ -217,7 +217,7 @@ function KpiCard({
     <button
       onClick={onClick}
       style={{
-        backgroundColor: isSelected ? "#6b6660" : P.card,
+        backgroundColor: isSelected ? "#2e2e2e" : P.card,
         border: isSelected ? `1px solid ${P.brand}` : `1px solid ${P.border}`,
         borderRadius: 14,
         padding: "16px 18px 12px",
@@ -233,7 +233,7 @@ function KpiCard({
       onMouseEnter={e => {
         if (!isSelected) {
           (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1c1c1c";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "#333333";
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#2e2e2e";
         }
       }}
       onMouseLeave={e => {
@@ -332,7 +332,7 @@ export function CampaignKpiCards({
       previous: prevImpressions,
       higherIsBetter: true,
       sub: totalImpressions > 0 ? "Reach across all platforms" : "No data yet",
-      accent: "#C8C8C8",
+      accent: "#a1a1aa",
       spark: impressionsSpark,
     },
     {

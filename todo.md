@@ -3478,3 +3478,24 @@
 - [x] Update --color-background to #171717 and --color-card to #262626 in index.css
 - [x] Unify --color-brand / --color-primary to #ef3735 across index.css (all TSX files updated)
 - [x] Update Login page background to #171717 (left panel #1e1e1e)
+
+## 🔄 Button Hover + Border Color
+- [ ] Button hover state uses --color-brand-hover (#d42e2c) instead of same brand color
+- [ ] Border color updated to oklch(0.250) for better card separation on #171717
+
+## 🔄 YouTube Dark Mode — Full App
+- [ ] Update index.css CSS variables to YouTube exact palette
+- [ ] Sweep all hardcoded colors in components/layouts/pages
+- [ ] Verify typography contrast matches YouTube (white / #aaa / #717171)
+
+## ✅ Supabase Dark Mode — Full App Color System
+- [x] Extracted Supabase dark palette from supabase.com/dashboard (pixel-verified)
+- [x] bg-base #171717, bg-surface #1c1c1c, bg-elevated #242424, border #2e2e2e
+- [x] text-primary #fafafa, text-secondary #a1a1aa (zinc-400), text-muted #71717a (zinc-500)
+- [x] brand-primary #ef3735, brand-hover #d42e2c
+- [x] Rewrote index.css CSS variables with full Supabase palette
+- [x] Updated all utility classes (badges, buttons, deltas, scores, icons)
+- [x] Chart palette: monochromatic #fafafa → #a1a1aa → #71717a → #3f3f46 + #ef3735 accent
+- [x] Swept all hardcoded colors across all 25+ component files
+- [x] Updated GlobalTopbar, TopbarLayout, LoginPage, AuthCallbackPage
+- [x] 0 TypeScript errors

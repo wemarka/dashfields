@@ -79,7 +79,7 @@ export function GlobalTopbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="glass-strong border-b border-neutral-800" style={{ backgroundColor: "#262626" }}>
+      <div style={{ backgroundColor: "#171717", borderBottom: "1px solid #2e2e2e" }}>
         <div className="flex items-center h-14 px-4 lg:px-6 gap-2">
           {/* ── Mobile Hamburger ──────────────────────────────────────── */}
           <button
@@ -146,7 +146,7 @@ export function GlobalTopbar() {
                   <ChevronDown className="w-3 h-3 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48 bg-neutral-900 border-neutral-800">
+              <DropdownMenuContent align="center" className="w-48" style={{ backgroundColor: '#1c1c1c', borderColor: '#2e2e2e' }}>
                 {MARKETING_ITEMS.map((item) => (
                   <DropdownMenuItem
                     key={item.path}

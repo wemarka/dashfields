@@ -8,95 +8,94 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   /* ── Radius ─────────────────────────────────────────────────────────────── */
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
-  --radius: 10px;
+  --radius: 6px;
 
   /* ═══════════════════════════════════════════════════════════════════════
-   * DESIGN TOKEN SYSTEM — Stone Palette (extracted from reference image)
+   * DESIGN TOKEN SYSTEM — Supabase Dark Mode
+   *
+   * Extracted from supabase.com/dashboard (dark mode, pixel-verified):
+   *   bg-base    = #171717  (rgb 23,23,23)   — page background
+   *   bg-surface = #1c1c1c  (rgb 28,28,28)   — cards, sidebar panels
+   *   bg-overlay = #242424  (rgb 36,36,36)   — modals, dropdowns, elevated
+   *   border     = #2e2e2e  (rgb 46,46,46)   — all borders
+   *   input-bg   = rgba(250,250,250,0.027)   — input fields
+   *   text-primary   = #fafafa (rgb 250,250,250) — headers, active data
+   *   text-secondary = #a1a1aa (zinc-400)        — labels, metadata
+   *   text-muted     = #71717a (zinc-500)         — placeholders, disabled
+   *   brand-primary  = #ef3735 (red)             — CTA buttons only
    *
    * SINGLE SOURCE OF TRUTH: edit ONLY these 3 lines to retheme the entire app:
- *   --color-background  = #171717 (bg-base — darkest surface)
- *   --color-card        = #262626 (bg-surface — cards, sidebar)
- *   --color-popover     = #1e1e1e (bg-elevated — modals, dropdowns)
-   *
-   * All other tokens are derived from these three values.
-   * Brand: #ef3735 red — CTA buttons only.
-   * Charts: monochromatic white→stone scale + brand-red accent.
+   *   --color-background  = #171717  (bg-base)
+   *   --color-card        = #1c1c1c  (bg-surface)
+   *   --color-popover     = #242424  (bg-overlay)
    * ═══════════════════════════════════════════════════════════════════════ */
 
-  /* ───────────────────────────────────────────────────────────────────────
-   * BACKGROUND HIERARCHY — Stone palette (warm gray with slight brown undertone)
-   * Extracted via pixel sampling: stone-700=#433F3A, stone-600=#56524C, stone-500=#76706C
-   * ─────────────────────────────────────────────────────────────────────── */
-  --color-background:           oklch(0.130 0.000 0);     /* #171717 — bg-base, page bg */
-  --color-foreground:           oklch(1.000 0.000 0);      /* #FFFFFF — text-primary */
+  /* ── Backgrounds ─────────────────────────────────────────────────────── */
+  --color-background:           oklch(0.130 0.000 0);      /* #171717 */
+  --color-foreground:           oklch(0.985 0.000 0);      /* #fafafa */
 
-  --color-card:                 oklch(0.185 0.000 0);     /* #262626 — cards, sidebar */
-  --color-card-foreground:      oklch(1.000 0.000 0);
-  --color-popover:              oklch(0.155 0.000 0);     /* #1e1e1e — modals, dropdowns */
-  --color-popover-foreground:   oklch(1.000 0.000 0);
+  --color-card:                 oklch(0.155 0.000 0);      /* #1c1c1c */
+  --color-card-foreground:      oklch(0.985 0.000 0);
+  --color-popover:              oklch(0.185 0.000 0);      /* #242424 */
+  --color-popover-foreground:   oklch(0.985 0.000 0);
 
-  /* ── Brand / CTA — applied ONLY to primary action buttons */
-  --color-primary:              oklch(0.601 0.231 27.3);  /* brand-primary #ef3735 */
-  --color-primary-foreground:   oklch(1.000 0.000 0);      /* pure white text inside CTAs */
+  /* ── Brand / CTA — applied ONLY to primary action buttons ────────────── */
+  --color-primary:              oklch(0.601 0.231 27.3);   /* #ef3735 */
+  --color-primary-foreground:   oklch(1.000 0.000 0);
+  --color-primary-hover:        oklch(0.550 0.231 27.3);   /* #d42e2c */
 
-  /* ── Secondary / Muted surfaces — derived from stone-600 */
-  --color-secondary:            oklch(0.589 0.010 56.1);  /* stone-500 + slight lift — hover */
-  --color-secondary-foreground: oklch(1.000 0.000 0);
+  /* ── Secondary / Muted ───────────────────────────────────────────────── */
+  --color-secondary:            oklch(0.210 0.000 0);      /* #2e2e2e hover */
+  --color-secondary-foreground: oklch(0.985 0.000 0);
 
-  --color-muted:                oklch(0.589 0.010 56.1);  /* stone hover surface */
-  --color-muted-foreground:     oklch(0.880 0.005 73.6);  /* warm light gray — WCAG AA on stone-700 */
+  --color-muted:                oklch(0.210 0.000 0);      /* #2e2e2e */
+  --color-muted-foreground:     oklch(0.680 0.000 0);      /* #a1a1aa zinc-400 */
 
-  --color-accent:               oklch(0.589 0.010 56.1);  /* stone hover */
-  --color-accent-foreground:    oklch(1.000 0.000 0);
+  --color-accent:               oklch(0.210 0.000 0);
+  --color-accent-foreground:    oklch(0.985 0.000 0);
 
-  --color-destructive:          oklch(0.592 0.227 28);     /* brand-red */
+  --color-destructive:          oklch(0.601 0.231 27.3);
   --color-destructive-foreground: oklch(1.000 0.000 0);
 
-  /* ── Borders — between stone-700 and stone-600 */
-  --color-border:               oklch(0.405 0.010 75.9);  /* border-subtle — between base & surface */
-  --color-input:                oklch(0.405 0.010 75.9);  /* same as border */
-  --color-ring:                 oklch(0.592 0.227 28 / 0.40);  /* brand-red focus ring */
+  /* ── Borders & Inputs ────────────────────────────────────────────────── */
+  --color-border:               oklch(0.210 0.000 0);      /* #2e2e2e */
+  --color-input:                oklch(0.210 0.000 0);
+  --color-ring:                 oklch(0.601 0.231 27.3 / 0.40);
 
-  /* ── Sidebar — same as bg-base (stone-700) */
-  --color-sidebar:                    oklch(0.370 0.010 73.6);  /* stone-700 */
-  --color-sidebar-foreground:         oklch(1.000 0.000 0);
-  --color-sidebar-border:             oklch(0.405 0.010 75.9);  /* border-subtle */
-  --color-sidebar-accent:             oklch(0.592 0.227 28 / 0.12);
-  --color-sidebar-accent-foreground:  oklch(0.592 0.227 28);
-  --color-sidebar-primary:            oklch(0.592 0.227 28);
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+  --color-sidebar:                    oklch(0.130 0.000 0);
+  --color-sidebar-foreground:         oklch(0.985 0.000 0);
+  --color-sidebar-border:             oklch(0.210 0.000 0);
+  --color-sidebar-accent:             oklch(0.601 0.231 27.3 / 0.10);
+  --color-sidebar-accent-foreground:  oklch(0.601 0.231 27.3);
+  --color-sidebar-primary:            oklch(0.601 0.231 27.3);
   --color-sidebar-primary-foreground: oklch(1.000 0.000 0);
-  --color-sidebar-ring:               oklch(0.592 0.227 28 / 0.20);
+  --color-sidebar-ring:               oklch(0.601 0.231 27.3 / 0.20);
 
-  /* ── Charts — monochromatic white→stone scale + brand-red accent
-   *   chart-1: #FFFFFF  pure white        — primary data series
-   *   chart-2: #C8C8C8  warm light gray   — secondary series
-   *   chart-3: stone-500 #76706C          — tertiary series
-   *   chart-4: stone-600 #56524C          — comparison/background bars
-   *   chart-5: #ef3735  brand red         — highlight/accent series
-   */
+  /* ── Charts — monochromatic white→gray scale + brand-red accent ─────── */
   --color-chart-1: oklch(1.000 0.000 0);    /* #FFFFFF — primary */
-  --color-chart-2: oklch(0.810 0.000 0);    /* #C8C8C8 — secondary */
-  --color-chart-3: oklch(0.549 0.010 56.1); /* stone-500 — tertiary */
-  --color-chart-4: oklch(0.440 0.011 78.2); /* stone-600 — background bars */
+  --color-chart-2: oklch(0.750 0.000 0);    /* #b8b8b8 — secondary */
+  --color-chart-3: oklch(0.520 0.000 0);    /* #787878 — tertiary */
+  --color-chart-4: oklch(0.330 0.000 0);    /* #484848 — background bars */
   --color-chart-5: oklch(0.601 0.231 27.3); /* #ef3735 — brand accent */
 
-  /* ── Brand tokens */
-  --color-brand:            oklch(0.601 0.231 27.3); /* #ef3735 */
-  --color-brand-hover:      oklch(0.550 0.231 27.3); /* #d42e2c — hover state */
+  /* ── Brand tokens ────────────────────────────────────────────────────── */
+  --color-brand:            oklch(0.601 0.231 27.3);  /* #ef3735 */
+  --color-brand-hover:      oklch(0.550 0.231 27.3);  /* #d42e2c */
   --color-brand-foreground: oklch(1.000 0.000 0);
-  --color-brand-subtle:     oklch(0.592 0.227 28 / 0.12);
+  --color-brand-subtle:     oklch(0.601 0.231 27.3 / 0.10);
 
-  /* ── Semantic status */
-  --color-success:   oklch(0.650 0.160 150);   /* green  — active, score */
-  --color-warning:   oklch(0.750 0.160 70);    /* amber  — paused, warning */
-  --color-info:      oklch(0.880 0.005 73.6);  /* warm light gray — info */
+  /* ── Semantic status ─────────────────────────────────────────────────── */
+  --color-success:   oklch(0.650 0.160 150);
+  --color-warning:   oklch(0.750 0.160 70);
+  --color-info:      oklch(0.680 0.000 0);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
@@ -118,18 +117,18 @@
   }
   button:not(:disabled), a[href], select:not(:disabled) { cursor: pointer; }
 
-  /* Scrollbar — neutral */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  /* Scrollbar — Supabase-style minimal */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.371 0.000 0 / 0.50); /* neutral-700 */
+    background: oklch(0.300 0.000 0 / 0.60);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.439 0.000 0 / 0.60); /* neutral-600 */
+    background: oklch(0.400 0.000 0 / 0.80);
   }
   ::selection {
-    background: oklch(0.592 0.227 28 / 0.30); /* brand-red selection */
+    background: oklch(0.601 0.231 27.3 / 0.25);
   }
 }
 
@@ -142,7 +141,7 @@
 @keyframes scale-bounce { from { opacity: 0; transform: scale(0.85) } to { opacity: 1; transform: scale(1) } }
 @keyframes shimmer    { from { background-position: -200% center } to { background-position: 200% center } }
 @keyframes float      { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
-@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 oklch(0.592 0.227 28 / 0.4) } 70% { box-shadow: 0 0 0 8px oklch(0.592 0.227 28 / 0) } 100% { box-shadow: 0 0 0 0 oklch(0.592 0.227 28 / 0) } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 oklch(0.601 0.231 27.3 / 0.4) } 70% { box-shadow: 0 0 0 8px oklch(0.601 0.231 27.3 / 0) } 100% { box-shadow: 0 0 0 0 oklch(0.601 0.231 27.3 / 0) } }
 @keyframes icon-bounce { 0%, 100% { transform: translateY(0) } 40% { transform: translateY(-3px) } 60% { transform: translateY(-1px) } }
 @keyframes icon-spin  { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
 @keyframes icon-shake { 0%, 100% { transform: rotate(0deg) } 20% { transform: rotate(-8deg) } 40% { transform: rotate(8deg) } 60% { transform: rotate(-5deg) } 80% { transform: rotate(5deg) } }
@@ -153,37 +152,37 @@
 
 /* ── Utilities ──────────────────────────────────────────────────────────── */
 @layer utilities {
-  /* Glass morphism — neutral dark */
+  /* Glass morphism — Supabase-style dark */
   .glass {
-    background: oklch(0.240 0.000 0 / 0.80);  /* neutral-850 */
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border: 1px solid oklch(0.400 0.000 0 / 0.25);
-    box-shadow: 0 4px 24px oklch(0 0 0 / 0.20);
+    background: oklch(0.155 0.000 0 / 0.85);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid oklch(0.210 0.000 0);
+    box-shadow: 0 4px 24px oklch(0 0 0 / 0.30);
   }
   .glass-strong {
-    background: oklch(0.240 0.000 0 / 0.94);
-    backdrop-filter: blur(32px) saturate(1.6);
-    -webkit-backdrop-filter: blur(32px) saturate(1.6);
-    border: 1px solid oklch(0.400 0.000 0 / 0.30);
-    box-shadow: 0 8px 40px oklch(0 0 0 / 0.28), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    background: oklch(0.155 0.000 0 / 0.96);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid oklch(0.210 0.000 0);
+    box-shadow: 0 8px 40px oklch(0 0 0 / 0.35);
   }
   .glass-subtle {
-    background: oklch(0.240 0.000 0 / 0.55);
+    background: oklch(0.155 0.000 0 / 0.60);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.310 0.000 0 / 0.40);
+    border: 1px solid oklch(0.210 0.000 0);
   }
 
   /* Animations */
-  .animate-fade-in       { animation: fade-in 0.35s cubic-bezier(0.4,0,0.2,1) both; }
-  .animate-slide-up      { animation: slide-up 0.45s cubic-bezier(0.16,1,0.3,1) both; }
-  .animate-slide-down    { animation: slide-down 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-  .animate-slide-in-right{ animation: slide-in-right 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-  .animate-scale-in      { animation: scale-in 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
-  .animate-scale-bounce  { animation: scale-bounce 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .animate-fade-in       { animation: fade-in 0.30s cubic-bezier(0.4,0,0.2,1) both; }
+  .animate-slide-up      { animation: slide-up 0.40s cubic-bezier(0.16,1,0.3,1) both; }
+  .animate-slide-down    { animation: slide-down 0.30s cubic-bezier(0.16,1,0.3,1) both; }
+  .animate-slide-in-right{ animation: slide-in-right 0.30s cubic-bezier(0.16,1,0.3,1) both; }
+  .animate-scale-in      { animation: scale-in 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .animate-scale-bounce  { animation: scale-bounce 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
   .animate-float         { animation: float 4s ease-in-out infinite; }
-  .animate-blur-in       { animation: blur-in 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+  .animate-blur-in       { animation: blur-in 0.45s cubic-bezier(0.4,0,0.2,1) both; }
   .animate-pulse-ring    { animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
   .animate-glow-pulse    { animation: glow-pulse 3s ease-in-out infinite; }
 
@@ -203,27 +202,27 @@
   .delay-400 { animation-delay: 400ms; }
   .delay-500 { animation-delay: 500ms; }
 
-  /* Shimmer skeleton */
+  /* Shimmer skeleton — Supabase-style */
   .shimmer {
-    background: linear-gradient(90deg, transparent 0%, oklch(0.269 0.000 0 / 0.50) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, oklch(0.210 0.000 0 / 0.60) 50%, transparent 100%);
     background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
+    animation: shimmer 1.8s ease-in-out infinite;
   }
 
   /* Gradient text — brand red */
   .gradient-text {
-    background: linear-gradient(135deg, oklch(0.650 0.200 25) 0%, oklch(0.592 0.227 28) 50%, oklch(0.550 0.180 35) 100%);
+    background: linear-gradient(135deg, oklch(0.650 0.200 25) 0%, oklch(0.601 0.231 27.3) 50%, oklch(0.550 0.180 35) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Typography helpers */
-  .page-header  { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; color: white; }
-  .page-subtitle { font-size: 0.8125rem; color: oklch(0.780 0.000 0); margin-top: 0.125rem; line-height: 1.5; }
-  .stat-value   { font-size: 1.625rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; color: white; }
-  .stat-label   { font-size: 0.75rem; color: oklch(0.780 0.000 0); margin-top: 0.25rem; }
-  .section-title { font-size: 0.8125rem; font-weight: 600; letter-spacing: -0.005em; color: white; }
+  /* Typography helpers — Supabase-style */
+  .page-header   { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.4; color: #fafafa; }
+  .page-subtitle { font-size: 0.8125rem; color: #a1a1aa; margin-top: 0.125rem; line-height: 1.5; }
+  .stat-value    { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1; color: #fafafa; }
+  .stat-label    { font-size: 0.75rem; color: #a1a1aa; margin-top: 0.25rem; }
+  .section-title { font-size: 0.8125rem; font-weight: 500; letter-spacing: -0.005em; color: #fafafa; }
 
   /* Empty state */
   .empty-state {
@@ -231,17 +230,16 @@
     justify-content: center; padding: 3rem 1.5rem; text-align: center; gap: 0.75rem;
   }
   .empty-state-icon {
-    width: 3rem; height: 3rem; border-radius: 1rem;
+    width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
     background: var(--color-brand-subtle);
     display: flex; align-items: center; justify-content: center;
   }
 
-  /* Card interactions — subtle lift */
-  .card-hover { transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; }
+  /* Card interactions — Supabase-style subtle */
+  .card-hover { transition: border-color 0.15s ease, background-color 0.15s ease; }
   .card-hover:hover {
-    box-shadow: 0 4px 20px oklch(0 0 0 / 0.30);
-    transform: translateY(-1px);
-    border-color: oklch(0.371 0.000 0); /* neutral-700 */
+    border-color: oklch(0.300 0.000 0);
+    background-color: oklch(0.165 0.000 0);
   }
 
   /* Scrollbar */
@@ -257,132 +255,126 @@
   /* Flex defaults */
   .flex { min-height: 0; min-width: 0; }
 
-  /* App background — stone-700 #433F3A with subtle red glow */
+  /* App background — Supabase #171717 */
   .app-bg {
-    background:
-      radial-gradient(ellipse 70% 50% at 10% 0%, oklch(0.592 0.227 28 / 0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 90% 100%, oklch(0.592 0.227 28 / 0.03) 0%, transparent 60%),
-      oklch(0.370 0.010 73.6);  /* stone-700 #433F3A */
+    background-color: #171717;
     min-height: 100dvh;
   }
 
   /* Brand pill / badge */
   .brand-badge {
     display: inline-flex; align-items: center; gap: 0.25rem;
-    padding: 0.2rem 0.6rem; border-radius: 9999px;
+    padding: 0.2rem 0.6rem; border-radius: 4px;
     background: var(--color-brand-subtle);
     color: var(--color-brand);
-    font-size: 0.75rem; font-weight: 600;
+    font-size: 0.75rem; font-weight: 500;
   }
 
   /* Topbar nav active indicator */
   .nav-active-dot {
-    width: 5px; height: 5px; border-radius: 9999px;
+    width: 4px; height: 4px; border-radius: 9999px;
     background: var(--color-brand);
-    box-shadow: 0 0 6px var(--color-brand);
   }
 
-  /* Muted text override — warm light gray (WCAG AA on stone-700 #433F3A) */
+  /* Muted text — Supabase zinc-400 */
   .text-neutral-400,
   .text-zinc-400,
   .text-gray-400 {
-    color: oklch(0.880 0.005 73.6) !important; /* warm light gray on stone bg */
+    color: #a1a1aa !important;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
-     DESIGN TOKEN UTILITIES — Dashfields Color System
+     DESIGN TOKEN UTILITIES — Dashfields Color System (Supabase Dark)
      Reference: shared/design-tokens.ts
      ═══════════════════════════════════════════════════════════════════════ */
 
   /* ── BUTTONS ──────────────────────────────────────────────────────────── */
-  /* CTA: brand-red — use ONLY for the primary call-to-action */
   .btn-cta {
     background-color: #ef3735;
     color: #ffffff;
     border: none;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
   }
   .btn-cta:hover:not(:disabled) {
-    background-color: #cc1c1c;
-    box-shadow: 0 0 16px rgba(230,32,32,0.35);
+    background-color: #d42e2c;
+    box-shadow: 0 0 12px rgba(239,55,53,0.30);
   }
-  /* Neutral filled — secondary actions */
   .btn-neutral {
-    background-color: #56524C;  /* stone-600 bg-surface */
-    color: #ffffff;
-    border: 1px solid #6b6660;  /* stone border */
-    transition: background-color 0.2s ease;
+    background-color: #1c1c1c;
+    color: #fafafa;
+    border: 1px solid #2e2e2e;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
   }
-  .btn-neutral:hover:not(:disabled) { background-color: #76706C; }  /* stone-500 hover */
-  /* Ghost — tertiary actions */
+  .btn-neutral:hover:not(:disabled) {
+    background-color: #242424;
+    border-color: #3a3a3a;
+  }
   .btn-ghost {
     background-color: transparent;
-    color: #e8e4e0;             /* warm light text */
-    border: 1px solid #6b6660;  /* stone border */
-    transition: background-color 0.2s ease, color 0.2s ease;
+    color: #a1a1aa;
+    border: 1px solid #2e2e2e;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
-  .btn-ghost:hover:not(:disabled) { background-color: #56524C; color: #ffffff; }
-  /* Legacy alias */
-  .btn-brand { background-color: #ef3735; color: white; transition: background-color 0.2s ease; }
-  .btn-brand:hover { background-color: #cc1c1c; }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: #1c1c1c;
+    color: #fafafa;
+  }
+  .btn-brand { background-color: #ef3735; color: white; border-radius: 6px; transition: background-color 0.15s ease; }
+  .btn-brand:hover { background-color: #d42e2c; }
 
   /* ── BADGES ───────────────────────────────────────────────────────────── */
-  /* Base badge shape — all badges extend this */
   .badge-base {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
   }
-  /* Hot / New / Trending — brand-red gradient */
   .badge-hot {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
     background: linear-gradient(135deg, #ef3735 0%, #ff5533 100%);
     color: #ffffff;
-    box-shadow: 0 1px 8px rgba(230,32,32,0.30);
   }
-  /* Active / Live / Running — green */
   .badge-active {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(34,197,94,0.14);
+    background: rgba(34,197,94,0.10);
     color: #4ade80;
-    border: 1px solid rgba(34,197,94,0.25);
+    border: 1px solid rgba(34,197,94,0.20);
   }
-  /* Paused / Pending / Warning — amber */
   .badge-paused {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(245,158,11,0.14);
+    background: rgba(245,158,11,0.10);
     color: #fbbf24;
-    border: 1px solid rgba(245,158,11,0.25);
+    border: 1px solid rgba(245,158,11,0.20);
   }
-  /* Inactive / Archived / Draft — neutral dark */
   .badge-inactive {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(255,255,255,0.08);
-    color: #b8b2ac;             /* stone-400 warm neutral */
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #71717a;
+    border: 1px solid rgba(255,255,255,0.08);
   }
-  /* Generic info chip — neutral light */
   .badge-neutral {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.01em;
     white-space: nowrap; line-height: 1.6;
-    background: rgba(255,255,255,0.10);
-    color: #e8e4e0;             /* warm white text */
-    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    color: #a1a1aa;
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
   /* ── STATUS DOTS ──────────────────────────────────────────────────────── */
@@ -390,71 +382,69 @@
     display: inline-block; width: 6px; height: 6px;
     border-radius: 9999px; flex-shrink: 0;
   }
-  .status-dot-active  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
-  .status-dot-paused  { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #f59e0b; }
-  .status-dot-inactive{ display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #76706C; }  /* stone-500 */
-  .status-dot-hot     { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #ef3735; animation: pulse-ring 2s cubic-bezier(0.455,0.03,0.515,0.955) infinite; }
+  .status-dot-active   { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.5); }
+  .status-dot-paused   { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #f59e0b; }
+  .status-dot-inactive { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #3f3f46; }
+  .status-dot-hot      { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; background: #ef3735; }
 
   /* ── SCORE / METRIC INDICATORS ────────────────────────────────────────── */
   .score-good {
     display: inline-flex; align-items: center;
-    padding: 2px 7px; border-radius: 6px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(34,197,94,0.14); color: #4ade80;
-    border: 1px solid rgba(34,197,94,0.22);
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(34,197,94,0.10); color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.18);
   }
   .score-warn {
     display: inline-flex; align-items: center;
-    padding: 2px 7px; border-radius: 6px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(245,158,11,0.14); color: #fbbf24;
-    border: 1px solid rgba(245,158,11,0.22);
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(245,158,11,0.10); color: #fbbf24;
+    border: 1px solid rgba(245,158,11,0.18);
   }
   .score-bad {
     display: inline-flex; align-items: center;
-    padding: 2px 7px; border-radius: 6px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(230,32,32,0.14); color: #f87171;
-    border: 1px solid rgba(230,32,32,0.22);
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(239,55,53,0.10); color: #f87171;
+    border: 1px solid rgba(239,55,53,0.18);
   }
 
   /* ── DELTA BADGES (% change) ──────────────────────────────────────────── */
   .delta-up {
     display: inline-flex; align-items: center; gap: 2px;
-    padding: 1px 6px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(34,197,94,0.12); color: #4ade80;
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(34,197,94,0.10); color: #4ade80;
   }
   .delta-down {
     display: inline-flex; align-items: center; gap: 2px;
-    padding: 1px 6px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(230,32,32,0.12); color: #f87171;
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(239,55,53,0.10); color: #f87171;
   }
   .delta-neutral {
     display: inline-flex; align-items: center; gap: 2px;
-    padding: 1px 6px; border-radius: 9999px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(255,255,255,0.06); color: #666666;  /* chart-3 */
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(255,255,255,0.05); color: #71717a;
   }
 
   /* ── ICON COLOR HELPERS ───────────────────────────────────────────────── */
-  .icon-default  { color: #C8C8C8; }  /* text-secondary */
-  .icon-muted    { color: #666666; }   /* chart-3 */
+  .icon-default  { color: #a1a1aa; }
+  .icon-muted    { color: #71717a; }
   .icon-active   { color: #4ade80; }
   .icon-brand    { color: #ef3735; }
   .icon-warning  { color: #fbbf24; }
 
   /* ── CHART COLORS (CSS vars for Recharts / Chart.js) ─────────────────── */
-  /* Neutral palette + brand-red accent. No blue/purple/teal. */
 }
 
 /* Override chart color vars at root level so Recharts picks them up */
 :root {
-  /* Stone-derived chart palette — white → stone scale + brand-red accent */
-  --color-chart-1: #FFFFFF;   /* pure white    — primary series */
-  --color-chart-2: #C8C8C8;   /* warm light    — secondary series */
-  --color-chart-3: #76706C;   /* stone-500     — tertiary series */
-  --color-chart-4: #56524C;   /* stone-600     — background/comparison */
-  --color-chart-5: #ef3735;   /* brand-red     — highlight/accent */
+  --color-chart-1: #fafafa;   /* near-white  — primary series */
+  --color-chart-2: #a1a1aa;   /* zinc-400    — secondary series */
+  --color-chart-3: #71717a;   /* zinc-500    — tertiary series */
+  --color-chart-4: #3f3f46;   /* zinc-700    — background/comparison */
+  --color-chart-5: #ef3735;   /* brand-red   — highlight/accent */
 }

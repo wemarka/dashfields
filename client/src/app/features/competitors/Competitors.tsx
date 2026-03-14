@@ -50,14 +50,14 @@ function DeltaBadge({ delta, lowerIsBetter = false }: { delta: number | null; lo
 
 // ─── Score Ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 60 ? "#C8C8C8" : score >= 40 ? "#737373" : "#ef3735";
+  const color = score >= 60 ? "#a1a1aa" : score >= 40 ? "#737373" : "#ef3735";
   const label = score >= 60 ? "Outperforming" : score >= 40 ? "On par" : "Underperforming";
 
   return (
     <div className="flex flex-col items-center gap-1">
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white"
-        style={{ background: `conic-gradient(${color} ${score}%, #6b6660 ${score}%)` }}
+        style={{ background: `conic-gradient(${color} ${score}%, #2e2e2e ${score}%)` }}
       >
         <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
           <span className="text-xs font-bold" style={{ color }}>{score}</span>
@@ -301,7 +301,7 @@ export default function Competitors() {
                 {/* Competitive Score */}
                 <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-xl">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#b8b8b8' : swotData.competitiveScore >= 40 ? '#737373' : '#ef3735'} ${swotData.competitiveScore}%, #6b6660 ${swotData.competitiveScore}%)` }}>
+                    style={{ background: `conic-gradient(${swotData.competitiveScore >= 60 ? '#a1a1aa' : swotData.competitiveScore >= 40 ? '#737373' : '#ef3735'} ${swotData.competitiveScore}%, #2e2e2e ${swotData.competitiveScore}%)` }}>
                     <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
                       <span className="text-xs font-bold">{swotData.competitiveScore}</span>
                     </div>
@@ -451,7 +451,7 @@ export default function Competitors() {
                         <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis angle={90} domain={[0, 200]} tick={{ fontSize: 9 }} />
                         <Radar name="Your Performance" dataKey="yours"     fill="#ef3735" fillOpacity={0.3} stroke="#ef3735" />
-                        <Radar name="Industry Avg"     dataKey="benchmark" fill="#3D3D3D" fillOpacity={0.2} stroke="#666666" strokeDasharray="4 4" />
+                        <Radar name="Industry Avg"     dataKey="benchmark" fill="#3D3D3D" fillOpacity={0.2} stroke="#71717a" strokeDasharray="4 4" />
                         <Legend />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -479,7 +479,7 @@ export default function Competitors() {
                         <Tooltip formatter={(v: number) => `${v.toFixed(2)}%`} />
                         <Legend />
                         <Line type="monotone" dataKey="yourCtr"      name="Your CTR"     stroke="#ef3735" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#666666" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                        <Line type="monotone" dataKey="benchmarkCtr" name="Industry Avg" stroke="#71717a" strokeWidth={2} strokeDasharray="4 4" dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   )}

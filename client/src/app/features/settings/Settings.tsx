@@ -28,7 +28,7 @@ function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
   if (mode === "dark") return (
     <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#212121" }}>
       <div className="flex h-full">
-        <div className="w-8 h-full" style={{ backgroundColor: "#56524C" }} />
+        <div className="w-8 h-full" style={{ backgroundColor: "#1c1c1c" }} />
         <div className="flex-1 p-1.5 space-y-1">
           <div className="h-2 rounded" style={{ backgroundColor: "#333", width: "60%" }} />
           <div className="h-1.5 rounded" style={{ backgroundColor: "#383838", width: "80%" }} />
@@ -40,7 +40,7 @@ function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
   return (
     <div className="w-full h-14 rounded-lg overflow-hidden" style={{ backgroundColor: "#e8e8e8" }}>
       <div className="flex h-full">
-        <div className="w-8 h-full" style={{ background: "linear-gradient(to bottom, #56524C 50%, #e0e0e0 50%)" }} />
+        <div className="w-8 h-full" style={{ background: "linear-gradient(to bottom, #1c1c1c 50%, #e0e0e0 50%)" }} />
         <div className="flex-1 p-1.5 space-y-1">
           <div className="h-2 rounded" style={{ background: "linear-gradient(to right, #333 50%, #d0d0d0 50%)", width: "60%" }} />
           <div className="h-1.5 rounded" style={{ backgroundColor: "#d0d0d0", width: "80%" }} />
@@ -129,7 +129,7 @@ export default function Settings() {
                     <div
                       className="w-full rounded-xl overflow-hidden transition-all"
                       style={{
-                        border: isActive ? "2px solid #ef3735" : "2px solid #6b6660",
+                        border: isActive ? "2px solid #ef3735" : "2px solid #2e2e2e",
                         padding: 2,
                       }}
                     >

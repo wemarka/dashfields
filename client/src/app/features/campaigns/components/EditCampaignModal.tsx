@@ -92,21 +92,21 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
         <div className="space-y-4 py-2">
           {/* Campaign Name */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#C8C8C8" }}>Campaign Name</Label>
+            <Label className="text-xs font-medium" style={{ color: "#a1a1aa" }}>Campaign Name</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Campaign name"
               className="text-sm h-8"
-              style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}
+              style={{ background: "#1c1c1c", border: "1px solid #333", color: "#fff" }}
             />
           </div>
 
           {/* Status */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#C8C8C8" }}>Status</Label>
+            <Label className="text-xs font-medium" style={{ color: "#a1a1aa" }}>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as "ACTIVE" | "PAUSED")}>
-              <SelectTrigger className="h-8 text-sm" style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}>
+              <SelectTrigger className="h-8 text-sm" style={{ background: "#1c1c1c", border: "1px solid #333", color: "#fff" }}>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent style={{ background: "#212121", border: "1px solid #383838" }}>
@@ -128,7 +128,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
 
           {/* Daily Budget */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium" style={{ color: "#C8C8C8" }}>Daily Budget</Label>
+            <Label className="text-xs font-medium" style={{ color: "#a1a1aa" }}>Daily Budget</Label>
             <div className="relative">
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: "#737373" }}>$</span>
               <Input
@@ -139,7 +139,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
                 min="1"
                 step="0.01"
                 className="text-sm h-8 pl-6"
-                style={{ background: "#56524C", border: "1px solid #333", color: "#fff" }}
+                style={{ background: "#1c1c1c", border: "1px solid #333", color: "#fff" }}
               />
             </div>
             <p className="text-xs" style={{ color: "#525252" }}>
@@ -154,7 +154,7 @@ export function EditCampaignModal({ campaign, open, onClose, onSuccess, accountI
             size="sm"
             onClick={onClose}
             className="text-xs h-7"
-            style={{ background: "transparent", border: "1px solid #333", color: "#C8C8C8" }}
+            style={{ background: "transparent", border: "1px solid #333", color: "#a1a1aa" }}
           >
             Cancel
           </Button>

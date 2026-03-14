@@ -578,14 +578,14 @@ export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
             </div>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-[#6b6660] leading-tight">{resolvedPageName}</p>
+            <p className="text-[11px] font-semibold text-[#2e2e2e] leading-tight">{resolvedPageName}</p>
             <div className="flex items-center gap-1">
               <span className="text-[9px] text-[#8E8E8E]">Sponsored</span>
               <IgLogo size={10} />
             </div>
           </div>
         </div>
-        <MoreHorizontal className="w-4 h-4 text-[#6b6660]" />
+        <MoreHorizontal className="w-4 h-4 text-[#2e2e2e]" />
       </div>
 
       {/* Media */}
@@ -607,17 +607,17 @@ export function InstagramFeedPreview({ ad, pageName, pageAvatarUrl }: {
       {/* Action bar */}
       <div className="flex items-center justify-between px-3 py-1.5">
         <div className="flex items-center gap-3">
-          <Heart className="w-4 h-4 text-[#6b6660]" />
-          <MessageCircle className="w-4 h-4 text-[#6b6660]" />
-          <Send className="w-4 h-4 text-[#6b6660]" />
+          <Heart className="w-4 h-4 text-[#2e2e2e]" />
+          <MessageCircle className="w-4 h-4 text-[#2e2e2e]" />
+          <Send className="w-4 h-4 text-[#2e2e2e]" />
         </div>
-        <Bookmark className="w-4 h-4 text-[#6b6660]" />
+        <Bookmark className="w-4 h-4 text-[#2e2e2e]" />
       </div>
 
       {/* Caption */}
       {(ad.headline || ad.message) && (
         <div className="px-3 pb-3">
-          <p className="text-[11px] text-[#6b6660]">
+          <p className="text-[11px] text-[#2e2e2e]">
             <span className="font-semibold">{resolvedPageName}</span>{" "}
             {ad.headline || ad.message}
           </p>

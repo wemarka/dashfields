@@ -6,11 +6,11 @@ import {
 } from "recharts";
 
 // Design Token chart palette — matches --color-chart-1…5 in index.css
-const CHART_COLORS = ["#ffffff", "#C8C8C8", "#787878", "#484848", "#ef3735"];
+const CHART_COLORS = ["#ffffff", "#a1a1aa", "#71717a", "#3f3f46", "#ef3735"];
 
 const TOOLTIP_STYLE = {
-  background: "#56524C",
-  border: "1px solid #6b6660",
+  background: "#1c1c1c",
+  border: "1px solid #2e2e2e",
   borderRadius: "10px",
   fontSize: "12px",
   color: "#ffffff",
@@ -39,7 +39,7 @@ export function CtrCpcChart({ ctrData, pieData }: CtrCpcChartProps) {
         <h2 className="text-sm font-semibold mb-4">CTR by Campaign</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={ctrData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#76706C" strokeOpacity={0.6} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#242424" strokeOpacity={0.6} />
             <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#B3B3B3" }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: "#B3B3B3" }} axisLine={false} tickLine={false} unit="%" />
             <Tooltip
@@ -76,7 +76,7 @@ export function CtrCpcChart({ ctrData, pieData }: CtrCpcChartProps) {
             <Legend
               iconType="circle"
               iconSize={8}
-              formatter={(value) => <span style={{ fontSize: "11px", color: "#C8C8C8" }}>{value}</span>}
+              formatter={(value) => <span style={{ fontSize: "11px", color: "#a1a1aa" }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

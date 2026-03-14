@@ -173,7 +173,7 @@ export default function RegisterPage() {
                 </div>
 
                 <Button type="submit" disabled={submitting || !email || !password || !name}
-                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors">
+                  className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand-hover text-white transition-colors">
                   {submitting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</> : "Create account"}
                 </Button>
               </form>

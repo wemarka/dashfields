@@ -2,11 +2,11 @@
  * HomePage — Creative hub landing page.
  *
  * ── Brand Palette (ONLY these values allowed) ──────────────────────────────
- *  Background:  #433F3A  (neutral-950)
- *  Card bg:     #56524C  (neutral-900)
- *  Border:      #6b6660  (neutral-800)
+ *  Background:  #171717  (neutral-950)
+ *  Card bg:     #1c1c1c  (neutral-900)
+ *  Border:      #2e2e2e  (neutral-800)
  *  Text dim:    #737373  (neutral-500)
- *  Text muted:  #b8b8b8  (neutral-400)
+ *  Text muted:  #a1a1aa  (neutral-400)
  *  Text bright: #ffffff  (white)
  *  Brand red:   #ef3735
  *  Gradient:    #ef3735 → #ffffff  (red to white, never orange/blue)
@@ -135,10 +135,10 @@ function fmtNumber(n: number): string {
 // ─── Palette constants (single source of truth) ──────────────────────────────
 const P = {
   bg:        "#171717",   // app base bg
-  card:      "#262626",   // card/surface bg
-  border:    "#333333",   // border
+  card:      "#1c1c1c",   // card/surface bg
+  border:    "#2e2e2e",   // border
   dim:       "#737373",   // neutral-500
-  muted:     "#C8C8C8",   // neutral-400
+  muted:     "#a1a1aa",   // neutral-400
   white:     "#ffffff",
   red:       "#ef3735",
   redAlpha8: "rgba(230,32,32,.08)",
@@ -269,9 +269,9 @@ export default function HomePage() {
           height: 1px;
           background: linear-gradient(90deg,
             transparent,
-            #6b6660 20%,
+            #2e2e2e 20%,
             #ef3735 50%,
-            #6b6660 80%,
+            #2e2e2e 80%,
             transparent);
           opacity: .35;
           margin: 0 60px;

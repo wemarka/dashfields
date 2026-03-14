@@ -375,7 +375,7 @@ export default function AdvancedAnalytics() {
                       <Bar dataKey="Last Click"  fill="#ef3735" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="First Click" fill="#ef3735" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="Linear"      fill="#B3B3B3" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Time Decay"  fill="#666666" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Time Decay"  fill="#71717a" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

@@ -59,7 +59,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-[#171717]">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#1e1e1e] border-r border-white/[0.06]">
+      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 p-10 bg-[#1c1c1c] border-r border-white/[0.06]">
         <img src={LOGO_URL} alt="Dashfields" className="h-7 w-auto object-contain brightness-0 invert" />
         <div>
           <blockquote className="text-white/70 text-lg leading-relaxed font-light mb-6">
@@ -154,7 +154,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={submitting || !email || !password}
-              className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand text-white transition-colors"
+              className="w-full h-11 rounded-xl font-medium bg-brand hover:bg-brand-hover text-white transition-colors"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin mr-2" />Signing in...</>

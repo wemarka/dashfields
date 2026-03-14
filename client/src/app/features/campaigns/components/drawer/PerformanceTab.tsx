@@ -171,7 +171,7 @@ function SparklineKpiCard({
 type ChartMetric = "impressions" | "clicks" | "spend";
 
 const CHART_METRICS: { key: ChartMetric; label: string; color: string }[] = [
-  { key: "impressions", label: "Impressions", color: "#C8C8C8" },
+  { key: "impressions", label: "Impressions", color: "#a1a1aa" },
   { key: "clicks",      label: "Clicks",      color: "#737373" },
   { key: "spend",       label: "Spend",       color: "#ef3735" },
 ];
@@ -215,7 +215,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               value={fmtNum(campaignInsight.impressions)}
               sub={`Reach: ${fmtNum(campaignInsight.reach)}`}
               color="text-muted-foreground" bgColor="bg-muted/30"
-              sparkData={sparkImpressions} sparkColor="#C8C8C8"
+              sparkData={sparkImpressions} sparkColor="#a1a1aa"
               trend={trendOf(sparkImpressions)}
               currentVal={campaignInsight.impressions}
               prevVal={prevPeriodInsight?.impressions ?? null}
@@ -345,7 +345,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ background: activeMetrics.has(m.key) ? m.color : "#6b6660" }}
+                  style={{ background: activeMetrics.has(m.key) ? m.color : "#2e2e2e" }}
                 />
                 {m.label}
               </button>
@@ -362,8 +362,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
             <AreaChart data={daily} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
               <defs>
                 <linearGradient id="gI2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C8C8C8" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#C8C8C8" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#a1a1aa" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#a1a1aa" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gC2" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#737373" stopOpacity={0.15} />
@@ -374,7 +374,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
                   <stop offset="95%" stopColor="#ef3735" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#76706C" strokeOpacity={0.6} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#242424" strokeOpacity={0.6} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: "#737373" }}
@@ -395,8 +395,8 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               />
               <RechartsTooltip
                 contentStyle={{
-                  background: "#56524C",
-                  border: "1px solid #6b6660",
+                  background: "#1c1c1c",
+                  border: "1px solid #2e2e2e",
                   borderRadius: "8px",
                   fontSize: "12px",
                   color: "#ffffff",

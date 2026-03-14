@@ -11,7 +11,7 @@ export const SENTIMENT_CONFIG: Record<string, { emoji: string; color: string; bg
 };
 
 // Brand palette sentiment colors
-export const SENTIMENT_COLORS = { positive: "#b8b8b8", negative: "#ef3735", neutral: "#737373", mixed: "#525252" };
+export const SENTIMENT_COLORS = { positive: "#a1a1aa", negative: "#ef3735", neutral: "#737373", mixed: "#525252" };
 
 export const PLATFORMS = ["instagram", "facebook", "twitter", "linkedin", "tiktok", "youtube"];
 

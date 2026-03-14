@@ -10,7 +10,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 // ─── Donut Colors ────────────────────────────────────────────────────────────
 const DONUT_COLORS = [
   "#ef3735", // brand-red
-  "#C8C8C8", // neutral-400
+  "#a1a1aa", // neutral-400
   "#c41a1a", // brand-red dark
   "#737373", // neutral-500
   "#ef4444", // red-500
@@ -18,7 +18,7 @@ const DONUT_COLORS = [
   "#b91c1c", // red-700
   "#404040", // neutral-700
   "#dc2626", // red-600
-  "#6b6660", // neutral-800
+  "#2e2e2e", // neutral-800
   "#6b7280", // gray-500
 ];
 
@@ -34,13 +34,13 @@ function DonutTooltip({
   const item = payload[0];
   return (
     <div
-      style={{ backgroundColor: "#56524C", border: "1px solid #6b6660" }}
+      style={{ backgroundColor: "#1c1c1c", border: "1px solid #2e2e2e" }}
       className="rounded-lg px-3 py-2 shadow-lg text-xs"
     >
       <p className="font-semibold" style={{ color: "#ffffff" }}>
         {item.name}
       </p>
-      <p style={{ color: "#C8C8C8" }}>
+      <p style={{ color: "#a1a1aa" }}>
         {item.payload.pct}% · {item.value.toLocaleString()} imp
       </p>
     </div>
@@ -213,7 +213,7 @@ function BreakdownSection({
                   />
                   <span
                     className="text-[11px] truncate flex-1"
-                    style={{ color: "#C8C8C8" }}
+                    style={{ color: "#a1a1aa" }}
                     title={item.label}
                   >
                     {item.label}
@@ -229,16 +229,16 @@ function BreakdownSection({
           {/* ── Detailed Table ── */}
           <div
             className="rounded-lg overflow-hidden"
-            style={{ border: "1px solid #6b6660" }}
+            style={{ border: "1px solid #2e2e2e" }}
           >
             {/* Table header */}
             <div
             className="grid text-[10px] font-semibold uppercase tracking-wider px-3 py-2"
             style={{
               gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
-                backgroundColor: "#6b6660",
+                backgroundColor: "#2e2e2e",
                 color: "#737373",
-                borderBottom: "1px solid #6b6660",
+                borderBottom: "1px solid #2e2e2e",
               }}
             >
               <span>Segment</span>
@@ -256,15 +256,15 @@ function BreakdownSection({
                 className="grid items-center px-3 py-2.5 transition-colors"
                 style={{
                   gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
-                  backgroundColor: idx % 2 === 0 ? "#56524C" : "#212121",
-                  borderBottom: idx < displayRows.length - 1 ? "1px solid #6b6660" : "none",
+                  backgroundColor: idx % 2 === 0 ? "#1c1c1c" : "#212121",
+                  borderBottom: idx < displayRows.length - 1 ? "1px solid #2e2e2e" : "none",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLDivElement).style.backgroundColor = "#222222";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                    idx % 2 === 0 ? "#56524C" : "#212121";
+                    idx % 2 === 0 ? "#1c1c1c" : "#212121";
                 }}
               >
                 {/* Segment label + progress bar */}
@@ -285,7 +285,7 @@ function BreakdownSection({
                   {/* Progress bar */}
                   <div
                     className="h-1 rounded-full overflow-hidden"
-                    style={{ backgroundColor: "#6b6660" }}
+                    style={{ backgroundColor: "#2e2e2e" }}
                   >
                     <div
                       className="h-full rounded-full transition-all duration-500"
@@ -310,21 +310,21 @@ function BreakdownSection({
 
                 {/* Impressions */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#C8C8C8" }}>
+                  <span className="text-[11px]" style={{ color: "#a1a1aa" }}>
                     {fmtNum(item.impressions)}
                   </span>
                 </div>
 
                 {/* Clicks */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#C8C8C8" }}>
+                  <span className="text-[11px]" style={{ color: "#a1a1aa" }}>
                     {fmtNum(item.clicks)}
                   </span>
                 </div>
 
                 {/* CTR */}
                 <div className="text-right">
-                  <span className="text-[11px]" style={{ color: "#C8C8C8" }}>
+                  <span className="text-[11px]" style={{ color: "#a1a1aa" }}>
                     {ctr(item.clicks, item.impressions)}
                   </span>
                 </div>
@@ -343,8 +343,8 @@ function BreakdownSection({
               className="grid items-center px-3 py-2.5"
               style={{
                 gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
-                backgroundColor: "#6b6660",
-                borderTop: "1px solid #6b6660",
+                backgroundColor: "#2e2e2e",
+                borderTop: "1px solid #2e2e2e",
               }}
             >
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
@@ -394,7 +394,7 @@ export function BreakdownTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div
           className="rounded-xl p-4"
-          style={{ backgroundColor: "#56524C", border: "1px solid #6b6660" }}
+          style={{ backgroundColor: "#1c1c1c", border: "1px solid #2e2e2e" }}
         >
           <BreakdownSection
             type="age"
@@ -407,7 +407,7 @@ export function BreakdownTab({
         </div>
         <div
           className="rounded-xl p-4"
-          style={{ backgroundColor: "#56524C", border: "1px solid #6b6660" }}
+          style={{ backgroundColor: "#1c1c1c", border: "1px solid #2e2e2e" }}
         >
           <BreakdownSection
             type="gender"
@@ -420,7 +420,7 @@ export function BreakdownTab({
         </div>
         <div
           className="rounded-xl p-4"
-          style={{ backgroundColor: "#56524C", border: "1px solid #6b6660" }}
+          style={{ backgroundColor: "#1c1c1c", border: "1px solid #2e2e2e" }}
         >
           <BreakdownSection
             type="region"
@@ -433,7 +433,7 @@ export function BreakdownTab({
         </div>
         <div
           className="rounded-xl p-4"
-          style={{ backgroundColor: "#56524C", border: "1px solid #6b6660" }}
+          style={{ backgroundColor: "#1c1c1c", border: "1px solid #2e2e2e" }}
         >
           <BreakdownSection
             type="device"
