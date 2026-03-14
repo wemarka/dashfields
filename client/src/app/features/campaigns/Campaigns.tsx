@@ -33,6 +33,7 @@ import { CampaignBuilder } from "@/app/features/campaigns/components/CampaignBui
 import CreateCampaignModal from "@/app/features/campaigns/components/CreateCampaignModal";
 import { PLATFORMS } from "@shared/platforms";
 import { PlatformIcon } from "@/app/components/PlatformIcon";
+import { AdAccountSelector, type AdAccountSelection } from "@/app/features/campaigns/components/AdAccountSelector";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month" | "custom";
@@ -188,6 +189,7 @@ export default function Campaigns() {
   const [statusTogglePending, setStatusTogglePending] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState("all");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [adAccountSelection, setAdAccountSelection] = useState<AdAccountSelection>({ type: "all" });
 
   // ── Data ───────────────────────────────────────────────────────────────────
   const { data: localCampaigns = [], isLoading: localLoading } =
@@ -198,11 +200,18 @@ export default function Campaigns() {
   const { data: metaStatus } = trpc.meta.connectionStatus.useQuery({ workspaceId: activeWorkspace?.id });
   const isMetaConnected = metaStatus?.connected ?? false;
   const metaDatePreset = datePreset === "custom" ? "last_30d" : datePreset;
-  const metaAccountFilter = activeGroupIds.length > 0
-    ? { accountIds: activeGroupIds }
-    : activeAccountId
-      ? { accountId: activeAccountId }
-      : {};
+  // Derive Meta account filter from the AdAccountSelector selection
+  const metaAccountFilter = useMemo(() => {
+    if (adAccountSelection.type === "single") {
+      const acc = accounts.find((a: { id: number }) => a.id === adAccountSelection.accountId);
+      if (acc) return { accountId: adAccountSelection.accountId };
+    }
+    if (adAccountSelection.type === "group") return { accountIds: adAccountSelection.accountIds };
+    // "all" — fall back to context-level selection
+    if (activeGroupIds.length > 0) return { accountIds: activeGroupIds };
+    if (activeAccountId) return { accountId: activeAccountId };
+    return {};
+  }, [adAccountSelection, accounts, activeGroupIds, activeAccountId]);
   const { data: metaCampaigns = [], isLoading: metaLoading, refetch: refetchMeta } =
     trpc.meta.campaigns.useQuery(
       { limit: 50, ...metaAccountFilter, workspaceId: activeWorkspace?.id },
@@ -478,7 +487,20 @@ export default function Campaigns() {
                 : "Manage and monitor all your ad campaigns"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* ── Ad Account Selector ── */}
+            {isMetaConnected && accounts.length > 0 && (
+              <AdAccountSelector
+                accounts={accounts}
+                isLoading={false}
+                value={adAccountSelection}
+                onChange={(sel) => {
+                  setAdAccountSelection(sel);
+                  // Immediately refetch with new account filter
+                  setTimeout(() => { refetchMeta(); refetchInsights(); }, 50);
+                }}
+              />
+            )}
             {hasAnyConnection && (
               <button
                 onClick={handleRefresh}

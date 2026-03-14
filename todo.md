@@ -3352,3 +3352,13 @@
 - [x] Progress bar inside each row showing visual proportion of the segment
 - [x] Dark theme enforced with direct hex values throughout
 - [x] 0 TypeScript errors
+
+## ✅ Ad Account Selector (Connector Dropdown)
+- [x] Built AdAccountSelector component with dark theme dropdown
+- [x] Shows all connected accounts grouped by platform (Facebook, Instagram, etc.)
+- [x] "All Accounts" option at the top (default)
+- [x] Each account row shows avatar/initial, name, platform_account_id, active status (Wifi icon)
+- [x] Selected account shown with checkmark and highlighted row
+- [x] Selecting an account updates metaAccountFilter and refetches campaigns/insights
+- [x] Integrated into Campaigns page header toolbar (visible when Meta is connected)
+- [x] 0 TypeScript errors
