@@ -214,6 +214,15 @@ export default function Campaigns() {
       { enabled: isMetaConnected }
     );
 
+  // ── Sparkline daily data ───────────────────────────────────────────────────
+  const sparklinePreset = (datePreset === "custom" || datePreset === "today" || datePreset === "yesterday")
+    ? "last_30d"
+    : datePreset as "last_7d" | "last_14d" | "last_30d" | "last_90d" | "this_month" | "last_month";
+  const { data: sparklineData = [] } = trpc.campaigns.dailySparkline.useQuery(
+    { datePreset: sparklinePreset, workspaceId: activeWorkspace?.id },
+    { staleTime: 5 * 60 * 1000 }
+  );
+
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateLocalStatus = trpc.campaigns.updateStatus.useMutation({
     onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Status updated"); },
@@ -543,6 +552,7 @@ export default function Campaigns() {
               activeCampaigns={kpis.activeCampaigns}
               totalCampaigns={kpis.totalCampaigns}
               loading={isLoading}
+              dailyData={sparklineData}
             />
           </div>
         )}

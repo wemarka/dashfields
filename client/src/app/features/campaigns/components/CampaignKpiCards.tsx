@@ -1,8 +1,7 @@
 /**
- * CampaignKpiCards.tsx — Redesigned KPI cards grid.
- * 5 individual elevated cards, large numbers, trend badges, subtle icons.
+ * CampaignKpiCards.tsx — 5 elevated KPI cards with inline SVG sparklines.
+ * Each card shows: label, large value, trend badge, sub-label, sparkline.
  */
-import { useMemo } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useCurrency } from "@/shared/hooks/useCurrency";
 
@@ -10,7 +9,6 @@ import { useCurrency } from "@/shared/hooks/useCurrency";
 const P = {
   bg:     "#0a0a0a",
   card:   "#171717",
-  card2:  "#1a1a1a",
   border: "#262626",
   text:   "#ffffff",
   muted:  "#a3a3a3",
@@ -21,6 +19,14 @@ const P = {
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+export type SparklinePoint = {
+  date: string;
+  spend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+};
+
 export interface CampaignKpiCardsProps {
   totalSpend: number;
   totalImpressions: number;
@@ -29,23 +35,96 @@ export interface CampaignKpiCardsProps {
   totalCampaigns: number;
   activeCampaigns: number;
   conversions?: number;
-  roas?: number;
-  frequency?: number;
   loading?: boolean;
   prevSpend?: number | null;
   prevImpressions?: number | null;
   prevClicks?: number | null;
   prevCtr?: number | null;
-  dailyData?: Array<{ date: string; spend: number; impressions: number; clicks: number; ctr: number }>;
+  dailyData?: SparklinePoint[];
   onKpiClick?: (metric: string) => void;
   activeMetric?: string | null;
 }
 
-// ─── Format helpers ───────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmtCompact(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toLocaleString();
+}
+
+// ─── SVG Sparkline ────────────────────────────────────────────────────────────
+function Sparkline({
+  data, color, height = 40, width = "100%",
+}: {
+  data: number[];
+  color: string;
+  height?: number;
+  width?: number | string;
+}) {
+  if (!data || data.length < 2) {
+    return (
+      <div style={{ height, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ height: 1, width: "100%", backgroundColor: P.border, borderRadius: 1 }} />
+      </div>
+    );
+  }
+
+  const W = 200; // internal viewBox width
+  const H = height;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const pad = 2;
+
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const polyline = pts.join(" ");
+
+  // Build fill path: close below the line
+  const firstPt = pts[0].split(",");
+  const lastPt  = pts[pts.length - 1].split(",");
+  const fillPath = `M ${firstPt[0]},${H} L ${polyline.replace(/(\d+\.?\d*),(\d+\.?\d*)/g, "L $1,$2").slice(2)} L ${lastPt[0]},${H} Z`;
+
+  const gradId = `sg-${color.replace("#", "")}`;
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      width={width}
+      height={height}
+      preserveAspectRatio="none"
+      style={{ display: "block", overflow: "visible" }}
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* Fill area */}
+      <path d={fillPath} fill={`url(#${gradId})`} />
+      {/* Line */}
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Last dot */}
+      <circle
+        cx={lastPt[0]}
+        cy={lastPt[1]}
+        r="2.5"
+        fill={color}
+      />
+    </svg>
+  );
 }
 
 // ─── Trend Badge ──────────────────────────────────────────────────────────────
@@ -65,7 +144,7 @@ function TrendBadge({ current, previous, higherIsBetter = true }: {
     );
   }
   const color = isGood ? P.green : P.brand;
-  const bg = isGood ? "rgba(34,197,94,0.10)" : "rgba(230,32,32,0.10)";
+  const bg    = isGood ? "rgba(34,197,94,0.10)" : "rgba(230,32,32,0.10)";
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11, fontWeight: 600, color, backgroundColor: bg, padding: "2px 7px", borderRadius: 6 }}>
       {isPositive ? <TrendingUp style={{ width: 10, height: 10 }} /> : <TrendingDown style={{ width: 10, height: 10 }} />}
@@ -77,89 +156,15 @@ function TrendBadge({ current, previous, higherIsBetter = true }: {
 // ─── Skeleton Card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div style={{ backgroundColor: P.card, border: `1px solid ${P.border}`, borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ backgroundColor: P.card, border: `1px solid ${P.border}`, borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ height: 10, width: 60, borderRadius: 4, backgroundColor: "#262626" }} />
         <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "#262626" }} />
       </div>
       <div style={{ height: 28, width: 80, borderRadius: 6, backgroundColor: "#1f1f1f" }} />
       <div style={{ height: 9, width: 100, borderRadius: 4, backgroundColor: "#1a1a1a" }} />
+      <div style={{ height: 40, borderRadius: 6, backgroundColor: "#1a1a1a" }} />
     </div>
-  );
-}
-
-// ─── Single KPI Card ──────────────────────────────────────────────────────────
-function KpiCard({
-  label, value, sub, icon, current, previous, higherIsBetter,
-  isSelected, onClick, accentColor,
-}: {
-  label: string; value: string; sub?: string;
-  icon: React.ReactNode; current: number;
-  previous?: number | null; higherIsBetter?: boolean;
-  isSelected?: boolean; onClick?: () => void;
-  accentColor?: string;
-}) {
-  const accent = accentColor ?? P.dim;
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        backgroundColor: isSelected ? "#1f1f1f" : P.card,
-        border: isSelected ? `1px solid ${P.brand}` : `1px solid ${P.border}`,
-        borderRadius: 14,
-        padding: "18px 20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        cursor: onClick ? "pointer" : "default",
-        outline: "none",
-        textAlign: "left",
-        width: "100%",
-        transition: "background 0.15s, border-color 0.15s",
-      }}
-      onMouseEnter={e => {
-        if (!isSelected) {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1c1c1c";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "#333333";
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isSelected) {
-          (e.currentTarget as HTMLButtonElement).style.backgroundColor = P.card;
-          (e.currentTarget as HTMLButtonElement).style.borderColor = P.border;
-        }
-      }}
-    >
-      {/* Top row: label + icon */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 11, color: P.subtle, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-          {label}
-        </span>
-        <div style={{
-          width: 34, height: 34, borderRadius: 10,
-          backgroundColor: `${accent}18`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: accent, flexShrink: 0,
-        }}>
-          {icon}
-        </div>
-      </div>
-
-      {/* Value */}
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 26, fontWeight: 700, color: P.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
-          {value}
-        </span>
-        <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
-      </div>
-
-      {/* Sub */}
-      {sub && (
-        <span style={{ fontSize: 11, color: P.subtle, lineHeight: 1.3 }}>
-          {sub}
-        </span>
-      )}
-    </button>
   );
 }
 
@@ -195,11 +200,92 @@ const CampaignsIcon = () => (
   </svg>
 );
 
+// ─── Single KPI Card ──────────────────────────────────────────────────────────
+function KpiCard({
+  label, value, sub, icon, current, previous, higherIsBetter,
+  isSelected, onClick, accentColor, sparkData,
+}: {
+  label: string; value: string; sub?: string;
+  icon: React.ReactNode; current: number;
+  previous?: number | null; higherIsBetter?: boolean;
+  isSelected?: boolean; onClick?: () => void;
+  accentColor: string;
+  sparkData: number[];
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        backgroundColor: isSelected ? "#1f1f1f" : P.card,
+        border: isSelected ? `1px solid ${P.brand}` : `1px solid ${P.border}`,
+        borderRadius: 14,
+        padding: "16px 18px 12px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        cursor: onClick ? "pointer" : "default",
+        outline: "none",
+        textAlign: "left",
+        width: "100%",
+        transition: "background 0.15s, border-color 0.15s",
+      }}
+      onMouseEnter={e => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1c1c1c";
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#333333";
+        }
+      }}
+      onMouseLeave={e => {
+        if (!isSelected) {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = P.card;
+          (e.currentTarget as HTMLButtonElement).style.borderColor = P.border;
+        }
+      }}
+    >
+      {/* Top row: label + icon */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 11, color: P.subtle, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          {label}
+        </span>
+        <div style={{
+          width: 32, height: 32, borderRadius: 9,
+          backgroundColor: `${accentColor}18`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: accentColor, flexShrink: 0,
+        }}>
+          {icon}
+        </div>
+      </div>
+
+      {/* Value + trend */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 24, fontWeight: 700, color: P.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+          {value}
+        </span>
+        <TrendBadge current={current} previous={previous} higherIsBetter={higherIsBetter} />
+      </div>
+
+      {/* Sub label */}
+      {sub && (
+        <span style={{ fontSize: 11, color: P.subtle, lineHeight: 1.3 }}>
+          {sub}
+        </span>
+      )}
+
+      {/* Sparkline */}
+      <div style={{ marginTop: 4, height: 40 }}>
+        <Sparkline data={sparkData} color={accentColor} height={40} width="100%" />
+      </div>
+    </button>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function CampaignKpiCards({
   totalSpend, totalImpressions, totalClicks, avgCtr,
   totalCampaigns, activeCampaigns, conversions, loading,
   prevSpend, prevImpressions, prevClicks, prevCtr,
+  dailyData = [],
   onKpiClick, activeMetric,
 }: CampaignKpiCardsProps) {
   const { fmt: fmtMoney } = useCurrency();
@@ -211,6 +297,14 @@ export function CampaignKpiCards({
       </div>
     );
   }
+
+  // Extract sparkline arrays from daily data
+  const spendSpark       = dailyData.map(d => d.spend);
+  const impressionsSpark = dailyData.map(d => d.impressions);
+  const clicksSpark      = dailyData.map(d => d.clicks);
+  const ctrSpark         = dailyData.map(d => d.ctr);
+  // Campaigns active count doesn't change daily — use spend as proxy
+  const campaignsSpark   = dailyData.map(d => d.spend > 0 ? 1 : 0);
 
   const cards = [
     {
@@ -225,6 +319,7 @@ export function CampaignKpiCards({
         ? `CPM ${fmtMoney(totalSpend / (totalImpressions / 1000), 2)}`
         : `${activeCampaigns} active / ${totalCampaigns}`,
       accent: P.brand,
+      spark: spendSpark,
     },
     {
       key: "impressions",
@@ -234,8 +329,9 @@ export function CampaignKpiCards({
       current: totalImpressions,
       previous: prevImpressions,
       higherIsBetter: true,
-      sub: totalImpressions > 0 ? `Reach across all platforms` : "No data yet",
+      sub: totalImpressions > 0 ? "Reach across all platforms" : "No data yet",
       accent: "#a78bfa",
+      spark: impressionsSpark,
     },
     {
       key: "clicks",
@@ -247,6 +343,7 @@ export function CampaignKpiCards({
       higherIsBetter: true,
       sub: totalClicks > 0 ? `CPC ${fmtMoney(totalSpend / totalClicks, 2)}` : "No clicks yet",
       accent: "#38bdf8",
+      spark: clicksSpark,
     },
     {
       key: "ctr",
@@ -258,6 +355,7 @@ export function CampaignKpiCards({
       higherIsBetter: true,
       sub: conversions != null ? `${fmtCompact(conversions)} conversions` : "Click-through rate",
       accent: P.green,
+      spark: ctrSpark,
     },
     {
       key: "campaigns",
@@ -269,6 +367,7 @@ export function CampaignKpiCards({
       higherIsBetter: true,
       sub: `${activeCampaigns} active of ${totalCampaigns} total`,
       accent: "#fb923c",
+      spark: campaignsSpark,
     },
   ];
 
@@ -287,6 +386,7 @@ export function CampaignKpiCards({
           isSelected={activeMetric === card.key}
           onClick={onKpiClick ? () => onKpiClick(card.key) : undefined}
           accentColor={card.accent}
+          sparkData={card.spark}
         />
       ))}
     </div>

@@ -336,4 +336,82 @@ export const campaignsRouter = router({
         .eq("user_id", ctx.user.id);
       return { success: true, count: input.campaignIds.length };
     }),
+
+  /**
+   * dailySparkline — returns aggregated daily metrics for KPI sparklines.
+   * Groups campaign_metrics rows by date within the selected date range.
+   */
+  dailySparkline: protectedProcedure
+    .input(z.object({
+      workspaceId: z.number().int().positive().optional(),
+      datePreset:  z.enum(["today", "yesterday", "last_7d", "last_14d", "last_30d", "last_90d", "this_month", "last_month"]).default("last_30d"),
+      since:       z.string().optional(), // YYYY-MM-DD override
+      until:       z.string().optional(), // YYYY-MM-DD override
+    }))
+    .query(async ({ ctx, input }) => {
+      const sb = getSupabase();
+
+      // ── Resolve date range ─────────────────────────────────────────────────
+      const now = new Date();
+      const today = now.toISOString().split("T")[0];
+      let since: string;
+      let until: string = input.until ?? today;
+
+      if (input.since) {
+        since = input.since;
+      } else {
+        const daysMap: Record<string, number> = {
+          today: 0, yesterday: 1, last_7d: 7, last_14d: 14,
+          last_30d: 30, last_90d: 90, this_month: 30, last_month: 60,
+        };
+        const days = daysMap[input.datePreset] ?? 30;
+        since = new Date(now.getTime() - days * 86_400_000).toISOString().split("T")[0];
+        if (input.datePreset === "yesterday") {
+          until = new Date(now.getTime() - 86_400_000).toISOString().split("T")[0];
+          since = until;
+        }
+      }
+
+      // ── Get campaign IDs for this user ─────────────────────────────────────
+      const { data: campaigns } = await sb
+        .from("campaigns")
+        .select("id")
+        .eq("user_id", ctx.user.id);
+
+      const campaignIds = (campaigns ?? []).map((c: { id: number }) => c.id);
+      if (campaignIds.length === 0) return [];
+
+      // ── Fetch daily metrics ────────────────────────────────────────────────
+      const { data: rows } = await sb
+        .from("campaign_metrics")
+        .select("date, spend, impressions, clicks, ctr")
+        .in("campaign_id", campaignIds)
+        .gte("date", since)
+        .lte("date", until)
+        .order("date", { ascending: true });
+
+      if (!rows || rows.length === 0) return [];
+
+      // ── Aggregate by date ──────────────────────────────────────────────────
+      const byDate: Record<string, { spend: number; impressions: number; clicks: number; ctrSum: number; ctrCount: number }> = {};
+
+      for (const r of rows) {
+        const d = r.date as string;
+        if (!byDate[d]) byDate[d] = { spend: 0, impressions: 0, clicks: 0, ctrSum: 0, ctrCount: 0 };
+        byDate[d].spend       += Number(r.spend ?? 0);
+        byDate[d].impressions += Number(r.impressions ?? 0);
+        byDate[d].clicks      += Number(r.clicks ?? 0);
+        if (r.ctr != null) { byDate[d].ctrSum += Number(r.ctr); byDate[d].ctrCount++; }
+      }
+
+      return Object.entries(byDate)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, v]) => ({
+          date,
+          spend:       Math.round(v.spend * 100) / 100,
+          impressions: v.impressions,
+          clicks:      v.clicks,
+          ctr:         v.ctrCount > 0 ? Math.round((v.ctrSum / v.ctrCount) * 100) / 100 : 0,
+        }));
+    }),
 });

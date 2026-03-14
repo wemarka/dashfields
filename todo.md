@@ -3323,3 +3323,9 @@
 - [ ] Fix Campaigns page colors
 - [ ] Fix Dashboard page colors
 - [ ] Fix all other pages and shared components
+
+## ✨ Sparkline in KPI Cards
+- [x] Aggregate daily data (spend/impressions/clicks/ctr) per selected date range in tRPC
+- [x] Build SVG Sparkline component (pure SVG, no external lib)
+- [x] Integrate Sparkline into each CampaignKpiCard
+- [x] Pass dailyData from Campaigns.tsx to CampaignKpiCards
