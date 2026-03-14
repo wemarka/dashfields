@@ -3299,3 +3299,6 @@
 - [x] Recent Creations: masonry grid with featured 2x2 card, play button overlay
 - [x] Scroll reveal animations with staggered delays
 - [x] Gradient line dividers between sections
+
+## 🎬 Home Hero Banner
+- [x] Add animated Hero Banner at top of Home page (bg image, badge, headline, CTA)

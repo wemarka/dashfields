@@ -296,6 +296,46 @@ export default function HomePage() {
           margin: 0 60px;
         }
 
+
+        /* Hero Banner animations */
+        @keyframes banner-float {
+          0%,100% { transform: scale(1.03) translateY(0px); }
+          50%      { transform: scale(1.06) translateY(-8px); }
+        }
+        @keyframes banner-fade-in {
+          from { opacity:0; transform: translateY(20px); }
+          to   { opacity:1; transform: translateY(0); }
+        }
+        @keyframes banner-slide-right {
+          from { opacity:0; transform: translateX(-30px); }
+          to   { opacity:1; transform: translateX(0); }
+        }
+        @keyframes banner-slide-up {
+          from { opacity:0; transform: translateY(24px); }
+          to   { opacity:1; transform: translateY(0); }
+        }
+        .banner-bg-img { animation: banner-float 8s ease-in-out infinite; }
+        .banner-badge  { animation: banner-fade-in 600ms ease forwards; opacity:0; }
+        .banner-title  { animation: banner-slide-right 700ms 100ms ease forwards; opacity:0; }
+        .banner-sub    { animation: banner-slide-up 700ms 200ms ease forwards; opacity:0; }
+        .banner-cta    { animation: banner-slide-up 700ms 350ms ease forwards; opacity:0; }
+        .banner-cta-btn {
+          transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
+        }
+        .banner-cta-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(230,32,32,.45);
+          background: #c41a1a !important;
+        }
+        .banner-secondary-btn {
+          transition: border-color 200ms ease, color 200ms ease, background 200ms ease;
+        }
+        .banner-secondary-btn:hover {
+          border-color: rgba(255,255,255,.35) !important;
+          background: rgba(255,255,255,.06) !important;
+          color: #e8eaed !important;
+        }
+
         /* Noise overlay */
         .noise-overlay {
           position: fixed; inset: 0; pointer-events: none; z-index: 9999;
@@ -305,6 +345,157 @@ export default function HomePage() {
 
       {/* Noise overlay */}
       <div className="noise-overlay" aria-hidden />
+
+
+      {/* ══════ HERO BANNER ══════ */}
+      <section
+        style={{
+          margin: "28px 60px 0",
+          borderRadius: 18,
+          overflow: "hidden",
+          position: "relative",
+          height: 260,
+          background: "#0d0f11",
+          border: "1px solid #1e2328",
+          cursor: "pointer",
+        }}
+        onClick={() => setLocation("/studios")}
+      >
+        <div
+          className="banner-bg-img"
+          style={{
+            position: "absolute", inset: 0,
+            backgroundImage: "url('https://images.unsplash.com/photo-1536240478700-b869070f9279?w=1400&q=85')",
+            backgroundSize: "cover", backgroundPosition: "center 30%",
+            transformOrigin: "center",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(105deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.65) 40%, rgba(0,0,0,.2) 70%, transparent 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute", top: "-40%", left: "-10%",
+            width: 500, height: 500, pointerEvents: "none",
+            background: "radial-gradient(circle, rgba(230,32,32,.12) 0%, transparent 65%)",
+          }}
+        />
+        <div
+          style={{
+            position: "relative", zIndex: 2,
+            padding: "36px 48px",
+            height: "100%",
+            display: "flex", flexDirection: "column", justifyContent: "center",
+            maxWidth: 620,
+          }}
+        >
+          <div
+            className="banner-badge"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "#e62020", color: "#fff",
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: "1.5px", textTransform: "uppercase",
+              padding: "4px 12px", borderRadius: 4,
+              marginBottom: 16, width: "fit-content",
+            }}
+          >
+            ✦ NEW IN DASH STUDIOS
+          </div>
+          <h2
+            className="syne banner-title"
+            style={{
+              fontWeight: 800,
+              fontSize: "clamp(26px, 3vw, 40px)",
+              lineHeight: 1.1,
+              letterSpacing: "-1px",
+              color: "#e8eaed",
+              marginBottom: 10,
+            }}
+          >
+            AI Video Generation<br />
+            <span style={{ color: "#e62020" }}>Powered by Kling 2.5</span>
+          </h2>
+          <p
+            className="banner-sub"
+            style={{
+              fontSize: 14, color: "rgba(232,234,237,.65)",
+              lineHeight: 1.55, marginBottom: 22, fontWeight: 300,
+            }}
+          >
+            Create cinematic ad videos from a single text prompt. Ultra-realistic motion, one click.
+          </p>
+          <div className="banner-cta" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <button
+              className="banner-cta-btn"
+              style={{
+                background: "#e62020", color: "#fff",
+                border: "none", borderRadius: 8,
+                padding: "10px 22px", fontSize: 14, fontWeight: 600,
+                cursor: "pointer",
+              }}
+              onClick={(e) => { e.stopPropagation(); setLocation("/studios"); }}
+            >
+              Try Dash Studios →
+            </button>
+            <button
+              className="banner-secondary-btn"
+              style={{
+                background: "transparent",
+                color: "rgba(232,234,237,.7)",
+                border: "1px solid rgba(255,255,255,.15)",
+                borderRadius: 8,
+                padding: "10px 22px", fontSize: 14, fontWeight: 500,
+                cursor: "pointer",
+              }}
+              onClick={(e) => { e.stopPropagation(); setLocation("/assist"); }}
+            >
+              Ask AI Assist
+            </button>
+          </div>
+        </div>
+        <div
+          style={{
+            position: "absolute", right: 48, top: "50%",
+            transform: "translateY(-50%)",
+            display: "flex", gap: 12, alignItems: "center",
+            zIndex: 2,
+          }}
+        >
+          {[
+            { label: "Campaigns", val: "4", sub: "Active" },
+            { label: "Reach", val: "124K", sub: "This month" },
+            { label: "ROI", val: "3.2x", sub: "Avg return" },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              style={{
+                background: "rgba(13,15,17,.75)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,.07)",
+                borderRadius: 12,
+                padding: "14px 20px",
+                textAlign: "center",
+                minWidth: 90,
+              }}
+            >
+              <div
+                className="syne"
+                style={{ fontSize: 22, fontWeight: 800, color: "#e8eaed", lineHeight: 1 }}
+              >
+                {stat.val}
+              </div>
+              <div style={{ fontSize: 11, color: "#555d68", marginTop: 4 }}>{stat.sub}</div>
+              <div style={{ fontSize: 10, color: "#e62020", fontWeight: 600, marginTop: 2, letterSpacing: "0.5px" }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ══════ HERO ══════ */}
       <section
