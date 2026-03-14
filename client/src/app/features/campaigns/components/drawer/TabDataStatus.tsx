@@ -99,7 +99,7 @@ export function TabRefreshOverlay({ isFetching, hasData, children }: TabRefreshO
           {/* Animated progress bar at top */}
           <div className="absolute top-0 left-0 right-0 h-0.5 overflow-hidden">
             <div className="h-full bg-primary/60 animate-[shimmer_1.2s_ease-in-out_infinite]" style={{
-              backgroundImage: "linear-gradient(90deg, transparent 0%, hsl(var(--primary)) 50%, transparent 100%)",
+              backgroundImage: "linear-gradient(90deg, transparent 0%, #e62020 50%, transparent 100%)",
               backgroundSize: "200% 100%",
               animation: "shimmer 1.2s ease-in-out infinite",
             }} />

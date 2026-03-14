@@ -98,7 +98,7 @@ export function DrawerHeader({
   return (
     <div
       className="shrink-0 bg-neutral-900"
-      style={{ borderBottom: "1px solid #f0f0f0" }}
+      style={{ borderBottom: "1px solid #262626" }}
     >
       {/* ── Row 1: Name + Status + Actions ── */}
       <div
@@ -124,8 +124,8 @@ export function DrawerHeader({
             <span
               className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
               style={{
-                background: "#f3f4f6",
-                color: "#6b7280",
+                background: "#262626",
+                color: "#a3a3a3",
                 borderRadius: 4,
                 padding: "3px 6px",
               }}
@@ -152,7 +152,7 @@ export function DrawerHeader({
                 borderRadius: 9,
                 border: "none",
                 cursor: isTogglingStatus ? "wait" : "pointer",
-                background: isActive ? "#22c55e" : "#d1d5db",
+                background: isActive ? "#22c55e" : "#404040",
                 transition: "background 0.2s",
                 opacity: isTogglingStatus ? 0.6 : 1,
                 flexShrink: 0,
@@ -181,7 +181,7 @@ export function DrawerHeader({
             </button>
             <span
               className="text-xs font-medium shrink-0"
-              style={{ color: isActive ? "#16a34a" : "#9ca3af" }}
+              style={{ color: isActive ? "#22c55e" : "#737373" }}
             >
               {isTogglingStatus ? "..." : isActive ? "Active" : "Paused"}
             </span>
@@ -213,8 +213,8 @@ export function DrawerHeader({
               style={{
                 padding: "5px 10px",
                 borderRadius: 6,
-                border: "1px solid #e5e7eb",
-                background: "#fff",
+                border: "1px solid #404040",
+                background: "#262626",
                 cursor: isExportingCsv ? "wait" : "pointer",
               }}
             >
@@ -234,8 +234,8 @@ export function DrawerHeader({
             style={{
               padding: "5px 10px",
               borderRadius: 6,
-              border: "1px solid #e5e7eb",
-              background: "#fff",
+              border: "1px solid #404040",
+              background: "#262626",
               cursor: isExporting ? "wait" : "pointer",
             }}
           >
@@ -251,7 +251,7 @@ export function DrawerHeader({
       {/* ── Row 2: Budget + Date presets ── */}
       <div
         className="flex items-center justify-between px-5"
-        style={{ height: 38, borderTop: "1px solid #f7f7f7" }}
+        style={{ height: 38, borderTop: "1px solid #262626" }}
       >
         {/* Budget */}
         <div className="flex items-center gap-1.5">
@@ -263,7 +263,7 @@ export function DrawerHeader({
                 onSave={onBudgetSave}
                 fmtMoney={fmtCurrency}
               />
-              <span style={{ color: "#d1d5db" }}>/day</span>
+              <span style={{ color: "#737373" }}>/day</span>
             </div>
           ) : (
             <span className="text-xs text-neutral-500">—</span>
@@ -274,7 +274,7 @@ export function DrawerHeader({
         <div
           className="flex items-center"
           style={{
-            background: "#f3f4f6",
+            background: "#1f1f1f",
             borderRadius: 7,
             padding: 2,
             gap: 1,
@@ -291,8 +291,8 @@ export function DrawerHeader({
                   borderRadius: 5,
                   fontSize: 11,
                   fontWeight: active ? 600 : 400,
-                  color: active ? "#111827" : "#9ca3af",
-                  background: active ? "#fff" : "transparent",
+                  color: active ? "#ffffff" : "#737373",
+                  background: active ? "#e62020" : "transparent",
                   boxShadow: active ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
                   border: "none",
                   cursor: "pointer",

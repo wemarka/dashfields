@@ -3334,3 +3334,12 @@
 - [x] Add periodComparison query to Campaigns.tsx for previous period data
 - [x] Wire prevSpend, prevImpressions, prevClicks, prevCtr to CampaignKpiCards
 - [x] Show comparison label in KPI cards (e.g. "vs previous 30 days")
+
+## 🎨 Campaign Drawer — Dark Palette Fix
+- [ ] Fix PerformanceTab: chart backgrounds, card colors, Recharts theme
+- [ ] Fix AdSetsTab: table/row backgrounds and text colors
+- [ ] Fix CreativesTab: card and image overlay colors
+- [ ] Fix HeatmapTab: heatmap cell colors
+- [ ] Fix BreakdownTab: chart and table colors
+- [ ] Fix NotesTab: input and note card colors
+- [ ] Fix Drawer wrapper: header, nav sidebar, budget bar colors

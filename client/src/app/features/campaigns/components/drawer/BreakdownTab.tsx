@@ -11,16 +11,16 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 // Brand palette chart colors — no blue, no orange
 const DONUT_COLORS = [
   "#e62020", // brand-red
-  "#ffffff", // white
   "#a3a3a3", // neutral-400
-  "#737373", // neutral-500
   "#c41a1a", // brand-red dark
+  "#737373", // neutral-500
+  "#ef4444", // red-500
   "#525252", // neutral-600
-  "#f87171", // red-300 (light red)
+  "#b91c1c", // red-700
   "#404040", // neutral-700
-  "#fca5a5", // red-200 (very light red)
+  "#dc2626", // red-600
   "#262626", // neutral-800
-  "#d4d4d4", // neutral-300
+  "#6b7280", // gray-500
 ];
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────

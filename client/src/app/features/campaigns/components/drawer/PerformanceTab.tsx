@@ -345,7 +345,7 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
               >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ background: activeMetrics.has(m.key) ? m.color : "hsl(var(--border))" }}
+                  style={{ background: activeMetrics.has(m.key) ? m.color : "#262626" }}
                 />
                 {m.label}
               </button>
@@ -374,33 +374,33 @@ export function PerformanceTab({ campaignInsight, prevPeriodInsight, daily, isLo
                   <stop offset="95%" stopColor="#E62020" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" strokeOpacity={0.6} />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 10, fill: "#737373" }}
                 tickFormatter={d => d?.slice(5) ?? ""}
                 axisLine={false} tickLine={false}
               />
               <YAxis
                 yAxisId="left"
-                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 10, fill: "#737373" }}
                 tickFormatter={v => fmtNum(v)}
                 axisLine={false} tickLine={false} width={40}
               />
               <YAxis
                 yAxisId="right" orientation="right"
-                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 10, fill: "#737373" }}
                 tickFormatter={v => `$${v}`}
                 axisLine={false} tickLine={false} width={36}
               />
               <RechartsTooltip
                 contentStyle={{
-                  background: "hsl(var(--popover))",
-                  border: "1px solid hsl(var(--border))",
+                  background: "#171717",
+                  border: "1px solid #262626",
                   borderRadius: "8px",
                   fontSize: "12px",
-                  color: "hsl(var(--popover-foreground))",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  color: "#ffffff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
                 }}
                 formatter={(value: number, name: string) => {
                   if (name === "Spend") return [`$${value.toFixed(2)}`, "Spend"];
