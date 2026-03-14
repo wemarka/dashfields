@@ -232,7 +232,7 @@ function UnifiedCampaignTableInner({
           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", position: "relative", width: size, height: size }}>
             <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
               {/* Track */}
-              <circle cx={cx} cy={cx} r={r} fill="none" stroke="#f3f4f6" strokeWidth={3} />
+              <circle cx={cx} cy={cx} r={r} fill="none" stroke="#262626" strokeWidth={3} />
               {/* Arc */}
               <circle
                 cx={cx} cy={cx} r={r}
@@ -257,11 +257,11 @@ function UnifiedCampaignTableInner({
         );
       }
       case "stopTime": {
-        if (!c.stopTime) return <span style={{ fontSize: 12, color: "#d1d5db" }}>—</span>;
+        if (!c.stopTime) return <span style={{ fontSize: 12, color: "#525252" }}>—</span>;
         const d = new Date(c.stopTime);
         const formatted = isNaN(d.getTime()) ? c.stopTime :
           d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-        return <span style={{ fontSize: 12, color: "#374151", fontWeight: 500, whiteSpace: "nowrap" }}>{formatted}</span>;
+        return <span style={{ fontSize: 12, color: "#a3a3a3", fontWeight: 500, whiteSpace: "nowrap" }}>{formatted}</span>;
       }
       default: return null;
     }
@@ -275,9 +275,9 @@ function UnifiedCampaignTableInner({
           <DropdownMenuTrigger asChild>
             <button
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] transition-colors"
-              style={{ backgroundColor: "#f3f4f6", color: "#6b7280", border: "none" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#e5e7eb"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; }}
+              style={{ backgroundColor: "#262626", color: "#a3a3a3", border: "none" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; }}
             >
               <Settings2 className="w-3 h-3" />
               Columns
@@ -309,9 +309,11 @@ function UnifiedCampaignTableInner({
               {/* Checkbox */}
               <th style={{ width: 36, padding: "9px 12px" }}>
                 <button onClick={toggleSelectAll} className="p-0.5">
-                  {allPageSelected ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} /> :
-                    somePageSelected ? <MinusSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} /> :
-                    <Square className="w-3.5 h-3.5" style={{ color: "#d1d5db" }} />}
+                  {allPageSelected
+                    ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#a3a3a3" }} />
+                    : somePageSelected
+                      ? <MinusSquare className="w-3.5 h-3.5" style={{ color: "#a3a3a3" }} />
+                      : <Square className="w-3.5 h-3.5" style={{ color: "#404040" }} />}
                 </button>
               </th>
               {visibleColumns.map((col) => (
@@ -349,18 +351,18 @@ function UnifiedCampaignTableInner({
                   <tr
                     onClick={() => onRowClick(c)}
                     style={{
-                      borderBottom: isLast ? "none" : "1px solid #f9fafb",
-                      backgroundColor: isCampaignSelected ? "#f0f9ff" : isSelected ? "#f9fafb" : "white",
+                      borderBottom: isLast ? "none" : "1px solid #1f1f1f",
+                      backgroundColor: isCampaignSelected ? "rgba(230,32,32,0.08)" : isSelected ? "#1f1f1f" : "#0a0a0a",
                       cursor: "pointer",
                       transition: "background-color 0.1s",
                     }}
                     onMouseEnter={e => {
                       if (!isCampaignSelected && !isSelected)
-                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#f9fafb";
+                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#171717";
                     }}
                     onMouseLeave={e => {
                       if (!isCampaignSelected && !isSelected)
-                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "white";
+                        (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#0a0a0a";
                     }}
                   >
                     {/* Switch — first column on the left */}
@@ -377,8 +379,8 @@ function UnifiedCampaignTableInner({
                     <td style={{ padding: "10px 12px" }} onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => toggleSelect(c.id)} className="p-0.5">
                         {isSelected
-                          ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#374151" }} />
-                          : <Square className="w-3.5 h-3.5" style={{ color: "#e5e7eb" }} />}
+                          ? <CheckSquare className="w-3.5 h-3.5" style={{ color: "#a3a3a3" }} />
+                          : <Square className="w-3.5 h-3.5" style={{ color: "#404040" }} />}
                       </button>
                     </td>
                     {visibleColumns.map((col) => (
@@ -400,8 +402,8 @@ function UnifiedCampaignTableInner({
                         <DropdownMenuTrigger asChild>
                           <button
                             className="flex items-center justify-center w-6 h-6 rounded transition-colors opacity-0 group-hover:opacity-100"
-                            style={{ color: "#9ca3af" }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6"; (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                            style={{ color: "#737373" }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#262626"; (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
                             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                           >
                             <MoreHorizontal className="w-3.5 h-3.5" />
