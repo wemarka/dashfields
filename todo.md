@@ -3373,3 +3373,10 @@
 - [x] Deduplicate by platform_account_id (same ad account ID = one entry)
 - [x] Fuzzy-match similar names (iLang Center / i Lang Center) to merge duplicates
 - [x] Show only unique Meta ad accounts (3 instead of 6)
+
+## 🔄 AdAccountSelector Strict Ad Account Fix
+- [x] Filter to account_type='ad_account' only (exclude pages/profiles)
+- [x] Deduplicate strictly by platform_account_id only (no fuzzy name matching)
+- [x] Display Ad Account ID under each account name in dropdown
+- [x] Remove black background behind Meta badge on avatar
+- [x] Add platform_account_id to AdAccount type and tRPC social.list response

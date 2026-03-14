@@ -1,9 +1,10 @@
 /**
  * AdAccountSelector.tsx
  * Dropdown to select a connected ad account.
- * - Facebook + Instagram accounts with the same name are merged into one Meta group
- * - Each group shows a Meta logo badge
- * - Profile pictures are shown when available
+ * - Shows ONLY accounts with account_type = 'ad_account'
+ * - Deduplicates strictly by platform_account_id (no fuzzy name matching)
+ * - Shows Ad Account ID under each name
+ * - Meta (FB/IG) accounts grouped under a single Meta Ads section
  * - No "All Accounts" option
  */
 import { useState, useRef, useEffect } from "react";
@@ -49,97 +50,78 @@ interface AdAccountSelectorProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const META_PLATFORMS = new Set(["facebook", "instagram"]);
 
-/** Normalise a name for fuzzy comparison: lowercase, remove spaces/dots/dashes */
-function normName(name: string): string {
-  return name.toLowerCase().replace(/[\s.\-_]+/g, "");
-}
-
 /**
- * Build "Meta groups" with 3-tier deduplication:
- * 1. Same platform_account_id  → same account
- * 2. Exact normalised name match → same account
- * 3. Fuzzy name match (one is a prefix/suffix of the other) → same account
+ * Build Meta groups strictly by platform_account_id.
+ * Only accounts with account_type = 'ad_account' are included.
+ * Each unique platform_account_id = one entry.
  */
 function buildMetaGroups(accounts: AdAccount[]) {
-  const metaAccounts = accounts.filter(a => META_PLATFORMS.has(a.platform));
-  const otherAccounts = accounts.filter(a => !META_PLATFORMS.has(a.platform));
+  // Filter to ad_account type only
+  const adAccounts = accounts.filter(a =>
+    a.account_type === "ad_account" || a.account_type === "ad"
+  );
 
-  // Step 1: Deduplicate by platform_account_id (same ad account ID = one entry)
+  const metaAccounts = adAccounts.filter(a => META_PLATFORMS.has(a.platform));
+  const otherAccounts = adAccounts.filter(a => !META_PLATFORMS.has(a.platform));
+
+  // Deduplicate strictly by platform_account_id
   const seenPlatformIds = new Map<string, AdAccount>();
-  const dedupedByPlatformId: AdAccount[] = [];
+  const uniqueMeta: AdAccount[] = [];
+
   for (const acc of metaAccounts) {
     const pid = acc.platform_account_id?.trim();
     if (pid) {
       if (!seenPlatformIds.has(pid)) {
         seenPlatformIds.set(pid, acc);
-        dedupedByPlatformId.push(acc);
+        uniqueMeta.push(acc);
       } else {
         // Keep the one with a profile picture
         const existing = seenPlatformIds.get(pid)!;
         if (!existing.profile_picture && acc.profile_picture) {
           seenPlatformIds.set(pid, acc);
-          const idx = dedupedByPlatformId.indexOf(existing);
-          if (idx !== -1) dedupedByPlatformId[idx] = acc;
+          const idx = uniqueMeta.indexOf(existing);
+          if (idx !== -1) uniqueMeta[idx] = acc;
         }
       }
     } else {
-      dedupedByPlatformId.push(acc);
+      // No platform_account_id — include as-is (rare fallback)
+      uniqueMeta.push(acc);
     }
   }
 
-  // Step 2 & 3: Group by exact normalised name, then merge fuzzy matches
-  const byNormName = new Map<string, AdAccount[]>();
-  for (const acc of dedupedByPlatformId) {
-    const key = normName(acc.name ?? acc.username ?? `#${acc.id}`);
-    if (!byNormName.has(key)) byNormName.set(key, []);
-    byNormName.get(key)!.push(acc);
-  }
-
-  // Merge groups whose normalised names are a prefix/suffix of each other
-  const keys = Array.from(byNormName.keys());
-  const merged = new Set<string>(); // keys that have been absorbed
-  for (let i = 0; i < keys.length; i++) {
-    if (merged.has(keys[i])) continue;
-    for (let j = i + 1; j < keys.length; j++) {
-      if (merged.has(keys[j])) continue;
-      const a = keys[i], b = keys[j];
-      // Fuzzy: one starts with the other, or they differ by ≤ 2 chars
-      const fuzzy = a.startsWith(b) || b.startsWith(a) ||
-        (Math.abs(a.length - b.length) <= 2 && (a.includes(b) || b.includes(a)));
-      if (fuzzy) {
-        // Merge j into i — keep the one with a picture or longer name
-        const iMembers = byNormName.get(keys[i])!;
-        const jMembers = byNormName.get(keys[j])!;
-        byNormName.set(keys[i], [...iMembers, ...jMembers]);
-        merged.add(keys[j]);
-      }
-    }
-  }
-
-  const metaGroups = Array.from(byNormName.entries())
-    .filter(([key]) => !merged.has(key))
-    .map(([, members]) => {
-      // Prefer the member with a profile picture, then FB, then first
-      const withPic = members.find(m => m.profile_picture);
-      const fb = members.find(m => m.platform === "facebook");
-      const representative = withPic ?? fb ?? members[0];
-      return {
-        id: `meta-${representative.id}`,
-        displayName: representative.name ?? representative.username ?? `Account #${representative.id}`,
-        picture: representative.profile_picture ?? null,
-        isActive: members.some(m => m.is_active),
-        members,
-        accountIds: members.map(m => m.id),
-        primaryId: representative.id,
-      };
-    })
-    // Sort: active first, then alphabetically
+  // Each unique Meta account becomes its own group
+  const metaGroups = uniqueMeta
+    .map(acc => ({
+      id: `meta-${acc.id}`,
+      displayName: acc.name ?? acc.username ?? `Account #${acc.id}`,
+      adAccountId: acc.platform_account_id ?? null,
+      picture: acc.profile_picture ?? null,
+      isActive: acc.is_active,
+      members: [acc],
+      accountIds: [acc.id],
+      primaryId: acc.id,
+    }))
     .sort((a, b) => {
       if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
       return a.displayName.localeCompare(b.displayName);
     });
 
-  return { metaGroups, otherAccounts };
+  // Deduplicate other platforms by platform_account_id too
+  const seenOtherIds = new Map<string, AdAccount>();
+  const uniqueOther: AdAccount[] = [];
+  for (const acc of otherAccounts) {
+    const pid = acc.platform_account_id?.trim();
+    if (pid) {
+      if (!seenOtherIds.has(pid)) {
+        seenOtherIds.set(pid, acc);
+        uniqueOther.push(acc);
+      }
+    } else {
+      uniqueOther.push(acc);
+    }
+  }
+
+  return { metaGroups, otherAccounts: uniqueOther };
 }
 
 // ─── Avatar component ─────────────────────────────────────────────────────────
@@ -192,10 +174,10 @@ export function AdAccountSelector({
 
   // Resolve trigger display
   const triggerInfo = (() => {
-    if (value.type === "all" || value.type === "group") {
-      // Find the group that matches
+    if (value.type === "group") {
       const grp = metaGroups.find(g =>
-        value.type === "group" && g.accountIds.every(id => (value as { accountIds: number[] }).accountIds.includes(id))
+        g.accountIds.length === value.accountIds.length &&
+        g.accountIds.every(id => value.accountIds.includes(id))
       ) ?? metaGroups[0] ?? null;
       if (grp) return { name: grp.displayName, picture: grp.picture, isActive: grp.isActive };
     }
@@ -203,7 +185,6 @@ export function AdAccountSelector({
       const acc = accounts.find(a => a.id === value.accountId);
       if (acc) return { name: acc.name ?? acc.username ?? `#${acc.id}`, picture: acc.profile_picture ?? null, isActive: acc.is_active };
     }
-    // Default: first Meta group
     const first = metaGroups[0];
     if (first) return { name: first.displayName, picture: first.picture, isActive: first.isActive };
     return { name: "Select Account", picture: null, isActive: false };
@@ -251,14 +232,13 @@ export function AdAccountSelector({
         ) : (
           <div style={{ position: "relative", flexShrink: 0 }}>
             <Avatar src={triggerInfo.picture} name={triggerInfo.name} size={20} />
-            {/* Meta badge */}
+            {/* Meta badge — no background */}
             <div style={{
               position: "absolute", bottom: -3, right: -3,
-              width: 12, height: 12, borderRadius: "50%",
-              backgroundColor: "#0a0a0a",
+              width: 12, height: 12,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <MetaLogo size={10} />
+              <MetaLogo size={11} />
             </div>
           </div>
         )}
@@ -287,7 +267,7 @@ export function AdAccountSelector({
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 9999,
-          minWidth: 260, maxWidth: 340,
+          minWidth: 280, maxWidth: 360,
           backgroundColor: "#171717",
           border: "1px solid #262626",
           borderRadius: 10,
@@ -308,9 +288,7 @@ export function AdAccountSelector({
               }}>
                 Meta Ads
               </span>
-              <span style={{
-                marginLeft: "auto", fontSize: 10, color: "#525252",
-              }}>
+              <span style={{ marginLeft: "auto", fontSize: 10, color: "#525252" }}>
                 {metaGroups.length} account{metaGroups.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -320,7 +298,6 @@ export function AdAccountSelector({
           <div style={{ maxHeight: 340, overflowY: "auto" }}>
             {metaGroups.map((grp) => {
               const selected = isGroupSelected(grp);
-
               return (
                 <button
                   key={grp.id}
@@ -339,21 +316,19 @@ export function AdAccountSelector({
                   onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
                 >
-                  {/* Avatar with Meta badge */}
+                  {/* Avatar with Meta badge — no background circle */}
                   <div style={{ position: "relative", flexShrink: 0 }}>
-                    <Avatar src={grp.picture} name={grp.displayName} size={32} />
+                    <Avatar src={grp.picture} name={grp.displayName} size={36} />
                     <div style={{
-                      position: "absolute", bottom: -3, right: -3,
-                      width: 14, height: 14, borderRadius: "50%",
-                      backgroundColor: "#171717",
+                      position: "absolute", bottom: -2, right: -4,
+                      width: 14, height: 14,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      border: "1px solid #262626",
                     }}>
-                      <MetaLogo size={10} />
+                      <MetaLogo size={13} />
                     </div>
                   </div>
 
-                  {/* Info */}
+                  {/* Info: name + Ad Account ID */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{
                       fontSize: 12, fontWeight: 600, color: "#ffffff",
@@ -361,8 +336,8 @@ export function AdAccountSelector({
                     }}>
                       {grp.displayName}
                     </p>
-                    <p style={{ fontSize: 10, color: "#525252", margin: 0, marginTop: 2 }}>
-                      Meta Ads
+                    <p style={{ fontSize: 10, color: "#525252", margin: 0, marginTop: 2, fontFamily: "monospace" }}>
+                      {grp.adAccountId ? `ID: ${grp.adAccountId}` : "Meta Ads"}
                     </p>
                   </div>
 
@@ -410,7 +385,7 @@ export function AdAccountSelector({
                       onMouseEnter={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1f1f1f"; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = selected ? "rgba(230,32,32,0.07)" : "transparent"; }}
                     >
-                      <Avatar src={acc.profile_picture} name={acc.name ?? acc.platform} size={30} />
+                      <Avatar src={acc.profile_picture} name={acc.name ?? acc.platform} size={36} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{
                           fontSize: 12, fontWeight: 500, color: "#e5e5e5",
@@ -418,8 +393,8 @@ export function AdAccountSelector({
                         }}>
                           {acc.name ?? acc.username ?? `Account #${acc.id}`}
                         </p>
-                        <p style={{ fontSize: 10, color: "#737373", margin: 0, marginTop: 1, textTransform: "capitalize" }}>
-                          {acc.platform}
+                        <p style={{ fontSize: 10, color: "#525252", margin: 0, marginTop: 1, fontFamily: "monospace" }}>
+                          {acc.platform_account_id ? `ID: ${acc.platform_account_id}` : acc.platform}
                         </p>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -438,7 +413,7 @@ export function AdAccountSelector({
             {/* Empty state */}
             {totalGroups === 0 && (
               <div style={{ padding: "20px 16px", textAlign: "center" }}>
-                <p style={{ fontSize: 12, color: "#737373", margin: 0 }}>No accounts connected</p>
+                <p style={{ fontSize: 12, color: "#737373", margin: 0 }}>No ad accounts connected</p>
                 <p style={{ fontSize: 11, color: "#525252", margin: "4px 0 0" }}>
                   Connect your ad accounts in Connections
                 </p>
