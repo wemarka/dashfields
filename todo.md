@@ -3273,3 +3273,8 @@
 
 ## 🔄 Replace Zap with Dashfields Icon
 - [x] Replace Zap icon in Topbar with actual Dashfields SVG icon paths
+
+## 🔄 Topbar Logo — Remove bg/text, animate icon color
+- [x] Remove background box from logo icon
+- [x] Remove "Dashfields" text from Topbar
+- [x] Apply white→brand-red color animation on SVG icon hover
