@@ -3368,3 +3368,8 @@
 - [x] Group Facebook + Instagram accounts with same name under one Meta-branded group
 - [x] Show profile_picture avatar for each account (or initial fallback)
 - [x] Meta group label shows Meta logo SVG icon
+
+## 🔄 AdAccountSelector Deduplication Fix
+- [x] Deduplicate by platform_account_id (same ad account ID = one entry)
+- [x] Fuzzy-match similar names (iLang Center / i Lang Center) to merge duplicates
+- [x] Show only unique Meta ad accounts (3 instead of 6)

@@ -49,38 +49,95 @@ interface AdAccountSelectorProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const META_PLATFORMS = new Set(["facebook", "instagram"]);
 
+/** Normalise a name for fuzzy comparison: lowercase, remove spaces/dots/dashes */
+function normName(name: string): string {
+  return name.toLowerCase().replace(/[\s.\-_]+/g, "");
+}
+
 /**
- * Build "Meta groups" by merging FB + IG accounts that share the same name.
- * Each group has a representative name, a list of member accounts, and a
- * combined "active" flag.
+ * Build "Meta groups" with 3-tier deduplication:
+ * 1. Same platform_account_id  → same account
+ * 2. Exact normalised name match → same account
+ * 3. Fuzzy name match (one is a prefix/suffix of the other) → same account
  */
 function buildMetaGroups(accounts: AdAccount[]) {
   const metaAccounts = accounts.filter(a => META_PLATFORMS.has(a.platform));
   const otherAccounts = accounts.filter(a => !META_PLATFORMS.has(a.platform));
 
-  // Group by normalised name
-  const byName = new Map<string, AdAccount[]>();
+  // Step 1: Deduplicate by platform_account_id (same ad account ID = one entry)
+  const seenPlatformIds = new Map<string, AdAccount>();
+  const dedupedByPlatformId: AdAccount[] = [];
   for (const acc of metaAccounts) {
-    const key = (acc.name ?? acc.username ?? `#${acc.id}`).trim().toLowerCase();
-    if (!byName.has(key)) byName.set(key, []);
-    byName.get(key)!.push(acc);
+    const pid = acc.platform_account_id?.trim();
+    if (pid) {
+      if (!seenPlatformIds.has(pid)) {
+        seenPlatformIds.set(pid, acc);
+        dedupedByPlatformId.push(acc);
+      } else {
+        // Keep the one with a profile picture
+        const existing = seenPlatformIds.get(pid)!;
+        if (!existing.profile_picture && acc.profile_picture) {
+          seenPlatformIds.set(pid, acc);
+          const idx = dedupedByPlatformId.indexOf(existing);
+          if (idx !== -1) dedupedByPlatformId[idx] = acc;
+        }
+      }
+    } else {
+      dedupedByPlatformId.push(acc);
+    }
   }
 
-  const metaGroups = Array.from(byName.entries()).map(([, members]) => {
-    // Prefer FB account for the display name / picture
-    const fb = members.find(m => m.platform === "facebook") ?? members[0];
-    const ig = members.find(m => m.platform === "instagram");
-    return {
-      id: `meta-${fb.id}`,
-      displayName: fb.name ?? fb.username ?? `Account #${fb.id}`,
-      picture: fb.profile_picture ?? ig?.profile_picture ?? null,
-      isActive: members.some(m => m.is_active),
-      members,
-      accountIds: members.map(m => m.id),
-      // Primary account ID for single-account queries
-      primaryId: fb.id,
-    };
-  });
+  // Step 2 & 3: Group by exact normalised name, then merge fuzzy matches
+  const byNormName = new Map<string, AdAccount[]>();
+  for (const acc of dedupedByPlatformId) {
+    const key = normName(acc.name ?? acc.username ?? `#${acc.id}`);
+    if (!byNormName.has(key)) byNormName.set(key, []);
+    byNormName.get(key)!.push(acc);
+  }
+
+  // Merge groups whose normalised names are a prefix/suffix of each other
+  const keys = Array.from(byNormName.keys());
+  const merged = new Set<string>(); // keys that have been absorbed
+  for (let i = 0; i < keys.length; i++) {
+    if (merged.has(keys[i])) continue;
+    for (let j = i + 1; j < keys.length; j++) {
+      if (merged.has(keys[j])) continue;
+      const a = keys[i], b = keys[j];
+      // Fuzzy: one starts with the other, or they differ by ≤ 2 chars
+      const fuzzy = a.startsWith(b) || b.startsWith(a) ||
+        (Math.abs(a.length - b.length) <= 2 && (a.includes(b) || b.includes(a)));
+      if (fuzzy) {
+        // Merge j into i — keep the one with a picture or longer name
+        const iMembers = byNormName.get(keys[i])!;
+        const jMembers = byNormName.get(keys[j])!;
+        byNormName.set(keys[i], [...iMembers, ...jMembers]);
+        merged.add(keys[j]);
+      }
+    }
+  }
+
+  const metaGroups = Array.from(byNormName.entries())
+    .filter(([key]) => !merged.has(key))
+    .map(([, members]) => {
+      // Prefer the member with a profile picture, then FB, then first
+      const withPic = members.find(m => m.profile_picture);
+      const fb = members.find(m => m.platform === "facebook");
+      const representative = withPic ?? fb ?? members[0];
+      return {
+        id: `meta-${representative.id}`,
+        displayName: representative.name ?? representative.username ?? `Account #${representative.id}`,
+        picture: representative.profile_picture ?? null,
+        isActive: members.some(m => m.is_active),
+        members,
+        accountIds: members.map(m => m.id),
+        primaryId: representative.id,
+      };
+    })
+    // Sort: active first, then alphabetically
+    .sort((a, b) => {
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+      return a.displayName.localeCompare(b.displayName);
+    });
 
   return { metaGroups, otherAccounts };
 }
