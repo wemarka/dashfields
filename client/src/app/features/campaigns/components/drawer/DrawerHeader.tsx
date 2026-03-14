@@ -1,9 +1,10 @@
 /**
- * drawer/DrawerHeader.tsx — Elegant, minimal campaign drawer header.
+ * drawer/DrawerHeader.tsx — Clean, organized campaign drawer header.
  *
- * Two-row layout:
- *  Row 1: [Platform] Campaign Name  ·  Objective badge  ·  Status toggle  ·  [spacer]  CSV  Report
- *  Row 2: Budget pill  ·  Date preset tabs
+ * Three-row layout:
+ *  Row 1 (Title bar):  [Platform icon]  Campaign Name  ·  Objective badge  ·  [spacer]  CSV  Report  [X]
+ *  Row 2 (Meta bar):   Status toggle  ·  Budget pill  ·  Clone button
+ *  Row 3 (Preset bar): Date preset tabs (right-aligned)
  */
 
 import { Loader2, Copy, FileDown, Activity, TableIcon, X } from "lucide-react";
@@ -81,6 +82,23 @@ interface DrawerHeaderProps {
   fmtCurrency: (n: number) => string;
 }
 
+// ─── Shared button style ──────────────────────────────────────────────────────
+const actionBtnStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 5,
+  padding: "4px 10px",
+  borderRadius: 6,
+  border: "1px solid #333",
+  background: "#1e1e1e",
+  cursor: "pointer",
+  fontSize: 11,
+  color: "#a1a1aa",
+  transition: "color 0.15s, background 0.15s",
+  whiteSpace: "nowrap" as const,
+  flexShrink: 0,
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function DrawerHeader({
   campaign, datePreset, onDatePresetChange,
@@ -97,43 +115,105 @@ export function DrawerHeader({
     .replace(/\b\w/g, c => c.toUpperCase()) ?? "";
 
   return (
-    <div
-      className="shrink-0 bg-neutral-900"
-      style={{ borderBottom: "1px solid #2e2e2e" }}
-    >
-      {/* ── Row 1: Name + Status + Actions ── */}
+    <div className="shrink-0 bg-neutral-900" style={{ borderBottom: "1px solid #2a2a2a" }}>
+
+      {/* ══ Row 1: Campaign name + actions ══════════════════════════════════ */}
       <div
-        className="flex items-center gap-3 px-5 pr-14"
-        style={{ height: 52 }}
+        className="flex items-center gap-2.5 px-4"
+        style={{ height: 48, borderBottom: "1px solid #222" }}
       >
         {/* Platform icon */}
         <div className="shrink-0">
-          <PlatformLogo platform={campaign?.platform} size={20} />
+          <PlatformLogo platform={campaign?.platform} size={18} />
         </div>
 
         {/* Campaign name */}
-        <h2
-          className="text-sm font-semibold text-white truncate leading-none"
-          style={{ maxWidth: 240 }}
-        >
+        <h2 className="text-sm font-semibold text-white truncate flex-1 leading-none">
           {campaign?.name ?? "Campaign"}
         </h2>
 
         {/* Objective badge */}
         {objectiveLabel && (
-            <span
-              className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none"
-              style={{
-                background: "#2e2e2e",
-                color: "#a1a1aa",
-                borderRadius: 4,
-                padding: "3px 6px",
-              }}
-            >
-              {objectiveLabel}
-            </span>
+          <span
+            className="shrink-0 text-[10px] font-medium uppercase tracking-wider leading-none hidden sm:inline-flex"
+            style={{
+              background: "#252525",
+              color: "#737373",
+              borderRadius: 4,
+              padding: "3px 7px",
+              border: "1px solid #333",
+            }}
+          >
+            {objectiveLabel}
+          </span>
         )}
 
+        {/* Action buttons group */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+          {/* CSV */}
+          {onExportCsv && (
+            <button
+              onClick={onExportCsv}
+              disabled={isExportingCsv}
+              title="Export as CSV"
+              style={actionBtnStyle}
+              className="hover:!text-white hover:!bg-neutral-700 disabled:opacity-40 disabled:cursor-wait"
+            >
+              {isExportingCsv
+                ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" />
+                : <TableIcon style={{ width: 11, height: 11 }} />
+              }
+              <span>{isExportingCsv ? "..." : "CSV"}</span>
+            </button>
+          )}
+
+          {/* Report */}
+          <button
+            onClick={onExport}
+            disabled={isExporting}
+            title="Export report"
+            style={actionBtnStyle}
+            className="hover:!text-white hover:!bg-neutral-700 disabled:opacity-40 disabled:cursor-wait"
+          >
+            {isExporting
+              ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" />
+              : <FileDown style={{ width: 11, height: 11 }} />
+            }
+            <span>{isExporting ? "..." : "Report"}</span>
+          </button>
+
+          {/* Close */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Close (Esc)"
+              aria-label="Close campaign drawer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                border: "1px solid #333",
+                background: "transparent",
+                cursor: "pointer",
+                flexShrink: 0,
+                color: "#737373",
+              }}
+              className="hover:!text-white hover:!bg-neutral-700 transition-colors"
+            >
+              <X style={{ width: 13, height: 13 }} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ══ Row 2: Status + Budget + Clone ══════════════════════════════════ */}
+      <div
+        className="flex items-center gap-4 px-4"
+        style={{ height: 38, borderBottom: "1px solid #222" }}
+      >
         {/* Status toggle */}
         {canToggle && (
           <div className="flex items-center gap-2 shrink-0">
@@ -146,9 +226,9 @@ export function DrawerHeader({
               style={{
                 position: "relative",
                 display: "inline-flex",
-                height: 18,
-                width: 32,
-                borderRadius: 9,
+                height: 16,
+                width: 28,
+                borderRadius: 8,
                 border: "none",
                 cursor: isTogglingStatus ? "wait" : "pointer",
                 background: isActive ? "#22c55e" : "#404040",
@@ -161,9 +241,9 @@ export function DrawerHeader({
                 style={{
                   position: "absolute",
                   top: 2,
-                  left: isActive ? 14 : 2,
-                  width: 14,
-                  height: 14,
+                  left: isActive ? 12 : 2,
+                  width: 12,
+                  height: 12,
                   borderRadius: "50%",
                   background: "#fff",
                   boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
@@ -174,7 +254,7 @@ export function DrawerHeader({
                 }}
               >
                 {isTogglingStatus && (
-                  <Loader2 style={{ width: 8, height: 8, color: "#9ca3af" }} className="animate-spin" />
+                  <Loader2 style={{ width: 7, height: 7, color: "#9ca3af" }} className="animate-spin" />
                 )}
               </span>
             </button>
@@ -187,118 +267,56 @@ export function DrawerHeader({
           </div>
         )}
 
-        {/* Clone button */}
-        <button
-          onClick={onClone}
-          className="flex items-center gap-1.5 shrink-0 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-          style={{ padding: "4px 8px", borderRadius: 6, background: "transparent" }}
-          title="Clone campaign"
-        >
-          <Copy style={{ width: 12, height: 12 }} />
-          <span>Clone</span>
-        </button>
+        {/* Divider */}
+        {canToggle && <div style={{ width: 1, height: 16, background: "#2e2e2e", flexShrink: 0 }} />}
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Action buttons */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {onExportCsv && (
-            <button
-              onClick={onExportCsv}
-              disabled={isExportingCsv}
-              title="Export as CSV"
-              className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-40"
-              style={{
-                padding: "5px 10px",
-                borderRadius: 6,
-                border: "1px solid #404040",
-                background: "#2e2e2e",
-                cursor: isExportingCsv ? "wait" : "pointer",
-              }}
-            >
-              {isExportingCsv
-                ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />
-                : <TableIcon style={{ width: 12, height: 12 }} />
-              }
-              <span>{isExportingCsv ? "..." : "CSV"}</span>
-            </button>
-          )}
-
-          <button
-            onClick={onExport}
-            disabled={isExporting}
-            title="Export report"
-            className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-40"
-            style={{
-              padding: "5px 10px",
-              borderRadius: 6,
-              border: "1px solid #404040",
-              background: "#2e2e2e",
-              cursor: isExporting ? "wait" : "pointer",
-            }}
-          >
-            {isExporting
-              ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />
-              : <FileDown style={{ width: 12, height: 12 }} />
-            }
-            <span>{isExporting ? "..." : "Report"}</span>
-          </button>
-
-          {/* Close button */}
-          {onClose && (
-            <button
-              onClick={onClose}
-              title="Close"
-              aria-label="Close campaign drawer"
-              className="flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                border: "1px solid #404040",
-                background: "transparent",
-                cursor: "pointer",
-                flexShrink: 0,
-                marginLeft: 4,
-              }}
-            >
-              <X style={{ width: 14, height: 14 }} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Row 2: Budget + Date presets ── */}
-      <div
-        className="flex items-center justify-between px-5"
-        style={{ height: 38, borderTop: "1px solid #2e2e2e" }}
-      >
         {/* Budget */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Activity style={{ width: 11, height: 11, color: "#525252" }} />
           {campaign?.dailyBudget != null ? (
             <div className="flex items-center gap-1 text-xs text-neutral-400">
-              <Activity style={{ width: 12, height: 12, color: "#9ca3af" }} />
               <InlineBudgetEditor
                 value={campaign.dailyBudget}
                 onSave={onBudgetSave}
                 fmtMoney={fmtCurrency}
               />
-              <span style={{ color: "#737373" }}>/day</span>
+              <span style={{ color: "#525252" }}>/day</span>
             </div>
           ) : (
-            <span className="text-xs text-neutral-500">—</span>
+            <span className="text-xs" style={{ color: "#525252" }}>No budget set</span>
           )}
         </div>
 
-        {/* Date preset tabs */}
+        {/* Divider */}
+        <div style={{ width: 1, height: 16, background: "#2e2e2e", flexShrink: 0 }} />
+
+        {/* Clone */}
+        <button
+          onClick={onClone}
+          className="flex items-center gap-1.5 shrink-0 text-xs transition-colors"
+          style={{ color: "#525252", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#a1a1aa")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#525252")}
+          title="Clone campaign"
+        >
+          <Copy style={{ width: 11, height: 11 }} />
+          <span>Clone</span>
+        </button>
+      </div>
+
+      {/* ══ Row 3: Date preset tabs ══════════════════════════════════════════ */}
+      <div
+        className="flex items-center justify-end px-4"
+        style={{ height: 36 }}
+      >
         <div
           className="flex items-center"
           style={{
-            background: "#2e2e2e",
+            background: "#1e1e1e",
             borderRadius: 7,
             padding: 2,
             gap: 1,
+            border: "1px solid #2a2a2a",
           }}
         >
           {DATE_PRESETS.map(({ label, value }) => {
@@ -312,9 +330,9 @@ export function DrawerHeader({
                   borderRadius: 5,
                   fontSize: 11,
                   fontWeight: active ? 600 : 400,
-                  color: active ? "#ffffff" : "#737373",
+                  color: active ? "#ffffff" : "#525252",
                   background: active ? "#ef3735" : "transparent",
-                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.15)" : "none",
                   border: "none",
                   cursor: "pointer",
                   transition: "all 0.15s",
@@ -327,6 +345,7 @@ export function DrawerHeader({
           })}
         </div>
       </div>
+
     </div>
   );
 }
