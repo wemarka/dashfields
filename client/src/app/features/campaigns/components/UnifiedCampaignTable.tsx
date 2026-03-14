@@ -56,6 +56,7 @@ function UnifiedCampaignTableInner({
   const [visibleCols, setVisibleCols] = useState<Set<string>>(() =>
     new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key))
   );
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
 
   const handleSort = useCallback((key: SortKey) => {
     setSortKey(prev => {
@@ -160,11 +161,13 @@ function UnifiedCampaignTableInner({
     const isToggling = statusTogglePending === c.id;
 
     switch (col.key) {
-      case "name":
+      case "name": {
+        const isHovered = hoveredRowId === c.id;
+        const isPinned = pinnedIds?.has(c.id);
         return (
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              {pinnedIds?.has(c.id) && (
+              {isPinned && (
                 <Pin className="w-3 h-3 flex-shrink-0" style={{ color: "#e62020" }} />
               )}
               <p
@@ -176,10 +179,48 @@ function UnifiedCampaignTableInner({
               >
                 {c.name}
               </p>
+              {/* Inline hover actions */}
+              {isHovered && (
+                <div className="flex items-center gap-0.5 ml-1" style={{ flexShrink: 0 }}>
+                  {onEdit && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onEdit(c); }}
+                          className="flex items-center justify-center w-5 h-5 rounded transition-colors"
+                          style={{ color: "#737373", backgroundColor: "transparent" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333"; (e.currentTarget as HTMLButtonElement).style.color = "#ffffff"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#737373"; }}
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">Edit Campaign</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {onPin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPin(c); }}
+                          className="flex items-center justify-center w-5 h-5 rounded transition-colors"
+                          style={{ color: isPinned ? "#e62020" : "#737373", backgroundColor: "transparent" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#333"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#ff4444" : "#ffffff"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = isPinned ? "#e62020" : "#737373"; }}
+                        >
+                          {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">{isPinned ? "Unpin" : "Pin to top"}</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              )}
             </div>
             {c.objective && <p className="truncate mt-0.5" style={{ fontSize: 11, color: "#737373" }}>{c.objective}</p>}
           </div>
         );
+      }
       case "status":
         return (
           <div className="flex items-center gap-1.5">
@@ -389,10 +430,12 @@ function UnifiedCampaignTableInner({
                       transition: "background-color 0.1s",
                     }}
                     onMouseEnter={e => {
+                      setHoveredRowId(c.id);
                       if (!isCampaignSelected && !isSelected)
                         (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#222222";
                     }}
                     onMouseLeave={e => {
+                      setHoveredRowId(null);
                       if (!isCampaignSelected && !isSelected)
                         (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#171717";
                     }}
