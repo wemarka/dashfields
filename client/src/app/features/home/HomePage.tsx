@@ -1,11 +1,11 @@
 /**
  * HomePage — Creative hub landing page.
- * Faithful React port of the reference "Dash Studios Home" design.
- * Brand colors: #E62020 (brand-red) replaces #c8ff00 (lime accent).
- * Fonts: Syne (headings) + Inter (body).
- * Sections: Hero (What would you create today?) → What's New → Recent Creations
+ * Brand colors: #e62020 (brand-red) throughout.
+ * Font: Inter (app default) — no Syne.
+ * Sections: Hero Banner → What would you create today? → What's New → Recent Creations
+ * Data: real stats from trpc.homeStats.quickSnapshot + trpc.homeStats.recentCreations
  */
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { trpc } from "@/core/lib/trpc";
@@ -74,7 +74,7 @@ const CREATE_TOOLS = [
   },
 ];
 
-// ─── What's New Data ─────────────────────────────────────────────────────────
+// ─── What's New Data (static changelog — no mock metrics) ───────────────────
 const NEWS_ITEMS = [
   {
     id: 1,
@@ -90,7 +90,7 @@ const NEWS_ITEMS = [
   {
     id: 2,
     tag: "Update",
-    tagColor: "bg-[#3b8eff] text-white",
+    tagColor: "bg-[#e62020] text-white",
     title: "Dash Studios — Video Generation with Kling 2.5",
     excerpt:
       "Create cinematic ad videos from a single text prompt. Powered by Kling 2.5 Turbo for ultra-realistic motion.",
@@ -101,7 +101,7 @@ const NEWS_ITEMS = [
   {
     id: 3,
     tag: "Update",
-    tagColor: "bg-[#3b8eff] text-white",
+    tagColor: "bg-[#e62020] text-white",
     title: "Multi-Platform Campaign Wizard — Now with TikTok",
     excerpt:
       "Launch campaigns across Facebook, Instagram, TikTok, and LinkedIn simultaneously with one unified workflow.",
@@ -122,59 +122,12 @@ const NEWS_ITEMS = [
   },
 ];
 
-// ─── Recent Creations Data ───────────────────────────────────────────────────
-const CREATIONS = [
-  {
-    id: 1,
-    featured: true,
-    title: "Summer Sale — TikTok Video Campaign",
-    type: "video",
-    author: "A",
-    platform: "TikTok",
-    views: "24.3K",
-    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
-  },
-  {
-    id: 2,
-    featured: false,
-    title: "Brand Awareness — Instagram Carousel",
-    type: "image",
-    author: "A",
-    platform: "Instagram",
-    views: "8.1K",
-    img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&q=80",
-  },
-  {
-    id: 3,
-    featured: false,
-    title: "Product Launch — Facebook Ad",
-    type: "image",
-    author: "A",
-    platform: "Facebook",
-    views: "12.7K",
-    img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&q=80",
-  },
-  {
-    id: 4,
-    featured: false,
-    title: "Retargeting — LinkedIn Sponsored",
-    type: "image",
-    author: "A",
-    platform: "LinkedIn",
-    views: "5.4K",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80",
-  },
-  {
-    id: 5,
-    featured: false,
-    title: "Flash Sale — Story Ad",
-    type: "video",
-    author: "A",
-    platform: "Instagram",
-    views: "19.2K",
-    img: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&q=80",
-  },
-];
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function fmtNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function HomePage() {
@@ -184,12 +137,37 @@ export default function HomePage() {
 
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
+  // Real data from server
+  const { data: snapshot } = trpc.homeStats.quickSnapshot.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+  const { data: creations } = trpc.homeStats.recentCreations.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+
+  // Banner stats derived from real data
+  const bannerStats = [
+    {
+      label: "Campaigns",
+      val: snapshot ? String(snapshot.activeCampaigns) : "—",
+      sub: "Active",
+    },
+    {
+      label: "Impressions",
+      val: snapshot ? fmtNumber(snapshot.totalImpressions) : "—",
+      sub: "Total",
+    },
+    {
+      label: "Click Rate",
+      val: snapshot ? `${snapshot.clickRate}%` : "—",
+      sub: "Avg CTR",
+    },
+  ];
+
   return (
     <>
-      {/* ── Inline styles for Syne font + animations ── */}
+      {/* ── Inline styles for animations only (no Syne, no noise) ── */}
       <style>{`
-        .syne { font-family: 'Syne', sans-serif; }
-
         /* Scroll reveal */
         .sr-reveal {
           opacity: 0;
@@ -296,7 +274,6 @@ export default function HomePage() {
           margin: 0 60px;
         }
 
-
         /* Hero Banner animations */
         @keyframes banner-float {
           0%,100% { transform: scale(1.03) translateY(0px); }
@@ -336,16 +313,19 @@ export default function HomePage() {
           color: #e8eaed !important;
         }
 
-        /* Noise overlay */
-        .noise-overlay {
-          position: fixed; inset: 0; pointer-events: none; z-index: 9999;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        /* Empty creations placeholder */
+        .creations-empty {
+          grid-column: 1 / -1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 60px 24px;
+          gap: 12px;
+          color: #555d68;
+          font-size: 14px;
         }
       `}</style>
-
-      {/* Noise overlay */}
-      <div className="noise-overlay" aria-hidden />
-
 
       {/* ══════ HERO BANNER ══════ */}
       <section
@@ -361,6 +341,7 @@ export default function HomePage() {
         }}
         onClick={() => setLocation("/studios")}
       >
+        {/* Floating background image */}
         <div
           className="banner-bg-img"
           style={{
@@ -370,19 +351,24 @@ export default function HomePage() {
             transformOrigin: "center",
           }}
         />
+        {/* Dark gradient overlay */}
         <div
           style={{
             position: "absolute", inset: 0,
             background: "linear-gradient(105deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.65) 40%, rgba(0,0,0,.2) 70%, transparent 100%)",
           }}
         />
+        {/* Brand-red glow (top-left) */}
         <div
+          aria-hidden
           style={{
             position: "absolute", top: "-40%", left: "-10%",
             width: 500, height: 500, pointerEvents: "none",
             background: "radial-gradient(circle, rgba(230,32,32,.12) 0%, transparent 65%)",
           }}
         />
+
+        {/* Text content */}
         <div
           style={{
             position: "relative", zIndex: 2,
@@ -406,7 +392,7 @@ export default function HomePage() {
             ✦ NEW IN DASH STUDIOS
           </div>
           <h2
-            className="syne banner-title"
+            className="banner-title"
             style={{
               fontWeight: 800,
               fontSize: "clamp(26px, 3vw, 40px)",
@@ -457,6 +443,8 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {/* Real stats cards (right side) */}
         <div
           style={{
             position: "absolute", right: 48, top: "50%",
@@ -465,11 +453,7 @@ export default function HomePage() {
             zIndex: 2,
           }}
         >
-          {[
-            { label: "Campaigns", val: "4", sub: "Active" },
-            { label: "Reach", val: "124K", sub: "This month" },
-            { label: "ROI", val: "3.2x", sub: "Avg return" },
-          ].map((stat) => (
+          {bannerStats.map((stat) => (
             <div
               key={stat.label}
               style={{
@@ -483,7 +467,6 @@ export default function HomePage() {
               }}
             >
               <div
-                className="syne"
                 style={{ fontSize: 22, fontWeight: 800, color: "#e8eaed", lineHeight: 1 }}
               >
                 {stat.val}
@@ -497,12 +480,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════ HERO ══════ */}
+      {/* ══════ HERO — What would you create today? ══════ */}
       <section
         className="relative overflow-hidden"
         style={{ padding: "72px 60px 80px", minHeight: "90vh", display: "flex", flexDirection: "column", justifyContent: "center" }}
       >
-        {/* Glow blobs */}
+        {/* Brand-red glow blobs — no blue */}
         <div
           aria-hidden
           style={{
@@ -516,7 +499,7 @@ export default function HomePage() {
           style={{
             position: "absolute", bottom: "-30%", left: "-15%",
             width: 700, height: 700, pointerEvents: "none",
-            background: "radial-gradient(circle, rgba(59,142,255,.04) 0%, transparent 60%)",
+            background: "radial-gradient(circle, rgba(230,32,32,.04) 0%, transparent 60%)",
           }}
         />
 
@@ -540,7 +523,7 @@ export default function HomePage() {
 
         {/* Headline */}
         <h1
-          className="syne sr-reveal sr-d2"
+          className="sr-reveal sr-d2"
           style={{
             fontWeight: 800,
             fontSize: "clamp(48px, 6vw, 82px)",
@@ -595,7 +578,7 @@ export default function HomePage() {
                 <div
                   style={{
                     position: "absolute", top: 12, right: 12, zIndex: 5,
-                    background: tool.badge === "HOT" ? "#e62020" : "#e62020",
+                    background: "#e62020",
                     color: "#fff", fontSize: 10, fontWeight: 700,
                     padding: "3px 8px", borderRadius: 4,
                     letterSpacing: "0.5px", textTransform: "uppercase",
@@ -623,7 +606,6 @@ export default function HomePage() {
               {/* Body */}
               <div style={{ padding: "16px 18px 18px" }}>
                 <div
-                  className="syne"
                   style={{
                     fontWeight: 700, fontSize: 15, marginBottom: 4,
                     display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -656,7 +638,6 @@ export default function HomePage() {
           }}
         >
           <h2
-            className="syne"
             style={{
               fontWeight: 800,
               fontSize: "clamp(32px, 4vw, 48px)",
@@ -732,7 +713,6 @@ export default function HomePage() {
               {/* Body */}
               <div style={{ padding: "18px 22px 22px" }}>
                 <div
-                  className="syne"
                   style={{ fontWeight: 700, fontSize: 18, marginBottom: 8, lineHeight: 1.3, color: "#e8eaed" }}
                 >
                   {item.title}
@@ -765,7 +745,6 @@ export default function HomePage() {
           }}
         >
           <h2
-            className="syne"
             style={{
               fontWeight: 800,
               fontSize: "clamp(32px, 4vw, 48px)",
@@ -791,104 +770,146 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Masonry grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gridTemplateRows: "auto auto",
-            gap: 16,
-          }}
-        >
-          {CREATIONS.map((c, i) => (
-            <div
-              key={c.id}
-              className={`creation-card shimmer-host sr-reveal sr-d${Math.min(i + 1, 6)}`}
-              style={{
-                background: "#131619", border: "1px solid #222830",
-                borderRadius: 14, overflow: "hidden",
-                cursor: "pointer", position: "relative",
-                gridColumn: c.featured ? "span 2" : undefined,
-                gridRow: c.featured ? "span 2" : undefined,
-              }}
-            >
-              {/* Image */}
+        {/* Grid — real data or empty state */}
+        {creations && creations.length > 0 ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateRows: "auto auto",
+              gap: 16,
+            }}
+          >
+            {creations.map((c, i) => (
               <div
+                key={c.id}
+                className={`creation-card shimmer-host sr-reveal sr-d${Math.min(i + 1, 6)}`}
                 style={{
-                  width: "100%", height: "100%",
-                  minHeight: c.featured ? 430 : 200,
-                  backgroundImage: `url('${c.img}')`,
-                  backgroundSize: "cover", backgroundPosition: "center",
-                  position: "relative",
+                  background: "#131619", border: "1px solid #222830",
+                  borderRadius: 14, overflow: "hidden",
+                  cursor: "pointer", position: "relative",
+                  gridColumn: i === 0 ? "span 2" : undefined,
+                  gridRow: i === 0 ? "span 2" : undefined,
                 }}
               >
+                {/* Image */}
                 <div
                   style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to top, rgba(11,13,15,.9) 0%, rgba(11,13,15,.1) 40%, transparent 60%)",
-                  }}
-                />
-              </div>
-
-              {/* Play button (video) */}
-              {c.type === "video" && (
-                <div
-                  className="play-btn"
-                  style={{
-                    position: "absolute", top: "50%", left: "50%",
-                    transform: "translate(-50%,-50%) scale(.85)",
-                    width: 52, height: 52,
-                    background: "rgba(255,255,255,.12)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: "50%",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    zIndex: 3, opacity: 0,
-                    transition: "opacity 300ms ease, transform 300ms cubic-bezier(.165,.84,.44,1)",
+                    width: "100%", height: "100%",
+                    minHeight: i === 0 ? 430 : 200,
+                    backgroundImage: `url('${c.url}')`,
+                    backgroundSize: "cover", backgroundPosition: "center",
+                    position: "relative",
                   }}
                 >
-                  <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "white", marginLeft: 3 }}>
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              )}
-
-              {/* Overlay info */}
-              <div
-                style={{
-                  position: "absolute", bottom: 0, left: 0, right: 0,
-                  padding: 20, zIndex: 2,
-                }}
-              >
-                <div
-                  className="syne"
-                  style={{
-                    fontWeight: 700,
-                    fontSize: c.featured ? 22 : 15,
-                    marginBottom: c.featured ? 6 : 4,
-                    color: "#e8eaed",
-                  }}
-                >
-                  {c.title}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: "#555d68" }}>
                   <div
                     style={{
-                      width: 22, height: 22, borderRadius: "50%",
-                      background: "#1a1e22", display: "flex",
-                      alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 700, color: "#e62020",
+                      position: "absolute", inset: 0,
+                      background: "linear-gradient(to top, rgba(11,13,15,.9) 0%, rgba(11,13,15,.1) 40%, transparent 60%)",
+                    }}
+                  />
+                </div>
+
+                {/* Play button (video) */}
+                {c.type === "video" && (
+                  <div
+                    className="play-btn"
+                    style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      transform: "translate(-50%,-50%) scale(.85)",
+                      width: 52, height: 52,
+                      background: "rgba(255,255,255,.12)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: "50%",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      zIndex: 3, opacity: 0,
+                      transition: "opacity 300ms ease, transform 300ms cubic-bezier(.165,.84,.44,1)",
                     }}
                   >
-                    {c.author}
+                    <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "white", marginLeft: 3 }}>
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
                   </div>
-                  <span>{c.platform}</span>
-                  <span style={{ color: "#222830" }}>•</span>
-                  <span>{c.views} views</span>
+                )}
+
+                {/* Overlay info */}
+                <div
+                  style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0,
+                    padding: 20, zIndex: 2,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: i === 0 ? 22 : 15,
+                      marginBottom: i === 0 ? 6 : 4,
+                      color: "#e8eaed",
+                    }}
+                  >
+                    {c.label}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: "#555d68" }}>
+                    <div
+                      style={{
+                        width: 22, height: 22, borderRadius: "50%",
+                        background: "#1a1e22", display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        fontSize: 10, fontWeight: 700, color: "#e62020",
+                      }}
+                    >
+                      {user?.name?.[0]?.toUpperCase() ?? "A"}
+                    </div>
+                    <span>{c.type === "video" ? "Video" : "Image"}</span>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          /* Empty state — no creations yet */
+          <div
+            className="sr-reveal"
+            style={{
+              background: "#131619", border: "1px solid #222830",
+              borderRadius: 14, padding: "60px 24px",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              gap: 14, textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: "50%",
+                background: "rgba(230,32,32,.08)",
+                border: "1px solid rgba(230,32,32,.18)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <svg viewBox="0 0 24 24" style={{ width: 24, height: 24, fill: "#e62020" }}>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
             </div>
-          ))}
-        </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "#e8eaed" }}>
+              No creations yet
+            </div>
+            <div style={{ fontSize: 13, color: "#555d68", maxWidth: 320 }}>
+              Start by generating images or videos in Dash Studios, and they'll appear here.
+            </div>
+            <button
+              onClick={() => setLocation("/studios")}
+              style={{
+                marginTop: 8,
+                background: "#e62020", color: "#fff",
+                border: "none", borderRadius: 8,
+                padding: "10px 24px", fontSize: 14, fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Open Dash Studios →
+            </button>
+          </div>
+        )}
       </section>
     </>
   );

@@ -3302,3 +3302,11 @@
 
 ## 🎬 Home Hero Banner
 - [x] Add animated Hero Banner at top of Home page (bg image, badge, headline, CTA)
+
+## 🏠 Home Page Polish
+- [x] Remove noise overlay from Home page background
+- [x] Change all blue glows to brand-red (#e62020)
+- [x] Switch all Syne font usage to Inter (app font)
+- [x] Replace mock campaign stats with real tRPC data
+- [x] Replace mock Recent Creations with real campaign/studio data
+- [x] Replace mock What's New with real data or remove static content
