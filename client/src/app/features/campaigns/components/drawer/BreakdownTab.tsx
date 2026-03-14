@@ -233,9 +233,9 @@ function BreakdownSection({
           >
             {/* Table header */}
             <div
-              className="grid text-[10px] font-semibold uppercase tracking-wider px-3 py-2"
-              style={{
-                gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+            className="grid text-[10px] font-semibold uppercase tracking-wider px-3 py-2"
+            style={{
+              gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
                 backgroundColor: "#1f1f1f",
                 color: "#737373",
                 borderBottom: "1px solid #262626",
@@ -255,7 +255,7 @@ function BreakdownSection({
                 key={item.label}
                 className="grid items-center px-3 py-2.5 transition-colors"
                 style={{
-                  gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+                  gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
                   backgroundColor: idx % 2 === 0 ? "#171717" : "#1a1a1a",
                   borderBottom: idx < displayRows.length - 1 ? "1px solid #1f1f1f" : "none",
                 }}
@@ -342,7 +342,7 @@ function BreakdownSection({
             <div
               className="grid items-center px-3 py-2.5"
               style={{
-                gridTemplateColumns: "1fr 80px 70px 70px 60px 70px",
+                gridTemplateColumns: "1fr 56px 76px 64px 60px 80px",
                 backgroundColor: "#1f1f1f",
                 borderTop: "1px solid #262626",
               }}
