@@ -3542,3 +3542,8 @@
 - [x] AlertDialog overlay → bg-background/60 backdrop-blur-sm
 - [x] ContextMenu → bg-card border-border, focus:bg-muted/60 text-white
 - [x] NavigationMenu → bg-card border-border
+
+## 🔄 UI Consistency — Menubar/HoverCard/Accordion
+- [x] Menubar → bg-card border-border, items focus:bg-muted/60 text-white
+- [x] HoverCard → bg-card border-border
+- [x] Accordion trigger → hover:bg-muted/30 (remove hover:underline)
