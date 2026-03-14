@@ -8,6 +8,7 @@ import {
   MetaCampaign,
   getMetaCampaigns,
   getCampaignInsights,
+  getCampaignInsightsByTimeRange,
   getCampaignDailyInsights,
   getCampaignBreakdown,
   createMetaCampaign,
@@ -1039,6 +1040,98 @@ export const metaCampaignsRouter = router({
       // Invalidate cache
       metaCache.invalidatePrefix(`campaignInsights:${ctx.user.id}`);
       return { success: true };
+    }),
+
+  /** Get campaign insights for the PREVIOUS equivalent period (for % change badges) */
+  campaignPeriodComparison: protectedProcedure
+    .input(z.object({
+      datePreset: datePresetEnum.default("last_30d"),
+      accountId: z.number().optional(),
+      accountIds: z.array(z.number()).optional(),
+      workspaceId: z.number().int().positive().optional(),
+      limit: z.number().min(1).max(50).default(20),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Helper: derive previous period date range from datePreset
+      const getPreviousPeriod = (preset: string): { since: string; until: string } => {
+        const now = new Date();
+        const fmt = (d: Date) => d.toISOString().split("T")[0];
+        const sub = (d: Date, days: number) => { const r = new Date(d); r.setDate(r.getDate() - days); return r; };
+        const presetDays: Record<string, number> = {
+          today: 1, yesterday: 1, last_7d: 7, last_14d: 14, last_30d: 30,
+          last_90d: 90, this_month: 30, last_month: 30,
+        };
+        const days = presetDays[preset] ?? 30;
+        const until = sub(now, days + 1);
+        const since = sub(now, days * 2);
+        return { since: fmt(since), until: fmt(until) };
+      };
+
+      const { since, until } = getPreviousPeriod(input.datePreset);
+
+      const sumActions = (actions: Array<{ action_type: string; value: string }> | undefined, keywords: string[]): number => {
+        if (!actions) return 0;
+        return actions
+          .filter(a => keywords.some(k => a.action_type.includes(k)))
+          .reduce((sum, a) => sum + Number(a.value ?? 0), 0);
+      };
+
+      const mapInsights = (insights: Awaited<ReturnType<typeof getCampaignInsightsByTimeRange>>) =>
+        insights.map(d => ({
+          campaignId: d.campaign_id ?? "",
+          impressions: Number(d.impressions ?? 0),
+          clicks: Number(d.clicks ?? 0),
+          spend: Number(d.spend ?? 0),
+          ctr: Number(d.ctr ?? 0),
+          leads: sumActions(d.actions, ["onsite_conversion.lead_grouped"]),
+          calls: sumActions(d.actions, [
+            "click_to_call_call_confirm", "click_to_call_native_call_placed",
+            "click_to_call_native_20s_call_connect", "call_confirm_grouped",
+          ]),
+          messages: sumActions(d.actions, ["onsite_conversion.messaging_conversation_started_7d"]),
+        }));
+
+      const cacheKey = metaCache.key("periodComparison", ctx.user.id,
+        input.accountIds ? input.accountIds.join(",") : input.accountId,
+        input.datePreset, input.limit, input.workspaceId);
+
+      return metaCache.getOrFetch(cacheKey, CACHE_TTL.CAMPAIGN_INSIGHTS, async () => {
+        if (input.accountIds && input.accountIds.length > 0) {
+          const sb = getSupabase();
+          const { data: acctRows } = await sb
+            .from("social_accounts")
+            .select("access_token, platform_account_id, platform")
+            .eq("user_id", ctx.user.id)
+            .in("id", input.accountIds)
+            .eq("is_active", true);
+          const adAccounts = (acctRows ?? []).filter(
+            d => d.access_token && d.platform_account_id && d.platform === "facebook"
+          );
+          if (adAccounts.length === 0) return [];
+          const results = await Promise.allSettled(
+            adAccounts.map(async acct => {
+              const insights = await getCampaignInsightsByTimeRange(acct.platform_account_id, acct.access_token, since, until, input.limit);
+              return mapInsights(insights);
+            })
+          );
+          return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+        }
+        if (input.accountId) {
+          const conn = await getMetaToken(ctx.user.id, input.accountId, input.workspaceId);
+          if (!conn) return [];
+          const insights = await getCampaignInsightsByTimeRange(conn.adAccountId, conn.token, since, until, input.limit);
+          return mapInsights(insights);
+        }
+        const allConns = await getAllMetaTokens(ctx.user.id, input.workspaceId);
+        if (allConns.length === 0) return [];
+        const results = await Promise.allSettled(
+          allConns.map(async conn => {
+            const insights = await getCampaignInsightsByTimeRange(conn.adAccountId, conn.token, since, until, input.limit);
+            return mapInsights(insights);
+          })
+        );
+        return results.filter((r): r is PromiseFulfilledResult<any[]> => r.status === "fulfilled").flatMap(r => r.value);
+      });
     }),
 
   /** Get video source URL from Meta Graph API for a given video_id */

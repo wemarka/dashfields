@@ -51,6 +51,16 @@ export interface UnifiedCampaignTableProps {
   onPin?: (campaign: UnifiedCampaign) => void;
   onEdit?: (campaign: UnifiedCampaign) => void;
   pinnedIds?: Set<string>;
+  /** Previous period insights keyed by campaign_id — used to render PerformanceBadge */
+  prevInsights?: Record<string, {
+    impressions: number;
+    clicks: number;
+    spend: number;
+    ctr: number;
+    leads: number;
+    calls: number;
+    messages: number;
+  }>;
 }
 
 export type SortKey = "name" | "status" | "platform" | "spend" | "impressions" | "clicks" | "ctr" | "reach" | "conversions" | "leads" | "calls" | "messages" | "cpc" | "cpm" | "score" | "stopTime";

@@ -210,6 +210,27 @@ export async function getCampaignInsights(
   return data.data ?? [];
 }
 
+/** Get campaign-level insights for a specific time range (for period comparison) */
+export async function getCampaignInsightsByTimeRange(
+  adAccountId: string,
+  accessToken: string,
+  since: string, // YYYY-MM-DD
+  until: string, // YYYY-MM-DD
+  limit = 25
+): Promise<MetaInsight[]> {
+  const data = await metaGet<{ data: MetaInsight[] }>(
+    `${ensureActPrefix(adAccountId)}/insights`,
+    accessToken,
+    {
+      level: "campaign",
+      fields: "campaign_id,campaign_name,impressions,reach,clicks,spend,ctr,cpc,cpm,actions",
+      time_range: JSON.stringify({ since, until }),
+      limit: String(limit),
+    }
+  );
+  return data.data ?? [];
+}
+
 /** Create a new campaign in a Meta ad account */
 export async function createMetaCampaign(
   adAccountId: string,

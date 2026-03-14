@@ -256,6 +256,28 @@ export default function Campaigns() {
     ? `vs ${periodData.period.previous.since} – ${periodData.period.previous.until}`
     : null;
 
+  // ── Per-campaign period comparison (for Performance Badges) ───────────────
+  const { data: campaignPrevData = [] } = trpc.meta.campaignPeriodComparison.useQuery(
+    { datePreset: metaDatePreset, limit: 50, ...metaAccountFilter, workspaceId: activeWorkspace?.id },
+    { enabled: isMetaConnected, staleTime: 5 * 60 * 1000 }
+  );
+  // Build a map: campaignId → previous period metrics
+  const prevInsightsMap = useMemo(() => {
+    const map: Record<string, { impressions: number; clicks: number; spend: number; ctr: number; leads: number; calls: number; messages: number }> = {};
+    campaignPrevData.forEach((d: { campaignId: string; impressions: number; clicks: number; spend: number; ctr: number; leads: number; calls: number; messages: number }) => {
+      map[d.campaignId] = {
+        impressions: d.impressions,
+        clicks: d.clicks,
+        spend: d.spend,
+        ctr: d.ctr,
+        leads: d.leads,
+        calls: d.calls,
+        messages: d.messages,
+      };
+    });
+    return map;
+  }, [campaignPrevData]);
+
   // ── Mutations ──────────────────────────────────────────────────────────────
   const updateLocalStatus = trpc.campaigns.updateStatus.useMutation({
     onSuccess: () => { utils.campaigns.list.invalidate(); toast.success("Status updated"); },
@@ -826,6 +848,7 @@ export default function Campaigns() {
             onPin={handlePin}
             onEdit={handleEdit}
             pinnedIds={pinnedIds}
+            prevInsights={prevInsightsMap}
           />
         </div>
       </div>

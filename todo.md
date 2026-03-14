@@ -3415,3 +3415,20 @@
 
 ## 🐛 Fix Pin Persistence After Refresh
 - [x] Pinned campaigns disappear after page refresh — fixed by creating pinned_campaigns table in Supabase
+
+## 🔄 Performance Badges — Campaign Period Comparison
+- [ ] Add campaignPeriodComparison tRPC procedure (current vs previous period per campaign)
+- [ ] Build PerformanceBadge component (↑/↓ % with green/red color)
+- [ ] Show badge on Spend column in campaign table rows
+- [ ] Show badge on CTR and Impressions columns
+- [ ] Auto-calculate previous period based on selected date preset
+
+## ✅ Performance Badges — Per-Campaign Period Comparison
+- [x] Added `prevInsights` prop to `UnifiedCampaignTableProps` (types.ts)
+- [x] Imported `PerformanceBadge` into `UnifiedCampaignTable.tsx`
+- [x] Updated `renderCell` for Spend, Impressions, Clicks, CTR, Leads, Calls, Messages to show PerformanceBadge below each value
+- [x] Added `campaignPeriodComparison` tRPC query in `Campaigns.tsx`
+- [x] Built `prevInsightsMap` (campaignId → previous period metrics) with `useMemo`
+- [x] Passed `prevInsights={prevInsightsMap}` to `UnifiedCampaignTable`
+- [x] server/__tests__/performanceBadge.test.ts — 13 tests (delta %, previous period, badge direction)
+- [x] 0 TypeScript errors

@@ -24,6 +24,7 @@ import {
   ALL_COLUMNS, fmtNum, fmtPercent, getPlatformName,
   StatusBadge, InlineBudgetEditor, BulkActionBar, CampaignSwitch,
 } from "./campaign-table";
+import { PerformanceBadge } from "./PerformanceBadge";
 
 // Re-export types for consumers
 export type { UnifiedCampaign, UnifiedCampaignTableProps };
@@ -45,7 +46,7 @@ function UnifiedCampaignTableInner({
   campaigns, loading, onRowClick, onOpenDrawer, selectedCampaignId,
   onStatusToggle, onDelete, onClone, onBudgetUpdate, onBulkAction,
   onFilterByAdSets, onFilterByCreatives, statusTogglePending,
-  onPin, onEdit, pinnedIds,
+  onPin, onEdit, pinnedIds, prevInsights,
   pageSize = 25,
 }: UnifiedCampaignTableProps) {
   const { fmt: fmtMoney } = useCurrency();
@@ -280,21 +281,76 @@ function UnifiedCampaignTableInner({
           </div>
         );
       }
-      case "spend":
-        return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#ffffff", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>;
+      case "spend": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#ffffff", fontWeight: 600 }}>{c.spend != null ? fmtMoney(c.spend, 2) : "—"}</span>
+            {prev && c.spend != null && <PerformanceBadge current={c.spend} previous={prev.spend} label="Spend" />}
+          </div>
+        );
+      }
       case "dailyBudget":
         if (onBudgetUpdate) return <InlineBudgetEditor value={c.dailyBudget} onSave={(v) => onBudgetUpdate(c, v)} fmtMoney={fmtMoney} />;
         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.dailyBudget != null ? fmtMoney(c.dailyBudget, 0) : "—"}</span>;
-      case "impressions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>;
-      case "clicks":      return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>;
-      case "ctr":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>;
+      case "impressions": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.impressions)}</span>
+            {prev && c.impressions != null && <PerformanceBadge current={c.impressions} previous={prev.impressions} label="Impressions" />}
+          </div>
+        );
+      }
+      case "clicks": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.clicks)}</span>
+            {prev && c.clicks != null && <PerformanceBadge current={c.clicks} previous={prev.clicks} label="Clicks" />}
+          </div>
+        );
+      }
+      case "ctr": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtPercent(c.ctr)}</span>
+            {prev && c.ctr != null && <PerformanceBadge current={c.ctr} previous={prev.ctr} label="CTR" />}
+          </div>
+        );
+      }
       case "reach":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.reach)}</span>;
       case "conversions": return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{fmtNum(c.conversions)}</span>;
       case "cpc":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.cpc != null ? fmtMoney(c.cpc, 2) : "—"}</span>;
       case "cpm":         return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.cpm != null ? fmtMoney(c.cpm, 2) : "—"}</span>;
-      case "leads":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>;
-      case "calls":       return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>;
-      case "messages":    return <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>;
+      case "leads": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.leads != null ? fmtNum(c.leads) : "—"}</span>
+            {prev && c.leads != null && <PerformanceBadge current={c.leads} previous={prev.leads} label="Leads" />}
+          </div>
+        );
+      }
+      case "calls": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.calls != null ? fmtNum(c.calls) : "—"}</span>
+            {prev && c.calls != null && <PerformanceBadge current={c.calls} previous={prev.calls} label="Calls" />}
+          </div>
+        );
+      }
+      case "messages": {
+        const prev = prevInsights?.[c.id];
+        return (
+          <div className="flex flex-col items-end gap-0.5">
+            <span style={{ fontSize: 12, fontFamily: "Inter, sans-serif", fontVariantNumeric: "tabular-nums", color: "#a3a3a3", fontWeight: 500 }}>{c.messages != null ? fmtNum(c.messages) : "—"}</span>
+            {prev && c.messages != null && <PerformanceBadge current={c.messages} previous={prev.messages} label="Messages" />}
+          </div>
+        );
+      }
       case "score": {
         if (c.score == null) return <span style={{ fontSize: 12, color: "#525252" }}>—</span>;
         const s = c.score;
