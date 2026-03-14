@@ -66,6 +66,31 @@ function detectDir(text: string): "rtl" | "ltr" {
   return total > 0 && rtlChars / total > 0.3 ? "rtl" : "ltr";
 }
 
+// ─── Date group helper ──────────────────────────────────────────────────
+function getDateGroup(ts: number): string {
+  const now = new Date();
+  const d = new Date(ts);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterdayStart = todayStart - 86_400_000;
+  const weekStart = todayStart - 6 * 86_400_000;
+  if (ts >= todayStart) return "Today";
+  if (ts >= yesterdayStart) return "Yesterday";
+  if (ts >= weekStart) return "This Week";
+  return "Older";
+}
+
+type GroupedSessions = { label: string; sessions: ChatSession[] }[];
+function groupSessions(sessions: ChatSession[]): GroupedSessions {
+  const order = ["Today", "Yesterday", "This Week", "Older"];
+  const map: Record<string, ChatSession[]> = {};
+  for (const s of sessions) {
+    const g = getDateGroup(s.timestamp);
+    if (!map[g]) map[g] = [];
+    map[g].push(s);
+  }
+  return order.filter((g) => map[g]?.length).map((label) => ({ label, sessions: map[label] }));
+}
+
 // ─── Relative time helper ──────────────────────────────────────────────────
 function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -93,6 +118,8 @@ export default function AIAgentPage() {
   const [showScrollBtn, setShowScrollBtn]     = useState(false);
   const [toolStatus, setToolStatus]           = useState<ToolStatus | null>(null);
   const [sidebarOpen, setSidebarOpen]         = useState(true);
+  const [lastLang, setLastLang]               = useState<"ar" | "en">("en");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -172,6 +199,25 @@ export default function AIAgentPage() {
       }
       return sess?.access_token ?? null;
     } catch { return null; }
+  }, []);
+
+  // Track last language used in conversation
+  useEffect(() => {
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUserMsg) {
+      setLastLang(detectDir(lastUserMsg.content) === "rtl" ? "ar" : "en");
+    }
+  }, [messages]);
+
+  // Clear all sessions
+  const handleClearAll = useCallback(() => {
+    setSessions([]);
+    saveLocal([]);
+    broadcastSessions([], null);
+    handleNewChat();
+    setShowClearConfirm(false);
+    toast.success("All conversations cleared");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const persistSession = useCallback((session: ChatSession) => {
@@ -472,26 +518,66 @@ export default function AIAgentPage() {
         </div>
 
         {/* Session list */}
-        <div className="flex-1 overflow-y-auto px-2 pb-4">
+        <div className="flex-1 overflow-y-auto px-2 pb-2">
           {sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center px-4">
               <MessageSquare className="w-8 h-8 text-neutral-700 mb-2" />
               <p className="text-xs text-neutral-600">No conversations yet</p>
             </div>
           ) : (
-            <div className="space-y-0.5 mt-1">
-              {sessions.map((session) => (
-                <SessionItem
-                  key={session.id}
-                  session={session}
-                  isActive={session.id === activeSessionId}
-                  onLoad={handleLoadSession}
-                  onDelete={handleDeleteSession}
-                />
+            <div className="mt-1">
+              {groupSessions(sessions).map(({ label, sessions: group }) => (
+                <div key={label} className="mb-3">
+                  <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-600">
+                    {label}
+                  </p>
+                  <div className="space-y-0.5">
+                    {group.map((session) => (
+                      <SessionItem
+                        key={session.id}
+                        session={session}
+                        isActive={session.id === activeSessionId}
+                        onLoad={handleLoadSession}
+                        onDelete={handleDeleteSession}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </div>
+
+        {/* Clear all button */}
+        {sessions.length > 0 && (
+          <div className="px-3 pb-4 pt-1 shrink-0 border-t border-neutral-800">
+            {showClearConfirm ? (
+              <div className="flex items-center gap-2 pt-3">
+                <span className="text-[11px] text-neutral-500 flex-1">Clear all?</span>
+                <button
+                  onClick={handleClearAll}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-brand-red text-white hover:bg-brand-red/90 transition-colors"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors"
+                >
+                  No
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="w-full flex items-center justify-center gap-1.5 mt-3 px-3 py-2 rounded-xl text-[11px] text-neutral-500 hover:text-brand-red hover:bg-neutral-900 transition-all"
+              >
+                <Trash2 className="w-3 h-3" />
+                Clear all conversations
+              </button>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* ── Sidebar toggle button ── */}
@@ -558,6 +644,7 @@ export default function AIAgentPage() {
                   textareaRef={textareaRef}
                   isRtl={isRtl}
                   t={t}
+                  lastLang={lastLang}
                 />
                 <p className="text-center text-[11px] text-neutral-600 mt-2">
                   {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
@@ -618,6 +705,7 @@ export default function AIAgentPage() {
                   textareaRef={textareaRef}
                   isRtl={isRtl}
                   t={t}
+                  lastLang={lastLang}
                 />
                 <p className="text-center text-[11px] text-neutral-600 mt-2">
                   {t("aiAgent.hint", "Enter to send • Shift+Enter for new line")}
@@ -666,13 +754,20 @@ function SessionItem({
 }
 
 // ─── Chat Input ────────────────────────────────────────────────────────────
-function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, textareaRef, isRtl, t }: {
+function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, textareaRef, isRtl, t, lastLang }: {
   input: string; setInput: (v: string) => void; isLoading: boolean;
   onSend: () => void; onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onStop: () => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>; isRtl: boolean; t: (k: string) => string;
+  lastLang?: "ar" | "en";
 }) {
   const hasText = input.trim().length > 0;
+  // Smart placeholder: detect from current input first, then fall back to lastLang
+  const inputDir = input.trim() ? detectDir(input) : (lastLang === "ar" ? "rtl" : "ltr");
+  const effectiveRtl = inputDir === "rtl";
+  const placeholder = effectiveRtl
+    ? "اسألني عن حملاتك، إعلاناتك، أو استراتيجيتك التسويقية..."
+    : (t("aiAgent.placeholder") || "Ask me about your campaigns, ads, or marketing strategy...");
   return (
     <div
       className={cn(
@@ -688,21 +783,21 @@ function ChatInput({ input, setInput, isLoading, onSend, onKeyDown, onStop, text
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder={t("aiAgent.placeholder")}
+        placeholder={placeholder}
         disabled={isLoading}
         rows={1}
-        dir={isRtl ? "rtl" : "ltr"}
+        dir={effectiveRtl ? "rtl" : "ltr"}
         className={cn(
           "resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-[15px] text-white",
           "placeholder:text-neutral-500 focus-visible:ring-0 focus-visible:ring-offset-0",
           "min-h-[28px] max-h-[200px] leading-relaxed",
-          isRtl ? "text-right" : "text-left",
+          effectiveRtl ? "text-right" : "text-left",
         )}
         style={{ boxShadow: "none" }}
       />
 
       {/* Bottom bar */}
-      <div className={cn("flex items-center justify-between px-3 pb-3 pt-1", isRtl ? "flex-row-reverse" : "")}>
+      <div className={cn("flex items-center justify-between px-3 pb-3 pt-1", effectiveRtl ? "flex-row-reverse" : "")}>
         {/* Left icons */}
         <div className={cn("flex items-center gap-0.5", isRtl ? "flex-row-reverse" : "")}>
           <button
