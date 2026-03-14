@@ -18,6 +18,7 @@ import {
   type CalendarPost, type ViewMode,
   STATUS_STYLES, MONTHS,
 } from "./components";
+import { EmptyState } from "@/core/components/ui/empty-state";
 
 export default function ContentCalendar() {
   usePageTitle("Content Calendar");
@@ -257,11 +258,16 @@ export default function ContentCalendar() {
           ) : (
             <div className="space-y-2 min-h-[200px]">
               {posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <List className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No posts this period</p>
-                  <button onClick={() => setCreateDate(today)} className="mt-3 text-xs text-primary hover:underline">Create your first post</button>
-                </div>
+                <EmptyState
+                  icon={List}
+                  title="No posts this period"
+                  size="sm"
+                  action={
+                    <button onClick={() => setCreateDate(today)} className="text-xs text-primary hover:underline transition-colors">
+                      Create your first post
+                    </button>
+                  }
+                />
               ) : (
                 [...posts].sort((a, b) => {
                   const da = a.scheduledAt ? new Date(a.scheduledAt).getTime() : 0;

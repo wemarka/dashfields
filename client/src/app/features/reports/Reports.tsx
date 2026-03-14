@@ -10,6 +10,7 @@ import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { toast } from "sonner";
 import { FileText, Plus, Calendar, RefreshCw, CheckCircle2, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { EmptyState } from "@/core/components/ui/empty-state";
 import {
   CreateReportModal,
   ReportCard,
@@ -169,14 +170,19 @@ export default function Reports() {
             ))}
           </div>
         ) : reports.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center mb-4"><FileText className="w-8 h-8 text-brand" /></div>
-            <h3 className="text-base font-semibold text-foreground mb-2">No reports yet</h3>
-            <p className="text-sm text-muted-foreground max-w-sm mb-6">Create your first report to download analytics data for any platform and date range.</p>
-            <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-              <Plus className="w-4 h-4" /> Create First Report
-            </button>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="No reports yet"
+            description="Create your first report to download analytics data for any platform and date range."
+            action={
+              <button
+                onClick={() => setShowCreate(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="w-4 h-4" /> Create First Report
+              </button>
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {reports.map((report) => (

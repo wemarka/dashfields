@@ -3562,3 +3562,8 @@
 - [x] Pagination active → bg-muted/60 text-white, hover → hover:bg-muted/30
 - [x] Input and Textarea aria-invalid error styling → border-[#ef3735] ring-[#ef3735]/40
 - [x] Create reusable EmptyState component → bg-muted/20 border-dashed border-border
+
+## 🔄 UI Consistency — EmptyState/LoadingState/FieldError
+- [x] Expand EmptyState to Reports, Publishing, Media Library pages
+- [x] Create reusable LoadingState component (spinner + skeleton variants)
+- [x] Create FieldError component → text-[#ef3735] text-xs with aria-invalid link

@@ -16,6 +16,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle
 } from "@/core/components/ui/dialog";
 import { toast } from "sonner";
+import { EmptyState } from "@/core/components/ui/empty-state";
+import { LoadingState } from "@/core/components/ui/loading-state";
 
 /* ─── helpers ─────────────────────────────────────────────────────────── */
 function formatBytes(bytes: number) {
@@ -315,28 +317,25 @@ export default function AssetsPage() {
 
       {/* Empty state */}
       {!assetsQuery.isLoading && items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6">
-            <ImageIcon className="w-10 h-10 text-neutral-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-2">No assets yet</h3>
-          <p className="text-neutral-400 mb-6 max-w-sm">
-            Upload images, videos, and documents to build your media library. Drag and drop or click the upload button.
-          </p>
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-[#ef3735]/14 hover:bg-[#ef3735]/14 text-white"
-          >
-            <Upload className="w-4 h-4 mr-2" /> Upload Your First Asset
-          </Button>
-        </div>
+        <EmptyState
+          icon={ImageIcon}
+          title="No assets yet"
+          description="Upload images, videos, and documents to build your media library. Drag and drop or click the upload button."
+          size="lg"
+          action={
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-[#ef3735]/14 hover:bg-[#ef3735]/20 text-white"
+            >
+              <Upload className="w-4 h-4 mr-2" /> Upload Your First Asset
+            </Button>
+          }
+        />
       )}
 
       {/* Loading */}
       {assetsQuery.isLoading && (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="w-8 h-8 text-neutral-500 animate-spin" />
-        </div>
+        <LoadingState label="Loading assets..." size="lg" />
       )}
 
       {/* Grid View */}
