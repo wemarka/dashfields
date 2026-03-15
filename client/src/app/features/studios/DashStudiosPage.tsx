@@ -16,14 +16,14 @@ import {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const STYLE_PRESETS = [
-  { id: "none",           label: "None",          emoji: null },
-  { id: "photorealistic", label: "Photorealistic", emoji: "📷" },
-  { id: "cinematic",      label: "Cinematic",      emoji: "🎬" },
-  { id: "minimalist",     label: "Minimalist",     emoji: "◻️" },
-  { id: "vibrant-pop",    label: "Vibrant Pop",    emoji: "🎨" },
-  { id: "luxury",         label: "Luxury",         emoji: "✨" },
-  { id: "neon-cyberpunk", label: "Cyberpunk",      emoji: "🌆" },
-  { id: "flat-illustration", label: "Illustration", emoji: "🖌️" },
+  { id: "none",              label: "No Style",       emoji: "○",  example: "Default generation, no style applied" },
+  { id: "photorealistic",    label: "Photorealistic",  emoji: "📷", example: "Ultra-sharp DSLR photo, natural lighting" },
+  { id: "cinematic",         label: "Cinematic",       emoji: "🎬", example: "Movie still, dramatic depth of field" },
+  { id: "minimalist",        label: "Minimalist",      emoji: "◻",  example: "Clean lines, white space, simple forms" },
+  { id: "vibrant-pop",       label: "Vibrant Pop",     emoji: "🎨", example: "Bold colors, high contrast, energetic" },
+  { id: "luxury",            label: "Luxury",          emoji: "✦",  example: "Gold tones, premium materials, elegant" },
+  { id: "neon-cyberpunk",    label: "Cyberpunk",       emoji: "⚡", example: "Neon lights, dark city, futuristic glow" },
+  { id: "flat-illustration", label: "Illustration",    emoji: "🖌",  example: "Flat vector art, clean strokes, editorial" },
 ] as const;
 
 const ASPECT_RATIOS = [
@@ -230,6 +230,89 @@ function PillDropdown<T extends string>({
               </button>
             ))}
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Style Preset Picker ────────────────────────────────────────────────────
+
+function StylePresetPicker({
+  value,
+  onChange,
+}: {
+  value: StylePreset;
+  onChange: (v: StylePreset) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = STYLE_PRESETS.find((p) => p.id === value) ?? STYLE_PRESETS[0];
+
+  const handleBlur = useCallback((e: React.FocusEvent) => {
+    if (!ref.current?.contains(e.relatedTarget as Node)) setOpen(false);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative" onBlur={handleBlur}>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        title="Style Preset"
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+          "border",
+          value !== "none"
+            ? "border-[rgba(239,55,53,0.35)] bg-[rgba(239,55,53,0.08)] text-[#f87171]"
+            : open
+              ? "border-white/20 bg-white/8 text-[#a1a1aa]"
+              : "border-white/8 text-[#555] hover:text-[#a1a1aa] hover:border-white/15"
+        )}
+      >
+        <Sparkles className="w-3 h-3" />
+        {value !== "none" ? (
+          <span className="max-w-[72px] truncate">{current.label}</span>
+        ) : (
+          <span>Style</span>
+        )}
+        <ChevronDown className={cn("w-3 h-3 transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute w-64 rounded-2xl z-[200] py-1.5"
+          style={{
+            bottom: "calc(100% + 8px)",
+            left: 0,
+            background: "#1e1e1e",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 -4px 24px rgba(0,0,0,0.6), 0 16px 48px rgba(0,0,0,0.6)",
+          }}
+        >
+          <div className="px-3 pt-2 pb-1">
+            <p className="text-[10px] text-[#555] uppercase tracking-widest font-semibold">Style Preset</p>
+          </div>
+          {STYLE_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => { onChange(preset.id as StylePreset); setOpen(false); }}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2 transition-all text-left",
+                preset.id === value
+                  ? "bg-white/6"
+                  : "hover:bg-white/4"
+              )}
+            >
+              <span className="text-base w-5 text-center shrink-0">{preset.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className={cn(
+                  "text-xs font-semibold leading-none",
+                  preset.id === value ? "text-white" : "text-[#a1a1aa]"
+                )}>{preset.label}</div>
+                <div className="text-[10px] text-[#555] mt-0.5 truncate">{preset.example}</div>
+              </div>
+              {preset.id === value && <Check className="w-3 h-3 text-[#ef3735] shrink-0" />}
+            </button>
+          ))}
         </div>
       )}
     </div>
@@ -601,36 +684,6 @@ export default function DashStudiosPage() {
             boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04)",
           }}
         >
-          {/* Style Presets Row */}
-          <div className="flex items-center gap-1.5 px-4 pt-3 pb-0 overflow-x-auto scrollbar-none">
-            {STYLE_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => setStyle(preset.id as StylePreset)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all shrink-0",
-                  style === preset.id
-                    ? "text-white"
-                    : "text-[#666] hover:text-[#a1a1aa]"
-                )}
-                style={{
-                  background: style === preset.id
-                    ? preset.id === "none" ? "rgba(255,255,255,0.1)" : "rgba(239,55,53,0.15)"
-                    : "rgba(255,255,255,0.04)",
-                  border: style === preset.id
-                    ? preset.id === "none" ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(239,55,53,0.3)"
-                    : "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                {preset.emoji && <span className="text-[10px]">{preset.emoji}</span>}
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Divider after presets */}
-          <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "8px 16px 0" }} />
-
           {/* Row 1: Prompt input */}
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
             {/* Tab icon */}
@@ -771,6 +824,9 @@ export default function DashStudiosPage() {
                 onChange={setQuality}
                 icon={Zap}
               />
+
+              {/* Style Preset */}
+              <StylePresetPicker value={style} onChange={setStyle} />
 
               {/* Duration (video only) */}
               {tab === "video" && (
