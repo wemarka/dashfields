@@ -10,10 +10,21 @@ import { cn } from "@/core/lib/utils";
 import {
   ImagePlus, Video, Loader2, Download, Trash2,
   Sparkles, ZoomIn, X, ChevronDown, Plus, Minus,
-  Zap, Wind, Clock, Cpu, Check,
+  Zap, Wind, Clock, Cpu, Check, Upload,
 } from "lucide-react";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
+
+const STYLE_PRESETS = [
+  { id: "none",           label: "None",          emoji: null },
+  { id: "photorealistic", label: "Photorealistic", emoji: "📷" },
+  { id: "cinematic",      label: "Cinematic",      emoji: "🎬" },
+  { id: "minimalist",     label: "Minimalist",     emoji: "◻️" },
+  { id: "vibrant-pop",    label: "Vibrant Pop",    emoji: "🎨" },
+  { id: "luxury",         label: "Luxury",         emoji: "✨" },
+  { id: "neon-cyberpunk", label: "Cyberpunk",      emoji: "🌆" },
+  { id: "flat-illustration", label: "Illustration", emoji: "🖌️" },
+] as const;
 
 const ASPECT_RATIOS = [
   { value: "1:1" as const, label: "1:1" },
@@ -85,9 +96,71 @@ const VIDEO_MODELS = [
 ] as const;
 
 type Tab = "image" | "video";
+type StylePreset = "none" | "photorealistic" | "cinematic" | "minimalist" | "vibrant-pop" | "luxury" | "neon-cyberpunk" | "flat-illustration";
 type AspectRatio = "1:1" | "16:9" | "9:16" | "4:3" | "3:4";
 type Quality = "standard" | "hd" | "4k";
 type Movement = "none" | "slow" | "medium" | "dynamic";
+
+// ─── Frame Upload Button ─────────────────────────────────────────────────────
+
+function FrameUploadButton({
+  label,
+  preview,
+  onFile,
+  onClear,
+}: {
+  label: string;
+  preview: string | null;
+  onFile: (url: string) => void;
+  onClear: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    onFile(url);
+  };
+
+  return (
+    <div className="relative flex flex-col items-center gap-1">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+      />
+      <button
+        onClick={() => inputRef.current?.click()}
+        className="relative w-14 h-10 rounded-xl overflow-hidden transition-all hover:scale-[1.03] active:scale-[0.97]"
+        style={{
+          border: preview ? "1px solid rgba(239,55,53,0.4)" : "1px dashed rgba(255,255,255,0.15)",
+          background: preview ? "transparent" : "rgba(255,255,255,0.03)",
+        }}
+      >
+        {preview ? (
+          <>
+            <img src={preview} alt={label} className="w-full h-full object-cover" />
+            <button
+              onClick={(e) => { e.stopPropagation(); onClear(); }}
+              className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(0,0,0,0.7)" }}
+            >
+              <X className="w-2.5 h-2.5 text-white" />
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-0.5 h-full">
+            <Upload className="w-3 h-3 text-[#555]" />
+          </div>
+        )}
+      </button>
+      <span className="text-[9px] font-semibold uppercase tracking-wider text-[#555]">{label}</span>
+    </div>
+  );
+}
 
 // ─── Floating Pill Dropdown ───────────────────────────────────────────────────
 
@@ -295,6 +368,9 @@ export default function DashStudiosPage() {
   const [movement, setMovement] = useState<Movement>("slow");
   const [imageModel, setImageModel] = useState("gemini-flash");
   const [videoModel, setVideoModel] = useState("veo-2");
+  const [style, setStyle] = useState<StylePreset>("none");
+  const [startFrame, setStartFrame] = useState<string | null>(null);
+  const [endFrame, setEndFrame] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -333,7 +409,7 @@ export default function DashStudiosPage() {
     generateMutation.mutate({
       prompt: prompt.trim(),
       aspectRatio,
-      style: quality === "4k" ? "photorealistic" : undefined,
+      style: style !== "none" ? style : (quality === "4k" ? "photorealistic" : undefined),
     });
   };
 
@@ -504,6 +580,10 @@ export default function DashStudiosPage() {
         </div>
       </div>
 
+      {/* ── Style Presets Chips ───────────────────────────────────────────── */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 pointer-events-none" style={{ bottom: "calc(100% - 100%)" }}>
+      </div>
+
       {/* ── Floating Bottom Toolbar ───────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pointer-events-none">
         <div
@@ -515,8 +595,38 @@ export default function DashStudiosPage() {
             boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04)",
           }}
         >
+          {/* Style Presets Row */}
+          <div className="flex items-center gap-1.5 px-4 pt-3 pb-0 overflow-x-auto scrollbar-none">
+            {STYLE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => setStyle(preset.id as StylePreset)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all shrink-0",
+                  style === preset.id
+                    ? "text-white"
+                    : "text-[#666] hover:text-[#a1a1aa]"
+                )}
+                style={{
+                  background: style === preset.id
+                    ? preset.id === "none" ? "rgba(255,255,255,0.1)" : "rgba(239,55,53,0.15)"
+                    : "rgba(255,255,255,0.04)",
+                  border: style === preset.id
+                    ? preset.id === "none" ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(239,55,53,0.3)"
+                    : "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                {preset.emoji && <span className="text-[10px]">{preset.emoji}</span>}
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Divider after presets */}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "8px 16px 0" }} />
+
           {/* Row 1: Prompt input */}
-          <div className="flex items-center gap-3 px-4 pt-3 pb-2">
+          <div className="flex items-center gap-3 px-4 pt-2.5 pb-2">
             {/* Tab icon */}
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -560,6 +670,26 @@ export default function DashStudiosPage() {
 
             {/* Left controls */}
             <div className="flex items-center gap-1.5 flex-1 flex-wrap">
+
+              {/* Start / End Frame (video only) */}
+              {tab === "video" && (
+                <>
+                  <FrameUploadButton
+                    label="Start"
+                    preview={startFrame}
+                    onFile={setStartFrame}
+                    onClear={() => setStartFrame(null)}
+                  />
+                  <FrameUploadButton
+                    label="End"
+                    preview={endFrame}
+                    onFile={setEndFrame}
+                    onClear={() => setEndFrame(null)}
+                  />
+                  {/* Separator */}
+                  <div className="w-px h-6 mx-1" style={{ background: "rgba(255,255,255,0.08)" }} />
+                </>
+              )}
 
               {/* Count stepper */}
               <div
