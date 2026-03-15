@@ -238,6 +238,18 @@ function PillDropdown<T extends string>({
 
 // ─── Style Preset Picker ────────────────────────────────────────────────────
 
+// Visual gradient thumbnails for each style preset
+const STYLE_THUMBNAILS: Record<string, { gradient: string; accent: string }> = {
+  none:              { gradient: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)", accent: "#555" },
+  photorealistic:    { gradient: "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)", accent: "#60a5fa" },
+  cinematic:         { gradient: "linear-gradient(135deg, #1a0a00 0%, #3d1a00 50%, #6b2d00 100%)", accent: "#f97316" },
+  minimalist:        { gradient: "linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%)", accent: "#888" },
+  "vibrant-pop":     { gradient: "linear-gradient(135deg, #ff0080 0%, #ff8c00 50%, #40e0d0 100%)", accent: "#fff" },
+  luxury:            { gradient: "linear-gradient(135deg, #1a1200 0%, #3d2e00 50%, #6b5000 100%)", accent: "#f59e0b" },
+  "neon-cyberpunk":  { gradient: "linear-gradient(135deg, #0d0221 0%, #190d3a 50%, #0d1b2a 100%)", accent: "#a855f7" },
+  "flat-illustration": { gradient: "linear-gradient(135deg, #1e3a5f 0%, #2d6a4f 100%)", accent: "#34d399" },
+};
+
 function StylePresetPicker({
   value,
   onChange,
@@ -255,6 +267,7 @@ function StylePresetPicker({
 
   return (
     <div ref={ref} className="relative" onBlur={handleBlur}>
+      {/* Trigger button */}
       <button
         onClick={() => setOpen((p) => !p)}
         title="Style Preset"
@@ -264,8 +277,8 @@ function StylePresetPicker({
           value !== "none"
             ? "border-[rgba(239,55,53,0.35)] bg-[rgba(239,55,53,0.08)] text-[#f87171]"
             : open
-              ? "border-white/20 bg-white/8 text-[#a1a1aa]"
-              : "border-white/8 text-[#555] hover:text-[#a1a1aa] hover:border-white/15"
+              ? "border-white/20 bg-white/[0.08] text-[#a1a1aa]"
+              : "border-white/[0.08] text-[#555] hover:text-[#a1a1aa] hover:border-white/[0.15]"
         )}
       >
         <Sparkles className="w-3 h-3" />
@@ -274,47 +287,116 @@ function StylePresetPicker({
         ) : (
           <span>Style</span>
         )}
-        <ChevronDown className={cn("w-3 h-3 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", open && "rotate-180")} />
       </button>
 
-      {open && (
-        <div
-          className="absolute w-64 rounded-2xl z-[200] py-1.5"
-          style={{
-            bottom: "calc(100% + 8px)",
-            left: 0,
-            background: "#1e1e1e",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 -4px 24px rgba(0,0,0,0.6), 0 16px 48px rgba(0,0,0,0.6)",
-          }}
-        >
-          <div className="px-3 pt-2 pb-1">
-            <p className="text-[10px] text-[#555] uppercase tracking-widest font-semibold">Style Preset</p>
-          </div>
-          {STYLE_PRESETS.map((preset) => (
+      {/* Visual grid panel */}
+      <div
+        className="absolute z-[200]"
+        style={{
+          bottom: "calc(100% + 12px)",
+          left: "50%",
+          width: 480,
+          background: "rgba(16,16,16,0.97)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 20,
+          boxShadow: "0 -8px 40px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+          backdropFilter: "blur(24px)",
+          padding: "16px",
+          pointerEvents: open ? "auto" : "none",
+          opacity: open ? 1 : 0,
+          transform: open
+            ? "translateX(-50%) translateY(0) scale(1)"
+            : "translateX(-50%) translateY(8px) scale(0.97)",
+          transition: "opacity 0.18s ease, transform 0.18s cubic-bezier(0.4,0,0.2,1)",
+          transformOrigin: "bottom center",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] text-[#555] uppercase tracking-[0.12em] font-semibold">Style Preset</span>
+          {value !== "none" && (
             <button
-              key={preset.id}
-              onClick={() => { onChange(preset.id as StylePreset); setOpen(false); }}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2 transition-all text-left",
-                preset.id === value
-                  ? "bg-white/6"
-                  : "hover:bg-white/4"
-              )}
+              onClick={() => { onChange("none" as StylePreset); setOpen(false); }}
+              className="text-[10px] text-[#ef3735] hover:text-[#f87171] transition-colors font-medium"
             >
-              <span className="text-base w-5 text-center shrink-0">{preset.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className={cn(
-                  "text-xs font-semibold leading-none",
-                  preset.id === value ? "text-white" : "text-[#a1a1aa]"
-                )}>{preset.label}</div>
-                <div className="text-[10px] text-[#555] mt-0.5 truncate">{preset.example}</div>
-              </div>
-              {preset.id === value && <Check className="w-3 h-3 text-[#ef3735] shrink-0" />}
+              Clear
             </button>
-          ))}
+          )}
         </div>
-      )}
+
+        {/* Grid */}
+        <div className="grid grid-cols-4 gap-2.5">
+          {STYLE_PRESETS.map((preset, i) => {
+            const thumb = STYLE_THUMBNAILS[preset.id];
+            const isActive = preset.id === value;
+            return (
+              <button
+                key={preset.id}
+                onClick={() => { onChange(preset.id as StylePreset); setOpen(false); }}
+                className="group flex flex-col items-center gap-1.5 transition-all"
+                style={{
+                  opacity: open ? 1 : 0,
+                  transform: open ? "translateY(0)" : "translateY(6px)",
+                  transition: `opacity 0.2s ease ${i * 0.025}s, transform 0.2s ease ${i * 0.025}s`,
+                }}
+              >
+                {/* Thumbnail */}
+                <div
+                  className="relative w-full rounded-xl overflow-hidden"
+                  style={{
+                    aspectRatio: "4/3",
+                    background: thumb.gradient,
+                    border: isActive
+                      ? "2px solid #ef3735"
+                      : "2px solid rgba(255,255,255,0.06)",
+                    boxShadow: isActive
+                      ? "0 0 0 3px rgba(239,55,53,0.2), 0 4px 16px rgba(0,0,0,0.5)"
+                      : "0 2px 8px rgba(0,0,0,0.4)",
+                    transition: "border-color 0.15s, box-shadow 0.15s",
+                  }}
+                >
+                  {/* Noise texture overlay */}
+                  <div
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E")`,
+                      backgroundSize: "100px 100px",
+                    }}
+                  />
+                  {/* Emoji accent */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center text-xl"
+                    style={{ textShadow: `0 0 12px ${thumb.accent}` }}
+                  >
+                    {preset.emoji}
+                  </div>
+                  {/* Active check */}
+                  {isActive && (
+                    <div
+                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ background: "#ef3735", boxShadow: "0 0 8px rgba(239,55,53,0.6)" }}
+                    >
+                      <Check className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  )}
+                  {/* Hover overlay */}
+                  <div
+                    className="absolute inset-0 bg-white/0 group-hover:bg-white/[0.06] transition-colors rounded-xl"
+                  />
+                </div>
+                {/* Label */}
+                <span
+                  className="text-[10px] font-semibold leading-none transition-colors"
+                  style={{ color: isActive ? "#fff" : "#666" }}
+                >
+                  {preset.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
