@@ -686,15 +686,37 @@ export default function DashStudiosPage() {
         >
           {/* Row 1: Prompt input */}
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            {/* Tab icon */}
+            {/* Image / Video Tab Switcher */}
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: "rgba(239,55,53,0.1)", border: "1px solid rgba(239,55,53,0.2)" }}
+              className="flex items-center shrink-0 rounded-lg p-0.5"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
-              {tab === "image"
-                ? <ImagePlus className="w-4 h-4" style={{ color: "#ef3735" }} />
-                : <Video className="w-4 h-4" style={{ color: "#ef3735" }} />
-              }
+              <button
+                onClick={() => setTab("image")}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                  tab === "image"
+                    ? "text-white"
+                    : "text-[#555] hover:text-[#888]"
+                )}
+                style={tab === "image" ? { background: "rgba(239,55,53,0.15)", border: "1px solid rgba(239,55,53,0.25)" } : {}}
+              >
+                <ImagePlus className="w-3.5 h-3.5" />
+                <span>Image</span>
+              </button>
+              <button
+                onClick={() => setTab("video")}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                  tab === "video"
+                    ? "text-white"
+                    : "text-[#555] hover:text-[#888]"
+                )}
+                style={tab === "video" ? { background: "rgba(239,55,53,0.15)", border: "1px solid rgba(239,55,53,0.25)" } : {}}
+              >
+                <Video className="w-3.5 h-3.5" />
+                <span>Video</span>
+              </button>
             </div>
 
             {/* Prompt + Negative stacked */}
