@@ -10,7 +10,7 @@ import { cn } from "@/core/lib/utils";
 import {
   ImagePlus, Video, Loader2, Download, Trash2,
   Sparkles, ZoomIn, X, ChevronDown, Plus, Minus,
-  Zap, Wind, Clock, Cpu, Check, Upload, Ban, Shuffle, Hash,
+  Zap, Wind, Clock, Cpu, Check, Upload, Ban,
 } from "lucide-react";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -377,12 +377,7 @@ export default function DashStudiosPage() {
   const [endFrame, setEndFrame] = useState<string | null>(null);
   const [negativePrompt, setNegativePrompt] = useState("");
   const [negativeOpen, setNegativeOpen] = useState(false);
-  const [seed, setSeed] = useState<string>("");
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-
-  const randomizeSeed = useCallback(() => {
-    setSeed(String(Math.floor(Math.random() * 2_147_483_647)));
-  }, []);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const generateMutation = trpc.studios.generateImage.useMutation({
@@ -636,39 +631,8 @@ export default function DashStudiosPage() {
           {/* Divider after presets */}
           <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "8px 16px 0" }} />
 
-          {/* Negative Prompt (collapsible) */}
-          {negativeOpen && (
-            <>
-              <div className="flex items-center gap-2 px-4 pt-2.5">
-                <Ban className="w-3.5 h-3.5 shrink-0" style={{ color: "#ef3735" }} />
-                <textarea
-                  value={negativePrompt}
-                  onChange={(e) => setNegativePrompt(e.target.value)}
-                  placeholder="Describe what to avoid — e.g. blurry, text, watermark, low quality…"
-                  rows={1}
-                  className="flex-1 bg-transparent text-xs text-white placeholder:text-[#3a3a3a] resize-none outline-none leading-relaxed py-0.5"
-                  style={{ maxHeight: 48 }}
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = "auto";
-                    el.style.height = `${Math.min(el.scrollHeight, 48)}px`;
-                  }}
-                />
-                {negativePrompt && (
-                  <button
-                    onClick={() => setNegativePrompt("")}
-                    className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
-                  >
-                    <X className="w-2.5 h-2.5 text-[#555]" />
-                  </button>
-                )}
-              </div>
-              <div style={{ height: 1, background: "rgba(239,55,53,0.08)", margin: "6px 16px 0" }} />
-            </>
-          )}
-
           {/* Row 1: Prompt input */}
-          <div className="flex items-center gap-3 px-4 pt-2.5 pb-2">
+          <div className="flex items-center gap-3 px-4 pt-3 pb-2">
             {/* Tab icon */}
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -680,28 +644,78 @@ export default function DashStudiosPage() {
               }
             </div>
 
-            {/* Prompt textarea */}
-            <textarea
-              ref={textareaRef}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate();
+            {/* Prompt + Negative stacked */}
+            <div className="flex-1 flex flex-col gap-0">
+              {/* Negative Prompt (collapsible) */}
+              {negativeOpen && (
+                <div className="flex items-center gap-1.5 pb-1.5 border-b mb-1.5" style={{ borderColor: "rgba(239,55,53,0.12)" }}>
+                  <Ban className="w-3 h-3 shrink-0" style={{ color: "#ef3735" }} />
+                  <textarea
+                    value={negativePrompt}
+                    onChange={(e) => setNegativePrompt(e.target.value)}
+                    placeholder="What to avoid — blurry, text, watermark, low quality…"
+                    rows={1}
+                    className="flex-1 bg-transparent text-xs text-white placeholder:text-[#3a3a3a] resize-none outline-none leading-relaxed"
+                    style={{ maxHeight: 40 }}
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${Math.min(el.scrollHeight, 40)}px`;
+                    }}
+                  />
+                  {negativePrompt && (
+                    <button
+                      onClick={() => setNegativePrompt("")}
+                      className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                    >
+                      <X className="w-2.5 h-2.5 text-[#555]" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Main prompt textarea */}
+              <textarea
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate();
+                }}
+                placeholder={
+                  tab === "image"
+                    ? "Describe your scene — use @ to add characters & props"
+                    : "Describe your video — motion, mood, camera movement…"
+                }
+                rows={1}
+                className="flex-1 bg-transparent text-sm text-white placeholder:text-[#444] resize-none outline-none leading-relaxed py-0.5"
+                style={{ minHeight: 28, maxHeight: 80 }}
+                onInput={(e) => {
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = `${Math.min(el.scrollHeight, 80)}px`;
+                }}
+              />
+            </div>
+
+            {/* Negative toggle icon — inside prompt row, right side */}
+            <button
+              onClick={() => setNegativeOpen((p) => !p)}
+              title={negativeOpen ? "Hide negative prompt" : "Add negative prompt"}
+              className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all relative"
+              style={{
+                background: negativeOpen ? "rgba(239,55,53,0.12)" : "rgba(255,255,255,0.04)",
+                border: negativeOpen ? "1px solid rgba(239,55,53,0.3)" : "1px solid rgba(255,255,255,0.08)",
               }}
-              placeholder={
-                tab === "image"
-                  ? "Describe your scene — use @ to add characters & props"
-                  : "Describe your video — motion, mood, camera movement…"
-              }
-              rows={1}
-              className="flex-1 bg-transparent text-sm text-white placeholder:text-[#444] resize-none outline-none leading-relaxed py-1"
-              style={{ minHeight: 28, maxHeight: 80 }}
-              onInput={(e) => {
-                const el = e.currentTarget;
-                el.style.height = "auto";
-                el.style.height = `${Math.min(el.scrollHeight, 80)}px`;
-              }}
-            />
+            >
+              <Ban className="w-3.5 h-3.5" style={{ color: negativeOpen ? "#f87171" : "#555" }} />
+              {negativePrompt && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full"
+                  style={{ background: "#ef3735" }}
+                />
+              )}
+            </button>
           </div>
 
           {/* Divider */}
@@ -712,70 +726,6 @@ export default function DashStudiosPage() {
 
             {/* Left controls */}
             <div className="flex items-center gap-1.5 flex-1 flex-wrap">
-
-              {/* Negative Prompt toggle */}
-              <button
-                onClick={() => setNegativeOpen((p) => !p)}
-                title="Negative Prompt"
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
-                  "border hover:border-white/20",
-                  negativeOpen
-                    ? "border-[rgba(239,55,53,0.35)] bg-[rgba(239,55,53,0.08)] text-[#f87171]"
-                    : "border-white/8 text-[#555] hover:text-[#a1a1aa]"
-                )}
-              >
-                <Ban className="w-3 h-3" />
-                <span>Negative</span>
-                {negativePrompt && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: "#ef3735" }}
-                  />
-                )}
-              </button>
-
-              {/* Separator */}
-              <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.07)" }} />
-
-              {/* Seed input */}
-              <div
-                className="flex items-center gap-1.5 rounded-lg overflow-hidden"
-                style={{ border: seed ? "1px solid rgba(99,102,241,0.4)" : "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}
-              >
-                <div className="flex items-center gap-1 pl-2.5">
-                  <Hash className="w-3 h-3" style={{ color: seed ? "#818cf8" : "#444" }} />
-                  <input
-                    type="number"
-                    min={0}
-                    max={2147483647}
-                    value={seed}
-                    onChange={(e) => setSeed(e.target.value)}
-                    placeholder="Seed"
-                    className="w-16 bg-transparent text-xs text-white placeholder:text-[#3a3a3a] outline-none py-1.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-                <button
-                  onClick={randomizeSeed}
-                  title="Randomize seed"
-                  className="px-2 py-1.5 transition-colors hover:bg-white/8 border-l"
-                  style={{ borderColor: "rgba(255,255,255,0.07)" }}
-                >
-                  <Shuffle className="w-3 h-3" style={{ color: "#555" }} />
-                </button>
-                {seed && (
-                  <button
-                    onClick={() => setSeed("")}
-                    title="Clear seed"
-                    className="pr-2 transition-colors hover:text-white"
-                  >
-                    <X className="w-2.5 h-2.5 text-[#444]" />
-                  </button>
-                )}
-              </div>
-
-              {/* Separator */}
-              <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.07)" }} />
 
               {/* Start / End Frame (video only) */}
               {tab === "video" && (
