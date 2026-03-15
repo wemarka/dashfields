@@ -675,49 +675,83 @@ export default function DashStudiosPage() {
 
       {/* ── Floating Bottom Toolbar ───────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pointer-events-none">
-        <div
-          className="pointer-events-auto mx-auto max-w-5xl rounded-2xl"
-          style={{
-            background: "rgba(18,18,18,0.92)",
-            border: "1px solid rgba(255,255,255,0.09)",
-            backdropFilter: "blur(20px)",
-            boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04)",
-          }}
-        >
+        <div className="pointer-events-auto mx-auto max-w-5xl flex items-stretch gap-0">
+
+          {/* ── Left: Image / Video vertical tab strip ── */}
+          <div
+            className="flex flex-col items-center justify-center shrink-0 rounded-l-2xl overflow-hidden"
+            style={{
+              background: "rgba(14,14,14,0.95)",
+              borderTop: "1px solid rgba(255,255,255,0.09)",
+              borderLeft: "1px solid rgba(255,255,255,0.09)",
+              borderBottom: "1px solid rgba(255,255,255,0.09)",
+              borderRight: "1px solid rgba(255,255,255,0.04)",
+              backdropFilter: "blur(20px)",
+              width: 64,
+              padding: "6px 4px",
+              gap: 2,
+              position: "relative",
+            }}
+          >
+            {/* Sliding indicator */}
+            <div
+              style={{
+                position: "absolute",
+                left: 4,
+                right: 4,
+                height: "calc(50% - 5px)",
+                borderRadius: 10,
+                background: "rgba(239,55,53,0.12)",
+                border: "1px solid rgba(239,55,53,0.22)",
+                transition: "top 0.22s cubic-bezier(0.4,0,0.2,1)",
+                top: tab === "image" ? 6 : "calc(50% + 3px)",
+                pointerEvents: "none",
+              }}
+            />
+            <button
+              onClick={() => setTab("image")}
+              className="relative z-10 flex flex-col items-center justify-center gap-1 w-full transition-all"
+              style={{ height: "calc(50% - 3px)", borderRadius: 10 }}
+            >
+              <ImagePlus
+                className="w-4 h-4 transition-colors"
+                style={{ color: tab === "image" ? "#ef3735" : "#444" }}
+              />
+              <span
+                className="text-[9px] font-semibold tracking-wide transition-colors"
+                style={{ color: tab === "image" ? "#fff" : "#444" }}
+              >IMAGE</span>
+            </button>
+            <button
+              onClick={() => setTab("video")}
+              className="relative z-10 flex flex-col items-center justify-center gap-1 w-full transition-all"
+              style={{ height: "calc(50% - 3px)", borderRadius: 10 }}
+            >
+              <Video
+                className="w-4 h-4 transition-colors"
+                style={{ color: tab === "video" ? "#ef3735" : "#444" }}
+              />
+              <span
+                className="text-[9px] font-semibold tracking-wide transition-colors"
+                style={{ color: tab === "video" ? "#fff" : "#444" }}
+              >VIDEO</span>
+            </button>
+          </div>
+
+          {/* ── Right: Main toolbar body ── */}
+          <div
+            className="flex-1 rounded-r-2xl"
+            style={{
+              background: "rgba(18,18,18,0.92)",
+              borderTop: "1px solid rgba(255,255,255,0.09)",
+              borderRight: "1px solid rgba(255,255,255,0.09)",
+              borderBottom: "1px solid rgba(255,255,255,0.09)",
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04)",
+            }}
+          >
           {/* Row 1: Prompt input */}
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            {/* Image / Video Tab Switcher */}
-            <div
-              className="flex items-center shrink-0 rounded-lg p-0.5"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-            >
-              <button
-                onClick={() => setTab("image")}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all",
-                  tab === "image"
-                    ? "text-white"
-                    : "text-[#555] hover:text-[#888]"
-                )}
-                style={tab === "image" ? { background: "rgba(239,55,53,0.15)", border: "1px solid rgba(239,55,53,0.25)" } : {}}
-              >
-                <ImagePlus className="w-3.5 h-3.5" />
-                <span>Image</span>
-              </button>
-              <button
-                onClick={() => setTab("video")}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all",
-                  tab === "video"
-                    ? "text-white"
-                    : "text-[#555] hover:text-[#888]"
-                )}
-                style={tab === "video" ? { background: "rgba(239,55,53,0.15)", border: "1px solid rgba(239,55,53,0.25)" } : {}}
-              >
-                <Video className="w-3.5 h-3.5" />
-                <span>Video</span>
-              </button>
-            </div>
 
             {/* Prompt + Negative stacked */}
             <div className="flex-1 flex flex-col gap-0">
@@ -911,7 +945,8 @@ export default function DashStudiosPage() {
               </button>
             </div>
           </div>
-        </div>
+          </div>{/* end toolbar body */}
+        </div>{/* end flex row */}
       </div>
 
       {/* ── Lightbox ─────────────────────────────────────────────────────── */}
