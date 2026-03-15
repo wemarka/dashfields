@@ -10,7 +10,7 @@ import { cn } from "@/core/lib/utils";
 import {
   ImagePlus, Video, Loader2, Download, Trash2,
   Sparkles, ZoomIn, X, ChevronDown, Plus, Minus,
-  Zap, Wind, Clock, Cpu, Check, Upload, Ban,
+  Zap, Wind, Clock, Cpu, Check, Upload, Ban, Images,
 } from "lucide-react";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -158,6 +158,168 @@ function FrameUploadButton({
         )}
       </button>
       <span className="text-[9px] font-semibold uppercase tracking-wider text-[#555]">{label}</span>
+    </div>
+  );
+}
+
+// ─── Reference Images Button ────────────────────────────────────────────────
+
+function ReferenceImagesButton({
+  images,
+  open,
+  onToggle,
+  onAdd,
+  onRemove,
+}: {
+  images: { id: string; dataUrl: string; name: string }[];
+  open: boolean;
+  onToggle: () => void;
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+}) {
+  const hasImages = images.length > 0;
+  const ref = useRef<HTMLDivElement>(null);
+
+  const handleBlur = useCallback((e: React.FocusEvent) => {
+    if (!ref.current?.contains(e.relatedTarget as Node)) {
+      // keep open so user can interact with thumbnails
+    }
+  }, []);
+
+  return (
+    <div ref={ref} className="relative" onBlur={handleBlur}>
+      {/* Trigger */}
+      <button
+        onClick={onToggle}
+        title="Reference Images"
+        className={cn(
+          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border",
+          hasImages
+            ? "border-[rgba(239,55,53,0.35)] bg-[rgba(239,55,53,0.08)] text-[#f87171]"
+            : open
+              ? "border-white/20 bg-white/[0.08] text-[#a1a1aa]"
+              : "border-white/[0.08] text-[#555] hover:text-[#a1a1aa] hover:border-white/[0.15]"
+        )}
+      >
+        <Images className="w-3 h-3" />
+        <span>Ref</span>
+        {hasImages && (
+          <span
+            className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+            style={{ background: "#ef3735", color: "#fff" }}
+          >
+            {images.length}
+          </span>
+        )}
+        <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", open && "rotate-180")} />
+      </button>
+
+      {/* Panel */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "calc(100% + 12px)",
+          left: "50%",
+          transform: open
+            ? "translateX(-50%) translateY(0) scale(1)"
+            : "translateX(-50%) translateY(8px) scale(0.97)",
+          width: 320,
+          background: "rgba(16,16,16,0.97)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 20,
+          boxShadow: "0 -8px 40px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+          backdropFilter: "blur(24px)",
+          padding: 16,
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 0.18s ease, transform 0.18s cubic-bezier(0.4,0,0.2,1)",
+          transformOrigin: "bottom center",
+          zIndex: 200,
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] text-[#555] uppercase tracking-[0.12em] font-semibold">
+            Reference Images
+          </span>
+          <span className="text-[10px] text-[#444]">{images.length}/4</span>
+        </div>
+
+        {/* Thumbnails grid */}
+        {images.length > 0 && (
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {images.map((img, i) => (
+              <div
+                key={img.id}
+                className="relative group rounded-xl overflow-hidden"
+                style={{
+                  aspectRatio: "1",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  opacity: open ? 1 : 0,
+                  transform: open ? "translateY(0)" : "translateY(4px)",
+                  transition: `opacity 0.18s ease ${i * 0.04}s, transform 0.18s ease ${i * 0.04}s`,
+                }}
+              >
+                <img src={img.dataUrl} alt={img.name} className="w-full h-full object-cover" />
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                  <button
+                    onClick={() => onRemove(img.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{ background: "rgba(239,55,53,0.9)" }}
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {images.length === 0 && (
+          <div
+            className="flex flex-col items-center justify-center gap-2 mb-3 rounded-2xl"
+            style={{
+              height: 80,
+              border: "1px dashed rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.02)",
+            }}
+          >
+            <Images className="w-5 h-5 text-[#333]" />
+            <span className="text-[10px] text-[#444]">No reference images yet</span>
+          </div>
+        )}
+
+        {/* Add button */}
+        {images.length < 4 && (
+          <button
+            onClick={onAdd}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium transition-all"
+            style={{
+              border: "1px dashed rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.03)",
+              color: "#666",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(239,55,53,0.3)";
+              (e.currentTarget as HTMLButtonElement).style.color = "#f87171";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)";
+              (e.currentTarget as HTMLButtonElement).style.color = "#666";
+            }}
+          >
+            <Upload className="w-3 h-3" />
+            Add Reference Image{images.length > 0 ? " (" + (4 - images.length) + " left)" : ""}
+          </button>
+        )}
+
+        {/* Hint */}
+        <p className="text-[10px] text-[#333] mt-2.5 text-center leading-relaxed">
+          Reference images guide the style, composition, or subject of your generation
+        </p>
+      </div>
     </div>
   );
 }
@@ -543,7 +705,33 @@ export default function DashStudiosPage() {
   const [negativePrompt, setNegativePrompt] = useState("");
   const [negativeOpen, setNegativeOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [referenceImages, setReferenceImages] = useState<{ id: string; dataUrl: string; name: string }[]>([]);
+  const [refImagesOpen, setRefImagesOpen] = useState(false);
+  const refImagesInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleAddReferenceImages = useCallback((files: FileList | null) => {
+    if (!files) return;
+    const remaining = 4 - referenceImages.length;
+    if (remaining <= 0) { toast.error("Maximum 4 reference images"); return; }
+    const toAdd = Array.from(files).slice(0, remaining);
+    toAdd.forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setReferenceImages((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl, name: file.name },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  }, [referenceImages.length]);
+
+  const removeReferenceImage = useCallback((id: string) => {
+    setReferenceImages((prev) => prev.filter((img) => img.id !== id));
+  }, []);
 
   const generateMutation = trpc.studios.generateImage.useMutation({
     onSuccess: () => {
@@ -962,6 +1150,30 @@ export default function DashStudiosPage() {
                 onChange={setQuality}
                 icon={Zap}
               />
+
+              {/* Reference Images (image mode only) */}
+              {tab === "image" && (
+                <>
+                  <ReferenceImagesButton
+                    images={referenceImages}
+                    open={refImagesOpen}
+                    onToggle={() => setRefImagesOpen((p) => !p)}
+                    onAdd={() => refImagesInputRef.current?.click()}
+                    onRemove={removeReferenceImage}
+                  />
+                  <input
+                    ref={refImagesInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => { handleAddReferenceImages(e.target.files); setRefImagesOpen(true); }}
+                    onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+                  />
+                  {/* Separator */}
+                  <div className="w-px h-6 mx-0.5" style={{ background: "rgba(255,255,255,0.08)" }} />
+                </>
+              )}
 
               {/* Style Preset */}
               <StylePresetPicker value={style} onChange={setStyle} />
