@@ -10,7 +10,7 @@ import { cn } from "@/core/lib/utils";
 import {
   ImagePlus, Video, Loader2, Download, Trash2,
   Sparkles, ZoomIn, X, ChevronDown, Plus, Minus,
-  Zap, Wind, Clock, Cpu, Check, Upload, Ban,
+  Zap, Wind, Clock, Cpu, Check, Upload, Ban, Shuffle, Hash,
 } from "lucide-react";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -377,7 +377,12 @@ export default function DashStudiosPage() {
   const [endFrame, setEndFrame] = useState<string | null>(null);
   const [negativePrompt, setNegativePrompt] = useState("");
   const [negativeOpen, setNegativeOpen] = useState(false);
+  const [seed, setSeed] = useState<string>("");
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  const randomizeSeed = useCallback(() => {
+    setSeed(String(Math.floor(Math.random() * 2_147_483_647)));
+  }, []);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const generateMutation = trpc.studios.generateImage.useMutation({
@@ -729,6 +734,45 @@ export default function DashStudiosPage() {
                   />
                 )}
               </button>
+
+              {/* Separator */}
+              <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.07)" }} />
+
+              {/* Seed input */}
+              <div
+                className="flex items-center gap-1.5 rounded-lg overflow-hidden"
+                style={{ border: seed ? "1px solid rgba(99,102,241,0.4)" : "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}
+              >
+                <div className="flex items-center gap-1 pl-2.5">
+                  <Hash className="w-3 h-3" style={{ color: seed ? "#818cf8" : "#444" }} />
+                  <input
+                    type="number"
+                    min={0}
+                    max={2147483647}
+                    value={seed}
+                    onChange={(e) => setSeed(e.target.value)}
+                    placeholder="Seed"
+                    className="w-16 bg-transparent text-xs text-white placeholder:text-[#3a3a3a] outline-none py-1.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <button
+                  onClick={randomizeSeed}
+                  title="Randomize seed"
+                  className="px-2 py-1.5 transition-colors hover:bg-white/8 border-l"
+                  style={{ borderColor: "rgba(255,255,255,0.07)" }}
+                >
+                  <Shuffle className="w-3 h-3" style={{ color: "#555" }} />
+                </button>
+                {seed && (
+                  <button
+                    onClick={() => setSeed("")}
+                    title="Clear seed"
+                    className="pr-2 transition-colors hover:text-white"
+                  >
+                    <X className="w-2.5 h-2.5 text-[#444]" />
+                  </button>
+                )}
+              </div>
 
               {/* Separator */}
               <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.07)" }} />
