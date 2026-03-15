@@ -11,6 +11,7 @@ import {
   ImagePlus, Video, Loader2, Download, Trash2,
   Sparkles, ZoomIn, X, ChevronDown, Plus, Minus,
   Zap, Wind, Clock, Cpu, Check, Upload, Ban, Images,
+  RefreshCw, Heart, Filter,
 } from "lucide-react";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -170,24 +171,38 @@ function ReferenceImagesButton({
   onToggle,
   onAdd,
   onRemove,
+  onDrop,
 }: {
   images: { id: string; dataUrl: string; name: string }[];
   open: boolean;
   onToggle: () => void;
   onAdd: () => void;
   onRemove: (id: string) => void;
+  onDrop: (files: FileList) => void;
 }) {
   const hasImages = images.length > 0;
   const ref = useRef<HTMLDivElement>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    if (!ref.current?.contains(e.relatedTarget as Node)) {
-      // keep open so user can interact with thumbnails
-    }
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) setIsDraggingOver(true);
   }, []);
 
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!ref.current?.contains(e.relatedTarget as Node)) setIsDraggingOver(false);
+  }, []);
+
+  const handleDropEvent = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    if (e.dataTransfer.files.length > 0) onDrop(e.dataTransfer.files);
+  }, [onDrop]);
+
   return (
-    <div ref={ref} className="relative" onBlur={handleBlur}>
+    <div ref={ref} className="relative">
       {/* Trigger */}
       <button
         onClick={onToggle}
@@ -216,6 +231,9 @@ function ReferenceImagesButton({
 
       {/* Panel */}
       <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDropEvent}
         style={{
           position: "absolute",
           bottom: "calc(100% + 12px)",
@@ -224,15 +242,15 @@ function ReferenceImagesButton({
             ? "translateX(-50%) translateY(0) scale(1)"
             : "translateX(-50%) translateY(8px) scale(0.97)",
           width: 320,
-          background: "rgba(16,16,16,0.97)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: isDraggingOver ? "rgba(239,55,53,0.06)" : "rgba(16,16,16,0.97)",
+          border: isDraggingOver ? "1px solid rgba(239,55,53,0.4)" : "1px solid rgba(255,255,255,0.1)",
           borderRadius: 20,
           boxShadow: "0 -8px 40px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
           backdropFilter: "blur(24px)",
           padding: 16,
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
-          transition: "opacity 0.18s ease, transform 0.18s cubic-bezier(0.4,0,0.2,1)",
+          transition: "opacity 0.18s ease, transform 0.18s cubic-bezier(0.4,0,0.2,1), background 0.15s ease, border-color 0.15s ease",
           transformOrigin: "bottom center",
           zIndex: 200,
         }}
@@ -279,15 +297,17 @@ function ReferenceImagesButton({
         {/* Empty state */}
         {images.length === 0 && (
           <div
-            className="flex flex-col items-center justify-center gap-2 mb-3 rounded-2xl"
+            className="flex flex-col items-center justify-center gap-2 mb-3 rounded-2xl transition-all"
             style={{
-              height: 80,
-              border: "1px dashed rgba(255,255,255,0.08)",
-              background: "rgba(255,255,255,0.02)",
+              height: 88,
+              border: isDraggingOver ? "1.5px dashed rgba(239,55,53,0.5)" : "1px dashed rgba(255,255,255,0.08)",
+              background: isDraggingOver ? "rgba(239,55,53,0.04)" : "rgba(255,255,255,0.02)",
             }}
           >
-            <Images className="w-5 h-5 text-[#333]" />
-            <span className="text-[10px] text-[#444]">No reference images yet</span>
+            <Upload className={cn("w-5 h-5 transition-colors", isDraggingOver ? "text-[#ef3735]" : "text-[#333]")} />
+            <span className="text-[10px] text-[#444]">
+              {isDraggingOver ? "Drop to add" : "Drop images here or click Add"}
+            </span>
           </div>
         )}
 
@@ -708,7 +728,18 @@ export default function DashStudiosPage() {
   const [referenceImages, setReferenceImages] = useState<{ id: string; dataUrl: string; name: string }[]>([]);
   const [refImagesOpen, setRefImagesOpen] = useState(false);
   const refImagesInputRef = useRef<HTMLInputElement>(null);
+  const [galleryFilter, setGalleryFilter] = useState<"all" | "images" | "videos" | "favorites">("all");
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const toggleFavorite = useCallback((id: number) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const handleAddReferenceImages = useCallback((files: FileList | null) => {
     if (!files) return;
@@ -788,6 +819,12 @@ export default function DashStudiosPage() {
 
   const isLoading = generateMutation.isPending;
 
+  const filteredItems = historyQuery.data?.items.filter((item) => {
+    if (galleryFilter === "favorites") return favorites.has(item.id);
+    if (galleryFilter === "videos") return false;
+    return true;
+  }) ?? [];
+
   return (
     <div className="relative flex flex-col h-full bg-background overflow-hidden">
 
@@ -822,6 +859,33 @@ export default function DashStudiosPage() {
           </div>
         </div>
 
+        {/* Gallery Filters */}
+        <div className="px-6 mb-4 flex items-center gap-1">
+          {(["all", "images", "videos", "favorites"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setGalleryFilter(f)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize",
+                galleryFilter === f
+                  ? "bg-white/10 text-white"
+                  : "text-[#555] hover:text-[#a1a1aa] hover:bg-white/[0.04]"
+              )}
+            >
+              {f === "favorites" && <Heart className={cn("w-3 h-3", galleryFilter === "favorites" ? "fill-[#ef3735] text-[#ef3735]" : "")} />}
+              {f === "all" && <Filter className="w-3 h-3" />}
+              {f === "images" && <ImagePlus className="w-3 h-3" />}
+              {f === "videos" && <Video className="w-3 h-3" />}
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === "favorites" && favorites.size > 0 && (
+                <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(239,55,53,0.2)", color: "#f87171" }}>
+                  {favorites.size}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
         {/* Gallery */}
         <div className="px-6">
           {historyQuery.isLoading ? (
@@ -835,77 +899,141 @@ export default function DashStudiosPage() {
               ))}
             </div>
           ) : historyQuery.data && historyQuery.data.items.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-              {/* In-progress placeholder */}
-              {isLoading && (
-                <div
-                  className="aspect-square rounded-2xl flex flex-col items-center justify-center gap-3"
-                  style={{ background: "#1a1a1a", border: "1px solid rgba(239,55,53,0.2)" }}
-                >
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ background: "rgba(239,55,53,0.1)" }}
-                  >
-                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#ef3735" }} />
-                  </div>
-                  <span className="text-[10px] text-[#555]">Generating…</span>
-                </div>
-              )}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                  {/* In-progress placeholder */}
+                  {isLoading && (
+                    <div
+                      className="aspect-square rounded-2xl flex flex-col items-center justify-center gap-3"
+                      style={{ background: "#1a1a1a", border: "1px solid rgba(239,55,53,0.2)" }}
+                    >
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{ background: "rgba(239,55,53,0.1)" }}
+                      >
+                        <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#ef3735" }} />
+                      </div>
+                      <span className="text-[10px] text-[#555]">Generating…</span>
+                    </div>
+                  )}
 
-              {historyQuery.data.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
-                  style={{ border: "1px solid rgba(255,255,255,0.06)" }}
-                  onClick={() => setLightboxUrl(item.imageUrl)}
-                >
-                  <img
-                    src={item.imageUrl}
-                    alt={item.prompt}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  {filteredItems.length === 0 && !isLoading && (
+                    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                      <Heart className="w-8 h-8 text-[#333] mb-3" />
+                      <p className="text-sm text-[#555]">
+                        {galleryFilter === "favorites" ? "No favorites yet — heart an image to save it here" : "No results"}
+                      </p>
+                    </div>
+                  )}
 
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all"
-                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)" }}
-                  >
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-[10px] text-white/70 line-clamp-2 mb-2">{item.prompt}</p>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDownload(item.imageUrl, `dashfields-${item.id}`); }}
-                          className="p-1.5 rounded-lg transition-colors hover:bg-white/10"
-                        >
-                          <Download className="w-3.5 h-3.5 text-white" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setLightboxUrl(item.imageUrl); }}
-                          className="p-1.5 rounded-lg transition-colors hover:bg-white/10"
-                        >
-                          <ZoomIn className="w-3.5 h-3.5 text-white" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); deleteMutation.mutate({ id: item.id }); }}
-                          className="p-1.5 rounded-lg transition-colors ml-auto"
-                          style={{ background: "rgba(239,55,53,0.15)" }}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" style={{ color: "#f87171" }} />
-                        </button>
+                  {filteredItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]"
+                      style={{ border: favorites.has(item.id) ? "1px solid rgba(239,55,53,0.3)" : "1px solid rgba(255,255,255,0.06)" }}
+                      onClick={() => setLightboxUrl(item.imageUrl)}
+                    >
+                      <img
+                        src={item.imageUrl}
+                        alt={item.prompt}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+
+                      {/* Favorite badge (always visible if favorited) */}
+                      {favorites.has(item.id) && (
+                        <div className="absolute top-2 left-2">
+                          <Heart className="w-3.5 h-3.5 fill-[#ef3735] text-[#ef3735]" />
+                        </div>
+                      )}
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all"
+                        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }}
+                      >
+                        {/* Top-right: Heart */}
+                        <div className="absolute top-2 right-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
+                            className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                            style={{ background: favorites.has(item.id) ? "rgba(239,55,53,0.8)" : "rgba(0,0,0,0.5)" }}
+                            title={favorites.has(item.id) ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Heart className={cn("w-3.5 h-3.5", favorites.has(item.id) ? "fill-white text-white" : "text-white")} />
+                          </button>
+                        </div>
+
+                        {/* Bottom: prompt + actions */}
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <p className="text-[10px] text-white/70 line-clamp-2 mb-2">{item.prompt}</p>
+                          <div className="flex items-center gap-1.5">
+                            {/* Download */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDownload(item.imageUrl, `dashfields-${item.id}`); }}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-white/10 text-white/80"
+                              title="Download"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>Save</span>
+                            </button>
+                            {/* Regenerate */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setPrompt(item.prompt); toast.info("Prompt loaded — hit Generate"); }}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-white/10 text-white/80"
+                              title="Regenerate with same prompt"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>Redo</span>
+                            </button>
+                            {/* Use as Reference */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fetch(item.imageUrl)
+                                  .then((r) => r.blob())
+                                  .then((blob) => {
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => {
+                                      const dataUrl = ev.target?.result as string;
+                                      setReferenceImages((prev) => {
+                                        if (prev.length >= 4) { toast.error("Max 4 reference images"); return prev; }
+                                        return [...prev, { id: `ref-${Date.now()}`, dataUrl, name: `ref-${item.id}` }];
+                                      });
+                                      setRefImagesOpen(true);
+                                      toast.success("Added as reference image");
+                                    };
+                                    reader.readAsDataURL(blob);
+                                  })
+                                  .catch(() => toast.error("Could not load image"));
+                              }}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-white/10 text-white/80"
+                              title="Use as reference image"
+                            >
+                              <Images className="w-3 h-3" />
+                              <span>Ref</span>
+                            </button>
+                            {/* Delete */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteMutation.mutate({ id: item.id }); }}
+                              className="p-1.5 rounded-lg transition-colors ml-auto"
+                              style={{ background: "rgba(239,55,53,0.15)" }}
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" style={{ color: "#f87171" }} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Aspect ratio badge */}
+                      <div
+                        className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[9px] font-medium opacity-0 group-hover:opacity-0"
+                        style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.5)" }}
+                      >
+                        {item.aspectRatio}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Aspect ratio badge */}
-                  <div
-                    className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[9px] font-medium"
-                    style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.5)" }}
-                  >
-                    {item.aspectRatio}
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
           ) : (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-32 text-center">
@@ -1160,6 +1288,7 @@ export default function DashStudiosPage() {
                     onToggle={() => setRefImagesOpen((p) => !p)}
                     onAdd={() => refImagesInputRef.current?.click()}
                     onRemove={removeReferenceImage}
+                    onDrop={(files) => { handleAddReferenceImages(files); setRefImagesOpen(true); }}
                   />
                   <input
                     ref={refImagesInputRef}
