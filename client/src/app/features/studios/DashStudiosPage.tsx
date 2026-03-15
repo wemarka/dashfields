@@ -593,7 +593,7 @@ export default function DashStudiosPage() {
       {/* ── Floating Bottom Toolbar ───────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pointer-events-none">
         <div
-          className="pointer-events-auto mx-auto max-w-5xl rounded-2xl overflow-hidden"
+          className="pointer-events-auto mx-auto max-w-5xl rounded-2xl"
           style={{
             background: "rgba(18,18,18,0.92)",
             border: "1px solid rgba(255,255,255,0.09)",
