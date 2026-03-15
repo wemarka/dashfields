@@ -204,11 +204,13 @@ function PillDropdown<T extends string>({
 
       {open && (
         <div
-          className="absolute bottom-full mb-2 left-0 min-w-[120px] rounded-xl overflow-hidden z-50"
+          className="absolute min-w-[120px] rounded-xl overflow-hidden z-[200]"
           style={{
-            background: "#1a1a1a",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            bottom: "calc(100% + 8px)",
+            left: 0,
+            background: "#1e1e1e",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 -4px 24px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
           <div className="py-1">
@@ -280,11 +282,13 @@ function ModelSelector({
 
       {open && (
         <div
-          className="absolute bottom-full mb-2 right-0 w-56 rounded-2xl overflow-hidden z-50"
+          className="absolute w-56 rounded-2xl overflow-hidden z-[200]"
           style={{
-            background: "#1a1a1a",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+            bottom: "calc(100% + 8px)",
+            right: 0,
+            background: "#1e1e1e",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 -4px 24px rgba(0,0,0,0.6), 0 16px 48px rgba(0,0,0,0.6)",
           }}
         >
           <div className="px-3 pt-3 pb-1">
